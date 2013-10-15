@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmi:id="_48XXADWgEeOGf4OmvEWlUw" type="EcoreTools" name="H2HModel" measurementUnit="Pixel">
+  <children xmi:type="notation:Node" xmi:id="_IuX3MDWhEeOGf4OmvEWlUw" type="1001">
+    <children xmi:type="notation:Node" xmi:id="_IuZFUDWhEeOGf4OmvEWlUw" type="4001"/>
+    <children xmi:type="notation:Node" xmi:id="_IuZFUTWhEeOGf4OmvEWlUw" type="5001">
+      <styles xmi:type="notation:DrawerStyle" xmi:id="_IuZFUjWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_IuZFUzWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_IuZFVDWhEeOGf4OmvEWlUw"/>
+    </children>
+    <children xmi:type="notation:Node" xmi:id="_IuZsYDWhEeOGf4OmvEWlUw" type="5002">
+      <styles xmi:type="notation:DrawerStyle" xmi:id="_IuZsYTWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_IuZsYjWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_IuZsYzWhEeOGf4OmvEWlUw"/>
+    </children>
+    <styles xmi:type="notation:ShapeStyle" xmi:id="_IuX3MTWhEeOGf4OmvEWlUw" fontColor="4210752" fontName="Segoe UI" fontHeight="10" fillColor="13761016" lineColor="8421504"/>
+    <element xmi:type="ecore:EClass" href="H2HModel.ecore#//MetaFile"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_IuX3MjWhEeOGf4OmvEWlUw" x="126" y="156" width="253" height="247"/>
+  </children>
+  <children xmi:type="notation:Node" xmi:id="_TiBnADWhEeOGf4OmvEWlUw" type="1001">
+    <children xmi:type="notation:Node" xmi:id="_TiBnAzWhEeOGf4OmvEWlUw" type="4001"/>
+    <children xmi:type="notation:Node" xmi:id="_TiBnBDWhEeOGf4OmvEWlUw" type="5001">
+      <styles xmi:type="notation:DrawerStyle" xmi:id="_TiCOEDWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_TiCOETWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_TiCOEjWhEeOGf4OmvEWlUw"/>
+    </children>
+    <children xmi:type="notation:Node" xmi:id="_TiCOEzWhEeOGf4OmvEWlUw" type="5002">
+      <styles xmi:type="notation:DrawerStyle" xmi:id="_TiCOFDWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_TiCOFTWhEeOGf4OmvEWlUw"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_TiCOFjWhEeOGf4OmvEWlUw"/>
+    </children>
+    <styles xmi:type="notation:ShapeStyle" xmi:id="_TiBnATWhEeOGf4OmvEWlUw" fontColor="4210752" fontName="Segoe UI" fontHeight="10" fillColor="13761016" lineColor="8421504"/>
+    <element xmi:type="ecore:EClass" href="H2HModel.ecore#//Version"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_TiBnAjWhEeOGf4OmvEWlUw" x="438" y="156" width="265" height="247"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_48XXATWgEeOGf4OmvEWlUw"/>
+  <element xmi:type="ecore:EPackage" href="H2HModel.ecore#/"/>
+  <edges xmi:type="notation:Edge" xmi:id="_VHE5QDWhEeOGf4OmvEWlUw" type="3002" source="_IuX3MDWhEeOGf4OmvEWlUw" target="_TiBnADWhEeOGf4OmvEWlUw">
+    <children xmi:type="notation:Node" xmi:id="_VHFgUDWhEeOGf4OmvEWlUw" type="4011">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_VHFgUTWhEeOGf4OmvEWlUw" x="-10" y="-10"/>
+    </children>
+    <children xmi:type="notation:Node" xmi:id="_VHGHYDWhEeOGf4OmvEWlUw" type="4012">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_VHGHYTWhEeOGf4OmvEWlUw" x="10" y="10"/>
+    </children>
+    <styles xmi:type="notation:ConnectorStyle" xmi:id="_VHE5QTWhEeOGf4OmvEWlUw" lineColor="4210752"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_VHE5QjWhEeOGf4OmvEWlUw" fontColor="4210752" fontName="Segoe UI" fontHeight="10"/>
+    <element xmi:type="ecore:EReference" href="H2HModel.ecore#//MetaFile/versions"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_VHE5QzWhEeOGf4OmvEWlUw" points="[33, 8, -192, -34]$[94, -73, -131, -115]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_VHHVgDWhEeOGf4OmvEWlUw" id="(0.8695652173913043,0.32793522267206476)"/>
+  </edges>
+</notation:Diagram>
