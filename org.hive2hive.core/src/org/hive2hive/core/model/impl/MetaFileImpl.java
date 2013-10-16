@@ -29,7 +29,7 @@ import org.hive2hive.core.model.Version;
  *
  * @generated
  */
-public class MetaFileImpl extends MinimalEObjectImpl.Container implements MetaFile {
+public class MetaFileImpl extends MetaDocumentImpl implements MetaFile {
 	/**
 	 * The cached value of the '{@link #getVersions() <em>Versions</em>}' reference list.
 	 * <!-- begin-user-doc -->

@@ -22,7 +22,7 @@ import org.eclipse.emf.ecore.EObject;
  * @model
  * @generated
  */
-public interface MetaFile extends EObject {
+public interface MetaFile extends MetaDocument {
 	/**
 	 * Returns the value of the '<em><b>Versions</b></em>' reference list.
 	 * The list contents are of type {@link org.hive2hive.core.model.Version}.

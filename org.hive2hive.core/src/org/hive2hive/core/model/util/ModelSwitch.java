@@ -69,12 +69,68 @@ public class ModelSwitch<T> extends Switch<T> {
 			case ModelPackage.META_FILE: {
 				MetaFile metaFile = (MetaFile)theEObject;
 				T result = caseMetaFile(metaFile);
+				if (result == null) result = caseMetaDocument(metaFile);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
 			case ModelPackage.VERSION: {
 				Version version = (Version)theEObject;
 				T result = caseVersion(version);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.USER_PERMISSION: {
+				UserPermission userPermission = (UserPermission)theEObject;
+				T result = caseUserPermission(userPermission);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.META_DOCUMENT: {
+				MetaDocument metaDocument = (MetaDocument)theEObject;
+				T result = caseMetaDocument(metaDocument);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.META_FOLDER: {
+				MetaFolder metaFolder = (MetaFolder)theEObject;
+				T result = caseMetaFolder(metaFolder);
+				if (result == null) result = caseMetaDocument(metaFolder);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.CHUNK: {
+				Chunk chunk = (Chunk)theEObject;
+				T result = caseChunk(chunk);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.USER_PROFILE: {
+				UserProfile userProfile = (UserProfile)theEObject;
+				T result = caseUserProfile(userProfile);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.FILE_TREE: {
+				FileTree fileTree = (FileTree)theEObject;
+				T result = caseFileTree(fileTree);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.FILE_TREE_NODE: {
+				FileTreeNode fileTreeNode = (FileTreeNode)theEObject;
+				T result = caseFileTreeNode(fileTreeNode);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.ONLINE_PEER: {
+				OnlinePeer onlinePeer = (OnlinePeer)theEObject;
+				T result = caseOnlinePeer(onlinePeer);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelPackage.LOCATIONS: {
+				Locations locations = (Locations)theEObject;
+				T result = caseLocations(locations);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -109,6 +165,141 @@ public class ModelSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseVersion(Version object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>User Permission</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>User Permission</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseUserPermission(UserPermission object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Meta Document</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Meta Document</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseMetaDocument(MetaDocument object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Meta Folder</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Meta Folder</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseMetaFolder(MetaFolder object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Chunk</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Chunk</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseChunk(Chunk object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>User Profile</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>User Profile</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseUserProfile(UserProfile object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>File Tree</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>File Tree</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseFileTree(FileTree object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>File Tree Node</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>File Tree Node</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseFileTreeNode(FileTreeNode object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Online Peer</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Online Peer</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseOnlinePeer(OnlinePeer object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Locations</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Locations</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseLocations(Locations object) {
 		return null;
 	}
 
