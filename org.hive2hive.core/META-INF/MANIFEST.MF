@@ -13,3 +13,4 @@ Export-Package: org.hive2hive.core.model,
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy
+Import-Package: org.apache.log4j
