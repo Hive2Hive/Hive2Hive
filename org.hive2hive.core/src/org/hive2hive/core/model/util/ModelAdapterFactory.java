@@ -112,6 +112,14 @@ public class ModelAdapterFactory extends AdapterFactoryImpl {
 				return createLocationsAdapter();
 			}
 			@Override
+			public Adapter caseUserMessage(UserMessage object) {
+				return createUserMessageAdapter();
+			}
+			@Override
+			public Adapter caseUserMessageQueue(UserMessageQueue object) {
+				return createUserMessageQueueAdapter();
+			}
+			@Override
 			public Adapter defaultCase(EObject object) {
 				return createEObjectAdapter();
 			}
@@ -282,6 +290,34 @@ public class ModelAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createLocationsAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.hive2hive.core.model.UserMessage <em>User Message</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.hive2hive.core.model.UserMessage
+	 * @generated
+	 */
+	public Adapter createUserMessageAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.hive2hive.core.model.UserMessageQueue <em>User Message Queue</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.hive2hive.core.model.UserMessageQueue
+	 * @generated
+	 */
+	public Adapter createUserMessageQueueAdapter() {
 		return null;
 	}
 

@@ -169,13 +169,22 @@ public interface ModelPackage extends EPackage {
 	int VERSION__DATE = 3;
 
 	/**
+	 * The feature id for the '<em><b>Chunk Keys</b></em>' attribute list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int VERSION__CHUNK_KEYS = 4;
+
+	/**
 	 * The number of structural features of the '<em>Version</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int VERSION_FEATURE_COUNT = 4;
+	int VERSION_FEATURE_COUNT = 5;
 
 
 	/**
@@ -272,13 +281,40 @@ public interface ModelPackage extends EPackage {
 	int CHUNK = 5;
 
 	/**
+	 * The feature id for the '<em><b>Id</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CHUNK__ID = 0;
+
+	/**
 	 * The feature id for the '<em><b>Data</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int CHUNK__DATA = 0;
+	int CHUNK__DATA = 1;
+
+	/**
+	 * The feature id for the '<em><b>Order</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CHUNK__ORDER = 2;
+
+	/**
+	 * The feature id for the '<em><b>Size</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CHUNK__SIZE = 3;
 
 	/**
 	 * The number of structural features of the '<em>Chunk</em>' class.
@@ -287,7 +323,7 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int CHUNK_FEATURE_COUNT = 1;
+	int CHUNK_FEATURE_COUNT = 4;
 
 	/**
 	 * The meta object id for the '{@link org.hive2hive.core.model.impl.UserProfileImpl <em>User Profile</em>}' class.
@@ -374,13 +410,22 @@ public interface ModelPackage extends EPackage {
 	int FILE_TREE_NODE = 8;
 
 	/**
+	 * The feature id for the '<em><b>Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int FILE_TREE_NODE__NAME = 0;
+
+	/**
 	 * The feature id for the '<em><b>Key Pair</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int FILE_TREE_NODE__KEY_PAIR = 0;
+	int FILE_TREE_NODE__KEY_PAIR = 1;
 
 	/**
 	 * The feature id for the '<em><b>Domain Key</b></em>' attribute.
@@ -389,7 +434,7 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int FILE_TREE_NODE__DOMAIN_KEY = 1;
+	int FILE_TREE_NODE__DOMAIN_KEY = 2;
 
 	/**
 	 * The feature id for the '<em><b>Parent</b></em>' reference.
@@ -398,7 +443,16 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int FILE_TREE_NODE__PARENT = 2;
+	int FILE_TREE_NODE__PARENT = 3;
+
+	/**
+	 * The feature id for the '<em><b>Folder</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int FILE_TREE_NODE__FOLDER = 4;
 
 	/**
 	 * The number of structural features of the '<em>File Tree Node</em>' class.
@@ -407,7 +461,7 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int FILE_TREE_NODE_FEATURE_COUNT = 3;
+	int FILE_TREE_NODE_FEATURE_COUNT = 5;
 
 	/**
 	 * The meta object id for the '{@link org.hive2hive.core.model.impl.OnlinePeerImpl <em>Online Peer</em>}' class.
@@ -475,6 +529,80 @@ public interface ModelPackage extends EPackage {
 	int LOCATIONS_FEATURE_COUNT = 1;
 
 	/**
+	 * The meta object id for the '{@link org.hive2hive.core.model.impl.UserMessageImpl <em>User Message</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see org.hive2hive.core.model.impl.UserMessageImpl
+	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getUserMessage()
+	 * @generated
+	 */
+	int USER_MESSAGE = 11;
+
+	/**
+	 * The feature id for the '<em><b>Id</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_MESSAGE__ID = 0;
+
+	/**
+	 * The feature id for the '<em><b>Sender</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_MESSAGE__SENDER = 1;
+
+	/**
+	 * The feature id for the '<em><b>Origin</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_MESSAGE__ORIGIN = 2;
+
+	/**
+	 * The number of structural features of the '<em>User Message</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_MESSAGE_FEATURE_COUNT = 3;
+
+	/**
+	 * The meta object id for the '{@link org.hive2hive.core.model.impl.UserMessageQueueImpl <em>User Message Queue</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see org.hive2hive.core.model.impl.UserMessageQueueImpl
+	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getUserMessageQueue()
+	 * @generated
+	 */
+	int USER_MESSAGE_QUEUE = 12;
+
+	/**
+	 * The feature id for the '<em><b>Queue</b></em>' reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_MESSAGE_QUEUE__QUEUE = 0;
+
+	/**
+	 * The number of structural features of the '<em>User Message Queue</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_MESSAGE_QUEUE_FEATURE_COUNT = 1;
+
+	/**
 	 * The meta object id for the '{@link org.hive2hive.core.model.Permission <em>Permission</em>}' enum.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -482,7 +610,7 @@ public interface ModelPackage extends EPackage {
 	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getPermission()
 	 * @generated
 	 */
-	int PERMISSION = 11;
+	int PERMISSION = 13;
 
 
 	/**
@@ -493,7 +621,7 @@ public interface ModelPackage extends EPackage {
 	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getPublicKey()
 	 * @generated
 	 */
-	int PUBLIC_KEY = 12;
+	int PUBLIC_KEY = 14;
 
 	/**
 	 * The meta object id for the '<em>Private Key</em>' data type.
@@ -503,7 +631,7 @@ public interface ModelPackage extends EPackage {
 	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getPrivateKey()
 	 * @generated
 	 */
-	int PRIVATE_KEY = 13;
+	int PRIVATE_KEY = 15;
 
 	/**
 	 * The meta object id for the '<em>Key Pair</em>' data type.
@@ -513,7 +641,7 @@ public interface ModelPackage extends EPackage {
 	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getKeyPair()
 	 * @generated
 	 */
-	int KEY_PAIR = 14;
+	int KEY_PAIR = 16;
 
 	/**
 	 * The meta object id for the '<em>Peer Address</em>' data type.
@@ -523,7 +651,7 @@ public interface ModelPackage extends EPackage {
 	 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getPeerAddress()
 	 * @generated
 	 */
-	int PEER_ADDRESS = 15;
+	int PEER_ADDRESS = 17;
 
 
 	/**
@@ -600,6 +728,17 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 */
 	EAttribute getVersion_Date();
+
+	/**
+	 * Returns the meta object for the attribute list '{@link org.hive2hive.core.model.Version#getChunkKeys <em>Chunk Keys</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute list '<em>Chunk Keys</em>'.
+	 * @see org.hive2hive.core.model.Version#getChunkKeys()
+	 * @see #getVersion()
+	 * @generated
+	 */
+	EAttribute getVersion_ChunkKeys();
 
 	/**
 	 * Returns the meta object for class '{@link org.hive2hive.core.model.UserPermission <em>User Permission</em>}'.
@@ -697,6 +836,17 @@ public interface ModelPackage extends EPackage {
 	EClass getChunk();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.Chunk#getId <em>Id</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Id</em>'.
+	 * @see org.hive2hive.core.model.Chunk#getId()
+	 * @see #getChunk()
+	 * @generated
+	 */
+	EAttribute getChunk_Id();
+
+	/**
 	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.Chunk#getData <em>Data</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -706,6 +856,28 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 */
 	EAttribute getChunk_Data();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.Chunk#getOrder <em>Order</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Order</em>'.
+	 * @see org.hive2hive.core.model.Chunk#getOrder()
+	 * @see #getChunk()
+	 * @generated
+	 */
+	EAttribute getChunk_Order();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.Chunk#getSize <em>Size</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Size</em>'.
+	 * @see org.hive2hive.core.model.Chunk#getSize()
+	 * @see #getChunk()
+	 * @generated
+	 */
+	EAttribute getChunk_Size();
 
 	/**
 	 * Returns the meta object for class '{@link org.hive2hive.core.model.UserProfile <em>User Profile</em>}'.
@@ -782,6 +954,17 @@ public interface ModelPackage extends EPackage {
 	EClass getFileTreeNode();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.FileTreeNode#getName <em>Name</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Name</em>'.
+	 * @see org.hive2hive.core.model.FileTreeNode#getName()
+	 * @see #getFileTreeNode()
+	 * @generated
+	 */
+	EAttribute getFileTreeNode_Name();
+
+	/**
 	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.FileTreeNode#getKeyPair <em>Key Pair</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -813,6 +996,17 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 */
 	EReference getFileTreeNode_Parent();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.FileTreeNode#isFolder <em>Folder</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Folder</em>'.
+	 * @see org.hive2hive.core.model.FileTreeNode#isFolder()
+	 * @see #getFileTreeNode()
+	 * @generated
+	 */
+	EAttribute getFileTreeNode_Folder();
 
 	/**
 	 * Returns the meta object for class '{@link org.hive2hive.core.model.OnlinePeer <em>Online Peer</em>}'.
@@ -866,6 +1060,70 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 */
 	EReference getLocations_OnlinePeers();
+
+	/**
+	 * Returns the meta object for class '{@link org.hive2hive.core.model.UserMessage <em>User Message</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>User Message</em>'.
+	 * @see org.hive2hive.core.model.UserMessage
+	 * @generated
+	 */
+	EClass getUserMessage();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.UserMessage#getId <em>Id</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Id</em>'.
+	 * @see org.hive2hive.core.model.UserMessage#getId()
+	 * @see #getUserMessage()
+	 * @generated
+	 */
+	EAttribute getUserMessage_Id();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.UserMessage#getSender <em>Sender</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Sender</em>'.
+	 * @see org.hive2hive.core.model.UserMessage#getSender()
+	 * @see #getUserMessage()
+	 * @generated
+	 */
+	EAttribute getUserMessage_Sender();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.UserMessage#getOrigin <em>Origin</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Origin</em>'.
+	 * @see org.hive2hive.core.model.UserMessage#getOrigin()
+	 * @see #getUserMessage()
+	 * @generated
+	 */
+	EAttribute getUserMessage_Origin();
+
+	/**
+	 * Returns the meta object for class '{@link org.hive2hive.core.model.UserMessageQueue <em>User Message Queue</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>User Message Queue</em>'.
+	 * @see org.hive2hive.core.model.UserMessageQueue
+	 * @generated
+	 */
+	EClass getUserMessageQueue();
+
+	/**
+	 * Returns the meta object for the reference list '{@link org.hive2hive.core.model.UserMessageQueue#getQueue <em>Queue</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the reference list '<em>Queue</em>'.
+	 * @see org.hive2hive.core.model.UserMessageQueue#getQueue()
+	 * @see #getUserMessageQueue()
+	 * @generated
+	 */
+	EReference getUserMessageQueue_Queue();
 
 	/**
 	 * Returns the meta object for enum '{@link org.hive2hive.core.model.Permission <em>Permission</em>}'.
@@ -1004,6 +1262,14 @@ public interface ModelPackage extends EPackage {
 		EAttribute VERSION__DATE = eINSTANCE.getVersion_Date();
 
 		/**
+		 * The meta object literal for the '<em><b>Chunk Keys</b></em>' attribute list feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute VERSION__CHUNK_KEYS = eINSTANCE.getVersion_ChunkKeys();
+
+		/**
 		 * The meta object literal for the '{@link org.hive2hive.core.model.impl.UserPermissionImpl <em>User Permission</em>}' class.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
@@ -1084,12 +1350,36 @@ public interface ModelPackage extends EPackage {
 		EClass CHUNK = eINSTANCE.getChunk();
 
 		/**
+		 * The meta object literal for the '<em><b>Id</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute CHUNK__ID = eINSTANCE.getChunk_Id();
+
+		/**
 		 * The meta object literal for the '<em><b>Data</b></em>' attribute feature.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
 		 * @generated
 		 */
 		EAttribute CHUNK__DATA = eINSTANCE.getChunk_Data();
+
+		/**
+		 * The meta object literal for the '<em><b>Order</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute CHUNK__ORDER = eINSTANCE.getChunk_Order();
+
+		/**
+		 * The meta object literal for the '<em><b>Size</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute CHUNK__SIZE = eINSTANCE.getChunk_Size();
 
 		/**
 		 * The meta object literal for the '{@link org.hive2hive.core.model.impl.UserProfileImpl <em>User Profile</em>}' class.
@@ -1154,6 +1444,14 @@ public interface ModelPackage extends EPackage {
 		EClass FILE_TREE_NODE = eINSTANCE.getFileTreeNode();
 
 		/**
+		 * The meta object literal for the '<em><b>Name</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute FILE_TREE_NODE__NAME = eINSTANCE.getFileTreeNode_Name();
+
+		/**
 		 * The meta object literal for the '<em><b>Key Pair</b></em>' attribute feature.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
@@ -1176,6 +1474,14 @@ public interface ModelPackage extends EPackage {
 		 * @generated
 		 */
 		EReference FILE_TREE_NODE__PARENT = eINSTANCE.getFileTreeNode_Parent();
+
+		/**
+		 * The meta object literal for the '<em><b>Folder</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute FILE_TREE_NODE__FOLDER = eINSTANCE.getFileTreeNode_Folder();
 
 		/**
 		 * The meta object literal for the '{@link org.hive2hive.core.model.impl.OnlinePeerImpl <em>Online Peer</em>}' class.
@@ -1220,6 +1526,58 @@ public interface ModelPackage extends EPackage {
 		 * @generated
 		 */
 		EReference LOCATIONS__ONLINE_PEERS = eINSTANCE.getLocations_OnlinePeers();
+
+		/**
+		 * The meta object literal for the '{@link org.hive2hive.core.model.impl.UserMessageImpl <em>User Message</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see org.hive2hive.core.model.impl.UserMessageImpl
+		 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getUserMessage()
+		 * @generated
+		 */
+		EClass USER_MESSAGE = eINSTANCE.getUserMessage();
+
+		/**
+		 * The meta object literal for the '<em><b>Id</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute USER_MESSAGE__ID = eINSTANCE.getUserMessage_Id();
+
+		/**
+		 * The meta object literal for the '<em><b>Sender</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute USER_MESSAGE__SENDER = eINSTANCE.getUserMessage_Sender();
+
+		/**
+		 * The meta object literal for the '<em><b>Origin</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute USER_MESSAGE__ORIGIN = eINSTANCE.getUserMessage_Origin();
+
+		/**
+		 * The meta object literal for the '{@link org.hive2hive.core.model.impl.UserMessageQueueImpl <em>User Message Queue</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see org.hive2hive.core.model.impl.UserMessageQueueImpl
+		 * @see org.hive2hive.core.model.impl.ModelPackageImpl#getUserMessageQueue()
+		 * @generated
+		 */
+		EClass USER_MESSAGE_QUEUE = eINSTANCE.getUserMessageQueue();
+
+		/**
+		 * The meta object literal for the '<em><b>Queue</b></em>' reference list feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EReference USER_MESSAGE_QUEUE__QUEUE = eINSTANCE.getUserMessageQueue_Queue();
 
 		/**
 		 * The meta object literal for the '{@link org.hive2hive.core.model.Permission <em>Permission</em>}' enum.

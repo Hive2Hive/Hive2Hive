@@ -71,6 +71,7 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
 			case ModelPackage.FILE_TREE_NODE: return createFileTreeNode();
 			case ModelPackage.ONLINE_PEER: return createOnlinePeer();
 			case ModelPackage.LOCATIONS: return createLocations();
+			case ModelPackage.USER_MESSAGE_QUEUE: return createUserMessageQueue();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -220,6 +221,16 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
 	public Locations createLocations() {
 		LocationsImpl locations = new LocationsImpl();
 		return locations;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public UserMessageQueue createUserMessageQueue() {
+		UserMessageQueueImpl userMessageQueue = new UserMessageQueueImpl();
+		return userMessageQueue;
 	}
 
 	/**

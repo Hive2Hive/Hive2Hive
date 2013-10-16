@@ -2,6 +2,7 @@
  */
 package org.hive2hive.core.model.impl;
 
+import java.security.KeyPair;
 import java.util.Collection;
 import java.util.Date;
 import org.eclipse.emf.common.notify.Notification;
@@ -11,6 +12,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 
+import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
 import org.eclipse.emf.ecore.util.EObjectResolvingEList;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.ModelPackage;
@@ -27,6 +29,7 @@ import org.hive2hive.core.model.Version;
  *   <li>{@link org.hive2hive.core.model.impl.VersionImpl#getCounter <em>Counter</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.VersionImpl#getSize <em>Size</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.VersionImpl#getDate <em>Date</em>}</li>
+ *   <li>{@link org.hive2hive.core.model.impl.VersionImpl#getChunkKeys <em>Chunk Keys</em>}</li>
  * </ul>
  * </p>
  *
@@ -96,6 +99,16 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 	 * @ordered
 	 */
 	protected Date date = DATE_EDEFAULT;
+
+	/**
+	 * The cached value of the '{@link #getChunkKeys() <em>Chunk Keys</em>}' attribute list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getChunkKeys()
+	 * @generated
+	 * @ordered
+	 */
+	protected EList<KeyPair> chunkKeys;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -196,6 +209,18 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EList<KeyPair> getChunkKeys() {
+		if (chunkKeys == null) {
+			chunkKeys = new EDataTypeUniqueEList<KeyPair>(KeyPair.class, this, ModelPackage.VERSION__CHUNK_KEYS);
+		}
+		return chunkKeys;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
@@ -207,6 +232,8 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 				return getSize();
 			case ModelPackage.VERSION__DATE:
 				return getDate();
+			case ModelPackage.VERSION__CHUNK_KEYS:
+				return getChunkKeys();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -233,6 +260,10 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 			case ModelPackage.VERSION__DATE:
 				setDate((Date)newValue);
 				return;
+			case ModelPackage.VERSION__CHUNK_KEYS:
+				getChunkKeys().clear();
+				getChunkKeys().addAll((Collection<? extends KeyPair>)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -257,6 +288,9 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 			case ModelPackage.VERSION__DATE:
 				setDate(DATE_EDEFAULT);
 				return;
+			case ModelPackage.VERSION__CHUNK_KEYS:
+				getChunkKeys().clear();
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -277,6 +311,8 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 				return size != SIZE_EDEFAULT;
 			case ModelPackage.VERSION__DATE:
 				return DATE_EDEFAULT == null ? date != null : !DATE_EDEFAULT.equals(date);
+			case ModelPackage.VERSION__CHUNK_KEYS:
+				return chunkKeys != null && !chunkKeys.isEmpty();
 		}
 		return super.eIsSet(featureID);
 	}
@@ -297,6 +333,8 @@ public class VersionImpl extends MinimalEObjectImpl.Container implements Version
 		result.append(size);
 		result.append(", date: ");
 		result.append(date);
+		result.append(", chunkKeys: ");
+		result.append(chunkKeys);
 		result.append(')');
 		return result.toString();
 	}

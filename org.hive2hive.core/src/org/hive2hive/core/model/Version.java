@@ -2,6 +2,7 @@
  */
 package org.hive2hive.core.model;
 
+import java.security.KeyPair;
 import java.util.Date;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -18,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link org.hive2hive.core.model.Version#getCounter <em>Counter</em>}</li>
  *   <li>{@link org.hive2hive.core.model.Version#getSize <em>Size</em>}</li>
  *   <li>{@link org.hive2hive.core.model.Version#getDate <em>Date</em>}</li>
+ *   <li>{@link org.hive2hive.core.model.Version#getChunkKeys <em>Chunk Keys</em>}</li>
  * </ul>
  * </p>
  *
@@ -120,4 +122,20 @@ public interface Version extends EObject {
 	 * @generated
 	 */
 	void setDate(Date value);
+
+	/**
+	 * Returns the value of the '<em><b>Chunk Keys</b></em>' attribute list.
+	 * The list contents are of type {@link java.security.KeyPair}.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Chunk Keys</em>' attribute list isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Chunk Keys</em>' attribute list.
+	 * @see org.hive2hive.core.model.ModelPackage#getVersion_ChunkKeys()
+	 * @model dataType="org.hive2hive.core.model.KeyPair"
+	 * @generated
+	 */
+	EList<KeyPair> getChunkKeys();
 } // Version
