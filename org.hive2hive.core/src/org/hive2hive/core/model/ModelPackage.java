@@ -345,13 +345,22 @@ public interface ModelPackage extends EPackage {
 	int USER_PROFILE__FILE_TREE = 0;
 
 	/**
+	 * The feature id for the '<em><b>Encryption Keys</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int USER_PROFILE__ENCRYPTION_KEYS = 1;
+
+	/**
 	 * The feature id for the '<em><b>Signature Keys</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int USER_PROFILE__SIGNATURE_KEYS = 1;
+	int USER_PROFILE__SIGNATURE_KEYS = 2;
 
 	/**
 	 * The feature id for the '<em><b>User Id</b></em>' attribute.
@@ -360,7 +369,7 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int USER_PROFILE__USER_ID = 2;
+	int USER_PROFILE__USER_ID = 3;
 
 	/**
 	 * The number of structural features of the '<em>User Profile</em>' class.
@@ -369,7 +378,7 @@ public interface ModelPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int USER_PROFILE_FEATURE_COUNT = 3;
+	int USER_PROFILE_FEATURE_COUNT = 4;
 
 	/**
 	 * The meta object id for the '{@link org.hive2hive.core.model.impl.FileTreeImpl <em>File Tree</em>}' class.
@@ -901,6 +910,17 @@ public interface ModelPackage extends EPackage {
 	EReference getUserProfile_FileTree();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.UserProfile#getEncryptionKeys <em>Encryption Keys</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Encryption Keys</em>'.
+	 * @see org.hive2hive.core.model.UserProfile#getEncryptionKeys()
+	 * @see #getUserProfile()
+	 * @generated
+	 */
+	EAttribute getUserProfile_EncryptionKeys();
+
+	/**
 	 * Returns the meta object for the attribute '{@link org.hive2hive.core.model.UserProfile#getSignatureKeys <em>Signature Keys</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1398,6 +1418,14 @@ public interface ModelPackage extends EPackage {
 		 * @generated
 		 */
 		EReference USER_PROFILE__FILE_TREE = eINSTANCE.getUserProfile_FileTree();
+
+		/**
+		 * The meta object literal for the '<em><b>Encryption Keys</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute USER_PROFILE__ENCRYPTION_KEYS = eINSTANCE.getUserProfile_EncryptionKeys();
 
 		/**
 		 * The meta object literal for the '<em><b>Signature Keys</b></em>' attribute feature.

@@ -48,6 +48,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="UserProfile">
     <eStructuralFeatures xsi:type="ecore:EReference" name="fileTree" lowerBound="1"
         eType="#//FileTree"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="encryptionKeys" lowerBound="1"
+        eType="#//KeyPair"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="signatureKeys" lowerBound="1"
         eType="#//KeyPair"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="userId" lowerBound="1"

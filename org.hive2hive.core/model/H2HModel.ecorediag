@@ -170,6 +170,10 @@
         <element xmi:type="ecore:EAttribute" href="H2HModel.ecore#//UserProfile/userId"/>
         <layoutConstraint xmi:type="notation:Location" xmi:id="_LzkFETYmEeOd5vmL9de8IQ"/>
       </children>
+      <children xmi:type="notation:Node" xmi:id="_3vG9kDb8EeOPg8hdUIRfSQ" type="2001">
+        <element xmi:type="ecore:EAttribute" href="H2HModel.ecore#//UserProfile/encryptionKeys"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_3vG9kTb8EeOPg8hdUIRfSQ"/>
+      </children>
       <children xmi:type="notation:Node" xmi:id="_gWM4IDYlEeOd5vmL9de8IQ" type="2001">
         <element xmi:type="ecore:EAttribute" href="H2HModel.ecore#//UserProfile/signatureKeys"/>
         <layoutConstraint xmi:type="notation:Location" xmi:id="_gWM4ITYlEeOd5vmL9de8IQ"/>

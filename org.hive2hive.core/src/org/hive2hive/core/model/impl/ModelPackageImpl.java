@@ -438,7 +438,7 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public EAttribute getUserProfile_SignatureKeys() {
+	public EAttribute getUserProfile_EncryptionKeys() {
 		return (EAttribute)userProfileEClass.getEStructuralFeatures().get(1);
 	}
 
@@ -447,8 +447,17 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public EAttribute getUserProfile_UserId() {
+	public EAttribute getUserProfile_SignatureKeys() {
 		return (EAttribute)userProfileEClass.getEStructuralFeatures().get(2);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getUserProfile_UserId() {
+		return (EAttribute)userProfileEClass.getEStructuralFeatures().get(3);
 	}
 
 	/**
@@ -724,6 +733,7 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
 
 		userProfileEClass = createEClass(USER_PROFILE);
 		createEReference(userProfileEClass, USER_PROFILE__FILE_TREE);
+		createEAttribute(userProfileEClass, USER_PROFILE__ENCRYPTION_KEYS);
 		createEAttribute(userProfileEClass, USER_PROFILE__SIGNATURE_KEYS);
 		createEAttribute(userProfileEClass, USER_PROFILE__USER_ID);
 
@@ -827,6 +837,7 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
 
 		initEClass(userProfileEClass, UserProfile.class, "UserProfile", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getUserProfile_FileTree(), this.getFileTree(), null, "fileTree", null, 1, 1, UserProfile.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getUserProfile_EncryptionKeys(), this.getKeyPair(), "encryptionKeys", null, 1, 1, UserProfile.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getUserProfile_SignatureKeys(), this.getKeyPair(), "signatureKeys", null, 1, 1, UserProfile.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getUserProfile_UserId(), ecorePackage.getEString(), "userId", null, 1, 1, UserProfile.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
