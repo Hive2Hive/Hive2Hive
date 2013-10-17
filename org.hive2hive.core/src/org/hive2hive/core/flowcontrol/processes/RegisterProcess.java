@@ -1,37 +1,26 @@
 package org.hive2hive.core.flowcontrol.processes;
 
+import org.hive2hive.core.flowcontrol.abstracts.ControlledProcess;
 import org.hive2hive.core.flowcontrol.interfaces.IProcess;
 
-public class RegisterProcess implements IProcess {
-
-	@Override
-	public void initialize() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void start() {
-		// TODO Auto-generated method stub
-
-	}
-
+public class RegisterProcess extends ControlledProcess {
+	
 	@Override
 	public void pause() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public void stop() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public void process() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
@@ -41,15 +30,16 @@ public class RegisterProcess implements IProcess {
 	}
 
 	@Override
-	public IProcess getNextProcess() {
+	public IProcess getNext() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public IProcess getPreviousProcess() {
+	public IProcess getPrevious() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	
 }

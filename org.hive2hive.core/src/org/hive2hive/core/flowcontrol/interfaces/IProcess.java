@@ -6,10 +6,8 @@ package org.hive2hive.core.flowcontrol.interfaces;
  *
  */
 public interface IProcess {
-
-	public void initialize();
 	
-	public void start();
+	public void run();
 	
 	public void pause();
 	
@@ -19,8 +17,8 @@ public interface IProcess {
 	
 	public int getProgress();
 	
-	public IProcess getNextProcess();
+	public IProcess getNext();
 	
-	public IProcess getPreviousProcess();
+	public IProcess getPrevious();
 	
 }
