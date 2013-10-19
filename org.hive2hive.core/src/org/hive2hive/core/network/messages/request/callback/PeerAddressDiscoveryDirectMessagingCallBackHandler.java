@@ -6,15 +6,23 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 
-public class PeerAddressDiscoveryDirectMessagingCallBackHandler implements ICallBackHandler {
+/**
+ * The callback handler receives a response on a peer address discovery request
+ * message. Then the handler resends the given direct message with the received
+ * peer address.
+ * 
+ * @author Seppi
+ */
+public class PeerAddressDiscoveryDirectMessagingCallBackHandler implements
+		ICallBackHandler {
 
 	private final NetworkManager networkManager;
 	private final BaseDirectMessage message;
 
-	public PeerAddressDiscoveryDirectMessagingCallBackHandler(NetworkManager aNetworkManager,
-			BaseDirectMessage aMessage) {
-		networkManager = aNetworkManager;
-		message = aMessage;
+	public PeerAddressDiscoveryDirectMessagingCallBackHandler(
+			NetworkManager networkManager, BaseDirectMessage message) {
+		this.networkManager = networkManager;
+		this.message = message;
 	}
 
 	@Override

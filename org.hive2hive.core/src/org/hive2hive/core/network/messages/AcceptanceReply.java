@@ -23,7 +23,5 @@ public enum AcceptanceReply {
 	 */
 	FUTURE_FAILURE,
 	/** Generic message to indicate that the message was sent to the wrong target. */
-	WRONG_TARGET,
-	/** A user message arrived at a node which is currently not a host for the target user. */
-	USER_MESSAGE_ARRIVED_AT_WRONG_CLIENT_PEER
+	WRONG_TARGET
 }

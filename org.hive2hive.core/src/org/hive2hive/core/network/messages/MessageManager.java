@@ -33,7 +33,6 @@ public class MessageManager {
 	}
 
 	public void send(BaseMessage aMessage) {
-
 		aMessage.increaseSendingCounter();
 
 		configureCallbackHandlerIfNeeded(aMessage);
@@ -115,7 +114,6 @@ public class MessageManager {
 	
 		@Override
 		public void operationComplete(FutureDHT future) throws Exception {
-	
 			AcceptanceReply reply = extractAcceptanceReply(future);
 			if (reply != AcceptanceReply.OK) {
 				message.handleSendingFailure(reply, networkManager);
@@ -155,7 +153,7 @@ public class MessageManager {
 					errorReason, networkManager.getNodeId()));
 			return AcceptanceReply.FAILURE;
 		}
-	
+
 	}
 
 	private class FutureListener2 extends BaseFutureAdapter<FutureResponse> {
@@ -206,6 +204,7 @@ public class MessageManager {
 			}
 			return AcceptanceReply.FAILURE;
 		}
+		
 	}
 
 	private class PeerAddressStorageListener extends BaseFutureAdapter<FutureDHT> {

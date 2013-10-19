@@ -197,7 +197,12 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	public void handleSendingFailure(AcceptanceReply reply,
 			NetworkManager aNetworkManager) {
-		if (AcceptanceReply.FAILURE == reply) {
+		switch (reply) {
+		case OK:
+			logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
+			throw new IllegalArgumentException(
+					"AcceptanceReply.OK is not a failure.");
+		case FAILURE:
 			if (SendingBehavior.SEND_MAX_ALLOWED_TIMES == getSendingBehavior()) {
 				if (getSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING) {
 					aNetworkManager.send(this);
@@ -207,7 +212,17 @@ public abstract class BaseMessage implements Runnable, Serializable {
 									getSendingCounter(),
 									aNetworkManager.getNodeId(), getTargetKey()));
 				}
+			} else {
+				logger.warn(String
+						.format("Message not accepted by the target after one try. Details:\n target key = '%s' message id = '%s'",
+								getTargetKey(), messageID));
 			}
+			break;
+		default:
+			logger.error(String.format("Unkown AcceptanceReply argument: %s",
+					reply));
+			throw new IllegalArgumentException(String.format(
+					"Unkown AcceptanceReply argument: %s", reply));
 		}
 	}
 }
