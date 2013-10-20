@@ -2,19 +2,19 @@ package org.hive2hive.core.encryption;
 
 public final class EncryptedContent {
 
-	private final String content;
-	private final String initVector;
+	private final byte[] content;
+	private final byte[] initVector;
 	
-	public EncryptedContent(String content, String initVector){
+	public EncryptedContent(byte[] content, byte[] initVector){
 		this.content = content;
 		this.initVector = initVector;
 	}
 	
-	public final String getContent(){
+	public final byte[] getContent(){
 		return content;
 	}
 	
-	public final String getInitVector(){
+	public final byte[] getInitVector(){
 		return initVector;
 	}
 }

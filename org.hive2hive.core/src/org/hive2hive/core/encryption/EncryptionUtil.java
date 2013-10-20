@@ -50,22 +50,29 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
 public final class EncryptionUtil {
-	
+
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
-	
+
 	public static final String ISO_8859_1 = "ISO-8859-1";
 	public static final String UTF_8 = "UTF-8";
 	public static final String DELIMITER = "DELIMITERDELIMITERDELIMITERDELIMITER";
 
 	private static final String AES_CIPHER_MODE = "AES/CBC/PKCS5PADDING";
+	private static final String RSA_CIPHER_MODE = "RSA";
 
-	private EncryptionUtil() {}
+	private EncryptionUtil() {
+	}
 
-	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey){
+	private static void encrypt(byte[] content, Key key, int opmode){
 		
-		String encryptedContent = null;
-		String initVector = null;
-		
+	}
+	
+	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
+
+		//encrypt(content, aesKey);
+		byte[] encryptedContent = null;
+		byte[] initVector = null;
+
 		try {
 			Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
 			try {
@@ -73,30 +80,26 @@ public final class EncryptionUtil {
 				cipher.init(Cipher.ENCRYPT_MODE, aesKey);
 				try {
 					// encrypt the content
-					encryptedContent = toString(cipher.doFinal(content));
-					initVector = toString(cipher.getIV());				
-	
+					encryptedContent = cipher.doFinal(content);
+					initVector = cipher.getIV();
+
 				} catch (IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception during encryption:", e);
 				}
 			} catch (InvalidKeyException e) {
 				logger.error("Invalid key:", e);
 			}
-	
+
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("Error during cipher initialisation:", e);
 		}
 		return new EncryptedContent(encryptedContent, initVector);
 	}
 
-	public static EncryptedContent encryptAES(String content, SecretKey aesKey) {
-		return encryptAES(toByte(content), aesKey);
-	}
-	
-	public static byte[] decryptAES(byte[] content, String initVector, SecretKey aesKey){
+	public static byte[] decryptAES(byte[] content, String initVector, SecretKey aesKey) {
 
 		byte[] decryptedContent = null;
-		
+
 		try {
 			Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
 			try {
@@ -118,8 +121,65 @@ public final class EncryptionUtil {
 		return decryptedContent;
 	}
 
-	public static String decryptAES(String content, String initVector, SecretKey aesKey){
-		return toString(decryptAES(toByte(content), initVector, aesKey));
+	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
+		//encrypt(content, publicKey);
+		byte[] encryptedContent = null;
+		byte[] initVector = null;
+
+		try {
+			Cipher cipher = Cipher.getInstance(RSA_CIPHER_MODE);
+			try {
+				cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+				try {
+					// encrypt the content
+					encryptedContent = cipher.doFinal(content);
+					initVector = cipher.getIV();
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("Exception during encryption:", e);
+				}
+			} catch (InvalidKeyException e) {
+				logger.error("Invalid key:", e);
+			}
+
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("Error during cipher initialisation:", e);
+		}
+		return new EncryptedContent(encryptedContent, initVector);
+	}
+
+	public static byte[] decryptRSA(byte[] content, PrivateKey privateKey) {
+		// try {
+		// Cipher c = Cipher.getInstance("RSA");
+		// c.init(Cipher.DECRYPT_MODE, aPrivateKey);
+		// return toString(c.doFinal(toByte(aStringToDecrypt)));
+		// } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+		// | IllegalBlockSizeException | BadPaddingException e) {
+		// logger.error("Exception during decryption:", e);
+		// }
+		// return null;
+		// }
+
+		byte[] decryptedContent = null;
+
+		try {
+			Cipher cipher = Cipher.getInstance(RSA_CIPHER_MODE);
+			try {
+				// initialize cipher with mode and key
+				cipher.init(Cipher.DECRYPT_MODE, privateKey);
+				try {
+					// decrypt the content
+					decryptedContent = cipher.doFinal(content);
+
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("Exception during decryption:", e);
+				}
+			} catch (InvalidKeyException e) {
+				logger.error("Exception during initialisation of the cipher:", e);
+			}
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("Error during cipher initialisation:", e);
+		}
+		return decryptedContent;
 	}
 
 	public static byte[] createRandomAESKey() {
@@ -246,111 +306,111 @@ public final class EncryptionUtil {
 		return (PrivateKey) convertStringToKey(aString, false);
 	}
 
-//	public static ClosedUserProfile encrypt(User aUser) {
-//		ClosedUserProfile closedUserProfile = ModelFactory.eINSTANCE.createClosedUserProfile();
-//		closedUserProfile.setUserID(aUser.getUserID());
-//		closedUserProfile.setPublicKey(convertKeyToString(aUser.getProfile().getPublicKey(), true));
-//
-//		byte[] aesKey = createRandomAESKey();
-//		SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
-//		try {
-//			Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
-//			try {
-//				cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-//				try {
-//					byte[] encodedPrivateKey = cipher.doFinal(toByte(convertKeyToString(aUser.getProfile()
-//							.getPrivateKey(), false)));
-//					closedUserProfile.setPrivateKey(toString(encodedPrivateKey));
-//
-//					// encrypt file tree
-//					Resource rs = ModelUtil.createResource("save");
-//					rs.getContents().add(aUser.getProfile().getFileRoot());
-//					String fileTreeAsString = ModelUtil.resourceToString(rs, UTF_8);
-//					String encryptedFileTreeAsString = toString(cipher.doFinal(toByte(fileTreeAsString)));
-//					closedUserProfile.setFileGhost(encryptedFileTreeAsString);
-//
-//					// encrypt friend lists
-//					ArrayList<Friend> friends = new ArrayList<Friend>(aUser.getProfile().getFriends());
-//					closedUserProfile.setFriends(new EncryptionCapsule(friends, aUser.getProfile()
-//							.getPublicKey()));
-//					ArrayList<Friend> friendRequests = new ArrayList<Friend>(aUser.getProfile()
-//							.getFriendRequests());
-//					closedUserProfile.setFriendRequests(new EncryptionCapsule(friendRequests, aUser.getProfile()
-//							.getPublicKey()));
-//					ArrayList<Friend> pendingFriendRequests = new ArrayList<Friend>(aUser.getProfile()
-//							.getPendingFriendRequests());
-//					closedUserProfile.setPendingFriendRequests(new EncryptionCapsule(pendingFriendRequests, aUser
-//							.getProfile().getPublicKey()));
-//
-//					byte[] salt = createRandomSalt();
-//					closedUserProfile.setTempKey(encryptTempKey(aesKey, aUser.getPassword(), salt));
-//					closedUserProfile.setPrivateSalt(toString(salt));
-//					closedUserProfile.setEPass(aUser.getProfile().getEPass());
-//					closedUserProfile.setIv(toString(cipher.getIV()));
-//				} catch (IllegalBlockSizeException | BadPaddingException e) {
-//					logger.error("Exception during encryption:", e);
-//				}
-//			} catch (InvalidKeyException e) {
-//				logger.error("Invalide key:", e);
-//				e.printStackTrace();
-//			}
-//
-//		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-//			logger.error("Error during cipher initialisation:", e);
-//		}
-//
-//		return closedUserProfile;
-//	}
+	// public static ClosedUserProfile encrypt(User aUser) {
+	// ClosedUserProfile closedUserProfile = ModelFactory.eINSTANCE.createClosedUserProfile();
+	// closedUserProfile.setUserID(aUser.getUserID());
+	// closedUserProfile.setPublicKey(convertKeyToString(aUser.getProfile().getPublicKey(), true));
+	//
+	// byte[] aesKey = createRandomAESKey();
+	// SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
+	// try {
+	// Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
+	// try {
+	// cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+	// try {
+	// byte[] encodedPrivateKey = cipher.doFinal(toByte(convertKeyToString(aUser.getProfile()
+	// .getPrivateKey(), false)));
+	// closedUserProfile.setPrivateKey(toString(encodedPrivateKey));
+	//
+	// // encrypt file tree
+	// Resource rs = ModelUtil.createResource("save");
+	// rs.getContents().add(aUser.getProfile().getFileRoot());
+	// String fileTreeAsString = ModelUtil.resourceToString(rs, UTF_8);
+	// String encryptedFileTreeAsString = toString(cipher.doFinal(toByte(fileTreeAsString)));
+	// closedUserProfile.setFileGhost(encryptedFileTreeAsString);
+	//
+	// // encrypt friend lists
+	// ArrayList<Friend> friends = new ArrayList<Friend>(aUser.getProfile().getFriends());
+	// closedUserProfile.setFriends(new EncryptionCapsule(friends, aUser.getProfile()
+	// .getPublicKey()));
+	// ArrayList<Friend> friendRequests = new ArrayList<Friend>(aUser.getProfile()
+	// .getFriendRequests());
+	// closedUserProfile.setFriendRequests(new EncryptionCapsule(friendRequests, aUser.getProfile()
+	// .getPublicKey()));
+	// ArrayList<Friend> pendingFriendRequests = new ArrayList<Friend>(aUser.getProfile()
+	// .getPendingFriendRequests());
+	// closedUserProfile.setPendingFriendRequests(new EncryptionCapsule(pendingFriendRequests, aUser
+	// .getProfile().getPublicKey()));
+	//
+	// byte[] salt = createRandomSalt();
+	// closedUserProfile.setTempKey(encryptTempKey(aesKey, aUser.getPassword(), salt));
+	// closedUserProfile.setPrivateSalt(toString(salt));
+	// closedUserProfile.setEPass(aUser.getProfile().getEPass());
+	// closedUserProfile.setIv(toString(cipher.getIV()));
+	// } catch (IllegalBlockSizeException | BadPaddingException e) {
+	// logger.error("Exception during encryption:", e);
+	// }
+	// } catch (InvalidKeyException e) {
+	// logger.error("Invalide key:", e);
+	// e.printStackTrace();
+	// }
+	//
+	// } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+	// logger.error("Error during cipher initialisation:", e);
+	// }
+	//
+	// return closedUserProfile;
+	// }
 
-//	//@SuppressWarnings("unchecked")
-//	public static UserProfile decrypt(ClosedUserProfile aClosedProfile, User aUser) {
-//		UserProfile userProfile = ModelFactory.eINSTANCE.createUserProfile();
-//
-//		byte[] aesKey = decryptTempKey(aClosedProfile.getTempKey(), aUser.getPassword(),
-//				aClosedProfile.getPrivateSalt());
-//		SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
-//		try {
-//			Cipher c = Cipher.getInstance(AES_CIPHER_MODE);
-//			try {
-//				c.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(toByte(aClosedProfile.getIv())));
-//				try {
-//					// decrypt private key
-//					String privateKey = toString(c.doFinal(toByte(aClosedProfile.getPrivateKey())));
-//					userProfile.setPrivateKey((PrivateKey) convertStringToKey(privateKey, false));
-//					userProfile.setPublicKey((PublicKey) convertStringToKey(aClosedProfile.getPublicKey(),
-//							true));
-//					userProfile.setEPass(aClosedProfile.getEPass());
-//
-//					// decrypt file tree
-//					String decryptedFileTreeAsString = toString(c.doFinal(toByte(aClosedProfile
-//							.getFileGhost())));
-//					Resource fileTreeResource = ModelUtil.stringToResource(decryptedFileTreeAsString, UTF_8);
-//					Directory fileTreeRoot = (Directory) fileTreeResource.getContents().get(0);
-//					userProfile.setFileRoot(fileTreeRoot);
-//
-//					// decrypt friend lists
-//					userProfile.getFriends().addAll(
-//							(ArrayList<Friend>) aClosedProfile.getFriends().getContent(
-//									userProfile.getPrivateKey()));
-//					userProfile.getFriendRequests().addAll(
-//							(ArrayList<Friend>) aClosedProfile.getFriendRequests().getContent(
-//									userProfile.getPrivateKey()));
-//					userProfile.getPendingFriendRequests().addAll(
-//							(ArrayList<Friend>) aClosedProfile.getPendingFriendRequests().getContent(
-//									userProfile.getPrivateKey()));
-//				} catch (IllegalBlockSizeException | BadPaddingException e) {
-//					logger.error("Exception during encryption:", e);
-//				}
-//			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-//				logger.error("Exception during cipher initialisation:", e);
-//			}
-//
-//		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-//			logger.error("Error during cipher initialisation:", e);
-//		}
-//
-//		return userProfile;
-//	}
+	// //@SuppressWarnings("unchecked")
+	// public static UserProfile decrypt(ClosedUserProfile aClosedProfile, User aUser) {
+	// UserProfile userProfile = ModelFactory.eINSTANCE.createUserProfile();
+	//
+	// byte[] aesKey = decryptTempKey(aClosedProfile.getTempKey(), aUser.getPassword(),
+	// aClosedProfile.getPrivateSalt());
+	// SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
+	// try {
+	// Cipher c = Cipher.getInstance(AES_CIPHER_MODE);
+	// try {
+	// c.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(toByte(aClosedProfile.getIv())));
+	// try {
+	// // decrypt private key
+	// String privateKey = toString(c.doFinal(toByte(aClosedProfile.getPrivateKey())));
+	// userProfile.setPrivateKey((PrivateKey) convertStringToKey(privateKey, false));
+	// userProfile.setPublicKey((PublicKey) convertStringToKey(aClosedProfile.getPublicKey(),
+	// true));
+	// userProfile.setEPass(aClosedProfile.getEPass());
+	//
+	// // decrypt file tree
+	// String decryptedFileTreeAsString = toString(c.doFinal(toByte(aClosedProfile
+	// .getFileGhost())));
+	// Resource fileTreeResource = ModelUtil.stringToResource(decryptedFileTreeAsString, UTF_8);
+	// Directory fileTreeRoot = (Directory) fileTreeResource.getContents().get(0);
+	// userProfile.setFileRoot(fileTreeRoot);
+	//
+	// // decrypt friend lists
+	// userProfile.getFriends().addAll(
+	// (ArrayList<Friend>) aClosedProfile.getFriends().getContent(
+	// userProfile.getPrivateKey()));
+	// userProfile.getFriendRequests().addAll(
+	// (ArrayList<Friend>) aClosedProfile.getFriendRequests().getContent(
+	// userProfile.getPrivateKey()));
+	// userProfile.getPendingFriendRequests().addAll(
+	// (ArrayList<Friend>) aClosedProfile.getPendingFriendRequests().getContent(
+	// userProfile.getPrivateKey()));
+	// } catch (IllegalBlockSizeException | BadPaddingException e) {
+	// logger.error("Exception during encryption:", e);
+	// }
+	// } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+	// logger.error("Exception during cipher initialisation:", e);
+	// }
+	//
+	// } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+	// logger.error("Error during cipher initialisation:", e);
+	// }
+	//
+	// return userProfile;
+	// }
 
 	private static String encryptTempKey(byte[] aesKey, String aPassword, byte[] someSalt) {
 		try {
@@ -420,37 +480,12 @@ public final class EncryptionUtil {
 		return result;
 	}
 
-//	public static String createEPassFromPassword(String aPassword) {
-//		Digester digester = new Digester();
-//		digester.setAlgorithm("SHA-1");
-//		byte[] digest = digester.digest(EncryptionUtil.toByte(aPassword));
-//		return EncryptionUtil.toString(digest);
-//	}
-
-	public static String encryptRSA(String aStringToEncrypt, PublicKey aPublicKey) {
-
-		try {
-			Cipher c = Cipher.getInstance("RSA");
-			c.init(Cipher.ENCRYPT_MODE, aPublicKey);
-			return toString(c.doFinal(toByte(aStringToEncrypt)));
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-				| IllegalBlockSizeException | BadPaddingException e) {
-			logger.error("Exception during encryption:", e);
-		}
-		return null;
-	}
-
-	public static String decryptRSA(String aStringToDecrypt, PrivateKey aPrivateKey) {
-		try {
-			Cipher c = Cipher.getInstance("RSA");
-			c.init(Cipher.DECRYPT_MODE, aPrivateKey);
-			return toString(c.doFinal(toByte(aStringToDecrypt)));
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-				| IllegalBlockSizeException | BadPaddingException e) {
-			logger.error("Exception during decryption:", e);
-		}
-		return null;
-	}
+	// public static String createEPassFromPassword(String aPassword) {
+	// Digester digester = new Digester();
+	// digester.setAlgorithm("SHA-1");
+	// byte[] digest = digester.digest(EncryptionUtil.toByte(aPassword));
+	// return EncryptionUtil.toString(digest);
+	// }
 
 	public static void encryptFileRSA(Path aSourcePath, Path aTargetPath, PublicKey aPublicKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
