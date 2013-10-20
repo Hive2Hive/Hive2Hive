@@ -1,5 +1,7 @@
 package org.hive2hive.core.network;
 
+import java.net.InetAddress;
+
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.PeerAddress;
 
@@ -51,11 +53,50 @@ public class NetworkManager {
 		messageManager = new MessageManager(this);
 		dataManager = new DataManager(this);
 	}
+	
+	/**
+	 * Create a peer which will be the first node in the network (master).
+	 * 
+	 * @return <code>true</code> if creating master peer was successful,
+	 *         <code>false</code> if not
+	 */
+	public boolean connect(){
+		return connection.connect();
+	}
+	
+	/**
+	 * Create a peer and bootstrap to a given peer through IP address
+	 * 
+	 * @param bootstrapInetAddress
+	 *            IP address to given bootstrapping peer
+	 * @return <code>true</code> if bootstrapping was successful,
+	 *         <code>false</code> if not
+	 */
+	public boolean connect(InetAddress bootstrapInetAddress) {
+		return connection.connect(bootstrapInetAddress);
+	}
+	
+	/**
+	 * Create a peer and bootstrap to a given peer through IP address and port
+	 * number
+	 * 
+	 * @param bootstrapInetAddress
+	 *            IP address to given bootstrapping peer
+	 * @param port
+	 *            port number to given bootstrapping peer
+	 * @return <code>true</code> if bootstrapping was successful,
+	 *         <code>false</code> if not
+	 */
+	public boolean connect(InetAddress bootstrapInetAddress, int port) {
+		return connection.connect(bootstrapInetAddress, port);
+	}
 
 	/**
 	 * Shutdown the connection to the p2p network.
 	 */
 	public void disconnect() {
+		if (!connection.isConnected())
+			return;
 		connection.disconnect();
 		logger.debug(String.format("Peer '%s' is shutdown", nodeId));
 	}
@@ -67,6 +108,8 @@ public class NetworkManager {
 	 *            the message to send
 	 */
 	public void send(BaseMessage aMessage) {
+		if (!connection.isConnected())
+			return;
 		messageManager.send(aMessage);
 	}
 
@@ -78,6 +121,8 @@ public class NetworkManager {
 	 * @see {@link MessageManager#send(AsynchronousMessage)}
 	 */
 	public void sendDirect(BaseDirectMessage aMessage) {
+		if (!connection.isConnected())
+			return;
 		messageManager.send(aMessage);
 	}
 
@@ -95,6 +140,8 @@ public class NetworkManager {
 	 */
 	public FutureDHT putGlobal(String locationKey, String contentKey,
 			DataWrapper wrapper) {
+		if (!connection.isConnected())
+			return null;
 		return dataManager.putGlobal(locationKey, contentKey, wrapper);
 	}
 
@@ -109,6 +156,8 @@ public class NetworkManager {
 	 * @return the desired content from the wrapper
 	 */
 	public Object getGlobal(String locationKey, String contentKey) {
+		if (!connection.isConnected())
+			return null;
 		return dataManager.getGlobal(locationKey, contentKey);
 	}
 
@@ -126,6 +175,8 @@ public class NetworkManager {
 	 */
 	public void putLocal(String locationKey, String contentKey,
 			DataWrapper wrapper) {
+		if (!connection.isConnected())
+			return;
 		dataManager.putLocal(locationKey, contentKey, wrapper);
 	}
 
@@ -139,6 +190,8 @@ public class NetworkManager {
 	 * @return the desired content from the wrapper
 	 */
 	public Object getLocal(String locationKey, String contentKey) {
+		if (!connection.isConnected())
+			return null;
 		return dataManager.getLocal(locationKey, contentKey);
 	}
 }
