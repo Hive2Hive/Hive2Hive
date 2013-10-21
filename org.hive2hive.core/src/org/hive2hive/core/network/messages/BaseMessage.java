@@ -6,9 +6,9 @@ import java.security.SecureRandom;
 
 import net.tomp2p.futures.FutureDHT;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
 
 /**

@@ -12,9 +12,9 @@ import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;

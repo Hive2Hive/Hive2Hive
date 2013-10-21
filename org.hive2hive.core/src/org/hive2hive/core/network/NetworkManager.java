@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -46,9 +47,8 @@ public class NetworkManager {
 		return getConnection().getPeer().getPeerAddress();
 	}
 	
-	public NetworkManager() {
-		// TODO give node id
-		nodeId = "bla";
+	public NetworkManager(String nodeId) {
+		this.nodeId = nodeId;
 		connection = new Connection(nodeId, this);
 		messageManager = new MessageManager(this);
 		dataManager = new DataManager(this);

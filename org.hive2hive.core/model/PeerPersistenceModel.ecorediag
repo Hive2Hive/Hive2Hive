@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmi:id="_57W80P9QEeKBnpfBzpku8Q" type="EcoreTools" name="PeerPersistenceModel" measurementUnit="Pixel">
+  <children xmi:type="notation:Node" xmi:id="_9eLjUP9QEeKBnpfBzpku8Q" type="1001">
+    <children xmi:type="notation:Node" xmi:id="_9eNYgP9QEeKBnpfBzpku8Q" type="4001"/>
+    <children xmi:type="notation:Node" xmi:id="_9eOmoP9QEeKBnpfBzpku8Q" type="5001">
+      <children xmi:type="notation:Node" xmi:id="_DQG3sP_rEeKwbIBf_PhnbQ" type="2001">
+        <element xmi:type="ecore:EAttribute" href="PeerPersistenceModel.ecore#//PeerMemory/keyPair"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_DQG3sf_rEeKwbIBf_PhnbQ"/>
+      </children>
+      <styles xmi:type="notation:DrawerStyle" xmi:id="_9eOmof9QEeKBnpfBzpku8Q"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_9eOmov9QEeKBnpfBzpku8Q"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_9eOmo_9QEeKBnpfBzpku8Q"/>
+    </children>
+    <children xmi:type="notation:Node" xmi:id="_9ePNsP9QEeKBnpfBzpku8Q" type="5002">
+      <styles xmi:type="notation:DrawerStyle" xmi:id="_9ePNsf9QEeKBnpfBzpku8Q"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_9ePNsv9QEeKBnpfBzpku8Q"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_9ePNs_9QEeKBnpfBzpku8Q"/>
+    </children>
+    <styles xmi:type="notation:ShapeStyle" xmi:id="_9eLjUf9QEeKBnpfBzpku8Q" fontColor="4210752" fontName="Lucida Grande" fontHeight="10" fillColor="13761016" lineColor="8421504"/>
+    <element xmi:type="ecore:EClass" href="PeerPersistenceModel.ecore#//PeerMemory"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_9eLjUv9QEeKBnpfBzpku8Q" x="218" y="192"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_57W80f9QEeKBnpfBzpku8Q"/>
+  <element xmi:type="ecore:EPackage" href="PeerPersistenceModel.ecore#/"/>
+</notation:Diagram>
