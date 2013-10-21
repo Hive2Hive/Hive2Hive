@@ -76,7 +76,6 @@ public class H2HJUnitTest {
 		return bar.toString();
 	}
 
-	@AfterClass
 	public static void afterClass() {
 		printTestIdentifier(testClass.getName(), false);
 	}

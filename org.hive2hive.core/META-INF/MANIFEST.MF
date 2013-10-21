@@ -9,10 +9,7 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.hive2hive.core.model,
  org.hive2hive.core.model.impl,
- org.hive2hive.core.model.util,
- org.hive2hive.core.peerpersistencemodel,
- org.hive2hive.core.peerpersistencemodel.impl,
- org.hive2hive.core.peerpersistencemodel.util
+ org.hive2hive.core.model.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy
