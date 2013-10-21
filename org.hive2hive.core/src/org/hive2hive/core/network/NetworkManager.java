@@ -12,7 +12,6 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataWrapper;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -23,8 +22,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  */
 public class NetworkManager {
 
-	private static final H2HLogger logger = H2HLoggerFactory
-			.getLogger(NetworkManager.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(NetworkManager.class);
 
 	private final String nodeId;
 	private final Connection connection;
@@ -38,7 +36,7 @@ public class NetworkManager {
 	public Connection getConnection() {
 		return connection;
 	}
-	
+
 	public MessageManager getMessageManager() {
 		return messageManager;
 	}
@@ -46,36 +44,34 @@ public class NetworkManager {
 	public PeerAddress getPeerAddress() {
 		return getConnection().getPeer().getPeerAddress();
 	}
-	
+
 	public NetworkManager(String nodeId) {
 		this.nodeId = nodeId;
 		connection = new Connection(nodeId, this);
 		messageManager = new MessageManager(this);
 		dataManager = new DataManager(this);
 	}
-	
+
 	/**
 	 * Create a peer which will be the first node in the network (master).
 	 * 
-	 * @return <code>true</code> if creating master peer was successful,
-	 *         <code>false</code> if not
+	 * @return <code>true</code> if creating master peer was successful, <code>false</code> if not
 	 */
-	public boolean connect(){
+	public boolean connect() {
 		return connection.connect();
 	}
-	
+
 	/**
 	 * Create a peer and bootstrap to a given peer through IP address
 	 * 
 	 * @param bootstrapInetAddress
 	 *            IP address to given bootstrapping peer
-	 * @return <code>true</code> if bootstrapping was successful,
-	 *         <code>false</code> if not
+	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
 	 */
 	public boolean connect(InetAddress bootstrapInetAddress) {
 		return connection.connect(bootstrapInetAddress);
 	}
-	
+
 	/**
 	 * Create a peer and bootstrap to a given peer through IP address and port
 	 * number
@@ -84,8 +80,7 @@ public class NetworkManager {
 	 *            IP address to given bootstrapping peer
 	 * @param port
 	 *            port number to given bootstrapping peer
-	 * @return <code>true</code> if bootstrapping was successful,
-	 *         <code>false</code> if not
+	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
 	 */
 	public boolean connect(InetAddress bootstrapInetAddress, int port) {
 		return connection.connect(bootstrapInetAddress, port);
@@ -103,27 +98,15 @@ public class NetworkManager {
 
 	/**
 	 * Sends a given message to the peer which is responsible to given key.
+	 * If the message is a BaseDirectMessage, the message is sent directly using TCP
 	 * 
-	 * @param aMessage
+	 * @param message
 	 *            the message to send
 	 */
-	public void send(BaseMessage aMessage) {
+	public void send(BaseMessage message) {
 		if (!connection.isConnected())
 			return;
-		messageManager.send(aMessage);
-	}
-
-	/**
-	 * Sends a given message directly (TCP) to the peer with the given address.
-	 * 
-	 * @param aMessge
-	 *            the message to send
-	 * @see {@link MessageManager#send(AsynchronousMessage)}
-	 */
-	public void sendDirect(BaseDirectMessage aMessage) {
-		if (!connection.isConnected())
-			return;
-		messageManager.send(aMessage);
+		messageManager.send(message);
 	}
 
 	/**
@@ -138,8 +121,7 @@ public class NetworkManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey,
-			DataWrapper wrapper) {
+	public FutureDHT putGlobal(String locationKey, String contentKey, DataWrapper wrapper) {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.putGlobal(locationKey, contentKey, wrapper);
@@ -155,7 +137,7 @@ public class NetworkManager {
 	 *            the content key - please choose one from {@link H2HConstants}
 	 * @return the desired content from the wrapper
 	 */
-	public Object getGlobal(String locationKey, String contentKey) {
+	public FutureDHT getGlobal(String locationKey, String contentKey) {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.getGlobal(locationKey, contentKey);
@@ -173,8 +155,7 @@ public class NetworkManager {
 	 * @param wrapper
 	 *            the wrapper containing the content to be stored
 	 */
-	public void putLocal(String locationKey, String contentKey,
-			DataWrapper wrapper) {
+	public void putLocal(String locationKey, String contentKey, DataWrapper wrapper) {
 		if (!connection.isConnected())
 			return;
 		dataManager.putLocal(locationKey, contentKey, wrapper);
