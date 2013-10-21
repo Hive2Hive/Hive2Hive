@@ -24,6 +24,7 @@ import org.hive2hive.core.model.UserProfile;
  * The following features are implemented:
  * <ul>
  *   <li>{@link org.hive2hive.core.model.impl.UserProfileImpl#getFileTree <em>File Tree</em>}</li>
+ *   <li>{@link org.hive2hive.core.model.impl.UserProfileImpl#getEncryptionKeys <em>Encryption Keys</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.UserProfileImpl#getSignatureKeys <em>Signature Keys</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.UserProfileImpl#getUserId <em>User Id</em>}</li>
  * </ul>
@@ -41,6 +42,26 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 	 * @ordered
 	 */
 	protected FileTree fileTree;
+
+	/**
+	 * The default value of the '{@link #getEncryptionKeys() <em>Encryption Keys</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getEncryptionKeys()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final KeyPair ENCRYPTION_KEYS_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getEncryptionKeys() <em>Encryption Keys</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getEncryptionKeys()
+	 * @generated
+	 * @ordered
+	 */
+	protected KeyPair encryptionKeys = ENCRYPTION_KEYS_EDEFAULT;
 
 	/**
 	 * The default value of the '{@link #getSignatureKeys() <em>Signature Keys</em>}' attribute.
@@ -144,6 +165,27 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public KeyPair getEncryptionKeys() {
+		return encryptionKeys;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setEncryptionKeys(KeyPair newEncryptionKeys) {
+		KeyPair oldEncryptionKeys = encryptionKeys;
+		encryptionKeys = newEncryptionKeys;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.USER_PROFILE__ENCRYPTION_KEYS, oldEncryptionKeys, encryptionKeys));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public KeyPair getSignatureKeys() {
 		return signatureKeys;
 	}
@@ -192,6 +234,8 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 			case ModelPackage.USER_PROFILE__FILE_TREE:
 				if (resolve) return getFileTree();
 				return basicGetFileTree();
+			case ModelPackage.USER_PROFILE__ENCRYPTION_KEYS:
+				return getEncryptionKeys();
 			case ModelPackage.USER_PROFILE__SIGNATURE_KEYS:
 				return getSignatureKeys();
 			case ModelPackage.USER_PROFILE__USER_ID:
@@ -210,6 +254,9 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 		switch (featureID) {
 			case ModelPackage.USER_PROFILE__FILE_TREE:
 				setFileTree((FileTree)newValue);
+				return;
+			case ModelPackage.USER_PROFILE__ENCRYPTION_KEYS:
+				setEncryptionKeys((KeyPair)newValue);
 				return;
 			case ModelPackage.USER_PROFILE__SIGNATURE_KEYS:
 				setSignatureKeys((KeyPair)newValue);
@@ -232,6 +279,9 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 			case ModelPackage.USER_PROFILE__FILE_TREE:
 				setFileTree((FileTree)null);
 				return;
+			case ModelPackage.USER_PROFILE__ENCRYPTION_KEYS:
+				setEncryptionKeys(ENCRYPTION_KEYS_EDEFAULT);
+				return;
 			case ModelPackage.USER_PROFILE__SIGNATURE_KEYS:
 				setSignatureKeys(SIGNATURE_KEYS_EDEFAULT);
 				return;
@@ -252,6 +302,8 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 		switch (featureID) {
 			case ModelPackage.USER_PROFILE__FILE_TREE:
 				return fileTree != null;
+			case ModelPackage.USER_PROFILE__ENCRYPTION_KEYS:
+				return ENCRYPTION_KEYS_EDEFAULT == null ? encryptionKeys != null : !ENCRYPTION_KEYS_EDEFAULT.equals(encryptionKeys);
 			case ModelPackage.USER_PROFILE__SIGNATURE_KEYS:
 				return SIGNATURE_KEYS_EDEFAULT == null ? signatureKeys != null : !SIGNATURE_KEYS_EDEFAULT.equals(signatureKeys);
 			case ModelPackage.USER_PROFILE__USER_ID:
@@ -270,7 +322,9 @@ public class UserProfileImpl extends MinimalEObjectImpl.Container implements Use
 		if (eIsProxy()) return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (signatureKeys: ");
+		result.append(" (encryptionKeys: ");
+		result.append(encryptionKeys);
+		result.append(", signatureKeys: ");
 		result.append(signatureKeys);
 		result.append(", userId: ");
 		result.append(userId);

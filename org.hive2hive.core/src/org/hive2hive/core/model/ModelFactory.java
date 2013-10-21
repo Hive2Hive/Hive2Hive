@@ -112,6 +112,15 @@ public interface ModelFactory extends EFactory {
 	Locations createLocations();
 
 	/**
+	 * Returns a new object of class '<em>User Message Queue</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>User Message Queue</em>'.
+	 * @generated
+	 */
+	UserMessageQueue createUserMessageQueue();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

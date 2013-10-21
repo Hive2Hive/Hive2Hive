@@ -2,6 +2,8 @@
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="model" nsURI="http://model/1.0" nsPrefix="model">
   <eClassifiers xsi:type="ecore:EClass" name="MetaFile" eSuperTypes="#//MetaDocument">
+    <eOperations name="getTotalSize" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
+    <eOperations name="getNewestVersion" lowerBound="1" eType="#//Version"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="versions" upperBound="-1"
         eType="#//Version"/>
   </eClassifiers>
@@ -12,6 +14,8 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="size" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chunkKeys" upperBound="-1"
+        eType="#//KeyPair"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="Permission">
     <eLiterals name="READONLY"/>
@@ -36,11 +40,16 @@
         eType="#//UserPermission"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Chunk">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="#//PublicKey"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="data" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EByteArray"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="order" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="size" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UserProfile">
     <eStructuralFeatures xsi:type="ecore:EReference" name="fileTree" lowerBound="1"
         eType="#//FileTree"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="encryptionKeys" lowerBound="1"
+        eType="#//KeyPair"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="signatureKeys" lowerBound="1"
         eType="#//KeyPair"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="userId" lowerBound="1"
@@ -51,10 +60,17 @@
         eType="#//FileTreeNode"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FileTreeNode">
+    <eOperations name="isRoot" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="isShared" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getFullPath" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="canWrite" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="keyPair" lowerBound="1"
         eType="#//KeyPair"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="domainKey" eType="#//PrivateKey"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//FileTree"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="folder" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OnlinePeer">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="PeerAddress" upperBound="-1"
@@ -66,4 +82,16 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="onlinePeers" eType="#//OnlinePeer"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EDataType" name="PeerAddress" instanceClassName="net.tomp2p.peers.PeerAddress"/>
+  <eClassifiers xsi:type="ecore:EClass" name="UserMessage" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="sender" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="origin" lowerBound="1"
+        eType="#//PeerAddress"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UserMessageQueue">
+    <eOperations name="getNext" lowerBound="1" eType="#//UserMessage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="queue" upperBound="-1"
+        eType="#//UserMessage"/>
+  </eClassifiers>
 </ecore:EPackage>

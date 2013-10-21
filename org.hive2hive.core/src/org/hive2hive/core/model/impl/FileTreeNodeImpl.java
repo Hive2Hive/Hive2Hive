@@ -24,15 +24,37 @@ import org.hive2hive.core.model.ModelPackage;
  * <p>
  * The following features are implemented:
  * <ul>
+ *   <li>{@link org.hive2hive.core.model.impl.FileTreeNodeImpl#getName <em>Name</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.FileTreeNodeImpl#getKeyPair <em>Key Pair</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.FileTreeNodeImpl#getDomainKey <em>Domain Key</em>}</li>
  *   <li>{@link org.hive2hive.core.model.impl.FileTreeNodeImpl#getParent <em>Parent</em>}</li>
+ *   <li>{@link org.hive2hive.core.model.impl.FileTreeNodeImpl#isFolder <em>Folder</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
 public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements FileTreeNode {
+	/**
+	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getName()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String NAME_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getName()
+	 * @generated
+	 * @ordered
+	 */
+	protected String name = NAME_EDEFAULT;
+
 	/**
 	 * The default value of the '{@link #getKeyPair() <em>Key Pair</em>}' attribute.
 	 * <!-- begin-user-doc -->
@@ -84,6 +106,26 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 	protected FileTree parent;
 
 	/**
+	 * The default value of the '{@link #isFolder() <em>Folder</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isFolder()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final boolean FOLDER_EDEFAULT = false;
+
+	/**
+	 * The cached value of the '{@link #isFolder() <em>Folder</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isFolder()
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean folder = FOLDER_EDEFAULT;
+
+	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -100,6 +142,27 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 	@Override
 	protected EClass eStaticClass() {
 		return ModelPackage.Literals.FILE_TREE_NODE;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setName(String newName) {
+		String oldName = name;
+		name = newName;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.FILE_TREE_NODE__NAME, oldName, name));
 	}
 
 	/**
@@ -187,9 +250,76 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public boolean isFolder() {
+		return folder;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setFolder(boolean newFolder) {
+		boolean oldFolder = folder;
+		folder = newFolder;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.FILE_TREE_NODE__FOLDER, oldFolder, folder));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public boolean isRoot() {
+		// TODO: implement this method
+		// Ensure that you remove @generated or mark it @generated NOT
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public boolean isShared() {
+		// TODO: implement this method
+		// Ensure that you remove @generated or mark it @generated NOT
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String getFullPath() {
+		// TODO: implement this method
+		// Ensure that you remove @generated or mark it @generated NOT
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public boolean canWrite() {
+		// TODO: implement this method
+		// Ensure that you remove @generated or mark it @generated NOT
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
+			case ModelPackage.FILE_TREE_NODE__NAME:
+				return getName();
 			case ModelPackage.FILE_TREE_NODE__KEY_PAIR:
 				return getKeyPair();
 			case ModelPackage.FILE_TREE_NODE__DOMAIN_KEY:
@@ -197,6 +327,8 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 			case ModelPackage.FILE_TREE_NODE__PARENT:
 				if (resolve) return getParent();
 				return basicGetParent();
+			case ModelPackage.FILE_TREE_NODE__FOLDER:
+				return isFolder();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -209,6 +341,9 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
+			case ModelPackage.FILE_TREE_NODE__NAME:
+				setName((String)newValue);
+				return;
 			case ModelPackage.FILE_TREE_NODE__KEY_PAIR:
 				setKeyPair((KeyPair)newValue);
 				return;
@@ -217,6 +352,9 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 				return;
 			case ModelPackage.FILE_TREE_NODE__PARENT:
 				setParent((FileTree)newValue);
+				return;
+			case ModelPackage.FILE_TREE_NODE__FOLDER:
+				setFolder((Boolean)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -230,6 +368,9 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
+			case ModelPackage.FILE_TREE_NODE__NAME:
+				setName(NAME_EDEFAULT);
+				return;
 			case ModelPackage.FILE_TREE_NODE__KEY_PAIR:
 				setKeyPair(KEY_PAIR_EDEFAULT);
 				return;
@@ -238,6 +379,9 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 				return;
 			case ModelPackage.FILE_TREE_NODE__PARENT:
 				setParent((FileTree)null);
+				return;
+			case ModelPackage.FILE_TREE_NODE__FOLDER:
+				setFolder(FOLDER_EDEFAULT);
 				return;
 		}
 		super.eUnset(featureID);
@@ -251,12 +395,16 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
+			case ModelPackage.FILE_TREE_NODE__NAME:
+				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
 			case ModelPackage.FILE_TREE_NODE__KEY_PAIR:
 				return KEY_PAIR_EDEFAULT == null ? keyPair != null : !KEY_PAIR_EDEFAULT.equals(keyPair);
 			case ModelPackage.FILE_TREE_NODE__DOMAIN_KEY:
 				return DOMAIN_KEY_EDEFAULT == null ? domainKey != null : !DOMAIN_KEY_EDEFAULT.equals(domainKey);
 			case ModelPackage.FILE_TREE_NODE__PARENT:
 				return parent != null;
+			case ModelPackage.FILE_TREE_NODE__FOLDER:
+				return folder != FOLDER_EDEFAULT;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -271,10 +419,14 @@ public class FileTreeNodeImpl extends MinimalEObjectImpl.Container implements Fi
 		if (eIsProxy()) return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (keyPair: ");
+		result.append(" (name: ");
+		result.append(name);
+		result.append(", keyPair: ");
 		result.append(keyPair);
 		result.append(", domainKey: ");
 		result.append(domainKey);
+		result.append(", folder: ");
+		result.append(folder);
 		result.append(')');
 		return result.toString();
 	}

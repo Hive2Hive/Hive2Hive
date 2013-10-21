@@ -39,4 +39,20 @@ public interface MetaFile extends MetaDocument {
 	 */
 	EList<Version> getVersions();
 
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @model kind="operation" required="true"
+	 * @generated
+	 */
+	long getTotalSize();
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @model kind="operation" required="true"
+	 * @generated
+	 */
+	Version getNewestVersion();
+
 } // MetaFile

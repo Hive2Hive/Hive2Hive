@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EObject;
  * The following features are supported:
  * <ul>
  *   <li>{@link org.hive2hive.core.model.UserProfile#getFileTree <em>File Tree</em>}</li>
+ *   <li>{@link org.hive2hive.core.model.UserProfile#getEncryptionKeys <em>Encryption Keys</em>}</li>
  *   <li>{@link org.hive2hive.core.model.UserProfile#getSignatureKeys <em>Signature Keys</em>}</li>
  *   <li>{@link org.hive2hive.core.model.UserProfile#getUserId <em>User Id</em>}</li>
  * </ul>
@@ -50,6 +51,32 @@ public interface UserProfile extends EObject {
 	 * @generated
 	 */
 	void setFileTree(FileTree value);
+
+	/**
+	 * Returns the value of the '<em><b>Encryption Keys</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Encryption Keys</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Encryption Keys</em>' attribute.
+	 * @see #setEncryptionKeys(KeyPair)
+	 * @see org.hive2hive.core.model.ModelPackage#getUserProfile_EncryptionKeys()
+	 * @model dataType="org.hive2hive.core.model.KeyPair" required="true"
+	 * @generated
+	 */
+	KeyPair getEncryptionKeys();
+
+	/**
+	 * Sets the value of the '{@link org.hive2hive.core.model.UserProfile#getEncryptionKeys <em>Encryption Keys</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Encryption Keys</em>' attribute.
+	 * @see #getEncryptionKeys()
+	 * @generated
+	 */
+	void setEncryptionKeys(KeyPair value);
 
 	/**
 	 * Returns the value of the '<em><b>Signature Keys</b></em>' attribute.
