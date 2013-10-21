@@ -38,7 +38,12 @@ public abstract class Process implements Runnable, IProcess {
 
 	@Override
 	public void start() {
-		new Thread(this).start();
+		if (state == ProcessState.INITIALIZING) {
+			state = ProcessState.RUNNING;
+			new Thread(this).start();
+		} else {
+			logger.error("Process state is " + state.toString() + ". Cannot start.");
+		}
 	}
 
 	@Override
@@ -67,8 +72,12 @@ public abstract class Process implements Runnable, IProcess {
 
 	@Override
 	public void stop() {
-		state = ProcessState.STOPPED;
-		rollBack();
+		if (state == ProcessState.STOPPED) {
+			logger.error("Process is already stopped");
+		} else {
+			state = ProcessState.STOPPED;
+			rollBack();
+		}
 	}
 
 	@Override
@@ -83,8 +92,12 @@ public abstract class Process implements Runnable, IProcess {
 
 	@Override
 	public void run() {
-		state = ProcessState.RUNNING;
 		currentStep.start();
+	}
+
+	@Override
+	public ProcessState getState() {
+		return state;
 	}
 
 	/**
