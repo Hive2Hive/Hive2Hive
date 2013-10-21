@@ -1,8 +1,11 @@
 package org.hive2hive.core.test.flowcontrol;
 
+import net.tomp2p.futures.FutureDHT;
+
 import org.hive2hive.core.flowcontrol.Process;
 import org.hive2hive.core.flowcontrol.ProcessState;
 import org.hive2hive.core.flowcontrol.ProcessStep;
+import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -47,6 +50,16 @@ public class ProcessTest extends H2HJUnitTest {
 
 			@Override
 			public void rollBack() {
+				// do nothing
+			}
+
+			@Override
+			protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
+				// do nothing
+			}
+
+			@Override
+			protected void handlePutGetResult(FutureDHT future) {
 				// do nothing
 			}
 		};
