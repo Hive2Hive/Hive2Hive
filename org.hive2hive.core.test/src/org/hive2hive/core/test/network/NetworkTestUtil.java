@@ -31,7 +31,7 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the master peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(String.format("Node %s", letter++));
+			NetworkManager node = new NetworkManager(String.format("Node %s", ++letter));
 			try {
 				node.connect(InetAddress.getByName("127.0.0.1"));
 			} catch (UnknownHostException e) {
