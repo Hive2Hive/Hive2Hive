@@ -1,5 +1,10 @@
 package org.hive2hive.core.encryption;
 
+/**
+ * This class holds the bytes of an encrypted content and its initialization vector.
+ * @author Christian
+ *
+ */
 public final class EncryptedContent {
 
 	private final byte[] content;

@@ -53,136 +53,170 @@ public final class EncryptionUtil {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
-	public static final String ISO_8859_1 = "ISO-8859-1";
-	public static final String UTF_8 = "UTF-8";
-	public static final String DELIMITER = "DELIMITERDELIMITERDELIMITERDELIMITER";
-
 	private static final String AES_CIPHER_MODE = "AES/CBC/PKCS5PADDING";
 	private static final String RSA_CIPHER_MODE = "RSA";
+
+	private static final String ISO_8859_1 = "ISO-8859-1";
+	private static final String UTF_8 = "UTF-8";
 
 	private EncryptionUtil() {
 	}
 
-	private static void encrypt(byte[] content, Key key, int opmode){
-		
-	}
-	
-	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
+	private static EncryptedContent encrypt(byte[] content, Key key, String transformationMode) {
 
-		//encrypt(content, aesKey);
 		byte[] encryptedContent = null;
 		byte[] initVector = null;
 
 		try {
-			Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
+			// declare transformation mode
+			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
-				// initialize cipher with mode and key
-				cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+				// initialize cipher with encryption mode and key
+				cipher.init(Cipher.ENCRYPT_MODE, key);
 				try {
 					// encrypt the content
 					encryptedContent = cipher.doFinal(content);
 					initVector = cipher.getIV();
-
 				} catch (IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception during encryption:", e);
 				}
 			} catch (InvalidKeyException e) {
 				logger.error("Invalid key:", e);
 			}
-
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Error during cipher initialisation:", e);
+			logger.error("Exception during cipher initialization:", e);
 		}
+
 		return new EncryptedContent(encryptedContent, initVector);
 	}
 
-	public static byte[] decryptAES(byte[] content, String initVector, SecretKey aesKey) {
+	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
+		return encrypt(content, aesKey, AES_CIPHER_MODE);
+	}
+
+	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
+		return encrypt(content, publicKey, RSA_CIPHER_MODE);
+	}
+
+	private static byte[] decrypt(EncryptedContent content, Key key, String transformationMode) {
 
 		byte[] decryptedContent = null;
 
 		try {
-			Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
+			// declare transformation mode
+			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
-				// initialize cipher with mode and key
-				cipher.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(toByte(initVector)));
+				// initialize cipher with decryption mode, key and initialization vector
+				cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(content.getInitVector()));
 				try {
 					// decrypt the content
-					decryptedContent = cipher.doFinal(content);
-
+					decryptedContent = cipher.doFinal(content.getContent());
 				} catch (IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception during decryption:", e);
 				}
 			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-				logger.error("Exception during initialisation of the cipher:", e);
+				logger.error("Invalid key or parameter:", e);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Error during cipher initialisation:", e);
+			logger.error("Exception during cipher initialization:", e);
 		}
+
 		return decryptedContent;
 	}
 
-	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
-		//encrypt(content, publicKey);
-		byte[] encryptedContent = null;
-		byte[] initVector = null;
-
-		try {
-			Cipher cipher = Cipher.getInstance(RSA_CIPHER_MODE);
-			try {
-				cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-				try {
-					// encrypt the content
-					encryptedContent = cipher.doFinal(content);
-					initVector = cipher.getIV();
-				} catch (IllegalBlockSizeException | BadPaddingException e) {
-					logger.error("Exception during encryption:", e);
-				}
-			} catch (InvalidKeyException e) {
-				logger.error("Invalid key:", e);
-			}
-
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Error during cipher initialisation:", e);
-		}
-		return new EncryptedContent(encryptedContent, initVector);
+	public static byte[] decryptAES(EncryptedContent content, SecretKey aesKey) {
+		return decrypt(content, aesKey, AES_CIPHER_MODE);
 	}
 
-	public static byte[] decryptRSA(byte[] content, PrivateKey privateKey) {
-		// try {
-		// Cipher c = Cipher.getInstance("RSA");
-		// c.init(Cipher.DECRYPT_MODE, aPrivateKey);
-		// return toString(c.doFinal(toByte(aStringToDecrypt)));
-		// } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-		// | IllegalBlockSizeException | BadPaddingException e) {
-		// logger.error("Exception during decryption:", e);
-		// }
-		// return null;
-		// }
+	public static byte[] decryptRSA(EncryptedContent content, PrivateKey privateKey) {
+		return decrypt(content, privateKey, RSA_CIPHER_MODE);
+	}
 
-		byte[] decryptedContent = null;
+	public static byte[] serializeObject(Object object) {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = null;
+		byte[] result = null;
 
 		try {
-			Cipher cipher = Cipher.getInstance(RSA_CIPHER_MODE);
+			oos = new ObjectOutputStream(baos);
+			oos.writeObject(object);
+			result = baos.toByteArray();
+		} catch (IOException e) {
+			logger.error("Exception while serializing object.");
+		} finally {
 			try {
-				// initialize cipher with mode and key
-				cipher.init(Cipher.DECRYPT_MODE, privateKey);
-				try {
-					// decrypt the content
-					decryptedContent = cipher.doFinal(content);
-
-				} catch (IllegalBlockSizeException | BadPaddingException e) {
-					logger.error("Exception during decryption:", e);
-				}
-			} catch (InvalidKeyException e) {
-				logger.error("Exception during initialisation of the cipher:", e);
+				oos.close();
+				baos.close();
+			} catch (IOException e) {
+				logger.error("Exception while closing serialization process.");
 			}
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Error during cipher initialisation:", e);
 		}
-		return decryptedContent;
+
+		return result;
+	}
+
+	public static Object deserializeObject(byte[] object) {
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(object);
+		ObjectInputStream ois = null;
+		Object result = null;
+
+		try {
+			ois = new ObjectInputStream(bais);
+			result = ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			logger.error("Exception while deserializing object.");
+		} finally {
+			try {
+				ois.close();
+				bais.close();
+			} catch (IOException e) {
+				logger.error("Exception while closing deserialization process.");
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Converts a String to a byte array using the ISO-8859-1 char set.
+	 * 
+	 * @param string The String to convert.
+	 * @return The byte array conversion result or null if the conversion fails.
+	 */
+	public static byte[] toByte(String string) {
+
+		byte[] result = null;
+
+		try {
+			result = string.getBytes(ISO_8859_1);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Exception while converting String to byte[]:", e);
+		}
+		return result;
+	}
+
+	/**
+	 * Converts a byte array to a String using the ISO-8859-1 char set.
+	 * 
+	 * @param bytes The bytes to convert.
+	 * @return The String conversion result or null if the conversion fails.
+	 */
+	public static String toString(byte[] bytes) {
+
+		String result = null;
+
+		try {
+			result = new String(bytes, ISO_8859_1);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Exception while converting byte[] to String:", e);
+		}
+		return result;
 	}
 
 	public static byte[] createRandomAESKey() {
+
 		SecureRandom random = new SecureRandom();
 		byte[] aesKey = new byte[16]; // 16 bytes = 128 bits
 		random.nextBytes(aesKey);
@@ -203,46 +237,7 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	/**
-	 * Convenience method to convert a String to a byte array using the
-	 * ISO-8859-1 char set for conversion.
-	 * 
-	 * @param the
-	 *            String to convert
-	 * @return the conversion result or <code>null</code> if the conversion
-	 *         fails.
-	 */
-	public static byte[] toByte(String aString) {
-		try {
-			byte[] result = aString.getBytes(ISO_8859_1);
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Can't convert String to byte[]:", e);
-		}
-		return null;
-	}
-
-	/**
-	 * Convenience method to convert a byte array to a String using the
-	 * ISO-8859-1 char set for conversion.
-	 * 
-	 * @param someBytes
-	 *            the byte array to convert
-	 * @return the conversion result or <code>null</code> if the conversion
-	 *         fails.
-	 */
-	public static String toString(byte[] someBytes) {
-		String result;
-		try {
-			result = new String(someBytes, ISO_8859_1);
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Can't convert byte[] to String:", e);
-		}
-		return null;
-	}
-
-	public static KeyPair generateRSAKeys() {
+	public static KeyPair createRSAKeys() {
 		KeyPairGenerator kpg;
 		try {
 			kpg = KeyPairGenerator.getInstance("RSA");
@@ -253,6 +248,42 @@ public final class EncryptionUtil {
 		}
 		return null;
 	}
+
+	private static SecretKey createDESKey(String aPassword, byte[] someSalt) {
+
+		byte[] tempKey = combine(toByte(aPassword), someSalt);
+
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("SHA-512");
+		} catch (NoSuchAlgorithmException e1) {
+			logger.error("Exception  during digest creation:", e1);
+			return null;
+		}
+		for (int i = 0; i < 1024; i++) {
+			md.update(tempKey);
+			tempKey = md.digest();
+			tempKey = combine(someSalt, tempKey);
+		}
+
+		try {
+			DESKeySpec dks = new DESKeySpec(tempKey);
+			SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
+			SecretKey desKey = skf.generateSecret(dks);
+			return desKey;
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			logger.error("Exception during des key creation from password:", e);
+		}
+		return null;
+	}
+
+	public static String encryptPrivateKey(PrivateKey aPrivateKey, byte[] anEasKey) {
+		return convertKeyToString(aPrivateKey, false);
+	}
+
+//	public static PrivateKey decryptPrivateKey(String aString, byte[] anEasKey) {
+//		return (PrivateKey) convertStringToKey(aString, false);
+//	}
 
 	public static String convertKeyToString(Key aKey, boolean isPublic) {
 		KeyFactory fact;
@@ -270,7 +301,7 @@ public final class EncryptionUtil {
 			}
 			StringBuffer buffer = new StringBuffer();
 			buffer.append(Base64.encode(m.toByteArray()));
-			buffer.append(DELIMITER);
+		//	buffer.append(DELIMITER);
 			buffer.append(Base64.encode(e.toByteArray()));
 			return buffer.toString();
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -279,137 +310,42 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	public static String encrypt(PrivateKey aPrivateKey, byte[] anEasKey) {
-		return convertKeyToString(aPrivateKey, false);
-	}
+//	public static Key convertStringToKey(String aString, boolean isPublic) {
+//		String[] parts = aString.split(DELIMITER);
+//		BigInteger m = new BigInteger(Base64.decode(parts[0]));
+//		BigInteger e = new BigInteger(Base64.decode(parts[1]));
+//		try {
+//			KeyFactory fact = KeyFactory.getInstance("RSA");
+//			if (isPublic) {
+//				RSAPublicKeySpec pbuclicKeySpec = new RSAPublicKeySpec(m, e);
+//				return fact.generatePublic(pbuclicKeySpec);
+//			} else {
+//				RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(m, e);
+//				return fact.generatePrivate(privateKeySpec);
+//			}
+//		} catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
+//			logger.error("Exception while creating the key:", e1);
+//		}
+//		return null;
+//	}
 
-	public static Key convertStringToKey(String aString, boolean isPublic) {
-		String[] parts = aString.split(DELIMITER);
-		BigInteger m = new BigInteger(Base64.decode(parts[0]));
-		BigInteger e = new BigInteger(Base64.decode(parts[1]));
-		try {
-			KeyFactory fact = KeyFactory.getInstance("RSA");
-			if (isPublic) {
-				RSAPublicKeySpec pbuclicKeySpec = new RSAPublicKeySpec(m, e);
-				return fact.generatePublic(pbuclicKeySpec);
-			} else {
-				RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(m, e);
-				return fact.generatePrivate(privateKeySpec);
-			}
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
-			logger.error("Exception while creating the key:", e1);
-		}
-		return null;
-	}
-
-	public static PrivateKey decryptPrivateKey(String aString, byte[] anEasKey) {
-		return (PrivateKey) convertStringToKey(aString, false);
-	}
-
-	// public static ClosedUserProfile encrypt(User aUser) {
-	// ClosedUserProfile closedUserProfile = ModelFactory.eINSTANCE.createClosedUserProfile();
-	// closedUserProfile.setUserID(aUser.getUserID());
-	// closedUserProfile.setPublicKey(convertKeyToString(aUser.getProfile().getPublicKey(), true));
-	//
-	// byte[] aesKey = createRandomAESKey();
-	// SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
+	// public static Key convertStringToKey(String aString, boolean isPublic) {
+	// String[] parts = aString.split(DELIMITER);
+	// BigInteger m = new BigInteger(Base64.decode(parts[0]));
+	// BigInteger e = new BigInteger(Base64.decode(parts[1]));
 	// try {
-	// Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
-	// try {
-	// cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-	// try {
-	// byte[] encodedPrivateKey = cipher.doFinal(toByte(convertKeyToString(aUser.getProfile()
-	// .getPrivateKey(), false)));
-	// closedUserProfile.setPrivateKey(toString(encodedPrivateKey));
-	//
-	// // encrypt file tree
-	// Resource rs = ModelUtil.createResource("save");
-	// rs.getContents().add(aUser.getProfile().getFileRoot());
-	// String fileTreeAsString = ModelUtil.resourceToString(rs, UTF_8);
-	// String encryptedFileTreeAsString = toString(cipher.doFinal(toByte(fileTreeAsString)));
-	// closedUserProfile.setFileGhost(encryptedFileTreeAsString);
-	//
-	// // encrypt friend lists
-	// ArrayList<Friend> friends = new ArrayList<Friend>(aUser.getProfile().getFriends());
-	// closedUserProfile.setFriends(new EncryptionCapsule(friends, aUser.getProfile()
-	// .getPublicKey()));
-	// ArrayList<Friend> friendRequests = new ArrayList<Friend>(aUser.getProfile()
-	// .getFriendRequests());
-	// closedUserProfile.setFriendRequests(new EncryptionCapsule(friendRequests, aUser.getProfile()
-	// .getPublicKey()));
-	// ArrayList<Friend> pendingFriendRequests = new ArrayList<Friend>(aUser.getProfile()
-	// .getPendingFriendRequests());
-	// closedUserProfile.setPendingFriendRequests(new EncryptionCapsule(pendingFriendRequests, aUser
-	// .getProfile().getPublicKey()));
-	//
-	// byte[] salt = createRandomSalt();
-	// closedUserProfile.setTempKey(encryptTempKey(aesKey, aUser.getPassword(), salt));
-	// closedUserProfile.setPrivateSalt(toString(salt));
-	// closedUserProfile.setEPass(aUser.getProfile().getEPass());
-	// closedUserProfile.setIv(toString(cipher.getIV()));
-	// } catch (IllegalBlockSizeException | BadPaddingException e) {
-	// logger.error("Exception during encryption:", e);
+	// KeyFactory fact = KeyFactory.getInstance("RSA");
+	// if (isPublic) {
+	// RSAPublicKeySpec pbuclicKeySpec = new RSAPublicKeySpec(m, e);
+	// return fact.generatePublic(pbuclicKeySpec);
+	// } else {
+	// RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(m, e);
+	// return fact.generatePrivate(privateKeySpec);
 	// }
-	// } catch (InvalidKeyException e) {
-	// logger.error("Invalide key:", e);
-	// e.printStackTrace();
+	// } catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
+	// logger.error("Exception while creating the key:", e1);
 	// }
-	//
-	// } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-	// logger.error("Error during cipher initialisation:", e);
-	// }
-	//
-	// return closedUserProfile;
-	// }
-
-	// //@SuppressWarnings("unchecked")
-	// public static UserProfile decrypt(ClosedUserProfile aClosedProfile, User aUser) {
-	// UserProfile userProfile = ModelFactory.eINSTANCE.createUserProfile();
-	//
-	// byte[] aesKey = decryptTempKey(aClosedProfile.getTempKey(), aUser.getPassword(),
-	// aClosedProfile.getPrivateSalt());
-	// SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
-	// try {
-	// Cipher c = Cipher.getInstance(AES_CIPHER_MODE);
-	// try {
-	// c.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(toByte(aClosedProfile.getIv())));
-	// try {
-	// // decrypt private key
-	// String privateKey = toString(c.doFinal(toByte(aClosedProfile.getPrivateKey())));
-	// userProfile.setPrivateKey((PrivateKey) convertStringToKey(privateKey, false));
-	// userProfile.setPublicKey((PublicKey) convertStringToKey(aClosedProfile.getPublicKey(),
-	// true));
-	// userProfile.setEPass(aClosedProfile.getEPass());
-	//
-	// // decrypt file tree
-	// String decryptedFileTreeAsString = toString(c.doFinal(toByte(aClosedProfile
-	// .getFileGhost())));
-	// Resource fileTreeResource = ModelUtil.stringToResource(decryptedFileTreeAsString, UTF_8);
-	// Directory fileTreeRoot = (Directory) fileTreeResource.getContents().get(0);
-	// userProfile.setFileRoot(fileTreeRoot);
-	//
-	// // decrypt friend lists
-	// userProfile.getFriends().addAll(
-	// (ArrayList<Friend>) aClosedProfile.getFriends().getContent(
-	// userProfile.getPrivateKey()));
-	// userProfile.getFriendRequests().addAll(
-	// (ArrayList<Friend>) aClosedProfile.getFriendRequests().getContent(
-	// userProfile.getPrivateKey()));
-	// userProfile.getPendingFriendRequests().addAll(
-	// (ArrayList<Friend>) aClosedProfile.getPendingFriendRequests().getContent(
-	// userProfile.getPrivateKey()));
-	// } catch (IllegalBlockSizeException | BadPaddingException e) {
-	// logger.error("Exception during encryption:", e);
-	// }
-	// } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-	// logger.error("Exception during cipher initialisation:", e);
-	// }
-	//
-	// } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-	// logger.error("Error during cipher initialisation:", e);
-	// }
-	//
-	// return userProfile;
+	// return null;
 	// }
 
 	private static String encryptTempKey(byte[] aesKey, String aPassword, byte[] someSalt) {
@@ -445,176 +381,11 @@ public final class EncryptionUtil {
 		return salt;
 	}
 
-	private static SecretKey createDESKey(String aPassword, byte[] someSalt) {
-
-		byte[] tempKey = combine(toByte(aPassword), someSalt);
-
-		MessageDigest md;
-		try {
-			md = MessageDigest.getInstance("SHA-512");
-		} catch (NoSuchAlgorithmException e1) {
-			logger.error("Exception  during digest creation:", e1);
-			return null;
-		}
-		for (int i = 0; i < 1024; i++) {
-			md.update(tempKey);
-			tempKey = md.digest();
-			tempKey = combine(someSalt, tempKey);
-		}
-
-		try {
-			DESKeySpec dks = new DESKeySpec(tempKey);
-			SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
-			SecretKey desKey = skf.generateSecret(dks);
-			return desKey;
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-			logger.error("Exception during des key creation from password:", e);
-		}
-		return null;
-	}
-
 	private static byte[] combine(byte[] arrayA, byte[] arrayB) {
 		byte[] result = new byte[arrayA.length + arrayB.length];
 		System.arraycopy(arrayA, 0, result, 0, arrayA.length);
 		System.arraycopy(arrayB, 0, result, arrayA.length, arrayB.length);
 		return result;
-	}
-
-	// public static String createEPassFromPassword(String aPassword) {
-	// Digester digester = new Digester();
-	// digester.setAlgorithm("SHA-1");
-	// byte[] digest = digester.digest(EncryptionUtil.toByte(aPassword));
-	// return EncryptionUtil.toString(digest);
-	// }
-
-	public static void encryptFileRSA(Path aSourcePath, Path aTargetPath, PublicKey aPublicKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		encryptOrDecryptRSA(aPublicKey, Cipher.ENCRYPT_MODE, aSourcePath, aTargetPath);
-	}
-
-	public static void decryptFileRSA(Path anInputPath, Path anOutputPath, PrivateKey aPrivateKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		encryptOrDecryptRSA(aPrivateKey, Cipher.DECRYPT_MODE, anInputPath, anOutputPath);
-	}
-
-	private static void encryptOrDecryptRSA(Key aKey, int aMode, Path anInputPath, Path anOutputPath)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException {
-		FileInputStream fis = new FileInputStream(anInputPath.toFile());
-		FileOutputStream fos = new FileOutputStream(anOutputPath.toFile());
-		Cipher cipher = Cipher.getInstance("RSA");
-		cipher.init(aMode, aKey);
-		if (aMode == Cipher.ENCRYPT_MODE) {
-			CipherInputStream cis = new CipherInputStream(fis, cipher);
-			doCopy(cis, fos);
-		} else if (aMode == Cipher.DECRYPT_MODE) {
-			CipherOutputStream cos = new CipherOutputStream(fos, cipher);
-			doCopy(fis, cos);
-		}
-	}
-
-	private static void doCopy(InputStream is, OutputStream os) throws IOException {
-		byte[] bytes = new byte[64];
-		int numBytes;
-		while ((numBytes = is.read(bytes)) != -1) {
-			os.write(bytes, 0, numBytes);
-		}
-		os.flush();
-		os.close();
-		is.close();
-	}
-
-	/**
-	 * Creates a SHA-256 checksum for a file.
-	 * 
-	 * @param aFilePaht the path of the file.
-	 * @return the checksum as a {@link String} or <code>null</code> if an exception occured.
-	 */
-	public static String generateSHACheckSumForFile(Path aFilePaht) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			try {
-				FileInputStream fis = new FileInputStream(aFilePaht.toFile());
-				byte[] dataBytes = new byte[1024];
-
-				int nread = 0;
-				try {
-					while ((nread = fis.read(dataBytes)) != -1) {
-						md.update(dataBytes, 0, nread);
-					}
-					fis.close();
-
-					byte[] mdbytes = md.digest();
-
-					StringBuffer hexString = new StringBuffer();
-					for (int i = 0; i < mdbytes.length; i++) {
-						hexString.append(Integer.toHexString(0xFF & mdbytes[i]));
-					}
-					return hexString.toString();
-				} catch (IOException e) {
-					logger.error("Exception while reading file:", e);
-				}
-			} catch (FileNotFoundException e) {
-				logger.error("Can't create a FileInputStream from path '" + aFilePaht.toString() + "'", e);
-			}
-		} catch (NoSuchAlgorithmException e) {
-			logger.error("Can't generate a MessageDigest for 'SHA-256'!", e);
-		}
-		return null;
-	}
-
-	public static Object deserializeObject(String anObjectAsString) {
-		byte[] data = Base64.decode(anObjectAsString);
-		try {
-			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-			Object o = ois.readObject();
-			ois.close();
-			return o;
-		} catch (IOException | ClassNotFoundException e) {
-			logger.error(String.format("Exception while deserializing object '%s':", anObjectAsString), e);
-		}
-		return null;
-	}
-
-	/** Write the object to a Base64 string. */
-	public static String serializeObject(Serializable aSerializableObject) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(baos);
-			oos.writeObject(aSerializableObject);
-			oos.close();
-			return new String(Base64.encode(baos.toByteArray()));
-		} catch (IOException e) {
-			logger.error(
-					String.format("Exception while serializing object '%s'", aSerializableObject.toString()),
-					e);
-		}
-		return null;
-	}
-
-	public static String serializePath(Path path) {
-		if (path.getNameCount() < 2) {
-			return path.toString();
-		} else {
-			StringBuffer buffer = new StringBuffer(path.getName(0).toString());
-			for (int i = 1; i < path.getNameCount(); i++) {
-				buffer.append(EncryptionUtil.DELIMITER);
-				buffer.append(path.getName(i).toString());
-			}
-			return buffer.toString();
-		}
-	}
-
-	public static Path deserializePath(String serializedPath) {
-		String[] pathParts = serializedPath.split(EncryptionUtil.DELIMITER);
-		if (pathParts.length > 1) {
-			String tail[] = new String[pathParts.length - 1];
-			System.arraycopy(pathParts, 1, tail, 0, pathParts.length - 1);
-			return Paths.get("", pathParts);
-			// return Paths.get(pathParts[0], tail);
-		} else if (pathParts.length == 1) {
-			return Paths.get(pathParts[0]);
-		}
-		return null;
 	}
 
 }
