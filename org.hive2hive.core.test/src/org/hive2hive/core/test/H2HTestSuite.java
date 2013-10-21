@@ -1,5 +1,6 @@
 package org.hive2hive.core.test;
 
+import org.hive2hive.core.test.flowcontrol.ProcessManagerTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -12,10 +13,14 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		// All tests of Box2Box
+// All tests of Hive2Hive
 
 		// TomP2P
-		ReplicationTest.class
+		ReplicationTest.class,
+
+		// Process Manager
+		ProcessManagerTest.class
+
 })
 public class H2HTestSuite {
 
