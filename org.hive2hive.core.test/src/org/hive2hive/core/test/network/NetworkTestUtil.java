@@ -4,10 +4,22 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hive2hive.core.network.NetworkManager;
 
 public class NetworkTestUtil {
+
+	/**
+	 * Creates a single node which is master.
+	 * 
+	 * @return a node
+	 */
+	public static NetworkManager createSingleNode() {
+		NetworkManager node = new NetworkManager("Node A");
+		node.connect();
+		return node;
+	}
 
 	/**
 	 * Creates a <code>hive2hive</code> network with the given number of nodes. First node in the list is the
@@ -37,6 +49,7 @@ public class NetworkTestUtil {
 			} catch (UnknownHostException e) {
 				// should not happen
 			}
+			nodes.add(node);
 		}
 
 		return nodes;
@@ -49,7 +62,12 @@ public class NetworkTestUtil {
 	 *            list containing all nodes which has to be disconnected.
 	 */
 	public static void shutdownNetwork(List<NetworkManager> network) {
-		for (NetworkManager node : network)
+		for (NetworkManager node : network) {
 			node.disconnect();
+		}
+	}
+	
+	public static String randomString(){
+		return UUID.randomUUID().toString();
 	}
 }
