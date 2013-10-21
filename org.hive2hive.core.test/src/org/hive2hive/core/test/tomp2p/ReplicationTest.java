@@ -9,6 +9,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,6 +59,11 @@ public class ReplicationTest extends H2HJUnitTest {
 		p1.shutdown();
 		p2.shutdown();
 		p3.shutdown();
+	}
+	
+	@AfterClass
+	public static void cleanAfterClass() {
+		afterClass();
 	}
 
 }

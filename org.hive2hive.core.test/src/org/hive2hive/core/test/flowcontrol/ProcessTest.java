@@ -7,6 +7,8 @@ import org.hive2hive.core.flowcontrol.ProcessState;
 import org.hive2hive.core.flowcontrol.ProcessStep;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,5 +68,10 @@ public class ProcessTest extends H2HJUnitTest {
 
 		return new Process(null, firstStep) {
 		};
+	}
+	
+	@AfterClass
+	public static void cleanAfterClass() {
+		afterClass();
 	}
 }

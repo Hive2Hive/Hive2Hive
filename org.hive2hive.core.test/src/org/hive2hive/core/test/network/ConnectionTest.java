@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,5 +34,10 @@ public class ConnectionTest extends H2HJUnitTest{
 		assertTrue(nodeB.connect(InetAddress.getLocalHost()));
 		nodeA.disconnect();
 		nodeB.disconnect();
+	}
+	
+	@AfterClass
+	public static void cleanAfterClass() {
+		afterClass();
 	}
 }
