@@ -38,6 +38,59 @@ public final class FileEncryptionUtil {
 	private FileEncryptionUtil() {
 	}
 	
+//	public static void encryptFileRSA(Path aSourcePath, Path aTargetPath, PublicKey aPublicKey)
+//			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+//		encryptOrDecryptRSA(aPublicKey, Cipher.ENCRYPT_MODE, aSourcePath, aTargetPath);
+//	}
+
+//	public static void decryptFileRSA(Path anInputPath, Path anOutputPath, PrivateKey aPrivateKey)
+//			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+//		encryptOrDecryptRSA(aPrivateKey, Cipher.DECRYPT_MODE, anInputPath, anOutputPath);
+//	}
+
+//	public static void encryptOrDecryptRSA(Key aKey, int aMode, Path anInputPath, Path anOutputPath)
+//			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException {
+//		
+//		FileInputStream fis = new FileInputStream(anInputPath.toFile());
+//		FileOutputStream fos = new FileOutputStream(anOutputPath.toFile());
+//		
+//		Cipher cipher = Cipher.getInstance("RSA");
+//		cipher.init(aMode, aKey);
+//		
+//		if (aMode == Cipher.ENCRYPT_MODE) {
+//			CipherInputStream cis = new CipherInputStream(fis, cipher);
+//			
+//			doCopy(cis, fos);
+//		} else if (aMode == Cipher.DECRYPT_MODE) {
+//			CipherOutputStream cos = new CipherOutputStream(fos, cipher);
+//			doCopy(fis, cos);
+//		}
+//	}
+	
+	public static void encryptFileRSA(Path fileInputPath, Path fileOutputPath, PublicKey publicKey) throws FileNotFoundException, IOException {
+		
+		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
+		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
+		
+		// encrypt the file input stream with the public key
+		CipherInputStream cis = EncryptionUtil.encryptStreamRSA(fis, publicKey);
+		
+		// write the encrypted stream to the file output stream
+		copyStream(cis, fos);
+	}
+
+	public static void decryptFileRSA(Path fileInputPath, Path fileOutputPath, PrivateKey privateKey) throws FileNotFoundException, IOException {
+		
+		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
+		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
+		
+		// decrypt the file output stream with the private key
+		CipherInputStream cis = EncryptionUtil.decryptStreamRSA(fis, privateKey);
+		
+		// write the decrypted stream
+		copyStream(cis, fos);
+	}
+	
 	public static String serializePath(Path path) {
 		if (path.getNameCount() < 2) {
 			return path.toString();
@@ -103,40 +156,16 @@ public final class FileEncryptionUtil {
 		return null;
 	}
 	
-	public static void encryptFileRSA(Path aSourcePath, Path aTargetPath, PublicKey aPublicKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		encryptOrDecryptRSA(aPublicKey, Cipher.ENCRYPT_MODE, aSourcePath, aTargetPath);
-	}
-
-	public static void decryptFileRSA(Path anInputPath, Path anOutputPath, PrivateKey aPrivateKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		encryptOrDecryptRSA(aPrivateKey, Cipher.DECRYPT_MODE, anInputPath, anOutputPath);
-	}
-
-	private static void encryptOrDecryptRSA(Key aKey, int aMode, Path anInputPath, Path anOutputPath)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException {
-		FileInputStream fis = new FileInputStream(anInputPath.toFile());
-		FileOutputStream fos = new FileOutputStream(anOutputPath.toFile());
-		Cipher cipher = Cipher.getInstance("RSA");
-		cipher.init(aMode, aKey);
-		if (aMode == Cipher.ENCRYPT_MODE) {
-			CipherInputStream cis = new CipherInputStream(fis, cipher);
-			doCopy(cis, fos);
-		} else if (aMode == Cipher.DECRYPT_MODE) {
-			CipherOutputStream cos = new CipherOutputStream(fos, cipher);
-			doCopy(fis, cos);
-		}
-	}
-	
-	private static void doCopy(InputStream is, OutputStream os) throws IOException {
-		byte[] bytes = new byte[64];
+	public static void copyStream(InputStream inputStream, OutputStream outputStream) throws IOException {
+		
 		int numBytes;
-		while ((numBytes = is.read(bytes)) != -1) {
-			os.write(bytes, 0, numBytes);
+		byte[] buffer = new byte[64];
+		while ((numBytes = inputStream.read(buffer)) != -1) {
+			outputStream.write(buffer, 0, numBytes);
 		}
-		os.flush();
-		os.close();
-		is.close();
+		outputStream.flush();
+		outputStream.close();
+		inputStream.close();
 	}
 	
 	public static String encryptPrivateKey(PrivateKey aPrivateKey, byte[] anEasKey) {

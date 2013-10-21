@@ -114,16 +114,16 @@ public final class EncryptionUtil {
 		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
 	}
 	
-	public static CipherOutputStream decryptStreamAES(OutputStream outputStream, SecretKey aesKey){
-		return decryptStream(outputStream, aesKey, AES_CIPHER_MODE);
+	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey){
+		return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
 	}
 	
 	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey){
 		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
 	}
 	
-	public static CipherOutputStream decryptStreamRSA(OutputStream outputStream, PrivateKey privateKey){
-		return decryptStream(outputStream, privateKey, RSA_CIPHER_MODE);
+	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey){
+		return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
 	}
 	
 	public static byte[] createRandomAESKey() {
@@ -269,10 +269,10 @@ public final class EncryptionUtil {
 		return new CipherInputStream(inputStream, encryptionCipher);
 	}
 
-	private static CipherOutputStream decryptStream(OutputStream outputStream, Key key, String transformationMode){
+	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode){
 	
 		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
-		return new CipherOutputStream(outputStream, decryptionCipher);
+		return new CipherInputStream(inputStream, decryptionCipher);
 	}
 
 	private static Cipher getEncryptionCipher(Key key, String transformationMode){
