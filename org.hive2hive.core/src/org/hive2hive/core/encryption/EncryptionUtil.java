@@ -3,8 +3,10 @@ package org.hive2hive.core.encryption;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -20,6 +22,8 @@ import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
@@ -94,18 +98,34 @@ public final class EncryptionUtil {
 		return encrypt(content, aesKey, AES_CIPHER_MODE);
 	}
 
-	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
-		return encrypt(content, publicKey, RSA_CIPHER_MODE);
-	}
-
 	public static byte[] decryptAES(EncryptedContent content, SecretKey aesKey) {
 		return decrypt(content, aesKey, AES_CIPHER_MODE);
+	}
+
+	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
+		return encrypt(content, publicKey, RSA_CIPHER_MODE);
 	}
 
 	public static byte[] decryptRSA(EncryptedContent content, PrivateKey privateKey) {
 		return decrypt(content, privateKey, RSA_CIPHER_MODE);
 	}
-
+	
+	public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey){
+		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
+	}
+	
+	public static CipherOutputStream decryptStreamAES(OutputStream outputStream, SecretKey aesKey){
+		return decryptStream(outputStream, aesKey, AES_CIPHER_MODE);
+	}
+	
+	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey){
+		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
+	}
+	
+	public static CipherOutputStream decryptStreamRSA(OutputStream outputStream, PrivateKey privateKey){
+		return decryptStream(outputStream, privateKey, RSA_CIPHER_MODE);
+	}
+	
 	public static byte[] createRandomAESKey() {
 	
 		SecureRandom random = new SecureRandom();
@@ -216,26 +236,15 @@ public final class EncryptionUtil {
 		byte[] encryptedContent = null;
 		byte[] initVector = null;
 	
+		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
 		try {
-			// declare transformation mode
-			Cipher cipher = Cipher.getInstance(transformationMode);
-			try {
-				// initialize cipher with encryption mode and key
-				cipher.init(Cipher.ENCRYPT_MODE, key);
-				try {
-					// encrypt the content
-					encryptedContent = cipher.doFinal(content);
-					initVector = cipher.getIV();
-				} catch (IllegalBlockSizeException | BadPaddingException e) {
-					logger.error("Exception during encryption:", e);
-				}
-			} catch (InvalidKeyException e) {
-				logger.error("Invalid key:", e);
-			}
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Exception during cipher initialization:", e);
+			// encrypt the content
+			encryptedContent = encryptionCipher.doFinal(content);
+			initVector = encryptionCipher.getIV();
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			logger.error("Exception during encryption:", e);
 		}
-	
+		
 		return new EncryptedContent(encryptedContent, initVector);
 	}
 
@@ -243,26 +252,62 @@ public final class EncryptionUtil {
 	
 		byte[] decryptedContent = null;
 	
+		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
+		try {
+			// decrypt the content
+			decryptedContent = decryptionCipher.doFinal(content.getContent());
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			logger.error("Exception during decryption:", e);
+		}
+		
+		return decryptedContent;
+	}
+
+	private static CipherInputStream encryptStream(InputStream inputStream, Key key, String transformationMode){
+		
+		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
+		return new CipherInputStream(inputStream, encryptionCipher);
+	}
+
+	private static CipherOutputStream decryptStream(OutputStream outputStream, Key key, String transformationMode){
+	
+		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
+		return new CipherOutputStream(outputStream, decryptionCipher);
+	}
+
+	private static Cipher getEncryptionCipher(Key key, String transformationMode){
+		try {
+			// declare transformation mode
+			Cipher cipher = Cipher.getInstance(transformationMode);
+			try {
+				// initialize cipher with encryption mode and key
+				cipher.init(Cipher.ENCRYPT_MODE, key);
+				return cipher;
+
+			} catch (InvalidKeyException e) {
+				logger.error("Invalid key:", e);
+			}
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("Exception during cipher initialization:", e);
+		}
+		return null;
+	}
+	
+	private static Cipher getDecryptionCipher(Key key, String transformationMode){
 		try {
 			// declare transformation mode
 			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
 				// initialize cipher with decryption mode, key and initialization vector
-				cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(content.getInitVector()));
-				try {
-					// decrypt the content
-					decryptedContent = cipher.doFinal(content.getContent());
-				} catch (IllegalBlockSizeException | BadPaddingException e) {
-					logger.error("Exception during decryption:", e);
-				}
-			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-				logger.error("Invalid key or parameter:", e);
+				cipher.init(Cipher.DECRYPT_MODE, key);
+				return cipher;
+			} catch (InvalidKeyException e) {
+				logger.error("Invalid key:", e);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("Exception during cipher initialization:", e);
 		}
-	
-		return decryptedContent;
+		return null;
 	}
 
 	private static byte[] combine(byte[] arrayA, byte[] arrayB) {
@@ -272,5 +317,4 @@ public final class EncryptionUtil {
 		System.arraycopy(arrayB, 0, result, arrayA.length, arrayB.length);
 		return result;
 	}
-
 }
