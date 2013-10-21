@@ -1,5 +1,6 @@
 package org.hive2hive.core.test;
 
+import org.hive2hive.core.network.Connection;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -15,7 +16,10 @@ import org.junit.runners.Suite.SuiteClasses;
 		// All tests of Box2Box
 
 		// TomP2P
-		ReplicationTest.class
+		ReplicationTest.class,
+		
+		// Network
+		Connection.class
 })
 public class H2HTestSuite {
 
