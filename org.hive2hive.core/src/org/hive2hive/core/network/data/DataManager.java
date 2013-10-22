@@ -69,25 +69,6 @@ public class DataManager {
 		logger.debug(String.format("global get key = '%s' content key = '%s'", locationKey, contentKey));
 		return networkManager.getConnection().getPeer().get(Number160.createHash(locationKey))
 				.setContentKey(Number160.createHash(contentKey)).start();
-		/**
-		 * futureDHT.awaitUninterruptibly();
-		 * if (futureDHT.isSuccess()) {
-		 * if (futureDHT.getData() != null) {
-		 * try {
-		 * return ((DataWrapper) futureDHT.getData().getObject())
-		 * .getContent();
-		 * } catch (ClassNotFoundException | ClassCastException
-		 * | IOException e) {
-		 * logger.error(String.format(
-		 * "global get failed exception = '%s'",
-		 * e.getMessage()));
-		 * }
-		 * } else {
-		 * logger.warn("futureDHT.getData() is null");
-		 * }
-		 * }
-		 * return null;
-		 **/
 	}
 
 	/**

@@ -2,13 +2,17 @@ package org.hive2hive.core.model;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.network.data.BaseDataWrapper;
+
 /**
  * Raw data part of a file that is added to the DHT
  * 
  * @author Nico
  * 
  */
-public class Chunk {
+public class Chunk extends BaseDataWrapper {
+
+	private static final long serialVersionUID = 1L;
 
 	private final int size;
 	private final PublicKey id;
@@ -36,5 +40,11 @@ public class Chunk {
 
 	public int getOrder() {
 		return order;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
