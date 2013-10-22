@@ -1,50 +1,66 @@
-/**
- */
 package org.hive2hive.core.model;
 
-import org.eclipse.emf.ecore.EObject;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.tomp2p.peers.PeerAddress;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Locations</b></em>'.
- * <!-- end-user-doc -->
- *
- * <p>
- * The following features are supported:
- * <ul>
- *   <li>{@link org.hive2hive.core.model.Locations#getOnlinePeers <em>Online Peers</em>}</li>
- * </ul>
- * </p>
- *
- * @see org.hive2hive.core.model.ModelPackage#getLocations()
- * @model
- * @generated
+ * A list of unique addresses of peers that are currently online. If there is at least one client online,
+ * exaclty one client becomes the master. Holding these addresses is necessary to locate clients.
+ * 
+ * @author Nico
+ * 
  */
-public interface Locations extends EObject {
-	/**
-	 * Returns the value of the '<em><b>Online Peers</b></em>' reference.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Online Peers</em>' reference isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Online Peers</em>' reference.
-	 * @see #setOnlinePeers(OnlinePeer)
-	 * @see org.hive2hive.core.model.ModelPackage#getLocations_OnlinePeers()
-	 * @model
-	 * @generated
-	 */
-	OnlinePeer getOnlinePeers();
+public class Locations {
+
+	private final String forUser;
+	private final List<OnlinePeer> onlinePeers;
+
+	public Locations(String forUser) {
+		this.forUser = forUser;
+		onlinePeers = new ArrayList<OnlinePeer>();
+	}
+
+	public String getForUser() {
+		return forUser;
+	}
 
 	/**
-	 * Sets the value of the '{@link org.hive2hive.core.model.Locations#getOnlinePeers <em>Online Peers</em>}' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Online Peers</em>' reference.
-	 * @see #getOnlinePeers()
-	 * @generated
+	 * Adds the address to the locations and checks if all other locations are online.
+	 * 
+	 * @param address the address to add (usually the address of the caller itself)
+	 * @return true if the newly entered address is now the master (no notification)
 	 */
-	void setOnlinePeers(OnlinePeer value);
+	public boolean addOnlinePeer(PeerAddress address) {
+		List<OnlinePeer> toRemove = new ArrayList<OnlinePeer>();
+		boolean shouldBecomeMaster = false;
+		for (OnlinePeer peer : onlinePeers) {
+			if (!isOnline(peer.getAddress())) {
+				// remove this one
+				toRemove.add(peer);
+				if (peer.isMaster()) {
+					// Master peer offline --> new entry becomes master
+					shouldBecomeMaster = true;
+				}
+			}
+		}
 
-} // Locations
+		onlinePeers.removeAll(toRemove);
+		onlinePeers.add(new OnlinePeer(address, shouldBecomeMaster));
+		return shouldBecomeMaster;
+	}
+
+	private boolean isOnline(PeerAddress toCheck) {
+		// TODO: Implement (Network manager is needed) or use a Util-Class for that
+		return true;
+	}
+
+	public OnlinePeer getMaster() {
+		for (OnlinePeer peer : onlinePeers) {
+			if (peer.isMaster())
+				return peer;
+		}
+		return null;
+	}
+}

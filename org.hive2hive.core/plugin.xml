@@ -6,20 +6,6 @@
 
 <plugin>
 
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated H2HModel -->
-      <package
-            uri="http://model/1.0"
-            class="org.hive2hive.core.model.ModelPackage"
-            genModel="model/H2HModel.genmodel"/>
-   </extension>
 
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated PeerPersistenceModel -->
-      <package
-            uri="http://peerpersistencemodel/1.0"
-            class="org.hive2hive.core.peerpersistencemodel.PeerPersistenceModelPackage"
-            genModel="model/PeerPersistenceModel.genmodel"/>
-   </extension>
 
 </plugin>
