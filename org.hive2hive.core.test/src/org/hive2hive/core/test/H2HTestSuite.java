@@ -1,7 +1,8 @@
 package org.hive2hive.core.test;
 
-import org.hive2hive.core.test.flowcontrol.ProcessManagerTest;
+import org.hive2hive.core.test.flowcontrol.ProcessStepTest;
 import org.hive2hive.core.test.flowcontrol.ProcessTest;
+import org.hive2hive.core.test.flowcontrol.manager.ProcessManagerTest;
 import org.hive2hive.core.test.network.ConnectionTest;
 import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
@@ -16,17 +17,16 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		// All tests of Box2Box
+// All tests of Box2Box
 
 		// TomP2P
 		ReplicationTest.class,
-		
+
 		// Network
-		ConnectionTest.class,
-		DataManagerTest.class,
+		ConnectionTest.class, DataManagerTest.class,
 
 		// Processes
-		ProcessTest.class, ProcessManagerTest.class
+		ProcessTest.class, ProcessManagerTest.class, ProcessStepTest.class
 
 })
 public class H2HTestSuite {

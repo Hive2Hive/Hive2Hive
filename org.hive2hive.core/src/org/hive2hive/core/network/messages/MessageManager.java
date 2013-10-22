@@ -17,7 +17,7 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.network.messages.request.IRequestMessage;
+import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 
 public class MessageManager {
@@ -55,9 +55,9 @@ public class MessageManager {
 	public void send(BaseDirectMessage aMessage) {
 		if (aMessage.getTargetAddress() != null) {
 			aMessage.increaseSendingCounter();
-	
+
 			configureCallbackHandlerIfNeeded(aMessage);
-	
+
 			FutureResponse futureResponse = networkManager.getConnection().getPeer()
 					.sendDirect(aMessage.getTargetAddress()).setObject(aMessage).start();
 			FutureListener2 futureListener = new FutureListener2(aMessage, networkManager);
@@ -72,7 +72,7 @@ public class MessageManager {
 				aMessage.discoverPeerAddressAndSendMe(networkManager);
 			}
 		}
-	
+
 	}
 
 	// TODO_B2B: A full field is exposed to the user - this is not a good encapsulation - change it if
@@ -86,10 +86,9 @@ public class MessageManager {
 		return requestP2PConfiguration;
 	}
 
-	private void configureCallbackHandlerIfNeeded(BaseMessage aMessage)
-			throws IllegalArgumentException {
-		if (aMessage instanceof IRequestMessage) {
-			IRequestMessage messageWithReply = (IRequestMessage) aMessage;
+	private void configureCallbackHandlerIfNeeded(BaseMessage aMessage) throws IllegalArgumentException {
+		if (aMessage instanceof BaseRequestMessage) {
+			BaseRequestMessage messageWithReply = (BaseRequestMessage) aMessage;
 			ICallBackHandler handler = messageWithReply.getCallBackHandler();
 			if (handler == null) {
 				if (callBackHandlers.get(aMessage.getMessageID()) == null) {
@@ -105,22 +104,22 @@ public class MessageManager {
 	private class FutureListener extends BaseFutureAdapter<FutureDHT> {
 		private final BaseMessage message;
 		private final NetworkManager networkManager;
-	
+
 		public FutureListener(BaseMessage aMessage, NetworkManager aNetworkManager) {
 			message = aMessage;
 			networkManager = aNetworkManager;
-	
+
 		}
-	
+
 		@Override
 		public void operationComplete(FutureDHT future) throws Exception {
 			AcceptanceReply reply = extractAcceptanceReply(future);
 			if (reply != AcceptanceReply.OK) {
 				message.handleSendingFailure(reply, networkManager);
 			}
-	
+
 		}
-	
+
 		private AcceptanceReply extractAcceptanceReply(FutureDHT aFuture) {
 			String errorReason = "";
 			if (aFuture.isSuccess()) {
@@ -204,7 +203,7 @@ public class MessageManager {
 			}
 			return AcceptanceReply.FAILURE;
 		}
-		
+
 	}
 
 	private class PeerAddressStorageListener extends BaseFutureAdapter<FutureDHT> {

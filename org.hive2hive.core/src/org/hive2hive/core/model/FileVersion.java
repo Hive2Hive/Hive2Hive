@@ -14,7 +14,7 @@ import org.hive2hive.core.network.data.DataWrapper;
  * @author Nico
  * 
  */
-public class Version extends DataWrapper {
+public class FileVersion extends DataWrapper {
 
 	private static final long serialVersionUID = 1L;
 	private final int counter;
@@ -22,7 +22,7 @@ public class Version extends DataWrapper {
 	private final long date;
 	private List<KeyPair> chunkIds;
 
-	public Version(int counter, int size, long date) {
+	public FileVersion(int counter, int size, long date) {
 		this.counter = counter;
 		this.size = size;
 		this.date = date;

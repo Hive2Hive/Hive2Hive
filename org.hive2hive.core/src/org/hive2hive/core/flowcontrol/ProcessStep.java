@@ -7,6 +7,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataWrapper;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 
@@ -73,14 +74,15 @@ public abstract class ProcessStep {
 	protected abstract void handlePutGetResult(FutureDHT future);
 
 	protected void send(BaseMessage message) {
-		if (message instanceof IRequestMessage) {
-			IRequestMessage requestMessage = (IRequestMessage) message;
+		if (message instanceof BaseRequestMessage) {
+			BaseRequestMessage requestMessage = (BaseRequestMessage) message;
 			requestMessage.setCallBackHandler(new ICallBackHandler() {
 				@Override
 				public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
 					handleMessageReply(asyncReturnMessage);
 				}
 			});
+
 		}
 
 		getNetworkManager().send(message);
