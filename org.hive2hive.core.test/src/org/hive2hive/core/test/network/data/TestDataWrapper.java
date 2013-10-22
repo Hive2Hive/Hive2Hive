@@ -5,14 +5,19 @@ import org.hive2hive.core.network.data.BaseDataWrapper;
 public class TestDataWrapper extends BaseDataWrapper {
 
 	private static final long serialVersionUID = -4190279666159015217L;
+	private final String testString;
 
-	public TestDataWrapper(Object content) {
-		super(content);
+	public TestDataWrapper(String testContent) {
+		this.testString = testContent;
 	}
 
 	@Override
 	public int getTimeToLive() {
 		return 10000;
+	}
+
+	public String getTestString() {
+		return testString;
 	}
 
 }
