@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-
-<!--
--->
-
 <plugin>
 
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated H2HModel -->
-      <package
-            uri="http://model/1.0"
-            class="org.hive2hive.core.model.ModelPackage"
-            genModel="model/H2HModel.genmodel"/>
-   </extension>
+
 
 </plugin>

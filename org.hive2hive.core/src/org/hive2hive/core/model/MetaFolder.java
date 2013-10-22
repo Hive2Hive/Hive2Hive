@@ -1,57 +1,52 @@
-/**
- */
 package org.hive2hive.core.model;
 
-import org.eclipse.emf.common.util.EList;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Meta Folder</b></em>'.
- * <!-- end-user-doc -->
- *
- * <p>
- * The following features are supported:
- * <ul>
- *   <li>{@link org.hive2hive.core.model.MetaFolder#getContent <em>Content</em>}</li>
- *   <li>{@link org.hive2hive.core.model.MetaFolder#getUserPermission <em>User Permission</em>}</li>
- * </ul>
- * </p>
- *
- * @see org.hive2hive.core.model.ModelPackage#getMetaFolder()
- * @model
- * @generated
+ * Holds the permissions for the folder (only one if private, but can have multiple users) and the keys for
+ * the containing documents
+ * 
+ * @author Nico
+ * 
  */
-public interface MetaFolder extends MetaDocument {
-	/**
-	 * Returns the value of the '<em><b>Content</b></em>' reference list.
-	 * The list contents are of type {@link org.hive2hive.core.model.MetaDocument}.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Content</em>' reference list isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Content</em>' reference list.
-	 * @see org.hive2hive.core.model.ModelPackage#getMetaFolder_Content()
-	 * @model
-	 * @generated
-	 */
-	EList<MetaDocument> getContent();
+public class MetaFolder extends MetaDocument {
 
-	/**
-	 * Returns the value of the '<em><b>User Permission</b></em>' reference list.
-	 * The list contents are of type {@link org.hive2hive.core.model.UserPermission}.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>User Permission</em>' reference list isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>User Permission</em>' reference list.
-	 * @see org.hive2hive.core.model.ModelPackage#getMetaFolder_UserPermission()
-	 * @model
-	 * @generated
-	 */
-	EList<UserPermission> getUserPermission();
+	private List<UserPermission> userPermissions;
+	private List<KeyPair> childDocuments;
 
-} // MetaFolder
+	public MetaFolder(PublicKey id, String creatorName) {
+		super(id);
+		userPermissions = new ArrayList<UserPermission>();
+		setChildDocuments(new ArrayList<KeyPair>());
+
+		// creator receives write permissions by default
+		userPermissions.add(new UserPermission(creatorName, PermissionType.WRITE));
+	}
+
+	public List<UserPermission> getUserPermissions() {
+		return userPermissions;
+	}
+
+	public void setUserPermissions(List<UserPermission> userPermissions) {
+		this.userPermissions = userPermissions;
+	}
+
+	public List<KeyPair> getChildDocuments() {
+		return childDocuments;
+	}
+
+	public void setChildDocuments(List<KeyPair> childDocuments) {
+		this.childDocuments = childDocuments;
+	}
+
+	public void addChildDocument(KeyPair child) {
+		if (childDocuments == null) {
+			childDocuments = new ArrayList<KeyPair>();
+		}
+		childDocuments.add(child);
+	}
+
+}
