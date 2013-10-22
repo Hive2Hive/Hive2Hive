@@ -1,58 +1,58 @@
-/**
- */
 package org.hive2hive.core.model;
 
-import org.eclipse.emf.common.util.EList;
-
-import org.eclipse.emf.ecore.EObject;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Meta File</b></em>'.
- * <!-- end-user-doc -->
- *
- * <p>
- * The following features are supported:
- * <ul>
- *   <li>{@link org.hive2hive.core.model.MetaFile#getVersions <em>Versions</em>}</li>
- * </ul>
- * </p>
- *
- * @see org.hive2hive.core.model.ModelPackage#getMetaFile()
- * @model
- * @generated
+ * Holds meta data of a file in the DHT
+ * 
+ * @author Nico
+ * 
  */
-public interface MetaFile extends MetaDocument {
-	/**
-	 * Returns the value of the '<em><b>Versions</b></em>' reference list.
-	 * The list contents are of type {@link org.hive2hive.core.model.Version}.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Versions</em>' reference list isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Versions</em>' reference list.
-	 * @see org.hive2hive.core.model.ModelPackage#getMetaFile_Versions()
-	 * @model
-	 * @generated
-	 */
-	EList<Version> getVersions();
+public class MetaFile extends MetaDocument {
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @model kind="operation" required="true"
-	 * @generated
-	 */
-	long getTotalSize();
+	private List<Version> versions;
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @model kind="operation" required="true"
-	 * @generated
-	 */
-	Version getNewestVersion();
+	public MetaFile(PublicKey id) {
+		super(id);
+		setVersions(new ArrayList<Version>());
+	}
 
-} // MetaFile
+	public List<Version> getVersions() {
+		return versions;
+	}
+
+	public void setVersions(List<Version> versions) {
+		this.versions = versions;
+	}
+
+	public int getTotalSize() {
+		if (versions == null) {
+			return 0;
+		} else {
+			int sum = 0;
+			for (Version version : versions) {
+				sum += version.getSize();
+			}
+			return sum;
+		}
+	}
+
+	public Version getNewestVersion() {
+		if (versions == null || versions.isEmpty()) {
+			return null;
+		}
+
+		Collections.sort(versions, new Comparator<Version>() {
+			@Override
+			public int compare(Version o1, Version o2) {
+				return new Integer(o1.getCounter()).compareTo(o2.getCounter());
+			}
+		});
+
+		return versions.get(0);
+	}
+}

@@ -1,193 +1,102 @@
-/**
- */
 package org.hive2hive.core.model;
 
+import java.io.File;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-
-import org.eclipse.emf.ecore.EObject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>File Tree Node</b></em>'.
- * <!-- end-user-doc -->
- *
- * <p>
- * The following features are supported:
- * <ul>
- *   <li>{@link org.hive2hive.core.model.FileTreeNode#getName <em>Name</em>}</li>
- *   <li>{@link org.hive2hive.core.model.FileTreeNode#getKeyPair <em>Key Pair</em>}</li>
- *   <li>{@link org.hive2hive.core.model.FileTreeNode#getDomainKey <em>Domain Key</em>}</li>
- *   <li>{@link org.hive2hive.core.model.FileTreeNode#getParent <em>Parent</em>}</li>
- *   <li>{@link org.hive2hive.core.model.FileTreeNode#isFolder <em>Folder</em>}</li>
- * </ul>
- * </p>
- *
- * @see org.hive2hive.core.model.ModelPackage#getFileTreeNode()
- * @model
- * @generated
+ * Tree implementation for the file tree. It stores the keys for the files and it's logic location.
+ * 
+ * @author Nico
+ * 
  */
-public interface FileTreeNode extends EObject {
-	/**
-	 * Returns the value of the '<em><b>Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Name</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Name</em>' attribute.
-	 * @see #setName(String)
-	 * @see org.hive2hive.core.model.ModelPackage#getFileTreeNode_Name()
-	 * @model required="true"
-	 * @generated
-	 */
-	String getName();
+public class FileTreeNode {
 
-	/**
-	 * Sets the value of the '{@link org.hive2hive.core.model.FileTreeNode#getName <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Name</em>' attribute.
-	 * @see #getName()
-	 * @generated
-	 */
-	void setName(String value);
+	private final KeyPair keyPair;
+	private final boolean isFolder;
+	private String name;
+	private FileTreeNode parent;
+	private KeyPair domainKeys;
+	private List<FileTreeNode> children;
 
-	/**
-	 * Returns the value of the '<em><b>Key Pair</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Key Pair</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Key Pair</em>' attribute.
-	 * @see #setKeyPair(KeyPair)
-	 * @see org.hive2hive.core.model.ModelPackage#getFileTreeNode_KeyPair()
-	 * @model dataType="org.hive2hive.core.model.KeyPair" required="true"
-	 * @generated
-	 */
-	KeyPair getKeyPair();
+	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder) {
+		this.parent = parent;
+		this.keyPair = keyPair;
+		this.name = name;
+		this.isFolder = isFolder;
+		setChildren(new ArrayList<FileTreeNode>());
+	}
 
-	/**
-	 * Sets the value of the '{@link org.hive2hive.core.model.FileTreeNode#getKeyPair <em>Key Pair</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Key Pair</em>' attribute.
-	 * @see #getKeyPair()
-	 * @generated
-	 */
-	void setKeyPair(KeyPair value);
+	public KeyPair getKeyPair() {
+		return keyPair;
+	}
 
-	/**
-	 * Returns the value of the '<em><b>Domain Key</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Domain Key</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Domain Key</em>' attribute.
-	 * @see #setDomainKey(PrivateKey)
-	 * @see org.hive2hive.core.model.ModelPackage#getFileTreeNode_DomainKey()
-	 * @model dataType="org.hive2hive.core.model.PrivateKey"
-	 * @generated
-	 */
-	PrivateKey getDomainKey();
+	public boolean isFolder() {
+		return isFolder;
+	}
 
-	/**
-	 * Sets the value of the '{@link org.hive2hive.core.model.FileTreeNode#getDomainKey <em>Domain Key</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Domain Key</em>' attribute.
-	 * @see #getDomainKey()
-	 * @generated
-	 */
-	void setDomainKey(PrivateKey value);
+	public String getName() {
+		return name;
+	}
 
-	/**
-	 * Returns the value of the '<em><b>Parent</b></em>' reference.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Parent</em>' reference isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Parent</em>' reference.
-	 * @see #setParent(FileTree)
-	 * @see org.hive2hive.core.model.ModelPackage#getFileTreeNode_Parent()
-	 * @model
-	 * @generated
-	 */
-	FileTree getParent();
+	public void setName(String name) {
+		this.name = name;
+	}
 
-	/**
-	 * Sets the value of the '{@link org.hive2hive.core.model.FileTreeNode#getParent <em>Parent</em>}' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Parent</em>' reference.
-	 * @see #getParent()
-	 * @generated
-	 */
-	void setParent(FileTree value);
+	public FileTreeNode getParent() {
+		return parent;
+	}
 
-	/**
-	 * Returns the value of the '<em><b>Folder</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Folder</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Folder</em>' attribute.
-	 * @see #setFolder(boolean)
-	 * @see org.hive2hive.core.model.ModelPackage#getFileTreeNode_Folder()
-	 * @model required="true"
-	 * @generated
-	 */
-	boolean isFolder();
+	public void setParent(FileTreeNode parent) {
+		this.parent = parent;
+	}
 
-	/**
-	 * Sets the value of the '{@link org.hive2hive.core.model.FileTreeNode#isFolder <em>Folder</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Folder</em>' attribute.
-	 * @see #isFolder()
-	 * @generated
-	 */
-	void setFolder(boolean value);
+	public List<FileTreeNode> getChildren() {
+		return children;
+	}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @model kind="operation" required="true"
-	 * @generated
-	 */
-	boolean isRoot();
+	public void setChildren(List<FileTreeNode> children) {
+		this.children = children;
+	}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @model kind="operation" required="true"
-	 * @generated
-	 */
-	boolean isShared();
+	public void addChild(FileTreeNode child) {
+		if (children == null) {
+			children = new ArrayList<FileTreeNode>();
+		}
+		children.add(child);
+	}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @model kind="operation" required="true"
-	 * @generated
-	 */
-	String getFullPath();
+	public KeyPair getDomainKeys() {
+		return domainKeys;
+	}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @model required="true"
-	 * @generated
-	 */
-	boolean canWrite();
+	public void setDomainKeys(KeyPair domainKeys) {
+		if (isFolder) {
+			this.domainKeys = domainKeys;
+		} else {
+			throw new IllegalStateException("The tree object is a file, thus, cannot add a domain key here");
+		}
+	}
 
-} // FileTreeNode
+	public boolean isRoot() {
+		return parent == null;
+	}
+
+	public boolean isShared() {
+		// TODO: go down recursively
+		return false;
+	}
+
+	public boolean canWrite() {
+		if (domainKeys == null) {
+			return parent.canWrite();
+		} else {
+			return true;
+		}
+	}
+
+	public String getFullPath() {
+		return parent.getFullPath() + File.pathSeparator + getName();
+	}
+}
