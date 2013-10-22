@@ -45,6 +45,9 @@ public class MessageManager {
 
 		BaseFutureAdapter<FutureDHT> futureListener = new FutureListener(aMessage, networkManager);
 		future.addListener(futureListener);
+
+		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
+				aMessage.getTargetKey(), aMessage.getMessageID()));
 	}
 
 	/**
@@ -55,13 +58,16 @@ public class MessageManager {
 	public void send(BaseDirectMessage aMessage) {
 		if (aMessage.getTargetAddress() != null) {
 			aMessage.increaseSendingCounter();
-	
+
 			configureCallbackHandlerIfNeeded(aMessage);
-	
+
 			FutureResponse futureResponse = networkManager.getConnection().getPeer()
 					.sendDirect(aMessage.getTargetAddress()).setObject(aMessage).start();
 			FutureListener2 futureListener = new FutureListener2(aMessage, networkManager);
 			futureResponse.addListener(futureListener);
+			
+			logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
+					aMessage.getTargetKey(), aMessage.getMessageID()));
 		} else {
 			if (aMessage.usesDHTCach()) {
 				Number160 key = Number160.createHash(aMessage.getTargetKey());
@@ -72,7 +78,7 @@ public class MessageManager {
 				aMessage.discoverPeerAddressAndSendMe(networkManager);
 			}
 		}
-	
+
 	}
 
 	// TODO_B2B: A full field is exposed to the user - this is not a good encapsulation - change it if
@@ -86,8 +92,7 @@ public class MessageManager {
 		return requestP2PConfiguration;
 	}
 
-	private void configureCallbackHandlerIfNeeded(BaseMessage aMessage)
-			throws IllegalArgumentException {
+	private void configureCallbackHandlerIfNeeded(BaseMessage aMessage) throws IllegalArgumentException {
 		if (aMessage instanceof IRequestMessage) {
 			IRequestMessage messageWithReply = (IRequestMessage) aMessage;
 			ICallBackHandler handler = messageWithReply.getCallBackHandler();
@@ -105,22 +110,20 @@ public class MessageManager {
 	private class FutureListener extends BaseFutureAdapter<FutureDHT> {
 		private final BaseMessage message;
 		private final NetworkManager networkManager;
-	
+
 		public FutureListener(BaseMessage aMessage, NetworkManager aNetworkManager) {
 			message = aMessage;
 			networkManager = aNetworkManager;
-	
 		}
-	
+
 		@Override
 		public void operationComplete(FutureDHT future) throws Exception {
 			AcceptanceReply reply = extractAcceptanceReply(future);
 			if (reply != AcceptanceReply.OK) {
 				message.handleSendingFailure(reply, networkManager);
 			}
-	
 		}
-	
+
 		private AcceptanceReply extractAcceptanceReply(FutureDHT aFuture) {
 			String errorReason = "";
 			if (aFuture.isSuccess()) {
@@ -167,12 +170,10 @@ public class MessageManager {
 
 		@Override
 		public void operationComplete(FutureResponse future) throws Exception {
-
 			AcceptanceReply reply = extractAcceptanceReply(future);
 			if (reply != AcceptanceReply.OK) {
 				message.handleSendingFailure(reply, networkManager);
 			}
-
 		}
 
 		private AcceptanceReply extractAcceptanceReply(FutureResponse aFuture) {
@@ -204,7 +205,7 @@ public class MessageManager {
 			}
 			return AcceptanceReply.FAILURE;
 		}
-		
+
 	}
 
 	private class PeerAddressStorageListener extends BaseFutureAdapter<FutureDHT> {

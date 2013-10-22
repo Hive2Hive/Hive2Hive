@@ -12,6 +12,7 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.BaseDataWrapper;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
+import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -107,6 +108,17 @@ public class NetworkManager {
 		if (!connection.isConnected())
 			return;
 		messageManager.send(message);
+	}
+	
+	/**
+	 * Sends a given message directly (TCP) to the peer with the given address.
+	 * 
+	 * @param aMessge
+	 *            the message to send
+	 * @see {@link MessageManager#send(BaseMessage)}
+	 */
+	public void send(BaseDirectMessage aMessage) {
+		messageManager.send(aMessage);
 	}
 
 	/**

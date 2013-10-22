@@ -4,6 +4,8 @@ import org.hive2hive.core.test.flowcontrol.ProcessManagerTest;
 import org.hive2hive.core.test.flowcontrol.ProcessTest;
 import org.hive2hive.core.test.network.ConnectionTest;
 import org.hive2hive.core.test.network.data.DataManagerTest;
+import org.hive2hive.core.test.network.messaging.BaseMessageTest;
+import org.hive2hive.core.test.network.messaging.BaseRequestMessageTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -24,6 +26,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		// Network
 		ConnectionTest.class,
 		DataManagerTest.class,
+		BaseMessageTest.class,
+		BaseRequestMessageTest.class,
 
 		// Processes
 		ProcessTest.class, ProcessManagerTest.class
