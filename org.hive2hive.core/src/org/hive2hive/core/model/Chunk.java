@@ -2,7 +2,8 @@ package org.hive2hive.core.model;
 
 import java.security.PublicKey;
 
-import org.hive2hive.core.network.data.BaseDataWrapper;
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
 
 /**
  * Raw data part of a file that is added to the DHT
@@ -10,7 +11,7 @@ import org.hive2hive.core.network.data.BaseDataWrapper;
  * @author Nico
  * 
  */
-public class Chunk extends BaseDataWrapper {
+public class Chunk extends DataWrapper {
 
 	private static final long serialVersionUID = 1L;
 
@@ -44,7 +45,6 @@ public class Chunk extends BaseDataWrapper {
 
 	@Override
 	public int getTimeToLive() {
-		// TODO Auto-generated method stub
-		return 0;
+		return TimeToLiveStore.getInstance().getChunk();
 	}
 }

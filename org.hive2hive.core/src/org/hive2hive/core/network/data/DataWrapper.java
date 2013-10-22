@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 
  * @author Seppi
  */
-public abstract class BaseDataWrapper implements Serializable {
+public abstract class DataWrapper implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

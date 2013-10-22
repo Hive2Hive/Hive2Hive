@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class MetaFile extends MetaDocument {
 
+	private static final long serialVersionUID = 1L;
 	private List<Version> versions;
 
 	public MetaFile(PublicKey id) {

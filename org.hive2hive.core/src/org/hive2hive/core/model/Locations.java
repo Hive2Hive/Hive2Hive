@@ -5,15 +5,19 @@ import java.util.List;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * A list of unique addresses of peers that are currently online. If there is at least one client online,
- * exaclty one client becomes the master. Holding these addresses is necessary to locate clients.
+ * exactly one client becomes the master. Holding these addresses is necessary to locate clients.
  * 
  * @author Nico
  * 
  */
-public class Locations {
+public class Locations extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private final String forUser;
 	private final List<OnlinePeer> onlinePeers;
 
@@ -62,5 +66,10 @@ public class Locations {
 				return peer;
 		}
 		return null;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getLocations();
 	}
 }

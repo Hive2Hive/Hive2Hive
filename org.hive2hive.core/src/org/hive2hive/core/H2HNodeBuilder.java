@@ -8,16 +8,8 @@ public class H2HNodeBuilder {
 	private int maxSizeAllVersions = maxFileSize * maxNumOfVersions;
 	private int chunkSize = 1024 * 1024; // 1Mb
 
-	// time to live configuration
-	private TimeToLiveStore ttlStore = new TimeToLiveStoreBuilder().build();
-
 	public H2HNode build() {
-		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, ttlStore);
-	}
-
-	public H2HNodeBuilder setTimeToLiveStoreBuilder(TimeToLiveStore ttlStore) {
-		this.ttlStore = ttlStore;
-		return this;
+		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize);
 	}
 
 	/**
