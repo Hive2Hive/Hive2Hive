@@ -5,14 +5,18 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * Tree implementation for the file tree. It stores the keys for the files and it's logic location.
  * 
  * @author Nico
  * 
  */
-public class FileTreeNode {
+public class FileTreeNode extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;
 	private final boolean isFolder;
 	private String name;
@@ -98,5 +102,10 @@ public class FileTreeNode {
 
 	public String getFullPath() {
 		return parent.getFullPath() + File.pathSeparator + getName();
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getMetaDocument();
 	}
 }

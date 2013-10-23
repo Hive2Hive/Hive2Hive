@@ -4,9 +4,10 @@ import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.BaseDataWrapper;
+import org.hive2hive.core.network.data.DataWrapper;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 
@@ -73,14 +74,15 @@ public abstract class ProcessStep {
 	protected abstract void handlePutGetResult(FutureDHT future);
 
 	protected void send(BaseMessage message) {
-		if (message instanceof IRequestMessage) {
-			IRequestMessage requestMessage = (IRequestMessage) message;
+		if (message instanceof BaseRequestMessage) {
+			BaseRequestMessage requestMessage = (BaseRequestMessage) message;
 			requestMessage.setCallBackHandler(new ICallBackHandler() {
 				@Override
 				public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
 					handleMessageReply(asyncReturnMessage);
 				}
 			});
+
 		}
 
 		getNetworkManager().send(message);
@@ -94,7 +96,7 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 * @param wrapper the data
 	 */
-	protected void put(String locationKey, String contentKey, BaseDataWrapper wrapper) {
+	protected void put(String locationKey, String contentKey, DataWrapper wrapper) {
 		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, wrapper);
 		putFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override

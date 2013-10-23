@@ -39,7 +39,7 @@ public class DataManagerTest extends H2HJUnitTest {
 		future.awaitUninterruptibly();
 
 		String result = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey)
-				.awaitUninterruptibly().getData().getObject()).getContent();
+				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data, result);
 	}
 
@@ -55,8 +55,8 @@ public class DataManagerTest extends H2HJUnitTest {
 		FutureDHT future = nodeA.putGlobal(locationKey, contentKey, new TestDataWrapper(data));
 		future.awaitUninterruptibly();
 
-		String result = (String) ((TestDataWrapper) nodeB.getGlobal(locationKey, contentKey)
-				.awaitUninterruptibly().getData().getObject()).getContent();
+		String result = ((TestDataWrapper) nodeB.getGlobal(locationKey, contentKey).awaitUninterruptibly()
+				.getData().getObject()).getTestString();
 		assertEquals(data, result);
 	}
 
@@ -70,7 +70,7 @@ public class DataManagerTest extends H2HJUnitTest {
 
 		node.putLocal(locationKey, contentKey, new TestDataWrapper(data));
 
-		String result = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey)).getContent();
+		String result = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey)).getTestString();
 		assertEquals(data, result);
 	}
 
@@ -86,134 +86,131 @@ public class DataManagerTest extends H2HJUnitTest {
 		FutureDHT future = nodeA.putGlobal(locationKey, contentKey, new TestDataWrapper(data));
 		future.awaitUninterruptibly();
 
-		String result = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey)).getContent();
+		String result = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey)).getTestString();
 		assertEquals(data, result);
 	}
-	
+
 	@Test
 	public void testGlobalPutOneLocationKeyMultipleContentKeys() throws Exception {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey1 = NetworkTestUtil.randomString();
 		String contentKey2 = NetworkTestUtil.randomString();
 		String contentKey3 = NetworkTestUtil.randomString();
-		
+
 		NetworkManager node = network.get(random.nextInt(networkSize));
-		
+
 		String data1 = NetworkTestUtil.randomString();
 		FutureDHT future1 = node.putGlobal(locationKey, contentKey1, new TestDataWrapper(data1));
 		future1.awaitUninterruptibly();
-		
+
 		String data2 = NetworkTestUtil.randomString();
 		FutureDHT future2 = node.putGlobal(locationKey, contentKey2, new TestDataWrapper(data2));
 		future2.awaitUninterruptibly();
-		
+
 		String data3 = NetworkTestUtil.randomString();
 		FutureDHT future3 = node.putGlobal(locationKey, contentKey3, new TestDataWrapper(data3));
 		future3.awaitUninterruptibly();
-		
+
 		String result1 = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey1)
-				.awaitUninterruptibly().getData().getObject()).getContent();
+				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data1, result1);
 		String result2 = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey2)
-				.awaitUninterruptibly().getData().getObject()).getContent();
+				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data2, result2);
 		String result3 = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey3)
-				.awaitUninterruptibly().getData().getObject()).getContent();
+				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data3, result3);
 	}
-	
+
 	@Test
 	public void testGlobalPutOneLocationKeyMultipleContentKeysGlobalGetFromOtherNodes() throws Exception {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey1 = NetworkTestUtil.randomString();
 		String contentKey2 = NetworkTestUtil.randomString();
 		String contentKey3 = NetworkTestUtil.randomString();
-		
+
 		String data1 = NetworkTestUtil.randomString();
 		FutureDHT future1 = network.get(random.nextInt(networkSize)).putGlobal(locationKey, contentKey1,
 				new TestDataWrapper(data1));
 		future1.awaitUninterruptibly();
-		
+
 		String data2 = NetworkTestUtil.randomString();
 		FutureDHT future2 = network.get(random.nextInt(networkSize)).putGlobal(locationKey, contentKey2,
 				new TestDataWrapper(data2));
 		future2.awaitUninterruptibly();
-		
+
 		String data3 = NetworkTestUtil.randomString();
 		FutureDHT future3 = network.get(random.nextInt(networkSize)).putGlobal(locationKey, contentKey3,
 				new TestDataWrapper(data3));
 		future3.awaitUninterruptibly();
-		
+
 		String result1 = (String) ((TestDataWrapper) network.get(random.nextInt(networkSize))
 				.getGlobal(locationKey, contentKey1).awaitUninterruptibly().getData().getObject())
-				.getContent();
+				.getTestString();
 		assertEquals(data1, result1);
 		String result2 = (String) ((TestDataWrapper) network.get(random.nextInt(networkSize))
 				.getGlobal(locationKey, contentKey2).awaitUninterruptibly().getData().getObject())
-				.getContent();
+				.getTestString();
 		assertEquals(data2, result2);
 		String result3 = (String) ((TestDataWrapper) network.get(random.nextInt(networkSize))
 				.getGlobal(locationKey, contentKey3).awaitUninterruptibly().getData().getObject())
-				.getContent();
+				.getTestString();
 		assertEquals(data3, result3);
 	}
-	
+
 	@Test
 	public void testLocalPutOneLocationKeyMultipleContentKeys() throws Exception {
 		NetworkManager node = network.get(random.nextInt(networkSize));
-		
+
 		String locationKey = node.getNodeId();
 		String contentKey1 = NetworkTestUtil.randomString();
 		String contentKey2 = NetworkTestUtil.randomString();
 		String contentKey3 = NetworkTestUtil.randomString();
-		
+
 		String data1 = NetworkTestUtil.randomString();
 		node.putLocal(locationKey, contentKey1, new TestDataWrapper(data1));
-		
+
 		String data2 = NetworkTestUtil.randomString();
 		node.putLocal(locationKey, contentKey2, new TestDataWrapper(data2));
-		
+
 		String data3 = NetworkTestUtil.randomString();
 		node.putLocal(locationKey, contentKey3, new TestDataWrapper(data3));
-		
-		String result1 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey1)).getContent();
+
+		String result1 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey1)).getTestString();
 		assertEquals(data1, result1);
-		String result2 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey2)).getContent();
+		String result2 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey2)).getTestString();
 		assertEquals(data2, result2);
-		String result3 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey3)).getContent();
+		String result3 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey3)).getTestString();
 		assertEquals(data3, result3);
 	}
-	
+
 	@Test
 	public void testGlobalPutOneLocationKeyMultipleContentKeysLocalGetFromOtherNodes() throws Exception {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-		
+
 		String locationKey = nodeB.getNodeId();
 		String contentKey1 = NetworkTestUtil.randomString();
 		String contentKey2 = NetworkTestUtil.randomString();
 		String contentKey3 = NetworkTestUtil.randomString();
-		
+
 		String data1 = NetworkTestUtil.randomString();
-		FutureDHT future1 = nodeA.putGlobal(locationKey, contentKey1,
-				new TestDataWrapper(data1));
+		FutureDHT future1 = nodeA.putGlobal(locationKey, contentKey1, new TestDataWrapper(data1));
 		future1.awaitUninterruptibly();
-		
+
 		String data2 = NetworkTestUtil.randomString();
-		FutureDHT future2 = nodeA.putGlobal(locationKey, contentKey2,
-				new TestDataWrapper(data2));
+		FutureDHT future2 = nodeA.putGlobal(locationKey, contentKey2, new TestDataWrapper(data2));
 		future2.awaitUninterruptibly();
-		
+
 		String data3 = NetworkTestUtil.randomString();
-		FutureDHT future3 = nodeA.putGlobal(locationKey, contentKey3,
-				new TestDataWrapper(data3));
+		FutureDHT future3 = nodeA.putGlobal(locationKey, contentKey3, new TestDataWrapper(data3));
 		future3.awaitUninterruptibly();
-		
-		String result1 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey1)).getContent();
+
+		String result1 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey1)).getTestString();
 		assertEquals(data1, result1);
-		String result2 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey2)).getContent();
+		String result2 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey2)).getTestString();
 		assertEquals(data2, result2);
-		String result3 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey3)).getContent();
+		String result3 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey3)).getTestString();
 		assertEquals(data3, result3);
 	}
 

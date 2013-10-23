@@ -9,7 +9,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.BaseDataWrapper;
+import org.hive2hive.core.network.data.DataWrapper;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -133,7 +133,7 @@ public class NetworkManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, BaseDataWrapper wrapper) {
+	public FutureDHT putGlobal(String locationKey, String contentKey, DataWrapper wrapper) {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.putGlobal(locationKey, contentKey, wrapper);
@@ -167,7 +167,7 @@ public class NetworkManager {
 	 * @param wrapper
 	 *            the wrapper containing the content to be stored
 	 */
-	public void putLocal(String locationKey, String contentKey, BaseDataWrapper wrapper) {
+	public void putLocal(String locationKey, String contentKey, DataWrapper wrapper) {
 		if (!connection.isConnected())
 			return;
 		dataManager.putLocal(locationKey, contentKey, wrapper);

@@ -14,18 +14,19 @@ import java.util.List;
  */
 public class MetaFile extends MetaDocument {
 
-	private List<Version> versions;
+	private static final long serialVersionUID = 1L;
+	private List<FileVersion> versions;
 
 	public MetaFile(PublicKey id) {
 		super(id);
-		setVersions(new ArrayList<Version>());
+		setVersions(new ArrayList<FileVersion>());
 	}
 
-	public List<Version> getVersions() {
+	public List<FileVersion> getVersions() {
 		return versions;
 	}
 
-	public void setVersions(List<Version> versions) {
+	public void setVersions(List<FileVersion> versions) {
 		this.versions = versions;
 	}
 
@@ -34,21 +35,21 @@ public class MetaFile extends MetaDocument {
 			return 0;
 		} else {
 			int sum = 0;
-			for (Version version : versions) {
+			for (FileVersion version : versions) {
 				sum += version.getSize();
 			}
 			return sum;
 		}
 	}
 
-	public Version getNewestVersion() {
+	public FileVersion getNewestVersion() {
 		if (versions == null || versions.isEmpty()) {
 			return null;
 		}
 
-		Collections.sort(versions, new Comparator<Version>() {
+		Collections.sort(versions, new Comparator<FileVersion>() {
 			@Override
-			public int compare(Version o1, Version o2) {
+			public int compare(FileVersion o1, FileVersion o2) {
 				return new Integer(o1.getCounter()).compareTo(o2.getCounter());
 			}
 		});

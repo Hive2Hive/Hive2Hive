@@ -65,7 +65,7 @@ public class MessageManager {
 					.sendDirect(aMessage.getTargetAddress()).setObject(aMessage).start();
 			FutureListener2 futureListener = new FutureListener2(aMessage, networkManager);
 			futureResponse.addListener(futureListener);
-			
+
 			logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
 					aMessage.getTargetKey(), aMessage.getMessageID()));
 		} else {

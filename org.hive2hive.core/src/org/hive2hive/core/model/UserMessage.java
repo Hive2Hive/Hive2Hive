@@ -2,6 +2,9 @@ package org.hive2hive.core.model;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * An encrypted and signed message which is stored in the DHT. The user message
  * will be stored in a queue (see {@link UserMessageQueue}). This allows an asynchronous communication between
@@ -10,8 +13,9 @@ import net.tomp2p.peers.PeerAddress;
  * @author Nico
  * 
  */
-public class UserMessage {
+public class UserMessage extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private final String id;
 	private final String sender;
 	private final PeerAddress origin;
@@ -32,5 +36,10 @@ public class UserMessage {
 
 	public PeerAddress getOrigin() {
 		return origin;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getUserMessageQueue();
 	}
 }

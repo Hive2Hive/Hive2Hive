@@ -58,7 +58,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
-		String result = (String) ((TestDataWrapper) tmp).getContent();
+		String result = ((TestDataWrapper) tmp).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}
@@ -89,7 +89,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
-		String result = (String) ((TestDataWrapper) tmp).getContent();
+		String result = ((TestDataWrapper) tmp).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}

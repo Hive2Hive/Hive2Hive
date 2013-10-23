@@ -2,6 +2,9 @@ package org.hive2hive.core.model;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * Data holder for a mapping between a peer's address and its role in the DHT (master or not). Every client
  * that is online has such an entry in its {@link Locations}.
@@ -9,8 +12,9 @@ import net.tomp2p.peers.PeerAddress;
  * @author Nico
  * 
  */
-public class OnlinePeer {
+public class OnlinePeer extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private PeerAddress address;
 	private boolean isMaster;
 
@@ -33,5 +37,10 @@ public class OnlinePeer {
 
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getLocations();
 	}
 }

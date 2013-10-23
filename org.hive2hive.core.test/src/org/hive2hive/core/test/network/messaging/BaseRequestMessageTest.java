@@ -43,11 +43,12 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		String contentKey = NetworkTestUtil.randomString();
-		
+
 		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 
-		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), nodeA.getPeerAddress(), contentKey);
+		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), nodeA.getPeerAddress(),
+				contentKey);
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		nodeA.send(message);
@@ -58,25 +59,26 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 			w.tickASecond();
 			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
 		} while (tmp == null);
-		
-		String receivedSecret = (String) ((TestDataWrapper) tmp).getContent();
-		String originalSecret =  (String) ((TestDataWrapper) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getContent();
-		
+
+		String receivedSecret = ((TestDataWrapper) tmp).getTestString();
+		String originalSecret = ((TestDataWrapper) nodeB.getLocal(nodeB.getNodeId(), contentKey))
+				.getTestString();
+
 		assertEquals(originalSecret, receivedSecret);
 	}
-	
+
 	@Override
 	@After
 	public void afterMethod() {
 		NetworkTestUtil.shutdownNetwork(network);
 		super.afterMethod();
 	}
-	
+
 	@AfterClass
 	public static void endTest() {
 		afterClass();
 	}
-	
+
 	private class Waiter {
 		private int counter = 0;
 		private final int maxAmoutOfTicks;
