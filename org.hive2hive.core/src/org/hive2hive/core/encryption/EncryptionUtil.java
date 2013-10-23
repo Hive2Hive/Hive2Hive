@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -32,9 +33,11 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
 /**
- * This class provides fundamental encryption and decryption functionalities as well as key generation methods.
+ * This class provides fundamental encryption and decryption functionalities as well as key generation
+ * methods.
+ * 
  * @author Christian
- *
+ * 
  */
 public final class EncryptionUtil {
 
@@ -44,16 +47,31 @@ public final class EncryptionUtil {
 	private static final String RSA_CIPHER_MODE = "RSA";
 
 	private static final String ISO_8859_1 = "ISO-8859-1";
+	
+	public enum AES_KEYLENGTH{
+		BIT128 (128);
+		//BIT192 (192),
+		//BIT256 (256);
+		
+		private final int bitLength;
+		AES_KEYLENGTH(int length){
+			bitLength = length;
+		}
+		
+		public int value(){
+			return bitLength;
+		}
+	}
 
 	private EncryptionUtil() {
 	}
 
 	public static byte[] serializeObject(Object object) {
-	
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = null;
 		byte[] result = null;
-	
+
 		try {
 			oos = new ObjectOutputStream(baos);
 			oos.writeObject(object);
@@ -68,16 +86,16 @@ public final class EncryptionUtil {
 				logger.error("Exception while closing serialization process.");
 			}
 		}
-	
+
 		return result;
 	}
 
 	public static Object deserializeObject(byte[] object) {
-	
+
 		ByteArrayInputStream bais = new ByteArrayInputStream(object);
 		ObjectInputStream ois = null;
 		Object result = null;
-	
+
 		try {
 			ois = new ObjectInputStream(bais);
 			result = ois.readObject();
@@ -91,7 +109,7 @@ public final class EncryptionUtil {
 				logger.error("Exception while closing deserialization process.");
 			}
 		}
-	
+
 		return result;
 	}
 
@@ -110,81 +128,73 @@ public final class EncryptionUtil {
 	public static byte[] decryptRSA(EncryptedContent content, PrivateKey privateKey) {
 		return decrypt(content, privateKey, RSA_CIPHER_MODE);
 	}
-	
-	public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey){
+
+	public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey) {
 		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
 	}
-	
-	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey){
+
+	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey) {
 		return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
 	}
-	
-	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey){
+
+	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey) {
 		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
 	}
-	
-	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey){
+
+	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey) {
 		return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
-	}
-	
-	public static byte[] createRandomAESKey() {
-	
-		SecureRandom random = new SecureRandom();
-		byte[] aesKey = new byte[16]; // 16 bytes = 128 bits
-		random.nextBytes(aesKey);
-		return aesKey;
-	}
-
-	public static SecretKey createSecretAESKey() {
-	
-		// TODO For more security use http://www.bouncycastle.org/
-		try {
-			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-			keyGenerator.init(128);
-			return keyGenerator.generateKey();
-		} catch (NoSuchAlgorithmException e) {
-			logger.error("Exception while secret AES key creation:", e);
-		}
-		return null;
-	}
-
-	public static KeyPair createRSAKeys() {
-	
-		try {
-			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-			kpg.initialize(2048);
-			return kpg.generateKeyPair();
-		} catch (NoSuchAlgorithmException e) {
-			logger.error("Exception while RSA keys creation:", e);
-		}
-		return null;
 	}
 
 	public static SecretKey createDESKey(String password, byte[] salt) {
-	
+
 		byte[] tempKey = combine(toByte(password), salt);
-	
+
 		MessageDigest messageDigest;
 		try {
 			messageDigest = MessageDigest.getInstance("SHA-512");
-			
+
 			for (int i = 0; i < 1024; i++) {
 				messageDigest.update(tempKey);
 				tempKey = messageDigest.digest();
 				tempKey = combine(salt, tempKey);
 			}
-	
+
 			try {
 				DESKeySpec dks = new DESKeySpec(tempKey);
 				SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
 				return skf.generateSecret(dks);
 			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
 				logger.error("Exception while DES key creation:", e);
-			}	
+			}
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Exception  while DES digest creation:", e);
 		}
-		
+
+		return null;
+	}
+
+	public static SecretKey createAESKey(AES_KEYLENGTH keyLength) {
+
+		// TODO For more security use http://www.bouncycastle.org/
+		try {
+			KeyGenerator kg = KeyGenerator.getInstance("AES");
+			kg.init(keyLength.value(), new SecureRandom());
+			return kg.generateKey();
+		} catch (NoSuchAlgorithmException | InvalidParameterException e) {
+			logger.error("Exception while creating AES key:", e);
+		}
+		return null;
+	}
+
+	public static KeyPair createRSAKeys() {
+
+		try {
+			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+			kpg.initialize(2048);
+			return kpg.generateKeyPair();
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Exception while creating RSA keys:", e);
+		}
 		return null;
 	}
 
@@ -225,7 +235,7 @@ public final class EncryptionUtil {
 	}
 
 	public static byte[] createRandomSalt() {
-		
+
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[20];
 		random.nextBytes(salt);
@@ -233,10 +243,10 @@ public final class EncryptionUtil {
 	}
 
 	private static EncryptedContent encrypt(byte[] content, Key key, String transformationMode) {
-	
+
 		byte[] encryptedContent = null;
 		byte[] initVector = null;
-	
+
 		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
 		try {
 			// encrypt the content
@@ -245,14 +255,14 @@ public final class EncryptionUtil {
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
 			logger.error("Exception during encryption:", e);
 		}
-		
+
 		return new EncryptedContent(encryptedContent, initVector);
 	}
 
 	private static byte[] decrypt(EncryptedContent content, Key key, String transformationMode) {
-	
+
 		byte[] decryptedContent = null;
-	
+
 		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
 		try {
 			// decrypt the content
@@ -260,23 +270,23 @@ public final class EncryptionUtil {
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
 			logger.error("Exception during decryption:", e);
 		}
-		
+
 		return decryptedContent;
 	}
 
-	private static CipherInputStream encryptStream(InputStream inputStream, Key key, String transformationMode){
-		
+	private static CipherInputStream encryptStream(InputStream inputStream, Key key, String transformationMode) {
+
 		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
 		return new CipherInputStream(inputStream, encryptionCipher);
 	}
 
-	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode){
-	
+	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode) {
+
 		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
 		return new CipherInputStream(inputStream, decryptionCipher);
 	}
 
-	private static Cipher getEncryptionCipher(Key key, String transformationMode){
+	private static Cipher getEncryptionCipher(Key key, String transformationMode) {
 		try {
 			// declare transformation mode
 			Cipher cipher = Cipher.getInstance(transformationMode);
@@ -293,8 +303,8 @@ public final class EncryptionUtil {
 		}
 		return null;
 	}
-	
-	private static Cipher getDecryptionCipher(Key key, String transformationMode){
+
+	private static Cipher getDecryptionCipher(Key key, String transformationMode) {
 		try {
 			// declare transformation mode
 			Cipher cipher = Cipher.getInstance(transformationMode);
@@ -312,7 +322,7 @@ public final class EncryptionUtil {
 	}
 
 	private static byte[] combine(byte[] arrayA, byte[] arrayB) {
-		
+
 		byte[] result = new byte[arrayA.length + arrayB.length];
 		System.arraycopy(arrayA, 0, result, 0, arrayA.length);
 		System.arraycopy(arrayB, 0, result, arrayA.length, arrayB.length);
