@@ -10,10 +10,16 @@ import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.data.TestDataWrapper;
 
+/**
+ * Used to test response messages and callback handlers. For further detail see {@link
+ * BaseRequestMessageTest#testSendingAnAsynchronousMessageWithReply()}
+ * 
+ * @author Seppi
+ */
 public class TestMessageWithReply extends BaseRequestMessage {
 
 	private static final long serialVersionUID = 6358613094488111567L;
-	
+
 	private final String contentKey;
 
 	public TestMessageWithReply(String aTargetKey, PeerAddress aSenderAddress, String contentKey) {
@@ -24,9 +30,9 @@ public class TestMessageWithReply extends BaseRequestMessage {
 	@Override
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
-		
+
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new TestDataWrapper(secret));
-		
+
 		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getTargetKey(),
 				getSenderAddress(), secret);
 		networkManager.send(responseMessage);
@@ -48,7 +54,8 @@ public class TestMessageWithReply extends BaseRequestMessage {
 		@Override
 		public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
 			String receivedSecret = (String) asyncReturnMessage.getContent();
-			networkManager.putLocal(networkManager.getNodeId(), contentKey, new TestDataWrapper(receivedSecret));			
+			networkManager.putLocal(networkManager.getNodeId(), contentKey, new TestDataWrapper(
+					receivedSecret));
 		}
 
 	}

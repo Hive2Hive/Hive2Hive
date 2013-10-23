@@ -3,13 +3,11 @@ package org.hive2hive.core.test.network.messaging;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.data.TestDataWrapper;
 import org.junit.After;
@@ -18,7 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BaseMessageTest extends H2HJUnitTest {
+public class BaseMessageTest extends NetworkJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
@@ -37,20 +35,29 @@ public class BaseMessageTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 	}
 
+	/**
+	 * This test checks if a message arrives asynchronously at the right target node (node which is
+	 * responsible for the given key). To verify this the receiving node stores the received data into the
+	 * DHT. Everything went right when same data is found with the node id of the receiving node as location
+	 * key.
+	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyToTargetNode() {
+		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-
+		// generate random data and content key
+		String data = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
-		String data = "test data";
-
+		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
-
+		// create a message with target node B
 		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey, new TestDataWrapper(
 				data));
+		// send message
 		nodeA.send(message);
 
+		// wait till message gets handled
 		Waiter w = new Waiter(20);
 		Object tmp = null;
 		do {
@@ -58,6 +65,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
+		// verify that data arrived
 		String result = (String) ((TestDataWrapper) tmp).getContent();
 		assertNotNull(result);
 		assertEquals(data, result);
@@ -70,18 +78,22 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode() {
+		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-
+		// generate random data and content key
 		String contentKey = NetworkTestUtil.randomString();
-		String data = "test data";
-
+		String data = NetworkTestUtil.randomString();
+		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
-
+		// create a test message which gets rejected several times
 		TestMessageOneWayMaxSending message = new TestMessageOneWayMaxSending(nodeB.getNodeId(), contentKey,
 				new TestDataWrapper(data));
+		// send message
 		nodeA.send(message);
 
+		// wait till message gets handled
+		// this might need some time 
 		Waiter w = new Waiter(20);
 		Object tmp = null;
 		do {
@@ -89,6 +101,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
+		// verify that data arrived
 		String result = (String) ((TestDataWrapper) tmp).getContent();
 		assertNotNull(result);
 		assertEquals(data, result);
@@ -104,28 +117,6 @@ public class BaseMessageTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() {
 		afterClass();
-	}
-
-	private class Waiter {
-		private int counter = 0;
-		private final int maxAmoutOfTicks;
-
-		public Waiter(int anAmountOfAcceptableTicks) {
-			maxAmoutOfTicks = anAmountOfAcceptableTicks;
-		}
-
-		public void tickASecond() {
-			synchronized (this) {
-				try {
-					wait(1000);
-				} catch (InterruptedException e) {
-				}
-			}
-			counter++;
-			if (counter >= maxAmoutOfTicks) {
-				fail(String.format("We waited for %d seconds. This is simply to long!", counter));
-			}
-		}
 	}
 
 }
