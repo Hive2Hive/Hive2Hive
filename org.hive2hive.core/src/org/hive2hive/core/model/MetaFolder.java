@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class MetaFolder extends MetaDocument {
 
+	private static final long serialVersionUID = 1L;
 	private List<UserPermission> userPermissions;
 	private List<KeyPair> childDocuments;
 

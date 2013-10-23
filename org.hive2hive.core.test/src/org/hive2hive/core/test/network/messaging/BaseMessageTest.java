@@ -66,7 +66,7 @@ public class BaseMessageTest extends NetworkJUnitTest {
 		} while (tmp == null);
 
 		// verify that data arrived
-		String result = (String) ((TestDataWrapper) tmp).getContent();
+		String result = ((TestDataWrapper) tmp).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}
@@ -102,7 +102,7 @@ public class BaseMessageTest extends NetworkJUnitTest {
 		} while (tmp == null);
 
 		// verify that data arrived
-		String result = (String) ((TestDataWrapper) tmp).getContent();
+		String result = ((TestDataWrapper) tmp).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}

@@ -2,6 +2,9 @@ package org.hive2hive.core.model;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * Abstract class for a meta document (can either be a file or a folder). The documents are identified by the
  * public key and can be decrypted using the private key
@@ -9,8 +12,9 @@ import java.security.PublicKey;
  * @author Nico
  * 
  */
-public abstract class MetaDocument {
+public abstract class MetaDocument extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private final PublicKey id;
 
 	public MetaDocument(PublicKey id) {
@@ -20,4 +24,10 @@ public abstract class MetaDocument {
 	public PublicKey getId() {
 		return id;
 	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getMetaDocument();
+	}
+
 }

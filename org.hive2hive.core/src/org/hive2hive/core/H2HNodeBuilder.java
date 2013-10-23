@@ -2,19 +2,40 @@ package org.hive2hive.core;
 
 public class H2HNodeBuilder {
 
-	private int fileSize = 10000;
+	// File size configuration
+	private int maxFileSize = 25 * 1024 * 1024; // 25Mb
+	private int maxNumOfVersions = 100;
+	private int maxSizeAllVersions = maxFileSize * maxNumOfVersions;
+	private int chunkSize = 1024 * 1024; // 1Mb
 
-	public H2HNodeBuilder() {
-
+	public H2HNode build() {
+		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize);
 	}
 
-	public H2HNodeBuilder setFileSize(int fileSize) {
-		this.fileSize = fileSize;
+	/**
+	 * Set the max size in bytes
+	 * 
+	 * @param fileSize in bytes
+	 * @return the builder according to the builder pattern
+	 */
+	public H2HNodeBuilder setMaxFileSize(int maxFileSize) {
+		this.maxFileSize = maxFileSize;
 		return this;
 	}
 
-	public H2HNode build() {
-		return new H2HNode();
+	public H2HNodeBuilder setMaxNumOfVersions(int maxNumOfVersions) {
+		this.maxNumOfVersions = maxNumOfVersions;
+		return this;
+	}
+
+	public H2HNodeBuilder setMaxSizeAllVersions(int maxSizeAllVersions) {
+		this.maxSizeAllVersions = maxSizeAllVersions;
+		return this;
+	}
+
+	public H2HNodeBuilder setChunkSize(int chunkSize) {
+		this.chunkSize = chunkSize;
+		return this;
 	}
 
 }

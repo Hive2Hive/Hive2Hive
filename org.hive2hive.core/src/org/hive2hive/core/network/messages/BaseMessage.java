@@ -39,7 +39,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	/**
 	 * Determines how a message should be handled if a failure in the sending to
-	 * the target node occures.
+	 * the target node occurs.
 	 * 
 	 * @author Nendor
 	 */

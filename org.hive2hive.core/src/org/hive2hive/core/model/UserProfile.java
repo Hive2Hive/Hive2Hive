@@ -2,6 +2,9 @@ package org.hive2hive.core.model;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * File which contains all keys and meta information about the files of the owner. Every client node tries to
  * have a decrypted up-to-date copy.
@@ -9,8 +12,9 @@ import java.security.KeyPair;
  * @author Nico
  * 
  */
-public class UserProfile {
+public class UserProfile extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private final KeyPair domainKeys;
 	private final String userId;
 	private final KeyPair encryptionKeys;
@@ -40,5 +44,10 @@ public class UserProfile {
 
 	public void setRoot(FileTreeNode root) {
 		this.root = root;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getUserProfile();
 	}
 }

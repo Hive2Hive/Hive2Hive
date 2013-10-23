@@ -40,7 +40,7 @@ public class DataManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, BaseDataWrapper wrapper) {
+	public FutureDHT putGlobal(String locationKey, String contentKey, DataWrapper wrapper) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(wrapper);
@@ -69,25 +69,6 @@ public class DataManager {
 		logger.debug(String.format("global get key = '%s' content key = '%s'", locationKey, contentKey));
 		return networkManager.getConnection().getPeer().get(Number160.createHash(locationKey))
 				.setContentKey(Number160.createHash(contentKey)).start();
-		/**
-		 * futureDHT.awaitUninterruptibly();
-		 * if (futureDHT.isSuccess()) {
-		 * if (futureDHT.getData() != null) {
-		 * try {
-		 * return ((DataWrapper) futureDHT.getData().getObject())
-		 * .getContent();
-		 * } catch (ClassNotFoundException | ClassCastException
-		 * | IOException e) {
-		 * logger.error(String.format(
-		 * "global get failed exception = '%s'",
-		 * e.getMessage()));
-		 * }
-		 * } else {
-		 * logger.warn("futureDHT.getData() is null");
-		 * }
-		 * }
-		 * return null;
-		 **/
 	}
 
 	/**
@@ -102,7 +83,7 @@ public class DataManager {
 	 * @param wrapper
 	 *            the wrapper containing the content to be stored
 	 */
-	public void putLocal(String locationKey, String contentKey, BaseDataWrapper wrapper) {
+	public void putLocal(String locationKey, String contentKey, DataWrapper wrapper) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(wrapper);

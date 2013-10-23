@@ -1,5 +1,8 @@
 package org.hive2hive.core.model;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.DataWrapper;
+
 /**
  * Mapping between the userId and the permission type. This is applied for {@link MetaFolder} objects in order
  * to identify users rights (and undertake necessary actions in case user leaves or wants to change rights)
@@ -7,8 +10,9 @@ package org.hive2hive.core.model;
  * @author Nico
  * 
  */
-public class UserPermission {
+public class UserPermission extends DataWrapper {
 
+	private static final long serialVersionUID = 1L;
 	private PermissionType permission;
 	private final String userId;
 
@@ -27,5 +31,10 @@ public class UserPermission {
 
 	public String getUserId() {
 		return userId;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getMetaDocument();
 	}
 }

@@ -81,9 +81,10 @@ public class BaseRequestMessageTest extends NetworkJUnitTest {
 		} while (tmp == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = (String) ((TestDataWrapper) tmp).getContent();
-		String originalSecret = (String) ((TestDataWrapper) nodeB.getLocal(nodeB.getNodeId(), contentKey))
-				.getContent();
+		String receivedSecret = ((TestDataWrapper) tmp).getTestString();
+		String originalSecret = ((TestDataWrapper) nodeB.getLocal(nodeB.getNodeId(), contentKey))
+				.getTestString();
+
 		assertEquals(originalSecret, receivedSecret);
 	}
 
