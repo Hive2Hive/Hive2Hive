@@ -66,8 +66,8 @@ public abstract class ProcessStep {
 
 	/**
 	 * An optional method which my be implemented blank if not needed.</br>
-	 * If this step needs to put something into the DHT, this method will be called once the
-	 * {@link FutureDHT} is done at this node.</br></br>
+	 * If this step needs to put something into the DHT, this method will be called once the {@link FutureDHT}
+	 * is done at this node.</br></br>
 	 * <b>Advice:</b></br>
 	 * Although it is possible for a step to do multiple puts, this should be avoided
 	 * if possible. We recommend to use a separate step for each request. This eases the reading and
@@ -76,11 +76,11 @@ public abstract class ProcessStep {
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
 	protected abstract void handlePutResult(FutureDHT future);
-	
+
 	/**
 	 * An optional method which my be implemented blank if not needed.</br>
-	 * If this step needs to get something from the DHT, this method will be called once the
-	 * {@link FutureDHT} is done at this node.</br></br>
+	 * If this step needs to get something from the DHT, this method will be called once the {@link FutureDHT}
+	 * is done at this node.</br></br>
 	 * <b>Advice:</b></br>
 	 * Although it is possible for a step to do multiple gets, this should be avoided
 	 * if possible. We recommend to use a separate step for each request. This eases the reading and
@@ -109,11 +109,14 @@ public abstract class ProcessStep {
 	 * 
 	 * @param locationKey
 	 * @param contentKey
-	 * @param wrapper the data
+	 * @param data
 	 */
-	protected void put(String locationKey, String contentKey, NetworkData wrapper) {
-		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, wrapper);
-		putFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+	protected void put(String locationKey, String contentKey, NetworkData data) {
+		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
+		PutVerificationListener verificationListener = new PutVerificationListener(getNetworkManager(),
+				locationKey, contentKey, data);
+		putFuture.addListener(verificationListener);
+		verificationListener.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
 				handlePutResult(future);

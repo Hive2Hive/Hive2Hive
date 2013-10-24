@@ -18,8 +18,7 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-
+		// TODO encrypt and put
 	}
 
 	@Override
@@ -34,8 +33,15 @@ public class PutUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void handlePutGetResult(FutureDHT future) {
+	protected void handlePutResult(FutureDHT future) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void handleGetResult(FutureDHT future) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
