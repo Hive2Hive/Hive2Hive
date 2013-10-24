@@ -127,18 +127,43 @@ public final class EncryptionUtil {
 		return result;
 	}
 
+	/**
+	 * Symmetrically encrypts byte[] content by means of the AES algorithm.
+	 * @param content The content to be encrypted.
+	 * @param aesKey The symmetric key with which the content will be encrypted.
+	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization vector (IV).
+	 */
 	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
 		return encrypt(content, aesKey, AES_CIPHER_MODE);
 	}
 
+	/**
+	 * Symmetrically decrypts a prior EncryptedContent by means of the AES algorithm.
+	 * @param content The EncryptedContent to be decrypted.
+	 * @param aesKey The symmetric key with which the content will be decrypted.
+	 * @return decrypted byte[] content
+	 */
 	public static byte[] decryptAES(EncryptedContent content, SecretKey aesKey) {
 		return decrypt(content, aesKey, AES_CIPHER_MODE);
 	}
 
+	/**
+	 * Asymmetrically encrypts byte[] content by means of the RSA algorithm. In order to encrypt the content, a public RSA key has to be provided.
+	 * @param content The content to be encrypted.
+	 * @param publicKey The asymmetric public key with which the content will be encrypted.
+	 * @return EncryptedContent which contains the encrypted byte[] content.
+	 */
 	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
 		return encrypt(content, publicKey, RSA_CIPHER_MODE);
 	}
 
+	/**
+	 * Asymmetrically decrypts a prior EncryptedContent by means of the RSA algorithm. In order to decrypt the content, a private RSA key has to be provided.
+	 * NOTE: RSA can only encrypt data that has a maximum byte length of:  ((key length in bits / 8) - 11) bytes. E.g. 256 bytes with a 2048 bits key.
+	 * @param content The EncryptedContent to be decrypted.
+	 * @param privateKey The asymmetric private key with which the content will be decrypted.
+	 * @return decrypted byte[] content.
+	 */
 	public static byte[] decryptRSA(EncryptedContent content, PrivateKey privateKey) {
 		return decrypt(content, privateKey, RSA_CIPHER_MODE);
 	}
@@ -187,6 +212,11 @@ public final class EncryptionUtil {
 		return null;
 	}
 
+	/**
+	 * Creates a symmetric AES key of the specified key length.
+	 * @param keyLength The length the AES key should have.
+	 * @return A symmetric AES key of the specified length.
+	 */
 	public static SecretKeySpec createAESKey(AES_KEYLENGTH keyLength) {
 
 		try {
@@ -202,6 +232,11 @@ public final class EncryptionUtil {
 		return null;
 	}
 
+	/**
+	 * Creates an asymmetric RSA key pair of the specified key length.
+	 * @param keyLength The length the RSA keys should have.
+	 * @return An asymmetric RSA key pair of the specified length.
+	 */
 	public static KeyPair createRSAKeys(RSA_KEYLENGTH keyLength) {
 
 		try {

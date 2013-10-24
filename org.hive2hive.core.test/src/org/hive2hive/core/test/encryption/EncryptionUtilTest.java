@@ -103,14 +103,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				// check key
 				keyPairs[i] = EncryptionUtil.createRSAKeys(sizes[s]);
 				Assert.assertNotNull(keyPairs[i]);
+				Assert.assertNotNull(keyPairs[i].getPrivate());
+				Assert.assertNotNull(keyPairs[i].getPublic());
 				Assert.assertEquals(keyPairs[i].getPrivate().getAlgorithm(), "RSA");
 				Assert.assertEquals(keyPairs[i].getPublic().getAlgorithm(), "RSA");
-
-				// check key length
-				Assert.assertTrue(EncryptionUtil.toString(keyPairs[i].getPrivate().getEncoded()).length() == sizes[s]
-						.value() / 8);
-				Assert.assertTrue(EncryptionUtil.toString(keyPairs[i].getPublic().getEncoded()).length() == sizes[s]
-						.value() / 8);
 			}
 		}
 	}
@@ -128,7 +124,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] content = new byte[random.nextInt(5242880)];
 			random.nextBytes(content);
 			
-			logger.debug(String.format("Testing AES encryption of %s byte file with a %s bit key.",
+			logger.debug(String.format("Testing AES encryption of a sample %s byte file with a %s bit key.",
 					content.length, sizes[s].value()));
 			
 			// generate AES key
@@ -164,7 +160,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] content = new byte[random.nextInt((sizes[s].value()/8)-11)];
 			random.nextBytes(content);
 			
-			logger.debug(String.format("Testing RSA encryption of %s byte file with a %s bit key.",
+			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.",
 					content.length, sizes[s].value()));
 			
 			// generate RSA key pair
