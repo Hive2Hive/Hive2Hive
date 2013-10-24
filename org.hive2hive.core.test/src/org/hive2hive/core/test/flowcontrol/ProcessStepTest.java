@@ -107,7 +107,12 @@ public class ProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handlePutGetResult(FutureDHT future) {
+		protected void handleGetResult(FutureDHT future) {
+			// it's a test for messages only
+		}
+		
+		@Override
+		protected void handlePutResult(FutureDHT future) {
 			// it's a test for messages only
 		}
 

@@ -60,7 +60,12 @@ public class ProcessTest extends H2HJUnitTest {
 			}
 
 			@Override
-			protected void handlePutGetResult(FutureDHT future) {
+			protected void handleGetResult(FutureDHT future) {
+				// do nothing
+			}
+			
+			@Override
+			protected void handlePutResult(FutureDHT future) {
 				// do nothing
 			}
 		};

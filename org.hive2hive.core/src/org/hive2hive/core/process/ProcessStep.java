@@ -7,6 +7,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 
@@ -61,20 +62,33 @@ public abstract class ProcessStep {
 
 	/**
 	 * An optional method which my be implemented blank if not needed.</br>
-	 * If this step needs to put or get something from the DHT, this method will be called once the
+	 * If this step needs to put something into the DHT, this method will be called once the
 	 * {@link FutureDHT} is done at this node.</br></br>
 	 * <b>Advice:</b></br>
-	 * Although it is possible for a step to do multiple puts or gets, this should be avoided
+	 * Although it is possible for a step to do multiple puts, this should be avoided
 	 * if possible. We recommend to use a separate step for each request. This eases the reading and
 	 * encapsulates one action in one step only.
 	 * 
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
-	protected abstract void handlePutGetResult(FutureDHT future);
+	protected abstract void handlePutResult(FutureDHT future);
+	
+	/**
+	 * An optional method which my be implemented blank if not needed.</br>
+	 * If this step needs to get something from the DHT, this method will be called once the
+	 * {@link FutureDHT} is done at this node.</br></br>
+	 * <b>Advice:</b></br>
+	 * Although it is possible for a step to do multiple gets, this should be avoided
+	 * if possible. We recommend to use a separate step for each request. This eases the reading and
+	 * encapsulates one action in one step only.
+	 * 
+	 * @param future the {@link FutureDHT} containing the result of the request.
+	 */
+	protected abstract void handleGetResult(FutureDHT future);
 
 	protected void send(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
-			IRequestMessage requestMessage = (IRequestMessage) message;
+			BaseRequestMessage requestMessage = (BaseRequestMessage) message;
 			requestMessage.setCallBackHandler(new ICallBackHandler() {
 				@Override
 				public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
@@ -82,7 +96,6 @@ public abstract class ProcessStep {
 				}
 			});
 		}
-
 		getNetworkManager().send(message);
 	}
 
@@ -99,7 +112,7 @@ public abstract class ProcessStep {
 		putFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
-				handlePutGetResult(future);
+				handlePutResult(future);
 			}
 		});
 	}
@@ -116,7 +129,7 @@ public abstract class ProcessStep {
 		getFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
-				handlePutGetResult(future);
+				handleGetResult(future);
 			}
 		});
 	}

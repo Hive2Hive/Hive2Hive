@@ -35,6 +35,7 @@ public abstract class Process implements IProcess {
 	}
 	
 	public void setFirstStep(ProcessStep firstStep){
+		firstStep.setProcess(this);
 		this.firstStep = firstStep;
 	}
 
