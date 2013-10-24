@@ -21,10 +21,10 @@ public class ResponseMessage extends BaseDirectMessage {
 	private final PeerAddress targetAddress;
 	private final Serializable content;
 
-	public ResponseMessage(String aMessageID, String aTargetKey,
-			PeerAddress aSenderPeerAddress, Serializable someContent) {
-		super(aMessageID, aTargetKey, aSenderPeerAddress, false);
-		targetAddress = aSenderPeerAddress;
+	public ResponseMessage(String messageID, String targetKey,
+			PeerAddress requesterAddress, Serializable someContent) {
+		super(messageID, targetKey, requesterAddress, false);
+		targetAddress = requesterAddress;
 		content = someContent;
 	}
 

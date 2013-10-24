@@ -2,7 +2,7 @@ package org.hive2hive.core.test.network.messaging;
 
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.test.network.data.TestDataWrapper;
+import org.hive2hive.core.test.H2HTestData;
 
 /**
  * This test message is used to put locally some content into the target node where the location key is equals
@@ -18,9 +18,9 @@ public class TestMessageOneWay extends BaseMessage {
 	private static final long serialVersionUID = 880089170139661640L;
 
 	private final String contentKey;
-	private final TestDataWrapper wrapper;
+	private final H2HTestData wrapper;
 
-	public TestMessageOneWay(String targetKey, String contentKey, TestDataWrapper wrapper) {
+	public TestMessageOneWay(String targetKey, String contentKey, H2HTestData wrapper) {
 		super(createMessageID(), targetKey);
 		this.contentKey = contentKey;
 		this.wrapper = wrapper;

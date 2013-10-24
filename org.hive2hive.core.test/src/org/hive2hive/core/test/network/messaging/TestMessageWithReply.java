@@ -7,8 +7,8 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
+import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.data.TestDataWrapper;
 
 /**
  * Used to test response messages and callback handlers. For further detail see {@link
@@ -31,7 +31,7 @@ public class TestMessageWithReply extends BaseRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		networkManager.putLocal(networkManager.getNodeId(), contentKey, new TestDataWrapper(secret));
+		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
 		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getTargetKey(),
 				getSenderAddress(), secret);
@@ -54,7 +54,7 @@ public class TestMessageWithReply extends BaseRequestMessage {
 		@Override
 		public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
 			String receivedSecret = (String) asyncReturnMessage.getContent();
-			networkManager.putLocal(networkManager.getNodeId(), contentKey, new TestDataWrapper(
+			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(
 					receivedSecret));
 		}
 
