@@ -1,6 +1,5 @@
 package org.hive2hive.core.network.messages;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +9,7 @@ import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -32,30 +29,30 @@ public class MessageManager {
 
 	}
 
-	public void send(BaseMessage aMessage) {
-		aMessage.increaseSendingCounter();
+	public void send(IMessage message) {
+		if (message instanceof BaseDirectMessage) {
+			sendDirect((BaseDirectMessage) message);
+		} else {
+			message.increaseSendingCounter();
 
-		configureCallbackHandlerIfNeeded(aMessage);
+			configureCallbackHandlerIfNeeded(message);
 
-		RequestP2PConfiguration requestP2PConfiguration = createSendingConfiguration();
-		Number160 keyForMessageID = Number160.createHash(aMessage.getTargetKey());
-		// send message to the peer which is responsible for the given key
-		FutureDHT future = networkManager.getConnection().getPeer().send(keyForMessageID).setObject(aMessage)
-				.setRequestP2PConfiguration(requestP2PConfiguration).setRefreshSeconds(0).start();
+			RequestP2PConfiguration requestP2PConfiguration = createSendingConfiguration();
+			Number160 keyForMessageID = Number160.createHash(message.getTargetKey());
+			// send message to the peer which is responsible for the given key
+			FutureDHT future = networkManager.getConnection().getPeer().send(keyForMessageID)
+					.setObject(message).setRequestP2PConfiguration(requestP2PConfiguration)
+					.setRefreshSeconds(0).start();
 
-		BaseFutureAdapter<FutureDHT> futureListener = new FutureListener(aMessage, networkManager);
-		future.addListener(futureListener);
+			BaseFutureAdapter<FutureDHT> futureListener = new FutureListener(message, networkManager);
+			future.addListener(futureListener);
 
-		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
-				aMessage.getTargetKey(), aMessage.getMessageID()));
+			logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
+					message.getTargetKey(), message.getMessageID()));
+		}
 	}
 
-	/**
-	 * Sends a given message directly (TCP) to the peer with the given address.
-	 * 
-	 * @param aMessge them message to send
-	 */
-	public void send(BaseDirectMessage aMessage) {
+	private void sendDirect(BaseDirectMessage aMessage) {
 		if (aMessage.getTargetAddress() != null) {
 			aMessage.increaseSendingCounter();
 
@@ -69,19 +66,12 @@ public class MessageManager {
 			logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
 					aMessage.getTargetKey(), aMessage.getMessageID()));
 		} else {
-			if (aMessage.usesDHTCach()) {
-				Number160 key = Number160.createHash(aMessage.getTargetKey());
-				FutureDHT futureDHT = networkManager.getConnection().getPeer().get(key)
-						.setContentKey(H2HConstants.PEER_ADDRESS).start();
-				futureDHT.addListener(new PeerAddressStorageListener(networkManager, aMessage));
-			} else {
-				aMessage.discoverPeerAddressAndSendMe(networkManager);
-			}
+			aMessage.discoverPeerAddressAndSendMe(networkManager);
 		}
 
 	}
 
-	// TODO_B2B: A full field is exposed to the user - this is not a good encapsulation - change it if
+	// TODO: A full field is exposed to the user - this is not a good encapsulation - change it if
 	// possible.
 	public Map<String, ICallBackHandler> getCallBackHandlers() {
 		return callBackHandlers;
@@ -92,7 +82,7 @@ public class MessageManager {
 		return requestP2PConfiguration;
 	}
 
-	private void configureCallbackHandlerIfNeeded(BaseMessage aMessage) throws IllegalArgumentException {
+	private void configureCallbackHandlerIfNeeded(IMessage aMessage) throws IllegalArgumentException {
 		if (aMessage instanceof IRequestMessage) {
 			IRequestMessage messageWithReply = (IRequestMessage) aMessage;
 			ICallBackHandler handler = messageWithReply.getCallBackHandler();
@@ -108,10 +98,10 @@ public class MessageManager {
 	}
 
 	private class FutureListener extends BaseFutureAdapter<FutureDHT> {
-		private final BaseMessage message;
+		private final IMessage message;
 		private final NetworkManager networkManager;
 
-		public FutureListener(BaseMessage aMessage, NetworkManager aNetworkManager) {
+		public FutureListener(IMessage aMessage, NetworkManager aNetworkManager) {
 			message = aMessage;
 			networkManager = aNetworkManager;
 		}
@@ -206,41 +196,6 @@ public class MessageManager {
 			return AcceptanceReply.FAILURE;
 		}
 
-	}
-
-	private class PeerAddressStorageListener extends BaseFutureAdapter<FutureDHT> {
-
-		private final NetworkManager networkManager;
-		private final BaseDirectMessage message;
-
-		public PeerAddressStorageListener(NetworkManager aNetworkManager, BaseDirectMessage aMessage) {
-			networkManager = aNetworkManager;
-			message = aMessage;
-		}
-
-		@Override
-		public void operationComplete(FutureDHT future) throws Exception {
-			if (future.isSuccess()) {
-				if (future.getData() != null) {
-					try {
-						logger.debug("Peer address found in DHT!");
-						PeerAddress peerAddress = (PeerAddress) future.getData().getObject();
-						message.setTargetPeerAddress(peerAddress);
-						networkManager.send(message);
-					} catch (ClassNotFoundException | IOException e) {
-						logger.warn("Can't get object from DHT. Reason: ", e);
-						message.discoverPeerAddressAndSendMe(networkManager);
-					}
-				} else {
-					logger.debug("No peer address found in DHT.");
-					message.discoverPeerAddressAndSendMe(networkManager);
-				}
-			} else {
-				logger.debug(String.format("Loading of peer address failed. Reason: %s",
-						future.getFailedReason()));
-				message.discoverPeerAddressAndSendMe(networkManager);
-			}
-		}
 	}
 
 }

@@ -18,7 +18,6 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	private PeerAddress targetPeerAddress;
 	private final boolean needsRedirectedSend;
-	private final boolean useDHTCache;
 
 	/**
 	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.
@@ -28,15 +27,12 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 * @param aTargetPeerAddress the {@link PeerAddress} of the target node
 	 * @param aNeedsRedirectedSend flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
-	 * @param useDHTToStorePeerAddress flag which indicates if the {@link PeerAddress} for the target key
-	 *            should be cached in the global DHT or not
 	 */
 	public BaseDirectMessage(String aMessageID, String aTargetKey, PeerAddress aTargetPeerAddress,
-			boolean aNeedsRedirectedSend, boolean useDHTToStorePeerAddress) {
+			boolean aNeedsRedirectedSend) {
 		super(aMessageID, aTargetKey);
 		targetPeerAddress = aTargetPeerAddress;
 		needsRedirectedSend = aNeedsRedirectedSend;
-		useDHTCache = useDHTToStorePeerAddress;
 	}
 
 	/**
@@ -46,20 +42,14 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 * @param aTargetPeerAddress the {@link PeerAddress} of the target node
 	 * @param aNeedsRedirectedSend flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
-	 * @param useDHTCachForAddress flag which indicates if the {@link PeerAddress} for the target key
-	 *            should be cached in the global DHT or not
 	 */
 	public BaseDirectMessage(String aTargetKey, PeerAddress aTargetPeerAddress, boolean aNeedsRedirectedSend,
 			boolean useDHTCachForAddress) {
-		this(createMessageID(), aTargetKey, aTargetPeerAddress, aNeedsRedirectedSend, useDHTCachForAddress);
+		this(createMessageID(), aTargetKey, aTargetPeerAddress, aNeedsRedirectedSend);
 	}
 
 	public boolean needsRedirectdSend() {
 		return needsRedirectedSend;
-	}
-
-	public boolean usesDHTCach() {
-		return useDHTCache;
 	}
 
 	public PeerAddress getTargetAddress() {
@@ -87,15 +77,6 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		return AcceptanceReply.WRONG_TARGET;
 	}
 
-	protected void updateDHTCacheIfNeeded() {
-		if (useDHTCache) {
-			// TODO store peer address into DHT
-//			DataWrapper dataWrapper = new DataWrapper(Type.TEST, targetPeerAddress);
-//			FutureDHT future = networkManager.store(getTargetKey(), B2BConstants.PEER_ADDRESS, dataWrapper);
-//			future.awaitUninterruptibly();
-		}
-	}
-
 	@Override
 	public void handleSendingFailure(AcceptanceReply reply, NetworkManager aNetworkManager) {
 		logger.debug(String.format("Have to handle a sending failure. AcceptanceReply='%s'", reply));
@@ -109,11 +90,6 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		} else {
 			super.handleSendingFailure(reply, aNetworkManager);
 		}
-	}
-	
-	@Override
-	public void run() {
-		updateDHTCacheIfNeeded();
 	}
 
 }

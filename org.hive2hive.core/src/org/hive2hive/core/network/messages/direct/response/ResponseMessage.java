@@ -23,7 +23,7 @@ public class ResponseMessage extends BaseDirectMessage {
 
 	public ResponseMessage(String aMessageID, String aTargetKey,
 			PeerAddress aSenderPeerAddress, Serializable someContent) {
-		super(aMessageID, aTargetKey, aSenderPeerAddress, false, false);
+		super(aMessageID, aTargetKey, aSenderPeerAddress, false);
 		targetAddress = aSenderPeerAddress;
 		content = someContent;
 	}
