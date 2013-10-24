@@ -1,5 +1,8 @@
 package org.hive2hive.core.process;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
 
@@ -20,6 +23,7 @@ import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 public abstract class ProcessStep {
 
 	private Process process;
+	private Map<String, NetworkData> backup = new HashMap<String, NetworkData>();
 
 	public void setProcess(Process aProcess) {
 		process = aProcess;
@@ -132,5 +136,13 @@ public abstract class ProcessStep {
 				handleGetResult(future);
 			}
 		});
+	}
+
+	protected void backup(String key, NetworkData data) {
+		backup.put(key, data);
+	}
+
+	protected NetworkData restore(String key) {
+		return backup.get(key);
 	}
 }
