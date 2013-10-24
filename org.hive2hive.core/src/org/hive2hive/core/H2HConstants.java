@@ -1,7 +1,5 @@
 package org.hive2hive.core;
 
-import net.tomp2p.peers.Number160;
-
 public interface H2HConstants {
 
 	// standard port for the hive2hive network
@@ -12,8 +10,6 @@ public interface H2HConstants {
 
 	// DHT content keys - these are used to distinguish the different types data
 	// stored for a given key
-	public static final Number160 PEER_ADDRESS = Number160.createHash("PEER_ADDRESS");
+	public static final String USER_PROFILE = "USER_PROFILE";
 
-	// Peer persistence constants
-	public static final String PEER_PERSISTENCE_FILE_NAME = "save.xmi";
 }

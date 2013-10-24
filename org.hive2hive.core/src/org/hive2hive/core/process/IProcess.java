@@ -1,5 +1,7 @@
 package org.hive2hive.core.process;
 
+import org.hive2hive.core.process.listener.IProcessListener;
+
 /**
  * This interface provides the default methods of a process which represents a use case.
  * 
@@ -21,5 +23,9 @@ public interface IProcess extends Runnable {
 	int getID();
 
 	ProcessState getState();
+	
+	void addListener(IProcessListener listener);
+	
+	boolean removeListener(IProcessListener listener);
 
 }

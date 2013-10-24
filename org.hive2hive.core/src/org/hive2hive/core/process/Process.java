@@ -6,6 +6,7 @@ import java.util.List;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.manager.ProcessManager;
 
 /**
@@ -26,6 +27,7 @@ public abstract class Process implements IProcess {
 	private ProcessStep firstStep;
 	private ProcessStep currentStep;
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
+	private final List<IProcessListener> listeners = new ArrayList<IProcessListener>();
 
 	public Process(NetworkManager networkManager) {
 		this.networkManager = networkManager;
@@ -33,8 +35,8 @@ public abstract class Process implements IProcess {
 		pid = processManager.getIdForNewProcess();
 		processManager.attachProcess(this);
 	}
-	
-	public void setFirstStep(ProcessStep firstStep){
+
+	public void setFirstStep(ProcessStep firstStep) {
 		firstStep.setProcess(this);
 		this.firstStep = firstStep;
 	}
@@ -79,7 +81,7 @@ public abstract class Process implements IProcess {
 			logger.warn("Process is already stopped");
 		} else {
 			state = ProcessState.STOPPED;
-			rollBack();
+			rollBack("Process stopped.");
 		}
 	}
 
@@ -134,6 +136,9 @@ public abstract class Process implements IProcess {
 			state = ProcessState.FINISHED;
 			// detach form the process manager
 			ProcessManager.getInstance().detachProcess(this);
+			for (IProcessListener listener: listeners){
+				listener.onSuccess();
+			}
 		}
 	}
 
@@ -146,9 +151,22 @@ public abstract class Process implements IProcess {
 		return networkManager;
 	}
 
-	protected void rollBack() {
+	public void rollBack(String reason) {
+		logger.warn(String.format("Rollback triggered. reason = '%s'", reason));
+		currentStep.rollBack();
 		for (ProcessStep step : executedSteps) {
 			step.rollBack();
 		}
+		for (IProcessListener listener: listeners){
+			listener.onFail(reason);
+		}
+	}
+	
+	public void addListener(IProcessListener listener){
+		listeners.add(listener);
+	}
+	
+	public boolean removeListener(IProcessListener listener){
+		return listeners.remove(listener);
 	}
 }
