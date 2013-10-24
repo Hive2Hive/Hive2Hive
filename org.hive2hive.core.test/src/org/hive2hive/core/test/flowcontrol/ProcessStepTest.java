@@ -7,10 +7,10 @@ import java.util.Map;
 
 import net.tomp2p.futures.FutureDHT;
 
-import org.hive2hive.core.flowcontrol.Process;
-import org.hive2hive.core.flowcontrol.ProcessStep;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
@@ -70,8 +70,9 @@ public class ProcessStepTest extends H2HJUnitTest {
 		final NetworkManager receiver = network.get(1);
 
 		DummyProcessStep step = new DummyProcessStep(sender, receiver, testContent);
-		Process process = new Process(sender, step) {
+		Process process = new Process(sender) {
 		};
+		process.setFirstStep(step);
 
 		String messageId = new String(step.getMessageId()); // copy
 

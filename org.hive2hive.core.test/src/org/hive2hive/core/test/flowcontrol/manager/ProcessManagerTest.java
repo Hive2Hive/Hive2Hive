@@ -2,9 +2,9 @@ package org.hive2hive.core.test.flowcontrol.manager;
 
 import java.util.Random;
 
-import org.hive2hive.core.flowcontrol.IProcess;
-import org.hive2hive.core.flowcontrol.ProcessState;
-import org.hive2hive.core.flowcontrol.manager.ProcessManager;
+import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.ProcessState;
+import org.hive2hive.core.process.manager.ProcessManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -95,6 +95,11 @@ public class ProcessManagerTest extends H2HJUnitTest {
 
 			@Override
 			public void continueProcess() {
+			}
+
+			@Override
+			public void run() {
+				
 			}
 		};
 	}

@@ -1,4 +1,4 @@
-package org.hive2hive.core.flowcontrol;
+package org.hive2hive.core.process;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
