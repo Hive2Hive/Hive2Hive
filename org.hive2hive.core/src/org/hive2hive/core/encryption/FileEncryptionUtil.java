@@ -78,18 +78,18 @@ public final class FileEncryptionUtil {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static void encryptFileRSA(Path fileInputPath, Path fileOutputPath, PublicKey publicKey)
-			throws FileNotFoundException, IOException {
-
-		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
-		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
-
-		// encrypt the file input stream with the public key
-		CipherInputStream cis = EncryptionUtil.encryptStreamRSA(fis, publicKey);
-
-		// write the encrypted stream to the file output stream
-		copyStream(cis, fos);
-	}
+//	public static void encryptFileRSA(Path fileInputPath, Path fileOutputPath, PublicKey publicKey)
+//			throws FileNotFoundException, IOException {
+//
+//		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
+//		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
+//
+//		// encrypt the file input stream with the public key
+//		CipherInputStream cis = EncryptionUtil.encryptStreamRSA(fis, publicKey);
+//
+//		// write the encrypted stream to the file output stream
+//		copyStream(cis, fos);
+//	}
 
 	/**
 	 * Decrypts a file by means of RSA. The file at the input path is decrypted and written to the output path.

@@ -3,7 +3,6 @@ package org.hive2hive.core.encryption;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -21,7 +20,6 @@ import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
@@ -51,7 +49,7 @@ public final class EncryptionUtil {
 	private static final String ISO_8859_1 = "ISO-8859-1";
 	
 	public enum AES_KEYLENGTH{
-		BIT128 (128);
+		BIT_128 (128);
 //		BIT192 (192);
 //		BIT256 (256);
 		
@@ -65,6 +63,21 @@ public final class EncryptionUtil {
 		}
 	}
 
+	public enum RSA_KEYLENGTH{
+		BIT_1024 (1024),
+		BIT_2048 (2048),
+		BIT_4096 (4096);
+		
+		private final int bitLength;
+		RSA_KEYLENGTH(int length){
+			bitLength = length;
+		}
+		
+		public int value(){
+			return bitLength;
+		}
+	}
+	
 	private EncryptionUtil() {
 	}
 
@@ -130,17 +143,17 @@ public final class EncryptionUtil {
 		return decrypt(content, privateKey, RSA_CIPHER_MODE);
 	}
 
-	public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey) {
-		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
-	}
+//	public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey) {
+//		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
+//	}
 
 //	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey) {
 //		return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
 //	}
 
-	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey) {
-		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
-	}
+//	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey) {
+//		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
+//	}
 
 //	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey) {
 //		return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
@@ -189,11 +202,11 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	public static KeyPair createRSAKeys() {
+	public static KeyPair createRSAKeys(RSA_KEYLENGTH keyLength) {
 
 		try {
 			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-			kpg.initialize(2048);
+			kpg.initialize(keyLength.value(), new SecureRandom());
 			return kpg.generateKeyPair();
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Exception while creating RSA keys:", e);
@@ -250,13 +263,24 @@ public final class EncryptionUtil {
 		byte[] encryptedContent = null;
 		byte[] initVector = null;
 
-		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
 		try {
-			// encrypt the content
-			encryptedContent = encryptionCipher.doFinal(content);
-			initVector = encryptionCipher.getIV();
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			logger.error("Exception during encryption:", e);
+			// declare transformation mode
+			Cipher cipher = Cipher.getInstance(transformationMode);
+			try {
+				// initialize cipher with encryption mode and key
+				cipher.init(Cipher.ENCRYPT_MODE, key);			
+				try {
+					// encrypt the content
+					encryptedContent = cipher.doFinal(content);
+					initVector = cipher.getIV();
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("Exception during encryption:", e);
+				}
+			} catch (InvalidKeyException e) {
+				logger.error("Invalid key:", e);
+			}
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("Exception during cipher initialization:", e);
 		}
 
 		return new EncryptedContent(encryptedContent, initVector);
@@ -266,63 +290,49 @@ public final class EncryptionUtil {
 
 		byte[] decryptedContent = null;
 
-		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode, new IvParameterSpec(content.getInitVector()));
-		try {
-			// decrypt the content
-			decryptedContent = decryptionCipher.doFinal(content.getContent());
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			logger.error("Exception during decryption:", e);
-		}
-
-		return decryptedContent;
-	}
-
-	private static CipherInputStream encryptStream(InputStream inputStream, Key key, String transformationMode) {
-
-		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
-		return new CipherInputStream(inputStream, encryptionCipher);
-	}
-
-//	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode) {
-//
-//		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
-//		return new CipherInputStream(inputStream, decryptionCipher);
-//	}
-
-	private static Cipher getEncryptionCipher(Key key, String transformationMode) {
 		try {
 			// declare transformation mode
 			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
-				// initialize cipher with encryption mode and key
-				cipher.init(Cipher.ENCRYPT_MODE, key);
-				return cipher;
-
-			} catch (InvalidKeyException e) {
-				logger.error("Invalid key:", e);
-			}
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Exception during cipher initialization:", e);
-		}
-		return null;
-	}
-
-	private static Cipher getDecryptionCipher(Key key, String transformationMode, IvParameterSpec ivSpec) {
-		try {
-			// declare transformation mode
-			Cipher cipher = Cipher.getInstance(transformationMode);
-			try {
-				// initialize cipher with decryption mode, key and initialization vector
-				cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
-				return cipher;
+				// initialize cipher with decryption mode, key (and initialization vector)
+				switch (transformationMode){
+					case AES_CIPHER_MODE:
+						IvParameterSpec ivSpec = new IvParameterSpec(content.getInitVector());
+						cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+						break;
+					case RSA_CIPHER_MODE:
+						cipher.init(Cipher.DECRYPT_MODE, key);
+						break;
+				}
+				try {
+					// decrypt the content
+					decryptedContent = cipher.doFinal(content.getContent());
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("Exception during decryption:", e);
+				}
 			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 				logger.error("Invalid key or algorithm parameter:", e);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("Exception during cipher initialization:", e);
 		}
-		return null;
+		
+		
+
+		return decryptedContent;
 	}
+
+//	private static CipherInputStream encryptStream(InputStream inputStream, Key key, String transformationMode) {
+//
+//		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
+//		return new CipherInputStream(inputStream, encryptionCipher);
+//	}
+
+//	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode) {
+//
+//		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
+//		return new CipherInputStream(inputStream, decryptionCipher);
+//	}
 
 	private static byte[] combine(byte[] arrayA, byte[] arrayB) {
 

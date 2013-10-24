@@ -29,7 +29,7 @@ public class EncryptionCapsule implements Serializable {
 		byte[] serializedObject = EncryptionUtil.serializeObject(content);
 		
 		// encrypt content with AES key
-		SecretKey aesKey = EncryptionUtil.createAESKey(AES_KEYLENGTH.BIT128);
+		SecretKey aesKey = EncryptionUtil.createAESKey(AES_KEYLENGTH.BIT_128);
 		aesEncryptedContent = EncryptionUtil.encryptAES(serializedObject, aesKey);
 
 		// encrypt key and initialization vector with RSA		
