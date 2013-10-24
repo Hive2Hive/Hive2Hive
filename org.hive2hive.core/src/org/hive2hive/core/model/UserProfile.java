@@ -3,7 +3,7 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.DataWrapper;
+import org.hive2hive.core.network.data.NetworkData;
 
 /**
  * File which contains all keys and meta information about the files of the owner. Every client node tries to
@@ -12,7 +12,7 @@ import org.hive2hive.core.network.data.DataWrapper;
  * @author Nico
  * 
  */
-public class UserProfile extends DataWrapper {
+public class UserProfile extends NetworkData {
 
 	private static final long serialVersionUID = 1L;
 	private final KeyPair domainKeys;

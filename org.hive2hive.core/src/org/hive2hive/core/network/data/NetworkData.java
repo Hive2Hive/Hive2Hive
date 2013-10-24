@@ -11,16 +11,16 @@ import java.io.Serializable;
  * 
  * @author Seppi
  */
-public abstract class DataWrapper implements Serializable {
+public abstract class NetworkData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * All data stored in the
-	 * <code>Hive2Hive<code> network has to have a version in order to detect conflicts and race conditions.
-	 * After each modification, the version has to increase by 1
+	 * <code>Hive2Hive<code> network has to have a timestamp in order to detect conflicts and solve race conditions.
+	 * After each modification, the timestamp has to be updated as well
 	 */
-	private int version = 0;
+	private long timestamp = System.currentTimeMillis();
 
 	/**
 	 * All data stored in the <code>Hive2Hive</code> network has to have a time to live value to prevent dead
@@ -31,19 +31,11 @@ public abstract class DataWrapper implements Serializable {
 	 */
 	public abstract int getTimeToLive();
 
-	public int getVersion() {
-		return version;
+	public void updateTimestamp() {
+		timestamp = System.currentTimeMillis();
 	}
 
-	public void setVersion(int version) {
-		this.version = version;
+	public long getTimestamp() {
+		return timestamp;
 	}
-
-	/**
-	 * Increases the version by 1
-	 */
-	public void increaseVersion() {
-		version = (version + 1) % Integer.MAX_VALUE;
-	}
-
 }

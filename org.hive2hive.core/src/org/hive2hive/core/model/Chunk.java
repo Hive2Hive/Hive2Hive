@@ -3,7 +3,7 @@ package org.hive2hive.core.model;
 import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.DataWrapper;
+import org.hive2hive.core.network.data.NetworkData;
 
 /**
  * Raw data part of a file that is added to the DHT
@@ -11,7 +11,7 @@ import org.hive2hive.core.network.data.DataWrapper;
  * @author Nico
  * 
  */
-public class Chunk extends DataWrapper {
+public class Chunk extends NetworkData {
 
 	private static final long serialVersionUID = 1L;
 

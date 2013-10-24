@@ -8,5 +8,3 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.log4j,
- org.eclipse.emf.ecore.xmi.impl

@@ -3,7 +3,7 @@ package org.hive2hive.core.model;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.DataWrapper;
+import org.hive2hive.core.network.data.NetworkData;
 
 /**
  * Data holder for a mapping between a peer's address and its role in the DHT (master or not). Every client
@@ -12,7 +12,7 @@ import org.hive2hive.core.network.data.DataWrapper;
  * @author Nico
  * 
  */
-public class OnlinePeer extends DataWrapper {
+public class OnlinePeer extends NetworkData {
 
 	private static final long serialVersionUID = 1L;
 	private PeerAddress address;

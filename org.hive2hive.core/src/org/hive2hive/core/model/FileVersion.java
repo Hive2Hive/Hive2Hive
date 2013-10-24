@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.DataWrapper;
+import org.hive2hive.core.network.data.NetworkData;
 
 /**
  * A version of a file in the DHT. A version contains several chunks (depending on the file size and the
@@ -14,7 +14,7 @@ import org.hive2hive.core.network.data.DataWrapper;
  * @author Nico
  * 
  */
-public class FileVersion extends DataWrapper {
+public class FileVersion extends NetworkData {
 
 	private static final long serialVersionUID = 1L;
 	private final int counter;

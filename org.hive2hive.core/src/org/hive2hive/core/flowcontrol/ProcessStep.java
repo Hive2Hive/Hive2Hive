@@ -4,7 +4,7 @@ import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.DataWrapper;
+import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
@@ -81,7 +81,6 @@ public abstract class ProcessStep {
 					handleMessageReply(asyncReturnMessage);
 				}
 			});
-
 		}
 
 		getNetworkManager().send(message);
@@ -95,7 +94,7 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 * @param wrapper the data
 	 */
-	protected void put(String locationKey, String contentKey, DataWrapper wrapper) {
+	protected void put(String locationKey, String contentKey, NetworkData wrapper) {
 		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, wrapper);
 		putFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override

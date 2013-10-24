@@ -1,8 +1,8 @@
 package org.hive2hive.core.test.network.data;
 
-import org.hive2hive.core.network.data.DataWrapper;
+import org.hive2hive.core.network.data.NetworkData;
 
-public class TestDataWrapper extends DataWrapper {
+public class TestDataWrapper extends NetworkData {
 
 	private static final long serialVersionUID = -4190279666159015217L;
 	private final String testString;

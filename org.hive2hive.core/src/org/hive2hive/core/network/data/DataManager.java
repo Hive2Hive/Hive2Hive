@@ -40,7 +40,7 @@ public class DataManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, DataWrapper wrapper) {
+	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkData wrapper) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(wrapper);
@@ -83,7 +83,7 @@ public class DataManager {
 	 * @param wrapper
 	 *            the wrapper containing the content to be stored
 	 */
-	public void putLocal(String locationKey, String contentKey, DataWrapper wrapper) {
+	public void putLocal(String locationKey, String contentKey, NetworkData wrapper) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(wrapper);
