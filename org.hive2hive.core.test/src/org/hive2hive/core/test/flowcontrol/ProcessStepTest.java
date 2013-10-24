@@ -12,6 +12,7 @@ import org.hive2hive.core.flowcontrol.ProcessStep;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -45,23 +46,13 @@ public class ProcessStepTest extends H2HJUnitTest {
 	}
 
 	private ResponseMessage waitForMessageResponse(final String messageID) throws InterruptedException {
-		int counter = 0;
-		while (true) {
-			synchronized (messageWaiterMap) {
-				if (messageWaiterMap.containsKey(messageID)) {
-					return messageWaiterMap.get(messageID);
-				}
-			}
-
-			synchronized (this) {
-				wait(500);
-			}
-
-			counter++;
-			if (counter > 40) {
-				Assert.fail("We waited for more than 20 seconds but list wasn't updated");
-			}
-		}
+		H2HWaiter w = new H2HWaiter(20);
+		ResponseMessage response = null;
+		do {
+			w.tickASecond();
+			response = messageWaiterMap.get(messageID);
+		} while (response == null);
+		return response;
 	}
 
 	@Test
