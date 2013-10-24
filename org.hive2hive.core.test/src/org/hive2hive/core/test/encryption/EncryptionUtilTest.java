@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.encryption;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 import javax.crypto.SecretKey;
 
@@ -85,7 +86,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void encryptAESTest() {
+	public void encryptionAESTest() {
 
 		// generate random sized content (max. 5MB)
 		SecureRandom random = new SecureRandom();
@@ -112,16 +113,24 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			Assert.assertNotEquals(encryptedContent.getContent(), content);
 			
 			// decrypt content
-//			byte[] decryptedContent = EncryptionUtil.decryptAES(encryptedContent, aesKey);
-//			
-//			Assert.assertNotNull(decryptedContent);
-//			Assert.assertEquals(content, decryptedContent);
+			byte[] decryptedContent = EncryptionUtil.decryptAES(encryptedContent, aesKey);
+			
+			Assert.assertNotNull(decryptedContent);			
+			Assert.assertTrue(Arrays.equals(content, decryptedContent));
 		}
 	}
-
+	
 	@Test
-	public void decryptAESTest() {
-
+	public void encryptStringAESTest() {
+		
+		String testString = "abcdefghijklmnopqrstuvwxyzüöä 0123456789";
+		byte[] content = EncryptionUtil.serializeObject(testString);
+		SecretKey aesKey = EncryptionUtil.createAESKey(AES_KEYLENGTH.BIT128);
+		EncryptedContent encryptedContent = EncryptionUtil.encryptAES(content, aesKey);
+		byte[] decryptedContent = EncryptionUtil.decryptAES(encryptedContent, aesKey);
+		String testString2 = (String)EncryptionUtil.deserializeObject(decryptedContent);
+		
+		Assert.assertEquals(testString, testString2);
 	}
 	
 	private AES_KEYLENGTH[] getAESKeySizes(){

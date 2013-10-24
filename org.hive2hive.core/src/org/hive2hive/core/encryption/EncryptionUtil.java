@@ -7,8 +7,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -28,6 +28,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -50,8 +52,8 @@ public final class EncryptionUtil {
 	
 	public enum AES_KEYLENGTH{
 		BIT128 (128);
-		//BIT192 (192),
-		//BIT256 (256);
+//		BIT192 (192);
+//		BIT256 (256);
 		
 		private final int bitLength;
 		AES_KEYLENGTH(int length){
@@ -86,13 +88,12 @@ public final class EncryptionUtil {
 				logger.error("Exception while closing serialization process.");
 			}
 		}
-
 		return result;
 	}
 
-	public static Object deserializeObject(byte[] object) {
+	public static Object deserializeObject(byte[] bytes) {
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(object);
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = null;
 		Object result = null;
 
@@ -133,17 +134,17 @@ public final class EncryptionUtil {
 		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
 	}
 
-	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey) {
-		return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
-	}
+//	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey) {
+//		return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
+//	}
 
 	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey) {
 		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
 	}
 
-	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey) {
-		return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
-	}
+//	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey) {
+//		return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
+//	}
 
 	public static SecretKey createDESKey(String password, byte[] salt) {
 
@@ -173,14 +174,16 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	public static SecretKey createAESKey(AES_KEYLENGTH keyLength) {
+	public static SecretKeySpec createAESKey(AES_KEYLENGTH keyLength) {
 
-		// TODO For more security use http://www.bouncycastle.org/
 		try {
 			KeyGenerator kg = KeyGenerator.getInstance("AES");
 			kg.init(keyLength.value(), new SecureRandom());
-			return kg.generateKey();
-		} catch (NoSuchAlgorithmException | InvalidParameterException e) {
+			SecretKey skey = kg.generateKey();
+			byte[] raw = skey.getEncoded();
+			SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+			return skeySpec;
+		} catch (NoSuchAlgorithmException e) {
 			logger.error("Exception while creating AES key:", e);
 		}
 		return null;
@@ -263,7 +266,7 @@ public final class EncryptionUtil {
 
 		byte[] decryptedContent = null;
 
-		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
+		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode, new IvParameterSpec(content.getInitVector()));
 		try {
 			// decrypt the content
 			decryptedContent = decryptionCipher.doFinal(content.getContent());
@@ -280,11 +283,11 @@ public final class EncryptionUtil {
 		return new CipherInputStream(inputStream, encryptionCipher);
 	}
 
-	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode) {
-
-		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
-		return new CipherInputStream(inputStream, decryptionCipher);
-	}
+//	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode) {
+//
+//		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
+//		return new CipherInputStream(inputStream, decryptionCipher);
+//	}
 
 	private static Cipher getEncryptionCipher(Key key, String transformationMode) {
 		try {
@@ -304,16 +307,16 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	private static Cipher getDecryptionCipher(Key key, String transformationMode) {
+	private static Cipher getDecryptionCipher(Key key, String transformationMode, IvParameterSpec ivSpec) {
 		try {
 			// declare transformation mode
 			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
 				// initialize cipher with decryption mode, key and initialization vector
-				cipher.init(Cipher.DECRYPT_MODE, key);
+				cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
 				return cipher;
-			} catch (InvalidKeyException e) {
-				logger.error("Invalid key:", e);
+			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+				logger.error("Invalid key or algorithm parameter:", e);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("Exception during cipher initialization:", e);

@@ -99,18 +99,18 @@ public final class FileEncryptionUtil {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static void decryptFileRSA(Path fileInputPath, Path fileOutputPath, PrivateKey privateKey)
-			throws FileNotFoundException, IOException {
-
-		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
-		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
-
-		// decrypt the file output stream with the private key
-		CipherInputStream cis = EncryptionUtil.decryptStreamRSA(fis, privateKey);
-
-		// write the decrypted stream to the file output stream
-		copyStream(cis, fos);
-	}
+//	public static void decryptFileRSA(Path fileInputPath, Path fileOutputPath, PrivateKey privateKey)
+//			throws FileNotFoundException, IOException {
+//
+//		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
+//		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
+//
+//		// decrypt the file output stream with the private key
+//		CipherInputStream cis = EncryptionUtil.decryptStreamRSA(fis, privateKey);
+//
+//		// write the decrypted stream to the file output stream
+//		copyStream(cis, fos);
+//	}
 
 	public static String serializePath(Path path) {
 
