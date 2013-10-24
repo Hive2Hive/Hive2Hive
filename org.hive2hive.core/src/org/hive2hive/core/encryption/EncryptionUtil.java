@@ -16,6 +16,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
@@ -48,38 +50,42 @@ public final class EncryptionUtil {
 	private static final String AES_CIPHER_MODE = "AES/CBC/PKCS5PADDING";
 	private static final String RSA_CIPHER_MODE = "RSA";
 
+	private static final String MD5_SIGNATURE_ALGORITHM = "MD5WithRSA";
+
 	private static final String ISO_8859_1 = "ISO-8859-1";
-	
-	public enum AES_KEYLENGTH{
-		BIT_128 (128);
-//		BIT192 (192);
-//		BIT256 (256);
-		
+
+	public enum AES_KEYLENGTH {
+		BIT_128(128);
+		// BIT192 (192);
+		// BIT256 (256);
+
 		private final int bitLength;
-		AES_KEYLENGTH(int length){
+
+		AES_KEYLENGTH(int length) {
 			bitLength = length;
 		}
-		
-		public int value(){
+
+		public int value() {
 			return bitLength;
 		}
 	}
 
-	public enum RSA_KEYLENGTH{
-		BIT_1024 (1024),
-		BIT_2048 (2048),
-		BIT_4096 (4096);
-		
+	public enum RSA_KEYLENGTH {
+		BIT_1024(1024),
+		BIT_2048(2048),
+		BIT_4096(4096);
+
 		private final int bitLength;
-		RSA_KEYLENGTH(int length){
+
+		RSA_KEYLENGTH(int length) {
 			bitLength = length;
 		}
-		
-		public int value(){
+
+		public int value() {
 			return bitLength;
 		}
 	}
-	
+
 	private EncryptionUtil() {
 	}
 
@@ -131,9 +137,11 @@ public final class EncryptionUtil {
 
 	/**
 	 * Symmetrically encrypts byte[] content by means of the AES algorithm.
+	 * 
 	 * @param content The content to be encrypted.
 	 * @param aesKey The symmetric key with which the content will be encrypted.
-	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization vector (IV).
+	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization
+	 *         vector (IV).
 	 */
 	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
 		return encrypt(content, aesKey, AES_CIPHER_MODE);
@@ -141,6 +149,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Symmetrically decrypts a prior EncryptedContent by means of the AES algorithm.
+	 * 
 	 * @param content The EncryptedContent to be decrypted.
 	 * @param aesKey The symmetric key with which the content will be decrypted.
 	 * @return decrypted byte[] content
@@ -150,7 +159,9 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Asymmetrically encrypts byte[] content by means of the RSA algorithm. In order to encrypt the content, a public RSA key has to be provided.
+	 * Asymmetrically encrypts byte[] content by means of the RSA algorithm. In order to encrypt the content,
+	 * a public RSA key has to be provided.
+	 * 
 	 * @param content The content to be encrypted.
 	 * @param publicKey The asymmetric public key with which the content will be encrypted.
 	 * @return EncryptedContent which contains the encrypted byte[] content.
@@ -160,8 +171,11 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Asymmetrically decrypts a prior EncryptedContent by means of the RSA algorithm. In order to decrypt the content, a private RSA key has to be provided.
-	 * NOTE: RSA can only encrypt data that has a maximum byte length of:  ((key length in bits / 8) - 11) bytes. E.g. 256 bytes with a 2048 bits key.
+	 * Asymmetrically decrypts a prior EncryptedContent by means of the RSA algorithm. In order to decrypt the
+	 * content, a private RSA key has to be provided.
+	 * NOTE: RSA can only encrypt data that has a maximum byte length of: ((key length in bits / 8) - 11)
+	 * bytes. E.g. 256 bytes with a 2048 bits key.
+	 * 
 	 * @param content The EncryptedContent to be decrypted.
 	 * @param privateKey The asymmetric private key with which the content will be decrypted.
 	 * @return decrypted byte[] content.
@@ -170,21 +184,21 @@ public final class EncryptionUtil {
 		return decrypt(content, privateKey, RSA_CIPHER_MODE);
 	}
 
-//	public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey) {
-//		return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
-//	}
+	// public static CipherInputStream encryptStreamAES(InputStream inputStream, SecretKey aesKey) {
+	// return encryptStream(inputStream, aesKey, AES_CIPHER_MODE);
+	// }
 
-//	public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey) {
-//		return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
-//	}
+	// public static CipherInputStream decryptStreamAES(InputStream inputStream, SecretKey aesKey) {
+	// return decryptStream(inputStream, aesKey, AES_CIPHER_MODE);
+	// }
 
-//	public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey) {
-//		return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
-//	}
+	// public static CipherInputStream encryptStreamRSA(InputStream inputStream, PublicKey publicKey) {
+	// return encryptStream(inputStream, publicKey, RSA_CIPHER_MODE);
+	// }
 
-//	public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey) {
-//		return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
-//	}
+	// public static CipherInputStream decryptStreamRSA(InputStream inputStream, PrivateKey privateKey) {
+	// return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
+	// }
 
 	public static SecretKey createDESKey(String password, byte[] salt) {
 
@@ -216,6 +230,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Creates a symmetric AES key of the specified key length.
+	 * 
 	 * @param keyLength The length the AES key should have.
 	 * @return A symmetric AES key of the specified length.
 	 */
@@ -236,6 +251,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Creates an asymmetric RSA key pair of the specified key length.
+	 * 
 	 * @param keyLength The length the RSA keys should have.
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
@@ -252,33 +268,77 @@ public final class EncryptionUtil {
 	}
 
 	public static SecretKey createAESKeyFromPassword(UserPassword password, AES_KEYLENGTH keyLength) {
-		
+
 		try {
 			SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-			KeySpec spec = new PBEKeySpec(password.getPassword(), password.getSalt(), 65536, keyLength.value());
+			KeySpec spec = new PBEKeySpec(password.getPassword(), password.getSalt(), 65536,
+					keyLength.value());
 			SecretKey tmpKey = kf.generateSecret(spec);
 			SecretKey key = new SecretKeySpec(tmpKey.getEncoded(), "AES");
-			return key;		
-		} catch (NoSuchAlgorithmException | NullPointerException | IllegalArgumentException | InvalidKeySpecException e) {
+			return key;
+		} catch (NoSuchAlgorithmException | NullPointerException | IllegalArgumentException
+				| InvalidKeySpecException e) {
 			logger.error("Exception while creating AES key from password:", e);
 		}
 		return null;
-		
-//		KeySpec spec = new PBEKeySpec(password, salt, 65536, 256);
-//		SecretKey tmp = factory.generateSecret(spec);
-//		SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
 	}
-	
+
 	/**
-	 * Creates a random salt that can be used in combination with a key in order to prevent dictionary attacks.
+	 * Creates a random salt that can be used in combination with a key in order to prevent dictionary
+	 * attacks.
+	 * 
 	 * @return A random 8 byte salt.
 	 */
-	public static byte[] createSalt() {
-	
+	public static byte[] createSalt(int byteLength) {
+
 		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[8];
+		byte[] salt = new byte[byteLength];
 		random.nextBytes(salt);
 		return salt;
+	}
+
+	/**
+	 * Signs the provided content with the specified private key.
+	 * 
+	 * @param content The content to be signed.
+	 * @param privateKey The private key used to sign the content.
+	 * @return A SignedContent object which is used to keep track of signature information of a signed
+	 *         content, which will be used once the content needs to be verified.
+	 */
+	public static SignedContent sign(byte[] content, PrivateKey privateKey) {
+
+		byte[] signatureBytes = null;
+
+		try {
+			Signature signature = Signature.getInstance(MD5_SIGNATURE_ALGORITHM);
+			signature.initSign(privateKey);
+			signature.update(content);
+			signatureBytes = signature.sign();
+
+		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+			logger.error("Exception while signing:", e);
+		}
+
+		return new SignedContent(content, signatureBytes);
+	}
+
+	/**
+	 * Verifies the signature of the provided content with the specified public key.
+	 * @param content The content to be verified.
+	 * @param publicKey The public key used to verify the content.
+	 * @return Returns true if the signature could be verified and false otherwise.
+	 */
+	public static boolean verify(SignedContent content, PublicKey publicKey) {
+
+		try {
+			Signature signature = Signature.getInstance(MD5_SIGNATURE_ALGORITHM);
+			signature.initVerify(publicKey);
+			signature.update(content.getOriginalData());
+			return signature.verify(content.getSignatureBytes());
+		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+			logger.error("Exception while verifying:", e);
+		}
+		return false;
 	}
 
 	/**
@@ -327,7 +387,7 @@ public final class EncryptionUtil {
 			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
 				// initialize cipher with encryption mode and key
-				cipher.init(Cipher.ENCRYPT_MODE, key);			
+				cipher.init(Cipher.ENCRYPT_MODE, key);
 				try {
 					// encrypt the content
 					encryptedContent = cipher.doFinal(content);
@@ -354,7 +414,7 @@ public final class EncryptionUtil {
 			Cipher cipher = Cipher.getInstance(transformationMode);
 			try {
 				// initialize cipher with decryption mode, key (and initialization vector)
-				switch (transformationMode){
+				switch (transformationMode) {
 					case AES_CIPHER_MODE:
 						IvParameterSpec ivSpec = new IvParameterSpec(content.getInitVector());
 						cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
@@ -375,23 +435,23 @@ public final class EncryptionUtil {
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("Exception during cipher initialization:", e);
 		}
-		
-		
 
 		return decryptedContent;
 	}
 
-//	private static CipherInputStream encryptStream(InputStream inputStream, Key key, String transformationMode) {
-//
-//		Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
-//		return new CipherInputStream(inputStream, encryptionCipher);
-//	}
+	// private static CipherInputStream encryptStream(InputStream inputStream, Key key, String
+	// transformationMode) {
+	//
+	// Cipher encryptionCipher = getEncryptionCipher(key, transformationMode);
+	// return new CipherInputStream(inputStream, encryptionCipher);
+	// }
 
-//	private static CipherInputStream decryptStream(InputStream inputStream, Key key, String transformationMode) {
-//
-//		Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
-//		return new CipherInputStream(inputStream, decryptionCipher);
-//	}
+	// private static CipherInputStream decryptStream(InputStream inputStream, Key key, String
+	// transformationMode) {
+	//
+	// Cipher decryptionCipher = getDecryptionCipher(key, transformationMode);
+	// return new CipherInputStream(inputStream, decryptionCipher);
+	// }
 
 	private static byte[] combine(byte[] arrayA, byte[] arrayB) {
 
