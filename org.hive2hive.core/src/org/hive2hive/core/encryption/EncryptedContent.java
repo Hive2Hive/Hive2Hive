@@ -7,16 +7,16 @@ package org.hive2hive.core.encryption;
  */
 public final class EncryptedContent {
 
-	private final byte[] content;
+	private final byte[] cipherContent;
 	private final byte[] initVector;
 	
-	public EncryptedContent(byte[] content, byte[] initVector){
-		this.content = content;
+	public EncryptedContent(byte[] cipherContent, byte[] initVector){
+		this.cipherContent = cipherContent;
 		this.initVector = initVector;
 	}
 	
-	public final byte[] getContent(){
-		return content;
+	public final byte[] getCipherContent(){
+		return cipherContent;
 	}
 	
 	public final byte[] getInitVector(){

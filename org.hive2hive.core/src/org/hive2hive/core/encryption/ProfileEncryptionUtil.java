@@ -10,4 +10,15 @@ public final class ProfileEncryptionUtil {
 	private ProfileEncryptionUtil() {
 	}
 
+	/**
+	 * Creates the UserPassword based on the password set by the user.
+	 * @param password
+	 * @return
+	 */
+	public static UserPassword createUserPassword(String password){
+		
+		char[] pwAsChar = password.toCharArray();
+		byte[] randomSalt = EncryptionUtil.createSalt();
+		return new UserPassword(pwAsChar, randomSalt);
+	}
 }
