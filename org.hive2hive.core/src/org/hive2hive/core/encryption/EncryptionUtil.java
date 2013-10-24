@@ -45,6 +45,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public final class EncryptionUtil {
 
+	// TODO throw exceptions where the library should
+	
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
 	private static final String AES_CIPHER_MODE = "AES/CBC/PKCS5PADDING";

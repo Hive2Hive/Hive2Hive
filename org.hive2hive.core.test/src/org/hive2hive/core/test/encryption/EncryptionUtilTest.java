@@ -13,6 +13,7 @@ import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.encryption.ProfileEncryptionUtil;
+import org.hive2hive.core.encryption.SignedContent;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.Assert;
@@ -21,6 +22,8 @@ import org.junit.Test;
 
 public class EncryptionUtilTest extends H2HJUnitTest {
 
+	// TODO test exception handling in case wrong encryption keys are used
+	
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = EncryptionUtilTest.class;
@@ -94,6 +97,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	@Test
 	public void createAESKeyFromPasswordTest() {
 
+		// TODO test whether always the same key is created from the password
 		Random random = new Random();
 
 		// check all key sizes
@@ -108,10 +112,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 				// generate user passwords
 				pws[i] = ProfileEncryptionUtil.createUserPassword(new BigInteger(130, random).toString(32));
-				
+
 				// generate AES key from password
 				SecretKey aesKey = EncryptionUtil.createAESKeyFromPassword(pws[i], sizes[s]);
-				
+
 				// check key
 				Assert.assertNotNull(aesKey);
 
@@ -158,11 +162,11 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] content = new byte[random.nextInt(5242880)];
 			random.nextBytes(content);
 
-			logger.debug(String.format("Testing AES encryption of a sample %s byte file with a %s bit key.",
-					content.length, sizes[s].value()));
-
 			// generate AES key
 			SecretKey aesKey = EncryptionUtil.createAESKey(sizes[s]);
+
+			logger.debug(String.format("Testing AES encryption of a sample %s byte file with a %s bit key.",
+					content.length, sizes[s].value()));
 
 			// encrypt content
 			EncryptedContent encryptedContent = EncryptionUtil.encryptAES(content, aesKey);
@@ -194,12 +198,12 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] content = new byte[random.nextInt(5242880)];
 			random.nextBytes(content);
 
+			// generate user password
+			UserPassword upw = ProfileEncryptionUtil.createUserPassword("thisIsAPassword_&123");
+
 			logger.debug(String.format(
 					"Testing AES encryption with password of a sample %s byte file with a %s bit key.",
 					content.length, sizes[s].value()));
-
-			// generate user password
-			UserPassword upw = ProfileEncryptionUtil.createUserPassword("thisIsAPassword_&123");
 
 			// generate AES key from password
 			SecretKey aesKey = EncryptionUtil.createAESKeyFromPassword(upw, sizes[s]);
@@ -234,11 +238,11 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] content = new byte[random.nextInt((sizes[s].value() / 8) - 11)];
 			random.nextBytes(content);
 
-			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.",
-					content.length, sizes[s].value()));
-
 			// generate RSA key pair
 			KeyPair keyPair = EncryptionUtil.createRSAKeys(sizes[s]);
+
+			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.",
+					content.length, sizes[s].value()));
 
 			// encrypt content with public key
 			EncryptedContent encryptedContent = EncryptionUtil.encryptRSA(content, keyPair.getPublic());
@@ -268,6 +272,41 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		String testString2 = (String) EncryptionUtil.deserializeObject(decryptedContent);
 
 		Assert.assertEquals(testString, testString2);
+	}
+
+	@Test
+	public void signatureTest() {
+
+		// check all key sizes
+		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
+
+		for (int s = 0; s < sizes.length; s++) {
+
+			// generate random sized content (max. 5MB)
+			SecureRandom random = new SecureRandom();
+			byte[] content = new byte[random.nextInt(5242880)];
+			random.nextBytes(content);
+
+			// create an asymmetric key pair
+			KeyPair rsaKeyPair = EncryptionUtil.createRSAKeys(sizes[s]);
+
+			logger.debug(String.format("Testing signature of a sample %s byte file with a %s bit key.",
+					content.length, sizes[s].value()));
+			
+			// sign the content
+			SignedContent signedContent = EncryptionUtil.sign(content, rsaKeyPair.getPrivate());
+			
+			Assert.assertNotNull(signedContent);
+			Assert.assertNotNull(signedContent.getOriginalData());
+			Assert.assertNotNull(signedContent.getSignatureBytes());
+			Assert.assertTrue(Arrays.equals(content, signedContent.getOriginalData()));
+			Assert.assertFalse(Arrays.equals(content, signedContent.getSignatureBytes()));
+			
+			// verify the content
+			boolean isVerified = EncryptionUtil.verify(signedContent, rsaKeyPair.getPublic());
+			
+			Assert.assertTrue(isVerified);
+		}
 	}
 
 	private static AES_KEYLENGTH[] getAESKeySizes() {
