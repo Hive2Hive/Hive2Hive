@@ -10,9 +10,8 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkData;
-import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.IMessage;
 import org.hive2hive.core.network.messages.MessageManager;
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -104,25 +103,12 @@ public class NetworkManager {
 	 * @param message
 	 *            the message to send
 	 */
-	public void send(BaseMessage message) {
+	public void send(IMessage message) {
 		if (!connection.isConnected())
 			return;
 		messageManager.send(message);
 	}
 	
-	/**
-	 * Sends a given message directly (TCP) to the peer with the given address.
-	 * 
-	 * @param aMessge
-	 *            the message to send
-	 * @see {@link MessageManager#send(BaseMessage)}
-	 */
-	public void send(BaseDirectMessage aMessage) {
-		if (!connection.isConnected())
-			return;
-		messageManager.send(aMessage);
-	}
-
 	/**
 	 * Stores the content into the DHT at the location under the given content
 	 * key

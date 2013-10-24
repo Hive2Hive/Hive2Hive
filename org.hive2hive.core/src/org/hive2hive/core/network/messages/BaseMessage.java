@@ -1,6 +1,5 @@
 package org.hive2hive.core.network.messages;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -31,27 +30,11 @@ import org.hive2hive.core.network.NetworkManager;
  * @author Nendor
  * 
  */
-public abstract class BaseMessage implements Runnable, Serializable {
+public abstract class BaseMessage implements IMessage {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseMessage.class);
 
 	private static final long serialVersionUID = 8896590561336373601L;
-
-	/**
-	 * Determines how a message should be handled if a failure in the sending to
-	 * the target node occurs.
-	 * 
-	 * @author Nendor
-	 */
-	public enum SendingBehavior {
-		/** This message should be sent only once */
-		SEND_ONCE,
-		/**
-		 * In case of a sending failure this message should be resent up to
-		 * {@link B2BConstants#MAX_SEND_MESSAGE_TRIES} times
-		 */
-		SEND_MAX_ALLOWED_TIMES
-	};
 
 	protected NetworkManager networkManager;
 
