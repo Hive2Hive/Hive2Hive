@@ -50,7 +50,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 	}
 
 	private ResponseMessage waitForMessageResponse(final String messageID) throws InterruptedException {
-		H2HWaiter w = new H2HWaiter(20);
+		H2HWaiter w = new H2HWaiter(2000);
 		ResponseMessage response = null;
 		do {
 			w.tickASecond();
@@ -154,7 +154,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		public MessageProcessStep(NetworkManager sender, NetworkManager receiver, String testContent) {
 			// initialize message here in order to have the message id already ready
 			messageToSend = new ProcessStepTestMessage(receiver.getNodeId(), sender.getPeerAddress(),
-					sender.getNodeId(), receiver.getPeerAddress(), testContent);
+					sender.getNodeId(), testContent);
 		}
 
 		@Override

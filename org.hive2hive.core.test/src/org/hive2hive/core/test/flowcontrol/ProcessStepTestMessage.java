@@ -12,22 +12,21 @@ import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 public class ProcessStepTestMessage extends BaseRequestMessage {
 
 	private static final long serialVersionUID = 6890311798712262910L;
-	private PeerAddress receiverAddress;
 	private final String senderId;
 	private final String testContent;
 
 	public ProcessStepTestMessage(String targetKey, PeerAddress senderAddress, String senderId,
-			PeerAddress receiverAddress, String testContent) {
+			String testContent) {
 		super(targetKey, senderAddress);
 		this.senderId = senderId;
-		this.receiverAddress = receiverAddress;
 		this.testContent = testContent;
 	}
 
 	@Override
 	public void run() {
 		// create a simple response
-		ResponseMessage response = new ResponseMessage(getMessageID(), senderId, receiverAddress, testContent);
+		ResponseMessage response = new ResponseMessage(getMessageID(), senderId, getSenderAddress(),
+				testContent);
 		networkManager.send(response);
 	}
 

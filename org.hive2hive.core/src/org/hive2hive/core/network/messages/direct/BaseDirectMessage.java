@@ -22,17 +22,17 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	/**
 	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.
 	 * 
-	 * @param aMessageID the ID of this message
-	 * @param aTargetKey the target key to which this message should be routed
-	 * @param aTargetPeerAddress the {@link PeerAddress} of the target node
-	 * @param aNeedsRedirectedSend flag which indicates if this message should be rerouted if a direct sending
+	 * @param messageID the ID of this message
+	 * @param targetKey the target key to which this message should be routed
+	 * @param targetPeerAddress the {@link PeerAddress} of the target node
+	 * @param needsRedirectedSend flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
 	 */
-	public BaseDirectMessage(String aMessageID, String aTargetKey, PeerAddress aTargetPeerAddress,
-			boolean aNeedsRedirectedSend) {
-		super(aMessageID, aTargetKey);
-		targetPeerAddress = aTargetPeerAddress;
-		needsRedirectedSend = aNeedsRedirectedSend;
+	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetPeerAddress,
+			boolean needsRedirectedSend) {
+		super(messageID, targetKey);
+		this.targetPeerAddress = targetPeerAddress;
+		this.needsRedirectedSend = needsRedirectedSend;
 	}
 
 	/**
