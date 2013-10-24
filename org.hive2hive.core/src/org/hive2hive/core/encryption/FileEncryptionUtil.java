@@ -2,7 +2,6 @@ package org.hive2hive.core.encryption;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,10 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-import javax.crypto.CipherInputStream;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -69,48 +64,8 @@ public final class FileEncryptionUtil {
 
 		return null;
 	}
-
-	/**
-	 * Encrypts a file by means of RSA. The file at the input path is encrypted and written to the output path.
-	 * @param fileInputPath Path of the file before encryption.
-	 * @param fileOutputPath Path of the file after the encryption.
-	 * @param publicKey RSA public key with which the file shall be encrypted.
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-//	public static void encryptFileRSA(Path fileInputPath, Path fileOutputPath, PublicKey publicKey)
-//			throws FileNotFoundException, IOException {
-//
-//		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
-//		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
-//
-//		// encrypt the file input stream with the public key
-//		CipherInputStream cis = EncryptionUtil.encryptStreamRSA(fis, publicKey);
-//
-//		// write the encrypted stream to the file output stream
-//		copyStream(cis, fos);
-//	}
-
-	/**
-	 * Decrypts a file by means of RSA. The file at the input path is decrypted and written to the output path.
-	 * @param fileInputPath Path of the file before decryption.
-	 * @param fileOutputPath Path of the file after the decryption.
-	 * @param privateKey RSA private key with which the file shall be decrypted.
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-//	public static void decryptFileRSA(Path fileInputPath, Path fileOutputPath, PrivateKey privateKey)
-//			throws FileNotFoundException, IOException {
-//
-//		FileInputStream fis = new FileInputStream(fileInputPath.toFile());
-//		FileOutputStream fos = new FileOutputStream(fileOutputPath.toFile());
-//
-//		// decrypt the file output stream with the private key
-//		CipherInputStream cis = EncryptionUtil.decryptStreamRSA(fis, privateKey);
-//
-//		// write the decrypted stream to the file output stream
-//		copyStream(cis, fos);
-//	}
+	
+	
 
 	public static String serializePath(Path path) {
 

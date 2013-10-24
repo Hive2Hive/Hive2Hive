@@ -17,6 +17,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -27,6 +28,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.hive2hive.core.log.H2HLogger;
@@ -217,7 +219,7 @@ public final class EncryptionUtil {
 	 * @param keyLength The length the AES key should have.
 	 * @return A symmetric AES key of the specified length.
 	 */
-	public static SecretKeySpec createAESKey(AES_KEYLENGTH keyLength) {
+	public static SecretKey createAESKey(AES_KEYLENGTH keyLength) {
 
 		try {
 			KeyGenerator kg = KeyGenerator.getInstance("AES");
@@ -247,6 +249,36 @@ public final class EncryptionUtil {
 			logger.error("Exception while creating RSA keys:", e);
 		}
 		return null;
+	}
+
+	public static SecretKey createAESKeyFromPassword(UserPassword password, AES_KEYLENGTH keyLength) {
+		
+		try {
+			SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			KeySpec spec = new PBEKeySpec(password.getPassword(), password.getSalt(), 65536, keyLength.value());
+			SecretKey tmpKey = kf.generateSecret(spec);
+			SecretKey key = new SecretKeySpec(tmpKey.getEncoded(), "AES");
+			return key;		
+		} catch (NoSuchAlgorithmException | NullPointerException | IllegalArgumentException | InvalidKeySpecException e) {
+			logger.error("Exception while creating AES key from password:", e);
+		}
+		return null;
+		
+//		KeySpec spec = new PBEKeySpec(password, salt, 65536, 256);
+//		SecretKey tmp = factory.generateSecret(spec);
+//		SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+	}
+	
+	/**
+	 * Creates a random salt that can be used in combination with a key in order to prevent dictionary attacks.
+	 * @return A random 8 byte salt.
+	 */
+	public static byte[] createSalt() {
+	
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[8];
+		random.nextBytes(salt);
+		return salt;
 	}
 
 	/**
@@ -283,14 +315,6 @@ public final class EncryptionUtil {
 			logger.error("Exception while converting byte[] to String:", e);
 		}
 		return result;
-	}
-
-	public static byte[] createRandomSalt() {
-
-		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[20];
-		random.nextBytes(salt);
-		return salt;
 	}
 
 	private static EncryptedContent encrypt(byte[] content, Key key, String transformationMode) {
@@ -341,7 +365,7 @@ public final class EncryptionUtil {
 				}
 				try {
 					// decrypt the content
-					decryptedContent = cipher.doFinal(content.getContent());
+					decryptedContent = cipher.doFinal(content.getCipherContent());
 				} catch (IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception during decryption:", e);
 				}
