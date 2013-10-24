@@ -1,9 +1,9 @@
-package org.hive2hive.core.flowcontrol.manager;
+package org.hive2hive.core.process.manager;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hive2hive.core.flowcontrol.IProcess;
+import org.hive2hive.core.process.IProcess;
 
 /**
  * This class monitors all running processes and is able to pause or stop them.

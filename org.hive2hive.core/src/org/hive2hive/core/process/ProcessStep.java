@@ -1,11 +1,11 @@
-package org.hive2hive.core.flowcontrol;
+package org.hive2hive.core.process;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkData;
-import org.hive2hive.core.network.messages.IMessage;
+import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
@@ -72,7 +72,7 @@ public abstract class ProcessStep {
 	 */
 	protected abstract void handlePutGetResult(FutureDHT future);
 
-	protected void send(IMessage message) {
+	protected void send(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(new ICallBackHandler() {

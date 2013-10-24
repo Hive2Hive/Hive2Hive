@@ -1,12 +1,12 @@
-package org.hive2hive.core.flowcontrol;
+package org.hive2hive.core.process;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hive2hive.core.flowcontrol.manager.ProcessManager;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.process.manager.ProcessManager;
 
 /**
  * This abstract process is used for executing workflows. It keeps the order of the process steps.
@@ -16,24 +16,26 @@ import org.hive2hive.core.network.NetworkManager;
  * @author Nendor, Nico
  * 
  */
-public abstract class Process implements Runnable, IProcess {
+public abstract class Process implements IProcess {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(NetworkManager.class);
 
 	private final int pid;
 	private ProcessState state = ProcessState.INITIALIZING;
 	private final NetworkManager networkManager;
+	private ProcessStep firstStep;
 	private ProcessStep currentStep;
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
 
-	public Process(NetworkManager networkManager, ProcessStep firstStep) {
+	public Process(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 		ProcessManager processManager = ProcessManager.getInstance();
 		pid = processManager.getIdForNewProcess();
 		processManager.attachProcess(this);
-
-		currentStep = firstStep;
-		currentStep.setProcess(this);
+	}
+	
+	public void setFirstStep(ProcessStep firstStep){
+		this.firstStep = firstStep;
 	}
 
 	@Override
@@ -73,7 +75,7 @@ public abstract class Process implements Runnable, IProcess {
 	@Override
 	public void stop() {
 		if (state == ProcessState.STOPPED) {
-			logger.error("Process is already stopped");
+			logger.warn("Process is already stopped");
 		} else {
 			state = ProcessState.STOPPED;
 			rollBack();
@@ -92,6 +94,7 @@ public abstract class Process implements Runnable, IProcess {
 
 	@Override
 	public void run() {
+		currentStep = firstStep;
 		currentStep.start();
 	}
 

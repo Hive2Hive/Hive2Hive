@@ -7,11 +7,11 @@ import java.util.Map;
 
 import net.tomp2p.futures.FutureDHT;
 
-import org.hive2hive.core.flowcontrol.Process;
-import org.hive2hive.core.flowcontrol.ProcessStep;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -50,7 +50,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 	}
 
 	private ResponseMessage waitForMessageResponse(final String messageID) throws InterruptedException {
-		H2HWaiter w = new H2HWaiter(2000);
+		H2HWaiter w = new H2HWaiter(20);
 		ResponseMessage response = null;
 		do {
 			w.tickASecond();
@@ -79,8 +79,9 @@ public class ProcessStepTest extends H2HJUnitTest {
 		final NetworkManager receiver = network.get(1);
 
 		MessageProcessStep step = new MessageProcessStep(sender, receiver, testContent);
-		Process process = new Process(sender, step) {
+		Process process = new Process(sender) {
 		};
+		process.setFirstStep(step);
 
 		String messageId = new String(step.getMessageId()); // copy
 
@@ -99,8 +100,9 @@ public class ProcessStepTest extends H2HJUnitTest {
 		final NetworkManager holder = network.get(1);
 
 		PutGetProcessStep step = new PutGetProcessStep(holder.getNodeId(), contentKey, data, true);
-		Process process = new Process(putter, step) {
+		Process process = new Process(putter) {
 		};
+		process.setFirstStep(step);
 
 		// check that receiver does not have any content
 		Assert.assertNull(holder.getLocal(contentKey, contentKey));
@@ -128,8 +130,9 @@ public class ProcessStepTest extends H2HJUnitTest {
 		holder.putLocal(holder.getNodeId(), contentKey, data);
 
 		PutGetProcessStep step = new PutGetProcessStep(holder.getNodeId(), contentKey, data, false);
-		Process process = new Process(getter, step) {
+		Process process = new Process(getter) {
 		};
+		process.setFirstStep(step);
 
 		// check that receiver does not have any content
 		Assert.assertNull(holder.getLocal(contentKey, contentKey));

@@ -1,4 +1,4 @@
-package org.hive2hive.core.flowcontrol;
+package org.hive2hive.core.process;
 
 /**
  * A process has exactly one state at each moment in time

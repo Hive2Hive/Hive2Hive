@@ -2,12 +2,11 @@ package org.hive2hive.core.test.flowcontrol;
 
 import net.tomp2p.futures.FutureDHT;
 
-import org.hive2hive.core.flowcontrol.Process;
-import org.hive2hive.core.flowcontrol.ProcessState;
-import org.hive2hive.core.flowcontrol.ProcessStep;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessState;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -66,8 +65,9 @@ public class ProcessTest extends H2HJUnitTest {
 			}
 		};
 
-		return new Process(null, firstStep) {
-		};
+		Process process = new Process(null) {};
+		process.setFirstStep(firstStep);
+		return process;
 	}
 	
 	@AfterClass

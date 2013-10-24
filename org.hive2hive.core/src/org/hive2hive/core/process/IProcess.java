@@ -1,4 +1,4 @@
-package org.hive2hive.core.flowcontrol;
+package org.hive2hive.core.process;
 
 /**
  * This interface provides the default methods of a process which represents a use case.
@@ -6,7 +6,7 @@ package org.hive2hive.core.flowcontrol;
  * @author Christian, Nico
  * 
  */
-public interface IProcess {
+public interface IProcess extends Runnable {
 
 	void pause();
 
