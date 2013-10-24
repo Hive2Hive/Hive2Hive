@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.data.TestDataWrapper;
 import org.junit.After;
@@ -16,7 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BaseMessageTest extends NetworkJUnitTest {
+public class BaseMessageTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
@@ -58,7 +60,7 @@ public class BaseMessageTest extends NetworkJUnitTest {
 		nodeA.send(message);
 
 		// wait till message gets handled
-		Waiter w = new Waiter(20);
+		H2HWaiter w = new H2HWaiter(20);
 		Object tmp = null;
 		do {
 			w.tickASecond();
@@ -93,8 +95,8 @@ public class BaseMessageTest extends NetworkJUnitTest {
 		nodeA.send(message);
 
 		// wait till message gets handled
-		// this might need some time 
-		Waiter w = new Waiter(20);
+		// this might need some time
+		H2HWaiter w = new H2HWaiter(20);
 		Object tmp = null;
 		do {
 			w.tickASecond();

@@ -10,6 +10,8 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
+import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.data.TestDataWrapper;
 import org.hive2hive.core.test.network.messaging.TestMessageWithReply.TestCallBackHandler;
@@ -25,7 +27,7 @@ import org.junit.Test;
  * 
  * @author Seppi
  */
-public class BaseRequestMessageTest extends NetworkJUnitTest {
+public class BaseRequestMessageTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
@@ -73,7 +75,7 @@ public class BaseRequestMessageTest extends NetworkJUnitTest {
 		nodeA.send(message);
 
 		// wait till callback handler gets executed
-		Waiter w = new Waiter(10);
+		H2HWaiter w = new H2HWaiter(10);
 		Object tmp = null;
 		do {
 			w.tickASecond();
