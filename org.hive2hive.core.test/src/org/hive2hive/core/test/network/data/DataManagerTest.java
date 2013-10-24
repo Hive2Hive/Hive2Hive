@@ -9,6 +9,7 @@ import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,10 +36,10 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data = NetworkTestUtil.randomString();
-		FutureDHT future = node.putGlobal(locationKey, contentKey, new TestDataWrapper(data));
+		FutureDHT future = node.putGlobal(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		String result = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey)
+		String result = (String) ((H2HTestData) node.getGlobal(locationKey, contentKey)
 				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data, result);
 	}
@@ -52,10 +53,10 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		String data = NetworkTestUtil.randomString();
-		FutureDHT future = nodeA.putGlobal(locationKey, contentKey, new TestDataWrapper(data));
+		FutureDHT future = nodeA.putGlobal(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		String result = ((TestDataWrapper) nodeB.getGlobal(locationKey, contentKey).awaitUninterruptibly()
+		String result = ((H2HTestData) nodeB.getGlobal(locationKey, contentKey).awaitUninterruptibly()
 				.getData().getObject()).getTestString();
 		assertEquals(data, result);
 	}
@@ -68,9 +69,9 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		String data = NetworkTestUtil.randomString();
 
-		node.putLocal(locationKey, contentKey, new TestDataWrapper(data));
+		node.putLocal(locationKey, contentKey, new H2HTestData(data));
 
-		String result = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey)).getTestString();
+		String result = (String) ((H2HTestData) node.getLocal(locationKey, contentKey)).getTestString();
 		assertEquals(data, result);
 	}
 
@@ -83,10 +84,10 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		String data = NetworkTestUtil.randomString();
-		FutureDHT future = nodeA.putGlobal(locationKey, contentKey, new TestDataWrapper(data));
+		FutureDHT future = nodeA.putGlobal(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		String result = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey)).getTestString();
+		String result = (String) ((H2HTestData) nodeB.getLocal(locationKey, contentKey)).getTestString();
 		assertEquals(data, result);
 	}
 
@@ -100,24 +101,24 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data1 = NetworkTestUtil.randomString();
-		FutureDHT future1 = node.putGlobal(locationKey, contentKey1, new TestDataWrapper(data1));
+		FutureDHT future1 = node.putGlobal(locationKey, contentKey1, new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FutureDHT future2 = node.putGlobal(locationKey, contentKey2, new TestDataWrapper(data2));
+		FutureDHT future2 = node.putGlobal(locationKey, contentKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FutureDHT future3 = node.putGlobal(locationKey, contentKey3, new TestDataWrapper(data3));
+		FutureDHT future3 = node.putGlobal(locationKey, contentKey3, new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		String result1 = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey1)
+		String result1 = (String) ((H2HTestData) node.getGlobal(locationKey, contentKey1)
 				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data1, result1);
-		String result2 = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey2)
+		String result2 = (String) ((H2HTestData) node.getGlobal(locationKey, contentKey2)
 				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data2, result2);
-		String result3 = (String) ((TestDataWrapper) node.getGlobal(locationKey, contentKey3)
+		String result3 = (String) ((H2HTestData) node.getGlobal(locationKey, contentKey3)
 				.awaitUninterruptibly().getData().getObject()).getTestString();
 		assertEquals(data3, result3);
 	}
@@ -131,28 +132,28 @@ public class DataManagerTest extends H2HJUnitTest {
 
 		String data1 = NetworkTestUtil.randomString();
 		FutureDHT future1 = network.get(random.nextInt(networkSize)).putGlobal(locationKey, contentKey1,
-				new TestDataWrapper(data1));
+				new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
 		FutureDHT future2 = network.get(random.nextInt(networkSize)).putGlobal(locationKey, contentKey2,
-				new TestDataWrapper(data2));
+				new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
 		FutureDHT future3 = network.get(random.nextInt(networkSize)).putGlobal(locationKey, contentKey3,
-				new TestDataWrapper(data3));
+				new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		String result1 = (String) ((TestDataWrapper) network.get(random.nextInt(networkSize))
+		String result1 = (String) ((H2HTestData) network.get(random.nextInt(networkSize))
 				.getGlobal(locationKey, contentKey1).awaitUninterruptibly().getData().getObject())
 				.getTestString();
 		assertEquals(data1, result1);
-		String result2 = (String) ((TestDataWrapper) network.get(random.nextInt(networkSize))
+		String result2 = (String) ((H2HTestData) network.get(random.nextInt(networkSize))
 				.getGlobal(locationKey, contentKey2).awaitUninterruptibly().getData().getObject())
 				.getTestString();
 		assertEquals(data2, result2);
-		String result3 = (String) ((TestDataWrapper) network.get(random.nextInt(networkSize))
+		String result3 = (String) ((H2HTestData) network.get(random.nextInt(networkSize))
 				.getGlobal(locationKey, contentKey3).awaitUninterruptibly().getData().getObject())
 				.getTestString();
 		assertEquals(data3, result3);
@@ -168,19 +169,19 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey3 = NetworkTestUtil.randomString();
 
 		String data1 = NetworkTestUtil.randomString();
-		node.putLocal(locationKey, contentKey1, new TestDataWrapper(data1));
+		node.putLocal(locationKey, contentKey1, new H2HTestData(data1));
 
 		String data2 = NetworkTestUtil.randomString();
-		node.putLocal(locationKey, contentKey2, new TestDataWrapper(data2));
+		node.putLocal(locationKey, contentKey2, new H2HTestData(data2));
 
 		String data3 = NetworkTestUtil.randomString();
-		node.putLocal(locationKey, contentKey3, new TestDataWrapper(data3));
+		node.putLocal(locationKey, contentKey3, new H2HTestData(data3));
 
-		String result1 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey1)).getTestString();
+		String result1 = (String) ((H2HTestData) node.getLocal(locationKey, contentKey1)).getTestString();
 		assertEquals(data1, result1);
-		String result2 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey2)).getTestString();
+		String result2 = (String) ((H2HTestData) node.getLocal(locationKey, contentKey2)).getTestString();
 		assertEquals(data2, result2);
-		String result3 = (String) ((TestDataWrapper) node.getLocal(locationKey, contentKey3)).getTestString();
+		String result3 = (String) ((H2HTestData) node.getLocal(locationKey, contentKey3)).getTestString();
 		assertEquals(data3, result3);
 	}
 
@@ -195,22 +196,22 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey3 = NetworkTestUtil.randomString();
 
 		String data1 = NetworkTestUtil.randomString();
-		FutureDHT future1 = nodeA.putGlobal(locationKey, contentKey1, new TestDataWrapper(data1));
+		FutureDHT future1 = nodeA.putGlobal(locationKey, contentKey1, new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FutureDHT future2 = nodeA.putGlobal(locationKey, contentKey2, new TestDataWrapper(data2));
+		FutureDHT future2 = nodeA.putGlobal(locationKey, contentKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FutureDHT future3 = nodeA.putGlobal(locationKey, contentKey3, new TestDataWrapper(data3));
+		FutureDHT future3 = nodeA.putGlobal(locationKey, contentKey3, new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		String result1 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey1)).getTestString();
+		String result1 = (String) ((H2HTestData) nodeB.getLocal(locationKey, contentKey1)).getTestString();
 		assertEquals(data1, result1);
-		String result2 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey2)).getTestString();
+		String result2 = (String) ((H2HTestData) nodeB.getLocal(locationKey, contentKey2)).getTestString();
 		assertEquals(data2, result2);
-		String result3 = (String) ((TestDataWrapper) nodeB.getLocal(locationKey, contentKey3)).getTestString();
+		String result3 = (String) ((H2HTestData) nodeB.getLocal(locationKey, contentKey3)).getTestString();
 		assertEquals(data3, result3);
 	}
 

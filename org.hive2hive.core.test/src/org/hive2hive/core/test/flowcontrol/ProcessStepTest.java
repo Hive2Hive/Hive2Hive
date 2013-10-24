@@ -10,8 +10,10 @@ import net.tomp2p.futures.FutureDHT;
 import org.hive2hive.core.flowcontrol.Process;
 import org.hive2hive.core.flowcontrol.ProcessStep;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
@@ -24,6 +26,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 	private final static int networkSize = 2;
 	private static List<NetworkManager> network;
 	private Map<String, ResponseMessage> messageWaiterMap;
+	private FutureDHT tempFutureStore;
 	private String testContent;
 
 	@BeforeClass
@@ -36,6 +39,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 	@Before
 	public void setup() {
 		messageWaiterMap = new HashMap<String, ResponseMessage>();
+		tempFutureStore = null;
 		testContent = NetworkTestUtil.randomString();
 	}
 
@@ -50,7 +54,21 @@ public class ProcessStepTest extends H2HJUnitTest {
 		ResponseMessage response = null;
 		do {
 			w.tickASecond();
-			response = messageWaiterMap.get(messageID);
+			synchronized (messageWaiterMap) {
+				response = messageWaiterMap.get(messageID);
+			}
+		} while (response == null);
+		return response;
+	}
+
+	private FutureDHT waitForFutureResult() throws InterruptedException {
+		H2HWaiter w = new H2HWaiter(20);
+		FutureDHT response = null;
+		do {
+			w.tickASecond();
+			synchronized (messageWaiterMap) {
+				response = tempFutureStore;
+			}
 		} while (response == null);
 		return response;
 	}
@@ -60,7 +78,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		final NetworkManager sender = network.get(0);
 		final NetworkManager receiver = network.get(1);
 
-		DummyProcessStep step = new DummyProcessStep(sender, receiver, testContent);
+		MessageProcessStep step = new MessageProcessStep(sender, receiver, testContent);
 		Process process = new Process(sender, step) {
 		};
 
@@ -73,14 +91,67 @@ public class ProcessStepTest extends H2HJUnitTest {
 		Assert.assertEquals(testContent, (String) response.getContent());
 	}
 
+	@Test
+	public void testPut() throws InterruptedException, IOException {
+		final String contentKey = "TEST";
+		final H2HTestData data = new H2HTestData(testContent);
+		final NetworkManager putter = network.get(0);
+		final NetworkManager holder = network.get(1);
+
+		PutGetProcessStep step = new PutGetProcessStep(holder.getNodeId(), contentKey, data, true);
+		Process process = new Process(putter, step) {
+		};
+
+		// check that receiver does not have any content
+		Assert.assertNull(holder.getLocal(contentKey, contentKey));
+
+		process.start();
+		FutureDHT future = waitForFutureResult();
+		Assert.assertTrue(future.isSuccess());
+		Assert.assertTrue(future.isCompleted());
+
+		// now, the receiver should have the content in memory
+		H2HTestData received = (H2HTestData) holder.getLocal(holder.getNodeId(), contentKey);
+		Assert.assertNotNull(received);
+
+		Assert.assertEquals(testContent, (String) received.getTestString());
+	}
+
+	@Test
+	public void testGet() throws InterruptedException, IOException, ClassNotFoundException {
+		final String contentKey = "TEST";
+		final H2HTestData data = new H2HTestData(testContent);
+		final NetworkManager getter = network.get(0);
+		final NetworkManager holder = network.get(1);
+
+		// put in the memory of 2nd peer
+		holder.putLocal(holder.getNodeId(), contentKey, data);
+
+		PutGetProcessStep step = new PutGetProcessStep(holder.getNodeId(), contentKey, data, false);
+		Process process = new Process(getter, step) {
+		};
+
+		// check that receiver does not have any content
+		Assert.assertNull(holder.getLocal(contentKey, contentKey));
+
+		process.start();
+		FutureDHT future = waitForFutureResult();
+		Assert.assertTrue(future.isSuccess());
+		Assert.assertTrue(future.isCompleted());
+
+		// now, the receiver should have the content in memory
+		H2HTestData received = (H2HTestData) future.getData().getObject();
+		Assert.assertEquals(testContent, (String) received.getTestString());
+	}
+
 	/**
 	 * A dummy process step that sends a message and waits for a reply
 	 */
-	private class DummyProcessStep extends ProcessStep {
+	private class MessageProcessStep extends ProcessStep {
 
 		private final ProcessStepTestMessage messageToSend;
 
-		public DummyProcessStep(NetworkManager sender, NetworkManager receiver, String testContent) {
+		public MessageProcessStep(NetworkManager sender, NetworkManager receiver, String testContent) {
 			// initialize message here in order to have the message id already ready
 			messageToSend = new ProcessStepTestMessage(receiver.getNodeId(), sender.getPeerAddress(),
 					sender.getNodeId(), receiver.getPeerAddress(), testContent);
@@ -98,7 +169,8 @@ public class ProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		protected void handlePutGetResult(FutureDHT future) {
-			// it's a test for messages only
+			// not expected to get a put/get result
+			Assert.fail();
 		}
 
 		@Override
@@ -111,6 +183,60 @@ public class ProcessStepTest extends H2HJUnitTest {
 
 		public String getMessageId() {
 			return messageToSend.getMessageID();
+		}
+	}
+
+	/**
+	 * A dummy process step that puts or gets an object
+	 */
+	private class PutGetProcessStep extends ProcessStep {
+
+		private NetworkData data;
+		private String locationKey;
+		private String contentKey;
+		private boolean put;
+
+		/**
+		 * 
+		 * @param locationKey
+		 * @param contentKey
+		 * @param data
+		 * @param put if true, then the step puts the data, else it gets the data from the location/content
+		 *            key
+		 */
+		public PutGetProcessStep(String locationKey, String contentKey, NetworkData data, boolean put) {
+			this.locationKey = locationKey;
+			this.contentKey = contentKey;
+			this.data = data;
+			this.put = put;
+		}
+
+		@Override
+		public void start() {
+			if (put) {
+				put(locationKey, contentKey, data);
+			} else {
+				get(locationKey, contentKey);
+			}
+		}
+
+		@Override
+		public void rollBack() {
+			Assert.fail("Should not have rollbacked here");
+		}
+
+		@Override
+		protected void handlePutGetResult(FutureDHT future) {
+			// notify the message waiter
+			synchronized (messageWaiterMap) {
+				tempFutureStore = future;
+			}
+		}
+
+		@Override
+		protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
+			// not expected to get a message reply
+			Assert.fail();
 		}
 	}
 }

@@ -12,8 +12,8 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.data.TestDataWrapper;
 import org.hive2hive.core.test.network.messaging.TestMessageWithReply.TestCallBackHandler;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -83,8 +83,8 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		} while (tmp == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((TestDataWrapper) tmp).getTestString();
-		String originalSecret = ((TestDataWrapper) nodeB.getLocal(nodeB.getNodeId(), contentKey))
+		String receivedSecret = ((H2HTestData) tmp).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey))
 				.getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
