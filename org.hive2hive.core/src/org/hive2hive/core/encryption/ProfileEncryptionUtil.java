@@ -17,8 +17,10 @@ public final class ProfileEncryptionUtil {
 	 */
 	public static UserPassword createUserPassword(String password){
 		
+		JavaEncryptionUtil encryptionUtil = new JavaEncryptionUtil();
+		
 		char[] pwAsChar = password.toCharArray();
-		byte[] randomSalt = EncryptionUtil.createSalt(8);
+		byte[] randomSalt = encryptionUtil.createSalt(8);
 		return new UserPassword(pwAsChar, randomSalt);
 	}
 }

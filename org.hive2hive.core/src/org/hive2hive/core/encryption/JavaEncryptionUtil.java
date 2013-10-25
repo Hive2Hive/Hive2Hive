@@ -43,11 +43,11 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  * @author Christian
  * 
  */
-public final class EncryptionUtil {
+public final class JavaEncryptionUtil implements IEncryptionUtil {
 
 	// TODO throw exceptions where the library should
 	
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(JavaEncryptionUtil.class);
 
 	private static final String AES_CIPHER_MODE = "AES/CBC/PKCS5PADDING";
 	private static final String RSA_CIPHER_MODE = "RSA";
@@ -88,10 +88,10 @@ public final class EncryptionUtil {
 		}
 	}
 
-	private EncryptionUtil() {
+	public JavaEncryptionUtil() {
 	}
 
-	public static byte[] serializeObject(Object object) {
+	public byte[] serializeObject(Object object) {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = null;
@@ -114,7 +114,7 @@ public final class EncryptionUtil {
 		return result;
 	}
 
-	public static Object deserializeObject(byte[] bytes) {
+	public Object deserializeObject(byte[] bytes) {
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = null;
@@ -145,7 +145,7 @@ public final class EncryptionUtil {
 	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization
 	 *         vector (IV).
 	 */
-	public static EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
+	public EncryptedContent encryptAES(byte[] content, SecretKey aesKey) {
 		return encrypt(content, aesKey, AES_CIPHER_MODE);
 	}
 
@@ -156,7 +156,7 @@ public final class EncryptionUtil {
 	 * @param aesKey The symmetric key with which the content will be decrypted.
 	 * @return decrypted byte[] content
 	 */
-	public static byte[] decryptAES(EncryptedContent content, SecretKey aesKey) {
+	public byte[] decryptAES(EncryptedContent content, SecretKey aesKey) {
 		return decrypt(content, aesKey, AES_CIPHER_MODE);
 	}
 
@@ -168,7 +168,7 @@ public final class EncryptionUtil {
 	 * @param publicKey The asymmetric public key with which the content will be encrypted.
 	 * @return EncryptedContent which contains the encrypted byte[] content.
 	 */
-	public static EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
+	public EncryptedContent encryptRSA(byte[] content, PublicKey publicKey) {
 		return encrypt(content, publicKey, RSA_CIPHER_MODE);
 	}
 
@@ -182,7 +182,7 @@ public final class EncryptionUtil {
 	 * @param privateKey The asymmetric private key with which the content will be decrypted.
 	 * @return decrypted byte[] content.
 	 */
-	public static byte[] decryptRSA(EncryptedContent content, PrivateKey privateKey) {
+	public byte[] decryptRSA(EncryptedContent content, PrivateKey privateKey) {
 		return decrypt(content, privateKey, RSA_CIPHER_MODE);
 	}
 
@@ -202,7 +202,7 @@ public final class EncryptionUtil {
 	// return decryptStream(inputStream, privateKey, RSA_CIPHER_MODE);
 	// }
 
-	public static SecretKey createDESKey(String password, byte[] salt) {
+	public SecretKey createDESKey(String password, byte[] salt) {
 
 		byte[] tempKey = combine(toByte(password), salt);
 
@@ -236,7 +236,7 @@ public final class EncryptionUtil {
 	 * @param keyLength The length the AES key should have.
 	 * @return A symmetric AES key of the specified length.
 	 */
-	public static SecretKey createAESKey(AES_KEYLENGTH keyLength) {
+	public SecretKey createAESKey(AES_KEYLENGTH keyLength) {
 
 		try {
 			KeyGenerator kg = KeyGenerator.getInstance("AES");
@@ -257,7 +257,7 @@ public final class EncryptionUtil {
 	 * @param keyLength The length the RSA keys should have.
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
-	public static KeyPair createRSAKeys(RSA_KEYLENGTH keyLength) {
+	public KeyPair createRSAKeys(RSA_KEYLENGTH keyLength) {
 
 		try {
 			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -269,7 +269,7 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	public static SecretKey createAESKeyFromPassword(UserPassword password, AES_KEYLENGTH keyLength) {
+	public SecretKey createAESKeyFromPassword(UserPassword password, AES_KEYLENGTH keyLength) {
 
 		try {
 			SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -291,7 +291,7 @@ public final class EncryptionUtil {
 	 * 
 	 * @return A random 8 byte salt.
 	 */
-	public static byte[] createSalt(int byteLength) {
+	public byte[] createSalt(int byteLength) {
 
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[byteLength];
@@ -307,7 +307,7 @@ public final class EncryptionUtil {
 	 * @return A SignedContent object which is used to keep track of signature information of a signed
 	 *         content, which will be used once the content needs to be verified.
 	 */
-	public static SignedContent sign(byte[] content, PrivateKey privateKey) {
+	public SignedContent sign(byte[] content, PrivateKey privateKey) {
 
 		byte[] signatureBytes = null;
 
@@ -330,7 +330,7 @@ public final class EncryptionUtil {
 	 * @param publicKey The public key used to verify the content.
 	 * @return Returns true if the signature could be verified and false otherwise.
 	 */
-	public static boolean verify(SignedContent content, PublicKey publicKey) {
+	public boolean verify(SignedContent content, PublicKey publicKey) {
 
 		try {
 			Signature signature = Signature.getInstance(MD5_SIGNATURE_ALGORITHM);
@@ -349,7 +349,7 @@ public final class EncryptionUtil {
 	 * @param string The String to convert.
 	 * @return The byte array conversion result or null if the conversion fails.
 	 */
-	public static byte[] toByte(String string) {
+	public byte[] toByte(String string) {
 
 		byte[] result = null;
 
@@ -367,7 +367,7 @@ public final class EncryptionUtil {
 	 * @param bytes The bytes to convert.
 	 * @return The String conversion result or null if the conversion fails.
 	 */
-	public static String toString(byte[] bytes) {
+	public String toString(byte[] bytes) {
 
 		String result = null;
 
