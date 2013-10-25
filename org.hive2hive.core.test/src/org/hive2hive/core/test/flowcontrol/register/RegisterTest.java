@@ -5,10 +5,10 @@ import java.util.List;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.flowcontrol.TestProcessListener;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -44,14 +44,14 @@ public class RegisterTest extends H2HJUnitTest {
 		node.putGlobal(userId, H2HConstants.USER_PROFILE, new UserProfile(userId, null, null));
 
 		RegisterProcess process = new RegisterProcess(userId, password, node);
-		RegisterProcessTestListener listener = new RegisterProcessTestListener();
+		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
 			waiter.tickASecond();
-		} while (!listener.hasExecuted());
+		} while (!listener.hasFailed());
 	}
 
 	@Override
@@ -64,25 +64,5 @@ public class RegisterTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() {
 		afterClass();
-	}
-
-	private class RegisterProcessTestListener implements IProcessListener {
-
-		public boolean executed = false;
-
-		public boolean hasExecuted() {
-			return executed;
-		}
-
-		@Override
-		public void onSuccess() {
-			// register process shouldn't success in this case;
-		}
-
-		@Override
-		public void onFail(String reason) {
-			executed = true;
-		}
-
 	}
 }

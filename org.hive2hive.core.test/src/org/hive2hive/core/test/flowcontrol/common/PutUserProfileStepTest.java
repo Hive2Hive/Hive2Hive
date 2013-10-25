@@ -26,6 +26,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Tests the generic step that puts the user profile into the DHT
+ * 
+ * @author Nico
+ * 
+ */
 public class PutUserProfileStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;

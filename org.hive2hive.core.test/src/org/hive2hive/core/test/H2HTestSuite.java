@@ -2,7 +2,9 @@ package org.hive2hive.core.test;
 
 import org.hive2hive.core.test.flowcontrol.ProcessStepTest;
 import org.hive2hive.core.test.flowcontrol.ProcessTest;
+import org.hive2hive.core.test.flowcontrol.common.PutUserProfileStepTest;
 import org.hive2hive.core.test.flowcontrol.manager.ProcessManagerTest;
+import org.hive2hive.core.test.flowcontrol.register.RegisterTest;
 import org.hive2hive.core.test.network.ConnectionTest;
 import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.network.messaging.BaseMessageTest;
@@ -28,7 +30,13 @@ import org.junit.runners.Suite.SuiteClasses;
 		ConnectionTest.class, DataManagerTest.class, BaseMessageTest.class, BaseRequestMessageTest.class,
 
 		// Processes
-		ProcessTest.class, ProcessManagerTest.class, ProcessStepTest.class
+		ProcessTest.class, ProcessManagerTest.class, ProcessStepTest.class,
+
+		// Process: Common steps
+		PutUserProfileStepTest.class,
+
+		// Process: Register
+		RegisterTest.class
 
 })
 public class H2HTestSuite {

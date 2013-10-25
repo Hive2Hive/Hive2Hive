@@ -13,6 +13,12 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
 
+/**
+ * Generic process step to encrypt the {@link: UserProfile} and add it to the DHT
+ * 
+ * @author Nico
+ * 
+ */
 public class PutUserProfileStep extends ProcessStep {
 
 	private final UserProfile profile;
