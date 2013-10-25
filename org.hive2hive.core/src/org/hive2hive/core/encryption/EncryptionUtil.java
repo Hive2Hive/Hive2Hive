@@ -4,6 +4,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.security.Security;
 
 import javax.crypto.BadPaddingException;
@@ -57,8 +58,10 @@ public final class EncryptionUtil {
 	}
 
 	public static byte[] generateIV() {
-		// TODO implement
-		return new byte[16];
+		SecureRandom random = new SecureRandom();
+		byte[] iv = new byte[16];
+		random.nextBytes(iv);
+		return iv;
 	}
 
 	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength) {
