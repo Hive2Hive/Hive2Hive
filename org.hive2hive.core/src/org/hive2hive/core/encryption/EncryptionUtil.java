@@ -151,7 +151,8 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Symmetrically encrypts byte[] content by means of the AES algorithm.
+	 * Symmetrically encrypts content inheriting from {@link NetworkData} by means of the AES algorithm.
+	 * The content first gets serialized, then encrypted.
 	 * 
 	 * @param content the content to be encrypted. Can be of any type that extends {@link NetworkData}.
 	 * @param aesKey The symmetric key with which the content will be encrypted.
@@ -160,7 +161,7 @@ public final class EncryptionUtil {
 	 */
 	public static <T extends NetworkData> EncryptedContent encryptAES(T content, SecretKey aesKey) {
 		byte[] serialized = serializeObject(content);
-		EncryptedContent encrypted = encrypt(serialized, aesKey, AES_CIPHER_MODE);
+		EncryptedContent encrypted = encryptAES(serialized, aesKey);
 		encrypted.setTimeToLive(content.getTimeToLive());
 		return encrypted;
 	}
@@ -177,7 +178,8 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Symmetrically decrypts a prior EncryptedContent by means of the AES algorithm.
+	 * Symmetrically decrypts a prior content inheriting from {@link NetworkData} by means of the AES
+	 * algorithm. The content gets deserialized after the decryption.
 	 * 
 	 * @param content The EncryptedContent to be decrypted.
 	 * @param aesKey The symmetric key with which the content will be decrypted.
@@ -186,7 +188,7 @@ public final class EncryptionUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T decryptAES(EncryptedContent content, SecretKey aesKey, Class<T> expectedClass) {
-		byte[] decrypted = decrypt(content, aesKey, AES_CIPHER_MODE);
+		byte[] decrypted = decryptAES(content, aesKey);
 		return (T) deserializeObject(decrypted);
 	}
 
