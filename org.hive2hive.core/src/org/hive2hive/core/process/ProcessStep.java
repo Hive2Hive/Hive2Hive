@@ -6,6 +6,8 @@ import java.util.Map;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
 
+import org.apache.log4j.Logger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.network.messages.BaseMessage;
@@ -17,11 +19,12 @@ import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 /**
  * One step of a complete workflow. This step calls the next step after finishing
  * 
- * @author Nendor, Nico
+ * @author Nico
  * 
  */
 public abstract class ProcessStep {
 
+	private final static Logger logger = H2HLoggerFactory.getLogger(ProcessStep.class);
 	private Process process;
 	private Map<String, NetworkData> backup = new HashMap<String, NetworkData>();
 
@@ -111,7 +114,7 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 * @param data
 	 */
-	protected void put(String locationKey, String contentKey, NetworkData data) {
+	protected void put(final String locationKey, final String contentKey, NetworkData data) {
 		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
 		PutVerificationListener verificationListener = new PutVerificationListener(getNetworkManager(),
 				locationKey, contentKey, data);
@@ -119,6 +122,7 @@ public abstract class ProcessStep {
 		verificationListener.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
+				logger.debug("Verification for put(" + locationKey + ", " + contentKey + ") complete");
 				handlePutResult(future);
 			}
 		});

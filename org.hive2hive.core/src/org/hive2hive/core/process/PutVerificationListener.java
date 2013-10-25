@@ -6,6 +6,8 @@ import java.util.List;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
 
+import org.apache.log4j.Logger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkData;
 
@@ -20,6 +22,8 @@ import org.hive2hive.core.network.data.NetworkData;
  * 
  */
 public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
+
+	private final static Logger logger = H2HLoggerFactory.getLogger(PutVerificationListener.class);
 
 	private final NetworkManager networkManager;
 	private final String locationKey;
@@ -39,6 +43,7 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 	@Override
 	public void operationComplete(FutureDHT future) throws Exception {
 		// store the future for notifying the listeners later with this
+		logger.debug("Start verification of put(" + locationKey + ", " + contentKey + ")");
 		final FutureDHT putFuture = future;
 		FutureDHT getFuture = networkManager.getGlobal(locationKey, contentKey);
 		getFuture.addListener(new BaseFutureAdapter<FutureDHT>() {

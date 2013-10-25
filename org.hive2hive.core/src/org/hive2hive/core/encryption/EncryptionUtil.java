@@ -35,6 +35,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.network.data.NetworkData;
 
 /**
  * This class provides fundamental encryption and decryption functionalities as well as key generation
@@ -46,7 +47,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 public final class EncryptionUtil {
 
 	// TODO throw exceptions where the library should
-	
+
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
 	private static final String AES_CIPHER_MODE = "AES/CBC/PKCS5PADDING";
@@ -150,6 +151,21 @@ public final class EncryptionUtil {
 	}
 
 	/**
+	 * Symmetrically encrypts byte[] content by means of the AES algorithm.
+	 * 
+	 * @param content the content to be encrypted. Can be of any type that extends {@link NetworkData}.
+	 * @param aesKey The symmetric key with which the content will be encrypted.
+	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization
+	 *         vector (IV).
+	 */
+	public static <T extends NetworkData> EncryptedContent encryptAES(T content, SecretKey aesKey) {
+		byte[] serialized = serializeObject(content);
+		EncryptedContent encrypted = encrypt(serialized, aesKey, AES_CIPHER_MODE);
+		encrypted.setTimeToLive(content.getTimeToLive());
+		return encrypted;
+	}
+
+	/**
 	 * Symmetrically decrypts a prior EncryptedContent by means of the AES algorithm.
 	 * 
 	 * @param content The EncryptedContent to be decrypted.
@@ -158,6 +174,20 @@ public final class EncryptionUtil {
 	 */
 	public static byte[] decryptAES(EncryptedContent content, SecretKey aesKey) {
 		return decrypt(content, aesKey, AES_CIPHER_MODE);
+	}
+
+	/**
+	 * Symmetrically decrypts a prior EncryptedContent by means of the AES algorithm.
+	 * 
+	 * @param content The EncryptedContent to be decrypted.
+	 * @param aesKey The symmetric key with which the content will be decrypted.
+	 * @param expectedClass the type of the object
+	 * @return decrypted object
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T decryptAES(EncryptedContent content, SecretKey aesKey, Class<T> expectedClass) {
+		byte[] decrypted = decrypt(content, aesKey, AES_CIPHER_MODE);
+		return (T) deserializeObject(decrypted);
 	}
 
 	/**
@@ -326,6 +356,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Verifies the signature of the provided content with the specified public key.
+	 * 
 	 * @param content The content to be verified.
 	 * @param publicKey The public key used to verify the content.
 	 * @return Returns true if the signature could be verified and false otherwise.
