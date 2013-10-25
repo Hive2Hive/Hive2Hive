@@ -1,6 +1,8 @@
 package org.hive2hive.core.test.network.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 import java.util.Random;
@@ -213,6 +215,64 @@ public class DataManagerTest extends H2HJUnitTest {
 		assertEquals(data2, result2);
 		String result3 = (String) ((H2HTestData) nodeB.getLocal(locationKey, contentKey3)).getTestString();
 		assertEquals(data3, result3);
+	}
+
+	@Test
+	public void testRemovalOneContentKey() {
+		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
+		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		String locationKey = nodeB.getNodeId();
+		String contentKey = NetworkTestUtil.randomString();
+
+		// put a content
+		nodeA.putGlobal(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()))
+				.awaitUninterruptibly();
+
+		// test that it is there
+		assertNotNull(nodeB.getLocal(locationKey, contentKey));
+
+		// delete it
+		nodeA.remove(locationKey, contentKey).awaitUninterruptibly();
+
+		// check that it is gone
+		assertNull(nodeB.getLocal(locationKey, contentKey));
+	}
+
+	@Test
+	public void testRemovalMultipleContentKey() {
+		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
+		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		String locationKey = nodeB.getNodeId();
+
+		String contentKey1 = NetworkTestUtil.randomString();
+		String contentKey2 = NetworkTestUtil.randomString();
+		String contentKey3 = NetworkTestUtil.randomString();
+
+		String testString1 = NetworkTestUtil.randomString();
+		String testString2 = NetworkTestUtil.randomString();
+		String testString3 = NetworkTestUtil.randomString();
+
+		// insert them
+		nodeA.putGlobal(locationKey, contentKey1, new H2HTestData(testString1)).awaitUninterruptibly();
+		nodeA.putGlobal(locationKey, contentKey2, new H2HTestData(testString2)).awaitUninterruptibly();
+		nodeA.putGlobal(locationKey, contentKey3, new H2HTestData(testString3)).awaitUninterruptibly();
+
+		// check that they are all stored
+		assertNotNull(nodeB.getLocal(locationKey, contentKey1));
+		assertNotNull(nodeB.getLocal(locationKey, contentKey2));
+		assertNotNull(nodeB.getLocal(locationKey, contentKey3));
+
+		// remove 2nd one and check that 1st and 3rd are still there
+		nodeA.remove(locationKey, contentKey2).awaitUninterruptibly();
+		assertNull(nodeB.getLocal(locationKey, contentKey2));
+		assertNotNull(nodeB.getLocal(locationKey, contentKey1));
+		assertNotNull(nodeB.getLocal(locationKey, contentKey3));
+
+		// remove 3rd one as well and check that they are gone as well
+		nodeA.remove(locationKey, contentKey1).awaitUninterruptibly();
+		nodeA.remove(locationKey, contentKey3).awaitUninterruptibly();
+		assertNull(nodeB.getLocal(locationKey, contentKey1));
+		assertNull(nodeB.getLocal(locationKey, contentKey3));
 	}
 
 	@AfterClass

@@ -117,14 +117,14 @@ public class NetworkManager {
 	 *            the unique id of the content
 	 * @param contentKey
 	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param wrapper
+	 * @param data
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkData wrapper) {
+	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkData data) {
 		if (!connection.isConnected())
 			return null;
-		return dataManager.putGlobal(locationKey, contentKey, wrapper);
+		return dataManager.putGlobal(locationKey, contentKey, data);
 	}
 
 	/**
@@ -152,13 +152,13 @@ public class NetworkManager {
 	 *            the unique id of the content
 	 * @param contentKey
 	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param wrapper
+	 * @param data
 	 *            the wrapper containing the content to be stored
 	 */
-	public void putLocal(String locationKey, String contentKey, NetworkData wrapper) {
+	public void putLocal(String locationKey, String contentKey, NetworkData data) {
 		if (!connection.isConnected())
 			return;
-		dataManager.putLocal(locationKey, contentKey, wrapper);
+		dataManager.putLocal(locationKey, contentKey, data);
 	}
 
 	/**
