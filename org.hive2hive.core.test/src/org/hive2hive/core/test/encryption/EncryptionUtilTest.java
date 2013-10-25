@@ -54,7 +54,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing AES %s-bit encryption:", sizes[s].value()));
+			logger.debug(String.format("Testing AES %s-bit encryption and decryption", sizes[s].value()));
 
 			// generate random sized content (max. 2MB)
 			byte[] data = generateRandomContent(2097152);
@@ -62,16 +62,33 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// generate AES key
 			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s]);
 
+			// generate IV
+			byte[] initVector = EncryptionUtil.generateIV();
+			
 			// encrypt data
+			byte[] encryptedData = null;
 			try {
-				byte[] encryptedData = EncryptionUtil.encryptAES(data, aesKey);
-				
-				assertFalse(Arrays.equals(data, encryptedData));
-
+				encryptedData = EncryptionUtil.encryptAES(data, aesKey, initVector);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Exception while testing AES encryption:", e);
 				e.printStackTrace();
 			}
+			
+			assertNotNull(encryptedData);
+			assertFalse(Arrays.equals(data, encryptedData));
+			
+			// decrypt data
+			byte[] decryptedData = null;
+			try {
+				decryptedData = EncryptionUtil.decryptAES(encryptedData, aesKey, initVector);
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+				logger.error("Exception while testing AES decryption:", e);
+				e.printStackTrace();
+			}
+			
+			assertNotNull(decryptedData);
+			assertFalse(Arrays.equals(encryptedData, decryptedData));
+			assertTrue(Arrays.equals(data, decryptedData));
 		}
 	}
 

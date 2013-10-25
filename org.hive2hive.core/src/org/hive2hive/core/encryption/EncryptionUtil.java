@@ -106,11 +106,6 @@ public final class EncryptionUtil {
 	// return null;
 	// }
 
-	public static byte[] encryptAES(byte[] data, SecretKey secretKey) throws DataLengthException,
-			IllegalStateException, InvalidCipherTextException {
-		return encryptAES(data, secretKey, generateIV());
-	}
-
 	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
@@ -124,18 +119,18 @@ public final class EncryptionUtil {
 
 		return cipherData(cipher, data);
 	}
-
-	private static byte[] cipherData(PaddedBufferedBlockCipher cipher, byte[] data)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
-
-		byte[] outBuffer = new byte[cipher.getOutputSize(data.length)];
-
-		int length1 = cipher.processBytes(data, 0, data.length, outBuffer, 0);
-		int length2 = cipher.doFinal(outBuffer, length1);
-
-		byte[] result = new byte[length1 + length2];
-		System.arraycopy(outBuffer, 0, result, 0, result.length);
-		return result;
+	
+	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException{
+		
+		AESEngine aesEngine = new AESEngine();
+		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
+		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
+		
+	    CipherParameters parameters = new ParametersWithIV(new KeyParameter(secretKey.getEncoded()), initVector);
+	    cipher.init(false, parameters);
+	    
+	    return cipherData(cipher, data);
 	}
 
 	public static String toHex(byte[] data) {
@@ -156,5 +151,18 @@ public final class EncryptionUtil {
 		if (Security.getProvider(BC) == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
+	}
+
+	private static byte[] cipherData(PaddedBufferedBlockCipher cipher, byte[] data)
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+	
+		byte[] outBuffer = new byte[cipher.getOutputSize(data.length)];
+	
+		int length1 = cipher.processBytes(data, 0, data.length, outBuffer, 0);
+		int length2 = cipher.doFinal(outBuffer, length1);
+	
+		byte[] result = new byte[length1 + length2];
+		System.arraycopy(outBuffer, 0, result, 0, result.length);
+		return result;
 	}
 }
