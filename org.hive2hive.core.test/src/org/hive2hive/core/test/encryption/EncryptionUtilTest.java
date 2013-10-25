@@ -1,20 +1,20 @@
 package org.hive2hive.core.test.encryption;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
+import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,6 +46,29 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		}
 	}
 
+	@Test
+	public void generateRSAKeyPairTest() {
+
+		// test all key sizes
+		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
+
+		for (int s = 0; s < sizes.length; s++) {
+
+			logger.debug(String.format("Testing RSA %s-bit key pair generation.", sizes[s].value()));
+
+			// generate RSA key pair
+			KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+			logger.debug(String.format("- Generated Private Key: %s", EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded())));
+			logger.debug(String.format("- Generated Public Key:  %s", EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded())));
+
+			assertNotNull(rsaKeyPair);
+			assertNotNull(rsaKeyPair.getPrivate());
+			assertNotNull(rsaKeyPair.getPublic());
+			assertTrue(rsaKeyPair.getPrivate().getAlgorithm().equals(EncryptionUtil.RSA));
+			assertTrue(rsaKeyPair.getPublic().getAlgorithm().equals(EncryptionUtil.RSA));
+		}
+	}
+	
 	@Test
 	public void encryptionAESTest() {
 
@@ -100,6 +123,14 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		return sizes;
 	}
 
+	private static RSA_KEYLENGTH[] getRSAKeySizes() {
+		RSA_KEYLENGTH[] sizes = new RSA_KEYLENGTH[RSA_KEYLENGTH.values().length];
+		for (int i = 0; i < sizes.length; i++) {
+			sizes[i] = RSA_KEYLENGTH.values()[i];
+		}
+		return sizes;
+	}
+	
 	private static byte[] generateRandomContent(int sizeInBytes) {
 		SecureRandom random = new SecureRandom();
 		byte[] content = new byte[random.nextInt(sizeInBytes)];

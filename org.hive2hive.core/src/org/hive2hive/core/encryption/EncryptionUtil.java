@@ -1,19 +1,14 @@
 package org.hive2hive.core.encryption;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.CipherParameters;
@@ -36,6 +31,7 @@ public final class EncryptionUtil {
 
 	private static final String BC = "BC";
 	public static final String AES = "AES";
+	public static final String RSA = "RSA";
 	private static final String AES_CBC_PKCS7PADDING = "AES/CBC/PKCS7Padding";
 
 	public enum AES_KEYLENGTH {
@@ -54,6 +50,22 @@ public final class EncryptionUtil {
 		}
 	}
 
+	public enum RSA_KEYLENGTH {
+		BIT_1024(1024),
+		BIT_2048(2048),
+		BIT_4096(4096);
+
+		private final int bitLength;
+
+		RSA_KEYLENGTH(int length) {
+			bitLength = length;
+		}
+
+		public int value() {
+			return bitLength;
+		}
+	}
+	
 	private EncryptionUtil() {
 	}
 
@@ -70,11 +82,25 @@ public final class EncryptionUtil {
 
 		try {
 			final KeyGenerator kg = KeyGenerator.getInstance(AES, BC);
-			kg.init(keyLength.value());
+			kg.init(keyLength.value(), new SecureRandom());
 			byte[] encoded = kg.generateKey().getEncoded();
 			return new SecretKeySpec(encoded, AES);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-			logger.error("Exception while key generator instance creation:", e);
+			logger.error("Exception while AES key generator instance creation:", e);
+		}
+		return null;
+	}
+
+	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
+		
+		installBCProvider();
+
+		try {
+			final KeyPairGenerator kpg = KeyPairGenerator.getInstance(RSA, BC);
+			kpg.initialize(keyLength.value(), new SecureRandom());
+			return kpg.generateKeyPair();		
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			logger.error("Exception while RSA key generator instance creation:", e);
 		}
 		return null;
 	}
@@ -122,18 +148,19 @@ public final class EncryptionUtil {
 
 		return cipherData(cipher, data);
 	}
-	
+
 	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException{
-		
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+
 		AESEngine aesEngine = new AESEngine();
 		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
 		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
-		
-	    CipherParameters parameters = new ParametersWithIV(new KeyParameter(secretKey.getEncoded()), initVector);
-	    cipher.init(false, parameters);
-	    
-	    return cipherData(cipher, data);
+
+		CipherParameters parameters = new ParametersWithIV(new KeyParameter(secretKey.getEncoded()),
+				initVector);
+		cipher.init(false, parameters);
+
+		return cipherData(cipher, data);
 	}
 
 	public static String toHex(byte[] data) {
@@ -158,12 +185,12 @@ public final class EncryptionUtil {
 
 	private static byte[] cipherData(PaddedBufferedBlockCipher cipher, byte[] data)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
-	
+
 		byte[] outBuffer = new byte[cipher.getOutputSize(data.length)];
-	
+
 		int length1 = cipher.processBytes(data, 0, data.length, outBuffer, 0);
 		int length2 = cipher.doFinal(outBuffer, length1);
-	
+
 		byte[] result = new byte[length1 + length2];
 		System.arraycopy(outBuffer, 0, result, 0, result.length);
 		return result;
