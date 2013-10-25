@@ -15,6 +15,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -31,8 +39,8 @@ public final class EncryptionUtil {
 
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
-		BIT192 (192),
-		BIT256 (256);
+		BIT192(192),
+		BIT256(256);
 
 		private final int bitLength;
 
@@ -44,58 +52,90 @@ public final class EncryptionUtil {
 			return bitLength;
 		}
 	}
-	
+
 	private EncryptionUtil() {
 	}
 
 	public static byte[] generateIV() {
 		// TODO implement
-		return new byte[] { 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00 };
+		return new byte[16];
 	}
-	
-	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength){
+
+	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength) {
 
 		installBCProvider();
-		
+
 		try {
 			final KeyGenerator kg = KeyGenerator.getInstance(AES, BC);
 			kg.init(keyLength.value());
 			byte[] encoded = kg.generateKey().getEncoded();
-			return new SecretKeySpec(encoded, AES);			
-		} catch (NoSuchAlgorithmException | NoSuchProviderException e){
+			return new SecretKeySpec(encoded, AES);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			logger.error("Exception while key generator instance creation:", e);
 		}
 		return null;
 	}
 
-	public static EncryptedContent encryptAES(byte[] data, SecretKey secretKey) throws InvalidKeyException,
-			InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-		return encryptAES(data, generateIV(), secretKey);
+	// public static EncryptedContent encryptAES(byte[] data, SecretKey secretKey) throws InvalidKeyException,
+	// InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+	// return encryptAES(data, generateIV(), secretKey);
+	// }
+	//
+	// public static EncryptedContent encryptAES(byte[] data, byte[] initVector, SecretKey secretKey)
+	// throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+	// BadPaddingException {
+	//
+	// // initialize the initialization vector (IV)
+	// IvParameterSpec ivSpec = new IvParameterSpec(initVector);
+	//
+	// // create cipher instance
+	// try {
+	// Cipher cipher = Cipher.getInstance(AES_CBC_PKCS7PADDING, BC);
+	//
+	// // initialize cipher
+	// cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
+	//
+	// // encrypt data
+	// byte[] cipherContent = cipher.doFinal(data);
+	//
+	// return new EncryptedContent(cipherContent, initVector);
+	//
+	// } catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+	// logger.error("Exception while cipher instance creation:", e);
+	// }
+	// return null;
+	// }
+
+	public static byte[] encryptAES(byte[] data, SecretKey secretKey) throws DataLengthException,
+			IllegalStateException, InvalidCipherTextException {
+		return encryptAES(data, secretKey, generateIV());
 	}
 
-	public static EncryptedContent encryptAES(byte[] data, byte[] initVector, SecretKey secretKey)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
-			BadPaddingException {
+	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
-		// initialize the initialization vector (IV)
-		IvParameterSpec ivSpec = new IvParameterSpec(initVector);
+		AESEngine aesEngine = new AESEngine();
+		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
+		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
 
-		// create cipher instance
-		try {
-			Cipher cipher = Cipher.getInstance(AES_CBC_PKCS7PADDING, BC);
+		CipherParameters parameters = new ParametersWithIV(new KeyParameter(secretKey.getEncoded()),
+				initVector);
+		cipher.init(true, parameters);
 
-			// initialize cipher
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
+		return cipherData(cipher, data);
+	}
 
-			// encrypt data
-			byte[] cipherContent = cipher.doFinal(data);
+	private static byte[] cipherData(PaddedBufferedBlockCipher cipher, byte[] data)
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
-			return new EncryptedContent(cipherContent, initVector);
+		byte[] outBuffer = new byte[cipher.getOutputSize(data.length)];
 
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
-			logger.error("Exception while cipher instance creation:", e);
-		}
-		return null;
+		int length1 = cipher.processBytes(data, 0, data.length, outBuffer, 0);
+		int length2 = cipher.doFinal(outBuffer, length1);
+
+		byte[] result = new byte[length1 + length2];
+		System.arraycopy(outBuffer, 0, result, 0, result.length);
+		return result;
 	}
 
 	public static String toHex(byte[] data) {
