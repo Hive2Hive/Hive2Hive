@@ -108,7 +108,7 @@ public class NetworkManager {
 			return;
 		messageManager.send(message);
 	}
-	
+
 	/**
 	 * Stores the content into the DHT at the location under the given content
 	 * key
@@ -174,5 +174,19 @@ public class NetworkManager {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.getLocal(locationKey, contentKey);
+	}
+
+	/**
+	 * Removes a content from the DHT
+	 * 
+	 * @param locationKey the unique id of the content
+	 * @param contentKey the content key - please choose one from {@link H2HConstants}
+	 * @return the future
+	 */
+	public FutureDHT remove(String locationKey, String contentKey) {
+		if (!connection.isConnected()) {
+			return null;
+		}
+		return dataManager.remove(locationKey, contentKey);
 	}
 }

@@ -63,18 +63,24 @@ public class ProcessTest extends H2HJUnitTest {
 			protected void handleGetResult(FutureDHT future) {
 				// do nothing
 			}
-			
+
 			@Override
 			protected void handlePutResult(FutureDHT future) {
 				// do nothing
 			}
+
+			@Override
+			protected void handleRemovalResult(FutureDHT future) {
+				// do nothing
+			}
 		};
 
-		Process process = new Process(null) {};
+		Process process = new Process(null) {
+		};
 		process.setFirstStep(firstStep);
 		return process;
 	}
-	
+
 	@AfterClass
 	public static void cleanAfterClass() {
 		afterClass();

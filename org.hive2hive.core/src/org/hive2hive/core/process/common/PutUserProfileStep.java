@@ -68,4 +68,9 @@ public class PutUserProfileStep extends ProcessStep {
 		// does not perform a get
 	}
 
+	@Override
+	protected void handleRemovalResult(FutureDHT future) {
+		// TODO only needed when rollbacking
+	}
+
 }

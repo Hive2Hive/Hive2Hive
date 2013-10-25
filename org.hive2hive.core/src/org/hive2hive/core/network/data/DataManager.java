@@ -131,4 +131,17 @@ public class DataManager {
 		}
 		return null;
 	}
+
+	/**
+	 * Removes a content from the DHT
+	 * 
+	 * @param locationKey the unique id of the content
+	 * @param contentKey the content key - please choose one from {@link H2HConstants}
+	 * @return the future
+	 */
+	public FutureDHT remove(String locationKey, String contentKey) {
+		logger.debug(String.format("remove key = '%s' content key = '%s'", locationKey, contentKey));
+		return networkManager.getConnection().getPeer().remove(Number160.createHash(locationKey))
+				.setContentKey(Number160.createHash(contentKey)).start();
+	}
 }

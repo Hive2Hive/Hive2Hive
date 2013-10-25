@@ -23,6 +23,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ProcessStepTest extends H2HJUnitTest {
+
+	enum StepAction {
+		PUT,
+		GET,
+		REMOVAL
+	};
+
 	private final static int networkSize = 2;
 	private static List<NetworkManager> network;
 	private Map<String, ResponseMessage> messageWaiterMap;
@@ -99,7 +106,8 @@ public class ProcessStepTest extends H2HJUnitTest {
 		final NetworkManager putter = network.get(0);
 		final NetworkManager holder = network.get(1);
 
-		PutGetProcessStep step = new PutGetProcessStep(holder.getNodeId(), contentKey, data, true);
+		PutGetRemovalProcessStep step = new PutGetRemovalProcessStep(holder.getNodeId(), contentKey, data,
+				StepAction.PUT);
 		Process process = new Process(putter) {
 		};
 		process.setFirstStep(step);
@@ -129,7 +137,8 @@ public class ProcessStepTest extends H2HJUnitTest {
 		// put in the memory of 2nd peer
 		holder.putLocal(holder.getNodeId(), contentKey, data);
 
-		PutGetProcessStep step = new PutGetProcessStep(holder.getNodeId(), contentKey, data, false);
+		PutGetRemovalProcessStep step = new PutGetRemovalProcessStep(holder.getNodeId(), contentKey, data,
+				StepAction.GET);
 		Process process = new Process(getter) {
 		};
 		process.setFirstStep(step);
@@ -145,6 +154,33 @@ public class ProcessStepTest extends H2HJUnitTest {
 		// now, the receiver should have the content in memory
 		H2HTestData received = (H2HTestData) future.getData().getObject();
 		Assert.assertEquals(testContent, (String) received.getTestString());
+	}
+
+	@Test
+	public void testRemoval() throws InterruptedException {
+		final String contentKey = "TEST";
+		final H2HTestData data = new H2HTestData(testContent);
+		final NetworkManager getter = network.get(0);
+		final NetworkManager holder = network.get(1);
+
+		// put the content first
+		holder.putLocal(holder.getNodeId(), contentKey, data);
+		Assert.assertNotNull(holder.getLocal(holder.getNodeId(), contentKey));
+
+		// start the process which removes the content
+		PutGetRemovalProcessStep step = new PutGetRemovalProcessStep(holder.getNodeId(), contentKey, data,
+				StepAction.REMOVAL);
+		Process process = new Process(getter) {
+		};
+		process.setFirstStep(step);
+
+		process.start();
+		FutureDHT future = waitForFutureResult();
+		Assert.assertTrue(future.isSuccess());
+		Assert.assertTrue(future.isCompleted());
+
+		// the content should be deleted now
+		Assert.assertNull(holder.getLocal(holder.getNodeId(), contentKey));
 	}
 
 	/**
@@ -172,9 +208,10 @@ public class ProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		protected void handleGetResult(FutureDHT future) {
-			// it's a test for messages only
+			// not expected to get a put/get result
+			Assert.fail();
 		}
-		
+
 		@Override
 		protected void handlePutResult(FutureDHT future) {
 			// not expected to get a put/get result
@@ -187,22 +224,29 @@ public class ProcessStepTest extends H2HJUnitTest {
 			synchronized (messageWaiterMap) {
 				messageWaiterMap.put(asyncReturnMessage.getMessageID(), asyncReturnMessage);
 			}
+			getProcess().nextStep(null);
 		}
 
 		public String getMessageId() {
 			return messageToSend.getMessageID();
+		}
+
+		@Override
+		protected void handleRemovalResult(FutureDHT future) {
+			// not expected to get a removal result
+			Assert.fail();
 		}
 	}
 
 	/**
 	 * A dummy process step that puts or gets an object
 	 */
-	private class PutGetProcessStep extends ProcessStep {
+	private class PutGetRemovalProcessStep extends ProcessStep {
 
 		private NetworkData data;
 		private String locationKey;
 		private String contentKey;
-		private boolean put;
+		private StepAction action;
 
 		/**
 		 * 
@@ -212,19 +256,28 @@ public class ProcessStepTest extends H2HJUnitTest {
 		 * @param put if true, then the step puts the data, else it gets the data from the location/content
 		 *            key
 		 */
-		public PutGetProcessStep(String locationKey, String contentKey, NetworkData data, boolean put) {
+		public PutGetRemovalProcessStep(String locationKey, String contentKey, NetworkData data,
+				StepAction action) {
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 			this.data = data;
-			this.put = put;
+			this.action = action;
 		}
 
 		@Override
 		public void start() {
-			if (put) {
-				put(locationKey, contentKey, data);
-			} else {
-				get(locationKey, contentKey);
+			switch (action) {
+				case PUT:
+					put(locationKey, contentKey, data);
+					break;
+				case GET:
+					get(locationKey, contentKey);
+					break;
+				case REMOVAL:
+					remove(locationKey, contentKey);
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -245,6 +298,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 			synchronized (messageWaiterMap) {
 				tempFutureStore = future;
 			}
+			getProcess().nextStep(null);
 		}
 
 		@Override
@@ -253,6 +307,15 @@ public class ProcessStepTest extends H2HJUnitTest {
 			synchronized (messageWaiterMap) {
 				tempFutureStore = future;
 			}
+			getProcess().nextStep(null);
+		}
+
+		@Override
+		protected void handleRemovalResult(FutureDHT future) {
+			synchronized (messageWaiterMap) {
+				tempFutureStore = future;
+			}
+			getProcess().nextStep(null);
 		}
 	}
 }

@@ -64,4 +64,9 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 		}
 	}
 
+	@Override
+	protected void handleRemovalResult(FutureDHT future) {
+		// not used
+	}
+
 }

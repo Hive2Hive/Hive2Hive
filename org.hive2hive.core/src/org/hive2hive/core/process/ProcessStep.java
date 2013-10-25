@@ -93,6 +93,19 @@ public abstract class ProcessStep {
 	 */
 	protected abstract void handleGetResult(FutureDHT future);
 
+	/**
+	 * An optional method which my be implemented blank if not needed.</br>
+	 * If this step needs to get something from the DHT, this method will be called once the {@link FutureDHT}
+	 * is done at this node.</br></br>
+	 * <b>Advice:</b></br>
+	 * Although it is possible for a step to do multiple gets, this should be avoided
+	 * if possible. We recommend to use a separate step for each request. This eases the reading and
+	 * encapsulates one action in one step only.
+	 * 
+	 * @param future the {@link FutureDHT} containing the result of the request.
+	 */
+	protected abstract void handleRemovalResult(FutureDHT future);
+
 	protected void send(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
 			BaseRequestMessage requestMessage = (BaseRequestMessage) message;
@@ -108,7 +121,7 @@ public abstract class ProcessStep {
 
 	/**
 	 * Make a put to the DHT. This is a non-blocking call; when it is done, it will call
-	 * {@link ProcessStep.handlePutGetResult}
+	 * {@link ProcessStep.handlePutResult}
 	 * 
 	 * @param locationKey
 	 * @param contentKey
@@ -130,7 +143,7 @@ public abstract class ProcessStep {
 
 	/**
 	 * Make a get to the DHT. This is a non-blocking call; when it is done, it will call
-	 * {@link ProcessStep.handlePutGetResult}
+	 * {@link ProcessStep.handleGetResult}
 	 * 
 	 * @param locationKey
 	 * @param contentKey
@@ -141,6 +154,22 @@ public abstract class ProcessStep {
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
 				handleGetResult(future);
+			}
+		});
+	}
+
+	/**
+	 * Call the DHT to remove a content. When it is done, it will call {@link ProcessStep.handleRemovalResult}
+	 * 
+	 * @param locationKey
+	 * @param contentKey
+	 */
+	protected void remove(String locationKey, String contentKey) {
+		FutureDHT removalFuture = getNetworkManager().remove(locationKey, contentKey);
+		removalFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+			@Override
+			public void operationComplete(FutureDHT future) throws Exception {
+				handleRemovalResult(future);
 			}
 		});
 	}
