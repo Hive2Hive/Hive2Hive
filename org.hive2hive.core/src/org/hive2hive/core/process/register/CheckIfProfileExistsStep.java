@@ -5,6 +5,7 @@ import java.io.IOException;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
@@ -16,9 +17,9 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CheckIfProfileExistsStep.class);
 
 	private final String userId;
-	private final String password;
+	private final UserPassword password;
 
-	public CheckIfProfileExistsStep(String userId, String password) {
+	public CheckIfProfileExistsStep(String userId, UserPassword password) {
 		this.userId = userId;
 		this.password = password;
 	}

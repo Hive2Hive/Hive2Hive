@@ -4,11 +4,13 @@ import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FutureDHT;
 
+import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.encryption.EncryptedContent;
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.UserPassword;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
@@ -20,6 +22,8 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  */
 public class PutUserProfileStep extends ProcessStep {
+
+	private final static Logger logger = H2HLoggerFactory.getLogger(PutUserProfileStep.class);
 
 	private final UserProfile profile;
 	private final ProcessStep next;
@@ -33,15 +37,16 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	public void start() {
+		logger.debug("Encrypting UserProfile with 128bit AES key from password");
 		SecretKey encryptionKey = EncryptionUtil.createAESKeyFromPassword(password, AES_KEYLENGTH.BIT_128);
 		EncryptedContent closedUserProfile = EncryptionUtil.encryptAES(profile, encryptionKey);
+		logger.debug("Putting UserProfile into the DHT");
 		put(profile.getUserId(), H2HConstants.USER_PROFILE, closedUserProfile);
 	}
 
 	@Override
 	public void rollBack() {
-		// TODO Auto-generated method stub
-
+		// TODO: Remove the user profile from DHT
 	}
 
 	@Override
@@ -51,7 +56,11 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void handlePutResult(FutureDHT future) {
-		getProcess().nextStep(next);
+		if (future.isSuccess()) {
+			getProcess().nextStep(next);
+		} else {
+			logger.error("Error occurred while putting user profile into DHT. Starting rollback");
+		}
 	}
 
 	@Override
