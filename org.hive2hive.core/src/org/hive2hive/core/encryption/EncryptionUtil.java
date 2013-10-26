@@ -1,7 +1,6 @@
 package org.hive2hive.core.encryption;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
@@ -11,14 +10,21 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.KeyGenerationParameters;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -65,7 +71,7 @@ public final class EncryptionUtil {
 			return bitLength;
 		}
 	}
-	
+
 	private EncryptionUtil() {
 	}
 
@@ -91,18 +97,27 @@ public final class EncryptionUtil {
 		return null;
 	}
 
-	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
-		
-		installBCProvider();
+	public static AsymmetricCipherKeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
 
-		try {
-			final KeyPairGenerator kpg = KeyPairGenerator.getInstance(RSA, BC);
-			kpg.initialize(keyLength.value(), new SecureRandom());
-			return kpg.generateKeyPair();		
-		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-			logger.error("Exception while RSA key generator instance creation:", e);
-		}
-		return null;
+		BigInteger publicExp = new BigInteger("10001", 16); // Fermat F4, largest known fermat prime
+		int strength = keyLength.value();
+		int certainty = 80; // certainty for the numbers to be primes, values >80 slow down algorithm
+		
+		RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
+		KeyGenerationParameters parameters = new RSAKeyGenerationParameters(publicExp, new SecureRandom(), strength, certainty);
+		kpg.init(parameters);
+
+		AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
+		return keyPair;
+
+		// try {
+		// final KeyPairGenerator kpg = KeyPairGenerator.getInstance(RSA, BC);
+		// kpg.initialize(keyLength.value(), new SecureRandom());
+		// return kpg.generateKeyPair();
+		// } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+		// logger.error("Exception while RSA key generator instance creation:", e);
+		// }
+		// return null;
 	}
 
 	// public static EncryptedContent encryptAES(byte[] data, SecretKey secretKey) throws InvalidKeyException,
@@ -163,6 +178,55 @@ public final class EncryptionUtil {
 		return cipherData(cipher, data);
 	}
 
+	public static byte[] encryptRSA(byte[] data, CipherParameters key) throws InvalidCipherTextException {
+
+		// String value = "";
+		// String key = readFileAsString(publicKeyFilename);
+		// BASE64Decoder b64 = new BASE64Decoder();
+		// AsymmetricKeyParameter publicKey =
+		// (AsymmetricKeyParameter) PublicKeyFactory.createKey(b64.decodeBuffer(key));
+		// AsymmetricBlockCipher e = new RSAEngine();
+		// e = new org.bouncycastle.crypto.encodings.PKCS1Encoding(e);
+		// e.init(true, publicKey);
+		//
+		// String inputdata = readFileAsString(inputFilename);
+		// byte[] messageBytes = inputdata.getBytes();
+		// int i = 0;
+		// int len = e.getInputBlockSize();
+		// while (i < messageBytes.length)
+		// {
+		// if (i + len > messageBytes.length)
+		// len = messageBytes.length - i;
+		//
+		// byte[] hexEncodedCipher = e.processBlock(messageBytes, i, len);
+		// value = value + getHexString(hexEncodedCipher);
+		// i += e.getInputBlockSize();
+		// }
+		//
+		// System.out.println(value);
+		// BufferedWriter out = new BufferedWriter(new FileWriter(encryptedFilename));
+		// out.write(value);
+		// out.close();
+
+		RSAEngine rsaEngine = new RSAEngine();
+		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
+
+		cipher.init(true, key);
+
+		int position = 0;
+		int inputBlockSize = cipher.getInputBlockSize();
+		byte[] result = new byte[0];
+		while (position < data.length) {
+			if (position + inputBlockSize > data.length)
+				inputBlockSize = data.length - position;
+
+			byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
+			result = combine(result, hexEncodedCipher);
+			position += cipher.getInputBlockSize();
+		}
+		return result;
+	}
+
 	public static String toHex(byte[] data) {
 
 		StringBuffer buf = new StringBuffer();
@@ -194,5 +258,15 @@ public final class EncryptionUtil {
 		byte[] result = new byte[length1 + length2];
 		System.arraycopy(outBuffer, 0, result, 0, result.length);
 		return result;
+	}
+
+	private static byte[] combine(byte[] one, byte[] two) {
+
+		byte[] combined = new byte[one.length + two.length];
+
+		System.arraycopy(one, 0, combined, 0, one.length);
+		System.arraycopy(two, 0, combined, one.length, two.length);
+
+		return combined;
 	}
 }

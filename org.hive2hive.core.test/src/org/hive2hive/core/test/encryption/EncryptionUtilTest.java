@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 import javax.crypto.SecretKey;
 
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.encryption.EncryptionUtil;
@@ -56,16 +57,12 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			logger.debug(String.format("Testing RSA %s-bit key pair generation.", sizes[s].value()));
 
-			// generate RSA key pair
-			KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
-			logger.debug(String.format("- Generated Private Key: %s", EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded())));
-			logger.debug(String.format("- Generated Public Key:  %s", EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded())));
-
+			// generate RSA key pair			
+			AsymmetricCipherKeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+			
 			assertNotNull(rsaKeyPair);
 			assertNotNull(rsaKeyPair.getPrivate());
 			assertNotNull(rsaKeyPair.getPublic());
-			assertTrue(rsaKeyPair.getPrivate().getAlgorithm().equals(EncryptionUtil.RSA));
-			assertTrue(rsaKeyPair.getPublic().getAlgorithm().equals(EncryptionUtil.RSA));
 		}
 	}
 	
