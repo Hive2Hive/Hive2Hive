@@ -3,6 +3,8 @@ package org.hive2hive.core.test.flowcontrol.register;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.encryption.EncryptedContent;
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.register.RegisterProcess;
@@ -12,6 +14,7 @@ import org.hive2hive.core.test.flowcontrol.TestProcessListener;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,15 +38,51 @@ public class RegisterTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCheckIfProfileExistsStepRollback() {
-		String userId = "a user id";
-		String password = "a password";
+	public void testRegisterProcessSuccess() {
+		NetworkManager client = network.get(0);
+		NetworkManager proxy = network.get(1);
 
-		NetworkManager node = network.get(0);
+		String userId = proxy.getNodeId();
+		String password = NetworkTestUtil.randomString();
 
-		node.putGlobal(userId, H2HConstants.USER_PROFILE, new UserProfile(userId, null, null));
+		RegisterProcess process = new RegisterProcess(userId, password, client);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
 
-		RegisterProcess process = new RegisterProcess(userId, password, node);
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// verify the new user profile and the locations map
+		EncryptedContent content = (EncryptedContent) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
+		Locations locations = (Locations) proxy.getLocal(userId, H2HConstants.USER_LOCATIONS);
+
+		// TODO: How to decrypt the profile correctly (with password only, without salt)
+		Assert.assertNotNull(content);
+		Assert.assertNotNull(locations);
+
+		// userId should match
+		// Assert.assertEquals(userId, profile.getUserId());
+		Assert.assertEquals(userId, locations.getUserId());
+
+		// fresh location maps should be empty
+		Assert.assertTrue(locations.getOnlinePeers().isEmpty());
+	}
+
+	@Test
+	public void testRegisterProcessProfileExists() {
+		NetworkManager client = network.get(0);
+		NetworkManager proxy = network.get(1);
+
+		String userId = proxy.getNodeId();
+		String password = NetworkTestUtil.randomString();
+
+		// already put a profile
+		client.putGlobal(userId, H2HConstants.USER_PROFILE, new UserProfile(userId, null, null));
+
+		RegisterProcess process = new RegisterProcess(userId, password, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

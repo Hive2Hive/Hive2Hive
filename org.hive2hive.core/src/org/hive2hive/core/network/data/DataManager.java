@@ -43,6 +43,7 @@ public class DataManager {
 	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkData wrapper) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
+			// TODO: How to use the domain key?
 			Data data = new Data(wrapper);
 			data.setTTLSeconds(wrapper.getTimeToLive());
 			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
@@ -86,6 +87,7 @@ public class DataManager {
 	public void putLocal(String locationKey, String contentKey, NetworkData wrapper) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
+			// TODO: How to use the domain key?
 			Data data = new Data(wrapper);
 			data.setTTLSeconds(wrapper.getTimeToLive());
 			networkManager

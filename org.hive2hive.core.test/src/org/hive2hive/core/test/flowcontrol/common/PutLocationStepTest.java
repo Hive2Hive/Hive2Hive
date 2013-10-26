@@ -72,7 +72,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		Assert.assertNotNull(found);
 
 		// verify if both objects are the same
-		Assert.assertEquals(userId, found.getForUser());
+		Assert.assertEquals(userId, found.getUserId());
 		Assert.assertEquals(putter.getPeerAddress(), found.getOnlinePeers().get(0).getAddress());
 	}
 
@@ -115,7 +115,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		Assert.assertNotNull(found);
 
 		// verify if both objects are the same
-		Assert.assertEquals(userId, found.getForUser());
+		Assert.assertEquals(userId, found.getUserId());
 		Assert.assertTrue(found.getOnlinePeers().isEmpty());
 	}
 

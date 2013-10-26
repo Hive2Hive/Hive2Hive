@@ -21,12 +21,12 @@ public class PutLocationStep extends PutProcessStep {
 
 	@Override
 	public void start() {
-		put(locations.getForUser(), H2HConstants.USER_LOCATIONS, locations);
+		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations);
 	}
 
 	@Override
 	public void rollBack() {
-		super.rollBackPut(locations.getForUser(), H2HConstants.USER_LOCATIONS);
+		super.rollBackPut(locations.getUserId(), H2HConstants.USER_LOCATIONS);
 	}
 
 	@Override

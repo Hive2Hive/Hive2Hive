@@ -5,23 +5,22 @@ import java.io.IOException;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.PutLocationStep;
+import org.hive2hive.core.process.common.PutUserProfileStep;
 
 public class CheckIfProfileExistsStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CheckIfProfileExistsStep.class);
-
 	private final String userId;
-	private final UserPassword password;
 
-	public CheckIfProfileExistsStep(String userId, UserPassword password) {
+	public CheckIfProfileExistsStep(String userId) {
 		this.userId = userId;
-		this.password = password;
 	}
 
 	@Override
@@ -49,8 +48,7 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	protected void handleGetResult(FutureDHT future) {
 		if (future.getData() == null) {
 			logger.debug(String.format("No user profile exists. user id = '%s'", userId));
-			// TODO assign next process
-			getProcess().nextStep(null);
+			continueWithNextStep();
 		} else {
 			try {
 				if (!(future.getData().getObject() instanceof UserProfile)) {
@@ -64,9 +62,20 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 		}
 	}
 
+	private void continueWithNextStep() {
+		RegisterProcess process = (RegisterProcess) super.getProcess();
+
+		// create the next steps:
+		// first, put the new user profile
+		// second, put the empty locations map
+		PutLocationStep putLocations = new PutLocationStep(new Locations(userId), null, null);
+		PutUserProfileStep putUserProfile = new PutUserProfileStep(process.getUserProfile(), null,
+				process.getUserPassword(), putLocations);
+		getProcess().nextStep(putUserProfile);
+	}
+
 	@Override
 	protected void handleRemovalResult(FutureDHT future) {
 		// not used
 	}
-
 }

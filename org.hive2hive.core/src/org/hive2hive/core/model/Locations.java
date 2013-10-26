@@ -26,7 +26,7 @@ public class Locations extends NetworkData {
 		onlinePeers = new ArrayList<OnlinePeer>();
 	}
 
-	public String getForUser() {
+	public String getUserId() {
 		return forUser;
 	}
 
