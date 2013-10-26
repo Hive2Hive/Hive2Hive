@@ -129,45 +129,13 @@ public final class EncryptionUtil {
 	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey)
 			throws InvalidCipherTextException {
 
-		RSAEngine rsaEngine = new RSAEngine();
-		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
-
-		cipher.init(true, publicKey);
-
-		int position = 0;
-		int inputBlockSize = cipher.getInputBlockSize();
-		byte[] result = new byte[0];
-		while (position < data.length) {
-			if (position + inputBlockSize > data.length)
-				inputBlockSize = data.length - position;
-
-			byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
-			result = combine(result, hexEncodedCipher);
-			position += cipher.getInputBlockSize();
-		}
-		return result;
+		return processRSACiphering(true, data, publicKey);
 	}
 
 	public static byte[] decryptRSA(byte[] data, CipherParameters privateKey)
 			throws InvalidCipherTextException {
 
-		RSAEngine rsaEngine = new RSAEngine();
-		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
-
-		cipher.init(false, privateKey);
-
-		int position = 0;
-		int inputBlockSize = cipher.getInputBlockSize();
-		byte[] result = new byte[0];
-		while (position < data.length) {
-			if (position + inputBlockSize > data.length)
-				inputBlockSize = data.length - position;
-
-			byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
-			result = combine(result, hexEncodedCipher);
-			position += cipher.getInputBlockSize();
-		}
-		return result;
+		return processRSACiphering(false, data, privateKey);
 	}
 
 	public static String toHex(byte[] data) {
@@ -210,6 +178,31 @@ public final class EncryptionUtil {
 
 		byte[] result = new byte[bytesProcessed1 + bytesProcessed2];
 		System.arraycopy(output, 0, result, 0, result.length);
+		return result;
+	}
+
+	private static byte[] processRSACiphering(boolean isEncrypting, byte[] data, CipherParameters key)
+			throws InvalidCipherTextException {
+
+		// set up engine and padding
+		RSAEngine rsaEngine = new RSAEngine();
+		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
+
+		// apply parameters
+		cipher.init(isEncrypting, key);
+
+		// process ciphering
+		int position = 0;
+		int inputBlockSize = cipher.getInputBlockSize();
+		byte[] result = new byte[0];
+		while (position < data.length) {
+			if (position + inputBlockSize > data.length)
+				inputBlockSize = data.length - position;
+
+			byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
+			result = combine(result, hexEncodedCipher);
+			position += cipher.getInputBlockSize();
+		}
 		return result;
 	}
 
