@@ -44,7 +44,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			logger.debug(String.format("Generated AES key: %s", EncryptionUtil.toHex(aesKey.getEncoded())));
 
 			assertNotNull(aesKey);
-			assertTrue(aesKey.getAlgorithm().equals(EncryptionUtil.AES));
+			assertTrue(aesKey.getAlgorithm().equals("AES"));
 		}
 	}
 

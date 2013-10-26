@@ -35,15 +35,10 @@ public final class EncryptionUtil {
 
 	private static String digits = "0123456789abcdef";
 
-	private static final String BC = "BC";
-	public static final String AES = "AES";
-	public static final String RSA = "RSA";
-	private static final String AES_CBC_PKCS7PADDING = "AES/CBC/PKCS7Padding";
-
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
-		BIT192(192),
-		BIT256(256);
+		BIT_192(192),
+		BIT_256(256);
 
 		private final int bitLength;
 
@@ -84,14 +79,13 @@ public final class EncryptionUtil {
 
 	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength) {
 
-		// TODO re-implement with BC classes
 		installBCProvider();
 
 		try {
-			final KeyGenerator kg = KeyGenerator.getInstance(AES, BC);
+			final KeyGenerator kg = KeyGenerator.getInstance("AES", "BC");
 			kg.init(keyLength.value(), new SecureRandom());
 			byte[] encoded = kg.generateKey().getEncoded();
-			return new SecretKeySpec(encoded, AES);
+			return new SecretKeySpec(encoded, "AES");
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			logger.error("Exception while AES key generator instance creation:", e);
 		}
@@ -152,8 +146,8 @@ public final class EncryptionUtil {
 		return buf.toString();
 	}
 
-	public static void installBCProvider() {
-		if (Security.getProvider(BC) == null) {
+	private static void installBCProvider() {
+		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
 	}
