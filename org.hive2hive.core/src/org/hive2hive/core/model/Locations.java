@@ -60,6 +60,10 @@ public class Locations extends NetworkData {
 		return true;
 	}
 
+	public List<OnlinePeer> getOnlinePeers() {
+		return onlinePeers;
+	}
+
 	public OnlinePeer getMaster() {
 		for (OnlinePeer peer : onlinePeers) {
 			if (peer.isMaster())

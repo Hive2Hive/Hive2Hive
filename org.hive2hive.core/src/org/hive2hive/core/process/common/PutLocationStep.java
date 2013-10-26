@@ -10,25 +10,23 @@ import org.hive2hive.core.process.PutProcessStep;
 
 public class PutLocationStep extends PutProcessStep {
 
-	private final String userId;
 	private final Locations locations;
 	private final ProcessStep nextStep;
 
-	public PutLocationStep(String userId, Locations locations, Locations previousVersion, ProcessStep nextStep) {
+	public PutLocationStep(Locations locations, Locations previousVersion, ProcessStep nextStep) {
 		super(previousVersion);
-		this.userId = userId;
 		this.locations = locations;
 		this.nextStep = nextStep;
 	}
 
 	@Override
 	public void start() {
-		put(userId, H2HConstants.USER_LOCATIONS, locations);
+		put(locations.getForUser(), H2HConstants.USER_LOCATIONS, locations);
 	}
 
 	@Override
 	public void rollBack() {
-		super.rollBackPut(userId, H2HConstants.USER_LOCATIONS);
+		super.rollBackPut(locations.getForUser(), H2HConstants.USER_LOCATIONS);
 	}
 
 	@Override
