@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;

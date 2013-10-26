@@ -84,6 +84,7 @@ public final class EncryptionUtil {
 
 	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength) {
 
+		// TODO re-implement with BC classes
 		installBCProvider();
 
 		try {
@@ -95,6 +96,7 @@ public final class EncryptionUtil {
 			logger.error("Exception while AES key generator instance creation:", e);
 		}
 		return null;
+
 	}
 
 	public static AsymmetricCipherKeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
@@ -110,73 +112,18 @@ public final class EncryptionUtil {
 
 		AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
 		return keyPair;
-
-		// try {
-		// final KeyPairGenerator kpg = KeyPairGenerator.getInstance(RSA, BC);
-		// kpg.initialize(keyLength.value(), new SecureRandom());
-		// return kpg.generateKeyPair();
-		// } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-		// logger.error("Exception while RSA key generator instance creation:", e);
-		// }
-		// return null;
 	}
-
-	// public static EncryptedContent encryptAES(byte[] data, SecretKey secretKey) throws InvalidKeyException,
-	// InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-	// return encryptAES(data, generateIV(), secretKey);
-	// }
-	//
-	// public static EncryptedContent encryptAES(byte[] data, byte[] initVector, SecretKey secretKey)
-	// throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
-	// BadPaddingException {
-	//
-	// // initialize the initialization vector (IV)
-	// IvParameterSpec ivSpec = new IvParameterSpec(initVector);
-	//
-	// // create cipher instance
-	// try {
-	// Cipher cipher = Cipher.getInstance(AES_CBC_PKCS7PADDING, BC);
-	//
-	// // initialize cipher
-	// cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
-	//
-	// // encrypt data
-	// byte[] cipherContent = cipher.doFinal(data);
-	//
-	// return new EncryptedContent(cipherContent, initVector);
-	//
-	// } catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
-	// logger.error("Exception while cipher instance creation:", e);
-	// }
-	// return null;
-	// }
 
 	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
-		AESEngine aesEngine = new AESEngine();
-		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
-		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
-
-		CipherParameters parameters = new ParametersWithIV(new KeyParameter(secretKey.getEncoded()),
-				initVector);
-		cipher.init(true, parameters);
-
-		return cipherData(cipher, data);
+		return processAESCiphering(true, data, secretKey, initVector);
 	}
 
 	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
-		AESEngine aesEngine = new AESEngine();
-		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
-		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
-
-		CipherParameters parameters = new ParametersWithIV(new KeyParameter(secretKey.getEncoded()),
-				initVector);
-		cipher.init(false, parameters);
-
-		return cipherData(cipher, data);
+		return processAESCiphering(false, data, secretKey, initVector);
 	}
 
 	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey)
@@ -201,13 +148,14 @@ public final class EncryptionUtil {
 		return result;
 	}
 
-	public static byte[] decryptRSA(byte[] data, CipherParameters privateKey) throws InvalidCipherTextException {
+	public static byte[] decryptRSA(byte[] data, CipherParameters privateKey)
+			throws InvalidCipherTextException {
 
 		RSAEngine rsaEngine = new RSAEngine();
 		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
-		
+
 		cipher.init(false, privateKey);
-		
+
 		int position = 0;
 		int inputBlockSize = cipher.getInputBlockSize();
 		byte[] result = new byte[0];
@@ -219,7 +167,7 @@ public final class EncryptionUtil {
 			result = combine(result, hexEncodedCipher);
 			position += cipher.getInputBlockSize();
 		}
-		return result;		
+		return result;
 	}
 
 	public static String toHex(byte[] data) {
@@ -242,16 +190,26 @@ public final class EncryptionUtil {
 		}
 	}
 
-	private static byte[] cipherData(PaddedBufferedBlockCipher cipher, byte[] data)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+	private static byte[] processAESCiphering(boolean isEncrypting, byte[] data, SecretKey key,
+			byte[] initVector) throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
-		byte[] outBuffer = new byte[cipher.getOutputSize(data.length)];
+		// set up engine, block cipher mode and padding
+		AESEngine aesEngine = new AESEngine();
+		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
+		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
 
-		int length1 = cipher.processBytes(data, 0, data.length, outBuffer, 0);
-		int length2 = cipher.doFinal(outBuffer, length1);
+		// apply parameters
+		CipherParameters parameters = new ParametersWithIV(new KeyParameter(key.getEncoded()), initVector);
+		cipher.init(isEncrypting, parameters);
 
-		byte[] result = new byte[length1 + length2];
-		System.arraycopy(outBuffer, 0, result, 0, result.length);
+		// process ciphering
+		byte[] output = new byte[cipher.getOutputSize(data.length)];
+
+		int bytesProcessed1 = cipher.processBytes(data, 0, data.length, output, 0);
+		int bytesProcessed2 = cipher.doFinal(output, bytesProcessed1);
+
+		byte[] result = new byte[bytesProcessed1 + bytesProcessed2];
+		System.arraycopy(output, 0, result, 0, result.length);
 		return result;
 	}
 
