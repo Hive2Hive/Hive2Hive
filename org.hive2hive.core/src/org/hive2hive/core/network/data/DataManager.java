@@ -111,7 +111,7 @@ public class DataManager {
 	 *            the content key - please choose one from {@link H2HConstants}
 	 * @return the desired content from the wrapper
 	 */
-	public Object getLocal(String locationKey, String contentKey) {
+	public NetworkData getLocal(String locationKey, String contentKey) {
 		logger.debug(String.format("local get key = '%s' content key = '%s'", locationKey, contentKey));
 		Data data = networkManager
 				.getConnection()
@@ -122,7 +122,7 @@ public class DataManager {
 						Number160.createHash(contentKey));
 		if (data != null) {
 			try {
-				return data.getObject();
+				return (NetworkData) data.getObject();
 			} catch (ClassNotFoundException | IOException e) {
 				logger.error(String.format("local get failed exception = '%s'", e.getMessage()));
 			}

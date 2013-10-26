@@ -46,7 +46,8 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// TODO: Remove the user profile from DHT
+		// Remove the user profile from DHT
+		remove(profile.getUserId(), H2HConstants.USER_PROFILE);
 	}
 
 	@Override
@@ -60,6 +61,7 @@ public class PutUserProfileStep extends ProcessStep {
 			getProcess().nextStep(next);
 		} else {
 			logger.error("Error occurred while putting user profile into DHT. Starting rollback");
+			getProcess().rollBack("UserProfile could not be put");
 		}
 	}
 
@@ -70,7 +72,12 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void handleRemovalResult(FutureDHT future) {
-		// TODO only needed when rollbacking
+		// only needed when rollbacking
+		if (future.isSuccess()) {
+			logger.debug("Removed the user profile while rollbacking");
+		} else {
+			logger.error("Could not remove the user profile while rollbacking. Could be that the profile has never been put.");
+		}
 	}
 
 }

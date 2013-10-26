@@ -170,7 +170,7 @@ public class NetworkManager {
 	 *            the content key - please choose one from {@link H2HConstants}
 	 * @return the desired content from the wrapper
 	 */
-	public Object getLocal(String locationKey, String contentKey) {
+	public NetworkData getLocal(String locationKey, String contentKey) {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.getLocal(locationKey, contentKey);

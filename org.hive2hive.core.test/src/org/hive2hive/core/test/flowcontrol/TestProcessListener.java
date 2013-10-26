@@ -4,8 +4,8 @@ import org.hive2hive.core.process.listener.IProcessListener;
 
 public class TestProcessListener implements IProcessListener {
 
-	public boolean onSuccess = false;
-	public boolean onFailure = false;
+	private boolean onSuccess = false;
+	private boolean onFailure = false;
 
 	public boolean hasSucceeded() {
 		return onSuccess;

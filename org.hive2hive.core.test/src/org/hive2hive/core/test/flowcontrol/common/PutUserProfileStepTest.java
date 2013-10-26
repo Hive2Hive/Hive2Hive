@@ -13,6 +13,7 @@ import org.hive2hive.core.encryption.ProfileEncryptionUtil;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.PutUserProfileStep;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -51,7 +52,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStep() throws InterruptedException {
+	public void testStepSuccessful() throws InterruptedException {
 		NetworkManager putter = network.get(0); // where the process runs
 		NetworkManager proxy = network.get(1); // where the user profile is stored
 
@@ -76,7 +77,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
 			waiter.tickASecond();
-		} while (!listener.onSuccess);
+		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
 		EncryptedContent found = (EncryptedContent) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
@@ -90,6 +91,46 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// verify if both objects are the same
 		Assert.assertEquals(userId, decrypted.getUserId());
 		Assert.assertEquals(testProfile.getTimestamp(), decrypted.getTimestamp());
+	}
+
+	@Test
+	public void testStepRollback() throws InterruptedException {
+		NetworkManager putter = network.get(0); // where the process runs
+		NetworkManager proxy = network.get(1); // where the user profile is stored
+
+		// create the needed objects
+		String userId = proxy.getNodeId();
+		String password = NetworkTestUtil.randomString();
+		UserPassword userPassword = ProfileEncryptionUtil.createUserPassword(password);
+		UserProfile testProfile = new UserProfile(userId,
+				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024),
+				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024));
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(putter) {
+		};
+		PutUserProfileStep step = new PutUserProfileStep(testProfile, userPassword, null);
+		process.setFirstStep(step);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// rollback
+		process.rollBack("Testing the rollback");
+
+		waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+
+		NetworkData nothing = proxy.getLocal(userId, H2HConstants.USER_PROFILE);
+		Assert.assertNull(nothing);
 	}
 
 	@Override
