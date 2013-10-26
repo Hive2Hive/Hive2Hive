@@ -174,24 +174,29 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// generate random sized content (max. 100 bytes)
 			byte[] data = generateRandomContent(100);
-			printBytes("Original Data", data);
+			printBytes("Original Data:", data);
 
 			// generate RSA key pair
 			AsymmetricCipherKeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
 
 			// sign data with private key
-			byte[] signedData = null;
+			byte[] signature = null;
 			try {
-				signedData = EncryptionUtil.sign(data, rsaKeyPair.getPrivate());
+				signature = EncryptionUtil.sign(data, rsaKeyPair.getPrivate());
 			} catch (DataLengthException | CryptoException e) {
 				logger.error("Exception while testing signing:", e);
 				e.printStackTrace();
 			}
 			
-			assertNotNull(signedData);
-			assertFalse(Arrays.equals(data, signedData));
+			assertNotNull(signature);
 
-			printBytes("Signed Data:", signedData);
+			printBytes("Signature:", signature);
+			
+			// verify data with public key
+			boolean isVerified = false;
+			isVerified = EncryptionUtil.verify(data, signature, rsaKeyPair.getPublic());
+			
+			assertTrue(isVerified);
 		}
 	}
 

@@ -140,22 +140,23 @@ public final class EncryptionUtil {
 		return processRSACiphering(false, data, privateKey);
 	}
 
-	public static byte[] sign(byte[] data, CipherParameters privateKey) throws DataLengthException, CryptoException {
+	public static byte[] sign(byte[] data, CipherParameters privateKey) throws DataLengthException,
+			CryptoException {
 
-		SHA1Digest digester = new SHA1Digest();	
+		SHA1Digest digester = new SHA1Digest();
 		RSADigestSigner signer = new RSADigestSigner(digester);
 		signer.init(true, privateKey);
 		signer.update(data, 0, data.length);
 		return signer.generateSignature();
 	}
-	
-	public static boolean verify(byte[] data, CipherParameters publicKey){
-		
-		SHA1Digest digester = new SHA1Digest();	
+
+	public static boolean verify(byte[] data, byte[] signature, CipherParameters publicKey) {
+
+		SHA1Digest digester = new SHA1Digest();
 		RSADigestSigner signer = new RSADigestSigner(digester);
 		signer.init(false, publicKey);
-		signer.update(data, 0, data.length);	
-		return signer.verifySignature(data);
+		signer.update(data, 0, data.length);
+		return signer.verifySignature(signature);
 	}
 
 	public static byte[] serializeObject(Object object) {
