@@ -1,19 +1,17 @@
 package org.hive2hive.core.test.encryption;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import java.security.KeyPair;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Random;
 
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
@@ -124,10 +122,11 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// generate random sized content (max. (key size / 8) - 11 bytes)
 			byte[] data = generateRandomContent((sizes[s].value() / 8) - 11);
-			
-			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.", data.length, sizes[s].value()));
+
+			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.",
+					data.length, sizes[s].value()));
 			printBytes("Original Data", data);
-			
+
 			// generate RSA key pair
 			AsymmetricCipherKeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
 
@@ -142,9 +141,9 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			assertNotNull(encryptedData);
 			assertFalse(Arrays.equals(data, encryptedData));
-			
+
 			printBytes("Encrypted Data:", encryptedData);
-			
+
 			// decrypt data with private key
 			byte[] decryptedData = null;
 			try {
@@ -153,12 +152,28 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				logger.error("Exception while testing RSA decryption:", e);
 				e.printStackTrace();
 			}
-			
+
 			assertNotNull(decryptedData);
 			assertTrue(Arrays.equals(data, decryptedData));
-			
+
 			printBytes("Decrypted Data:", decryptedData);
 		}
+	}
+
+	@Test
+	public void serializationTest() {
+
+		String data = generateRandomString();
+		logger.debug("Testing data serialization.");
+		logger.debug("Test String: " + data);
+
+		byte[] serializedData = EncryptionUtil.serializeObject(data);
+		assertNotNull(serializedData);
+		printBytes("Serialized Data:", serializedData);
+
+		String deserializedData = (String) EncryptionUtil.deserializeObject(serializedData);
+		assertNotNull(deserializedData);
+		assertEquals(data, deserializedData);
 	}
 
 	private static AES_KEYLENGTH[] getAESKeySizes() {
@@ -183,8 +198,12 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		random.nextBytes(content);
 		return content;
 	}
-	
-	private static void printBytes(String description, byte[] bytes){
+
+	private static String generateRandomString() {
+		return new BigInteger(130, new Random()).toString(32);
+	}
+
+	private static void printBytes(String description, byte[] bytes) {
 		logger.debug(description);
 		logger.debug(EncryptionUtil.toHex(bytes));
 	}

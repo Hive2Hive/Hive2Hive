@@ -31,20 +31,6 @@ public class JavaEncryptionUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void serializationTest() {
-
-		// test String serialization
-		String testString = "abcdefghijklmnopqrstuvwxyzüöä 0123456789";
-		byte[] serialized = encryptionUtil.serializeObject(testString);
-		Assert.assertNotEquals(testString, encryptionUtil.toString(serialized));
-
-		String deserialized = (String) encryptionUtil.deserializeObject(serialized);
-		Assert.assertEquals(testString, deserialized);
-
-		// TODO test Object serialization
-	}
-
-	@Test
 	public void toByteTest() {
 
 		String testString = "abcdefghijklmnopqrstuvwxyzüöä 0123456789";

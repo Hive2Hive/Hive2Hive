@@ -92,52 +92,6 @@ public final class JavaEncryptionUtil {
 	public JavaEncryptionUtil() {
 	}
 
-	public byte[] serializeObject(Object object) {
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = null;
-		byte[] result = null;
-
-		try {
-			oos = new ObjectOutputStream(baos);
-			oos.writeObject(object);
-			result = baos.toByteArray();
-		} catch (IOException e) {
-			logger.error("Exception while serializing object.");
-		} finally {
-			try {
-				oos.close();
-				baos.close();
-			} catch (IOException e) {
-				logger.error("Exception while closing serialization process.");
-			}
-		}
-		return result;
-	}
-
-	public Object deserializeObject(byte[] bytes) {
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = null;
-		Object result = null;
-
-		try {
-			ois = new ObjectInputStream(bais);
-			result = ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			logger.error("Exception while deserializing object.");
-		} finally {
-			try {
-				ois.close();
-				bais.close();
-			} catch (IOException e) {
-				logger.error("Exception while closing deserialization process.");
-			}
-		}
-
-		return result;
-	}
-
 	/**
 	 * Symmetrically encrypts byte[] content by means of the AES algorithm.
 	 * 
