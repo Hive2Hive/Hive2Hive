@@ -1,13 +1,6 @@
 package org.hive2hive.core.encryption;
 
 import java.io.Serializable;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.hive2hive.core.encryption.JavaEncryptionUtil.AES_KEYLENGTH;
 
 /**
  * This class is used to encrypt objects for transmission. The content to transmit is encrypted in a hybrid manner.

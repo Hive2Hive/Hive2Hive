@@ -10,9 +10,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
@@ -100,6 +104,20 @@ public final class EncryptionUtil {
 	}
 
 	/**
+	 * Generates a random salt that can be used in combination with a password in order to prevent dictionary
+	 * attacks.
+	 * 
+	 * @return A random 8 byte salt.
+	 */
+	public static byte[] generateSalt(int byteLength) {
+
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[byteLength];
+		random.nextBytes(salt);
+		return salt;
+	}
+
+	/**
 	 * Generates a symmetric AES key of the specified key length.
 	 * 
 	 * @param keyLength The length the AES key should have.
@@ -119,6 +137,16 @@ public final class EncryptionUtil {
 		}
 		return null;
 
+	}
+
+	@Deprecated
+	public static SecretKey generateAESKeyFromPassword(UserPassword password, AES_KEYLENGTH keyLength)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		KeySpec spec = new PBEKeySpec(password.getPassword(), password.getSalt(), 65536, keyLength.value());
+		SecretKey tmpKey = kf.generateSecret(spec);
+		SecretKey key = new SecretKeySpec(tmpKey.getEncoded(), "AES");
+		return key;
 	}
 
 	/**
@@ -274,6 +302,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Converts the content of a byte array into a human readable form.
+	 * 
 	 * @param data The byte array to be converted.
 	 * @return The hex converted byte array.
 	 */
