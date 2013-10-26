@@ -260,40 +260,40 @@ public class JavaEncryptionUtilTest extends H2HJUnitTest {
 //		Assert.assertEquals(testString, testString2);
 //	}
 
-	@Test
-	public void signatureTest() {
-
-		// check all key sizes
-		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
-
-		for (int s = 0; s < sizes.length; s++) {
-
-			// generate random sized content (max. 5MB)
-			SecureRandom random = new SecureRandom();
-			byte[] content = new byte[random.nextInt(5242880)];
-			random.nextBytes(content);
-
-			// create an asymmetric key pair
-			KeyPair rsaKeyPair = encryptionUtil.createRSAKeys(sizes[s]);
-
-			logger.debug(String.format("Testing signature of a sample %s byte file with a %s bit key.",
-					content.length, sizes[s].value()));
-			
-			// sign the content
-			SignedContent signedContent = encryptionUtil.sign(content, rsaKeyPair.getPrivate());
-			
-			Assert.assertNotNull(signedContent);
-			Assert.assertNotNull(signedContent.getOriginalData());
-			Assert.assertNotNull(signedContent.getSignatureBytes());
-			Assert.assertTrue(Arrays.equals(content, signedContent.getOriginalData()));
-			Assert.assertFalse(Arrays.equals(content, signedContent.getSignatureBytes()));
-			
-			// verify the content
-			boolean isVerified = encryptionUtil.verify(signedContent, rsaKeyPair.getPublic());
-			
-			Assert.assertTrue(isVerified);
-		}
-	}
+//	@Test
+//	public void signatureTest() {
+//
+//		// check all key sizes
+//		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
+//
+//		for (int s = 0; s < sizes.length; s++) {
+//
+//			// generate random sized content (max. 5MB)
+//			SecureRandom random = new SecureRandom();
+//			byte[] content = new byte[random.nextInt(5242880)];
+//			random.nextBytes(content);
+//
+//			// create an asymmetric key pair
+//			KeyPair rsaKeyPair = encryptionUtil.createRSAKeys(sizes[s]);
+//
+//			logger.debug(String.format("Testing signature of a sample %s byte file with a %s bit key.",
+//					content.length, sizes[s].value()));
+//			
+//			// sign the content
+//			SignedContent signedContent = encryptionUtil.sign(content, rsaKeyPair.getPrivate());
+//			
+//			Assert.assertNotNull(signedContent);
+//			Assert.assertNotNull(signedContent.getOriginalData());
+//			Assert.assertNotNull(signedContent.getSignatureBytes());
+//			Assert.assertTrue(Arrays.equals(content, signedContent.getOriginalData()));
+//			Assert.assertFalse(Arrays.equals(content, signedContent.getSignatureBytes()));
+//			
+//			// verify the content
+//			boolean isVerified = encryptionUtil.verify(signedContent, rsaKeyPair.getPublic());
+//			
+//			Assert.assertTrue(isVerified);
+//		}
+//	}
 
 	private static AES_KEYLENGTH[] getAESKeySizes() {
 		AES_KEYLENGTH[] sizes = new AES_KEYLENGTH[AES_KEYLENGTH.values().length];

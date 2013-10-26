@@ -10,6 +10,7 @@ import java.util.Random;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.encryption.EncryptionUtil;
@@ -23,7 +24,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = JavaEncryptionUtilTest.class;
+		testClass = EncryptionUtilTest.class;
 		beforeClass();
 	}
 
@@ -113,6 +114,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void encryptionRSATest() {
+
 		// test all key sizes
 		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
 
@@ -157,6 +159,39 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			assertTrue(Arrays.equals(data, decryptedData));
 
 			printBytes("Decrypted Data:", decryptedData);
+		}
+	}
+
+	@Test
+	public void signatureTest() {
+
+		// test all key sizes
+		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
+
+		for (int s = 0; s < sizes.length; s++) {
+
+			logger.debug(String.format("Testing %s-bit RSA SHA-1 signing and verificiation.", sizes[s].value()));
+
+			// generate random sized content (max. 100 bytes)
+			byte[] data = generateRandomContent(100);
+			printBytes("Original Data", data);
+
+			// generate RSA key pair
+			AsymmetricCipherKeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+
+			// sign data with private key
+			byte[] signedData = null;
+			try {
+				signedData = EncryptionUtil.sign(data, rsaKeyPair.getPrivate());
+			} catch (DataLengthException | CryptoException e) {
+				logger.error("Exception while testing signing:", e);
+				e.printStackTrace();
+			}
+			
+			assertNotNull(signedData);
+			assertFalse(Arrays.equals(data, signedData));
+
+			printBytes("Signed Data:", signedData);
 		}
 	}
 

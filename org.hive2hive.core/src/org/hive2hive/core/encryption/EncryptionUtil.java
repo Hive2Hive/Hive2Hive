@@ -18,9 +18,11 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.KeyGenerationParameters;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.RSAEngine;
@@ -30,6 +32,7 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
+import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -137,6 +140,24 @@ public final class EncryptionUtil {
 		return processRSACiphering(false, data, privateKey);
 	}
 
+	public static byte[] sign(byte[] data, CipherParameters privateKey) throws DataLengthException, CryptoException {
+
+		SHA1Digest digester = new SHA1Digest();	
+		RSADigestSigner signer = new RSADigestSigner(digester);
+		signer.init(true, privateKey);
+		signer.update(data, 0, data.length);
+		return signer.generateSignature();
+	}
+	
+	public static boolean verify(byte[] data, CipherParameters publicKey){
+		
+		SHA1Digest digester = new SHA1Digest();	
+		RSADigestSigner signer = new RSADigestSigner(digester);
+		signer.init(false, publicKey);
+		signer.update(data, 0, data.length);	
+		return signer.verifySignature(data);
+	}
+
 	public static byte[] serializeObject(Object object) {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -182,7 +203,7 @@ public final class EncryptionUtil {
 
 		return result;
 	}
-	
+
 	public static String toHex(byte[] data) {
 
 		StringBuffer buf = new StringBuffer();
