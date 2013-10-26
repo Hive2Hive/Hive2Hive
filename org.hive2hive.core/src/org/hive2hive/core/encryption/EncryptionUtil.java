@@ -102,9 +102,10 @@ public final class EncryptionUtil {
 		BigInteger publicExp = new BigInteger("10001", 16); // Fermat F4, largest known fermat prime
 		int strength = keyLength.value();
 		int certainty = 80; // certainty for the numbers to be primes, values >80 slow down algorithm
-		
+
 		RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
-		KeyGenerationParameters parameters = new RSAKeyGenerationParameters(publicExp, new SecureRandom(), strength, certainty);
+		KeyGenerationParameters parameters = new RSAKeyGenerationParameters(publicExp, new SecureRandom(),
+				strength, certainty);
 		kpg.init(parameters);
 
 		AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
@@ -178,35 +179,8 @@ public final class EncryptionUtil {
 		return cipherData(cipher, data);
 	}
 
-	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey) throws InvalidCipherTextException {
-
-		// String value = "";
-		// String key = readFileAsString(publicKeyFilename);
-		// BASE64Decoder b64 = new BASE64Decoder();
-		// AsymmetricKeyParameter publicKey =
-		// (AsymmetricKeyParameter) PublicKeyFactory.createKey(b64.decodeBuffer(key));
-		// AsymmetricBlockCipher e = new RSAEngine();
-		// e = new org.bouncycastle.crypto.encodings.PKCS1Encoding(e);
-		// e.init(true, publicKey);
-		//
-		// String inputdata = readFileAsString(inputFilename);
-		// byte[] messageBytes = inputdata.getBytes();
-		// int i = 0;
-		// int len = e.getInputBlockSize();
-		// while (i < messageBytes.length)
-		// {
-		// if (i + len > messageBytes.length)
-		// len = messageBytes.length - i;
-		//
-		// byte[] hexEncodedCipher = e.processBlock(messageBytes, i, len);
-		// value = value + getHexString(hexEncodedCipher);
-		// i += e.getInputBlockSize();
-		// }
-		//
-		// System.out.println(value);
-		// BufferedWriter out = new BufferedWriter(new FileWriter(encryptedFilename));
-		// out.write(value);
-		// out.close();
+	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey)
+			throws InvalidCipherTextException {
 
 		RSAEngine rsaEngine = new RSAEngine();
 		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
@@ -225,6 +199,27 @@ public final class EncryptionUtil {
 			position += cipher.getInputBlockSize();
 		}
 		return result;
+	}
+
+	public static byte[] decryptRSA(byte[] data, CipherParameters privateKey) throws InvalidCipherTextException {
+
+		RSAEngine rsaEngine = new RSAEngine();
+		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
+		
+		cipher.init(false, privateKey);
+		
+		int position = 0;
+		int inputBlockSize = cipher.getInputBlockSize();
+		byte[] result = new byte[0];
+		while (position < data.length) {
+			if (position + inputBlockSize > data.length)
+				inputBlockSize = data.length - position;
+
+			byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
+			result = combine(result, hexEncodedCipher);
+			position += cipher.getInputBlockSize();
+		}
+		return result;		
 	}
 
 	public static String toHex(byte[] data) {

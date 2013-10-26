@@ -145,7 +145,18 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			printBytes("Encrypted Data:", encryptedData);
 			
 			// decrypt data with private key
+			byte[] decryptedData = null;
+			try {
+				decryptedData = EncryptionUtil.decryptRSA(encryptedData, rsaKeyPair.getPrivate());
+			} catch (InvalidCipherTextException e) {
+				logger.error("Exception while testing RSA decryption:", e);
+				e.printStackTrace();
+			}
 			
+			assertNotNull(decryptedData);
+			assertTrue(Arrays.equals(data, decryptedData));
+			
+			printBytes("Decrypted Data:", decryptedData);
 		}
 	}
 
