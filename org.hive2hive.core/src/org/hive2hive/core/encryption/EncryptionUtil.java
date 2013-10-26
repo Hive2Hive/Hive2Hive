@@ -178,7 +178,7 @@ public final class EncryptionUtil {
 		return cipherData(cipher, data);
 	}
 
-	public static byte[] encryptRSA(byte[] data, CipherParameters key) throws InvalidCipherTextException {
+	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey) throws InvalidCipherTextException {
 
 		// String value = "";
 		// String key = readFileAsString(publicKeyFilename);
@@ -211,7 +211,7 @@ public final class EncryptionUtil {
 		RSAEngine rsaEngine = new RSAEngine();
 		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
 
-		cipher.init(true, key);
+		cipher.init(true, publicKey);
 
 		int position = 0;
 		int inputBlockSize = cipher.getInputBlockSize();

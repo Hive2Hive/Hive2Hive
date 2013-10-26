@@ -57,15 +57,15 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			logger.debug(String.format("Testing RSA %s-bit key pair generation.", sizes[s].value()));
 
-			// generate RSA key pair			
+			// generate RSA key pair
 			AsymmetricCipherKeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
-			
+
 			assertNotNull(rsaKeyPair);
 			assertNotNull(rsaKeyPair.getPrivate());
 			assertNotNull(rsaKeyPair.getPublic());
 		}
 	}
-	
+
 	@Test
 	public void encryptionAESTest() {
 
@@ -78,13 +78,13 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// generate random sized content (max. 2MB)
 			byte[] data = generateRandomContent(2097152);
-			
+
 			// generate AES key
 			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s]);
 
 			// generate IV
 			byte[] initVector = EncryptionUtil.generateIV();
-			
+
 			// encrypt data
 			byte[] encryptedData = null;
 			try {
@@ -93,10 +93,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				logger.error("Exception while testing AES encryption:", e);
 				e.printStackTrace();
 			}
-			
+
 			assertNotNull(encryptedData);
 			assertFalse(Arrays.equals(data, encryptedData));
-			
+
 			// decrypt data
 			byte[] decryptedData = null;
 			try {
@@ -105,10 +105,47 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				logger.error("Exception while testing AES decryption:", e);
 				e.printStackTrace();
 			}
-			
+
 			assertNotNull(decryptedData);
 			assertFalse(Arrays.equals(encryptedData, decryptedData));
 			assertTrue(Arrays.equals(data, decryptedData));
+		}
+	}
+
+	@Test
+	public void encryptionRSATest() {
+		// test all key sizes
+		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
+
+		for (int s = 0; s < sizes.length; s++) {
+
+			logger.debug(String.format("Testing RSA %s-bit encryption and decryption", sizes[s].value()));
+
+			// generate random sized content (max. (key size / 8) - 11 bytes)
+			byte[] data = generateRandomContent((sizes[s].value() / 8) - 11);
+			
+			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.", data.length, sizes[s].value()));
+			printBytes("Original Data", data);
+			
+			// generate RSA key pair
+			AsymmetricCipherKeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+
+			// encrypt data with public key
+			byte[] encryptedData = null;
+			try {
+				encryptedData = EncryptionUtil.encryptRSA(data, rsaKeyPair.getPublic());
+			} catch (InvalidCipherTextException e) {
+				logger.error("Exception while testing RSA encryption:", e);
+				e.printStackTrace();
+			}
+
+			assertNotNull(encryptedData);
+			assertFalse(Arrays.equals(data, encryptedData));
+			
+			printBytes("Encrypted Data:", encryptedData);
+			
+			// decrypt data with private key
+			
 		}
 	}
 
@@ -127,11 +164,16 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		}
 		return sizes;
 	}
-	
+
 	private static byte[] generateRandomContent(int sizeInBytes) {
 		SecureRandom random = new SecureRandom();
 		byte[] content = new byte[random.nextInt(sizeInBytes)];
 		random.nextBytes(content);
 		return content;
+	}
+	
+	private static void printBytes(String description, byte[] bytes){
+		logger.debug(description);
+		logger.debug(EncryptionUtil.toHex(bytes));
 	}
 }
