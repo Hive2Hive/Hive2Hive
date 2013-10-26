@@ -143,20 +143,12 @@ public final class EncryptionUtil {
 	public static byte[] sign(byte[] data, CipherParameters privateKey) throws DataLengthException,
 			CryptoException {
 
-		SHA1Digest digester = new SHA1Digest();
-		RSADigestSigner signer = new RSADigestSigner(digester);
-		signer.init(true, privateKey);
-		signer.update(data, 0, data.length);
-		return signer.generateSignature();
+		return setupSigner(true, data, privateKey).generateSignature();
 	}
 
 	public static boolean verify(byte[] data, byte[] signature, CipherParameters publicKey) {
 
-		SHA1Digest digester = new SHA1Digest();
-		RSADigestSigner signer = new RSADigestSigner(digester);
-		signer.init(false, publicKey);
-		signer.update(data, 0, data.length);
-		return signer.verifySignature(signature);
+		return setupSigner(false, data, publicKey).verifySignature(signature);
 	}
 
 	public static byte[] serializeObject(Object object) {
@@ -225,7 +217,7 @@ public final class EncryptionUtil {
 		}
 	}
 
-	private static byte[] processAESCiphering(boolean isEncrypting, byte[] data, SecretKey key,
+	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key,
 			byte[] initVector) throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
 		// set up engine, block cipher mode and padding
@@ -235,7 +227,7 @@ public final class EncryptionUtil {
 
 		// apply parameters
 		CipherParameters parameters = new ParametersWithIV(new KeyParameter(key.getEncoded()), initVector);
-		cipher.init(isEncrypting, parameters);
+		cipher.init(forEncrypting, parameters);
 
 		// process ciphering
 		byte[] output = new byte[cipher.getOutputSize(data.length)];
@@ -271,6 +263,21 @@ public final class EncryptionUtil {
 			position += cipher.getInputBlockSize();
 		}
 		return result;
+	}
+
+	private static RSADigestSigner setupSigner(boolean forSigning, byte[] data, CipherParameters key) {
+		
+		// set up digester / hash function (e.g. SHA-1)
+		SHA1Digest digester = new SHA1Digest();
+		
+		// set up signature mode (e.g. RSA)
+		RSADigestSigner signer = new RSADigestSigner(digester);
+		
+		// apply parameters
+		signer.init(forSigning, key);
+		signer.update(data, 0, data.length);
+		
+		return signer;
 	}
 
 	private static byte[] combine(byte[] one, byte[] two) {
