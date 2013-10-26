@@ -37,6 +37,14 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
+/**
+ * This class provides fundamental functionalities for data encryption, decryption, signing and verification.
+ * Provided are both symmetric as well as asymmetric encryption approaches. Furthermore, it provides methods
+ * to generate various parameters, such as keys and key pairs.
+ * 
+ * @author Christian
+ * 
+ */
 public final class EncryptionUtil {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
@@ -78,6 +86,12 @@ public final class EncryptionUtil {
 	private EncryptionUtil() {
 	}
 
+	/**
+	 * Randomly generates a 16-byte initialization vector (IV) which can be used as parameter for symmetric
+	 * encryption.
+	 * 
+	 * @return Returns a randomly generated 16-byte IV.
+	 */
 	public static byte[] generateIV() {
 		SecureRandom random = new SecureRandom();
 		byte[] iv = new byte[16];
@@ -85,6 +99,12 @@ public final class EncryptionUtil {
 		return iv;
 	}
 
+	/**
+	 * Generates a symmetric AES key of the specified key length.
+	 * 
+	 * @param keyLength The length the AES key should have.
+	 * @return A symmetric AES key of the specified length.
+	 */
 	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength) {
 
 		installBCProvider();
@@ -101,6 +121,12 @@ public final class EncryptionUtil {
 
 	}
 
+	/**
+	 * Generates an asymmetric RSA key pair of the specified key length.
+	 * 
+	 * @param keyLength The length the RSA keys should have.
+	 * @return An asymmetric RSA key pair of the specified length.
+	 */
 	public static AsymmetricCipherKeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
 
 		BigInteger publicExp = new BigInteger("10001", 16); // Fermat F4, largest known fermat prime
@@ -116,36 +142,85 @@ public final class EncryptionUtil {
 		return keyPair;
 	}
 
+	/**
+	 * Symmetrically encrypts the provided data by means of the AES algorithm.
+	 * 
+	 * @param data The data to be encrypted.
+	 * @param secretKey The symmetric key with which the data shall be encrypted.
+	 * @param initVector The initialization vector (IV) with which the data shall be encrypted.
+	 * @return Returns the encrypted data.
+	 */
 	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
 		return processAESCiphering(true, data, secretKey, initVector);
 	}
 
+	/**
+	 * Symmetrically decrypts the provided data by means of the AES algorithm.
+	 * 
+	 * @param data The data to be decrypted.
+	 * @param secretKey The symmetric key with which the data shall be decrypted.
+	 * @param initVector The initialization vector (IV) with which the data shall be decrypted.
+	 * @return Returns the decrypted data.
+	 */
 	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
 		return processAESCiphering(false, data, secretKey, initVector);
 	}
 
+	/**
+	 * Asymmetrically encrypts the provided data by means of the RSA algorithm. In order to encrypt the
+	 * content,
+	 * a public RSA key has to be provided.
+	 * 
+	 * @param data The data to be encrypted.
+	 * @param publicKey The asymmetric public key with which the data shall be encrypted.
+	 * @return Returns the encrypted data.
+	 */
 	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey)
 			throws InvalidCipherTextException {
 
 		return processRSACiphering(true, data, publicKey);
 	}
 
+	/**
+	 * Asymmetrically decrypts the provided data by means of the RSA algorithm. In order to decrypt the
+	 * content,
+	 * a private RSA key has to be provided.
+	 * 
+	 * @param data The data to be decrypted.
+	 * @param publicKey The asymmetric private key with which the data shall be decrypted.
+	 * @return Returns the decrypted data.
+	 */
 	public static byte[] decryptRSA(byte[] data, CipherParameters privateKey)
 			throws InvalidCipherTextException {
 
 		return processRSACiphering(false, data, privateKey);
 	}
 
+	/**
+	 * Signs the provided data with the specified private key and returns the signature.
+	 * 
+	 * @param data The content to be signed.
+	 * @param privateKey The private key used to sign the content.
+	 * @return The created signature of the data.
+	 */
 	public static byte[] sign(byte[] data, CipherParameters privateKey) throws DataLengthException,
 			CryptoException {
 
 		return setupSigner(true, data, privateKey).generateSignature();
 	}
 
+	/**
+	 * Verifies the provided signature of the provided data with the specified public key.
+	 * 
+	 * @param data The data to be verified.
+	 * @param signature The signature with which the data should be verified.
+	 * @param publicKey The public key used to verify the content.
+	 * @return Returns true if the signature could be verified and false otherwise.
+	 */
 	public static boolean verify(byte[] data, byte[] signature, CipherParameters publicKey) {
 
 		return setupSigner(false, data, publicKey).verifySignature(signature);
@@ -197,6 +272,11 @@ public final class EncryptionUtil {
 		return result;
 	}
 
+	/**
+	 * Converts the content of a byte array into a human readable form.
+	 * @param data The byte array to be converted.
+	 * @return The hex converted byte array.
+	 */
 	public static String toHex(byte[] data) {
 
 		StringBuffer buf = new StringBuffer();
@@ -266,17 +346,17 @@ public final class EncryptionUtil {
 	}
 
 	private static RSADigestSigner setupSigner(boolean forSigning, byte[] data, CipherParameters key) {
-		
+
 		// set up digester / hash function (e.g. SHA-1)
 		SHA1Digest digester = new SHA1Digest();
-		
+
 		// set up signature mode (e.g. RSA)
 		RSADigestSigner signer = new RSADigestSigner(digester);
-		
+
 		// apply parameters
 		signer.init(forSigning, key);
 		signer.update(data, 0, data.length);
-		
+
 		return signer;
 	}
 
