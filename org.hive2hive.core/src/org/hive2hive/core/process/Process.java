@@ -136,7 +136,7 @@ public abstract class Process implements IProcess {
 			state = ProcessState.FINISHED;
 			// detach form the process manager
 			ProcessManager.getInstance().detachProcess(this);
-			for (IProcessListener listener: listeners){
+			for (IProcessListener listener : listeners) {
 				listener.onSuccess();
 			}
 		}
@@ -152,21 +152,22 @@ public abstract class Process implements IProcess {
 	}
 
 	public void rollBack(String reason) {
+		state = ProcessState.ROLLBACK;
 		logger.warn(String.format("Rollback triggered. reason = '%s'", reason));
 		currentStep.rollBack();
 		for (ProcessStep step : executedSteps) {
 			step.rollBack();
 		}
-		for (IProcessListener listener: listeners){
+		for (IProcessListener listener : listeners) {
 			listener.onFail(reason);
 		}
 	}
-	
-	public void addListener(IProcessListener listener){
+
+	public void addListener(IProcessListener listener) {
 		listeners.add(listener);
 	}
-	
-	public boolean removeListener(IProcessListener listener){
+
+	public boolean removeListener(IProcessListener listener) {
 		return listeners.remove(listener);
 	}
 }

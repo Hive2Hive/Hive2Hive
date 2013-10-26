@@ -11,5 +11,6 @@ public interface H2HConstants {
 	// DHT content keys - these are used to distinguish the different types data
 	// stored for a given key
 	public static final String USER_PROFILE = "USER_PROFILE";
+	public static final String USER_LOCATIONS = "USER_LOCATIONS";
 
 }

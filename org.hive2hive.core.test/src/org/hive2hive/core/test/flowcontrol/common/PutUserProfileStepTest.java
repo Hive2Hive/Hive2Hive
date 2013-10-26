@@ -13,7 +13,6 @@ import org.hive2hive.core.encryption.ProfileEncryptionUtil;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkData;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.PutUserProfileStep;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -67,7 +66,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(testProfile, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(testProfile, null, userPassword, null);
 		process.setFirstStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -102,14 +101,18 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
 		UserPassword userPassword = ProfileEncryptionUtil.createUserPassword(password);
-		UserProfile testProfile = new UserProfile(userId,
+		UserProfile nnewProfile = new UserProfile(userId,
+				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024),
+				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024));
+
+		UserProfile originalProfile = new UserProfile(userId,
 				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(testProfile, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(nnewProfile, originalProfile, userPassword, null);
 		process.setFirstStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -129,8 +132,11 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		NetworkData nothing = proxy.getLocal(userId, H2HConstants.USER_PROFILE);
-		Assert.assertNull(nothing);
+		UserProfile gotProfile = (UserProfile) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
+		// check that restored profile is the same as the 'original'
+		Assert.assertEquals(userId, gotProfile.getUserId());
+		Assert.assertEquals(originalProfile.getEncryptionKeys().getPrivate(), gotProfile.getEncryptionKeys()
+				.getPrivate());
 	}
 
 	@Override

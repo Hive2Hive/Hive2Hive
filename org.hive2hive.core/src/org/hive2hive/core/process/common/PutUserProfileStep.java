@@ -14,6 +14,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.PutProcessStep;
 
 /**
  * Generic process step to encrypt the {@link: UserProfile} and add it to the DHT
@@ -21,7 +22,7 @@ import org.hive2hive.core.process.ProcessStep;
  * @author Nico
  * 
  */
-public class PutUserProfileStep extends ProcessStep {
+public class PutUserProfileStep extends PutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutUserProfileStep.class);
 
@@ -29,7 +30,9 @@ public class PutUserProfileStep extends ProcessStep {
 	private final ProcessStep next;
 	private final UserPassword password;
 
-	public PutUserProfileStep(UserProfile profile, UserPassword password, ProcessStep next) {
+	public PutUserProfileStep(UserProfile profile, UserProfile previousVersion, UserPassword password,
+			ProcessStep next) {
+		super(previousVersion);
 		this.profile = profile;
 		this.next = next;
 		this.password = password;
@@ -46,8 +49,7 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// Remove the user profile from DHT
-		remove(profile.getUserId(), H2HConstants.USER_PROFILE);
+		super.rollBackPut(profile.getUserId(), H2HConstants.USER_PROFILE);
 	}
 
 	@Override
@@ -72,12 +74,7 @@ public class PutUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void handleRemovalResult(FutureDHT future) {
-		// only needed when rollbacking
-		if (future.isSuccess()) {
-			logger.debug("Removed the user profile while rollbacking");
-		} else {
-			logger.error("Could not remove the user profile while rollbacking. Could be that the profile has never been put.");
-		}
+		// no removal used
 	}
 
 }

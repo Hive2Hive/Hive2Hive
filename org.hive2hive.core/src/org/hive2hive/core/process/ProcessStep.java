@@ -128,6 +128,12 @@ public abstract class ProcessStep {
 	 * @param data
 	 */
 	protected void put(final String locationKey, final String contentKey, NetworkData data) {
+		if (getProcess().getState() == ProcessState.ROLLBACK) {
+			rollbackPut(locationKey, contentKey, data);
+			return;
+		}
+
+		// TODO: Verify with old version of the data
 		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
 		PutVerificationListener verificationListener = new PutVerificationListener(getNetworkManager(),
 				locationKey, contentKey, data);
@@ -137,6 +143,28 @@ public abstract class ProcessStep {
 			public void operationComplete(FutureDHT future) throws Exception {
 				logger.debug("Verification for put(" + locationKey + ", " + contentKey + ") complete");
 				handlePutResult(future);
+			}
+		});
+	}
+
+	/**
+	 * Put specialized for rollback (e.g. when restoring original data). Exceptions and callbacks are
+	 * suppressed (nobody cares about rollbacks of rollbacks)
+	 * 
+	 * @param locationKey
+	 * @param contentKey
+	 * @param data
+	 */
+	private void rollbackPut(String locationKey, String contentKey, NetworkData data) {
+		FutureDHT rollbackFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
+		rollbackFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+			@Override
+			public void operationComplete(FutureDHT future) throws Exception {
+				if (future.isSuccess()) {
+					logger.debug("Rollback: Restored the old content");
+				} else {
+					logger.error("Rollback: Could not restore the old content");
+				}
 			}
 		});
 	}
@@ -165,11 +193,37 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 */
 	protected void remove(String locationKey, String contentKey) {
+		if (getProcess().getState() == ProcessState.ROLLBACK) {
+			rollbackRemove(locationKey, contentKey);
+			return;
+		}
+
 		FutureDHT removalFuture = getNetworkManager().remove(locationKey, contentKey);
 		removalFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
 				handleRemovalResult(future);
+			}
+		});
+	}
+
+	/**
+	 * Remove specialized for rollback (e.g. when deleting added data). Exceptions and callbacks are
+	 * suppressed (nobody cares about rollbacks of rollbacks)
+	 * 
+	 * @param locationKey
+	 * @param contentKey
+	 */
+	private void rollbackRemove(String locationKey, String contentKey) {
+		FutureDHT rollbackFuture = getNetworkManager().remove(locationKey, contentKey);
+		rollbackFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+			@Override
+			public void operationComplete(FutureDHT future) throws Exception {
+				if (future.isSuccess()) {
+					logger.debug("Rollback: Removed new content");
+				} else {
+					logger.error("Rollback: Could not delete the newly put content");
+				}
 			}
 		});
 	}

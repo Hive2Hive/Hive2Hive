@@ -11,5 +11,6 @@ public enum ProcessState {
 	PAUSED,
 	STOPPED,
 	FINISHED,
-	INITIALIZING;
+	INITIALIZING,
+	ROLLBACK;
 }
