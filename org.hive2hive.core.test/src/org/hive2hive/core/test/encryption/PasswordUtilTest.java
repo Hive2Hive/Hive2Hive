@@ -112,6 +112,9 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			password[i] = generateRandomString().toCharArray();
 			byte[] salt = PasswordUtil.generateSalt();
 
+			logger.debug(String.format("Validating password %s", String.valueOf(password[i])));
+			logger.debug(String.format("with salt %s", EncryptionUtil.toHex(salt)));
+			
 			// generate hash
 			byte[] hash = null;
 			try {

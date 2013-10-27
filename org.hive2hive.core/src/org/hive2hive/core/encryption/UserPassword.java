@@ -1,8 +1,8 @@
 package org.hive2hive.core.encryption;
 
 /**
- * This class simply represents a user password. Each instance automatically generates a new salt as salts
- * should be unique per-user per-password.
+ * This class simply represents a user password. Do not change the password or the salt manually by using
+ * setters but rather use PasswordUtil.generatePassword() to generate a new user password.
  * 
  * @author Christian
  * 
@@ -12,10 +12,10 @@ public final class UserPassword {
 	private char[] password;
 	private byte[] salt;
 
-	public UserPassword(char[] password) {
+	public UserPassword(char[] password, byte[] salt) {
 
 		this.password = password;
-		this.salt = PasswordUtil.generateSalt();
+		this.salt = salt;
 	}
 
 	public char[] getPassword() {

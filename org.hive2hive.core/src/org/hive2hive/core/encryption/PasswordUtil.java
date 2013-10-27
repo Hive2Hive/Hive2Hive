@@ -30,13 +30,25 @@ public final class PasswordUtil {
 	}
 
 	/**
+	 * Generates a user password based on the user defined password. This function randomly generates a salt
+	 * that is attached to this password.
+	 * 
+	 * @param password
+	 * @return Returns a UserPassword that holds the password and its associated salt.
+	 */
+	public static UserPassword generatePassword(char[] password) {
+
+		return new UserPassword(password, generateSalt());
+	}
+
+	/**
 	 * Generates a random salt that can be used in combination with a password in order to prevent
 	 * dictionary and brute-force attacks.
 	 * 
 	 * @return A random salt.
 	 */
 	public static byte[] generateSalt() {
-
+	
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[SALT_BYTE_SIZE];
 		random.nextBytes(salt);
