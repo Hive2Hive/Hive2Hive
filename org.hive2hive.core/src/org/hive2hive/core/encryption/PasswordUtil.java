@@ -3,10 +3,14 @@ package org.hive2hive.core.encryption;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
+import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
@@ -20,25 +24,11 @@ public final class PasswordUtil {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PasswordUtil.class);
 
-	public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
-
-	public static final int SALT_BYTE_SIZE = 24; // should be equal to HASH_BYTE_SIZE
-	public static final int HASH_BYTE_SIZE = 24; // should be equal to SALT_BYTE_SIZE
-	public static final int PBKDF2_ITERATIONS = 1000; // slowing factor
+	public static final int HASH_BIT_SIZE = 192; 
+	public static final int SALT_BIT_SIZE = HASH_BIT_SIZE;
+	public static final int PBKDF2_ITERATIONS = 65536; // slowing factor
 
 	private PasswordUtil() {
-	}
-
-	/**
-	 * Generates a user password based on the user defined password. This function randomly generates a salt
-	 * that is attached to this password.
-	 * 
-	 * @param password
-	 * @return Returns a UserPassword that holds the password and its associated salt.
-	 */
-	public static UserPassword generatePassword(char[] password) {
-
-		return new UserPassword(password, generateSalt());
 	}
 
 	/**
@@ -50,9 +40,21 @@ public final class PasswordUtil {
 	public static byte[] generateSalt() {
 	
 		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[SALT_BYTE_SIZE];
+		byte[] salt = new byte[SALT_BIT_SIZE];
 		random.nextBytes(salt);
 		return salt;
+	}
+
+	/**
+	 * Generates a user password based on the user defined password. This function randomly generates a salt
+	 * that is attached to this password.
+	 * 
+	 * @param password
+	 * @return Returns a UserPassword that holds the password and its associated salt.
+	 */
+	public static UserPassword generatePassword(char[] password) {
+	
+		return new UserPassword(password, generateSalt());
 	}
 
 	/**
@@ -62,9 +64,23 @@ public final class PasswordUtil {
 	 * @return a salted PBKDF2 hash of the password
 	 */
 	public static byte[] generateHash(char[] password, byte[] salt) throws InvalidKeySpecException {
-
+	
 		// hash the password
-		return pbkdf2(password, salt);
+		return getPBKDF2Hash(password, salt, HASH_BIT_SIZE);
+	}
+
+	/**
+	 * Generates a symmetric AES key of the specified size and based on the provided UserPassword.
+	 * @param upw The UserPassword from which the AES key is derivated.
+	 * @param keyLength The desired key length of the resulting AES key.
+	 * @return Returns the derived symmetric AES key of desired size.
+	 * @throws InvalidKeySpecException
+	 */
+	public static SecretKey generateAESKeyFromPassword(UserPassword upw, AES_KEYLENGTH keyLength) throws InvalidKeySpecException {
+		
+		byte[] secretKeyEncoded = getPBKDF2Hash(upw.getPassword(), upw.getSalt(), keyLength.value());
+		
+		return new SecretKeySpec(secretKeyEncoded, "AES");
 	}
 
 	/**
@@ -79,7 +95,7 @@ public final class PasswordUtil {
 			throws InvalidKeySpecException {
 
 		// compute hash of password using same salt, iteration count and hash length
-		byte[] testHash = pbkdf2(password, salt);
+		byte[] testHash = getPBKDF2Hash(password, salt, HASH_BIT_SIZE);
 
 		// compare the hashes in constant time
 		return slowCompare(correctHash, testHash);
@@ -93,13 +109,14 @@ public final class PasswordUtil {
 	 * @param bytes the length of the hash to compute in bytes
 	 * @return the PBDKF2 hash of the password
 	 */
-	private static byte[] pbkdf2(char[] password, byte[] salt) throws InvalidKeySpecException {
+	private static byte[] getPBKDF2Hash(char[] password, byte[] salt, int hashBitSize) throws InvalidKeySpecException {
 
 		try {
-			SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
+			SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
-			PBEKeySpec spec = new PBEKeySpec(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE * 8);
-			return skf.generateSecret(spec).getEncoded();
+			KeySpec spec = new PBEKeySpec(password, salt, PBKDF2_ITERATIONS, hashBitSize);
+			SecretKey secretKey = skf.generateSecret(spec);
+			return secretKey.getEncoded();
 
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Error while PBKDF2 key streching:", e);

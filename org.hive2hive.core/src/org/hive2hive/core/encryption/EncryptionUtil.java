@@ -10,13 +10,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
@@ -123,16 +119,6 @@ public final class EncryptionUtil {
 		}
 		return null;
 
-	}
-
-	@Deprecated
-	public static SecretKey generateAESKeyFromPassword(UserPassword password, AES_KEYLENGTH keyLength)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
-		SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		KeySpec spec = new PBEKeySpec(password.getPassword(), password.getSalt(), 65536, keyLength.value());
-		SecretKey tmpKey = kf.generateSecret(spec);
-		SecretKey key = new SecretKeySpec(tmpKey.getEncoded(), "AES");
-		return key;
 	}
 
 	/**

@@ -28,7 +28,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			// test salt generation
 			salt[i] = PasswordUtil.generateSalt();
 			assertNotNull(salt[i]);
-			assertTrue(salt[i].length == PasswordUtil.SALT_BYTE_SIZE);
+			assertTrue(salt[i].length == PasswordUtil.SALT_BIT_SIZE);
 
 			logger.debug(String.format("Generated Salt: %s", EncryptionUtil.toHex(salt[i])));
 
@@ -43,7 +43,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 	public void generateHashTest() {
 
 		// test various passwords
-		char[][] password = new char[20][];
+		char[][] password = new char[5][];
 		for (int i = 0; i < password.length; i++) {
 
 			// set a random password and salt
@@ -62,7 +62,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			}
 
 			assertNotNull(hash);
-			assertTrue(hash.length == PasswordUtil.HASH_BYTE_SIZE);
+			assertTrue(hash.length == PasswordUtil.HASH_BIT_SIZE / 8);
 
 			logger.debug(String.format("Generated Salt: %s", EncryptionUtil.toHex(hash)));
 
