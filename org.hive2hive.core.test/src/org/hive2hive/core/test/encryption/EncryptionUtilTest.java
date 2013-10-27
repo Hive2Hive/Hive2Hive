@@ -231,20 +231,4 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		}
 		return sizes;
 	}
-
-	private static byte[] generateRandomContent(int sizeInBytes) {
-		SecureRandom random = new SecureRandom();
-		byte[] content = new byte[random.nextInt(sizeInBytes)];
-		random.nextBytes(content);
-		return content;
-	}
-
-	private static String generateRandomString() {
-		return new BigInteger(130, new Random()).toString(32);
-	}
-
-	private static void printBytes(String description, byte[] bytes) {
-		logger.debug(description);
-		logger.debug(EncryptionUtil.toHex(bytes));
-	}
 }
