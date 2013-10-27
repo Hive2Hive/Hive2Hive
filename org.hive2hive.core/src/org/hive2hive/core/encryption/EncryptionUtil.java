@@ -104,20 +104,6 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Generates a random salt that can be used in combination with a password in order to prevent dictionary
-	 * attacks.
-	 * 
-	 * @return A random 8 byte salt.
-	 */
-	public static byte[] generateSalt(int byteLength) {
-
-		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[byteLength];
-		random.nextBytes(salt);
-		return salt;
-	}
-
-	/**
 	 * Generates a symmetric AES key of the specified key length.
 	 * 
 	 * @param keyLength The length the AES key should have.
