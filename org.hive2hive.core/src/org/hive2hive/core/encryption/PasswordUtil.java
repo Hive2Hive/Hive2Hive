@@ -102,10 +102,11 @@ public final class PasswordUtil {
 	}
 
 	/**
-	 * Computes the PBKDF2 hash of a password.
+	 * Computes the PBKDF2 hash of a password. This includes key size stretching where short passwords are enlarged up to the provided hash size.
 	 * 
 	 * @param password the password to hash
 	 * @param salt the salt
+	 * @param hashBitSize the length the hash should have (key size stretching)
 	 * @param bytes the length of the hash to compute in bytes
 	 * @return the PBDKF2 hash of the password
 	 */

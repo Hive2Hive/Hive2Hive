@@ -49,8 +49,6 @@ public final class EncryptionUtil {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
-	private static String digits = "0123456789abcdef";
-
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
 		BIT_192(192),
@@ -280,6 +278,7 @@ public final class EncryptionUtil {
 	 */
 	public static String toHex(byte[] data) {
 
+		final String digits = "0123456789abcdef";
 		StringBuffer buf = new StringBuffer();
 
 		for (int i = 0; i != data.length; i++) {
