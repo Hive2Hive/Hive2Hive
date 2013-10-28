@@ -14,7 +14,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.encryption.EncryptionUtil;
@@ -218,7 +217,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	@Test
 	public void serializationTest() {
 
-		String data = generateRandomString();
+		String data = generateRandomString(1000);
 		logger.debug("Testing data serialization.");
 		logger.debug("Test String: " + data);
 
@@ -231,7 +230,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		assertEquals(data, deserializedData);
 	}
 
-	private static AES_KEYLENGTH[] getAESKeySizes() {
+	public static AES_KEYLENGTH[] getAESKeySizes() {
 		AES_KEYLENGTH[] sizes = new AES_KEYLENGTH[AES_KEYLENGTH.values().length];
 		for (int i = 0; i < sizes.length; i++) {
 			sizes[i] = AES_KEYLENGTH.values()[i];
@@ -239,7 +238,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		return sizes;
 	}
 
-	private static RSA_KEYLENGTH[] getRSAKeySizes() {
+	public static RSA_KEYLENGTH[] getRSAKeySizes() {
 		RSA_KEYLENGTH[] sizes = new RSA_KEYLENGTH[RSA_KEYLENGTH.values().length];
 		for (int i = 0; i < sizes.length; i++) {
 			sizes[i] = RSA_KEYLENGTH.values()[i];

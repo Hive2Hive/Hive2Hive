@@ -45,8 +45,9 @@ public class RegisterTest extends H2HJUnitTest {
 
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
+		String pin = generateRandomString(6);
 
-		RegisterProcess process = new RegisterProcess(userId, password, client);
+		RegisterProcess process = new RegisterProcess(userId, password, pin, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -85,11 +86,12 @@ public class RegisterTest extends H2HJUnitTest {
 
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
+		String pin = generateRandomString(6);
 
 		// already put a profile
 		client.putGlobal(userId, H2HConstants.USER_PROFILE, new UserProfile(userId, null, null));
 
-		RegisterProcess process = new RegisterProcess(userId, password, client);
+		RegisterProcess process = new RegisterProcess(userId, password, pin, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

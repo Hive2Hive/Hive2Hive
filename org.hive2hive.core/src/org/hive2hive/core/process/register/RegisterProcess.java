@@ -4,7 +4,6 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.encryption.PasswordUtil;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -16,10 +15,10 @@ public class RegisterProcess extends Process {
 	private final UserPassword userPassword;
 	private final UserProfile userProfile;
 
-	public RegisterProcess(String userId, String password, NetworkManager networkManager) {
+	public RegisterProcess(String userId, String password, String pin, NetworkManager networkManager) {
 		super(networkManager);
 		this.userId = userId;
-		userPassword = PasswordUtil.generatePassword(password.toCharArray());
+		userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 

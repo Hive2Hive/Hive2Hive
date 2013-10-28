@@ -1,5 +1,6 @@
 package org.hive2hive.core.encryption;
 
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -37,24 +38,63 @@ public final class PasswordUtil {
 	 * 
 	 * @return A random salt.
 	 */
-	public static byte[] generateSalt() {
+	public static byte[] generateRandomSalt() {
 
 		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[SALT_BIT_SIZE];
+		byte[] salt = new byte[SALT_BIT_SIZE / 8];
 		random.nextBytes(salt);
 		return salt;
 	}
 
 	/**
-	 * Generates a user password based on the user defined password. This function randomly generates a salt
-	 * that is attached to this password.
+	 * Generates a fixed salt based on the provided input. This means that always the same salt produced and
+	 * returned.
 	 * 
-	 * @param password
-	 * @return Returns a UserPassword that holds the password and its associated salt.
+	 * @param input The input on which the fixed salt generation shall be based.
+	 * @return Returns a fix salt.
 	 */
-	public static UserPassword generatePassword(char[] password) {
-		return new UserPassword(password, generateSalt());
+	public static byte[] generateFixedSalt(byte[] input) {
+
+		try {
+			byte[] fixedSalt = new byte[SALT_BIT_SIZE / 8];
+
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			byte[] state = sha.digest(input);
+			sha.update(state);
+
+			int offset = 0;
+			while (offset < fixedSalt.length) {
+				state = sha.digest();
+
+				if (fixedSalt.length - offset > state.length) {
+					System.arraycopy(state, 0, fixedSalt, offset, state.length);
+				} else {
+					System.arraycopy(state, 0, fixedSalt, offset, fixedSalt.length - offset);
+				}
+
+				offset += state.length;
+
+				sha.update(state);
+			}
+
+			return fixedSalt;
+
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Exception while generating fixed salt:", e);
+		}
+		return null;
 	}
+
+	// /**
+	// * Generates a user password based on the user defined password. This function randomly generates a salt
+	// * that is attached to this password.
+	// *
+	// * @param password
+	// * @return Returns a UserPassword that holds the password and its associated salt.
+	// */
+	// public static UserPassword generatePassword(char[] password) {
+	// return new UserPassword(password, generateSalt());
+	// }
 
 	/**
 	 * Returns a salted PBKDF2 hash of the password.
@@ -72,14 +112,21 @@ public final class PasswordUtil {
 	 * Generates a symmetric AES key of the specified size and based on the provided UserPassword.
 	 * 
 	 * @param upw The UserPassword from which the AES key is derivated.
-	 * @param keyLength The desired key length of the resulting AES key.
+	 * @param keyLength The desired key lengt<h of the resulting AES key.
 	 * @return Returns the derived symmetric AES key of desired size.
 	 * @throws InvalidKeySpecException
 	 */
 	public static SecretKey generateAESKeyFromPassword(UserPassword upw, AES_KEYLENGTH keyLength)
 			throws InvalidKeySpecException {
 
-		byte[] secretKeyEncoded = getPBKDF2Hash(upw.getPassword(), upw.getSalt(), keyLength.value());
+		// generate a fixed salt out of the PIN itself
+		byte[] pinEnlargementSalt = generateFixedSalt(EncryptionUtil.serializeObject(upw.getPin()));
+
+		// enlarge PIN with enlargement salt, such that PIN has same size as the hash
+		byte[] enlargedPin = getPBKDF2Hash(upw.getPin(), pinEnlargementSalt, SALT_BIT_SIZE);
+
+		// use the enlarged PIN as salt to generate the symmetric AES key
+		byte[] secretKeyEncoded = getPBKDF2Hash(upw.getPassword(), enlargedPin, keyLength.value());
 
 		return new SecretKeySpec(secretKeyEncoded, "AES");
 	}

@@ -63,7 +63,8 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
-		UserPassword userPassword = PasswordUtil.generatePassword(password.toCharArray());
+		String pin = generateRandomString(6);
+		UserPassword userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
 		UserProfile testProfile = new UserProfile(userId,
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
@@ -106,7 +107,8 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
-		UserPassword userPassword = PasswordUtil.generatePassword(password.toCharArray());
+		String pin = generateRandomString(6);
+		UserPassword userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
 		UserProfile nnewProfile = new UserProfile(userId,
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));

@@ -92,15 +92,15 @@ public class H2HJUnitTest {
 	}
 
 	/**
-	 * Returns a random string that with a maximal length of 100 chars.
+	 * Returns a random string that with a specified maximal length of chars.
 	 * @return
 	 */
-	protected static String generateRandomString() {
+	protected static String generateRandomString(int maxLength) {
 		
 		Random random = new Random();
 		char [] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-		char buf[] = new char[random.nextInt(100)];
+		char buf[] = new char[random.nextInt(maxLength)];
 		for (int i=0;i<buf.length;i++) {
 		  int index = random.nextInt(subset.length);
 		  buf[i] = subset[index];

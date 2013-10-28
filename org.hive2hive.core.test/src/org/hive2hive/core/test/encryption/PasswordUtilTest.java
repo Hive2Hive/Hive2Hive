@@ -1,12 +1,18 @@
 package org.hive2hive.core.test.encryption;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
+import javax.crypto.SecretKey;
+
 import org.hive2hive.core.encryption.EncryptionUtil;
+import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.PasswordUtil;
+import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,9 +32,9 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int i = 0; i < salt.length; i++) {
 
 			// test salt generation
-			salt[i] = PasswordUtil.generateSalt();
+			salt[i] = PasswordUtil.generateRandomSalt();
 			assertNotNull(salt[i]);
-			assertTrue(salt[i].length == PasswordUtil.SALT_BIT_SIZE);
+			assertTrue(salt[i].length == PasswordUtil.SALT_BIT_SIZE / 8);
 
 			logger.debug(String.format("Generated Salt: %s", EncryptionUtil.toHex(salt[i])));
 
@@ -38,7 +44,84 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			}
 		}
 	}
+	
+	@Test
+	public void generateFixedSaltTest() {
 
+		// test for different input
+		byte[][] input = new byte[5][];
+		for (int i = 0; i < input.length; i++){
+			input[i] = generateRandomString(15).getBytes();
+			
+			logger.debug(String.format("Random Input: %s", EncryptionUtil.toHex(input[i])));
+			
+			byte[][] fixedSalt = new byte[10][];
+			for (int j = 0; j < fixedSalt.length; j++) {
+
+				// test fixed salt generation
+				fixedSalt[j] = PasswordUtil.generateFixedSalt(input[i]);
+				
+				assertNotNull(fixedSalt[j]);
+				assertTrue(fixedSalt[j].length == PasswordUtil.SALT_BIT_SIZE / 8);
+
+				logger.debug(String.format("Generated Fixed Salt: %s", EncryptionUtil.toHex(fixedSalt[j])));
+
+				// test whether salts are equal
+				for (int k = 0; k < j; k++) {
+					assertTrue(Arrays.equals(fixedSalt[k], fixedSalt[j]));
+				}
+			}
+		}
+	}
+
+	@Test
+	public void generateAESKeyFromPasswordTest() {
+		
+		// test all key sizes
+		AES_KEYLENGTH[] sizes = EncryptionUtilTest.getAESKeySizes();
+
+		for (int s = 0; s < sizes.length; s++) {
+			
+			// test various UserPasswords
+			UserPassword[] upw = new UserPassword[5];
+			for (int i = 0; i < upw.length; i++){
+				
+				char[] randomPW = generateRandomString(20).toCharArray();
+				char[] randomPIN = generateRandomString(6).toCharArray();
+				
+				upw[i] = new UserPassword(randomPW, randomPIN);
+				logger.debug(String.format("Testing %sbit AES key generation from user password and PIN:", sizes[s].value()));
+				logger.debug(String.format("Random PW: %s", String.valueOf(randomPW)));
+				logger.debug(String.format("Random PIN: %s", String.valueOf(randomPIN)));
+				
+				// test the generation process multiple times to ensure consistent result
+				SecretKey[] aesKey = new SecretKey[3];
+				for (int j = 0; j < aesKey.length; j++){
+					
+					// generate AES key
+					try {
+						aesKey[j] = PasswordUtil.generateAESKeyFromPassword(upw[i], sizes[s]);
+					} catch (InvalidKeySpecException e) {
+						logger.debug("Exception while testing AES key generation from password and PIN:", e);
+						e.printStackTrace();
+					}
+					
+					assertNotNull(aesKey[j]);
+					assertNotNull(aesKey[j].getEncoded());
+					assertTrue(aesKey[j].getEncoded().length == sizes[s].value() / 8);
+					
+					logger.debug(String.format("Generated %s-bit AES key: %s", sizes[s].value(), EncryptionUtil.toHex(aesKey[j].getEncoded())));
+					
+					// test whether generated AES passwords are equal
+					for (int k = 0; k < j; k++) {
+						assertTrue(Arrays.equals(aesKey[k].getEncoded(), aesKey[j].getEncoded()));
+					}
+				}
+			}
+			
+		}
+	}
+	
 	@Test
 	public void generateHashTest() {
 
@@ -47,8 +130,8 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int i = 0; i < password.length; i++) {
 
 			// set a random password and salt
-			password[i] = generateRandomString().toCharArray();
-			byte[] salt = PasswordUtil.generateSalt();
+			password[i] = generateRandomString(20).toCharArray();
+			byte[] salt = PasswordUtil.generateRandomSalt();
 
 			logger.debug(String.format("Tested Password: %s", String.valueOf(password[i])));
 
@@ -82,11 +165,11 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				// assure new parameters
 				char[] otherPW;
 				do {
-					otherPW = generateRandomString().toCharArray();
+					otherPW = generateRandomString(20).toCharArray();
 				} while (Arrays.equals(otherPW, password[i]));
 				byte[] otherSalt;
 				do {
-					otherSalt = PasswordUtil.generateSalt();
+					otherSalt = PasswordUtil.generateRandomSalt();
 				} while (Arrays.equals(otherSalt, salt));
 
 				try {
@@ -109,8 +192,8 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int i = 0; i < password.length; i++) {
 
 			// set a random password and salt
-			password[i] = generateRandomString().toCharArray();
-			byte[] salt = PasswordUtil.generateSalt();
+			password[i] = generateRandomString(20).toCharArray();
+			byte[] salt = PasswordUtil.generateRandomSalt();
 
 			logger.debug(String.format("Validating password %s", String.valueOf(password[i])));
 			logger.debug(String.format("with salt %s", EncryptionUtil.toHex(salt)));
@@ -141,16 +224,16 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				// assure new parameters
 				char[] otherPW;
 				do {
-					otherPW = generateRandomString().toCharArray();
+					otherPW = generateRandomString(20).toCharArray();
 				} while (Arrays.equals(otherPW, password[i]));
 				byte[] otherSalt;
 				do {
-					otherSalt = PasswordUtil.generateSalt();
+					otherSalt = PasswordUtil.generateRandomSalt();
 				} while (Arrays.equals(otherSalt, salt));
 				byte[] otherHash = null;
 				do {
 					try {
-						otherHash = PasswordUtil.generateHash(generateRandomString().toCharArray(), PasswordUtil.generateSalt());
+						otherHash = PasswordUtil.generateHash(generateRandomString(20).toCharArray(), PasswordUtil.generateRandomSalt());
 					} catch (InvalidKeySpecException e) {
 						logger.error("Exception whil testing password validation.", e);
 						e.printStackTrace();
