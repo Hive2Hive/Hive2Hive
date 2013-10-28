@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * The queue stores all {@link UserMessage}s that need to be processed by a client when he comes online. This
@@ -13,7 +13,7 @@ import org.hive2hive.core.network.data.NetworkData;
  * @author Nico
  * 
  */
-public class UserMessageQueue extends NetworkData {
+public class UserMessageQueue extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final String forUser;

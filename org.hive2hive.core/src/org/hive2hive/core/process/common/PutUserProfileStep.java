@@ -1,14 +1,19 @@
 package org.hive2hive.core.process.common;
 
+import java.security.spec.InvalidKeySpecException;
+
 import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FutureDHT;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.encryption.EncryptedContent;
-import org.hive2hive.core.encryption.EncryptionUtil;
+import org.hive2hive.core.encryption.EncryptedNetworkContent;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
+import org.hive2hive.core.encryption.H2HEncryptionUtil;
+import org.hive2hive.core.encryption.PasswordUtil;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
@@ -40,11 +45,19 @@ public class PutUserProfileStep extends PutProcessStep {
 
 	@Override
 	public void start() {
-		logger.debug("Encrypting UserProfile with 128bit AES key from password");
-		SecretKey encryptionKey = EncryptionUtil.createAESKeyFromPassword(password, AES_KEYLENGTH.BIT_128);
-		EncryptedContent closedUserProfile = EncryptionUtil.encryptAES(profile, encryptionKey);
-		logger.debug("Putting UserProfile into the DHT");
-		put(profile.getUserId(), H2HConstants.USER_PROFILE, closedUserProfile);
+		logger.debug("Encrypting UserProfile with 256bit AES key from password");
+		try {
+			SecretKey encryptionKey = PasswordUtil
+					.generateAESKeyFromPassword(password, AES_KEYLENGTH.BIT_256);
+			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(profile, encryptionKey);
+			logger.debug("Putting UserProfile into the DHT");
+			put(profile.getUserId(), H2HConstants.USER_PROFILE, encryptedUserProfile);
+		} catch (InvalidKeySpecException | DataLengthException | IllegalStateException
+				| InvalidCipherTextException e) {
+			// TODO Handle exceptions and rollback
+			e.printStackTrace();
+			getProcess().rollBack(e.getMessage());
+		}
 	}
 
 	@Override

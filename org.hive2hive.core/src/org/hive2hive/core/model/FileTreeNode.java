@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Tree implementation for the file tree. It stores the keys for the files and it's logic location.
@@ -14,7 +14,7 @@ import org.hive2hive.core.network.data.NetworkData;
  * @author Nico
  * 
  */
-public class FileTreeNode extends NetworkData {
+public class FileTreeNode extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;

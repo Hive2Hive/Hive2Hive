@@ -1,15 +1,19 @@
 package org.hive2hive.core.test.flowcontrol.common;
 
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 import javax.crypto.SecretKey;
 
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.encryption.EncryptedContent;
+import org.hive2hive.core.encryption.EncryptedNetworkContent;
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.encryption.ProfileEncryptionUtil;
+import org.hive2hive.core.encryption.H2HEncryptionUtil;
+import org.hive2hive.core.encryption.PasswordUtil;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -51,17 +55,18 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccessful() throws InterruptedException {
+	public void testStepSuccessful() throws InterruptedException, InvalidKeySpecException,
+			DataLengthException, IllegalStateException, InvalidCipherTextException {
 		NetworkManager putter = network.get(0); // where the process runs
 		NetworkManager proxy = network.get(1); // where the user profile is stored
 
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
-		UserPassword userPassword = ProfileEncryptionUtil.createUserPassword(password);
+		UserPassword userPassword = PasswordUtil.generatePassword(password.toCharArray());
 		UserProfile testProfile = new UserProfile(userId,
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024));
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
@@ -79,13 +84,14 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		EncryptedContent found = (EncryptedContent) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
+		EncryptedNetworkContent found = (EncryptedNetworkContent) proxy.getLocal(userId,
+				H2HConstants.USER_PROFILE);
 		Assert.assertNotNull(found);
 
 		// decrypt it using the same password as set above
-		SecretKey decryptionKeys = EncryptionUtil.createAESKeyFromPassword(userPassword,
-				AES_KEYLENGTH.BIT_128);
-		UserProfile decrypted = EncryptionUtil.decryptAES(found, decryptionKeys, UserProfile.class);
+		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(userPassword,
+				AES_KEYLENGTH.BIT_256);
+		UserProfile decrypted = (UserProfile) H2HEncryptionUtil.decryptAES(found, decryptionKeys);
 
 		// verify if both objects are the same
 		Assert.assertEquals(userId, decrypted.getUserId());
@@ -100,14 +106,14 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		String password = NetworkTestUtil.randomString();
-		UserPassword userPassword = ProfileEncryptionUtil.createUserPassword(password);
+		UserPassword userPassword = PasswordUtil.generatePassword(password.toCharArray());
 		UserProfile nnewProfile = new UserProfile(userId,
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024));
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		UserProfile originalProfile = new UserProfile(userId,
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_1024));
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {

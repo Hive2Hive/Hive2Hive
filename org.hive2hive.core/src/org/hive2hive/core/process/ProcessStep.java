@@ -9,7 +9,7 @@ import net.tomp2p.futures.FutureDHT;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.BaseRequestMessage;
@@ -26,7 +26,7 @@ public abstract class ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(ProcessStep.class);
 	private Process process;
-	private Map<String, NetworkData> backup = new HashMap<String, NetworkData>();
+	private Map<String, NetworkContent> backup = new HashMap<String, NetworkContent>();
 
 	public void setProcess(Process aProcess) {
 		process = aProcess;
@@ -127,7 +127,7 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 * @param data
 	 */
-	protected void put(final String locationKey, final String contentKey, NetworkData data) {
+	protected void put(final String locationKey, final String contentKey, NetworkContent data) {
 		if (getProcess().getState() == ProcessState.ROLLBACK) {
 			rollbackPut(locationKey, contentKey, data);
 			return;
@@ -155,7 +155,7 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 * @param data
 	 */
-	private void rollbackPut(String locationKey, String contentKey, NetworkData data) {
+	private void rollbackPut(String locationKey, String contentKey, NetworkContent data) {
 		FutureDHT rollbackFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
 		rollbackFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 			@Override

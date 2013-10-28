@@ -3,7 +3,7 @@ package org.hive2hive.core.model;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * An encrypted and signed message which is stored in the DHT. The user message
@@ -13,7 +13,7 @@ import org.hive2hive.core.network.data.NetworkData;
  * @author Nico
  * 
  */
-public class UserMessage extends NetworkData {
+public class UserMessage extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final String id;

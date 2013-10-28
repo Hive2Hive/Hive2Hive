@@ -40,7 +40,7 @@ public class DataManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkData wrapper) {
+	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkContent wrapper) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(wrapper);
@@ -84,7 +84,7 @@ public class DataManager {
 	 * @param wrapper
 	 *            the wrapper containing the content to be stored
 	 */
-	public void putLocal(String locationKey, String contentKey, NetworkData wrapper) {
+	public void putLocal(String locationKey, String contentKey, NetworkContent wrapper) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			// TODO: How to use the domain key?
@@ -113,7 +113,7 @@ public class DataManager {
 	 *            the content key - please choose one from {@link H2HConstants}
 	 * @return the desired content from the wrapper
 	 */
-	public NetworkData getLocal(String locationKey, String contentKey) {
+	public NetworkContent getLocal(String locationKey, String contentKey) {
 		logger.debug(String.format("local get key = '%s' content key = '%s'", locationKey, contentKey));
 		Data data = networkManager
 				.getConnection()
@@ -124,7 +124,7 @@ public class DataManager {
 						Number160.createHash(contentKey));
 		if (data != null) {
 			try {
-				return (NetworkData) data.getObject();
+				return (NetworkContent) data.getObject();
 			} catch (ClassNotFoundException | IOException e) {
 				logger.error(String.format("local get failed exception = '%s'", e.getMessage()));
 			}

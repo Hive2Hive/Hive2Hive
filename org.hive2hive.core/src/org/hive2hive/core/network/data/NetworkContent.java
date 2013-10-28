@@ -14,7 +14,7 @@ import net.tomp2p.peers.Number160;
  * 
  * @author Seppi
  */
-public abstract class NetworkData implements Serializable {
+public abstract class NetworkContent implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

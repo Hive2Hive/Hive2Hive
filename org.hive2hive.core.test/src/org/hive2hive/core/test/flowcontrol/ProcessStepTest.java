@@ -8,7 +8,7 @@ import java.util.Map;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
@@ -243,7 +243,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 	 */
 	private class PutGetRemovalProcessStep extends ProcessStep {
 
-		private NetworkData data;
+		private NetworkContent data;
 		private String locationKey;
 		private String contentKey;
 		private StepAction action;
@@ -256,7 +256,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		 * @param put if true, then the step puts the data, else it gets the data from the location/content
 		 *            key
 		 */
-		public PutGetRemovalProcessStep(String locationKey, String contentKey, NetworkData data,
+		public PutGetRemovalProcessStep(String locationKey, String contentKey, NetworkContent data,
 				StepAction action) {
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;

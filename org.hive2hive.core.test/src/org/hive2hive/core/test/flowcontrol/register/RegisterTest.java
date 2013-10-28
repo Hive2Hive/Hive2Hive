@@ -3,7 +3,7 @@ package org.hive2hive.core.test.flowcontrol.register;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.encryption.EncryptedContent;
+import org.hive2hive.core.encryption.EncryptedNetworkContent;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
@@ -58,7 +58,7 @@ public class RegisterTest extends H2HJUnitTest {
 
 		// verify the new public key, the user profile and the locations map
 		UserPublicKey publicKey = (UserPublicKey) proxy.getLocal(userId, H2HConstants.USER_PUBLIC_KEY);
-		EncryptedContent content = (EncryptedContent) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
+		EncryptedNetworkContent content = (EncryptedNetworkContent) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
 		Locations locations = (Locations) proxy.getLocal(userId, H2HConstants.USER_LOCATIONS);
 
 		Assert.assertNotNull(publicKey);

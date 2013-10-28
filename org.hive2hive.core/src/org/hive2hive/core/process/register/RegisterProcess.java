@@ -1,8 +1,10 @@
 package org.hive2hive.core.process.register;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.encryption.ProfileEncryptionUtil;
+import org.hive2hive.core.encryption.PasswordUtil;
 import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -17,9 +19,11 @@ public class RegisterProcess extends Process {
 	public RegisterProcess(String userId, String password, NetworkManager networkManager) {
 		super(networkManager);
 		this.userId = userId;
-		userPassword = ProfileEncryptionUtil.createUserPassword(password);
-		userProfile = new UserProfile(userId, EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_2048),
-				EncryptionUtil.createRSAKeys(RSA_KEYLENGTH.BIT_2048));
+		userPassword = PasswordUtil.generatePassword(password.toCharArray());
+		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+
+		userProfile = new UserProfile(userId, encryptionKeys, domainKeys);
 		setFirstStep(new CheckIfProfileExistsStep(userId));
 	}
 

@@ -1,7 +1,7 @@
 package org.hive2hive.core.encryption;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * This class holds the bytes of an encrypted content and its initialization vector.
@@ -9,14 +9,14 @@ import org.hive2hive.core.network.data.NetworkData;
  * @author Christian
  * 
  */
-public final class EncryptedContent extends NetworkData {
+public final class EncryptedNetworkContent extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final byte[] cipherContent;
 	private final byte[] initVector;
 	private int timeToLive = TimeToLiveStore.convertDaysToSeconds(365);
 
-	public EncryptedContent(byte[] cipherContent, byte[] initVector) {
+	public EncryptedNetworkContent(byte[] cipherContent, byte[] initVector) {
 		this.cipherContent = cipherContent;
 		this.initVector = initVector;
 	}

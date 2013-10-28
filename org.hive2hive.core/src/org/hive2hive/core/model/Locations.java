@@ -6,7 +6,7 @@ import java.util.List;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * A list of unique addresses of peers that are currently online. If there is at least one client online,
@@ -15,7 +15,7 @@ import org.hive2hive.core.network.data.NetworkData;
  * @author Nico
  * 
  */
-public class Locations extends NetworkData {
+public class Locations extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final String forUser;

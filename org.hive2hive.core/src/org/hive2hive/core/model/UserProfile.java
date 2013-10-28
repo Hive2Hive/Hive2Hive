@@ -3,7 +3,7 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * File which contains all keys and meta information about the files of the owner.
@@ -11,7 +11,7 @@ import org.hive2hive.core.network.data.NetworkData;
  * @author Nico
  * 
  */
-public class UserProfile extends NetworkData {
+public class UserProfile extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final KeyPair domainKeys;

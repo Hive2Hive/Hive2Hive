@@ -1,5 +1,10 @@
 package org.hive2hive.core.test;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Random;
+
+import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.junit.After;
@@ -77,6 +82,36 @@ public class H2HJUnitTest {
 
 	public static void afterClass() {
 		printTestIdentifier(testClass.getName(), false);
+	}
+	
+	protected static byte[] generateRandomContent(int sizeInBytes) {
+		SecureRandom random = new SecureRandom();
+		byte[] content = new byte[random.nextInt(sizeInBytes)];
+		random.nextBytes(content);
+		return content;
+	}
+
+	/**
+	 * Returns a random string that with a maximal length of 100 chars.
+	 * @return
+	 */
+	protected static String generateRandomString() {
+		
+		Random random = new Random();
+		char [] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
+
+		char buf[] = new char[random.nextInt(100)];
+		for (int i=0;i<buf.length;i++) {
+		  int index = random.nextInt(subset.length);
+		  buf[i] = subset[index];
+		}
+
+		return new String(buf);
+	}
+
+	protected static void printBytes(String description, byte[] bytes) {
+		logger.debug(description);
+		logger.debug(EncryptionUtil.toHex(bytes));
 	}
 
 }

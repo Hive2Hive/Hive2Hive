@@ -9,7 +9,7 @@ import net.tomp2p.futures.FutureDHT;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkData;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Verifies a put by checking if all replicas accepted the content. If not, the version is compared and the
@@ -28,11 +28,11 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 	private final NetworkManager networkManager;
 	private final String locationKey;
 	private final String contentKey;
-	private final NetworkData expectedData;
+	private final NetworkContent expectedData;
 	private final List<BaseFutureAdapter<FutureDHT>> listeners;
 
 	public PutVerificationListener(NetworkManager networkManager, String locationKey, String contentKey,
-			NetworkData expectedData) {
+			NetworkContent expectedData) {
 		this.networkManager = networkManager;
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
