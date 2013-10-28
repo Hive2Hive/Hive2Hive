@@ -2,6 +2,7 @@ package org.hive2hive.core.test;
 
 import org.hive2hive.core.test.flowcontrol.ProcessStepTest;
 import org.hive2hive.core.test.flowcontrol.ProcessTest;
+import org.hive2hive.core.test.flowcontrol.common.PutLocationStepTest;
 import org.hive2hive.core.test.flowcontrol.common.PutUserProfileStepTest;
 import org.hive2hive.core.test.flowcontrol.manager.ProcessManagerTest;
 import org.hive2hive.core.test.flowcontrol.register.RegisterTest;
@@ -33,7 +34,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		ProcessTest.class, ProcessManagerTest.class, ProcessStepTest.class,
 
 		// Process: Common steps
-		PutUserProfileStepTest.class,
+		PutUserProfileStepTest.class, PutLocationStepTest.class,
 
 		// Process: Register
 		RegisterTest.class
