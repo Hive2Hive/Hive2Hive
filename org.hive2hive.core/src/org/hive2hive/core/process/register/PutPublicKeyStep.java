@@ -3,13 +3,10 @@ package org.hive2hive.core.process.register;
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.PutProcessStep;
-import org.hive2hive.core.process.common.PutLocationStep;
-import org.hive2hive.core.process.common.PutUserProfileStep;
 
 /**
  * Puts the user's public key to the network (which is used for encryption of messages and other
@@ -46,22 +43,11 @@ public class PutPublicKeyStep extends PutProcessStep {
 	@Override
 	protected void handlePutResult(FutureDHT future) {
 		if (future.isSuccess()) {
-			continueWithNextStep();
+			// TODO: next step?
+			getProcess().nextStep(null);
 		} else {
 			rollBack();
 		}
-	}
-
-	private void continueWithNextStep() {
-		RegisterProcess process = (RegisterProcess) super.getProcess();
-
-		// create the next steps:
-		// first, put the new user profile
-		// second, put the empty locations map
-		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), null, null);
-		PutUserProfileStep first = new PutUserProfileStep(userProfile, null, process.getUserPassword(),
-				second);
-		getProcess().nextStep(first);
 	}
 
 	@Override
