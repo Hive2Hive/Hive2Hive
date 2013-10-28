@@ -5,9 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.SignatureException;
 import java.util.Arrays;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.CryptoException;
@@ -63,6 +67,9 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			assertNotNull(rsaKeyPair);
 			assertNotNull(rsaKeyPair.getPrivate());
 			assertNotNull(rsaKeyPair.getPublic());
+			
+			logger.debug(String.format("Private Key: %s", EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded())));
+			logger.debug(String.format("Public Key: %s", EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded())));
 		}
 	}
 
@@ -136,8 +143,9 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] encryptedData = null;
 			try {
 				encryptedData = EncryptionUtil.encryptRSA(data, rsaKeyPair.getPublic());
-			} catch (InvalidCipherTextException e) {
+			} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Exception while testing RSA encryption:", e);
+				e.printStackTrace();
 				e.printStackTrace();
 			}
 
@@ -148,9 +156,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// decrypt data with private key
 			byte[] decryptedData = null;
+
 			try {
 				decryptedData = EncryptionUtil.decryptRSA(encryptedData, rsaKeyPair.getPrivate());
-			} catch (InvalidCipherTextException e) {
+			} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Exception while testing RSA decryption:", e);
 				e.printStackTrace();
 			}
@@ -170,7 +179,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing %s-bit RSA SHA-1 signing and verificiation.",
+			logger.debug(String.format("Testing SHA-1 with RSA %s-bit signing and verificiation.",
 					sizes[s].value()));
 
 			// generate random sized content (max. 100 bytes)
@@ -184,7 +193,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] signature = null;
 			try {
 				signature = EncryptionUtil.sign(data, rsaKeyPair.getPrivate());
-			} catch (DataLengthException | CryptoException e) {
+			} catch (InvalidKeyException | SignatureException e) {
 				logger.error("Exception while testing signing:", e);
 				e.printStackTrace();
 			}
@@ -195,7 +204,12 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// verify data with public key
 			boolean isVerified = false;
-			isVerified = EncryptionUtil.verify(data, signature, rsaKeyPair.getPublic());
+			try {
+				isVerified = EncryptionUtil.verify(data, signature, rsaKeyPair.getPublic());
+			} catch (InvalidKeyException | SignatureException e) {
+				logger.error("Exception while testing verification:", e);
+				e.printStackTrace();
+			}
 
 			assertTrue(isVerified);
 		}

@@ -5,31 +5,36 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.RSAKeyGenParameterSpec;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.hive2hive.core.log.H2HLogger;
@@ -47,6 +52,8 @@ public final class EncryptionUtil {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
+	public static final String SINGATURE_ALGORITHM = "SHA1withRSA";
+	
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
 		BIT_192(192),
@@ -124,12 +131,19 @@ public final class EncryptionUtil {
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
-		KeyPairGenerator gen = new JDKKeyPairGenerator.RSA();
-		return gen.generateKeyPair();
 
-		// BigInteger publicExp = new BigInteger("10001", 16); // Fermat F4, largest known fermat prime
-		// int strength = keyLength.value();
-		// int certainty = 80; // certainty for the numbers to be primes, values >80 slow down algorithm
+		int strength = keyLength.value();
+		BigInteger publicExp = new BigInteger("10001", 16); // Fermat F4, largest known fermat prime
+
+		try {
+			JDKKeyPairGenerator gen = new JDKKeyPairGenerator.RSA();
+			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(strength, publicExp);
+			gen.initialize(params, new SecureRandom());
+			return gen.generateKeyPair();
+		} catch (InvalidAlgorithmParameterException e) {
+			logger.error("Exception whil RSA key pair generation:", e);
+		}
+		return null;
 
 		// RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
 		// KeyGenerationParameters parameters = new RSAKeyGenerationParameters(publicExp, new SecureRandom(),
@@ -176,11 +190,26 @@ public final class EncryptionUtil {
 	 * @param data The data to be encrypted.
 	 * @param publicKey The asymmetric public key with which the data shall be encrypted.
 	 * @return Returns the encrypted data.
+	 * @throws InvalidKeyException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
 	 */
-	public static byte[] encryptRSA(byte[] data, CipherParameters publicKey)
-			throws InvalidCipherTextException {
+	public static byte[] encryptRSA(byte[] data, PublicKey publicKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException {
 
-		return processRSACiphering(true, data, publicKey);
+		installBCProvider();
+
+		try {
+			Cipher cipher = Cipher.getInstance("RSA", "BC");
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+			return cipher.doFinal(data);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
+			logger.error("Exception while RSA encryption:", e);
+			e.printStackTrace();
+		}
+		return null;
+
+		// return processRSACiphering(true, data, publicKey);
 	}
 
 	/**
@@ -191,11 +220,26 @@ public final class EncryptionUtil {
 	 * @param data The data to be decrypted.
 	 * @param publicKey The asymmetric private key with which the data shall be decrypted.
 	 * @return Returns the decrypted data.
+	 * @throws InvalidKeyException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
 	 */
-	public static byte[] decryptRSA(byte[] data, CipherParameters privateKey)
-			throws InvalidCipherTextException {
+	public static byte[] decryptRSA(byte[] data, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException {
 
-		return processRSACiphering(false, data, privateKey);
+		installBCProvider();
+
+		try {
+			Cipher cipher = Cipher.getInstance("RSA", "BC");
+			cipher.init(Cipher.DECRYPT_MODE, privateKey);
+			return cipher.doFinal(data);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
+			logger.error("Exception while RSA encryption:", e);
+			e.printStackTrace();
+		}
+		return null;
+
+		// return processRSACiphering(false, data, privateKey);
 	}
 
 	/**
@@ -204,11 +248,26 @@ public final class EncryptionUtil {
 	 * @param data The content to be signed.
 	 * @param privateKey The private key used to sign the content.
 	 * @return The created signature of the data.
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
 	 */
-	public static byte[] sign(byte[] data, CipherParameters privateKey) throws DataLengthException,
-			CryptoException {
+	public static byte[] sign(byte[] data, PrivateKey privateKey) throws InvalidKeyException,
+			SignatureException {
 
-		return setupSigner(true, data, privateKey).generateSignature();
+		installBCProvider();
+		
+		try {
+			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
+			signEngine.initSign(privateKey);
+			signEngine.update(data);
+			return signEngine.sign();
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			logger.error("Exception while signing:", e);
+		}
+
+		return null;
+
+		// return setupSigner(true, data, privateKey).generateSignature();
 	}
 
 	/**
@@ -218,10 +277,26 @@ public final class EncryptionUtil {
 	 * @param signature The signature with which the data should be verified.
 	 * @param publicKey The public key used to verify the content.
 	 * @return Returns true if the signature could be verified and false otherwise.
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
 	 */
-	public static boolean verify(byte[] data, byte[] signature, CipherParameters publicKey) {
+	public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey)
+			throws InvalidKeyException, SignatureException {
 
-		return setupSigner(false, data, publicKey).verifySignature(signature);
+		installBCProvider();
+		
+		try {
+			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
+			signEngine.initVerify(publicKey);
+			signEngine.update(data);
+			return signEngine.verify(signature);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			logger.error("Exception while signing:", e);
+		}
+
+		return false;
+
+		// return setupSigner(false, data, publicKey).verifySignature(signature);
 	}
 
 	public static byte[] serializeObject(Object object) {
@@ -320,53 +395,53 @@ public final class EncryptionUtil {
 		return result;
 	}
 
-	private static byte[] processRSACiphering(boolean isEncrypting, byte[] data, CipherParameters key)
-			throws InvalidCipherTextException {
+	// private static byte[] processRSACiphering(boolean isEncrypting, byte[] data, CipherParameters key)
+	// throws InvalidCipherTextException {
+	//
+	// // set up engine and padding
+	// RSAEngine rsaEngine = new RSAEngine();
+	// AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
+	//
+	// // apply parameters
+	// cipher.init(isEncrypting, key);
+	//
+	// // process ciphering
+	// int position = 0;
+	// int inputBlockSize = cipher.getInputBlockSize();
+	// byte[] result = new byte[0];
+	// while (position < data.length) {
+	// if (position + inputBlockSize > data.length)
+	// inputBlockSize = data.length - position;
+	//
+	// byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
+	// result = combine(result, hexEncodedCipher);
+	// position += cipher.getInputBlockSize();
+	// }
+	// return result;
+	// }
 
-		// set up engine and padding
-		RSAEngine rsaEngine = new RSAEngine();
-		AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
+	// private static RSADigestSigner setupSigner(boolean forSigning, byte[] data, CipherParameters key) {
+	//
+	// // set up digester / hash function (e.g. SHA-1)
+	// SHA1Digest digester = new SHA1Digest();
+	//
+	// // set up signature mode (e.g. RSA)
+	// RSADigestSigner signer = new RSADigestSigner(digester);
+	//
+	// // apply parameters
+	// signer.init(forSigning, key);
+	// signer.update(data, 0, data.length);
+	//
+	// return signer;
+	// }
 
-		// apply parameters
-		cipher.init(isEncrypting, key);
-
-		// process ciphering
-		int position = 0;
-		int inputBlockSize = cipher.getInputBlockSize();
-		byte[] result = new byte[0];
-		while (position < data.length) {
-			if (position + inputBlockSize > data.length)
-				inputBlockSize = data.length - position;
-
-			byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
-			result = combine(result, hexEncodedCipher);
-			position += cipher.getInputBlockSize();
-		}
-		return result;
-	}
-
-	private static RSADigestSigner setupSigner(boolean forSigning, byte[] data, CipherParameters key) {
-
-		// set up digester / hash function (e.g. SHA-1)
-		SHA1Digest digester = new SHA1Digest();
-
-		// set up signature mode (e.g. RSA)
-		RSADigestSigner signer = new RSADigestSigner(digester);
-
-		// apply parameters
-		signer.init(forSigning, key);
-		signer.update(data, 0, data.length);
-
-		return signer;
-	}
-
-	private static byte[] combine(byte[] one, byte[] two) {
-
-		byte[] combined = new byte[one.length + two.length];
-
-		System.arraycopy(one, 0, combined, 0, one.length);
-		System.arraycopy(two, 0, combined, one.length, two.length);
-
-		return combined;
-	}
+	// private static byte[] combine(byte[] one, byte[] two) {
+	//
+	// byte[] combined = new byte[one.length + two.length];
+	//
+	// System.arraycopy(one, 0, combined, 0, one.length);
+	// System.arraycopy(two, 0, combined, one.length, two.length);
+	//
+	// return combined;
+	// }
 }
