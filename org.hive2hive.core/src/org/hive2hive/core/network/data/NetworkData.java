@@ -2,6 +2,9 @@ package org.hive2hive.core.network.data;
 
 import java.io.Serializable;
 
+import net.tomp2p.p2p.builder.DHTBuilder;
+import net.tomp2p.peers.Number160;
+
 /**
  * All data of <code>Hive2Hive</code> which has to be stored in the DHT are
  * using this wrapper.
@@ -14,6 +17,12 @@ import java.io.Serializable;
 public abstract class NetworkData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Some data has a domain key (used to sign content). This is the default domain key, however, by changing
+	 * it, the content get signed, once it's put.
+	 */
+	private Number160 signature = DHTBuilder.DEFAULT_DOMAIN;
 
 	/**
 	 * All data stored in the
@@ -37,5 +46,13 @@ public abstract class NetworkData implements Serializable {
 
 	public long getTimestamp() {
 		return timestamp;
+	}
+
+	public Number160 getSignature() {
+		return signature;
+	}
+
+	protected void setSignature(Number160 signature) {
+		this.signature = signature;
 	}
 }

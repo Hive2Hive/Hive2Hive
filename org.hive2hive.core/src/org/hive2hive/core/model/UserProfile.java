@@ -6,8 +6,7 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkData;
 
 /**
- * File which contains all keys and meta information about the files of the owner. Every client node tries to
- * have a decrypted up-to-date copy.
+ * File which contains all keys and meta information about the files of the owner.
  * 
  * @author Nico
  * 

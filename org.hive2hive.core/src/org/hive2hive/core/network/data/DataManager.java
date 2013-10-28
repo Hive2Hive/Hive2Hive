@@ -43,11 +43,11 @@ public class DataManager {
 	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkData wrapper) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
-			// TODO: How to use the domain key?
 			Data data = new Data(wrapper);
 			data.setTTLSeconds(wrapper.getTimeToLive());
 			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
-					.setData(Number160.createHash(contentKey), data).start();
+					.setData(Number160.createHash(contentKey), data).setDomainKey(wrapper.getSignature())
+					.start();
 		} catch (IOException e) {
 			logger.error(String
 					.format("Global put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
