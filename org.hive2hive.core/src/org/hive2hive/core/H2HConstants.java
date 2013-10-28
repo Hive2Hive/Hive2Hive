@@ -12,5 +12,6 @@ public interface H2HConstants {
 	// stored for a given key
 	public static final String USER_PROFILE = "USER_PROFILE";
 	public static final String USER_LOCATIONS = "USER_LOCATIONS";
+	public static final String USER_PUBLIC_KEY = "USER_PUBLIC_KEY";
 
 }

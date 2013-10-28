@@ -227,12 +227,4 @@ public abstract class ProcessStep {
 			}
 		});
 	}
-
-	protected void backup(String key, NetworkData data) {
-		backup.put(key, data);
-	}
-
-	protected NetworkData restore(String key) {
-		return backup.get(key);
-	}
 }
