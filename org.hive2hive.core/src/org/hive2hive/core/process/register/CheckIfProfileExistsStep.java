@@ -64,17 +64,17 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 
 	private void continueWithNextStep() {
 		RegisterProcess process = (RegisterProcess) super.getProcess();
+		UserProfile userProfile = process.getUserProfile();
 
 		// create the next steps:
 		// first, put the new user profile
 		// second, put the empty locations map
 		// third, put the public key of the user
-		// next step: Put the public key of the user into the DHT
-		PutPublicKeyStep third = new PutPublicKeyStep(process.getUserProfile());
-		PutLocationStep second = new PutLocationStep(new Locations(process.getUserProfile().getUserId()),
-				null, third);
-		PutUserProfileStep first = new PutUserProfileStep(process.getUserProfile(), null,
-				process.getUserPassword(), second);
+		PutPublicKeyStep third = new PutPublicKeyStep(userProfile.getUserId(), userProfile
+				.getEncryptionKeys().getPublic());
+		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), null, third);
+		PutUserProfileStep first = new PutUserProfileStep(userProfile, null, process.getUserPassword(),
+				second);
 		getProcess().nextStep(first);
 	}
 

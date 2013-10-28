@@ -1,9 +1,10 @@
 package org.hive2hive.core.process.register;
 
+import java.security.PublicKey;
+
 import net.tomp2p.futures.FutureDHT;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.PutProcessStep;
@@ -17,22 +18,23 @@ import org.hive2hive.core.process.PutProcessStep;
  */
 public class PutPublicKeyStep extends PutProcessStep {
 
-	private UserProfile userProfile;
+	private final String userId;
+	private final PublicKey publicKey;
 
-	protected PutPublicKeyStep(UserProfile userProfile) {
+	protected PutPublicKeyStep(String userId, PublicKey publicKey) {
 		super(null);
-		this.userProfile = userProfile;
+		this.userId = userId;
+		this.publicKey = publicKey;
 	}
 
 	@Override
 	public void start() {
-		put(userProfile.getUserId(), H2HConstants.USER_PUBLIC_KEY, new UserPublicKey(userProfile
-				.getEncryptionKeys().getPublic()));
+		put(userId, H2HConstants.USER_PUBLIC_KEY, new UserPublicKey(publicKey));
 	}
 
 	@Override
 	public void rollBack() {
-		super.rollBackPut(userProfile.getUserId(), H2HConstants.USER_PUBLIC_KEY);
+		super.rollBackPut(userId, H2HConstants.USER_PUBLIC_KEY);
 	}
 
 	@Override

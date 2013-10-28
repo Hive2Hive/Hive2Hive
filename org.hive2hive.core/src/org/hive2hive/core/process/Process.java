@@ -153,11 +153,14 @@ public abstract class Process implements IProcess {
 
 	public void rollBack(String reason) {
 		state = ProcessState.ROLLBACK;
-		logger.warn(String.format("Rollback triggered. reason = '%s'", reason));
+		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
 		currentStep.rollBack();
+
+		// TODO: rollback reverse order
 		for (ProcessStep step : executedSteps) {
 			step.rollBack();
 		}
+
 		for (IProcessListener listener : listeners) {
 			listener.onFail(reason);
 		}
