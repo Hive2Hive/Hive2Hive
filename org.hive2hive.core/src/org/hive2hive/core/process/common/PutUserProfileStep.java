@@ -49,13 +49,13 @@ public class PutUserProfileStep extends PutProcessStep {
 		try {
 			SecretKey encryptionKey = PasswordUtil
 					.generateAESKeyFromPassword(password, AES_KEYLENGTH.BIT_256);
-			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(profile, encryptionKey);
+			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(profile,
+					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
 			put(profile.getUserId(), H2HConstants.USER_PROFILE, encryptedUserProfile);
 		} catch (DataLengthException | IllegalStateException
 				| InvalidCipherTextException e) {
-			// TODO Handle exceptions and rollback
-			e.printStackTrace();
+			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().rollBack(e.getMessage());
 		}
 	}
