@@ -45,12 +45,27 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 		// store the future for notifying the listeners later with this
 		logger.debug("Start verification of put(" + locationKey + ", " + contentKey + ")");
 		final FutureDHT putFuture = future;
+
+		// TODO
+		// get the raw keys from the putFuture
+		// if raw keys have empty collection --> did not save because of verification (previous version does
+		// not match)
+
+		// wait some seconds
+
 		FutureDHT getFuture = networkManager.getGlobal(locationKey, contentKey);
 		getFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
 
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
-				// TODO: verify with expected data and the timestamps
+				// TODO
+
+				// get history object and verify if my key is contained
+				// if newest in history --> my object is most recent one
+				// if not newest in history --> already newer version, but that's based on my version
+				// if not in list --> fork happened and I'm not part of the "right" branch. --> Rollback to
+				// base on newest version --> possibly throw an exception or repeat the put based on the most
+				// recent version
 				notifyListeners(putFuture);
 			}
 		});
