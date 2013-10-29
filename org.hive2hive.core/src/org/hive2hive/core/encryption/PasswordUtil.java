@@ -102,7 +102,7 @@ public final class PasswordUtil {
 	 * @param password the password to hash
 	 * @return a salted PBKDF2 hash of the password
 	 */
-	public static byte[] generateHash(char[] password, byte[] salt) throws InvalidKeySpecException {
+	public static byte[] generateHash(char[] password, byte[] salt) {
 
 		// hash the password
 		return getPBKDF2Hash(password, salt, HASH_BIT_SIZE);
@@ -116,8 +116,7 @@ public final class PasswordUtil {
 	 * @return Returns the derived symmetric AES key of desired size.
 	 * @throws InvalidKeySpecException
 	 */
-	public static SecretKey generateAESKeyFromPassword(UserPassword upw, AES_KEYLENGTH keyLength)
-			throws InvalidKeySpecException {
+	public static SecretKey generateAESKeyFromPassword(UserPassword upw, AES_KEYLENGTH keyLength) {
 
 		// generate a fixed salt out of the PIN itself
 		byte[] pinEnlargementSalt = generateFixedSalt(EncryptionUtil.serializeObject(upw.getPin()));
@@ -139,8 +138,7 @@ public final class PasswordUtil {
 	 * @param correctHash the hash of the valid password
 	 * @return true if the password is correct, false if not
 	 */
-	public static boolean validatePassword(char[] password, byte[] salt, byte[] correctHash)
-			throws InvalidKeySpecException {
+	public static boolean validatePassword(char[] password, byte[] salt, byte[] correctHash) {
 
 		// compute hash of password using same salt, iteration count and hash length
 		byte[] testHash = getPBKDF2Hash(password, salt, HASH_BIT_SIZE);
@@ -159,8 +157,7 @@ public final class PasswordUtil {
 	 * @param bytes the length of the hash to compute in bytes
 	 * @return the PBDKF2 hash of the password
 	 */
-	private static byte[] getPBKDF2Hash(char[] password, byte[] salt, int hashBitSize)
-			throws InvalidKeySpecException {
+	private static byte[] getPBKDF2Hash(char[] password, byte[] salt, int hashBitSize) {
 
 		try {
 			SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -169,7 +166,7 @@ public final class PasswordUtil {
 			SecretKey secretKey = skf.generateSecret(spec);
 			return secretKey.getEncoded();
 
-		} catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			logger.error("Error while PBKDF2 key streching:", e);
 		}
 		return null;
