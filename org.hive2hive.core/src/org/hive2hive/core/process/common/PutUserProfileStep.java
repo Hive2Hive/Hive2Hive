@@ -52,7 +52,7 @@ public class PutUserProfileStep extends PutProcessStep {
 			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(profile, encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
 			put(profile.getUserId(), H2HConstants.USER_PROFILE, encryptedUserProfile);
-		} catch (InvalidKeySpecException | DataLengthException | IllegalStateException
+		} catch (DataLengthException | IllegalStateException
 				| InvalidCipherTextException e) {
 			// TODO Handle exceptions and rollback
 			e.printStackTrace();
