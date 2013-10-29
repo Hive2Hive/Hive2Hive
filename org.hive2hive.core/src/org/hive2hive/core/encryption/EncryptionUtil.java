@@ -53,7 +53,9 @@ public final class EncryptionUtil {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
 	public static final String SINGATURE_ALGORITHM = "SHA1withRSA";
-	
+
+	public static final int IV_LENGTH = 16;
+
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
 		BIT_192(192),
@@ -97,7 +99,7 @@ public final class EncryptionUtil {
 	 */
 	public static byte[] generateIV() {
 		SecureRandom random = new SecureRandom();
-		byte[] iv = new byte[16];
+		byte[] iv = new byte[IV_LENGTH];
 		random.nextBytes(iv);
 		return iv;
 	}
@@ -242,6 +244,28 @@ public final class EncryptionUtil {
 		// return processRSACiphering(false, data, privateKey);
 	}
 
+	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey,
+			AES_KEYLENGTH keyLength) throws DataLengthException, IllegalStateException,
+			InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+
+		// generate AES key
+		SecretKey aesKey = generateAESKey(keyLength);
+
+		// generate IV
+		byte[] initVector = generateIV();
+
+		// encrypt data symmetrically
+		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector);
+
+		// encapsulate symmetric encryption parameters
+		AESParameters params = new AESParameters(aesKey.getEncoded(), initVector);
+
+		// encrypt parameters asymmetrically
+		byte[] rsaEncryptedParams = encryptRSA(serializeObject(params), publicKey);
+
+		return new HybridEncryptedContent(rsaEncryptedParams, aesEncryptedData);
+	}
+
 	/**
 	 * Signs the provided data with the specified private key and returns the signature.
 	 * 
@@ -255,7 +279,7 @@ public final class EncryptionUtil {
 			SignatureException {
 
 		installBCProvider();
-		
+
 		try {
 			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
 			signEngine.initSign(privateKey);
@@ -284,7 +308,7 @@ public final class EncryptionUtil {
 			throws InvalidKeyException, SignatureException {
 
 		installBCProvider();
-		
+
 		try {
 			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
 			signEngine.initVerify(publicKey);

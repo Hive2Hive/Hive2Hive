@@ -59,6 +59,13 @@ public final class FileEncryptionUtil {
 		return null;
 
 	}
+	
+	public static byte[] encryptFile(Path filePath) {
+		
+		
+		
+		return null;
+	}
 
 	public static String serializePath(Path path) {
 
