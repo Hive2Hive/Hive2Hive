@@ -15,8 +15,9 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 
 /**
  * This class provides special encryption and decryption functionalities for files.
+ * 
  * @author Christian
- *
+ * 
  */
 public final class FileEncryptionUtil {
 
@@ -28,44 +29,36 @@ public final class FileEncryptionUtil {
 	}
 
 	/**
-	 * Create a SHA-256 checksum based on the binary representation of a file.
+	 * Generates a SHA-256 checksum based on the binary representation of a file.
+	 * 
 	 * @param filePath The path of the file which shall be check summed.
 	 * @return The checksum of the file.
-	 * @throws FileNotFoundException
+	 * @throws IOException
 	 */
-	public static String createChecksum(Path filePath) throws FileNotFoundException {
+	public static String generateChecksum(Path filePath) throws IOException {
 
 		try {
-			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			try {
-				FileInputStream fis = new FileInputStream(filePath.toFile());
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-				byte[] buffer = new byte[1024];
+			FileInputStream fis = new FileInputStream(filePath.toFile());
 
-				int numBytes = 0;
-				while ((numBytes = fis.read(buffer)) != -1) {
-					messageDigest.update(buffer, 0, numBytes);
-				}
-				fis.close();
-
-				byte[] mdbytes = messageDigest.digest();
-				StringBuffer hexString = new StringBuffer();
-				for (int i = 0; i < mdbytes.length; i++) {
-					hexString.append(Integer.toHexString(0xFF & mdbytes[i]));
-				}
-				return hexString.toString();
-
-			} catch (IOException e) {
-				logger.error("Exception while closing input stream:", e);
+			int position = 0;
+			byte[] buffer = new byte[1024];
+			while ((position = fis.read(buffer)) != 1) {
+				digest.update(buffer, 0, position);
 			}
+			fis.close();
+			byte[] digestBytes = digest.digest();
+
+			return EncryptionUtil.toHex(digestBytes);
+
 		} catch (NoSuchAlgorithmException e) {
-			logger.error("Exception during message digest initialization:", e);
+			logger.error("Exception while creating checksum;", e);
 		}
 
 		return null;
+
 	}
-	
-	
 
 	public static String serializePath(Path path) {
 
