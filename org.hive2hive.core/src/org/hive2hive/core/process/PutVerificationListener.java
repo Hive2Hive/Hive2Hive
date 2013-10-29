@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -29,46 +30,50 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 	private final String locationKey;
 	private final String contentKey;
 	private final NetworkContent expectedData;
-	private final List<BaseFutureAdapter<FutureDHT>> listeners;
+	private final ProcessStep processStep;
 
-	public PutVerificationListener(NetworkManager networkManager, String locationKey, String contentKey,
+	public PutVerificationListener(NetworkManager networkManager, ProcessStep processStep, String locationKey, String contentKey,
 			NetworkContent expectedData) {
 		this.networkManager = networkManager;
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.expectedData = expectedData;
-		listeners = new ArrayList<BaseFutureAdapter<FutureDHT>>();
+		this.processStep = processStep;
 	}
 
 	@Override
 	public void operationComplete(FutureDHT future) throws Exception {
+		final FutureDHT putFuture = future;
+		
 		// store the future for notifying the listeners later with this
 		logger.debug("Start verification of put(" + locationKey + ", " + contentKey + ")");
-		final FutureDHT putFuture = future;
+
+		// check if on all peers the data has been stored
+		// TODO it seems that TomP2P gives no feedback when a peer was accessed --> null
+		for (PeerAddress peerAddress : putFuture.getRawKeys().keySet()) {
+			// TODO compare here the time stamp / version key to check if correct data was stored
+			if (future.getRawKeys().get(peerAddress) == null
+					|| future.getRawKeys().get(peerAddress).isEmpty() ) {
+				logger.warn("Version conflict detected after put.");
+				// TODO rollback
+			} else {
+				// logger.debug("ok");
+			}
+		}
+
 		FutureDHT getFuture = networkManager.getGlobal(locationKey, contentKey);
 		getFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
-
 			@Override
 			public void operationComplete(FutureDHT future) throws Exception {
 				// TODO: verify with expected data and the timestamps
-				notifyListeners(putFuture);
+				notifyProcessStep(putFuture);
 			}
 		});
 	}
 
-	private void notifyListeners(FutureDHT future) throws Exception {
-		for (BaseFutureAdapter<FutureDHT> listener : listeners) {
-			listener.operationComplete(future);
-		}
-	}
-
-	/**
-	 * Adds a listener which are notified after the verification
-	 * 
-	 * @param listener
-	 */
-	public void addListener(BaseFutureAdapter<FutureDHT> listener) {
-		listeners.add(listener);
+	private void notifyProcessStep(FutureDHT future){
+		logger.debug("Verification for put(" + locationKey + ", " + contentKey + ") complete");
+		processStep.handlePutResult(future);
 	}
 
 }

@@ -135,16 +135,9 @@ public abstract class ProcessStep {
 
 		// TODO: Verify with old version of the data
 		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
-		PutVerificationListener verificationListener = new PutVerificationListener(getNetworkManager(),
+		PutVerificationListener verificationListener = new PutVerificationListener(getNetworkManager(), this,
 				locationKey, contentKey, data);
 		putFuture.addListener(verificationListener);
-		verificationListener.addListener(new BaseFutureAdapter<FutureDHT>() {
-			@Override
-			public void operationComplete(FutureDHT future) throws Exception {
-				logger.debug("Verification for put(" + locationKey + ", " + contentKey + ") complete");
-				handlePutResult(future);
-			}
-		});
 	}
 
 	/**
