@@ -2,7 +2,9 @@ package org.hive2hive.core.network;
 
 import java.net.InetAddress;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -121,7 +123,7 @@ public class NetworkManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkContent data) {
+	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent data) {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.putGlobal(locationKey, contentKey, data);
@@ -137,7 +139,7 @@ public class NetworkManager {
 	 *            the content key - please choose one from {@link H2HConstants}
 	 * @return the desired content from the wrapper
 	 */
-	public FutureDHT getGlobal(String locationKey, String contentKey) {
+	public FutureGet getGlobal(String locationKey, String contentKey) {
 		if (!connection.isConnected())
 			return null;
 		return dataManager.getGlobal(locationKey, contentKey);
@@ -183,7 +185,7 @@ public class NetworkManager {
 	 * @param contentKey the content key - please choose one from {@link H2HConstants}
 	 * @return the future
 	 */
-	public FutureDHT remove(String locationKey, String contentKey) {
+	public FutureRemove remove(String locationKey, String contentKey) {
 		if (!connection.isConnected()) {
 			return null;
 		}

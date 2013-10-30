@@ -1,10 +1,10 @@
 package org.hive2hive.core.process;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -26,7 +26,6 @@ public abstract class ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(ProcessStep.class);
 	private Process process;
-	private Map<String, NetworkContent> backup = new HashMap<String, NetworkContent>();
 
 	public void setProcess(Process aProcess) {
 		process = aProcess;
@@ -78,7 +77,7 @@ public abstract class ProcessStep {
 	 * 
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
-	protected abstract void handlePutResult(FutureDHT future);
+	protected abstract void handlePutResult(FuturePut future);
 
 	/**
 	 * An optional method which my be implemented blank if not needed.</br>
@@ -91,7 +90,7 @@ public abstract class ProcessStep {
 	 * 
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
-	protected abstract void handleGetResult(FutureDHT future);
+	protected abstract void handleGetResult(FutureGet future);
 
 	/**
 	 * An optional method which my be implemented blank if not needed.</br>
@@ -104,7 +103,7 @@ public abstract class ProcessStep {
 	 * 
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
-	protected abstract void handleRemovalResult(FutureDHT future);
+	protected abstract void handleRemovalResult(FutureRemove future);
 
 	protected void send(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
@@ -134,7 +133,7 @@ public abstract class ProcessStep {
 		}
 
 		// TODO: Verify with old version of the data
-		FutureDHT putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
+		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
 		PutVerificationListener verificationListener = new PutVerificationListener(getNetworkManager(), this,
 				locationKey, contentKey, data);
 		putFuture.addListener(verificationListener);
@@ -149,10 +148,10 @@ public abstract class ProcessStep {
 	 * @param data
 	 */
 	private void rollbackPut(String locationKey, String contentKey, NetworkContent data) {
-		FutureDHT rollbackFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
-		rollbackFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+		FuturePut rollbackFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
+		rollbackFuture.addListener(new BaseFutureAdapter<FuturePut>() {
 			@Override
-			public void operationComplete(FutureDHT future) throws Exception {
+			public void operationComplete(FuturePut future) throws Exception {
 				if (future.isSuccess()) {
 					logger.debug("Rollback: Restored the old content");
 				} else {
@@ -170,10 +169,10 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 */
 	protected void get(String locationKey, String contentKey) {
-		FutureDHT getFuture = getNetworkManager().getGlobal(locationKey, contentKey);
-		getFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+		FutureGet getFuture = getNetworkManager().getGlobal(locationKey, contentKey);
+		getFuture.addListener(new BaseFutureAdapter<FutureGet>() {
 			@Override
-			public void operationComplete(FutureDHT future) throws Exception {
+			public void operationComplete(FutureGet future) throws Exception {
 				handleGetResult(future);
 			}
 		});
@@ -191,10 +190,10 @@ public abstract class ProcessStep {
 			return;
 		}
 
-		FutureDHT removalFuture = getNetworkManager().remove(locationKey, contentKey);
-		removalFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+		FutureRemove removalFuture = getNetworkManager().remove(locationKey, contentKey);
+		removalFuture.addListener(new BaseFutureAdapter<FutureRemove>() {
 			@Override
-			public void operationComplete(FutureDHT future) throws Exception {
+			public void operationComplete(FutureRemove future) throws Exception {
 				handleRemovalResult(future);
 			}
 		});
@@ -208,10 +207,10 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 */
 	private void rollbackRemove(String locationKey, String contentKey) {
-		FutureDHT rollbackFuture = getNetworkManager().remove(locationKey, contentKey);
-		rollbackFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+		FutureRemove rollbackFuture = getNetworkManager().remove(locationKey, contentKey);
+		rollbackFuture.addListener(new BaseFutureAdapter<FutureRemove>() {
 			@Override
-			public void operationComplete(FutureDHT future) throws Exception {
+			public void operationComplete(FutureRemove future) throws Exception {
 				if (future.isSuccess()) {
 					logger.debug("Rollback: Removed new content");
 				} else {

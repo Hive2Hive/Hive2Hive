@@ -2,7 +2,9 @@ package org.hive2hive.core.network.data;
 
 import java.io.IOException;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.p2p.builder.DHTBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
@@ -40,11 +42,11 @@ public class DataManager {
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FutureDHT putGlobal(String locationKey, String contentKey, NetworkContent wrapper) {
+	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent wrapper) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(wrapper);
-			data.setTTLSeconds(wrapper.getTimeToLive());
+			data.ttlSeconds(wrapper.getTimeToLive());
 			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
 					.setData(Number160.createHash(contentKey), data).setDomainKey(wrapper.getSignature())
 					.start();
@@ -66,7 +68,7 @@ public class DataManager {
 	 *            the content key - please choose one from {@link H2HConstants}
 	 * @return the future
 	 */
-	public FutureDHT getGlobal(String locationKey, String contentKey) {
+	public FutureGet getGlobal(String locationKey, String contentKey) {
 		logger.debug(String.format("global get key = '%s' content key = '%s'", locationKey, contentKey));
 		return networkManager.getConnection().getPeer().get(Number160.createHash(locationKey))
 				.setContentKey(Number160.createHash(contentKey)).start();
@@ -89,12 +91,12 @@ public class DataManager {
 		try {
 			// TODO: How to use the domain key?
 			Data data = new Data(wrapper);
-			data.setTTLSeconds(wrapper.getTimeToLive());
+			data.ttlSeconds(wrapper.getTimeToLive());
 			networkManager
 					.getConnection()
 					.getPeer()
 					.getPeerBean()
-					.getStorage()
+					.storage()
 					.put(Number160.createHash(locationKey), DHTBuilder.DEFAULT_DOMAIN,
 							Number160.createHash(contentKey), data);
 		} catch (IOException e) {
@@ -119,12 +121,12 @@ public class DataManager {
 				.getConnection()
 				.getPeer()
 				.getPeerBean()
-				.getStorage()
+				.storage()
 				.get(Number160.createHash(locationKey), DHTBuilder.DEFAULT_DOMAIN,
 						Number160.createHash(contentKey));
 		if (data != null) {
 			try {
-				return (NetworkContent) data.getObject();
+				return (NetworkContent) data.object();
 			} catch (ClassNotFoundException | IOException e) {
 				logger.error(String.format("local get failed exception = '%s'", e.getMessage()));
 			}
@@ -141,7 +143,7 @@ public class DataManager {
 	 * @param contentKey the content key - please choose one from {@link H2HConstants}
 	 * @return the future
 	 */
-	public FutureDHT remove(String locationKey, String contentKey) {
+	public FutureRemove remove(String locationKey, String contentKey) {
 		logger.debug(String.format("remove key = '%s' content key = '%s'", locationKey, contentKey));
 		return networkManager.getConnection().getPeer().remove(Number160.createHash(locationKey))
 				.setContentKey(Number160.createHash(contentKey)).start();

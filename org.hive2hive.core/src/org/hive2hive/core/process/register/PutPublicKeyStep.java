@@ -2,7 +2,9 @@ package org.hive2hive.core.process.register;
 
 import java.security.PublicKey;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserPublicKey;
@@ -43,7 +45,7 @@ public class PutPublicKeyStep extends PutProcessStep {
 	}
 
 	@Override
-	protected void handlePutResult(FutureDHT future) {
+	protected void handlePutResult(FuturePut future) {
 		if (future.isSuccess()) {
 			// TODO: next step?
 			getProcess().nextStep(null);
@@ -53,12 +55,12 @@ public class PutPublicKeyStep extends PutProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(FutureDHT future) {
+	protected void handleGetResult(FutureGet future) {
 		// not used
 	}
 
 	@Override
-	protected void handleRemovalResult(FutureDHT future) {
+	protected void handleRemovalResult(FutureRemove future) {
 		// not used
 	}
 

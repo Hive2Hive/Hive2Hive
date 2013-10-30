@@ -17,5 +17,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/tomp2p-core"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

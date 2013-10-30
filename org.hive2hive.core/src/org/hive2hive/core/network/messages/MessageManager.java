@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
@@ -40,11 +40,12 @@ public class MessageManager {
 			RequestP2PConfiguration requestP2PConfiguration = createSendingConfiguration();
 			Number160 keyForMessageID = Number160.createHash(message.getTargetKey());
 			// send message to the peer which is responsible for the given key
-			FutureDHT future = networkManager.getConnection().getPeer().send(keyForMessageID)
-					.setObject(message).setRequestP2PConfiguration(requestP2PConfiguration)
-					.setRefreshSeconds(0).start();
 
-			BaseFutureAdapter<FutureDHT> futureListener = new FutureListener(message, networkManager);
+			// TODO what was the 'setRefreshSeconds(0)' parameter here?
+			FutureDirect future = networkManager.getConnection().getPeer().send(keyForMessageID)
+					.setObject(message).setRequestP2PConfiguration(requestP2PConfiguration).start();
+
+			BaseFutureAdapter<FutureDirect> futureListener = new FutureDirectListener(message, networkManager);
 			future.addListener(futureListener);
 
 			logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
@@ -60,7 +61,7 @@ public class MessageManager {
 
 			FutureResponse futureResponse = networkManager.getConnection().getPeer()
 					.sendDirect(aMessage.getTargetAddress()).setObject(aMessage).start();
-			FutureListener2 futureListener = new FutureListener2(aMessage, networkManager);
+			FutureResponseListener futureListener = new FutureResponseListener(aMessage, networkManager);
 			futureResponse.addListener(futureListener);
 
 			logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
@@ -97,24 +98,24 @@ public class MessageManager {
 		}
 	}
 
-	private class FutureListener extends BaseFutureAdapter<FutureDHT> {
+	private class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 		private final IMessage message;
 		private final NetworkManager networkManager;
 
-		public FutureListener(IMessage aMessage, NetworkManager aNetworkManager) {
+		public FutureDirectListener(IMessage aMessage, NetworkManager aNetworkManager) {
 			message = aMessage;
 			networkManager = aNetworkManager;
 		}
 
 		@Override
-		public void operationComplete(FutureDHT future) throws Exception {
+		public void operationComplete(FutureDirect future) throws Exception {
 			AcceptanceReply reply = extractAcceptanceReply(future);
 			if (reply != AcceptanceReply.OK) {
 				message.handleSendingFailure(reply, networkManager);
 			}
 		}
 
-		private AcceptanceReply extractAcceptanceReply(FutureDHT aFuture) {
+		private AcceptanceReply extractAcceptanceReply(FutureDirect aFuture) {
 			String errorReason = "";
 			if (aFuture.isSuccess()) {
 				try {
@@ -149,11 +150,11 @@ public class MessageManager {
 
 	}
 
-	private class FutureListener2 extends BaseFutureAdapter<FutureResponse> {
+	private class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 		private final BaseMessage message;
 		private final NetworkManager networkManager;
 
-		public FutureListener2(BaseMessage aMessage, NetworkManager aNetworkManager) {
+		public FutureResponseListener(BaseMessage aMessage, NetworkManager aNetworkManager) {
 			message = aMessage;
 			networkManager = aNetworkManager;
 		}
@@ -170,7 +171,8 @@ public class MessageManager {
 			String errorReason = "";
 			if (aFuture.isSuccess()) {
 				try {
-					Object returnedObject = aFuture.getObject();
+					// TODO: Verify if 'getResponse' works
+					Object returnedObject = aFuture.getResponse();
 					if (returnedObject != null) {
 						if (returnedObject instanceof AcceptanceReply) {
 							AcceptanceReply reply = (AcceptanceReply) returnedObject;

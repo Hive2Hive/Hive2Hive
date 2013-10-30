@@ -4,7 +4,9 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 import net.tomp2p.storage.StorageMemory;
@@ -49,8 +51,8 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		NetworkManager nodeC = network.get(2);
 
 		// node B and C will deny the put request
-		nodeB.getConnection().getPeer().getPeerBean().setStorage(new DenyingTestStorage());
-		nodeC.getConnection().getPeer().getPeerBean().setStorage(new DenyingTestStorage());
+		nodeB.getConnection().getPeer().getPeerBean().storage(new DenyingTestStorage());
+		nodeC.getConnection().getPeer().getPeerBean().storage(new DenyingTestStorage());
 
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
@@ -105,15 +107,15 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handlePutResult(FutureDHT future) {
+		protected void handlePutResult(FuturePut future) {
 		}
 
 		@Override
-		protected void handleGetResult(FutureDHT future) {
+		protected void handleGetResult(FutureGet future) {
 		}
 
 		@Override
-		protected void handleRemovalResult(FutureDHT future) {
+		protected void handleRemovalResult(FutureRemove future) {
 		}
 
 	}

@@ -1,6 +1,8 @@
 package org.hive2hive.core.test.flowcontrol;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
@@ -60,17 +62,17 @@ public class ProcessTest extends H2HJUnitTest {
 			}
 
 			@Override
-			protected void handleGetResult(FutureDHT future) {
+			protected void handleGetResult(FutureGet future) {
 				// do nothing
 			}
 
 			@Override
-			protected void handlePutResult(FutureDHT future) {
+			protected void handlePutResult(FuturePut future) {
 				// do nothing
 			}
 
 			@Override
-			protected void handleRemovalResult(FutureDHT future) {
+			protected void handleRemovalResult(FutureRemove future) {
 				// do nothing
 			}
 		};

@@ -1,10 +1,8 @@
 package org.hive2hive.core.process;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
 import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
@@ -22,7 +20,7 @@ import org.hive2hive.core.network.data.NetworkContent;
  * @author Nico
  * 
  */
-public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
+public class PutVerificationListener extends BaseFutureAdapter<FuturePut> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutVerificationListener.class);
 
@@ -32,8 +30,8 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 	private final NetworkContent expectedData;
 	private final ProcessStep processStep;
 
-	public PutVerificationListener(NetworkManager networkManager, ProcessStep processStep, String locationKey, String contentKey,
-			NetworkContent expectedData) {
+	public PutVerificationListener(NetworkManager networkManager, ProcessStep processStep,
+			String locationKey, String contentKey, NetworkContent expectedData) {
 		this.networkManager = networkManager;
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
@@ -42,9 +40,9 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 	}
 
 	@Override
-	public void operationComplete(FutureDHT future) throws Exception {
-		final FutureDHT putFuture = future;
-		
+	public void operationComplete(FuturePut future) throws Exception {
+		final FuturePut putFuture = future;
+
 		// store the future for notifying the listeners later with this
 		logger.debug("Start verification of put(" + locationKey + ", " + contentKey + ")");
 
@@ -53,7 +51,7 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 		for (PeerAddress peerAddress : putFuture.getRawKeys().keySet()) {
 			// TODO compare here the time stamp / version key to check if correct data was stored
 			if (future.getRawKeys().get(peerAddress) == null
-					|| future.getRawKeys().get(peerAddress).isEmpty() ) {
+					|| future.getRawKeys().get(peerAddress).isEmpty()) {
 				logger.warn("Version conflict detected after put.");
 				// TODO rollback
 			} else {
@@ -61,19 +59,32 @@ public class PutVerificationListener extends BaseFutureAdapter<FutureDHT> {
 			}
 		}
 
-		FutureDHT getFuture = networkManager.getGlobal(locationKey, contentKey);
-		getFuture.addListener(new BaseFutureAdapter<FutureDHT>() {
+		// TODO
+		// get the raw keys from the putFuture
+		// if raw keys have empty collection --> did not save because of verification (previous version does
+		// not match)
+
+		// wait some seconds
+
+		FutureGet getFuture = networkManager.getGlobal(locationKey, contentKey);
+		getFuture.addListener(new BaseFutureAdapter<FutureGet>() {
 			@Override
-			public void operationComplete(FutureDHT future) throws Exception {
-				// TODO: verify with expected data and the timestamps
+			public void operationComplete(FutureGet future) throws Exception {
+				// TODO
+
+				// get history object and verify if my key is contained
+				// if newest in history --> my object is most recent one
+				// if not newest in history --> already newer version, but that's based on my version
+				// if not in list --> fork happened and I'm not part of the "right" branch. --> Rollback to
+				// base on newest version --> possibly throw an exception or repeat the put based on the most
+				// recent version
 				notifyProcessStep(putFuture);
 			}
 		});
 	}
 
-	private void notifyProcessStep(FutureDHT future){
+	private void notifyProcessStep(FuturePut future) {
 		logger.debug("Verification for put(" + locationKey + ", " + contentKey + ") complete");
 		processStep.handlePutResult(future);
 	}
-
 }
