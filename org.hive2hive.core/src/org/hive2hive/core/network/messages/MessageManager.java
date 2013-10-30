@@ -2,11 +2,13 @@ package org.hive2hive.core.network.messages;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
+import net.tomp2p.message.Buffer;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 
@@ -171,17 +173,20 @@ public class MessageManager {
 			String errorReason = "";
 			if (aFuture.isSuccess()) {
 				try {
-					// TODO: Verify if 'getResponse' works
-					Object returnedObject = aFuture.getResponse();
-					if (returnedObject != null) {
-						if (returnedObject instanceof AcceptanceReply) {
-							AcceptanceReply reply = (AcceptanceReply) returnedObject;
-							return reply;
+					List<Buffer> returnedBuffer = aFuture.getResponse().getBufferList();
+					if (returnedBuffer != null) {
+						if (!returnedBuffer.isEmpty()) {
+							if (returnedBuffer.get(0).object() instanceof AcceptanceReply) {
+								AcceptanceReply reply = (AcceptanceReply) returnedBuffer.get(0).object();
+								return reply;
+							} else {
+								errorReason = "The returned object was not of type AcceptanceReply!";
+							}
 						} else {
-							errorReason = "The returned object was not of type AcceptanceReply!";
+							errorReason = "No reply received.";
 						}
 					} else {
-						errorReason = "Returned object is null.";
+						errorReason = "Returned buffer is null.";
 					}
 				} catch (Exception e) {
 					errorReason = String.format("Exception while getting object from response, '%s'", e);

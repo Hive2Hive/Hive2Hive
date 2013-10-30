@@ -19,8 +19,7 @@ import org.hive2hive.core.network.NetworkManager;
  */
 public class MessageReplyHandler implements ObjectDataReply {
 
-	private static final H2HLogger logger = H2HLoggerFactory
-			.getLogger(MessageReplyHandler.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageReplyHandler.class);
 
 	private final NetworkManager networkManager;
 
@@ -35,13 +34,16 @@ public class MessageReplyHandler implements ObjectDataReply {
 			receivedMessage.setNetworkManager(networkManager);
 			AcceptanceReply reply = receivedMessage.accept();
 			if (AcceptanceReply.OK == reply) {
+				logger.debug("Received and accepted a message.");
 				// handle message in own thread
 				new Thread(receivedMessage).start();
+			} else {
+				logger.warn(String.format("Received but denied a message. acceptance reply = '%s'", reply));
 			}
 			return reply;
 		}
 		logger.error("Received unknown Message.");
 		return null;
 	}
-	
+
 }

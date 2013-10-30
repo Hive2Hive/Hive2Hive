@@ -11,14 +11,16 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.H2HTestData;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.messaging.TestMessageWithReply.TestCallBackHandler;
+import org.hive2hive.core.test.network.messaging.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -56,6 +58,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * appears.
 	 */
 	@Test
+	@Ignore
 	public void testSendingAnAsynchronousMessageWithReply() {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
@@ -84,8 +87,46 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey))
-				.getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+
+		assertEquals(originalSecret, receivedSecret);
+	}
+
+	/**
+	 * This tests sends a message with a request asynchronously to the target node. The response message (sent
+	 * from the responding node) is configured in a way that it will be blocked on the target node (requesting
+	 * node) till the maximum allowed numbers of retrying to send the very message is reached.
+	 */
+	@Test
+	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode() {
+		// select two random nodes
+		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
+		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		// generate a random content key
+		String contentKey = NetworkTestUtil.randomString();
+		// check if selected locations are empty
+		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
+		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		// create a message with target node B
+		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(), nodeA.getPeerAddress(),
+				contentKey);
+		// create and add a callback handler
+		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
+		message.setCallBackHandler(callBackHandler);
+		// send message
+		nodeA.send(message);
+
+		// wait till callback handler gets executed
+		H2HWaiter w = new H2HWaiter(10);
+		Object tmp = null;
+		do {
+			w.tickASecond();
+			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
+		} while (tmp == null);
+
+		// load and verify if same secret was shared
+		String receivedSecret = ((H2HTestData) tmp).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}
