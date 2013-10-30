@@ -27,32 +27,22 @@ public class ReplicationTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testReplicationPureTomP2P() throws IOException,
-			InterruptedException {
-		Peer p1 = new PeerMaker(Number160.createHash(1))
-				.setEnableIndirectReplication(true).setPorts(5000)
+	public void testReplicationPureTomP2P() throws IOException, InterruptedException {
+		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(5000)
 				.makeAndListen();
-		Peer p2 = new PeerMaker(Number160.createHash(2))
-				.setEnableIndirectReplication(true).setMasterPeer(p1)
+		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
 				.makeAndListen();
-		Peer p3 = new PeerMaker(Number160.createHash(3))
-				.setEnableIndirectReplication(true).setMasterPeer(p1)
+		Peer p3 = new PeerMaker(Number160.createHash(3)).setEnableIndirectReplication(true).masterPeer(p1)
 				.makeAndListen();
 
-		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start()
-				.awaitUninterruptibly();
+		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 
-		p2.put(Number160.createHash("key")).setData(new Data("test")).start()
-				.awaitUninterruptibly();
+		p2.put(Number160.createHash("key")).setData(new Data("test")).start().awaitUninterruptibly();
 
-		p3.bootstrap().setPeerAddress(p1.getPeerAddress()).start()
-				.awaitUninterruptibly();
+		p3.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 
-		Data test = p3
-				.getPeerBean()
-				.getStorage()
-				.get(Number160.createHash("key"), DHTBuilder.DEFAULT_DOMAIN,
-						Number160.ZERO);
+		Data test = p3.getPeerBean().storage()
+				.get(Number160.createHash("key"), DHTBuilder.DEFAULT_DOMAIN, Number160.ZERO);
 
 		Assert.assertNotNull(test);
 
@@ -60,7 +50,7 @@ public class ReplicationTest extends H2HJUnitTest {
 		p2.shutdown();
 		p3.shutdown();
 	}
-	
+
 	@AfterClass
 	public static void cleanAfterClass() {
 		afterClass();

@@ -19,11 +19,14 @@
 	<packaging>pom</packaging>
 	<version>1.0.0</version>
 	<dependencies>
+		<!-- 
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>TomP2P</artifactId>
 			<version>4.4</version>
 		</dependency>
+		 -->
+		 
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -42,9 +45,11 @@
 		</dependency>
 	</dependencies>
 	<repositories>
+		<!-- 
 		<repository>
 			<id>tomp2p.net</id>
 			<url>http://tomp2p.net/dev/mvn/</url>
 		</repository>
+		 -->
 	</repositories>
 </project>

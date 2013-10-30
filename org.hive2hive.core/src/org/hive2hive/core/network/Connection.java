@@ -21,8 +21,7 @@ import org.hive2hive.core.network.messages.MessageReplyHandler;
  */
 public class Connection {
 
-	private static final H2HLogger logger = H2HLoggerFactory
-			.getLogger(Connection.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Connection.class);
 
 	private Peer peer = null;
 	private boolean isConnected = false;
@@ -53,8 +52,7 @@ public class Connection {
 	/**
 	 * Create a peer which will be the first node in the network (master).
 	 * 
-	 * @return <code>true</code> if creating master peer was successful,
-	 *         <code>false</code> if not
+	 * @return <code>true</code> if creating master peer was successful, <code>false</code> if not
 	 */
 	public boolean connect() {
 		if (isConnected) {
@@ -75,8 +73,7 @@ public class Connection {
 	 * 
 	 * @param bootstrapInetAddress
 	 *            IP address to given bootstrapping peer
-	 * @return <code>true</code> if bootstrapping was successful,
-	 *         <code>false</code> if not
+	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
 	 */
 	public boolean connect(InetAddress bootstrapInetAddress) {
 		return connect(bootstrapInetAddress, H2HConstants.H2H_PORT);
@@ -90,8 +87,7 @@ public class Connection {
 	 *            IP address to given bootstrapping peer
 	 * @param port
 	 *            port number to given bootstrapping peer
-	 * @return <code>true</code> if bootstrapping was successful,
-	 *         <code>false</code> if not
+	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
 	 */
 	public boolean connect(InetAddress bootstrapInetAddress, int port) {
 		if (isConnected) {
@@ -104,24 +100,22 @@ public class Connection {
 		if (!createPeer())
 			return false;
 
-		FutureDiscover futureDiscover = peer.discover()
-				.setInetAddress(bootstrapInetAddress).setPorts(port).start();
+		FutureDiscover futureDiscover = peer.discover().setInetAddress(bootstrapInetAddress).setPorts(port)
+				.start();
 		futureDiscover.awaitUninterruptibly();
 
 		if (futureDiscover.isSuccess()) {
-			logger.debug(String
-					.format("Successfully discovered, found that my outside address is: %s",
-							futureDiscover.getPeerAddress()));
+			logger.debug(String.format("Successfully discovered, found that my outside address is: %s",
+					futureDiscover.getPeerAddress()));
 		} else {
-			logger.warn(String.format("Failed discovering: %s",
-					futureDiscover.getFailedReason()));
+			logger.warn(String.format("Failed discovering: %s", futureDiscover.getFailedReason()));
 			peer.shutdown();
 			isConnected = false;
 			return false;
 		}
 
-		FutureBootstrap futureBootstrap = peer.bootstrap()
-				.setInetAddress(bootstrapInetAddress).setPorts(port).start();
+		FutureBootstrap futureBootstrap = peer.bootstrap().setInetAddress(bootstrapInetAddress)
+				.setPorts(port).start();
 		futureBootstrap.awaitUninterruptibly();
 
 		if (futureBootstrap.isSuccess()) {
@@ -130,8 +124,7 @@ public class Connection {
 			isConnected = true;
 			return true;
 		} else {
-			logger.warn(String.format("Failed bootstraping: %s",
-					futureDiscover.getFailedReason()));
+			logger.warn(String.format("Failed bootstraping: %s", futureDiscover.getFailedReason()));
 			peer.shutdown();
 			isConnected = false;
 			return false;
@@ -155,17 +148,15 @@ public class Connection {
 			while (NetworkUtils.isPortAvailable(port) == false)
 				port++;
 
-			peer = new PeerMaker(Number160.createHash(nodeId)).setPorts(port)
-					.setEnableIndirectReplication(true).makeAndListen();
+			peer = new PeerMaker(Number160.createHash(nodeId)).ports(port).setEnableIndirectReplication(true)
+					.makeAndListen();
 			// override the put method for validation tasks
-			peer.getPeerBean().setStorage(new H2HStorageMemory(networkManager));
+			peer.getPeerBean().storage(new H2HStorageMemory(networkManager));
 			// attach a reply handler for messages
 			peer.setObjectDataReply(new MessageReplyHandler(networkManager));
 			return true;
 		} catch (IOException e) {
-			logger.error(String.format(
-					"Exception during the creation of a peer: %s",
-					e.getMessage()));
+			logger.error(String.format("Exception during the creation of a peer: %s", e.getMessage()));
 			return false;
 		}
 	}

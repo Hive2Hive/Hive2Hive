@@ -1,10 +1,10 @@
 package org.hive2hive.core.process.common;
 
-import java.security.spec.InvalidKeySpecException;
-
 import javax.crypto.SecretKey;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
@@ -53,8 +53,7 @@ public class PutUserProfileStep extends PutProcessStep {
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
 			put(profile.getUserId(), H2HConstants.USER_PROFILE, encryptedUserProfile);
-		} catch (DataLengthException | IllegalStateException
-				| InvalidCipherTextException e) {
+		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().rollBack(e.getMessage());
 		}
@@ -71,7 +70,7 @@ public class PutUserProfileStep extends PutProcessStep {
 	}
 
 	@Override
-	protected void handlePutResult(FutureDHT future) {
+	protected void handlePutResult(FuturePut future) {
 		if (future.isSuccess()) {
 			getProcess().nextStep(next);
 		} else {
@@ -81,12 +80,12 @@ public class PutUserProfileStep extends PutProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(FutureDHT future) {
+	protected void handleGetResult(FutureGet future) {
 		// does not perform a get
 	}
 
 	@Override
-	protected void handleRemovalResult(FutureDHT future) {
+	protected void handleRemovalResult(FutureRemove future) {
 		// no removal used
 	}
 

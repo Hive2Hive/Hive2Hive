@@ -2,7 +2,9 @@ package org.hive2hive.core.process.register;
 
 import java.io.IOException;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
@@ -40,18 +42,18 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	}
 
 	@Override
-	protected void handlePutResult(FutureDHT future) {
+	protected void handlePutResult(FuturePut future) {
 		// not used
 	}
 
 	@Override
-	protected void handleGetResult(FutureDHT future) {
+	protected void handleGetResult(FutureGet future) {
 		if (future.getData() == null) {
 			logger.debug(String.format("No user profile exists. user id = '%s'", userId));
 			continueWithNextStep();
 		} else {
 			try {
-				if (!(future.getData().getObject() instanceof UserProfile)) {
+				if (!(future.getData().object() instanceof UserProfile)) {
 					logger.warn(String.format("Instance of UserProfile expected. key = '%s'", userId));
 				}
 			} catch (ClassNotFoundException | IOException e) {
@@ -79,7 +81,7 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	}
 
 	@Override
-	protected void handleRemovalResult(FutureDHT future) {
+	protected void handleRemovalResult(FutureRemove future) {
 		// not used
 	}
 }

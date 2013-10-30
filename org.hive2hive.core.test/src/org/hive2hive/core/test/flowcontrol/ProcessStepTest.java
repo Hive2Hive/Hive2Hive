@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -68,6 +71,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		return response;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private FutureDHT waitForFutureResult() throws InterruptedException {
 		H2HWaiter w = new H2HWaiter(20);
 		FutureDHT response = null;
@@ -116,7 +120,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		Assert.assertNull(holder.getLocal(contentKey, contentKey));
 
 		process.start();
-		FutureDHT future = waitForFutureResult();
+		FuturePut future = (FuturePut) waitForFutureResult();
 		Assert.assertTrue(future.isSuccess());
 		Assert.assertTrue(future.isCompleted());
 
@@ -147,12 +151,12 @@ public class ProcessStepTest extends H2HJUnitTest {
 		Assert.assertNull(holder.getLocal(contentKey, contentKey));
 
 		process.start();
-		FutureDHT future = waitForFutureResult();
+		FutureGet future = (FutureGet) waitForFutureResult();
 		Assert.assertTrue(future.isSuccess());
 		Assert.assertTrue(future.isCompleted());
 
 		// now, the receiver should have the content in memory
-		H2HTestData received = (H2HTestData) future.getData().getObject();
+		H2HTestData received = (H2HTestData) future.getData().object();
 		Assert.assertEquals(testContent, (String) received.getTestString());
 	}
 
@@ -175,7 +179,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		process.setFirstStep(step);
 
 		process.start();
-		FutureDHT future = waitForFutureResult();
+		FutureRemove future = (FutureRemove) waitForFutureResult();
 		Assert.assertTrue(future.isSuccess());
 		Assert.assertTrue(future.isCompleted());
 
@@ -207,13 +211,13 @@ public class ProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handleGetResult(FutureDHT future) {
+		protected void handleGetResult(FutureGet future) {
 			// not expected to get a put/get result
 			Assert.fail();
 		}
 
 		@Override
-		protected void handlePutResult(FutureDHT future) {
+		protected void handlePutResult(FuturePut future) {
 			// not expected to get a put/get result
 			Assert.fail();
 		}
@@ -232,7 +236,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handleRemovalResult(FutureDHT future) {
+		protected void handleRemovalResult(FutureRemove future) {
 			// not expected to get a removal result
 			Assert.fail();
 		}
@@ -293,7 +297,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handlePutResult(FutureDHT future) {
+		protected void handlePutResult(FuturePut future) {
 			// notify the message waiter
 			synchronized (messageWaiterMap) {
 				tempFutureStore = future;
@@ -302,7 +306,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handleGetResult(FutureDHT future) {
+		protected void handleGetResult(FutureGet future) {
 			// notify the message waiter
 			synchronized (messageWaiterMap) {
 				tempFutureStore = future;
@@ -311,7 +315,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handleRemovalResult(FutureDHT future) {
+		protected void handleRemovalResult(FutureRemove future) {
 			synchronized (messageWaiterMap) {
 				tempFutureStore = future;
 			}

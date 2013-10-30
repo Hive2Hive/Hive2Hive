@@ -1,6 +1,8 @@
 package org.hive2hive.core.process.common;
 
-import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FuturePut;
+import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
@@ -35,7 +37,7 @@ public class PutLocationStep extends PutProcessStep {
 	}
 
 	@Override
-	protected void handlePutResult(FutureDHT future) {
+	protected void handlePutResult(FuturePut future) {
 		if (future.isSuccess()) {
 			getProcess().nextStep(nextStep);
 		} else {
@@ -44,12 +46,12 @@ public class PutLocationStep extends PutProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(FutureDHT future) {
+	protected void handleGetResult(FutureGet future) {
 		// nothing is get
 	}
 
 	@Override
-	protected void handleRemovalResult(FutureDHT future) {
+	protected void handleRemovalResult(FutureRemove future) {
 		// nothing to remove
 	}
 }
