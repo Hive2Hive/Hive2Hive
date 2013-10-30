@@ -58,7 +58,6 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * appears.
 	 */
 	@Test
-	@Ignore
 	public void testSendingAnAsynchronousMessageWithReply() {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
