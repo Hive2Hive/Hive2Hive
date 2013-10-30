@@ -2,6 +2,7 @@ package org.hive2hive.core.test.tomp2p;
 
 import java.io.IOException;
 
+import net.tomp2p.futures.FuturePut;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.p2p.builder.DHTBuilder;
@@ -37,7 +38,11 @@ public class ReplicationTest extends H2HJUnitTest {
 
 		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 
-		p2.put(Number160.createHash("key")).setData(new Data("test")).start().awaitUninterruptibly();
+		FuturePut putFuture = p2.put(Number160.createHash("key"))
+				.setData(DHTBuilder.DEFAULT_DOMAIN, Number160.ZERO, new Data("test")).start();
+		putFuture.awaitUninterruptibly();
+		putFuture.getFutureRequests().awaitUninterruptibly();
+		Assert.assertEquals(2, putFuture.getFutureRequests().getSuccessCounter());
 
 		p3.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 
