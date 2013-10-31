@@ -10,6 +10,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -46,10 +47,15 @@ public class ReplicationTest extends H2HJUnitTest {
 
 		p3.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 
-		Data test = p3.getPeerBean().storage()
-				.get(Number160.createHash("key"), DHTBuilder.DEFAULT_DOMAIN, Number160.ZERO);
+		H2HWaiter w = new H2HWaiter(10);
+		Data tmp = null;
+		do {
+			w.tickASecond();
+			tmp = p3.getPeerBean().storage()
+					.get(Number160.createHash("key"), DHTBuilder.DEFAULT_DOMAIN, Number160.ZERO);
+		} while (tmp == null);
 
-		Assert.assertNotNull(test);
+		Assert.assertNotNull(tmp);
 
 		p1.shutdown();
 		p2.shutdown();

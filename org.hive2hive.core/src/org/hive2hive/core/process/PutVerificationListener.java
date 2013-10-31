@@ -48,10 +48,10 @@ public class PutVerificationListener extends BaseFutureAdapter<FuturePut> {
 
 		// check if on all peers the data has been stored
 		// TODO it seems that TomP2P gives no feedback when a peer was accessed --> null
-		for (PeerAddress peerAddress : putFuture.getRawKeys().keySet()) {
+		for (PeerAddress peerAddress : putFuture.getRawResult().keySet()) {
 			// TODO compare here the time stamp / version key to check if correct data was stored
-			if (future.getRawKeys().get(peerAddress) == null
-					|| future.getRawKeys().get(peerAddress).isEmpty()) {
+			if (future.getRawResult().get(peerAddress) == null
+					|| future.getRawResult().get(peerAddress).isEmpty()) {
 				logger.warn("Version conflict detected after put.");
 				// TODO rollback
 			} else {
