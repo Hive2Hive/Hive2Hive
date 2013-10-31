@@ -38,22 +38,22 @@ public class DataManager {
 	 *            the unique id of the content
 	 * @param contentKey
 	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param wrapper
+	 * @param content
 	 *            the wrapper containing the content to be stored
 	 * @return the future
 	 */
-	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent wrapper) {
+	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent content) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
-			Data data = new Data(wrapper);
-			data.ttlSeconds(wrapper.getTimeToLive());
+			Data data = new Data(content);
+			data.ttlSeconds(content.getTimeToLive());
 			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
-					.setData(Number160.createHash(contentKey), data).setDomainKey(wrapper.getSignature())
+					.setData(Number160.createHash(contentKey), data).setDomainKey(content.getSignature())
 					.start();
 		} catch (IOException e) {
 			logger.error(String
 					.format("Global put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
-							wrapper.toString(), locationKey, contentKey, e.getMessage()));
+							content.toString(), locationKey, contentKey, e.getMessage()));
 			return null;
 		}
 	}

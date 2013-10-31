@@ -7,6 +7,7 @@ import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
@@ -19,16 +20,21 @@ import org.hive2hive.core.process.common.PutUserProfileStep;
 public class CheckIfProfileExistsStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CheckIfProfileExistsStep.class);
-	private final String userId;
+	private final UserProfile profile;
+	private final String locationKey;
 
-	public CheckIfProfileExistsStep(String userId) {
-		this.userId = userId;
+	public CheckIfProfileExistsStep(UserProfile profile, UserPassword password) {
+		this.profile = profile;
+
+		// password is required to get the location key
+		this.locationKey = profile.getLocationKey(password);
 	}
 
 	@Override
 	public void start() {
-		logger.debug(String.format("Checking if a user profile already exists. user id = '%s'", userId));
-		get(userId, H2HConstants.USER_PROFILE);
+		logger.debug(String.format("Checking if a user profile already exists. user id = '%s'",
+				profile.getUserId()));
+		get(locationKey, H2HConstants.USER_PROFILE);
 	}
 
 	@Override
@@ -49,12 +55,12 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	@Override
 	protected void handleGetResult(FutureGet future) {
 		if (future.getData() == null) {
-			logger.debug(String.format("No user profile exists. user id = '%s'", userId));
+			logger.debug(String.format("No user profile exists. user id = '%s'", profile.getUserId()));
 			continueWithNextStep();
 		} else {
 			try {
 				if (!(future.getData().object() instanceof UserProfile)) {
-					logger.warn(String.format("Instance of UserProfile expected. key = '%s'", userId));
+					logger.warn(String.format("Instance of UserProfile expected. key = '%s'", locationKey));
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				logger.warn(String.format("future.getData().getObject() failed. reason = '%s'",

@@ -54,7 +54,6 @@ public final class PasswordUtil {
 	 * @return Returns a fix salt.
 	 */
 	public static byte[] generateFixedSalt(byte[] input) {
-
 		try {
 			byte[] fixedSalt = new byte[SALT_BIT_SIZE / 8];
 
@@ -103,7 +102,6 @@ public final class PasswordUtil {
 	 * @return a salted PBKDF2 hash of the password
 	 */
 	public static byte[] generateHash(char[] password, byte[] salt) {
-
 		// hash the password
 		return getPBKDF2Hash(password, salt, HASH_BIT_SIZE);
 	}

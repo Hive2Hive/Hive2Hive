@@ -34,6 +34,7 @@ public class PutUserProfileStep extends PutProcessStep {
 	private final UserProfile profile;
 	private final ProcessStep next;
 	private final UserPassword password;
+	private String locationkey;
 
 	public PutUserProfileStep(UserProfile profile, UserProfile previousVersion, UserPassword password,
 			ProcessStep next) {
@@ -41,6 +42,7 @@ public class PutUserProfileStep extends PutProcessStep {
 		this.profile = profile;
 		this.next = next;
 		this.password = password;
+		this.locationkey = profile.getLocationKey(password);
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class PutUserProfileStep extends PutProcessStep {
 			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(profile,
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
-			put(profile.getUserId(), H2HConstants.USER_PROFILE, encryptedUserProfile);
+			put(locationkey, H2HConstants.USER_PROFILE, encryptedUserProfile);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().rollBack(e.getMessage());
@@ -61,7 +63,7 @@ public class PutUserProfileStep extends PutProcessStep {
 
 	@Override
 	public void rollBack() {
-		super.rollBackPut(profile.getUserId(), H2HConstants.USER_PROFILE);
+		super.rollBackPut(locationkey, H2HConstants.USER_PROFILE);
 	}
 
 	@Override

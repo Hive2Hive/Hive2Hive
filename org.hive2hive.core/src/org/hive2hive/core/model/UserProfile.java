@@ -3,6 +3,8 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 
 import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.encryption.PasswordUtil;
+import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.network.data.NetworkContent;
 
 /**
@@ -48,5 +50,19 @@ public class UserProfile extends NetworkContent {
 	@Override
 	public int getTimeToLive() {
 		return TimeToLiveStore.getInstance().getUserProfile();
+	}
+
+	public String getLocationKey(UserPassword password) {
+		// concatenate PIN + PW + UserId
+		String location = new StringBuilder().append(password.getPin()).append(password.getPassword())
+				.append(userId).toString();
+
+		// create fixed salt based on location
+		byte[] fixedSalt = PasswordUtil.generateFixedSalt(location.getBytes());
+
+		// hash the location
+		byte[] locationKey = PasswordUtil.generateHash(location.toCharArray(), fixedSalt);
+
+		return new String(locationKey);
 	}
 }

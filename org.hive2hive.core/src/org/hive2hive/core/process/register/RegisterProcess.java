@@ -19,11 +19,12 @@ public class RegisterProcess extends Process {
 		super(networkManager);
 		this.userId = userId;
 		userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
+
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-
 		userProfile = new UserProfile(userId, encryptionKeys, domainKeys);
-		setFirstStep(new CheckIfProfileExistsStep(userId));
+
+		setFirstStep(new CheckIfProfileExistsStep(userProfile, userPassword));
 	}
 
 	public String getUserId() {
