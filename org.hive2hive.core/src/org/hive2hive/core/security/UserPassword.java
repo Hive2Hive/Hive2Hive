@@ -1,4 +1,4 @@
-package org.hive2hive.core.encryption;
+package org.hive2hive.core.security;
 
 /**
  * This class simply represents a user password. Do not change the password or the PIN manually by using

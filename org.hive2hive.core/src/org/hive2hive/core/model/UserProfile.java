@@ -3,9 +3,9 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.encryption.PasswordUtil;
-import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.security.PasswordUtil;
+import org.hive2hive.core.security.UserPassword;
 
 /**
  * File which contains all keys and meta information about the files of the owner.

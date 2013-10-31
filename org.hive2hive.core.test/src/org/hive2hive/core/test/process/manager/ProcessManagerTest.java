@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.flowcontrol.manager;
+package org.hive2hive.core.test.process.manager;
 
 import java.util.Random;
 

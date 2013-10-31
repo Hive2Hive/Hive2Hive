@@ -1,4 +1,4 @@
-package org.hive2hive.core.encryption;
+package org.hive2hive.core.security;
 
 import javax.crypto.SecretKey;
 
@@ -9,7 +9,6 @@ import org.hive2hive.core.network.data.NetworkContent;
 public final class H2HEncryptionUtil {
 
 	private H2HEncryptionUtil() {
-		// only static
 	}
 
 	/**

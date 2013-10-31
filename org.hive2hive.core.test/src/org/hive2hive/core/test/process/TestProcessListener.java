@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.flowcontrol;
+package org.hive2hive.core.test.process;
 
 import org.hive2hive.core.process.listener.IProcessListener;
 

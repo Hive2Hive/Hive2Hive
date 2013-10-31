@@ -4,9 +4,9 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -87,6 +87,13 @@ public class H2HJUnitTest {
 	protected static byte[] generateRandomContent(int sizeInBytes) {
 		SecureRandom random = new SecureRandom();
 		byte[] content = new byte[random.nextInt(sizeInBytes)];
+		random.nextBytes(content);
+		return content;
+	}
+	
+	protected static byte[] generateFixedContent(int sizeInBytes) {
+		SecureRandom random = new SecureRandom();
+		byte[] content = new byte[sizeInBytes];
 		random.nextBytes(content);
 		return content;
 	}

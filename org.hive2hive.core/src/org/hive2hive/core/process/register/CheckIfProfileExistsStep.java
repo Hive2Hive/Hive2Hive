@@ -7,7 +7,6 @@ import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
@@ -16,6 +15,7 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.PutLocationStep;
 import org.hive2hive.core.process.common.PutUserProfileStep;
+import org.hive2hive.core.security.UserPassword;
 
 public class CheckIfProfileExistsStep extends ProcessStep {
 

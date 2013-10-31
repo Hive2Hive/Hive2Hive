@@ -2,10 +2,10 @@ package org.hive2hive.core.test.model;
 
 import java.security.KeyPair;
 
-import org.hive2hive.core.encryption.EncryptionUtil;
-import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.Assert;

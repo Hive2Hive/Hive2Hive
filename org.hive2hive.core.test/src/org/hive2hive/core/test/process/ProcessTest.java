@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.flowcontrol;
+package org.hive2hive.core.test.process;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;

@@ -1,4 +1,4 @@
-package org.hive2hive.core.encryption;
+package org.hive2hive.core.security;
 
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -11,6 +11,8 @@ import org.hive2hive.core.network.data.NetworkContent;
  */
 public final class EncryptedNetworkContent extends NetworkContent {
 
+	// TODO maybe this class should not just represent symmetric encrypted content but also asymmetric
+	
 	private static final long serialVersionUID = 1L;
 	private final byte[] cipherContent;
 	private final byte[] initVector;

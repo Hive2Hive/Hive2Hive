@@ -8,10 +8,10 @@ import java.util.Arrays;
 
 import javax.crypto.SecretKey;
 
-import org.hive2hive.core.encryption.EncryptionUtil;
-import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
-import org.hive2hive.core.encryption.PasswordUtil;
-import org.hive2hive.core.encryption.UserPassword;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.PasswordUtil;
+import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
