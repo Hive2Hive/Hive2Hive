@@ -179,9 +179,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		RSA_KEYLENGTH[] rsaSizes = getRSAKeySizes();
 		AES_KEYLENGTH[] aesSizes = getAESKeySizes();
 
-		// TODO also support 1024-bit RSA in hybrid encryption
-		// test only 2048-bit and 4096-bit RSA key sizes
-		for (int s1 = 1; s1 < rsaSizes.length; s1++) {
+		// test all RSA key sizes
+		for (int s1 = 0; s1 < rsaSizes.length; s1++) {
 
 			// test all AES key sizes
 			for (int s2 = 0; s2 < aesSizes.length; s2++) {
@@ -224,7 +223,6 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				assertNotNull(decryptedData);
 				assertTrue(Arrays.equals(data, decryptedData));
 			}
-
 		}
 	}
 

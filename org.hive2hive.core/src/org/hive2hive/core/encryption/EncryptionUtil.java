@@ -18,6 +18,7 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -74,6 +75,7 @@ public final class EncryptionUtil {
 	}
 
 	public enum RSA_KEYLENGTH {
+		BIT_512(512),
 		BIT_1024(1024),
 		BIT_2048(2048),
 		BIT_4096(4096);
@@ -267,18 +269,21 @@ public final class EncryptionUtil {
 
 		// generate AES key
 		SecretKey aesKey = generateAESKey(aesKeyLength);
+		byte[] encodedAesKey = aesKey.getEncoded();
 
 		// generate IV
 		byte[] initVector = generateIV();
+		
+		// concatenate symmetric encryption parameters -> max. 48 bytes (with AES 256) -> can be encrypted with RSA 512 bit
+		byte[] params = new byte[initVector.length + encodedAesKey.length];
+		System.arraycopy(initVector, 0, params, 0, initVector.length);
+		System.arraycopy(encodedAesKey, 0, params, initVector.length, encodedAesKey.length);
 
 		// encrypt data symmetrically
 		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector);
-
-		// encapsulate symmetric encryption parameters
-		AESParameters params = new AESParameters(aesKey.getEncoded(), initVector);
-
+	
 		// encrypt parameters asymmetrically
-		byte[] rsaEncryptedParams = encryptRSA(serializeObject(params), publicKey);
+		byte[] rsaEncryptedParams = encryptRSA(params, publicKey);
 
 		return new HybridEncryptedContent(rsaEncryptedParams, aesEncryptedData);
 	}
@@ -301,16 +306,17 @@ public final class EncryptionUtil {
 	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DataLengthException,
 			IllegalStateException, InvalidCipherTextException {
-
-		byte[] rsaEncryptedParams = data.getEncryptedParameters();
-		byte[] aesEncryptedData = data.getEncryptedData();
-
+		
 		// decrypt parameters asymmetrically
-		AESParameters params = (AESParameters) deserializeObject(decryptRSA(rsaEncryptedParams, privateKey));
+		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey);
+		
+		// split symmetric encryption parameters
+		byte[] initVector = Arrays.copyOfRange(params, 0, IV_LENGTH);
+		byte[] encodedAesKey = Arrays.copyOfRange(params, IV_LENGTH, params.length);
 
 		// decrypt data symmetrically
-		SecretKey aesKey = new SecretKeySpec(params.getEncodedKey(), 0, params.getEncodedKey().length, "AES");
-		return decryptAES(aesEncryptedData, aesKey, params.getIV());
+		SecretKey aesKey = new SecretKeySpec(encodedAesKey, 0, encodedAesKey.length, "AES");
+		return decryptAES(data.getEncryptedData(), aesKey, initVector);
 	}
 
 	/**
