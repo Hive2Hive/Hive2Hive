@@ -60,11 +60,8 @@ public final class FileEncryptionUtil {
 
 	}
 	
-	public static byte[] encryptFile(Path filePath) {
-		
-		
-		
-		return null;
+	public static void encryptFile(Path filePath) throws FileNotFoundException {
+
 	}
 
 	public static String serializePath(Path path) {

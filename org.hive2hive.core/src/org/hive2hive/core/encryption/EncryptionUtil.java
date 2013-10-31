@@ -443,7 +443,7 @@ public final class EncryptionUtil {
 		return buf.toString();
 	}
 
-	private static void installBCProvider() {
+	public static void installBCProvider() {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
