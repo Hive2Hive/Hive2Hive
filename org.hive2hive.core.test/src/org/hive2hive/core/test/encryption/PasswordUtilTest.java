@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import javax.crypto.SecretKey;
@@ -86,14 +85,14 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			UserPassword[] upw = new UserPassword[5];
 			for (int i = 0; i < upw.length; i++) {
 
-				char[] randomPW = generateRandomString(20).toCharArray();
-				char[] randomPIN = generateRandomString(6).toCharArray();
+				String randomPW = generateRandomString(20);
+				String randomPIN = generateRandomString(6);
 
 				upw[i] = new UserPassword(randomPW, randomPIN);
 				logger.debug(String.format("Testing %sbit AES key generation from user password and PIN:",
 						sizes[s].value()));
-				logger.debug(String.format("Random PW: %s", String.valueOf(randomPW)));
-				logger.debug(String.format("Random PIN: %s", String.valueOf(randomPIN)));
+				logger.debug(String.format("Random PW: %s", randomPW));
+				logger.debug(String.format("Random PIN: %s", randomPIN));
 
 				// test the generation process multiple times to ensure consistent result
 				SecretKey[] aesKey = new SecretKey[3];

@@ -10,24 +10,19 @@ package org.hive2hive.core.encryption;
  */
 public final class UserPassword {
 
-	private final char[] password;
-	private final char[] pin;
+	private final String password;
+	private final String pin;
 
-	public UserPassword(char[] password, char[] pin) {
+	public UserPassword(String password, String pin) {
 		this.password = password;
 		this.pin = pin;
 	}
 
-	public UserPassword(String password, String pin) {
-		this.password = password.toCharArray();
-		this.pin = pin.toCharArray();
-	}
-
-	public char[] getPassword() {
+	public String getPassword() {
 		return password;
 	}
 
-	public char[] getPin() {
+	public String getPin() {
 		return pin;
 	}
 }

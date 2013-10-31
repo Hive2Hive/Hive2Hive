@@ -68,7 +68,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		String password = NetworkTestUtil.randomString();
 		String pin = generateRandomString(6);
-		UserPassword userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
+		UserPassword userPassword = new UserPassword(password, pin);
 		UserProfile testProfile = new UserProfile(userId,
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
@@ -116,7 +116,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		String password = NetworkTestUtil.randomString();
 		String pin = generateRandomString(6);
-		UserPassword userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
+		UserPassword userPassword = new UserPassword(password, pin);
 		UserProfile newProfile = new UserProfile(userId,
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));

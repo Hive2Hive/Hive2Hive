@@ -18,7 +18,7 @@ public class RegisterProcess extends Process {
 	public RegisterProcess(String userId, String password, String pin, NetworkManager networkManager) {
 		super(networkManager);
 		this.userId = userId;
-		userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
+		userPassword = new UserPassword(password, pin);
 
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
