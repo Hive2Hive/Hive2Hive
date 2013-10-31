@@ -2,12 +2,12 @@ package org.hive2hive.core.process.register;
 
 import java.security.KeyPair;
 
-import org.hive2hive.core.encryption.EncryptionUtil;
-import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.encryption.UserPassword;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
 public class RegisterProcess extends Process {
 

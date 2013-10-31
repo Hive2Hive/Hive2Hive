@@ -1,4 +1,4 @@
-package org.hive2hive.core.encryption;
+package org.hive2hive.core.security;
 
 /**
  * This class contains the result of a hybrid encryption. It holds the RSA encrypted parameters and the AES encrypted data.

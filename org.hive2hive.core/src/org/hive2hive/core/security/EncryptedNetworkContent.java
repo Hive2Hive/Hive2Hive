@@ -1,4 +1,4 @@
-package org.hive2hive.core.encryption;
+package org.hive2hive.core.security;
 
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;

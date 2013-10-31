@@ -16,10 +16,10 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.hive2hive.core.encryption.EncryptionUtil;
-import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
-import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.encryption.HybridEncryptedContent;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;

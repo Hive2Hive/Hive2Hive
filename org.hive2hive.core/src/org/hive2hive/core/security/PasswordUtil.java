@@ -1,4 +1,4 @@
-package org.hive2hive.core.encryption;
+package org.hive2hive.core.security;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,9 +11,9 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 
 /**
  * This class provides basic functionalities regarding password validation.

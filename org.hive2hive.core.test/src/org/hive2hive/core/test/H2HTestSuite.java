@@ -1,15 +1,15 @@
 package org.hive2hive.core.test;
 
-import org.hive2hive.core.test.flowcontrol.ProcessStepTest;
-import org.hive2hive.core.test.flowcontrol.ProcessTest;
-import org.hive2hive.core.test.flowcontrol.common.PutLocationStepTest;
-import org.hive2hive.core.test.flowcontrol.common.PutUserProfileStepTest;
-import org.hive2hive.core.test.flowcontrol.manager.ProcessManagerTest;
-import org.hive2hive.core.test.flowcontrol.register.RegisterTest;
 import org.hive2hive.core.test.network.ConnectionTest;
 import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.network.messaging.BaseMessageTest;
 import org.hive2hive.core.test.network.messaging.BaseRequestMessageTest;
+import org.hive2hive.core.test.process.ProcessStepTest;
+import org.hive2hive.core.test.process.ProcessTest;
+import org.hive2hive.core.test.process.common.PutLocationStepTest;
+import org.hive2hive.core.test.process.common.PutUserProfileStepTest;
+import org.hive2hive.core.test.process.manager.ProcessManagerTest;
+import org.hive2hive.core.test.process.register.RegisterTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.flowcontrol.common;
+package org.hive2hive.core.test.process.common;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.PutLocationStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.flowcontrol.TestProcessListener;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
