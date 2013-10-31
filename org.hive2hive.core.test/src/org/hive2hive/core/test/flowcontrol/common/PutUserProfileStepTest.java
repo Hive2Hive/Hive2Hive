@@ -1,9 +1,12 @@
 package org.hive2hive.core.test.flowcontrol.common;
 
+import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 import javax.crypto.SecretKey;
+
+import net.tomp2p.futures.FutureGet;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -56,12 +59,13 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testStepSuccessful() throws InterruptedException, InvalidKeySpecException,
-			DataLengthException, IllegalStateException, InvalidCipherTextException {
+			DataLengthException, IllegalStateException, InvalidCipherTextException, ClassNotFoundException,
+			IOException {
 		NetworkManager putter = network.get(0); // where the process runs
-		NetworkManager proxy = network.get(1); // where the user profile is stored
+		NetworkManager client = network.get(1); // where the user profile is stored
 
 		// create the needed objects
-		String userId = proxy.getNodeId();
+		String userId = NetworkTestUtil.randomString();
 		String password = NetworkTestUtil.randomString();
 		String pin = generateRandomString(6);
 		UserPassword userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
@@ -85,8 +89,11 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		EncryptedNetworkContent found = (EncryptedNetworkContent) proxy.getLocal(userId,
+		FutureGet global = client.getGlobal(testProfile.getLocationKey(userPassword),
 				H2HConstants.USER_PROFILE);
+		global.awaitUninterruptibly();
+		global.getFutureRequests().awaitUninterruptibly();
+		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
 		Assert.assertNotNull(found);
 
 		// decrypt it using the same password as set above
@@ -100,16 +107,17 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException {
+	public void testStepRollback() throws InterruptedException, ClassNotFoundException, IOException,
+			DataLengthException, IllegalStateException, InvalidCipherTextException {
 		NetworkManager putter = network.get(0); // where the process runs
-		NetworkManager proxy = network.get(1); // where the user profile is stored
+		NetworkManager client = network.get(1); // where the user profile is stored
 
 		// create the needed objects
-		String userId = proxy.getNodeId();
+		String userId = NetworkTestUtil.randomString();
 		String password = NetworkTestUtil.randomString();
 		String pin = generateRandomString(6);
 		UserPassword userPassword = new UserPassword(password.toCharArray(), pin.toCharArray());
-		UserProfile nnewProfile = new UserProfile(userId,
+		UserProfile newProfile = new UserProfile(userId,
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
@@ -120,7 +128,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(nnewProfile, originalProfile, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(newProfile, originalProfile, userPassword, null);
 		process.setFirstStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -140,10 +148,22 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		UserProfile gotProfile = (UserProfile) proxy.getLocal(userId, H2HConstants.USER_PROFILE);
+		FutureGet global = client.getGlobal(newProfile.getLocationKey(userPassword),
+				H2HConstants.USER_PROFILE);
+		global.awaitUninterruptibly();
+		global.getFutureRequests().awaitUninterruptibly();
+
+		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
+		Assert.assertNotNull(found);
+
+		// decrypt it using the same password as set above
+		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(userPassword,
+				AES_KEYLENGTH.BIT_256);
+		UserProfile decrypted = (UserProfile) H2HEncryptionUtil.decryptAES(found, decryptionKeys);
+
 		// check that restored profile is the same as the 'original'
-		Assert.assertEquals(userId, gotProfile.getUserId());
-		Assert.assertEquals(originalProfile.getEncryptionKeys().getPrivate(), gotProfile.getEncryptionKeys()
+		Assert.assertEquals(userId, decrypted.getUserId());
+		Assert.assertEquals(originalProfile.getEncryptionKeys().getPrivate(), decrypted.getEncryptionKeys()
 				.getPrivate());
 	}
 
