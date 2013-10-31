@@ -25,6 +25,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.CipherParameters;
@@ -53,8 +54,8 @@ public final class EncryptionUtil {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
 	public static final String SINGATURE_ALGORITHM = "SHA1withRSA";
-
 	public static final int IV_LENGTH = 16;
+	public static final RSA_KEYLENGTH HYBRID_RSA_KEYLENGTH = RSA_KEYLENGTH.BIT_2048;
 
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
@@ -92,10 +93,10 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Randomly generates a 16-byte initialization vector (IV) which can be used as parameter for symmetric
+	 * Randomly generates an initialization vector (IV) which can be used as parameter for symmetric
 	 * encryption.
 	 * 
-	 * @return Returns a randomly generated 16-byte IV.
+	 * @return Returns a randomly generated IV.
 	 */
 	public static byte[] generateIV() {
 		SecureRandom random = new SecureRandom();
@@ -186,8 +187,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Asymmetrically encrypts the provided data by means of the RSA algorithm. In order to encrypt the
-	 * content,
-	 * a public RSA key has to be provided.
+	 * content, a public RSA key has to be provided.
 	 * 
 	 * @param data The data to be encrypted.
 	 * @param publicKey The asymmetric public key with which the data shall be encrypted.
@@ -216,8 +216,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Asymmetrically decrypts the provided data by means of the RSA algorithm. In order to decrypt the
-	 * content,
-	 * a private RSA key has to be provided.
+	 * content, a private RSA key has to be provided.
 	 * 
 	 * @param data The data to be decrypted.
 	 * @param publicKey The asymmetric private key with which the data shall be decrypted.
@@ -244,12 +243,30 @@ public final class EncryptionUtil {
 		// return processRSACiphering(false, data, privateKey);
 	}
 
+	/**
+	 * Encrypts the provided data in a hybrid manner. First, the content is symmetrically encrypted with a
+	 * randomly generated IV and AES key of the specified length. Then, these encryption parameters are
+	 * asymmetrically encrypted with the provided RSA public key.</br>
+	 * <b>NOTE:</b> Use a minimum RSA key length of 2048 bit.
+	 * 
+	 * @param data The data to be encrypted in a hybrid manner.
+	 * @param publicKey The RSA public key with which the data shall be encrypted.
+	 * @param aesKeyLength The key length of the inner AES encryption.
+	 * @return Returns a {@link HybridEncryptedContent} object containing the RSA encrypted parameters and the
+	 *         AES encrypted content.
+	 * @throws DataLengthException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 */
 	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey,
-			AES_KEYLENGTH keyLength) throws DataLengthException, IllegalStateException,
+			AES_KEYLENGTH aesKeyLength) throws DataLengthException, IllegalStateException,
 			InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
 		// generate AES key
-		SecretKey aesKey = generateAESKey(keyLength);
+		SecretKey aesKey = generateAESKey(aesKeyLength);
 
 		// generate IV
 		byte[] initVector = generateIV();
@@ -264,6 +281,36 @@ public final class EncryptionUtil {
 		byte[] rsaEncryptedParams = encryptRSA(serializeObject(params), publicKey);
 
 		return new HybridEncryptedContent(rsaEncryptedParams, aesEncryptedData);
+	}
+
+	/**
+	 * Decrypts the provided data in a hybrid manner. First, the symmetric encryption parameters stored in the
+	 * {@link HybridEncryptedContent} are asymmetrically decrypted with the specified RSA private key. Then,
+	 * the symmetrically encrypted data is decrypted by means of these parameters and then returned.
+	 * 
+	 * @param data The {@link HybridEncryptedContent} to be decrypted in a hybrid manner.
+	 * @param privateKey The RSA private key with which the data shall be decrypted.
+	 * @return Returns the decrypted data.
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws DataLengthException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 */
+	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DataLengthException,
+			IllegalStateException, InvalidCipherTextException {
+
+		byte[] rsaEncryptedParams = data.getEncryptedParameters();
+		byte[] aesEncryptedData = data.getEncryptedData();
+
+		// decrypt parameters asymmetrically
+		AESParameters params = (AESParameters) deserializeObject(decryptRSA(rsaEncryptedParams, privateKey));
+
+		// decrypt data symmetrically
+		SecretKey aesKey = new SecretKeySpec(params.getEncodedKey(), 0, params.getEncodedKey().length, "AES");
+		return decryptAES(aesEncryptedData, aesKey, params.getIV());
 	}
 
 	/**
@@ -334,7 +381,7 @@ public final class EncryptionUtil {
 			oos.writeObject(object);
 			result = baos.toByteArray();
 		} catch (IOException e) {
-			logger.error("Exception while serializing object.");
+			logger.error("Exception while serializing object:", e);
 		} finally {
 			try {
 				oos.close();

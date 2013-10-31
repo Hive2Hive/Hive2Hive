@@ -1,24 +1,28 @@
 package org.hive2hive.core.encryption;
 
+import java.io.Serializable;
+
 /**
- * This class encapsulates the parameters used for symmetric AES encryption. This includes the secret AES
- * password and the initialization vector (IV).
+ * This class encapsulates the parameters used for symmetric AES encryption. This includes the encoded AES
+ * key and the initialization vector (IV).
  * 
  * @author Christian
  * 
  */
-public final class AESParameters {
+public final class AESParameters implements Serializable {
 
-	private final byte[] aesKey;
+	private static final long serialVersionUID = -7571488981717241025L;
+	
+	private final byte[] encodedKey;
 	private final byte[] initVector;
 
-	public AESParameters(byte[] aesKey, byte[] initVector) {
-		this.aesKey = aesKey;
+	public AESParameters(byte[] encodedKey, byte[] initVector) {
+		this.encodedKey = encodedKey;
 		this.initVector = initVector;
 	}
 
-	public byte[] getAESKey() {
-		return aesKey;
+	public byte[] getEncodedKey() {
+		return encodedKey;
 	}
 
 	public byte[] getIV() {

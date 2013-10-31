@@ -1,5 +1,10 @@
 package org.hive2hive.core.encryption;
 
+/**
+ * This class contains the result of a hybrid encryption. It holds the RSA encrypted parameters and the AES encrypted data.
+ * @author Christian
+ *
+ */
 public final class HybridEncryptedContent {
 
 	private final byte[] encryptedParameters;
@@ -10,10 +15,18 @@ public final class HybridEncryptedContent {
 		this.encryptedData = encryptedData;
 	}
 	
+	/**
+	 * Get the RSA encrypted parameters.
+	 * @return
+	 */
 	public byte[] getEncryptedParameters() {
 		return encryptedParameters;
 	}
 	
+	/**
+	 * Get the AES encrypted data.
+	 * @return
+	 */
 	public byte[] getEncryptedData() {
 		return encryptedData;
 	}
