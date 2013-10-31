@@ -1,6 +1,5 @@
 package org.hive2hive.core.network;
 
-import java.nio.ByteBuffer;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,48 +111,6 @@ public class H2HStorageMemory extends StorageMemory {
 			// previous version is already outdated (or not existent)
 			logger.error("New content does not base on latest version in storage");
 			return PutStatus.VERSION_CONFLICT;
-		}
-	}
-
-	/**
-	 * Private class that splits the version keys
-	 * 
-	 * The version key (160bit) is split into two parts: The timestamp (64bit) and the hash of the
-	 * previous version (96bit). We can verify if the put is valid if the previous version is the latest
-	 * one (with the highest timestamp).
-	 * 
-	 * @author Nico
-	 * 
-	 */
-	private class VersionKey {
-		private final byte[] timestamp = new byte[8];
-		private final byte[] previousHash = new byte[12];
-		private final Number160 versionKey;
-
-		public VersionKey(Number160 versionKey) {
-			this.versionKey = versionKey;
-			versionKey.toByteArray(timestamp, 0);
-			versionKey.toByteArray(previousHash, timestamp.length);
-		}
-
-		public Number160 getPreviousHash() {
-			return new Number160(previousHash);
-		}
-
-		public long getTimestamp() {
-			return bytesToLong(timestamp);
-		}
-
-		/* Source: http://stackoverflow.com/a/4485196 */
-		private long bytesToLong(byte[] bytes) {
-			ByteBuffer buffer = ByteBuffer.allocate(8);
-			buffer.put(bytes);
-			buffer.flip(); // need flip
-			return buffer.getLong();
-		}
-
-		public Number160 getVersionKey() {
-			return versionKey;
 		}
 	}
 }
