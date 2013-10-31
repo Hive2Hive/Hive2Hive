@@ -185,20 +185,26 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// test all AES key sizes
 			for (int s2 = 0; s2 < aesSizes.length; s2++) {
 
-				// generate random sized content (max. 50 MB)
-				byte[] data = generateRandomContent(52428800);
+				// generate random content (50 MB)
+				byte[] data = generateFixedContent(52428800);
 
 				logger.debug(String
 						.format("Testing hybrid encryption and decryption of a sample %s byte file with a %s bit RSA and a %s bit AES key.",
 								data.length, rsaSizes[s1].value(), aesSizes[s2].value()));
 
 				// generate RSA key pair
+				long start = System.currentTimeMillis();
 				KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(rsaSizes[s1]);
+				long stop = System.currentTimeMillis();
+				logger.debug(String.format("RSA Key Generation Time: %s ms", stop-start));
 
 				// encrypt data with public key
 				HybridEncryptedContent encryptedData = null;
 				try {
+					start = System.currentTimeMillis();
 					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2]);
+					stop = System.currentTimeMillis();
+					logger.debug(String.format("Hybrid Encryption Time: %s ms", stop-start));
 				} catch (DataLengthException | InvalidKeyException | IllegalStateException
 						| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception while testing hybrid encryption:", e);
@@ -213,7 +219,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				// decrypt data with private key
 				byte[] decryptedData = null;
 				try {
+					start = System.currentTimeMillis();
 					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate());
+					stop = System.currentTimeMillis();
+					logger.debug(String.format("Hybrid Decryption Time: %s ms", stop-start));
 				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 						| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
 					logger.error("Exception while testing hybrid decryption:", e);
