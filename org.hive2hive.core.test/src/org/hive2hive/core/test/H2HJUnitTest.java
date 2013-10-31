@@ -90,6 +90,13 @@ public class H2HJUnitTest {
 		random.nextBytes(content);
 		return content;
 	}
+	
+	protected static byte[] generateFixedContent(int sizeInBytes) {
+		SecureRandom random = new SecureRandom();
+		byte[] content = new byte[sizeInBytes];
+		random.nextBytes(content);
+		return content;
+	}
 
 	/**
 	 * Returns a random string that with a specified maximal length of chars.

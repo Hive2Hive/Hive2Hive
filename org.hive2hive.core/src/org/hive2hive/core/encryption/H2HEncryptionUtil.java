@@ -9,7 +9,6 @@ import org.hive2hive.core.network.data.NetworkContent;
 public final class H2HEncryptionUtil {
 
 	private H2HEncryptionUtil() {
-		// only static
 	}
 
 	/**

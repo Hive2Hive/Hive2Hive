@@ -18,6 +18,7 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -53,7 +54,9 @@ public final class EncryptionUtil {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
 	public static final String SINGATURE_ALGORITHM = "SHA1withRSA";
-	
+	public static final int IV_LENGTH = 16;
+	public static final RSA_KEYLENGTH HYBRID_RSA_KEYLENGTH = RSA_KEYLENGTH.BIT_2048;
+
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
 		BIT_192(192),
@@ -71,6 +74,7 @@ public final class EncryptionUtil {
 	}
 
 	public enum RSA_KEYLENGTH {
+		BIT_512(512),
 		BIT_1024(1024),
 		BIT_2048(2048),
 		BIT_4096(4096);
@@ -90,14 +94,14 @@ public final class EncryptionUtil {
 	}
 
 	/**
-	 * Randomly generates a 16-byte initialization vector (IV) which can be used as parameter for symmetric
+	 * Randomly generates an initialization vector (IV) which can be used as parameter for symmetric
 	 * encryption.
 	 * 
-	 * @return Returns a randomly generated 16-byte IV.
+	 * @return Returns a randomly generated IV.
 	 */
 	public static byte[] generateIV() {
 		SecureRandom random = new SecureRandom();
-		byte[] iv = new byte[16];
+		byte[] iv = new byte[IV_LENGTH];
 		random.nextBytes(iv);
 		return iv;
 	}
@@ -184,8 +188,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Asymmetrically encrypts the provided data by means of the RSA algorithm. In order to encrypt the
-	 * content,
-	 * a public RSA key has to be provided.
+	 * content, a public RSA key has to be provided.
 	 * 
 	 * @param data The data to be encrypted.
 	 * @param publicKey The asymmetric public key with which the data shall be encrypted.
@@ -214,8 +217,7 @@ public final class EncryptionUtil {
 
 	/**
 	 * Asymmetrically decrypts the provided data by means of the RSA algorithm. In order to decrypt the
-	 * content,
-	 * a private RSA key has to be provided.
+	 * content, a private RSA key has to be provided.
 	 * 
 	 * @param data The data to be decrypted.
 	 * @param publicKey The asymmetric private key with which the data shall be decrypted.
@@ -243,6 +245,80 @@ public final class EncryptionUtil {
 	}
 
 	/**
+	 * Encrypts the provided data in a hybrid manner. First, the content is symmetrically encrypted with a
+	 * randomly generated IV and AES key of the specified length. Then, these encryption parameters are
+	 * asymmetrically encrypted with the provided RSA public key.</br>
+	 * <b>NOTE:</b> Use a minimum RSA key length of 2048 bit.
+	 * 
+	 * @param data The data to be encrypted in a hybrid manner.
+	 * @param publicKey The RSA public key with which the data shall be encrypted.
+	 * @param aesKeyLength The key length of the inner AES encryption.
+	 * @return Returns a {@link HybridEncryptedContent} object containing the RSA encrypted parameters and the
+	 *         AES encrypted content.
+	 * @throws DataLengthException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 */
+	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey,
+			AES_KEYLENGTH aesKeyLength) throws DataLengthException, IllegalStateException,
+			InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+
+		// generate AES key
+		SecretKey aesKey = generateAESKey(aesKeyLength);
+		byte[] encodedAesKey = aesKey.getEncoded();
+
+		// generate IV
+		byte[] initVector = generateIV();
+		
+		// concatenate symmetric encryption parameters -> max. 48 bytes (with AES 256) -> can be encrypted with RSA 512 bit
+		byte[] params = new byte[initVector.length + encodedAesKey.length];
+		System.arraycopy(initVector, 0, params, 0, initVector.length);
+		System.arraycopy(encodedAesKey, 0, params, initVector.length, encodedAesKey.length);
+
+		// encrypt data symmetrically
+		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector);
+	
+		// encrypt parameters asymmetrically
+		byte[] rsaEncryptedParams = encryptRSA(params, publicKey);
+
+		return new HybridEncryptedContent(rsaEncryptedParams, aesEncryptedData);
+	}
+
+	/**
+	 * Decrypts the provided data in a hybrid manner. First, the symmetric encryption parameters stored in the
+	 * {@link HybridEncryptedContent} are asymmetrically decrypted with the specified RSA private key. Then,
+	 * the symmetrically encrypted data is decrypted by means of these parameters and then returned.
+	 * 
+	 * @param data The {@link HybridEncryptedContent} to be decrypted in a hybrid manner.
+	 * @param privateKey The RSA private key with which the data shall be decrypted.
+	 * @return Returns the decrypted data.
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws DataLengthException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 */
+	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DataLengthException,
+			IllegalStateException, InvalidCipherTextException {
+		
+		// decrypt parameters asymmetrically
+		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey);
+		
+		// split symmetric encryption parameters
+		byte[] initVector = Arrays.copyOfRange(params, 0, IV_LENGTH);
+		byte[] encodedAesKey = Arrays.copyOfRange(params, IV_LENGTH, params.length);
+
+		// decrypt data symmetrically
+		SecretKey aesKey = new SecretKeySpec(encodedAesKey, 0, encodedAesKey.length, "AES");
+		return decryptAES(data.getEncryptedData(), aesKey, initVector);
+	}
+
+	/**
 	 * Signs the provided data with the specified private key and returns the signature.
 	 * 
 	 * @param data The content to be signed.
@@ -255,7 +331,7 @@ public final class EncryptionUtil {
 			SignatureException {
 
 		installBCProvider();
-		
+
 		try {
 			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
 			signEngine.initSign(privateKey);
@@ -284,7 +360,7 @@ public final class EncryptionUtil {
 			throws InvalidKeyException, SignatureException {
 
 		installBCProvider();
-		
+
 		try {
 			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
 			signEngine.initVerify(publicKey);
@@ -310,7 +386,7 @@ public final class EncryptionUtil {
 			oos.writeObject(object);
 			result = baos.toByteArray();
 		} catch (IOException e) {
-			logger.error("Exception while serializing object.");
+			logger.error("Exception while serializing object:", e);
 		} finally {
 			try {
 				oos.close();
@@ -366,7 +442,7 @@ public final class EncryptionUtil {
 		return buf.toString();
 	}
 
-	private static void installBCProvider() {
+	public static void installBCProvider() {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}

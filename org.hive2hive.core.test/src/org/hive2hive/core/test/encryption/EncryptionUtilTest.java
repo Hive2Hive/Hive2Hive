@@ -19,6 +19,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.encryption.EncryptionUtil;
 import org.hive2hive.core.encryption.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.encryption.EncryptionUtil.RSA_KEYLENGTH;
+import org.hive2hive.core.encryption.HybridEncryptedContent;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,9 +67,11 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			assertNotNull(rsaKeyPair);
 			assertNotNull(rsaKeyPair.getPrivate());
 			assertNotNull(rsaKeyPair.getPublic());
-			
-			logger.debug(String.format("Private Key: %s", EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded())));
-			logger.debug(String.format("Public Key: %s", EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded())));
+
+			logger.debug(String.format("Private Key: %s",
+					EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded())));
+			logger.debug(String.format("Public Key: %s",
+					EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded())));
 		}
 	}
 
@@ -167,6 +170,68 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			assertTrue(Arrays.equals(data, decryptedData));
 
 			printBytes("Decrypted Data:", decryptedData);
+		}
+	}
+
+	@Test
+	public void encryptionHybridTest() {
+
+		RSA_KEYLENGTH[] rsaSizes = getRSAKeySizes();
+		AES_KEYLENGTH[] aesSizes = getAESKeySizes();
+
+		// test all RSA key sizes
+		for (int s1 = 0; s1 < rsaSizes.length; s1++) {
+
+			// test all AES key sizes
+			for (int s2 = 0; s2 < aesSizes.length; s2++) {
+
+				// generate random content (50 MB)
+				byte[] data = generateFixedContent(52428800);
+
+				logger.debug(String
+						.format("Testing hybrid encryption and decryption of a sample %s byte file with a %s bit RSA and a %s bit AES key.",
+								data.length, rsaSizes[s1].value(), aesSizes[s2].value()));
+
+				// generate RSA key pair
+				long start = System.currentTimeMillis();
+				KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(rsaSizes[s1]);
+				long stop = System.currentTimeMillis();
+				logger.debug(String.format("RSA Key Generation Time: %s ms", stop-start));
+
+				// encrypt data with public key
+				HybridEncryptedContent encryptedData = null;
+				try {
+					start = System.currentTimeMillis();
+					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2]);
+					stop = System.currentTimeMillis();
+					logger.debug(String.format("Hybrid Encryption Time: %s ms", stop-start));
+				} catch (DataLengthException | InvalidKeyException | IllegalStateException
+						| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("Exception while testing hybrid encryption:", e);
+					e.printStackTrace();
+				}
+
+				assertNotNull(encryptedData);
+				assertNotNull(encryptedData.getEncryptedData());
+				assertNotNull(encryptedData.getEncryptedParameters());
+				assertFalse(Arrays.equals(data, encryptedData.getEncryptedData()));
+
+				// decrypt data with private key
+				byte[] decryptedData = null;
+				try {
+					start = System.currentTimeMillis();
+					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate());
+					stop = System.currentTimeMillis();
+					logger.debug(String.format("Hybrid Decryption Time: %s ms", stop-start));
+				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
+						| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
+					logger.error("Exception while testing hybrid decryption:", e);
+					e.printStackTrace();
+				}
+				
+				assertNotNull(decryptedData);
+				assertTrue(Arrays.equals(data, decryptedData));
+			}
 		}
 	}
 
