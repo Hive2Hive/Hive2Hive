@@ -12,6 +12,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Tests the user profile behavior
+ * 
+ * @author Nico
+ * 
+ */
 public class UserProfileTest extends H2HJUnitTest {
 
 	@BeforeClass

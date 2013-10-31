@@ -19,9 +19,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public class H2HStorageMemory extends StorageMemory {
 
-	private static final H2HLogger logger = H2HLoggerFactory
-			.getLogger(H2HStorageMemory.class);
-	
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HStorageMemory.class);
+
 	private final NetworkManager networkManager;
 
 	public H2HStorageMemory(NetworkManager networkManager) {
@@ -29,12 +28,25 @@ public class H2HStorageMemory extends StorageMemory {
 	}
 
 	@Override
-	public PutStatus put(Number160 locationKey, Number160 domainKey,
-			Number160 contentKey, Data newData, PublicKey publicKey,
-			boolean putIfAbsent, boolean domainProtection) {
-		// TODO implement validation strategies
-		return super.put(locationKey, domainKey, contentKey, newData,
-				publicKey, putIfAbsent, domainProtection);
-	}
+	public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
+			PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
+		// TODO this method receives another Number160 parameter for the version
 
+		// The version key (160bit) is split into two parts: The timestamp (64bit) and the hash of the
+		// previous version (96bit). We can verify if the put is valid if the previous version is the latest
+		// one (with the highest timestamp).
+
+		// if the previous version is the latest one accept it (continue).
+		// if the previous version is already outdated (or not existent), return PutStatus.VERSION_CONFLICT
+
+		// After adding the content to the memory, old versions should be cleaned up. How many old versions we
+		// keep could probably be parameterized. I (Nico) would recommend to keep at least 2 or 3 versions,
+		// thus we can recognize concurrent modification better (else, the 'previous version' hash
+		// is always wrong).
+
+		// TODO implement the crap above
+
+		return super.put(locationKey, domainKey, contentKey, newData, publicKey, putIfAbsent,
+				domainProtection);
+	}
 }
