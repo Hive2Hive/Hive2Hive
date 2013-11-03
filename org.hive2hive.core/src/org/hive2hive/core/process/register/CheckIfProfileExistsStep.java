@@ -3,7 +3,6 @@ package org.hive2hive.core.process.register;
 import java.io.IOException;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
@@ -42,11 +41,6 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	}
 
 	@Override
-	protected void handlePutResult(FuturePut future) {
-		// not used
-	}
-
-	@Override
 	protected void handleGetResult(FutureGet future) {
 		if (future.getData() == null) {
 			logger.debug(String.format("No user profile exists. user id = '%s'", userId));
@@ -74,9 +68,8 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 		// third, put the public key of the user
 		PutPublicKeyStep third = new PutPublicKeyStep(userProfile.getUserId(), userProfile
 				.getEncryptionKeys().getPublic());
-		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), null, third);
-		PutUserProfileStep first = new PutUserProfileStep(userProfile, null, process.getUserPassword(),
-				second);
+		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), third);
+		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getUserPassword(), second);
 		getProcess().nextStep(first);
 	}
 

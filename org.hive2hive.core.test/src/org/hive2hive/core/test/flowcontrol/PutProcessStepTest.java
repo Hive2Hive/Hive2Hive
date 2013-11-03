@@ -2,22 +2,17 @@ package org.hive2hive.core.test.flowcontrol;
 
 import java.security.PublicKey;
 import java.util.List;
-import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 import net.tomp2p.storage.StorageMemory;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.PutProcessStep;
+import org.hive2hive.core.process.common.PutProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -28,8 +23,9 @@ import org.junit.Test;
 public class PutProcessStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 3;
-	private static Random random = new Random();
+	private static final int networkSize = 5;
+	private String contentKey = "a content key";
+	private String data = "some data";
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -45,28 +41,146 @@ public class PutProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutVersionConflict() {
-		NetworkManager nodeA = network.get(0);
-		NetworkManager nodeB = network.get(1);
-		NetworkManager nodeC = network.get(2);
+	public void testPutProcessStep() {
+		String locationKey = network.get(0).getNodeId();
 
-		// node B and C will deny the put request
-		nodeB.getConnection().getPeer().getPeerBean().storage(new DenyingTestStorage());
-		nodeC.getConnection().getPeer().getPeerBean().storage(new DenyingTestStorage());
+		// initialize the process and the one and only step to test
+		Process process = new Process(network.get(0)) {
+		};
+		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		process.setFirstStep(putStep);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
-		String data = NetworkTestUtil.randomString();
-
-		PutProcessTestStep putStep = new PutProcessTestStep(new H2HTestData(data), null, locationKey,
-				contentKey);
-		putStep.setProcess(new Process(nodeA) {
-		});
-		putStep.start();
-
-		// TODO check if put rollback was correct
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
 	}
 
+	@Test
+	public void testPutProcessStepDelayedGetFails() {
+		// all nodes will deny the put request
+		for (NetworkManager node: network)
+			node.getConnection().getPeer().getPeerBean().storage(new DenyingGetTestStorage());
+
+		String locationKey = network.get(0).getNodeId();
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(network.get(0)) {
+		};
+		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		process.setFirstStep(putStep);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
+
+	@Test
+	public void testPutProcessStepAllContactedPeersDenyPut() {
+		// all nodes will deny the put request
+		for (NetworkManager node: network)
+			node.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+
+		String locationKey = network.get(0).getNodeId();
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(network.get(0)) {
+		};
+		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		process.setFirstStep(putStep);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
+	
+	@Test
+	public void testPutProcessStepMinorityOfContactedPeersDenyPut() {
+		network.get(0).getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		network.get(1).getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+
+		String locationKey = network.get(0).getNodeId();
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(network.get(0)) {
+		};
+		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		process.setFirstStep(putStep);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+	}
+	
+	@Test
+	public void testPutProcessStepMajorityOfContactedPeersDenyPut() {
+		network.get(1).getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		network.get(2).getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		network.get(3).getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		network.get(4).getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+
+		String locationKey = network.get(0).getNodeId();
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(network.get(0)) {
+		};
+		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		process.setFirstStep(putStep);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
+		
+	/**
+	 * Not implemented yet.
+	 */
+	@Test
+	public void testPutProcessStepWithOneVersionConflict() {
+		network.get(0).getConnection().getPeer().getPeerBean().storage(new VersionConflictTestStorage());
+
+		String locationKey = network.get(0).getNodeId();
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(network.get(0)) {
+		};
+		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		process.setFirstStep(putStep);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
+	
 	@Override
 	@After
 	public void afterMethod() {
@@ -79,53 +193,28 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class PutProcessTestStep extends PutProcessStep {
-
-		private final NetworkContent newData;
-		private final String locationKey;
-		private final String contentKey;
-
-		protected PutProcessTestStep(NetworkContent newData, NetworkContent oldData, String locationKey,
-				String contentKey) {
-			super(oldData);
-			this.newData = newData;
-			this.locationKey = locationKey;
-			this.contentKey = contentKey;
-		}
-
-		@Override
-		public void start() {
-			put(locationKey, contentKey, newData);
-		}
-
-		@Override
-		public void rollBack() {
-		}
-
-		@Override
-		protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-		}
-
-		@Override
-		protected void handlePutResult(FuturePut future) {
-		}
-
-		@Override
-		protected void handleGetResult(FutureGet future) {
-		}
-
-		@Override
-		protected void handleRemovalResult(FutureRemove future) {
-		}
-
-	}
-
-	private class DenyingTestStorage extends StorageMemory {
+	private class DenyingPutTestStorage extends StorageMemory {
 		@Override
 		public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
 				PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
 			// doesn't accept any data
 			return PutStatus.FAILED;
+		}
+	}
+	
+	private class DenyingGetTestStorage extends StorageMemory {
+	    @Override
+	    public Data get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
+	        return null;
+	    }
+	}
+
+	private class VersionConflictTestStorage extends StorageMemory {
+		@Override
+		public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
+				PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
+			// imitate a version conflict
+			return PutStatus.VERSION_CONFLICT;
 		}
 	}
 }
