@@ -10,7 +10,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.PutLocationStep;
 import org.hive2hive.core.process.common.PutUserProfileStep;
@@ -39,11 +38,6 @@ public class CheckIfProfileExistsStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// only a get call which has no effect
-	}
-
-	@Override
-	protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-		// not used
 	}
 
 	@Override

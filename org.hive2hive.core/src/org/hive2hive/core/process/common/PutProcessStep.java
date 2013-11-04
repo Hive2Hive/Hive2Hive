@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
@@ -15,7 +14,6 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
 
 /**
@@ -141,11 +139,6 @@ public class PutProcessStep extends ProcessStep {
 			getProcess().rollBack(
 					String.format("Put verification failed. Couldn't put data after %s tries.", putTries));
 		}
-	}
-
-	@Override
-	protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-		// ignore
 	}
 
 	@Override

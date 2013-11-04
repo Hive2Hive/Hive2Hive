@@ -8,11 +8,6 @@ import net.tomp2p.futures.FutureRemove;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.request.BaseRequestMessage;
-import org.hive2hive.core.network.messages.request.IRequestMessage;
-import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 
 /**
  * One step of a complete workflow. This step calls the next step after finishing
@@ -52,20 +47,6 @@ public abstract class ProcessStep {
 
 	/**
 	 * An optional method which my be implemented blank if not needed.</br>
-	 * If this step needs to send out {@link IRequestMessage}(s), this method will be called once the
-	 * {@link ResponseMessage} arrived at this node. To send a {@link IRequestMessage}, a step needs to use
-	 * {@link ProcessStep#send(org.hive2hive.core.messages.request.BaseRequestMessage)}.</br></br>
-	 * <b>Advice:</b></br>
-	 * Although it is possible for a step to send out multiple {@link IRequestMessage}s this should be avoided
-	 * if possible. We recommend to use a separate step for each request. This eases the reading and
-	 * encapsulates one action in one step only.
-	 * 
-	 * @param asyncReturnMessage the {@link Responsemessage} containing the result of the request.
-	 */
-	protected abstract void handleMessageReply(ResponseMessage asyncReturnMessage);
-
-	/**
-	 * An optional method which my be implemented blank if not needed.</br>
 	 * If this step needs to get something from the DHT, this method will be called once the {@link FutureDHT}
 	 * is done at this node.</br></br>
 	 * <b>Advice:</b></br>
@@ -89,19 +70,6 @@ public abstract class ProcessStep {
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
 	protected abstract void handleRemovalResult(FutureRemove future);
-
-	protected void send(BaseMessage message) {
-		if (message instanceof IRequestMessage) {
-			BaseRequestMessage requestMessage = (BaseRequestMessage) message;
-			requestMessage.setCallBackHandler(new ICallBackHandler() {
-				@Override
-				public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
-					handleMessageReply(asyncReturnMessage);
-				}
-			});
-		}
-		getNetworkManager().send(message);
-	}
 
 	/**
 	 * Make a get to the DHT. This is a non-blocking call; when it is done, it will call
