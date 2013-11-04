@@ -76,7 +76,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(testProfile, null, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(testProfile, userPassword, null);
 		process.setFirstStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -128,7 +128,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(newProfile, originalProfile, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(newProfile, userPassword, null);
 		process.setFirstStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);

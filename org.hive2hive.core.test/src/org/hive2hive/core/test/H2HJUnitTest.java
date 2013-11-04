@@ -1,6 +1,5 @@
 package org.hive2hive.core.test;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -18,17 +17,17 @@ public class H2HJUnitTest {
 
 	protected static Class<? extends H2HJUnitTest> testClass;
 	protected static H2HLogger logger;
-	
+
 	@Rule
 	public TestName name = new TestName();
-	
+
 	@Before
-	public void beforeMethod(){
+	public void beforeMethod() {
 		logger.debug(createMessage(name.getMethodName(), true));
 	}
-	
+
 	@After
-	public void afterMethod(){
+	public void afterMethod() {
 		logger.debug(createMessage(name.getMethodName(), false));
 	}
 
@@ -83,14 +82,14 @@ public class H2HJUnitTest {
 	public static void afterClass() {
 		printTestIdentifier(testClass.getName(), false);
 	}
-	
+
 	protected static byte[] generateRandomContent(int sizeInBytes) {
 		SecureRandom random = new SecureRandom();
 		byte[] content = new byte[random.nextInt(sizeInBytes)];
 		random.nextBytes(content);
 		return content;
 	}
-	
+
 	protected static byte[] generateFixedContent(int sizeInBytes) {
 		SecureRandom random = new SecureRandom();
 		byte[] content = new byte[sizeInBytes];
@@ -100,17 +99,18 @@ public class H2HJUnitTest {
 
 	/**
 	 * Returns a random string that with a specified maximal length of chars.
+	 * 
 	 * @return
 	 */
 	protected static String generateRandomString(int maxLength) {
-		
+
 		Random random = new Random();
-		char [] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
+		char[] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 		char buf[] = new char[random.nextInt(maxLength)];
-		for (int i=0;i<buf.length;i++) {
-		  int index = random.nextInt(subset.length);
-		  buf[i] = subset[index];
+		for (int i = 0; i < buf.length; i++) {
+			int index = random.nextInt(subset.length);
+			buf[i] = subset[index];
 		}
 
 		return new String(buf);
