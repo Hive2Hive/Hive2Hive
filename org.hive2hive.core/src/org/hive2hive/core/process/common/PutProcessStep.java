@@ -142,11 +142,6 @@ public class PutProcessStep extends ProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(FutureGet future) {
-		// ignore
-	}
-
-	@Override
 	protected void handleRemovalResult(FutureRemove future) {
 		// ignore
 	}

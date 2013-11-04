@@ -1,6 +1,5 @@
 package org.hive2hive.core.test.process;
 
-import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -57,11 +56,6 @@ public class ProcessTest extends H2HJUnitTest {
 
 			@Override
 			protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-				// do nothing
-			}
-
-			@Override
-			protected void handleGetResult(FutureGet future) {
 				// do nothing
 			}
 

@@ -5,9 +5,10 @@ import java.security.KeyPair;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.common.GetLocationsStep;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.UserPassword;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
+import org.hive2hive.core.security.UserPassword;
 
 public class RegisterProcess extends Process {
 
@@ -24,7 +25,11 @@ public class RegisterProcess extends Process {
 		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		userProfile = new UserProfile(userId, encryptionKeys, domainKeys);
 
-		setFirstStep(new CheckIfProfileExistsStep(userProfile, userPassword));
+		// get the locations map to check if a user with the same name is already existent
+		CheckIfUserExistsStep profileExistsStep = new CheckIfUserExistsStep();
+		GetLocationsStep getLocationsStep = new GetLocationsStep(userId, profileExistsStep);
+		profileExistsStep.setPreviousStep(getLocationsStep);
+		setFirstStep(getLocationsStep);
 	}
 
 	public String getUserId() {

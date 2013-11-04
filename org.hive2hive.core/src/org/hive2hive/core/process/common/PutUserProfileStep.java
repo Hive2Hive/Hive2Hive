@@ -49,5 +49,4 @@ public class PutUserProfileStep extends PutProcessStep {
 			getProcess().rollBack(e.getMessage());
 		}
 	}
-
 }

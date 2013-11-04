@@ -17,10 +17,10 @@ import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.security.EncryptedNetworkContent;
+import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserPassword;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -58,7 +58,7 @@ public class RegisterTest extends H2HJUnitTest {
 
 		String userId = NetworkTestUtil.randomString();
 		String password = NetworkTestUtil.randomString();
-		String pin = generateRandomString(6);
+		String pin = NetworkTestUtil.randomString();
 
 		RegisterProcess process = new RegisterProcess(userId, password, pin, client);
 		TestProcessListener listener = new TestProcessListener();
@@ -114,19 +114,16 @@ public class RegisterTest extends H2HJUnitTest {
 	@Test
 	public void testRegisterProcessProfileExists() {
 		NetworkManager client = network.get(0);
-		NetworkManager proxy = network.get(1);
 
-		String userId = proxy.getNodeId();
+		String userId = NetworkTestUtil.randomString();
 		String password = NetworkTestUtil.randomString();
-		String pin = generateRandomString(6);
+		String pin = NetworkTestUtil.randomString();
 
-		// already put a profile
-		UserProfile profile = new UserProfile(userId, null, null);
-		UserPassword userPassword = new UserPassword(password, pin);
-		FuturePut putProfile = client.putGlobal(profile.getLocationKey(userPassword),
-				H2HConstants.USER_PROFILE, new UserProfile(userId, null, null));
+		// already put a locations map
+		FuturePut putProfile = client.putGlobal(userId, H2HConstants.USER_LOCATIONS, new Locations(userId));
 		putProfile.awaitUninterruptibly();
 		putProfile.getFutureRequests().awaitUninterruptibly();
+		Assert.assertTrue(putProfile.isSuccess());
 
 		RegisterProcess process = new RegisterProcess(userId, password, pin, client);
 		TestProcessListener listener = new TestProcessListener();

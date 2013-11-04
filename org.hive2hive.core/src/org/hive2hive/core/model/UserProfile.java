@@ -53,6 +53,10 @@ public class UserProfile extends NetworkContent {
 	}
 
 	public String getLocationKey(UserPassword password) {
+		return getLocationKey(userId, password);
+	}
+
+	public static String getLocationKey(String userId, UserPassword password) {
 		// concatenate PIN + PW + UserId
 		String location = new StringBuilder().append(password.getPin()).append(password.getPassword())
 				.append(userId).toString();

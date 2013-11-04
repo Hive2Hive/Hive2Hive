@@ -2,7 +2,6 @@ package org.hive2hive.core.process;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDHT;
-import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FutureRemove;
 
 import org.apache.log4j.Logger;
@@ -56,37 +55,7 @@ public abstract class ProcessStep {
 	 * 
 	 * @param future the {@link FutureDHT} containing the result of the request.
 	 */
-	protected abstract void handleGetResult(FutureGet future);
-
-	/**
-	 * An optional method which my be implemented blank if not needed.</br>
-	 * If this step needs to get something from the DHT, this method will be called once the {@link FutureDHT}
-	 * is done at this node.</br></br>
-	 * <b>Advice:</b></br>
-	 * Although it is possible for a step to do multiple gets, this should be avoided
-	 * if possible. We recommend to use a separate step for each request. This eases the reading and
-	 * encapsulates one action in one step only.
-	 * 
-	 * @param future the {@link FutureDHT} containing the result of the request.
-	 */
 	protected abstract void handleRemovalResult(FutureRemove future);
-
-	/**
-	 * Make a get to the DHT. This is a non-blocking call; when it is done, it will call
-	 * {@link ProcessStep.handleGetResult}
-	 * 
-	 * @param locationKey
-	 * @param contentKey
-	 */
-	protected void get(String locationKey, String contentKey) {
-		FutureGet getFuture = getNetworkManager().getGlobal(locationKey, contentKey);
-		getFuture.addListener(new BaseFutureAdapter<FutureGet>() {
-			@Override
-			public void operationComplete(FutureGet future) throws Exception {
-				handleGetResult(future);
-			}
-		});
-	}
 
 	/**
 	 * Call the DHT to remove a content. When it is done, it will call {@link ProcessStep.handleRemovalResult}
