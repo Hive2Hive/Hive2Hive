@@ -8,6 +8,9 @@ public interface H2HConstants {
 	// configurations for network messages
 	public static final int MAX_MESSAGE_SENDING = 5;
 
+	// enable/disable the put verification on the remote peer
+	public static final boolean REMOTE_VERIFICATION_ENABLED = false;
+
 	// maximal numbers of versions kept in the DHT (see versionKey)
 	public static final int MAX_VERSIONS_HISTORY = 5;
 	public static final long MIN_VERSIONS_AGE_BEFORE_REMOVAL_MS = 5 * 60 * 1000; // 5mins

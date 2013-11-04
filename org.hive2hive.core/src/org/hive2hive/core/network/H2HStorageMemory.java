@@ -38,27 +38,36 @@ public class H2HStorageMemory extends StorageMemory {
 	@Override
 	public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
 			PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
+		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
+			@Deprecated
+			Number160 versionKey = Number160.MAX_VALUE;
+
+			logger.debug("Start verification of locationKey: " + locationKey + " domainKey: " + domainKey
+					+ " contentKey: " + contentKey + " versionKey: " + versionKey);
+			PutStatus status = validateVersion(locationKey, domainKey, contentKey, versionKey);
+			if (status == PutStatus.OK) {
+				// TODO: add the version key here
+				status = super.put(locationKey, domainKey, contentKey, newData, publicKey, putIfAbsent,
+						domainProtection);
+
+				// After adding the content to the memory, old versions should be cleaned up. How many old
+				// versions we keep can be parameterized in the constants.
+				cleanupVersions(locationKey, domainKey, contentKey, versionKey);
+			}
+
+			logger.debug("Finished verification (" + status + ") of locationKey: " + locationKey
+					+ " domainKey: " + domainKey + " contentKey: " + contentKey + " versionKey: "
+					+ versionKey);
+			return status;
+		} else {
+			logger.debug("Disabled the put verification strategy on the remote peer");
+			// TODO: add the version key here
+			return super.put(locationKey, domainKey, contentKey, newData, publicKey, putIfAbsent,
+					domainProtection);
+		}
 		// TODO this method receives another Number160 parameter for the version
 		// this serves as stub
-		@Deprecated
-		Number160 versionKey = Number160.MAX_VALUE;
 
-		logger.debug("Start verification of locationKey: " + locationKey + " domainKey: " + domainKey
-				+ " contentKey: " + contentKey + " versionKey: " + versionKey);
-		PutStatus status = validateVersion(locationKey, domainKey, contentKey, versionKey);
-		if (status == PutStatus.OK) {
-			// TODO: add the version key here
-			status = super.put(locationKey, domainKey, contentKey, newData, publicKey, putIfAbsent,
-					domainProtection);
-
-			// After adding the content to the memory, old versions should be cleaned up. How many old
-			// versions we keep can be parameterized in the constants.
-			cleanupVersions(locationKey, domainKey, contentKey, versionKey);
-		}
-
-		logger.debug("Finished verification (" + status + ") of locationKey: " + locationKey + " domainKey: "
-				+ domainKey + " contentKey: " + contentKey + " versionKey: " + versionKey);
-		return status;
 	}
 
 	private PutStatus validateVersion(Number160 locationKey, Number160 domainKey, Number160 contentKey,
