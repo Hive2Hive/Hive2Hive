@@ -12,6 +12,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.MessageProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -81,7 +82,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		final NetworkManager sender = network.get(0);
 		final NetworkManager receiver = network.get(1);
 
-		MessageProcessStep step = new MessageProcessStep(sender, receiver, testContent);
+		DummyMessageProcessStep step = new DummyMessageProcessStep(sender, receiver, testContent);
 		Process process = new Process(sender) {
 		};
 		process.setFirstStep(step);
@@ -124,11 +125,11 @@ public class ProcessStepTest extends H2HJUnitTest {
 	/**
 	 * A dummy process step that sends a message and waits for a reply
 	 */
-	private class MessageProcessStep extends ProcessStep {
+	private class DummyMessageProcessStep extends MessageProcessStep {
 
 		private final ProcessStepTestMessage messageToSend;
 
-		public MessageProcessStep(NetworkManager sender, NetworkManager receiver, String testContent) {
+		public DummyMessageProcessStep(NetworkManager sender, NetworkManager receiver, String testContent) {
 			// initialize message here in order to have the message id already ready
 			messageToSend = new ProcessStepTestMessage(receiver.getNodeId(), sender.getPeerAddress(),
 					sender.getNodeId(), testContent);
@@ -144,14 +145,14 @@ public class ProcessStepTest extends H2HJUnitTest {
 			Assert.fail("Should not have rollbacked here");
 		}
 
-		@Override
-		protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-			// notify the message waiter
-			synchronized (messageWaiterMap) {
-				messageWaiterMap.put(asyncReturnMessage.getMessageID(), asyncReturnMessage);
-			}
-			getProcess().nextStep(null);
-		}
+		// @Override
+		// protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
+		// // notify the message waiter
+		// synchronized (messageWaiterMap) {
+		// messageWaiterMap.put(asyncReturnMessage.getMessageID(), asyncReturnMessage);
+		// }
+		// getProcess().nextStep(null);
+		// }
 
 		public String getMessageId() {
 			return messageToSend.getMessageID();
@@ -192,12 +193,6 @@ public class ProcessStepTest extends H2HJUnitTest {
 		@Override
 		public void rollBack() {
 			Assert.fail("Should not have rollbacked here");
-		}
-
-		@Override
-		protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-			// not expected to get a message reply
-			Assert.fail();
 		}
 
 		@Override

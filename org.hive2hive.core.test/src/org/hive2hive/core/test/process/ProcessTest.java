@@ -2,7 +2,6 @@ package org.hive2hive.core.test.process;
 
 import net.tomp2p.futures.FutureRemove;
 
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessState;
 import org.hive2hive.core.process.ProcessStep;
@@ -51,11 +50,6 @@ public class ProcessTest extends H2HJUnitTest {
 
 			@Override
 			public void rollBack() {
-				// do nothing
-			}
-
-			@Override
-			protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
 				// do nothing
 			}
 

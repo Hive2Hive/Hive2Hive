@@ -103,12 +103,6 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handleMessageReply(ResponseMessage asyncReturnMessage) {
-			// not expected to get a message reply
-			Assert.fail();
-		}
-
-		@Override
 		protected void handleRemovalResult(FutureRemove future) {
 			// not expected to get a removal
 			Assert.fail();
