@@ -27,7 +27,6 @@ public class GetProcessStepTest extends H2HJUnitTest {
 	private final static int networkSize = 2;
 	private static List<NetworkManager> network;
 	private Map<String, ResponseMessage> messageWaiterMap;
-	@SuppressWarnings("rawtypes")
 	private NetworkContent tempContent;
 	private String testContent;
 
@@ -50,7 +49,6 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	@SuppressWarnings("rawtypes")
 	private NetworkContent waitForFutureResult() throws InterruptedException {
 		H2HWaiter w = new H2HWaiter(20);
 		NetworkContent content = null;

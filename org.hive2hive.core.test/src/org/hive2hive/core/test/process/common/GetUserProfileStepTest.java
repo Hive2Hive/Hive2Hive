@@ -62,7 +62,6 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 			DataLengthException, IllegalStateException, InvalidCipherTextException, ClassNotFoundException,
 			IOException {
 		NetworkManager putter = network.get(0); // where the process runs
-		NetworkManager client = network.get(1); // where the user profile is stored
 
 		// create the needed objects
 		String userId = NetworkTestUtil.randomString();
