@@ -121,10 +121,6 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
-		UserProfile originalProfile = new UserProfile(userId,
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
-
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
@@ -153,18 +149,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 
-		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
-		Assert.assertNotNull(found);
-
-		// decrypt it using the same password as set above
-		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(userPassword,
-				AES_KEYLENGTH.BIT_256);
-		UserProfile decrypted = (UserProfile) H2HEncryptionUtil.decryptAES(found, decryptionKeys);
-
-		// check that restored profile is the same as the 'original'
-		Assert.assertEquals(userId, decrypted.getUserId());
-		Assert.assertEquals(originalProfile.getEncryptionKeys().getPrivate(), decrypted.getEncryptionKeys()
-				.getPrivate());
+		Assert.assertNull(global.getData());
 	}
 
 	@Override

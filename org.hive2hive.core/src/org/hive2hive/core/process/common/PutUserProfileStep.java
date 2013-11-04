@@ -29,7 +29,7 @@ public class PutUserProfileStep extends PutProcessStep {
 	private final UserPassword password;
 
 	public PutUserProfileStep(UserProfile profile, UserPassword password, ProcessStep nextStep) {
-		super(profile.getUserId(), H2HConstants.USER_PROFILE, null, nextStep);
+		super(profile.getLocationKey(password), H2HConstants.USER_PROFILE, null, nextStep);
 		this.profile = profile;
 		this.password = password;
 	}
