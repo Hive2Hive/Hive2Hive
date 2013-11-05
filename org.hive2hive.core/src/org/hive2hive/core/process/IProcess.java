@@ -31,8 +31,9 @@ public interface IProcess extends Runnable {
 	void continueProcess();
 
 	/**
-	 * Stops the process, such that its state will be {@link ProcessState#STOPPED}. This instantly forces the
-	 * process to rollback itself.
+	 * Stops the process and first issues a rollback, where the state changes to
+	 * {@link ProcessState#ROLLBACKING}. After the rollback has completed, the process' state changes to
+	 * {@link ProcessState#STOPPED}.
 	 */
 	void stop();
 

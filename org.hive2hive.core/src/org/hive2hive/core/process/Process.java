@@ -15,7 +15,7 @@ import org.hive2hive.core.process.manager.ProcessManager;
  * This wrapper is necessary since workflows contain many long-running network calls. The callback of
  * then starts the next process step
  * 
- * @author Nendor, Nico
+ * @author Nendor, Nico, Christian
  * 
  */
 public abstract class Process implements IProcess {
@@ -28,7 +28,6 @@ public abstract class Process implements IProcess {
 	private final int pid;
 	private ProcessState state;
 
-//	private ProcessStep firstStep;
 	private ProcessStep currentStep;
 
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
@@ -41,11 +40,6 @@ public abstract class Process implements IProcess {
 
 		ProcessManager.getInstance().attachProcess(this);
 	}
-
-//	public void setFirstStep(ProcessStep firstStep) {
-//		firstStep.setProcess(this);
-//		this.firstStep = firstStep;
-//	}
 
 	/**
 	 * Sets the next {@link ProcessStep} of this process and starts executing if this process is in
