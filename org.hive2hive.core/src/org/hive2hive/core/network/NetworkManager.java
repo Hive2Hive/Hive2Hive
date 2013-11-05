@@ -2,9 +2,11 @@ package org.hive2hive.core.network;
 
 import java.net.InetAddress;
 
+import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
+import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -12,8 +14,9 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.messages.IMessage;
+import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
+import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -99,16 +102,30 @@ public class NetworkManager {
 	}
 
 	/**
-	 * Sends a given message to the peer which is responsible to given key.
-	 * If the message is a BaseDirectMessage, the message is sent directly using TCP
+	 * Sends a given message to the peer which is responsible to given key. </br>
+	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)}
 	 * 
 	 * @param message
 	 *            the message to send
+	 * @return a future
 	 */
-	public void send(IMessage message) {
+	public FutureDirect send(BaseMessage message) {
 		if (!connection.isConnected())
-			return;
-		messageManager.send(message);
+			return null;
+		return messageManager.send(message);
+	}
+
+	/**
+	 * Message is sent directly using TCP.
+	 * 
+	 * @param message
+	 *            the message to send
+	 * @return future
+	 */
+	public FutureResponse sendDirect(BaseDirectMessage message) {
+		if (!connection.isConnected())
+			return null;
+		return messageManager.sendDirect(message);
 	}
 
 	/**
