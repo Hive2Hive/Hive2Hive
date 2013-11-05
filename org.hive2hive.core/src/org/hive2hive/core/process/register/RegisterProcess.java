@@ -19,7 +19,7 @@ public class RegisterProcess extends Process {
 	public RegisterProcess(String userId, String password, String pin, NetworkManager networkManager) {
 		super(networkManager);
 		this.userId = userId;
-		userPassword = new UserPassword(password, pin);
+		this.userPassword = new UserPassword(password, pin);
 
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
@@ -29,7 +29,7 @@ public class RegisterProcess extends Process {
 		CheckIfUserExistsStep profileExistsStep = new CheckIfUserExistsStep();
 		GetLocationsStep getLocationsStep = new GetLocationsStep(userId, profileExistsStep);
 		profileExistsStep.setPreviousStep(getLocationsStep);
-		setFirstStep(getLocationsStep);
+		setNextStep(getLocationsStep);
 	}
 
 	public String getUserId() {

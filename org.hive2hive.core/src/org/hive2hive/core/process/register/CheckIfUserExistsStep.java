@@ -46,7 +46,7 @@ public class CheckIfUserExistsStep extends ProcessStep {
 				.getEncryptionKeys().getPublic());
 		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), third);
 		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getUserPassword(), second);
-		getProcess().nextStep(first);
+		getProcess().setNextStep(first);
 	}
 
 	@Override

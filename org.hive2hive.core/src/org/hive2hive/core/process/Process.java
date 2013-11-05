@@ -1,6 +1,7 @@
 package org.hive2hive.core.process;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hive2hive.core.log.H2HLogger;
@@ -19,26 +20,52 @@ import org.hive2hive.core.process.manager.ProcessManager;
  */
 public abstract class Process implements IProcess {
 
+	// TODO throw exceptions on invalid process states
+
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Process.class);
 
-	private final int pid;
-	private ProcessState state = ProcessState.INITIALIZING;
 	private final NetworkManager networkManager;
-	private ProcessStep firstStep;
+	private final int pid;
+	private ProcessState state;
+
+//	private ProcessStep firstStep;
 	private ProcessStep currentStep;
+
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
 	private final List<IProcessListener> listeners = new ArrayList<IProcessListener>();
 
 	public Process(NetworkManager networkManager) {
 		this.networkManager = networkManager;
-		ProcessManager processManager = ProcessManager.getInstance();
-		pid = processManager.getNewPID();
-		processManager.attachProcess(this);
+		this.pid = ProcessManager.getInstance().getNewPID();
+		this.state = ProcessState.INITIALIZING;
+
+		ProcessManager.getInstance().attachProcess(this);
 	}
 
-	public void setFirstStep(ProcessStep firstStep) {
-		firstStep.setProcess(this);
-		this.firstStep = firstStep;
+//	public void setFirstStep(ProcessStep firstStep) {
+//		firstStep.setProcess(this);
+//		this.firstStep = firstStep;
+//	}
+
+	/**
+	 * Sets the next {@link ProcessStep} of this process and starts executing if this process is in
+	 * {@link ProcessState#RUNNING}. Otherwise the next step will be marked to be executed when the process
+	 * resumes.
+	 * 
+	 * @param nextStep the next step or <code>null</code>, if the process should finish
+	 */
+	public void setNextStep(ProcessStep nextStep) {
+		executedSteps.add(currentStep);
+	
+		if (nextStep != null) {
+			currentStep = nextStep;
+			currentStep.setProcess(this);
+	
+			if (state == ProcessState.RUNNING)
+				currentStep.start();
+		} else {			
+			finish();
+		}
 	}
 
 	@Override
@@ -67,7 +94,7 @@ public abstract class Process implements IProcess {
 			if (currentStep != null) {
 				currentStep.start();
 			} else {
-				logger.error("No next step to continue.");
+				logger.error("No step to continue.");
 			}
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot continue.");
@@ -81,6 +108,17 @@ public abstract class Process implements IProcess {
 			rollBack("Process stopped.");
 		} else {
 			logger.warn("Process is already stopped");
+		}
+	}
+
+	private void finish() {
+		if (state == ProcessState.RUNNING) {
+			state = ProcessState.FINISHED;
+			ProcessManager.getInstance().detachProcess(this);
+			
+			for (IProcessListener listener : listeners) {
+				listener.onSuccess();
+			}
 		}
 	}
 
@@ -101,43 +139,26 @@ public abstract class Process implements IProcess {
 
 	@Override
 	public final void run() {
-		currentStep = firstStep;
-		currentStep.start();
-	}
-
-	/**
-	 * Calls the next step
-	 * 
-	 * @param nextStep if null, the process will finalize itself and be done. Else, the given process step
-	 *            will be executed
-	 */
-	public void nextStep(ProcessStep nextStep) {
-		executedSteps.add(currentStep);
-
-		if (nextStep == null) {
-			// implicitly finalizing the process
-			finalize();
+		if (currentStep != null){
+			currentStep.start();			
 		} else {
-			// normal case
-			currentStep = nextStep;
-			currentStep.setProcess(this);
-
-			if (state == ProcessState.RUNNING)
-				currentStep.start();
+			logger.error("No process step to start with specified.");
 		}
 	}
 
-	/**
-	 * When all steps of this process are finished
-	 */
-	public void finalize() {
-		if (state == ProcessState.RUNNING) {
-			state = ProcessState.FINISHED;
-			// detach form the process manager
-			ProcessManager.getInstance().detachProcess(this);
-			for (IProcessListener listener : listeners) {
-				listener.onSuccess();
-			}
+	public void rollBack(String reason) {
+		state = ProcessState.ROLLBACKING;
+		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
+		currentStep.rollBack();
+
+		// rollback in reverse order
+		Collections.reverse(executedSteps);
+		for (ProcessStep step : executedSteps){
+			step.rollBack();
+		}
+
+		for (IProcessListener listener : listeners) {
+			listener.onFail(reason);
 		}
 	}
 
@@ -148,21 +169,6 @@ public abstract class Process implements IProcess {
 	 */
 	public NetworkManager getNetworkManager() {
 		return networkManager;
-	}
-
-	public void rollBack(String reason) {
-		state = ProcessState.ROLLBACKING;
-		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
-		currentStep.rollBack();
-
-		// TODO: rollback reverse order
-		for (ProcessStep step : executedSteps) {
-			step.rollBack();
-		}
-
-		for (IProcessListener listener : listeners) {
-			listener.onFail(reason);
-		}
 	}
 
 	public void addListener(IProcessListener listener) {

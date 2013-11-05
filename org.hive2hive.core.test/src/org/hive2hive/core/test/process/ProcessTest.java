@@ -36,9 +36,6 @@ public class ProcessTest extends H2HJUnitTest {
 
 		process.continueProcess();
 		Assert.assertEquals(ProcessState.RUNNING, process.getState());
-
-		process.finalize();
-		Assert.assertEquals(ProcessState.FINISHED, process.getState());
 	}
 
 	private Process generateProcess() {
@@ -61,7 +58,7 @@ public class ProcessTest extends H2HJUnitTest {
 
 		Process process = new Process(null) {
 		};
-		process.setFirstStep(firstStep);
+		process.setNextStep(firstStep);
 		return process;
 	}
 

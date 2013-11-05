@@ -85,7 +85,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		DummyMessageProcessStep step = new DummyMessageProcessStep(sender, receiver, testContent);
 		Process process = new Process(sender) {
 		};
-		process.setFirstStep(step);
+		process.setNextStep(step);
 
 		String messageId = new String(step.getMessageId()); // copy
 
@@ -111,7 +111,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 		RemovalProcessStep step = new RemovalProcessStep(holder.getNodeId(), contentKey);
 		Process process = new Process(getter) {
 		};
-		process.setFirstStep(step);
+		process.setNextStep(step);
 
 		process.start();
 		FutureRemove future = (FutureRemove) waitForFutureResult();
@@ -200,7 +200,7 @@ public class ProcessStepTest extends H2HJUnitTest {
 			synchronized (messageWaiterMap) {
 				tempFutureStore = future;
 			}
-			getProcess().nextStep(null);
+			getProcess().setNextStep(null);
 		}
 	}
 }

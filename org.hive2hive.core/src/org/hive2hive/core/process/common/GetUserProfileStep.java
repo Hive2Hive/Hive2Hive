@@ -59,7 +59,7 @@ public class GetUserProfileStep extends GetProcessStep {
 			}
 		}
 
-		getProcess().nextStep(nextStep);
+		getProcess().setNextStep(nextStep);
 	}
 
 	/**

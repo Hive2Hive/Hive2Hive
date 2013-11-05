@@ -48,7 +48,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(network.get(0)) {
 		};
 		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
-		process.setFirstStep(putStep);
+		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -72,7 +72,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(network.get(0)) {
 		};
 		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
-		process.setFirstStep(putStep);
+		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -96,7 +96,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(network.get(0)) {
 		};
 		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
-		process.setFirstStep(putStep);
+		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -119,7 +119,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(network.get(0)) {
 		};
 		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
-		process.setFirstStep(putStep);
+		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -144,7 +144,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(network.get(0)) {
 		};
 		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
-		process.setFirstStep(putStep);
+		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -169,7 +169,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(network.get(0)) {
 		};
 		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
-		process.setFirstStep(putStep);
+		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

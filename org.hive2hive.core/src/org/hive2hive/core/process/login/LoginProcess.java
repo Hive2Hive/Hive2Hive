@@ -21,7 +21,7 @@ public class LoginProcess extends Process {
 		addToLocsStep.setPreviousStep(locationsStep);
 
 		GetUserProfileStep userProfileStep = new GetUserProfileStep(userId, userPassword, locationsStep);
-		setFirstStep(userProfileStep);
+		setNextStep(userProfileStep);
 	}
 
 	public String getUserId() {

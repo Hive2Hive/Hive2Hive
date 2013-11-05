@@ -74,7 +74,7 @@ public class PutProcessStep extends ProcessStep {
 					"Verification for put completed. location key = '%s' content key = '%s'", locationKey,
 					contentKey));
 			// everything is ok, continue with next step
-			getProcess().nextStep(nextStep);
+			getProcess().setNextStep(nextStep);
 		} else {
 			logger.warn(String
 					.format("Put verification failed. Concurrent modification happened. location key = '%s' content key = '%s'",
