@@ -3,7 +3,7 @@ package org.hive2hive.core;
 import java.util.UUID;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 
 public class H2HNode implements IH2HNode {
@@ -45,7 +45,7 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public Process register(String userId, String password, String pin) {
+	public IProcess register(String userId, String password, String pin) {
 		RegisterProcess process = new RegisterProcess(userId, password, pin, networkManager);
 		if (autostartProcesses) {
 			process.start();
@@ -54,7 +54,7 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public Process login(String userId, String password, String pin) {
+	public IProcess login(String userId, String password, String pin) {
 		// TODO Auto-generated method stub
 		return null;
 	}
