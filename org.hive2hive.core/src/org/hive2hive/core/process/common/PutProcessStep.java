@@ -29,7 +29,7 @@ public class PutProcessStep extends ProcessStep {
 
 	protected final String locationKey;
 	protected final String contentKey;
-	protected NetworkContent data;
+	protected final NetworkContent content;
 	protected ProcessStep nextStep;
 
 	// used to count put retries
@@ -37,20 +37,21 @@ public class PutProcessStep extends ProcessStep {
 	// used to count get tries
 	private int getTries = 0;
 
-	public PutProcessStep(String locationKey, String contentKey, NetworkContent data, ProcessStep nextStep) {
-		this.data = data;
+	public PutProcessStep(String locationKey, String contentKey, NetworkContent content, ProcessStep nextStep) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
+		this.content = content;
 		this.nextStep = nextStep;
 	}
 
 	@Override
 	public void start() {
-		put(locationKey, contentKey, data);
+		put(locationKey, contentKey, content);
 	}
 
-	protected void put(final String locationKey, final String contentKey, NetworkContent data) {
-		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
+	protected void put(final String locationKey, final String contentKey, NetworkContent content) {
+		
+		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, content);
 		putFuture.addListener(new PutVerificationListener());
 	}
 
@@ -129,7 +130,7 @@ public class PutProcessStep extends ProcessStep {
 							if (future.isFailed()) {
 								logger.warn("Put Retry: Could not delete the newly put content");
 							}
-							put(locationKey, contentKey, data);
+							put(locationKey, contentKey, content);
 						}
 					});
 		} else {
