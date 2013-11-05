@@ -20,6 +20,7 @@ public interface H2HConstants {
 	public static final String USER_PROFILE = "USER_PROFILE";
 	public static final String USER_LOCATIONS = "USER_LOCATIONS";
 	public static final String USER_PUBLIC_KEY = "USER_PUBLIC_KEY";
+	public static final String USER_MESSAGE_QUEUE_KEY = "USER_MESSAGE_QUEUE_KEY";
 
 	// waiting time (in milliseconds) after a put operation to verify if put succeeded
 	public static final long PUT_VERIFICATION_WAITING_TIME = 2000;

@@ -16,16 +16,16 @@ import org.hive2hive.core.network.data.NetworkContent;
 public class UserMessageQueue extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
-	private final String forUser;
+	private final String userId;
 	private final Queue<UserMessage> messageQueue;
 
-	public UserMessageQueue(String forUser) {
-		this.forUser = forUser;
+	public UserMessageQueue(String userId) {
+		this.userId = userId;
 		messageQueue = new LinkedList<UserMessage>();
 	}
 
-	public String getForUser() {
-		return forUser;
+	public String getUserId() {
+		return userId;
 	}
 
 	public Queue<UserMessage> getMessageQueue() {

@@ -30,7 +30,7 @@ public class PutProcessStep extends ProcessStep {
 	protected final NetworkContent newData;
 	protected final String locationKey;
 	protected final String contentKey;
-	protected final ProcessStep nextStep;
+	protected ProcessStep nextStep;
 
 	// used to count put retries
 	private int putTries = 0;
