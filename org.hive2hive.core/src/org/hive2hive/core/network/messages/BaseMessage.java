@@ -164,6 +164,56 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public abstract AcceptanceReply accept();
 
 	/**
+	 * This method is called if a failure is detected while sending this
+	 * message. The idea is that sending failures are handled by the message
+	 * itself, because the message is the only entity which knows how to perform
+	 * from the point of a failure on. Some messages don't need do be sent
+	 * again, while others need a redirect or wish to inform special (potential
+	 * several) customers about the failure.</br>
+	 * This abstract class implements
+	 * the default behavior for {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
+	 * Subclasses which need a different or more elaborated failure handling
+	 * have to extend or override this method.</br>
+	 * </br>
+	 * This method analyzes the reply and give <code>true</code> if a resend of the message is recommend and a
+	 * <code>false</code> if not.
+	 * 
+	 * @param reply
+	 *            the reply of the sending attempts
+	 * @return <code>true</code> if resending recommended, <code>false</code> if not
+	 * @throws IllegalArgumentException reply has to be {@link AcceptanceReply#FAILURE} or
+	 *             {@link AcceptanceReply#FUTURE_FAILURE}
+	 */
+	public boolean handleSendingFailure(AcceptanceReply reply) throws IllegalArgumentException {
+		logger.debug(String.format("Have to handle a sending failure. reply = '%s'", reply));
+		switch (reply) {
+			case OK:
+				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
+				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
+			case FAILURE:
+			case FUTURE_FAILURE:
+				if (SendingBehavior.SEND_MAX_ALLOWED_TIMES == sendingBehavior) {
+					if (sendingCounter < H2HConstants.MAX_MESSAGE_SENDING) {
+						return true;
+					} else {
+						logger.error(String
+								.format("Message does not getting accepted by the targets in %d tries. target key = '%s'",
+										sendingCounter, targetKey));
+						return false;
+					}
+				} else {
+					logger.warn(String.format(
+							"Message not accepted by the target after one try. target key = '%s'", targetKey));
+					return false;
+				}
+			default:
+				logger.error(String.format("Unkown AcceptanceReply argument: %s", reply));
+				throw new IllegalArgumentException(
+						String.format("Unkown AcceptanceReply argument: %s", reply));
+		}
+	}
+
+	/**
 	 * Convenience method to create a random message ID
 	 * 
 	 * @return a random String of 12 characters length

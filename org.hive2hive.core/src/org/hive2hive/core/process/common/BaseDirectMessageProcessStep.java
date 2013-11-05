@@ -3,12 +3,15 @@ package org.hive2hive.core.process.common;
 import java.util.List;
 
 import net.tomp2p.futures.BaseFutureAdapter;
+import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.message.Buffer;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.SendingBehavior;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
@@ -33,22 +36,6 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 		}
 		FutureResponse futureResponse = getNetworkManager().sendDirect(message);
 		futureResponse.addListener(new FutureResponseListener());
-	}
-
-	@Override
-	public void handleSendingFailure(AcceptanceReply reply) {
-		logger.debug(String.format("Have to handle a sending failure. AcceptanceReply='%s'", reply));
-		BaseDirectMessage directMessage = (BaseDirectMessage) message;
-		if (AcceptanceReply.FUTURE_FAILURE == reply) {
-			logger.debug(String.format(
-					"Failure while sending this message directly using the peer address '%s' ",
-					directMessage.getTargetAddress()));
-			if (directMessage.needsRedirectedSend()) {
-				// TODO fallback on routed sending
-			}
-		} else {
-			super.handleSendingFailure(reply);
-		}
 	}
 
 	private class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
