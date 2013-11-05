@@ -6,7 +6,6 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
@@ -57,16 +56,16 @@ public class ResponseMessage extends BaseDirectMessage {
 		return content;
 	}
 
-//	@Override
-//	public void handleSendingFailure(AcceptanceReply reply,
-//			NetworkManager aNetworkManager) {
-//		if (AcceptanceReply.NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE == reply) {
-//			logger.warn(String
-//					.format("Receiving node has no callback handler for this message. message id = %s",
-//							getMessageID()));
-//		} else {
-//			super.handleSendingFailure(reply, aNetworkManager);
-//		}
-//	}
+	@Override
+	public boolean handleSendingFailure(AcceptanceReply reply) {
+		if (AcceptanceReply.NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE == reply) {
+			logger.warn(String
+					.format("Receiving node has no callback handler for this message. message id = %s",
+							getMessageID()));
+			return true;
+		} else {
+			return super.handleSendingFailure(reply);
+		}
+	}
 
 }

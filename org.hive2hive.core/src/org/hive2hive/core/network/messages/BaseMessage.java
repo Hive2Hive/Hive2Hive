@@ -3,8 +3,10 @@ package org.hive2hive.core.network.messages;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Collection;
 
 import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -187,9 +189,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public boolean handleSendingFailure(AcceptanceReply reply) throws IllegalArgumentException {
 		logger.debug(String.format("Have to handle a sending failure. reply = '%s'", reply));
 		switch (reply) {
-			case OK:
-				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
-				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
 			case FAILURE:
 			case FUTURE_FAILURE:
 				if (SendingBehavior.SEND_MAX_ALLOWED_TIMES == sendingBehavior) {
@@ -206,10 +205,41 @@ public abstract class BaseMessage implements Runnable, Serializable {
 							"Message not accepted by the target after one try. target key = '%s'", targetKey));
 					return false;
 				}
+			case OK:
+				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
+				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
 			default:
 				logger.error(String.format("Unkown AcceptanceReply argument: %s", reply));
 				throw new IllegalArgumentException(
 						String.format("Unkown AcceptanceReply argument: %s", reply));
+		}
+	}
+
+	public AcceptanceReply extractAcceptanceReply(FutureDirect aFuture) {
+		String errorReason = "";
+		if (aFuture.isSuccess()) {
+			Collection<Object> returndedObject = aFuture.getRawDirectData2().values();
+			if (returndedObject == null) {
+				errorReason = "Returned object is null.";
+			} else if (returndedObject.isEmpty()) {
+				errorReason = "Returned raw data is empty.";
+			} else {
+				Object firstReturnedObject = returndedObject.iterator().next();
+				if (firstReturnedObject == null) {
+					errorReason = "First returned object is null.";
+				} else if (firstReturnedObject instanceof AcceptanceReply) {
+					AcceptanceReply reply = (AcceptanceReply) firstReturnedObject;
+					return reply;
+				} else {
+					errorReason = "The returned object was not of type AcceptanceReply!";
+				}
+			}
+			logger.error(String.format("A failure while sending a message occured. reason = '%s'",
+					errorReason));
+			return AcceptanceReply.FAILURE;
+		} else {
+			logger.error(String.format("Future not successful. reason = '%s'", aFuture.getFailedReason()));
+			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}
 

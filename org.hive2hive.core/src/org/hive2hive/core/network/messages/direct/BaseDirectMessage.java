@@ -1,5 +1,9 @@
 package org.hive2hive.core.network.messages.direct;
 
+import java.util.List;
+
+import net.tomp2p.futures.FutureResponse;
+import net.tomp2p.message.Buffer;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -7,7 +11,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.SendingBehavior;
 
 public abstract class BaseDirectMessage extends BaseMessage {
 
@@ -17,6 +20,8 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	private PeerAddress targetPeerAddress;
 	private final boolean needsRedirectedSend;
+
+	private int directSendingCounter = 0;
 
 	/**
 	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.
@@ -52,6 +57,13 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		targetPeerAddress = aTargetPeerAddress;
 	}
 
+	/**
+	 * Increases the internal sending counter of this direct message.
+	 */
+	public void increaseDirectSendingCounter() {
+		directSendingCounter++;
+	}
+
 	@Override
 	public AcceptanceReply accept() {
 		if (networkManager.getPeerAddress().equals(targetPeerAddress)) {
@@ -61,36 +73,66 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	}
 
 	@Override
-	public boolean handleSendingFailure(AcceptanceReply reply) {
-		logger.debug(String.format("Have to handle a sending failure. AcceptanceReply='%s'", reply));
+	public boolean handleSendingFailure(AcceptanceReply reply) throws IllegalArgumentException {
+		logger.debug(String.format("Have to handle a sending failure. reply = '%s'", reply));
 		switch (reply) {
+			case WRONG_TARGET:
+				logger.error(String
+						.format("Wrong node responded while sending this message directly using the peer address '%s' ",
+								getTargetAddress()));
+			case FAILURE:
+			case FUTURE_FAILURE:
+				if (directSendingCounter < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
+					return true;
+				} else {
+					logger.debug(String.format(
+							"Failure while sending this message directly using the peer address '%s' ",
+							getTargetAddress()));
+					return false;
+				}
 			case OK:
 				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
-			case FAILURE:
-			case FUTURE_FAILURE:
-			case WRONG_TARGET:
-				if (SendingBehavior.SEND_MAX_ALLOWED_TIMES == getSendingBehavior()) {
-					if (getSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING) {
-						logger.warn(String.format("Message reply was failure. Resending #%s...",
-								getSendingCounter()));
-						return true;
-					} else {
-						logger.error(String
-								.format("Message does not getting accepted by the targets in %d tries. target key = '%s'",
-										getSendingCounter(), getTargetKey()));
-						return false;
-					}
-				} else {
-					logger.warn(String
-							.format("Message not accepted by the target after one try. Details:\n target key = '%s' message id = '%s'",
-									getTargetKey(), getMessageID()));
-					return false;
-				}
 			default:
 				logger.error(String.format("Unkown AcceptanceReply argument: %s", reply));
 				throw new IllegalArgumentException(
 						String.format("Unkown AcceptanceReply argument: %s", reply));
+		}
+	}
+
+	public AcceptanceReply extractAcceptanceReply(FutureResponse aFuture) {
+		String errorReason = "";
+		if (aFuture.isSuccess()) {
+			List<Buffer> returnedBuffer = aFuture.getResponse().getBufferList();
+			if (returnedBuffer == null) {
+				errorReason = "Returned buffer is null.";
+			} else if (returnedBuffer.isEmpty()) {
+				errorReason = "Returned buffer is empty.";
+			} else {
+				Buffer firstReturnedBuffer = returnedBuffer.iterator().next();
+				if (firstReturnedBuffer == null) {
+					errorReason = "First returned buffer is null.";
+				} else {
+					Object responseObject;
+					try {
+						responseObject = firstReturnedBuffer.object();
+						if (responseObject instanceof AcceptanceReply) {
+							AcceptanceReply reply = (AcceptanceReply) responseObject;
+							return reply;
+						} else {
+							errorReason = "The returned object was not of type AcceptanceReply!";
+						}
+					} catch (Exception e) {
+						errorReason = "Exception occured while getting the object.";
+					}
+				}
+			}
+			logger.error(String.format("A failure while sending a message occured. reason = '%s'",
+					errorReason));
+			return AcceptanceReply.FAILURE;
+		} else {
+			logger.error(String.format("Future not successful. reason = '%s'", aFuture.getFailedReason()));
+			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}
 }

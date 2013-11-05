@@ -1,17 +1,11 @@
 package org.hive2hive.core.process.common;
 
-import java.util.List;
-
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
-import net.tomp2p.message.Buffer;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
-import org.hive2hive.core.network.messages.SendingBehavior;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
@@ -24,12 +18,16 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 		super(message, nextStep);
 	}
 
-	@Override
-	public void start() {
-		sendDirect((BaseDirectMessage) message);
+	private BaseDirectMessage getDirectMessage() {
+		return (BaseDirectMessage) message;
 	}
 
-	private void sendDirect(BaseDirectMessage message) {
+	@Override
+	public void start() {
+		sendDirect(getDirectMessage());
+	}
+
+	protected void sendDirect(BaseDirectMessage message) {
 		if (message instanceof IRequestMessage) {
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(this);
@@ -38,56 +36,37 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 		futureResponse.addListener(new FutureResponseListener());
 	}
 
+	private void handleDirectSendingSuccess() {
+		getProcess().nextStep(nextStep);
+	}
+
+	public void handleDirectSendingFailure(AcceptanceReply reply) {
+		boolean directResending = getDirectMessage().handleSendingFailure(reply);
+		if (directResending) {
+			sendDirect(getDirectMessage());
+		} else {
+			if (getDirectMessage().needsRedirectedSend()) {
+				logger.warn(String
+						.format("Sending direct message failed. Using normal routed sending as fallback. target key = '&s' target address = '%s'",
+								getDirectMessage().getTargetKey(), getDirectMessage().getTargetAddress()));
+				send(message);
+			} else {
+				getProcess().rollBack("Sending direct message failed.");
+			}
+		}
+	}
+
 	private class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 
 		@Override
 		public void operationComplete(FutureResponse future) throws Exception {
-			AcceptanceReply reply = extractAcceptanceReply(future);
+			AcceptanceReply reply = getDirectMessage().extractAcceptanceReply(future);
 			if (reply == AcceptanceReply.OK) {
-				handleSendingSuccess();
+				handleDirectSendingSuccess();
 			} else {
-				handleSendingFailure(reply);
+				handleDirectSendingFailure(reply);
 			}
 		}
-
-		private AcceptanceReply extractAcceptanceReply(FutureResponse aFuture) {
-			String errorReason = "";
-			if (aFuture.isSuccess()) {
-				List<Buffer> returnedBuffer = aFuture.getResponse().getBufferList();
-				if (returnedBuffer == null) {
-					errorReason = "Returned buffer is null.";
-				} else if (returnedBuffer.isEmpty()) {
-					errorReason = "Returned buffer is empty.";
-				} else {
-					Buffer firstReturnedBuffer = returnedBuffer.iterator().next();
-					if (firstReturnedBuffer == null) {
-						errorReason = "First returned buffer is null.";
-					} else {
-						Object responseObject;
-						try {
-							responseObject = firstReturnedBuffer.object();
-							if (responseObject instanceof AcceptanceReply) {
-								AcceptanceReply reply = (AcceptanceReply) responseObject;
-								return reply;
-							} else {
-								errorReason = "The returned object was not of type AcceptanceReply!";
-							}
-						} catch (Exception e) {
-							errorReason = "Exception occured while getting the object.";
-						}
-					}
-				}
-				logger.error(String
-						.format("A failure while sending a message occured. Info: reason = '%s' from (node ID) = '%s'",
-								errorReason, getNetworkManager().getNodeId()));
-				return AcceptanceReply.FAILURE;
-			} else {
-				logger.error(String.format("Future not successful. Reason = '%s' from (node ID) = '%s'",
-						aFuture.getFailedReason(), getNetworkManager().getNodeId()));
-				return AcceptanceReply.FUTURE_FAILURE;
-			}
-		}
-
 
 	}
 }

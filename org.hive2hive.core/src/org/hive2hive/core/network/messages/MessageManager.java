@@ -48,9 +48,7 @@ public class MessageManager {
 		if (aMessage.getTargetAddress() == null) {
 			throw new IllegalArgumentException("target address can not be null");
 		}
-		
-		aMessage.increaseSendingCounter();
-
+	
 		configureCallbackHandlerIfNeeded(aMessage);
 
 		FutureResponse futureResponse = networkManager.getConnection().getPeer()
