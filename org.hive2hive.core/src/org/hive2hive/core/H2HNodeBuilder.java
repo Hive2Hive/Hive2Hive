@@ -1,5 +1,7 @@
 package org.hive2hive.core;
 
+import java.net.InetAddress;
+
 public class H2HNodeBuilder {
 
 	// File size configuration
@@ -8,9 +10,12 @@ public class H2HNodeBuilder {
 	private int maxSizeAllVersions = maxFileSize * maxNumOfVersions;
 	private int chunkSize = 1024 * 1024; // 1Mb
 	private boolean autostartProcesses = true;
+	private boolean isMaster = false;
+	private InetAddress bootstrapAddress = null;
 
 	public IH2HNode build() {
-		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, autostartProcesses);
+		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, autostartProcesses,
+				isMaster, bootstrapAddress);
 	}
 
 	/**
@@ -41,6 +46,16 @@ public class H2HNodeBuilder {
 
 	public H2HNodeBuilder setAutostartProcesses(boolean autostart) {
 		this.autostartProcesses = autostart;
+		return this;
+	}
+
+	public H2HNodeBuilder setMaster(boolean isMaster) {
+		this.isMaster = isMaster;
+		return this;
+	}
+
+	public H2HNodeBuilder setBootstrapAddress(InetAddress bootstrapAddress) {
+		this.bootstrapAddress = bootstrapAddress;
 		return this;
 	}
 

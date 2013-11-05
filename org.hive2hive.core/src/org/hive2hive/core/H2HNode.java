@@ -1,5 +1,6 @@
 package org.hive2hive.core;
 
+import java.net.InetAddress;
 import java.util.UUID;
 
 import org.hive2hive.core.network.NetworkManager;
@@ -15,18 +16,25 @@ public class H2HNode implements IH2HNode {
 	private final int chunkSize;
 	private final boolean autostartProcesses;
 	private final NetworkManager networkManager;
+	private final boolean isMaster;
+	private final InetAddress bootstrapAddress;
 
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
-			boolean autostartProcesses) {
+			boolean autostartProcesses, boolean isMaster, InetAddress bootstrapAddress) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
 		this.autostartProcesses = autostartProcesses;
+		this.isMaster = isMaster;
+		this.bootstrapAddress = bootstrapAddress;
 
-		// TODO initialize the network manager correctly
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
-		// networkManager.connect();
+		if (isMaster) {
+			networkManager.connect();
+		} else {
+			networkManager.connect(bootstrapAddress);
+		}
 	}
 
 	public int getMaxFileSize() {
@@ -61,5 +69,10 @@ public class H2HNode implements IH2HNode {
 			process.start();
 		}
 		return process;
+	}
+
+	@Override
+	public void disconnect() {
+		networkManager.disconnect();
 	}
 }

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hive2hive.core.H2HNodeBuilder;
+import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.network.NetworkManager;
 
 public class NetworkTestUtil {
@@ -24,7 +26,7 @@ public class NetworkTestUtil {
 	}
 
 	/**
-	 * Creates a <code>hive2hive</code> network with the given number of nodes. First node in the list is the
+	 * Creates a network with the given number of nodes. First node in the list is the
 	 * master node where all other nodes bootstrapped to him.</br>
 	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
 	 * 
@@ -35,7 +37,7 @@ public class NetworkTestUtil {
 	public static List<NetworkManager> createNetwork(int numberOfNodes) {
 		if (numberOfNodes < 1)
 			throw new IllegalArgumentException("invalid size of network");
-		List<NetworkManager> nodes = new ArrayList<NetworkManager>();
+		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (master)
 		NetworkManager master = new NetworkManager("Node A");
@@ -68,16 +70,59 @@ public class NetworkTestUtil {
 			node.disconnect();
 		}
 	}
-	
+
+	/**
+	 * Creates a <code>Hive2Hive</code> network with the given number of nodes. First node in the list is the
+	 * master node where all other nodes bootstrapped to him.</br>
+	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
+	 * 
+	 * @param numberOfNodes
+	 *            size of the network (has to be larger than one)
+	 * @return list containing all Hive2Hive nodes where the first one is the bootstrapping node (master)
+	 */
+	public static List<IH2HNode> createH2HNetwork(int numberOfNodes) {
+		if (numberOfNodes < 1)
+			throw new IllegalArgumentException("invalid size of network");
+		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
+
+		// create a master
+		IH2HNode master = new H2HNodeBuilder().setMaster(true).build();
+		nodes.add(master);
+
+		try {
+			InetAddress bootstrapAddress = InetAddress.getByName("127.0.0.1");
+			for (int i = 1; i < numberOfNodes; i++) {
+				IH2HNode node = new H2HNodeBuilder().setBootstrapAddress(bootstrapAddress).build();
+				nodes.add(node);
+			}
+		} catch (UnknownHostException e) {
+			// should not happen
+		}
+
+		return nodes;
+	}
+
+	/**
+	 * Shutdown a network.
+	 * 
+	 * @param network
+	 *            list containing all nodes which has to be disconnected.
+	 */
+	public static void shutdownH2HNetwork(List<IH2HNode> network) {
+		for (IH2HNode node : network) {
+			node.disconnect();
+		}
+	}
+
 	/**
 	 * Generates a random string (based on UUID)
 	 * 
 	 * @return a random string
 	 */
-	public static String randomString(){
+	public static String randomString() {
 		return UUID.randomUUID().toString();
 	}
-	
+
 	protected class Waiter {
 		private int counter = 0;
 		private final int maxAmoutOfTicks;

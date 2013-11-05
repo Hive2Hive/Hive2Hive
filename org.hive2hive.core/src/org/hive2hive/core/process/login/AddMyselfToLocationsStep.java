@@ -9,12 +9,12 @@ import org.hive2hive.core.process.common.PutProcessStep;
 public class AddMyselfToLocationsStep extends PutProcessStep {
 
 	private GetLocationsStep locationsStep;
-	private String userId;
+	private final String userId;
 
 	public AddMyselfToLocationsStep(String userId) {
 		super(userId, H2HConstants.USER_LOCATIONS, null, null);
 		this.userId = userId;
-		// TODO set next step
+		// TODO set next step which checks if all peers in the locations are online
 	}
 
 	@Override

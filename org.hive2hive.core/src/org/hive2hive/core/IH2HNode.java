@@ -15,4 +15,6 @@ public interface IH2HNode {
 	IProcess register(String userId, String password, String pin);
 
 	IProcess login(String userId, String password, String pin);
+
+	void disconnect();
 }
