@@ -29,12 +29,16 @@ public class ProcessManager {
 		return instance;
 	}
 
-	public int getIdForNewProcess() {
+	/**
+	 * Returns a unique PID (process ID) for this {@link ProcessManager}.
+	 * @return A unique PID.
+	 */
+	public int getNewPID() {
 		return pidCounter++ % Integer.MAX_VALUE;
 	}
 
 	/**
-	 * Attach a process to the ProcessManager such that it is aware of it.
+	 * Attach a process to the {@link ProcessManager} such that it is aware of it.
 	 * 
 	 * @param process
 	 */
@@ -47,7 +51,7 @@ public class ProcessManager {
 	}
 
 	/**
-	 * Detach a process from the ProcessManager such that it no longer knows about it.
+	 * Detach a process from the {@link ProcessManager} such that it no longer knows about it.
 	 * 
 	 * @param process
 	 */

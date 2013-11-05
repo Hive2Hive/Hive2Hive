@@ -27,7 +27,6 @@ public abstract class ProcessStep {
 		return process;
 	}
 
-	/* shortcut */
 	protected NetworkManager getNetworkManager() {
 		return process.getNetworkManager();
 	}
@@ -64,7 +63,7 @@ public abstract class ProcessStep {
 	 * @param contentKey
 	 */
 	protected void remove(String locationKey, String contentKey) {
-		if (getProcess().getState() == ProcessState.ROLLBACK) {
+		if (getProcess().getState() == ProcessState.ROLLBACKING) {
 			rollbackRemove(locationKey, contentKey);
 			return;
 		}

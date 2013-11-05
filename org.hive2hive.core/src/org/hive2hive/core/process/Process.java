@@ -19,7 +19,7 @@ import org.hive2hive.core.process.manager.ProcessManager;
  */
 public abstract class Process implements IProcess {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(NetworkManager.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Process.class);
 
 	private final int pid;
 	private ProcessState state = ProcessState.INITIALIZING;
@@ -32,7 +32,7 @@ public abstract class Process implements IProcess {
 	public Process(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 		ProcessManager processManager = ProcessManager.getInstance();
-		pid = processManager.getIdForNewProcess();
+		pid = processManager.getNewPID();
 		processManager.attachProcess(this);
 	}
 
@@ -54,7 +54,6 @@ public abstract class Process implements IProcess {
 	@Override
 	public void pause() {
 		if (state == ProcessState.RUNNING) {
-			// finish the process step; Process will pause before next step
 			state = ProcessState.PAUSED;
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot pause.");
@@ -68,7 +67,7 @@ public abstract class Process implements IProcess {
 			if (currentStep != null) {
 				currentStep.start();
 			} else {
-				logger.error("No next step to continue");
+				logger.error("No next step to continue.");
 			}
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot continue.");
@@ -77,33 +76,33 @@ public abstract class Process implements IProcess {
 
 	@Override
 	public void stop() {
-		if (state == ProcessState.STOPPED) {
-			logger.warn("Process is already stopped");
-		} else {
+		if (state != ProcessState.STOPPED) {
 			state = ProcessState.STOPPED;
 			rollBack("Process stopped.");
+		} else {
+			logger.warn("Process is already stopped");
 		}
 	}
 
 	@Override
-	public int getProgress() {
-		return executedSteps.size();
-	}
-
-	@Override
-	public int getID() {
+	public final int getID() {
 		return pid;
 	}
 
 	@Override
-	public void run() {
-		currentStep = firstStep;
-		currentStep.start();
+	public final ProcessState getState() {
+		return state;
 	}
 
 	@Override
-	public ProcessState getState() {
-		return state;
+	public final int getProgress() {
+		return executedSteps.size();
+	}
+
+	@Override
+	public final void run() {
+		currentStep = firstStep;
+		currentStep.start();
 	}
 
 	/**
@@ -152,7 +151,7 @@ public abstract class Process implements IProcess {
 	}
 
 	public void rollBack(String reason) {
-		state = ProcessState.ROLLBACK;
+		state = ProcessState.ROLLBACKING;
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
 		currentStep.rollBack();
 
