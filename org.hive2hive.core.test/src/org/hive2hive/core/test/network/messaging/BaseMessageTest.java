@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.messages.FutureDirectListener;
+import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.H2HTestData;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,13 +57,24 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey, new H2HTestData(
-				data));
+		final TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), nodeA.getPeerAddress(),
+				contentKey, new H2HTestData(data));
 		// send message
-		nodeA.send(message);
+		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+			@Override
+			public void onSuccess() {
+
+			}
+
+			@Override
+			public void onFailure() {
+				// should not happen
+				Assert.fail("Should not failed.");
+			}
+		}, message, nodeA));
 
 		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(20);
+		H2HWaiter w = new H2HWaiter(10);
 		Object tmp = null;
 		do {
 			w.tickASecond();
@@ -89,14 +103,24 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a test message which gets rejected several times
-		TestMessageOneWayMaxSending message = new TestMessageOneWayMaxSending(nodeB.getNodeId(), contentKey,
-				new H2HTestData(data));
+		TestMessageOneWayMaxSending message = new TestMessageOneWayMaxSending(nodeB.getNodeId(),
+				nodeA.getPeerAddress(), contentKey, new H2HTestData(data));
 		// send message
-		nodeA.send(message);
+		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+			@Override
+			public void onSuccess() {
+			}
+
+			@Override
+			public void onFailure() {
+				// should not happen
+				Assert.fail("Should not failed.");
+			}
+		}, message, nodeA));
 
 		// wait till message gets handled
 		// this might need some time
-		H2HWaiter w = new H2HWaiter(20);
+		H2HWaiter w = new H2HWaiter(10);
 		Object tmp = null;
 		do {
 			w.tickASecond();

@@ -8,15 +8,15 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 
-public class TestResponseMessageMaxSending extends ResponseMessage{
+public class TestResponseMessageMaxSending extends ResponseMessage {
 
 	private static final long serialVersionUID = 9169072033631718522L;
 
-	public TestResponseMessageMaxSending(String messageID, String targetKey,
+	public TestResponseMessageMaxSending(String messageID, String targetKey, PeerAddress senderAddress,
 			PeerAddress requesterAddress, Serializable someContent) {
-		super(messageID, targetKey, requesterAddress, someContent);
+		super(messageID, targetKey, senderAddress, requesterAddress, someContent);
 	}
-	
+
 	@Override
 	public AcceptanceReply accept() {
 		// block the first tries
@@ -25,5 +25,5 @@ public class TestResponseMessageMaxSending extends ResponseMessage{
 		}
 		return super.accept();
 	}
-	
+
 }

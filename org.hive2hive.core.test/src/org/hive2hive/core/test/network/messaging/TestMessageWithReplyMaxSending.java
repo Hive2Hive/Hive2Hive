@@ -4,9 +4,9 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.BaseRequestMessage;
-import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 
@@ -34,7 +34,7 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
 		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(), getTargetKey(),
-				getSenderAddress(), secret);
+				networkManager.getPeerAddress(), getSenderAddress(), secret);
 		networkManager.send(responseMessage);
 	}
 
@@ -43,7 +43,7 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 		return AcceptanceReply.OK;
 	}
 
-	public class TestCallBackHandlerMaxSendig implements ICallBackHandler {
+	public class TestCallBackHandlerMaxSendig implements IResponseCallBackHandler {
 
 		private final NetworkManager networkManager;
 
@@ -52,8 +52,8 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 		}
 
 		@Override
-		public void handleReturnMessage(ResponseMessage asyncReturnMessage) {
-			String receivedSecret = (String) asyncReturnMessage.getContent();
+		public void handleResponseMessage(ResponseMessage responseMessage) {
+			String receivedSecret = (String) responseMessage.getContent();
 			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(
 					receivedSecret));
 		}

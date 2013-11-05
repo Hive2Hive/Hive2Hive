@@ -1,16 +1,17 @@
 package org.hive2hive.core.process.common;
 
-import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDirect;
 
-import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.FutureDirectListener;
+import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
 
-abstract public class BaseMessageProcessStep extends ProcessStep implements IResponseCallBackHandler {
+abstract public class BaseMessageProcessStep extends ProcessStep implements IBaseMessageListener,
+		IResponseCallBackHandler {
 
 	protected final BaseMessage message;
 	protected final ProcessStep nextStep;
@@ -36,37 +37,17 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IRes
 			requestMessage.setCallBackHandler(this);
 		}
 		FutureDirect futureDirect = getNetworkManager().send(message);
-		futureDirect.addListener(new FutureDirectListener());
+		futureDirect.addListener(new FutureDirectListener(this, message, getNetworkManager()));
 	}
 
-	private void handleSendingSuccess() {
+	public void onSuccess() {
 		getProcess().nextStep(nextStep);
 	}
 
-	private void handleSendingFailure(AcceptanceReply reply){
-		boolean resending = message.handleSendingFailure(reply);
-		if (resending){
-			FutureDirect futureDirect = getNetworkManager().send(message);
-			futureDirect.addListener(new FutureDirectListener());
-		} else {
-			getProcess().rollBack("Sending message failed.");
-		}
+	public void onFailure() {
+		getProcess().rollBack("Sending message failed.");
 	}
-	
+
 	public abstract void handleResponseMessage(ResponseMessage responseMessage);
-
-	private class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
-
-		@Override
-		public void operationComplete(FutureDirect future) throws Exception {
-			AcceptanceReply reply = message.extractAcceptanceReply(future);
-			if (reply == AcceptanceReply.OK) {
-				handleSendingSuccess();
-			} else {
-				handleSendingFailure(reply);
-			}
-		}
-		
-	}
 
 }

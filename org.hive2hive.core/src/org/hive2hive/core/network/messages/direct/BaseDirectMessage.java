@@ -1,9 +1,5 @@
 package org.hive2hive.core.network.messages.direct;
 
-import java.util.List;
-
-import net.tomp2p.futures.FutureResponse;
-import net.tomp2p.message.Buffer;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -100,39 +96,4 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		}
 	}
 
-	public AcceptanceReply extractAcceptanceReply(FutureResponse aFuture) {
-		String errorReason = "";
-		if (aFuture.isSuccess()) {
-			List<Buffer> returnedBuffer = aFuture.getResponse().getBufferList();
-			if (returnedBuffer == null) {
-				errorReason = "Returned buffer is null.";
-			} else if (returnedBuffer.isEmpty()) {
-				errorReason = "Returned buffer is empty.";
-			} else {
-				Buffer firstReturnedBuffer = returnedBuffer.iterator().next();
-				if (firstReturnedBuffer == null) {
-					errorReason = "First returned buffer is null.";
-				} else {
-					Object responseObject;
-					try {
-						responseObject = firstReturnedBuffer.object();
-						if (responseObject instanceof AcceptanceReply) {
-							AcceptanceReply reply = (AcceptanceReply) responseObject;
-							return reply;
-						} else {
-							errorReason = "The returned object was not of type AcceptanceReply!";
-						}
-					} catch (Exception e) {
-						errorReason = "Exception occured while getting the object.";
-					}
-				}
-			}
-			logger.error(String.format("A failure while sending a message occured. reason = '%s'",
-					errorReason));
-			return AcceptanceReply.FAILURE;
-		} else {
-			logger.error(String.format("Future not successful. reason = '%s'", aFuture.getFailedReason()));
-			return AcceptanceReply.FUTURE_FAILURE;
-		}
-	}
 }
