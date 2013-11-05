@@ -96,23 +96,15 @@ public abstract class Process implements IProcess {
 	}
 
 	@Override
-	public void stop() {
-		if (state != ProcessState.STOPPED) {
+	public void stop(String reason) {
+		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
+			// first roll back
+			rollBack(reason);
+			
+			// then mark process as stopped
 			state = ProcessState.STOPPED;
-			rollBack("Process stopped.");
 		} else {
 			logger.warn("Process is already stopped");
-		}
-	}
-
-	private void finish() {
-		if (state == ProcessState.RUNNING) {
-			state = ProcessState.FINISHED;
-			ProcessManager.getInstance().detachProcess(this);
-			
-			for (IProcessListener listener : listeners) {
-				listener.onSuccess();
-			}
 		}
 	}
 
@@ -140,12 +132,25 @@ public abstract class Process implements IProcess {
 		}
 	}
 
-	public void rollBack(String reason) {
+	private void finish() {
+		if (state == ProcessState.RUNNING) {
+			state = ProcessState.FINISHED;
+			ProcessManager.getInstance().detachProcess(this);
+			
+			for (IProcessListener listener : listeners) {
+				listener.onSuccess();
+			}
+		}
+	}
+
+	private void rollBack(String reason) {
 		state = ProcessState.ROLLBACKING;
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
+		
+		// roll back current step
 		currentStep.rollBack();
 
-		// rollback in reverse order
+		// rollback already executed steps
 		Collections.reverse(executedSteps);
 		for (ProcessStep step : executedSteps){
 			step.rollBack();
@@ -157,9 +162,8 @@ public abstract class Process implements IProcess {
 	}
 
 	/**
-	 * Getter
-	 * 
-	 * @return the {@link NetworkManager} which hosts this process.
+	 * Get the {@link NetworkManager} which is hosting this process.
+	 * @return Returns the hosting {@link NetworkManager}.
 	 */
 	public NetworkManager getNetworkManager() {
 		return networkManager;

@@ -68,7 +68,7 @@ public class ProcessManagerTest extends H2HJUnitTest {
 			private int id = new Random().nextInt(100);
 
 			@Override
-			public void stop() {
+			public void stop(String reason) {
 			}
 
 			@Override

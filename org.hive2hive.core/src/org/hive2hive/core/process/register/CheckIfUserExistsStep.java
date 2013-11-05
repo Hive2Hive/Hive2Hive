@@ -30,7 +30,7 @@ public class CheckIfUserExistsStep extends ProcessStep {
 			continueWithNextStep();
 		} else {
 			logger.error("User profile already exists");
-			getProcess().rollBack("Profile already exists");
+			getProcess().stop("Profile already exists");
 		}
 	}
 

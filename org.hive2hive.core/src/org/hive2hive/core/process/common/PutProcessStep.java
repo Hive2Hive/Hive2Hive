@@ -79,7 +79,7 @@ public class PutProcessStep extends ProcessStep {
 			logger.warn(String
 					.format("Put verification failed. Concurrent modification happened. location key = '%s' content key = '%s'",
 							locationKey, contentKey));
-			getProcess().rollBack("Put verification failed. Reason: Concurrent modification happened.");
+			getProcess().stop("Put verification failed. Reason: Concurrent modification happened.");
 		}
 	}
 
@@ -113,7 +113,7 @@ public class PutProcessStep extends ProcessStep {
 			logger.error(String
 					.format("Put verification failed. Couldn't get data after %s tries. location key = '%s' content key = '%s'",
 							getTries - 1, locationKey, contentKey));
-			getProcess().rollBack("Put verification failed. Reason: Couldn't get data.");
+			getProcess().stop("Put verification failed. Reason: Couldn't get data.");
 		}
 	}
 
@@ -136,7 +136,7 @@ public class PutProcessStep extends ProcessStep {
 			logger.error(String
 					.format("Put verification failed. Couldn't put data after %s tries. location key = '%s' content key = '%s'",
 							putTries, locationKey, contentKey));
-			getProcess().rollBack(
+			getProcess().stop(
 					String.format("Put verification failed. Couldn't put data after %s tries.", putTries));
 		}
 	}

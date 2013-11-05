@@ -35,7 +35,7 @@ public interface IProcess extends Runnable {
 	 * {@link ProcessState#ROLLBACKING}. After the rollback has completed, the process' state changes to
 	 * {@link ProcessState#STOPPED}.
 	 */
-	void stop();
+	void stop(String reason);
 
 	/**
 	 * Returns the per-{@link ProcessManager} unique PID of this process.

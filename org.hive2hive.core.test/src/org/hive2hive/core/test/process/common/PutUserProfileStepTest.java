@@ -137,7 +137,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// rollback
-		process.rollBack("Testing the rollback");
+		process.stop("Testing the rollback");
 
 		waiter = new H2HWaiter(20);
 		do {

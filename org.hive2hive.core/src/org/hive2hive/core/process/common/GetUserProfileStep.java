@@ -55,7 +55,7 @@ public class GetUserProfileStep extends GetProcessStep {
 				userProfile = (UserProfile) decrypted;
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
-				getProcess().rollBack(e.getMessage());
+				getProcess().stop(e.getMessage());
 			}
 		}
 
