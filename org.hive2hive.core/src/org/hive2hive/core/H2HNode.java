@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 
 public class H2HNode implements IH2HNode {
@@ -25,7 +26,7 @@ public class H2HNode implements IH2HNode {
 
 		// TODO initialize the network manager correctly
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
-		networkManager.connect();
+		// networkManager.connect();
 	}
 
 	public int getMaxFileSize() {
@@ -55,7 +56,10 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public IProcess login(String userId, String password, String pin) {
-		// TODO Auto-generated method stub
-		return null;
+		LoginProcess process = new LoginProcess(userId, password, pin, networkManager);
+		if (autostartProcesses) {
+			process.start();
+		}
+		return process;
 	}
 }

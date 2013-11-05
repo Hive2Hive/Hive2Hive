@@ -27,9 +27,9 @@ public class PutProcessStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutProcessStep.class);
 
-	protected final NetworkContent newData;
 	protected final String locationKey;
 	protected final String contentKey;
+	protected NetworkContent data;
 	protected ProcessStep nextStep;
 
 	// used to count put retries
@@ -37,8 +37,8 @@ public class PutProcessStep extends ProcessStep {
 	// used to count get tries
 	private int getTries = 0;
 
-	public PutProcessStep(String locationKey, String contentKey, NetworkContent newData, ProcessStep nextStep) {
-		this.newData = newData;
+	public PutProcessStep(String locationKey, String contentKey, NetworkContent data, ProcessStep nextStep) {
+		this.data = data;
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.nextStep = nextStep;
@@ -46,7 +46,7 @@ public class PutProcessStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		put(locationKey, contentKey, newData);
+		put(locationKey, contentKey, data);
 	}
 
 	protected void put(final String locationKey, final String contentKey, NetworkContent data) {
@@ -129,7 +129,7 @@ public class PutProcessStep extends ProcessStep {
 							if (future.isFailed()) {
 								logger.warn("Put Retry: Could not delete the newly put content");
 							}
-							put(locationKey, contentKey, newData);
+							put(locationKey, contentKey, data);
 						}
 					});
 		} else {

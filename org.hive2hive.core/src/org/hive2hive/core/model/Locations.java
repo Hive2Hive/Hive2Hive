@@ -1,7 +1,7 @@
 package org.hive2hive.core.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -19,48 +19,37 @@ public class Locations extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final String forUser;
-	private final List<OnlinePeer> onlinePeers;
+	private final Set<OnlinePeer> onlinePeers;
 
 	public Locations(String forUser) {
 		this.forUser = forUser;
-		onlinePeers = new ArrayList<OnlinePeer>();
+		onlinePeers = new HashSet<OnlinePeer>();
 	}
 
 	public String getUserId() {
 		return forUser;
 	}
 
-	/**
-	 * Adds the address to the locations and checks if all other locations are online.
-	 * 
-	 * @param address the address to add (usually the address of the caller itself)
-	 * @return true if the newly entered address is now the master (no notification)
-	 */
-	public boolean addOnlinePeer(PeerAddress address) {
-		List<OnlinePeer> toRemove = new ArrayList<OnlinePeer>();
-		boolean shouldBecomeMaster = false;
-		for (OnlinePeer peer : onlinePeers) {
-			if (!isOnline(peer.getAddress())) {
-				// remove this one
-				toRemove.add(peer);
-				if (peer.isMaster()) {
-					// Master peer offline --> new entry becomes master
-					shouldBecomeMaster = true;
-				}
+	public void addOnlinePeer(OnlinePeer onlinePeer) {
+		onlinePeers.add(onlinePeer);
+	}
+
+	public void removeOnlinePeer(OnlinePeer toRemove) {
+		onlinePeers.remove(toRemove);
+	}
+
+	public void removeOnlinePeer(PeerAddress toRemove) {
+		OnlinePeer removal = null;
+		for (OnlinePeer online : onlinePeers) {
+			if (online.getAddress().equals(toRemove)) {
+				removal = online;
+				break;
 			}
 		}
-
-		onlinePeers.removeAll(toRemove);
-		onlinePeers.add(new OnlinePeer(address, shouldBecomeMaster));
-		return shouldBecomeMaster;
+		onlinePeers.remove(removal);
 	}
 
-	private boolean isOnline(PeerAddress toCheck) {
-		// TODO: Implement (Network manager is needed) or use a Util-Class for that
-		return true;
-	}
-
-	public List<OnlinePeer> getOnlinePeers() {
+	public Set<OnlinePeer> getOnlinePeers() {
 		return onlinePeers;
 	}
 
