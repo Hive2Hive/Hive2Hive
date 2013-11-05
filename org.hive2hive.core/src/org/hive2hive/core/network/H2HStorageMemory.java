@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
@@ -23,7 +22,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  * gets stored on a node the put method gets called where the node can verify
  * the store request.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class H2HStorageMemory extends StorageMemory {
 
@@ -40,7 +39,7 @@ public class H2HStorageMemory extends StorageMemory {
 			PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
 		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
 			@Deprecated
-			Number160 versionKey = Number160.MAX_VALUE;
+			Number160 versionKey = null;
 
 			logger.debug("Start verification of locationKey: " + locationKey + " domainKey: " + domainKey
 					+ " contentKey: " + contentKey + " versionKey: " + versionKey);
@@ -73,9 +72,7 @@ public class H2HStorageMemory extends StorageMemory {
 	private PutStatus validateVersion(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			Number160 versionKey) {
 		/** 0. get all versions for this locationKey, domainKey and contentKey combination **/
-		// TODO This list is only a stub, get it from the local storage (key = versionKey, value = data)
-		/* Map<Number160, Data> history = get(locationKey, domainKey, contentKey */
-		Map<Number160, Data> history = new HashMap<Number160, Data>();
+		Map<Number160, Data> history = getHistoryOnStorage(locationKey, domainKey, contentKey);
 
 		/** 1. if version is null and no history yet, it is the first entry here **/
 		if (versionKey == null) {
@@ -121,14 +118,11 @@ public class H2HStorageMemory extends StorageMemory {
 
 	private void cleanupVersions(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			Number160 versionKey) {
-		// TODO This list is only a stub, get it from the local storage (key = versionKey, value = data)
-		/* Map<Number160, Data> history = get(locationKey, domainKey, contentKey */
-		Map<Number160, Data> history = new HashMap<Number160, Data>();
-		Set<Number160> keys = history.keySet();
+		Map<Number160, Data> history = getHistoryOnStorage(locationKey, domainKey, contentKey);
 
 		// add them to a list and sort them
 		List<VersionKey> versionKeys = new ArrayList<VersionKey>();
-		for (Number160 key : keys) {
+		for (Number160 key : history.keySet()) {
 			versionKeys.add(new VersionKey(key));
 		}
 
@@ -143,7 +137,7 @@ public class H2HStorageMemory extends StorageMemory {
 		long now = System.currentTimeMillis();
 		while (versionKeys.size() >= H2HConstants.MAX_VERSIONS_HISTORY) {
 			VersionKey toRemove = versionKeys.get(0);
-			if (toRemove.getTimestamp() + H2HConstants.MIN_VERSIONS_AGE_BEFORE_REMOVAL_MS > now) {
+			if (toRemove.getTimestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS > now) {
 				// stop removal because oldest version is too 'young'
 				break;
 			} else {
@@ -175,5 +169,12 @@ public class H2HStorageMemory extends StorageMemory {
 		}
 
 		return null;
+	}
+
+	private Map<Number160, Data> getHistoryOnStorage(Number160 locationKey, Number160 domainKey,
+			Number160 contentKey) {
+		// TODO This list is only a stub, get it from the local storage (key = versionKey, value = data)
+		/* return get(locationKey, domainKey, contentKey) */
+		return new HashMap<Number160, Data>();
 	}
 }
