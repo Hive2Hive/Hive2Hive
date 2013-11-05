@@ -7,9 +7,10 @@ public class H2HNodeBuilder {
 	private int maxNumOfVersions = 100;
 	private int maxSizeAllVersions = maxFileSize * maxNumOfVersions;
 	private int chunkSize = 1024 * 1024; // 1Mb
+	private boolean autostartProcesses = true;
 
-	public H2HNode build() {
-		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize);
+	public IH2HNode build() {
+		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, autostartProcesses);
 	}
 
 	/**
@@ -35,6 +36,11 @@ public class H2HNodeBuilder {
 
 	public H2HNodeBuilder setChunkSize(int chunkSize) {
 		this.chunkSize = chunkSize;
+		return this;
+	}
+
+	public H2HNodeBuilder setAutostartProcesses(boolean autostart) {
+		this.autostartProcesses = autostart;
 		return this;
 	}
 

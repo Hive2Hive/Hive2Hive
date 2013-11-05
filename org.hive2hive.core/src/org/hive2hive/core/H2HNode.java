@@ -1,17 +1,31 @@
 package org.hive2hive.core;
 
-public class H2HNode {
+import java.util.UUID;
+
+import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.register.RegisterProcess;
+
+public class H2HNode implements IH2HNode {
 
 	private final int maxFileSize;
 	private final int maxNumOfVersions;
 	private final int maxSizeAllVersions;
 	private final int chunkSize;
+	private final boolean autostartProcesses;
+	private final NetworkManager networkManager;
 
-	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize) {
+	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
+			boolean autostartProcesses) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
+		this.autostartProcesses = autostartProcesses;
+
+		// TODO initialize the network manager correctly
+		networkManager = new NetworkManager(UUID.randomUUID().toString());
+		networkManager.connect();
 	}
 
 	public int getMaxFileSize() {
@@ -28,5 +42,20 @@ public class H2HNode {
 
 	public int getChunkSize() {
 		return chunkSize;
+	}
+
+	@Override
+	public Process register(String userId, String password, String pin) {
+		RegisterProcess process = new RegisterProcess(userId, password, pin, networkManager);
+		if (autostartProcesses) {
+			process.start();
+		}
+		return process;
+	}
+
+	@Override
+	public Process login(String userId, String password, String pin) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
