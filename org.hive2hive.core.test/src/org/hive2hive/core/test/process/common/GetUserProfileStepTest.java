@@ -85,7 +85,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		Process process = new Process(putter) {
 		};
 		GetUserProfileStep step = new GetUserProfileStep(userId, userPassword, null);
-		process.setFirstStep(step);
+		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

@@ -32,7 +32,7 @@ public class GetLocationsStep extends GetProcessStep {
 			locations = (Locations) content;
 		}
 
-		getProcess().nextStep(nextStep);
+		getProcess().setNextStep(nextStep);
 	}
 
 	public Locations getLocations() {

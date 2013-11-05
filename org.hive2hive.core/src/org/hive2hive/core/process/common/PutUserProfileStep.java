@@ -46,7 +46,7 @@ public class PutUserProfileStep extends PutProcessStep {
 			put(locationKey, contentKey, encryptedUserProfile);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
-			getProcess().rollBack(e.getMessage());
+			getProcess().stop(e.getMessage());
 		}
 	}
 }

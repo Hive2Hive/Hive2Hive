@@ -1,6 +1,7 @@
 package org.hive2hive.core.process;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hive2hive.core.log.H2HLogger;
@@ -14,31 +15,51 @@ import org.hive2hive.core.process.manager.ProcessManager;
  * This wrapper is necessary since workflows contain many long-running network calls. The callback of
  * then starts the next process step
  * 
- * @author Nendor, Nico
+ * @author Nendor, Nico, Christian
  * 
  */
 public abstract class Process implements IProcess {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(NetworkManager.class);
+	// TODO throw exceptions on invalid process states
 
-	private final int pid;
-	private ProcessState state = ProcessState.INITIALIZING;
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Process.class);
+
 	private final NetworkManager networkManager;
-	private ProcessStep firstStep;
+	private final int pid;
+	private ProcessState state;
+
 	private ProcessStep currentStep;
+
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
 	private final List<IProcessListener> listeners = new ArrayList<IProcessListener>();
 
 	public Process(NetworkManager networkManager) {
 		this.networkManager = networkManager;
-		ProcessManager processManager = ProcessManager.getInstance();
-		pid = processManager.getIdForNewProcess();
-		processManager.attachProcess(this);
+		this.pid = ProcessManager.getInstance().getNewPID();
+		this.state = ProcessState.INITIALIZING;
+
+		ProcessManager.getInstance().attachProcess(this);
 	}
 
-	public void setFirstStep(ProcessStep firstStep) {
-		firstStep.setProcess(this);
-		this.firstStep = firstStep;
+	/**
+	 * Sets the next {@link ProcessStep} of this process and starts executing if this process is in
+	 * {@link ProcessState#RUNNING}. Otherwise the next step will be marked to be executed when the process
+	 * resumes.
+	 * 
+	 * @param nextStep the next step or <code>null</code>, if the process should finish
+	 */
+	public void setNextStep(ProcessStep nextStep) {
+		executedSteps.add(currentStep);
+	
+		if (nextStep != null) {
+			currentStep = nextStep;
+			currentStep.setProcess(this);
+	
+			if (state == ProcessState.RUNNING)
+				currentStep.start();
+		} else {			
+			finish();
+		}
 	}
 
 	@Override
@@ -54,7 +75,6 @@ public abstract class Process implements IProcess {
 	@Override
 	public void pause() {
 		if (state == ProcessState.RUNNING) {
-			// finish the process step; Process will pause before next step
 			state = ProcessState.PAUSED;
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot pause.");
@@ -68,7 +88,7 @@ public abstract class Process implements IProcess {
 			if (currentStep != null) {
 				currentStep.start();
 			} else {
-				logger.error("No next step to continue");
+				logger.error("No step to continue.");
 			}
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot continue.");
@@ -76,94 +96,77 @@ public abstract class Process implements IProcess {
 	}
 
 	@Override
-	public void stop() {
-		if (state == ProcessState.STOPPED) {
-			logger.warn("Process is already stopped");
-		} else {
+	public void stop(String reason) {
+		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
+			// first roll back
+			rollBack(reason);
+			
+			// then mark process as stopped
 			state = ProcessState.STOPPED;
-			rollBack("Process stopped.");
+		} else {
+			logger.warn("Process is already stopped");
 		}
 	}
 
 	@Override
-	public int getProgress() {
-		return executedSteps.size();
-	}
-
-	@Override
-	public int getID() {
+	public final int getID() {
 		return pid;
 	}
 
 	@Override
-	public void run() {
-		currentStep = firstStep;
-		currentStep.start();
-	}
-
-	@Override
-	public ProcessState getState() {
+	public final ProcessState getState() {
 		return state;
 	}
 
-	/**
-	 * Calls the next step
-	 * 
-	 * @param nextStep if null, the process will finalize itself and be done. Else, the given process step
-	 *            will be executed
-	 */
-	public void nextStep(ProcessStep nextStep) {
-		executedSteps.add(currentStep);
+	@Override
+	public final int getProgress() {
+		return executedSteps.size();
+	}
 
-		if (nextStep == null) {
-			// implicitly finalizing the process
-			finalize();
+	@Override
+	public final void run() {
+		if (currentStep != null){
+			currentStep.start();			
 		} else {
-			// normal case
-			currentStep = nextStep;
-			currentStep.setProcess(this);
-
-			if (state == ProcessState.RUNNING)
-				currentStep.start();
+			logger.error("No process step to start with specified.");
 		}
 	}
 
-	/**
-	 * When all steps of this process are finished
-	 */
-	public void finalize() {
+	private void finish() {
 		if (state == ProcessState.RUNNING) {
 			state = ProcessState.FINISHED;
-			// detach form the process manager
 			ProcessManager.getInstance().detachProcess(this);
+			
 			for (IProcessListener listener : listeners) {
 				listener.onSuccess();
 			}
 		}
 	}
 
-	/**
-	 * Getter
-	 * 
-	 * @return the {@link NetworkManager} which hosts this process.
-	 */
-	public NetworkManager getNetworkManager() {
-		return networkManager;
-	}
-
-	public void rollBack(String reason) {
-		state = ProcessState.ROLLBACK;
+	private void rollBack(String reason) {
+		state = ProcessState.ROLLBACKING;
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
+		
+		// roll back current step
 		currentStep.rollBack();
 
-		// TODO: rollback reverse order
-		for (ProcessStep step : executedSteps) {
+		// rollback already executed steps
+		Collections.reverse(executedSteps);
+		for (ProcessStep step : executedSteps){
 			step.rollBack();
 		}
 
 		for (IProcessListener listener : listeners) {
 			listener.onFail(reason);
 		}
+	}
+
+	/**
+	 * Get the {@link NetworkManager} which is hosting this process.
+	 * @return Returns the hosting {@link NetworkManager}.
+	 */
+	public NetworkManager getNetworkManager() {
+		return networkManager;
 	}
 
 	public void addListener(IProcessListener listener) {

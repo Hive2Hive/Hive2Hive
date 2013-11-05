@@ -62,7 +62,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		Process process = new Process(putter) {
 		};
 		GetLocationsStep step = new GetLocationsStep(userId, null);
-		process.setFirstStep(step);
+		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

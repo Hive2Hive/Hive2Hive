@@ -59,7 +59,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		Process process = new Process(putter) {
 		};
 		PutLocationStep step = new PutLocationStep(newLocations, null);
-		process.setFirstStep(step);
+		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -96,7 +96,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		Process process = new Process(putter) {
 		};
 		PutLocationStep step = new PutLocationStep(newLocations, null);
-		process.setFirstStep(step);
+		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -108,7 +108,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// rollback
-		process.rollBack("Testing the rollback");
+		process.stop("Testing the rollback");
 
 		waiter = new H2HWaiter(20);
 		do {

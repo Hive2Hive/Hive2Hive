@@ -29,7 +29,7 @@ public class PutProcessStep extends ProcessStep {
 
 	protected final String locationKey;
 	protected final String contentKey;
-	protected NetworkContent data;
+	protected final NetworkContent content;
 	protected ProcessStep nextStep;
 
 	// used to count put retries
@@ -37,20 +37,21 @@ public class PutProcessStep extends ProcessStep {
 	// used to count get tries
 	private int getTries = 0;
 
-	public PutProcessStep(String locationKey, String contentKey, NetworkContent data, ProcessStep nextStep) {
-		this.data = data;
+	public PutProcessStep(String locationKey, String contentKey, NetworkContent content, ProcessStep nextStep) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
+		this.content = content;
 		this.nextStep = nextStep;
 	}
 
 	@Override
 	public void start() {
-		put(locationKey, contentKey, data);
+		put(locationKey, contentKey, content);
 	}
 
-	protected void put(final String locationKey, final String contentKey, NetworkContent data) {
-		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, data);
+	protected void put(final String locationKey, final String contentKey, NetworkContent content) {
+		
+		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, content);
 		putFuture.addListener(new PutVerificationListener());
 	}
 
@@ -74,12 +75,12 @@ public class PutProcessStep extends ProcessStep {
 					"Verification for put completed. location key = '%s' content key = '%s'", locationKey,
 					contentKey));
 			// everything is ok, continue with next step
-			getProcess().nextStep(nextStep);
+			getProcess().setNextStep(nextStep);
 		} else {
 			logger.warn(String
 					.format("Put verification failed. Concurrent modification happened. location key = '%s' content key = '%s'",
 							locationKey, contentKey));
-			getProcess().rollBack("Put verification failed. Reason: Concurrent modification happened.");
+			getProcess().stop("Put verification failed. Reason: Concurrent modification happened.");
 		}
 	}
 
@@ -113,7 +114,7 @@ public class PutProcessStep extends ProcessStep {
 			logger.error(String
 					.format("Put verification failed. Couldn't get data after %s tries. location key = '%s' content key = '%s'",
 							getTries - 1, locationKey, contentKey));
-			getProcess().rollBack("Put verification failed. Reason: Couldn't get data.");
+			getProcess().stop("Put verification failed. Reason: Couldn't get data.");
 		}
 	}
 
@@ -129,14 +130,14 @@ public class PutProcessStep extends ProcessStep {
 							if (future.isFailed()) {
 								logger.warn("Put Retry: Could not delete the newly put content");
 							}
-							put(locationKey, contentKey, data);
+							put(locationKey, contentKey, content);
 						}
 					});
 		} else {
 			logger.error(String
 					.format("Put verification failed. Couldn't put data after %s tries. location key = '%s' content key = '%s'",
 							putTries, locationKey, contentKey));
-			getProcess().rollBack(
+			getProcess().stop(
 					String.format("Put verification failed. Couldn't put data after %s tries.", putTries));
 		}
 	}

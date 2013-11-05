@@ -14,11 +14,10 @@ import org.hive2hive.core.process.IProcess;
 public class ProcessManager {
 	private static ProcessManager instance;
 	private int pidCounter;
-	private Map<Integer, IProcess> controlledProcesses;
+	private Map<Integer, IProcess> attachedProcesses;
 
 	private ProcessManager() {
-		// is singleton
-		controlledProcesses = new HashMap<Integer, IProcess>();
+		attachedProcesses = new HashMap<Integer, IProcess>();
 		pidCounter = 0;
 	}
 
@@ -29,37 +28,41 @@ public class ProcessManager {
 		return instance;
 	}
 
-	public int getIdForNewProcess() {
+	/**
+	 * Returns a unique PID (process ID) for this {@link ProcessManager}.
+	 * @return A unique PID.
+	 */
+	public int getNewPID() {
 		return pidCounter++ % Integer.MAX_VALUE;
 	}
 
+	public IProcess getProcess(int processID) {
+		return attachedProcesses.get(processID);
+	}
+
 	/**
-	 * Attach a process to the ProcessManager such that it is aware of it.
+	 * Attach a process to the {@link ProcessManager} such that it is aware of it.
 	 * 
 	 * @param process
 	 */
 	public void attachProcess(IProcess process) throws IllegalArgumentException {
 		if (!isProcessAttached(process.getID())) {
-			controlledProcesses.put(process.getID(), process);
+			attachedProcesses.put(process.getID(), process);
 		} else {
 			throw new IllegalArgumentException("Process is already attached");
 		}
 	}
 
 	/**
-	 * Detach a process from the ProcessManager such that it no longer knows about it.
+	 * Detach a process from the {@link ProcessManager} such that it no longer knows about it.
 	 * 
 	 * @param process
 	 */
 	public void detachProcess(IProcess process) {
-		controlledProcesses.remove(process.getID());
-	}
-
-	public IProcess getProcess(int processID) {
-		return controlledProcesses.get(processID);
+		attachedProcesses.remove(process.getID());
 	}
 
 	private boolean isProcessAttached(int processID) {
-		return controlledProcesses.containsKey(processID);
+		return attachedProcesses.containsKey(processID);
 	}
 }

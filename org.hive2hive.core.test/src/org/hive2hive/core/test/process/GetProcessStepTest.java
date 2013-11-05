@@ -71,7 +71,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		DummyGetProcessStep step = new DummyGetProcessStep(locationKey, contentKey);
 		Process process = new Process(getter) {
 		};
-		process.setFirstStep(step);
+		process.setNextStep(step);
 
 		// check that receiver does not have any content
 		Assert.assertNull(holder.getLocal(contentKey, contentKey));
@@ -108,7 +108,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 			synchronized (testContent) {
 				tempContent = content;
 			}
-			getProcess().nextStep(null);
+			getProcess().setNextStep(null);
 		}
 	}
 }

@@ -27,8 +27,8 @@ public class ProcessManagerTest extends H2HJUnitTest {
 	@Test
 	public void testIncreasingPID() {
 		ProcessManager manager = ProcessManager.getInstance();
-		int first = manager.getIdForNewProcess();
-		int second = manager.getIdForNewProcess();
+		int first = manager.getNewPID();
+		int second = manager.getNewPID();
 		Assert.assertTrue(first != second);
 	}
 
@@ -68,7 +68,7 @@ public class ProcessManagerTest extends H2HJUnitTest {
 			private int id = new Random().nextInt(100);
 
 			@Override
-			public void stop() {
+			public void stop(String reason) {
 			}
 
 			@Override
