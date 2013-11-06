@@ -89,4 +89,14 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(child1.isShared());
 		Assert.assertFalse(child2.isShared());
 	}
+
+	@Test
+	public void testGetChildByName() {
+		Assert.assertEquals(child1, root.getChildByName("1f1"));
+		Assert.assertEquals(dir1, root.getChildByName("1d"));
+		Assert.assertEquals(null, root.getChildByName("2f"));
+		Assert.assertEquals(null, root.getChildByName(null));
+		Assert.assertEquals(null, root.getChildByName(""));
+
+	}
 }

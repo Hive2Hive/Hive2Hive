@@ -3,7 +3,7 @@ package org.hive2hive.core.test.file;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileManager;
@@ -22,6 +22,12 @@ import org.junit.Test;
 public class FileManagerTest extends H2HJUnitTest {
 
 	private FileManager fileManager;
+	private FileTreeNode root;
+	private FileTreeNode child1;
+	private FileTreeNode child2;
+	private FileTreeNode dir1;
+	private FileTreeNode child3;
+	private FileTreeNode dir2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -46,11 +52,11 @@ public class FileManagerTest extends H2HJUnitTest {
 		FileUtils.deleteDirectory(fileManager.getRoot());
 	}
 
-	@Test
-	public void testMissingOnDisk() throws IOException {
+	@Before
+	public void createTreeNode() {
 		// create a tree
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
-		FileTreeNode rootNode = new FileTreeNode(keys);
+		root = new FileTreeNode(keys);
 
 		// naming convention:
 		// [number][type][index] where number is the level and type is either 'f' for file or 'd' for
@@ -63,21 +69,43 @@ public class FileManagerTest extends H2HJUnitTest {
 		// - 1d:
 		// - - 2f
 		// - - 2d (empty folder)
-		FileTreeNode child1 = new FileTreeNode(rootNode, keys, "1f1", false);
-		FileTreeNode child2 = new FileTreeNode(rootNode, keys, "1f2", false);
-		FileTreeNode dir1 = new FileTreeNode(rootNode, keys, "1d", true);
-		FileTreeNode child3 = new FileTreeNode(dir1, keys, "2f", false);
-		FileTreeNode dir2 = new FileTreeNode(dir1, keys, "2d", true);
+		child1 = new FileTreeNode(root, keys, "1f1", false);
+		child2 = new FileTreeNode(root, keys, "1f2", false);
+		dir1 = new FileTreeNode(root, keys, "1d", true);
+		child3 = new FileTreeNode(dir1, keys, "2f", false);
+		dir2 = new FileTreeNode(dir1, keys, "2d", true);
+	}
 
+	@Test
+	public void testMissingOnDisk() throws IOException {
 		// create similar structure on disk (1f2 and 2d missing)
-		File root = fileManager.getRoot();
-		File dir1File = new File(root, "1d");
-		FileUtils.writeStringToFile(new File(root, "1f1"), NetworkTestUtil.randomString());
+		File rootFile = fileManager.getRoot();
+		File dir1File = new File(rootFile, "1d");
+		FileUtils.writeStringToFile(new File(rootFile, "1f1"), NetworkTestUtil.randomString());
 		FileUtils.writeStringToFile(new File(dir1File, "2f"), NetworkTestUtil.randomString());
 
-		List<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(rootNode);
+		Set<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(root);
 		Assert.assertTrue(missingOnDisk.contains(child2));
 		Assert.assertTrue(missingOnDisk.contains(dir2));
 		Assert.assertEquals(2, missingOnDisk.size());
+	}
+
+	@Test
+	public void testMissingInTree() throws IOException {
+		// create similar structure on disk (1f2 missing, but 1f3, 2dn and 2fn in addition)
+		File rootFile = fileManager.getRoot();
+		File dir1File = new File(rootFile, "1d");
+		FileUtils.writeStringToFile(new File(rootFile, "1f1"), NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(new File(rootFile, "1f3"), NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(new File(dir1File, "2f"), NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(new File(dir1File, "2fn"), NetworkTestUtil.randomString());
+		new File(dir1File, "2dn").mkdir();
+
+		Set<File> missingInTree = fileManager.getMissingInTree(root);
+		Assert.assertEquals(3, missingInTree.size());
+		for (File file : missingInTree) {
+			Assert.assertTrue(file.getName().equalsIgnoreCase("1f3")
+					|| file.getName().equalsIgnoreCase("2dn") || file.getName().equalsIgnoreCase("2fn"));
+		}
 	}
 }

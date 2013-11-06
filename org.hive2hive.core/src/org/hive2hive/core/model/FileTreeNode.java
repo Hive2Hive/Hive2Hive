@@ -91,6 +91,18 @@ public class FileTreeNode extends NetworkContent {
 		children.add(child);
 	}
 
+	public FileTreeNode getChildByName(String name) {
+		if (name != null) {
+			String withoutSeparator = name.replaceAll(FileManager.FILE_SEP, "");
+			for (FileTreeNode child : children) {
+				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
+					return child;
+				}
+			}
+		}
+		return null;
+	}
+
 	public KeyPair getDomainKeys() {
 		return domainKeys;
 	}
@@ -156,7 +168,7 @@ public class FileTreeNode extends NetworkContent {
 		sb.append("name=").append(name);
 		sb.append(" path=").append(getFullPath());
 		sb.append(" isFolder=").append(isFolder);
-		sb.append(" children=").append(children.size());
+		sb.append(" children=").append(children.size()).append("]");
 		return sb.toString();
 	}
 }
