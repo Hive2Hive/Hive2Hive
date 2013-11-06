@@ -1,5 +1,6 @@
 package org.hive2hive.core;
 
+import java.io.File;
 import java.net.InetAddress;
 
 public class H2HNodeBuilder {
@@ -12,10 +13,11 @@ public class H2HNodeBuilder {
 	private boolean autostartProcesses = true;
 	private boolean isMaster = false;
 	private InetAddress bootstrapAddress = null;
+	private String rootPath = new File(System.getProperty("user.home"), "H2H").getAbsolutePath();
 
 	public IH2HNode build() {
 		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, autostartProcesses,
-				isMaster, bootstrapAddress);
+				isMaster, bootstrapAddress, rootPath);
 	}
 
 	/**
@@ -56,6 +58,11 @@ public class H2HNodeBuilder {
 
 	public H2HNodeBuilder setBootstrapAddress(InetAddress bootstrapAddress) {
 		this.bootstrapAddress = bootstrapAddress;
+		return this;
+	}
+
+	public H2HNodeBuilder setRootPath(String rootPath) {
+		this.rootPath = rootPath;
 		return this;
 	}
 

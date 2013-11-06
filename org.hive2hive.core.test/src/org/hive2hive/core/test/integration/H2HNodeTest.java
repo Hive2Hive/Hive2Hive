@@ -14,6 +14,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Integration tests for the H2HNode.
+ * 
+ * @author Nico
+ * 
+ */
 public class H2HNodeTest extends H2HJUnitTest {
 
 	private static final int NETWORK_SIZE = 10;

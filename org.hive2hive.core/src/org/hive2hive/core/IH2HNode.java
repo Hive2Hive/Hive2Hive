@@ -1,5 +1,8 @@
 package org.hive2hive.core;
 
+import java.io.File;
+
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.process.IProcess;
 
 /**
@@ -15,6 +18,13 @@ public interface IH2HNode {
 	IProcess register(String userId, String password, String pin);
 
 	IProcess login(String userId, String password, String pin);
+
+	/**
+	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
+	 * the
+	 * node configuration
+	 */
+	IProcess add(File file) throws IllegalFileLocation;
 
 	void disconnect();
 }

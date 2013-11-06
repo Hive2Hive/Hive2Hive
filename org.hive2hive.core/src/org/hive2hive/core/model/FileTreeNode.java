@@ -1,11 +1,11 @@
 package org.hive2hive.core.model;
 
-import java.io.File;
 import java.security.KeyPair;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.NetworkContent;
 
 /**
@@ -22,14 +22,34 @@ public class FileTreeNode extends NetworkContent {
 	private String name;
 	private FileTreeNode parent;
 	private KeyPair domainKeys;
-	private List<FileTreeNode> children;
+	private Set<FileTreeNode> children;
 
+	/**
+	 * Constructor for child nodes
+	 * 
+	 * @param parent
+	 * @param keyPair
+	 * @param name
+	 * @param isFolder
+	 */
 	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder) {
 		this.parent = parent;
 		this.keyPair = keyPair;
 		this.name = name;
 		this.isFolder = isFolder;
-		setChildren(new ArrayList<FileTreeNode>());
+		parent.addChild(this);
+		setChildren(new HashSet<FileTreeNode>());
+	}
+
+	/**
+	 * Constructor for root node
+	 * 
+	 * @param keyPair
+	 */
+	public FileTreeNode(KeyPair keyPair) {
+		this.keyPair = keyPair;
+		this.isFolder = true;
+		setChildren(new HashSet<FileTreeNode>());
 	}
 
 	public KeyPair getKeyPair() {
@@ -56,19 +76,37 @@ public class FileTreeNode extends NetworkContent {
 		this.parent = parent;
 	}
 
-	public List<FileTreeNode> getChildren() {
+	public Set<FileTreeNode> getChildren() {
 		return children;
 	}
 
-	public void setChildren(List<FileTreeNode> children) {
+	public void setChildren(Set<FileTreeNode> children) {
 		this.children = children;
 	}
 
 	public void addChild(FileTreeNode child) {
 		if (children == null) {
-			children = new ArrayList<FileTreeNode>();
+			children = new HashSet<FileTreeNode>();
 		}
 		children.add(child);
+	}
+
+	/**
+	 * Finds a child with a name. If the child does not exist, null is returned
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public FileTreeNode getChildByName(String name) {
+		if (name != null) {
+			String withoutSeparator = name.replaceAll(FileManager.FILE_SEP, "");
+			for (FileTreeNode child : children) {
+				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
+					return child;
+				}
+			}
+		}
+		return null;
 	}
 
 	public KeyPair getDomainKeys() {
@@ -88,8 +126,23 @@ public class FileTreeNode extends NetworkContent {
 	}
 
 	public boolean isShared() {
-		// TODO: go down recursively
-		return false;
+		if (parent == null) {
+			// is root
+			return false;
+		} else if (isFolder) {
+			// TODO: Domain keys indicate if the folder can be written. How to properly indicate that the
+			// folder is shared?
+			if (domainKeys == null) {
+				// no domain keys --> ask parent if shared
+				return parent.isShared();
+			} else {
+				// having domain keys and not beeing root --> shared
+				return true;
+			}
+		} else {
+			// ask parent folder
+			return parent.isShared();
+		}
 	}
 
 	public boolean canWrite() {
@@ -100,12 +153,33 @@ public class FileTreeNode extends NetworkContent {
 		}
 	}
 
+	/**
+	 * Returns the full path (starting at the root) of this node
+	 * 
+	 * @return
+	 */
 	public String getFullPath() {
-		return parent.getFullPath() + File.pathSeparator + getName();
+		if (parent == null) {
+			return FileManager.FILE_SEP;
+		} else if (isFolder) {
+			return parent.getFullPath() + getName() + FileManager.FILE_SEP;
+		} else {
+			return parent.getFullPath() + getName();
+		}
 	}
 
 	@Override
 	public int getTimeToLive() {
 		return TimeToLiveStore.getInstance().getMetaDocument();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("FileTreeNode [");
+		sb.append("name=").append(name);
+		sb.append(" path=").append(getFullPath());
+		sb.append(" isFolder=").append(isFolder);
+		sb.append(" children=").append(children.size()).append("]");
+		return sb.toString();
 	}
 }

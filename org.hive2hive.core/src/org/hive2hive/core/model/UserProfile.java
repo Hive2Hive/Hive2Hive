@@ -1,6 +1,7 @@
 package org.hive2hive.core.model;
 
 import java.security.KeyPair;
+import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -68,5 +69,21 @@ public class UserProfile extends NetworkContent {
 		byte[] locationKey = PasswordUtil.generateHash(location.toCharArray(), fixedSalt);
 
 		return new String(locationKey);
+	}
+
+	public FileTreeNode getFileById(PublicKey fileId) {
+		return findById(root, fileId);
+	}
+
+	private FileTreeNode findById(FileTreeNode current, PublicKey fileId) {
+		if (current.getKeyPair().getPublic().equals(fileId)) {
+			return current;
+		}
+
+		FileTreeNode found = null;
+		for (FileTreeNode child : current.getChildren()) {
+			found = findById(child, fileId);
+		}
+		return found;
 	}
 }

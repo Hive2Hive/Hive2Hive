@@ -1,8 +1,11 @@
 package org.hive2hive.core;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.util.UUID;
 
+import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.login.LoginProcess;
@@ -16,11 +19,12 @@ public class H2HNode implements IH2HNode {
 	private final int chunkSize;
 	private final boolean autostartProcesses;
 	private final NetworkManager networkManager;
+	private final FileManager fileManager;
 	private final boolean isMaster;
 	private final InetAddress bootstrapAddress;
 
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
-			boolean autostartProcesses, boolean isMaster, InetAddress bootstrapAddress) {
+			boolean autostartProcesses, boolean isMaster, InetAddress bootstrapAddress, String rootPath) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeAllVersions = maxSizeAllVersions;
@@ -35,6 +39,8 @@ public class H2HNode implements IH2HNode {
 		} else {
 			networkManager.connect(bootstrapAddress);
 		}
+
+		fileManager = new FileManager(rootPath);
 	}
 
 	public int getMaxFileSize() {
@@ -51,6 +57,11 @@ public class H2HNode implements IH2HNode {
 
 	public int getChunkSize() {
 		return chunkSize;
+	}
+
+	@Override
+	public void disconnect() {
+		networkManager.disconnect();
 	}
 
 	@Override
@@ -72,7 +83,12 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public void disconnect() {
-		networkManager.disconnect();
+	public IProcess add(File file) throws IllegalFileLocation {
+		// file must be in the given root directory
+		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {
+			throw new IllegalFileLocation();
+		}
+
+		return null;
 	}
 }
