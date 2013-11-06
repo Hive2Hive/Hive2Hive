@@ -21,10 +21,22 @@ public class FileManager {
 		root = rootDirectory;
 	}
 
+	/**
+	 * Returns the root node
+	 * 
+	 * @return
+	 */
 	public File getRoot() {
 		return root;
 	}
 
+	/**
+	 * Returns the file on disk (if existent) from a file node of the user profile
+	 * 
+	 * @param fileToFind
+	 * @return
+	 * @throws FileNotFoundException
+	 */
 	public File getFile(FileTreeNode fileToFind) throws FileNotFoundException {
 		File file = new File(root, fileToFind.getFullPath());
 		if (!file.exists()) {
@@ -34,6 +46,12 @@ public class FileManager {
 		return file;
 	}
 
+	/**
+	 * Returns a list of nodes of the file tree that are nowhere on the disk.
+	 * 
+	 * @param rootNode
+	 * @return
+	 */
 	public Set<FileTreeNode> getMissingOnDisk(FileTreeNode rootNode) {
 		Set<FileTreeNode> missingOnDisk = new HashSet<FileTreeNode>();
 
@@ -56,6 +74,12 @@ public class FileManager {
 		return missingOnDisk;
 	}
 
+	/**
+	 * Returns the missing files that exist on disk but not in the file tree in the user profile
+	 * 
+	 * @param rootNode
+	 * @return
+	 */
 	public Set<File> getMissingInTree(FileTreeNode rootNode) {
 		Set<File> missingInTree = new HashSet<File>();
 

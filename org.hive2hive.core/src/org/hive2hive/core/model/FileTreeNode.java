@@ -91,6 +91,12 @@ public class FileTreeNode extends NetworkContent {
 		children.add(child);
 	}
 
+	/**
+	 * Finds a child with a name. If the child does not exist, null is returned
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public FileTreeNode getChildByName(String name) {
 		if (name != null) {
 			String withoutSeparator = name.replaceAll(FileManager.FILE_SEP, "");
@@ -147,6 +153,11 @@ public class FileTreeNode extends NetworkContent {
 		}
 	}
 
+	/**
+	 * Returns the full path (starting at the root) of this node
+	 * 
+	 * @return
+	 */
 	public String getFullPath() {
 		if (parent == null) {
 			return FileManager.FILE_SEP;
