@@ -35,7 +35,7 @@ public class TestMessageWithReply extends BaseRequestMessage {
 
 		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getTargetKey(),
 				networkManager.getPeerAddress(), getSenderAddress(), secret);
-		networkManager.send(responseMessage);
+		networkManager.sendDirect(responseMessage);
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class TestResponseMessageMaxSending extends ResponseMessage {
 	@Override
 	public AcceptanceReply accept() {
 		// block the first tries
-		if (getSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING) {
+		if (getDirectSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
 			return AcceptanceReply.FAILURE;
 		}
 		return super.accept();

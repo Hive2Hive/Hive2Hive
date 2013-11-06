@@ -44,18 +44,20 @@ public class MessageManager {
 		return futureDirect;
 	}
 
-	public FutureResponse sendDirect(BaseDirectMessage aMessage) {
-		if (aMessage.getTargetAddress() == null) {
+	public FutureResponse sendDirect(BaseDirectMessage message) {
+		if (message.getTargetAddress() == null) {
 			throw new IllegalArgumentException("target address can not be null");
 		}
+		
+		message.increaseDirectSendingCounter();
 	
-		configureCallbackHandlerIfNeeded(aMessage);
+		configureCallbackHandlerIfNeeded(message);
 
 		FutureResponse futureResponse = networkManager.getConnection().getPeer()
-				.sendDirect(aMessage.getTargetAddress()).setObject(aMessage).start();
+				.sendDirect(message.getTargetAddress()).setObject(message).start();
 
 		logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
-				aMessage.getTargetKey(), aMessage.getMessageID()));
+				message.getTargetKey(), message.getMessageID()));
 		
 		return futureResponse;
 	}

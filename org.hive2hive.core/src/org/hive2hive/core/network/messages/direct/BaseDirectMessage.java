@@ -48,6 +48,10 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	public PeerAddress getTargetAddress() {
 		return targetPeerAddress;
 	}
+	
+	public int getDirectSendingCounter() {
+		return directSendingCounter;
+	}
 
 	public void setTargetPeerAddress(PeerAddress aTargetPeerAddress) {
 		targetPeerAddress = aTargetPeerAddress;
