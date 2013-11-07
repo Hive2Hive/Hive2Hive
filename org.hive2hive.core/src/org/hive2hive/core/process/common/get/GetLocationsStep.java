@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common;
+package org.hive2hive.core.process.common.get;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
@@ -13,7 +13,7 @@ import org.hive2hive.core.process.ProcessStep;
  * @author Nico
  * 
  */
-public class GetLocationsStep extends GetProcessStep {
+public class GetLocationsStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetLocationsStep.class);
 	private final ProcessStep nextStep;

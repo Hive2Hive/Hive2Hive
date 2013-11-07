@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common;
+package org.hive2hive.core.process.common.put;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;

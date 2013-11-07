@@ -8,7 +8,7 @@ import net.tomp2p.futures.FutureRemove;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.GetProcessStep;
+import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -86,7 +86,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 	/**
 	 * A dummy process step that puts or gets an object
 	 */
-	private class DummyGetProcessStep extends GetProcessStep {
+	private class DummyGetProcessStep extends BaseGetProcessStep {
 
 		public DummyGetProcessStep(String locationKey, String contentKey) {
 			super(locationKey, contentKey);

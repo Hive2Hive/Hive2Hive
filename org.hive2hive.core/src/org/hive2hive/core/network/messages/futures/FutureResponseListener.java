@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.messages;
+package org.hive2hive.core.network.messages.futures;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,6 +11,8 @@ import net.tomp2p.message.Buffer;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 public class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {

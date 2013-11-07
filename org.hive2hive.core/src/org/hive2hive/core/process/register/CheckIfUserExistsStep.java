@@ -7,9 +7,9 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.common.GetLocationsStep;
-import org.hive2hive.core.process.common.PutLocationStep;
-import org.hive2hive.core.process.common.PutUserProfileStep;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
+import org.hive2hive.core.process.common.put.PutLocationStep;
+import org.hive2hive.core.process.common.put.PutUserProfileStep;
 
 /**
  * This step is called as soon as the @link{GetLocationsStep} is done.

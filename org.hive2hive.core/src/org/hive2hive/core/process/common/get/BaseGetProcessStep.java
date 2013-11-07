@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common;
+package org.hive2hive.core.process.common.get;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureGet;
@@ -16,14 +16,14 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Nico
  */
-public abstract class GetProcessStep extends ProcessStep {
+public abstract class BaseGetProcessStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(GetProcessStep.class);
+	private final static Logger logger = H2HLoggerFactory.getLogger(BaseGetProcessStep.class);
 
 	protected final String locationKey;
 	protected final String contentKey;
 
-	public GetProcessStep(String locationKey, String contentKey) {
+	public BaseGetProcessStep(String locationKey, String contentKey) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 	}

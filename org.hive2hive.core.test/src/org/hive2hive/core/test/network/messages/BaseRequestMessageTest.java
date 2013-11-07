@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.FutureDirectListener;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -54,7 +54,8 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * Test if a asynchronous message (implementing the {@link IRequestMessage}) interface gets
 	 * properly handled. To verify this node A sends to node B a randomly created contentKey. Node B generates
 	 * a random secret. The secret gets locally stored (location key is node B's node id) and sent back
-	 * with a {@link ResponseMessage} to node A. A callback handler implementing {@link IResponseCallBackHandler} at
+	 * with a {@link ResponseMessage} to node A. A callback handler implementing
+	 * {@link IResponseCallBackHandler} at
 	 * node A handles the received response message and also locally puts the received secret into the DHT
 	 * (location key is node A's node id). Every think went right when under both location keys the same data
 	 * appears.
@@ -70,8 +71,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), nodeA.getPeerAddress(),
-				contentKey);
+		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
@@ -119,8 +119,8 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(), nodeA.getPeerAddress(),
-				contentKey);
+		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(),
+				nodeA.getPeerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);

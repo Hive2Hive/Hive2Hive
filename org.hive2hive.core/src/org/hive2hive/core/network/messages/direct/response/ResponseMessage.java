@@ -8,48 +8,68 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.hive2hive.core.network.messages.request.IRequestMessage;
 
+/**
+ * This message has to be used for response messages when a request message implementing the
+ * {@link IRequestMessage} interface arrives.</br></br>
+ * 
+ * <b>Important</b> The message id of the response message has to be the same like the requesting message.
+ * This necessary for the requesting peer to find the correct {@link IResponseCallBackHandler} callback
+ * handler to handle the response message at the requesting node.</br></br>
+ * 
+ * <b>Design decisions:</b>
+ * <ul>
+ * <li>A response message is a {@link BaseDirectMessage}. The goal is to contact the requesting node directly.
+ * </li>
+ * <li>The fall back for re-routing is disabled. It makes no sense to route a response message to another not
+ * requesting node.</li>
+ * </ul>
+ * 
+ * @author Nendor, Seppi
+ */
 public class ResponseMessage extends BaseDirectMessage {
 
-	private static final H2HLogger logger = H2HLoggerFactory
-			.getLogger(ResponseMessage.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ResponseMessage.class);
 
 	private static final long serialVersionUID = -4182581031050888858L;
 
-	private final PeerAddress targetAddress;
 	private final Serializable content;
 
-	public ResponseMessage(String messageID, String targetKey, PeerAddress senderAddress,
-			PeerAddress requesterAddress, Serializable someContent) {
-		super(messageID, targetKey, senderAddress, requesterAddress, false);
-		targetAddress = requesterAddress;
+	/**
+	 * Constructor for a response message.
+	 * 
+	 * @param messageID
+	 *            the message id which has to be the same like the request message id
+	 * @param requesterAddress
+	 *            the peer address of the requesting node
+	 * @param someContent
+	 *            the content for any response
+	 */
+	public ResponseMessage(String messageID, PeerAddress requesterAddress, Serializable someContent) {
+		super(messageID, null, requesterAddress, false);
 		content = someContent;
 	}
 
 	@Override
 	public void run() {
-		IResponseCallBackHandler handler = networkManager.getMessageManager()
-				.getCallBackHandlers().remove(getMessageID());
+		IResponseCallBackHandler handler = networkManager.getMessageManager().getCallBackHandlers()
+				.remove(getMessageID());
 		if (handler != null) {
 			handler.handleResponseMessage(this);
 		} else {
-			logger.warn(String
-					.format("No call back handler for this message! currentNodeID='%s', AsyncReturnMessage='%s'",
-							networkManager.getNodeId(), this));
+			logger.warn(String.format(
+					"No call back handler for this message! currentNodeID='%s', AsyncReturnMessage='%s'",
+					networkManager.getNodeId(), this));
 		}
 	}
 
 	@Override
 	public AcceptanceReply accept() {
-		if (networkManager.getMessageManager().getCallBackHandlers()
-				.get(getMessageID()) != null) {
+		if (networkManager.getMessageManager().getCallBackHandlers().get(getMessageID()) != null) {
 			return AcceptanceReply.OK;
 		}
 		return AcceptanceReply.NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE;
-	}
-
-	public PeerAddress getTargetAddress() {
-		return targetAddress;
 	}
 
 	public Object getContent() {
@@ -59,9 +79,9 @@ public class ResponseMessage extends BaseDirectMessage {
 	@Override
 	public boolean handleSendingFailure(AcceptanceReply reply) {
 		if (AcceptanceReply.NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE == reply) {
-			logger.warn(String
-					.format("Receiving node has no callback handler for this message. message id = %s",
-							getMessageID()));
+			logger.warn(String.format(
+					"Receiving node has no callback handler for this message. message id = %s",
+					getMessageID()));
 			return true;
 		} else {
 			return super.handleSendingFailure(reply);

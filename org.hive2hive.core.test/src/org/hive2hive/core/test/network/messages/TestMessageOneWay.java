@@ -1,7 +1,5 @@
 package org.hive2hive.core.test.network.messages;
 
-import net.tomp2p.peers.PeerAddress;
-
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.test.H2HTestData;
@@ -22,8 +20,8 @@ public class TestMessageOneWay extends BaseMessage {
 	private final String contentKey;
 	private final H2HTestData wrapper;
 
-	public TestMessageOneWay(String targetKey, PeerAddress senderAddress, String contentKey, H2HTestData wrapper) {
-		super(createMessageID(), targetKey, senderAddress);
+	public TestMessageOneWay(String targetKey, String contentKey, H2HTestData wrapper) {
+		super(createMessageID(), targetKey);
 		this.contentKey = contentKey;
 		this.wrapper = wrapper;
 	}

@@ -1,14 +1,21 @@
-package org.hive2hive.core.network.messages;
+package org.hive2hive.core.network.messages.futures;
 
 import java.util.Collection;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.IBaseMessageListener;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDirect;
 
+/**
+ * 
+ * @author Seppi
+ */
 public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureDirectListener.class);

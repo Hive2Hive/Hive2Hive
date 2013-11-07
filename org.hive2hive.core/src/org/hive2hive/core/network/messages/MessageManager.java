@@ -28,6 +28,7 @@ public class MessageManager {
 
 	public FutureDirect send(BaseMessage message) {
 		message.increaseSendingCounter();
+		message.setSenderAddress(networkManager.getPeerAddress());
 
 		configureCallbackHandlerIfNeeded(message);
 
@@ -50,6 +51,7 @@ public class MessageManager {
 		}
 		
 		message.increaseDirectSendingCounter();
+		message.setSenderAddress(networkManager.getPeerAddress());
 	
 		configureCallbackHandlerIfNeeded(message);
 

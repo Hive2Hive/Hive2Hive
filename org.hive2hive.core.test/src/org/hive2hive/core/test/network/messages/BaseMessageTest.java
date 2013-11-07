@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.FutureDirectListener;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -57,8 +57,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), nodeA.getPeerAddress(),
-				contentKey, new H2HTestData(data));
+		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey,
+				new H2HTestData(data));
 		// send message
 		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
 			@Override
@@ -103,8 +103,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a test message which gets rejected several times
-		TestMessageOneWayMaxSending message = new TestMessageOneWayMaxSending(nodeB.getNodeId(),
-				nodeA.getPeerAddress(), contentKey, new H2HTestData(data));
+		TestMessageOneWayMaxSending message = new TestMessageOneWayMaxSending(nodeB.getNodeId(), contentKey,
+				new H2HTestData(data));
 		// send message
 		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
 			@Override

@@ -103,11 +103,13 @@ public class NetworkManager {
 
 	/**
 	 * Sends a given message to the peer which is responsible to given key. </br>
-	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)}
+	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
+	 * <b>Important:</b> For an appropriate message handling like resends and error log, use and attach a
+	 * {@link FutureDirectListener} future listener.
 	 * 
 	 * @param message
 	 *            the message to send
-	 * @return a future
+	 * @return future
 	 */
 	public FutureDirect send(BaseMessage message) {
 		if (!connection.isConnected())
@@ -116,7 +118,9 @@ public class NetworkManager {
 	}
 
 	/**
-	 * Message is sent directly using TCP.
+	 * Message is sent directly using TCP. </br></br>
+	 * <b>Important:</b> For an appropriate message handling like resends and error log, use and attach a
+	 * {@link FutureResponseListener} future listener.
 	 * 
 	 * @param message
 	 *            the message to send

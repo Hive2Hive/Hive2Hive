@@ -1,10 +1,10 @@
-package org.hive2hive.core.process.common;
+package org.hive2hive.core.process.common.messages;
 
 import net.tomp2p.futures.FutureResponse;
 
-import org.hive2hive.core.network.messages.FutureResponseListener;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
 

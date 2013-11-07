@@ -15,7 +15,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.BaseMessageProcessStep;
+import org.hive2hive.core.process.common.messages.BaseMessageProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -73,8 +73,8 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), nodeA.getPeerAddress(),
-				contentKey, new H2HTestData(data));
+		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey,
+				new H2HTestData(data));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
@@ -135,8 +135,8 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), nodeA.getPeerAddress(),
-				contentKey, new H2HTestData(data));
+		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey,
+				new H2HTestData(data));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
@@ -182,8 +182,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), nodeA.getPeerAddress(),
-				contentKey);
+		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), contentKey);
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
@@ -221,7 +220,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
 		} while (tmp == null);
-		
+
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
 		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();

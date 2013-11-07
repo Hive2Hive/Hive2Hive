@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common;
+package org.hive2hive.core.process.common.get;
 
 import javax.crypto.SecretKey;
 
@@ -22,7 +22,7 @@ import org.hive2hive.core.security.UserPassword;
  * @author Nico
  * 
  */
-public class GetUserProfileStep extends GetProcessStep {
+public class GetUserProfileStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserProfileStep.class);
 

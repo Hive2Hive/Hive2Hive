@@ -40,11 +40,11 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	protected NetworkManager networkManager;
 
-	private final String messageID;
-	private final String targetKey;
-	private final PeerAddress senderAddress;
+	protected final String messageID;
+	protected final String targetKey;
 	private final SendingBehavior sendingBehavior;
 
+	private PeerAddress senderAddress;
 	private int sendingCounter = 0;
 
 	/**
@@ -54,16 +54,12 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 *            the ID of this message - should be chosen uniquely if possible
 	 * @param targetKey
 	 *            the key identifying the target of this message
-	 * @param senderAddress
-	 *            peer address of the sender
 	 * @param sendingBehavior
 	 *            the sending behavior used for this message
 	 */
-	public BaseMessage(String messageID, String targetKey, PeerAddress senderAddress,
-			SendingBehavior sendingBehavior) {
+	public BaseMessage(String messageID, String targetKey, SendingBehavior sendingBehavior) {
 		this.messageID = messageID;
 		this.targetKey = targetKey;
-		this.senderAddress = senderAddress;
 		this.sendingBehavior = sendingBehavior;
 	}
 
@@ -75,11 +71,9 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 *            the ID of this message - should be chosen uniquely if possible
 	 * @param targetKey
 	 *            the key identifying the target of this message
-	 * @param senderAddress
-	 *            peer address of the sender
 	 */
-	public BaseMessage(String messageID, String targetKey, PeerAddress senderAddress) {
-		this(messageID, targetKey, senderAddress, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
+	public BaseMessage(String messageID, String targetKey) {
+		this(messageID, targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
 	}
 
 	/**
@@ -130,6 +124,16 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	/**
 	 * Setter
 	 * 
+	 * @param senderAddress
+	 *            the peer address of the sender node
+	 */
+	public void setSenderAddress(PeerAddress senderAddress) {
+		this.senderAddress = senderAddress;
+	}
+
+	/**
+	 * Setter
+	 * 
 	 * @param aNetworkManager
 	 *            the {@link NetworkManager} to be used by this message
 	 */
@@ -155,9 +159,12 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 * </br></br>
 	 * 
 	 * <b>Important:</b></br> All concrete subclasses have to implement this
-	 * method and adhere to the following points:</br> <li>This method must terminate as quickly as possible.</li>
-	 * <li>No blocking in any way is allowed.</li> <li>No sending of messages or other network activities are
-	 * permitted.</li>
+	 * method and adhere to the following points:</br>
+	 * <ul>
+	 * <li>This method must terminate as quickly as possible.</li>
+	 * <li>No blocking in any way is allowed.</li>
+	 * <li>No sending of messages or other network activities are permitted.</li>
+	 * </ul>
 	 * 
 	 * @return the {@link AcceptanceReply} of the target node.
 	 */

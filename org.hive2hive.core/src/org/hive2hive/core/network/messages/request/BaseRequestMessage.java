@@ -1,7 +1,5 @@
 package org.hive2hive.core.network.messages.request;
 
-import net.tomp2p.peers.PeerAddress;
-
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 
@@ -11,22 +9,21 @@ import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHand
  * @author Nendor, Seppi
  * 
  */
-public abstract class BaseRequestMessage extends BaseMessage implements
-                IRequestMessage {
+public abstract class BaseRequestMessage extends BaseMessage implements IRequestMessage {
 
-        private static final long serialVersionUID = 4510609215735076075L;
+	private static final long serialVersionUID = 4510609215735076075L;
 
-        private IResponseCallBackHandler callBackHandler;
+	private IResponseCallBackHandler callBackHandler;
 
-        public BaseRequestMessage(String targetKey, PeerAddress senderAddress) {
-                super(createMessageID(), targetKey, senderAddress);
-        }
+	public BaseRequestMessage(String targetKey) {
+		super(createMessageID(), targetKey);
+	}
 
-        public IResponseCallBackHandler getCallBackHandler() {
-                return callBackHandler;
-        }
+	public IResponseCallBackHandler getCallBackHandler() {
+		return callBackHandler;
+	}
 
-        public void setCallBackHandler(IResponseCallBackHandler aHandler) {
-                callBackHandler = aHandler;
-        }
+	public void setCallBackHandler(IResponseCallBackHandler aHandler) {
+		callBackHandler = aHandler;
+	}
 }

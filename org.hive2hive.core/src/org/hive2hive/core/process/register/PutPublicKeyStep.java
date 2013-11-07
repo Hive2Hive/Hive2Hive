@@ -5,7 +5,7 @@ import java.security.PublicKey;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.model.UserPublicKey;
-import org.hive2hive.core.process.common.PutProcessStep;
+import org.hive2hive.core.process.common.put.PutProcessStep;
 
 /**
  * Puts the user's public key to the network (which is used for encryption of messages and other

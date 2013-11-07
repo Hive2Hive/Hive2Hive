@@ -5,7 +5,7 @@ import java.security.KeyPair;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.GetLocationsStep;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserPassword;

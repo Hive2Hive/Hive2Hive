@@ -8,7 +8,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.LocationsEntry;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.GetLocationsStep;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;

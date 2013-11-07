@@ -4,8 +4,8 @@ import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.common.GetLocationsStep;
-import org.hive2hive.core.process.common.GetUserProfileStep;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
+import org.hive2hive.core.process.common.get.GetUserProfileStep;
 
 public class VerifyUserProfileStep extends ProcessStep {
 

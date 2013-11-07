@@ -23,9 +23,9 @@ public class TestDirectMessage extends BaseDirectMessage {
 	private final String contentKey;
 	private final H2HTestData wrapper;
 
-	public TestDirectMessage(String targetKey, PeerAddress targetAddress, PeerAddress senderAddress,
-			String contentKey, H2HTestData wrapper, boolean needsRedirectedSend) {
-		super(targetKey, targetAddress, senderAddress, needsRedirectedSend);
+	public TestDirectMessage(String targetKey, PeerAddress targetAddress, String contentKey,
+			H2HTestData wrapper, boolean needsRedirectedSend) {
+		super(targetKey, targetAddress, needsRedirectedSend);
 		this.contentKey = contentKey;
 		this.wrapper = wrapper;
 	}

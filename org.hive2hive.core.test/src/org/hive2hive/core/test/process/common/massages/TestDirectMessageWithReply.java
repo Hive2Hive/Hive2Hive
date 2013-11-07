@@ -13,7 +13,8 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 
 /**
  * A test message which is direct and is a request. Used to test response messages and callback handlers. For
- * further detail see {@link BaseDirectMessageProcessStepTest#baseDirectMessageProcessStepTestWithARequestMessage()}
+ * further detail see
+ * {@link BaseDirectMessageProcessStepTest#baseDirectMessageProcessStepTestWithARequestMessage()}
  * 
  * @author Seppi
  */
@@ -25,9 +26,9 @@ public class TestDirectMessageWithReply extends BaseDirectMessage implements IRe
 
 	private final String contentKey;
 
-	public TestDirectMessageWithReply(String targetKey, PeerAddress targetAddress, PeerAddress senderAddress,
-			String contentKey, boolean needsRedirectedSend) {
-		super(targetKey, targetAddress, senderAddress, needsRedirectedSend);
+	public TestDirectMessageWithReply(String targetKey, PeerAddress targetAddress, String contentKey,
+			boolean needsRedirectedSend) {
+		super(targetKey, targetAddress, needsRedirectedSend);
 		this.contentKey = contentKey;
 	}
 
@@ -47,8 +48,7 @@ public class TestDirectMessageWithReply extends BaseDirectMessage implements IRe
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getTargetKey(),
-				networkManager.getPeerAddress(), getSenderAddress(), secret);
+		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getSenderAddress(), secret);
 		networkManager.sendDirect(responseMessage);
 	}
 

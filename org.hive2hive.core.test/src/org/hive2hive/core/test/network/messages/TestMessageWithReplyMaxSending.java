@@ -4,20 +4,20 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
-import org.hive2hive.core.network.messages.FutureResponseListener;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 import org.hive2hive.core.network.messages.request.BaseRequestMessage;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.Assert;
 
 /**
- * Used to test response messages and callback handlers. For further detail see {@link
- * BaseRequestMessageTest#testSendingAnAsynchronousMessageWithReply()}
+ * Used to test response messages and callback handlers. For further detail see
+ * {@link BaseRequestMessageTest#testSendingAnAsynchronousMessageWithReply()}
  * 
- * @author Seppi
+ * @author Nendor, Seppi
  */
 public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 
@@ -25,8 +25,8 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 
 	private final String contentKey;
 
-	public TestMessageWithReplyMaxSending(String aTargetKey, PeerAddress aSenderAddress, String contentKey) {
-		super(aTargetKey, aSenderAddress);
+	public TestMessageWithReplyMaxSending(String targetKey, PeerAddress senderAddress, String contentKey) {
+		super(targetKey);
 		this.contentKey = contentKey;
 	}
 
@@ -36,19 +36,21 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(), getTargetKey(),
-				networkManager.getPeerAddress(), getSenderAddress(), secret);
-		networkManager.sendDirect(responseMessage).addListener(new FutureResponseListener(new IBaseMessageListener() {
-			@Override
-			public void onSuccess() {
-			}
+		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(),
+				getSenderAddress(), secret);
+		networkManager.sendDirect(responseMessage).addListener(
+				new FutureResponseListener(new IBaseMessageListener() {
+					@Override
+					public void onSuccess() {
+					}
 
-			@Override
-			public void onFailure() {
-				// should not happen
-				Assert.fail("Should not failed.");
-			}
-		}, responseMessage, networkManager));;
+					@Override
+					public void onFailure() {
+						// should not happen
+						Assert.fail("Should not failed.");
+					}
+				}, responseMessage, networkManager));
+		;
 	}
 
 	@Override
@@ -67,8 +69,7 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(
-					receivedSecret));
+			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
 		}
 
 	}

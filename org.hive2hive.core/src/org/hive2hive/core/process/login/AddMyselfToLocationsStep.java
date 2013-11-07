@@ -5,8 +5,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.LocationsEntry;
-import org.hive2hive.core.process.common.GetLocationsStep;
-import org.hive2hive.core.process.common.PutProcessStep;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
+import org.hive2hive.core.process.common.put.PutProcessStep;
 
 public class AddMyselfToLocationsStep extends PutProcessStep {
 

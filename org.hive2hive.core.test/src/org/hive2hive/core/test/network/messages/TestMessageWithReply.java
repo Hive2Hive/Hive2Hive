@@ -1,7 +1,5 @@
 package org.hive2hive.core.test.network.messages;
 
-import net.tomp2p.peers.PeerAddress;
-
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -22,8 +20,8 @@ public class TestMessageWithReply extends BaseRequestMessage {
 
 	private final String contentKey;
 
-	public TestMessageWithReply(String targetKey, PeerAddress senderAddress, String contentKey) {
-		super(targetKey, senderAddress);
+	public TestMessageWithReply(String targetKey, String contentKey) {
+		super(targetKey);
 		this.contentKey = contentKey;
 	}
 
@@ -33,8 +31,7 @@ public class TestMessageWithReply extends BaseRequestMessage {
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getTargetKey(),
-				networkManager.getPeerAddress(), getSenderAddress(), secret);
+		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getSenderAddress(), secret);
 		networkManager.sendDirect(responseMessage);
 	}
 

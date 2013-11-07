@@ -15,7 +15,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.BaseDirectMessageProcessStep;
+import org.hive2hive.core.process.common.messages.BaseDirectMessageProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -52,9 +52,10 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
 	}
-	
+
 	/**
-	 * Sends a direct asynchronous message through a process step. This test checks if the process step successes
+	 * Sends a direct asynchronous message through a process step. This test checks if the process step
+	 * successes
 	 * when the message arrives at the right target node (given through {@link PeerAddress}). This
 	 * is verified by locally storing and looking for the sent test data at the receiving node.
 	 */
@@ -71,7 +72,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 
 		// create a message with target node B
-		TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(), nodeA.getPeerAddress(),
+		TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
 				contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
@@ -133,7 +134,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(), nodeA.getPeerAddress(),
+		TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
 				contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
@@ -180,8 +181,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getNodeId(), nodeB.getPeerAddress(), nodeA.getPeerAddress(),
-				contentKey, false);
+		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getNodeId(),
+				nodeB.getPeerAddress(), contentKey, false);
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
@@ -219,7 +220,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
 		} while (tmp == null);
-		
+
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
 		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();

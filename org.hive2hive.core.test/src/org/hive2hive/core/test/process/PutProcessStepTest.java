@@ -9,7 +9,7 @@ import net.tomp2p.storage.StorageMemory;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.PutProcessStep;
+import org.hive2hive.core.process.common.put.PutProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
