@@ -6,7 +6,6 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -116,12 +115,6 @@ public class ContactPeersStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void handleRemovalResult(FutureRemove future) {
 		// TODO Auto-generated method stub
 
 	}

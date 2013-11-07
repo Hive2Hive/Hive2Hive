@@ -3,8 +3,6 @@ package org.hive2hive.core.test.process;
 import java.io.IOException;
 import java.util.List;
 
-import net.tomp2p.futures.FutureRemove;
-
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.Process;
@@ -95,12 +93,6 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		@Override
 		public void rollBack() {
 			Assert.fail("Should not have rollbacked here");
-		}
-
-		@Override
-		protected void handleRemovalResult(FutureRemove future) {
-			// not expected to get a removal
-			Assert.fail();
 		}
 
 		@Override

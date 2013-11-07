@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
@@ -81,11 +80,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		};
 		BaseMessageProcessStep step = new BaseMessageProcessStep(message, null) {
 			@Override
-			protected void handleRemovalResult(FutureRemove future) {
-				Assert.fail("Should be not used.");
-			}
-
-			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
 			}
@@ -143,11 +137,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		};
 		BaseMessageProcessStep step = new BaseMessageProcessStep(message, null) {
 			@Override
-			protected void handleRemovalResult(FutureRemove future) {
-				Assert.fail("Should be not used.");
-			}
-
-			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
 			}
@@ -188,11 +177,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		Process process = new Process(nodeA) {
 		};
 		BaseMessageProcessStep step = new BaseMessageProcessStep(message, null) {
-			@Override
-			protected void handleRemovalResult(FutureRemove future) {
-				Assert.fail("Should be not used.");
-			}
-
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data

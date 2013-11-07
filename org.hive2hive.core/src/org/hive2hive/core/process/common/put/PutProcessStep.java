@@ -50,7 +50,6 @@ public class PutProcessStep extends ProcessStep {
 	}
 
 	protected void put(final String locationKey, final String contentKey, NetworkContent content) {
-		
 		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, content);
 		putFuture.addListener(new PutVerificationListener());
 	}
@@ -58,7 +57,7 @@ public class PutProcessStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// TODO extend the remove method with the version key
-		remove(locationKey, contentKey);
+		// remove(locationKey, contentKey);
 	}
 
 	private void checkVersionKey() {
@@ -142,11 +141,6 @@ public class PutProcessStep extends ProcessStep {
 		}
 	}
 
-	@Override
-	protected void handleRemovalResult(FutureRemove future) {
-		// ignore
-	}
-
 	/**
 	 * Verifies a put by checking if all replicas accepted the content. If not, the version is compared and
 	 * the newest version is taken. Old deprecated versions are cleaned up.
@@ -161,23 +155,20 @@ public class PutProcessStep extends ProcessStep {
 
 		@Override
 		public void operationComplete(FuturePut future) throws Exception {
-			final FuturePut putFuture = future;
-
-			// store the future for notifying the listeners later with this
 			logger.debug(String.format("Start verification of put. location key = '%s' content key = '%s'",
 					locationKey, contentKey));
 
-			if (putFuture.isFailed() || putFuture.getRawResult().isEmpty()) {
+			if (future.isFailed() || future.getRawResult().isEmpty()) {
 				retryPut();
 			} else {
 				// analyze returned PutStatus
 				Map<PeerAddress, Byte> statusMap = new HashMap<>();
-				for (PeerAddress peeradress : putFuture.getRawResult().keySet()) {
-					statusMap.put(peeradress, putFuture.getRawResult().get(peeradress).values().iterator()
+				for (PeerAddress peeradress : future.getRawResult().keySet()) {
+					statusMap.put(peeradress, future.getRawResult().get(peeradress).values().iterator()
 							.next());
 				}
 				int failedNodes = 0;
-				int contactedNodes = putFuture.getRawResult().keySet().size();
+				int contactedNodes = future.getRawResult().keySet().size();
 				for (Byte status : statusMap.values()) {
 					if (PutStatus.values()[status] == PutStatus.VERSION_CONFLICT) {
 						// TODO implement version conflict

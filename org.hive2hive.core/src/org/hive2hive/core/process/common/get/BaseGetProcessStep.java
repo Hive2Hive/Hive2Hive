@@ -2,7 +2,6 @@ package org.hive2hive.core.process.common.get;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FutureRemove;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -44,11 +43,6 @@ public abstract class BaseGetProcessStep extends ProcessStep {
 	}
 
 	protected abstract void handleGetResult(NetworkContent content);
-
-	@Override
-	protected void handleRemovalResult(FutureRemove future) {
-		// ignore
-	}
 
 	/**
 	 * Verifies a get.

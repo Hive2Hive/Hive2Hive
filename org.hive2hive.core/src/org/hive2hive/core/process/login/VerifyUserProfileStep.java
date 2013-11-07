@@ -1,7 +1,5 @@
 package org.hive2hive.core.process.login;
 
-import net.tomp2p.futures.FutureRemove;
-
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetLocationsStep;
@@ -48,11 +46,6 @@ public class VerifyUserProfileStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// do nothing
-	}
-
-	@Override
-	protected void handleRemovalResult(FutureRemove future) {
 		// do nothing
 	}
 

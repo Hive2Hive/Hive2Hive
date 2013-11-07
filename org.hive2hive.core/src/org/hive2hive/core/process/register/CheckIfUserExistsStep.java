@@ -1,7 +1,5 @@
 package org.hive2hive.core.process.register;
 
-import net.tomp2p.futures.FutureRemove;
-
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
@@ -52,11 +50,6 @@ public class CheckIfUserExistsStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// only a get call which has no effect
-	}
-
-	@Override
-	protected void handleRemovalResult(FutureRemove future) {
-		// not used
 	}
 
 	public void setPreviousStep(GetLocationsStep locationsStep) {
