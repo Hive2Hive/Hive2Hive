@@ -49,15 +49,16 @@ public abstract class Process implements IProcess {
 	 * @param nextStep the next step or <code>null</code>, if the process should finish
 	 */
 	public void setNextStep(ProcessStep nextStep) {
-		executedSteps.add(currentStep);
-	
+		if (currentStep != null)
+			executedSteps.add(currentStep);
+
 		if (nextStep != null) {
 			currentStep = nextStep;
 			currentStep.setProcess(this);
-	
+
 			if (state == ProcessState.RUNNING)
 				currentStep.start();
-		} else {			
+		} else {
 			finish();
 		}
 	}
@@ -100,11 +101,11 @@ public abstract class Process implements IProcess {
 		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
 			// first roll back
 			rollBack(reason);
-			
+
 			// then mark process as stopped
 			state = ProcessState.STOPPED;
 		} else {
-			logger.warn("Process is already stopped");
+			logger.warn("Process is already stopped or still rollbacking");
 		}
 	}
 
@@ -125,8 +126,8 @@ public abstract class Process implements IProcess {
 
 	@Override
 	public final void run() {
-		if (currentStep != null){
-			currentStep.start();			
+		if (currentStep != null) {
+			currentStep.start();
 		} else {
 			logger.error("No process step to start with specified.");
 		}
@@ -136,7 +137,7 @@ public abstract class Process implements IProcess {
 		if (state == ProcessState.RUNNING) {
 			state = ProcessState.FINISHED;
 			ProcessManager.getInstance().detachProcess(this);
-			
+
 			for (IProcessListener listener : listeners) {
 				listener.onSuccess();
 			}
@@ -146,13 +147,13 @@ public abstract class Process implements IProcess {
 	private void rollBack(String reason) {
 		state = ProcessState.ROLLBACKING;
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
-		
+
 		// roll back current step
 		currentStep.rollBack();
 
 		// rollback already executed steps
 		Collections.reverse(executedSteps);
-		for (ProcessStep step : executedSteps){
+		for (ProcessStep step : executedSteps) {
 			step.rollBack();
 		}
 
@@ -163,6 +164,7 @@ public abstract class Process implements IProcess {
 
 	/**
 	 * Get the {@link NetworkManager} which is hosting this process.
+	 * 
 	 * @return Returns the hosting {@link NetworkManager}.
 	 */
 	public NetworkManager getNetworkManager() {
