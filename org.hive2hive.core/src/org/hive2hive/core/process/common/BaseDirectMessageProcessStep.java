@@ -30,10 +30,14 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 	}
 
 	public void onSuccess() {
+		if (message instanceof IRequestMessage)
+			return;
 		getProcess().nextStep(nextStep);
 	}
 
 	public void onFailure() {
+		if (message instanceof IRequestMessage)
+			return;
 		getProcess().rollBack("Sending direct message failed.");
 	}
 

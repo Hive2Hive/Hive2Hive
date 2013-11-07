@@ -41,10 +41,14 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 	}
 
 	public void onSuccess() {
+		if (message instanceof IRequestMessage)
+			return;
 		getProcess().nextStep(nextStep);
 	}
 
 	public void onFailure() {
+		if (message instanceof IRequestMessage)
+			return;
 		getProcess().rollBack("Sending message failed.");
 	}
 
