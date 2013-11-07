@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.network.messaging;
+package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -16,8 +16,8 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.messaging.TestMessageWithReply.TestCallBackHandler;
-import org.hive2hive.core.test.network.messaging.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
+import org.hive2hive.core.test.network.messages.TestMessageWithReply.TestCallBackHandler;
+import org.hive2hive.core.test.network.messages.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;

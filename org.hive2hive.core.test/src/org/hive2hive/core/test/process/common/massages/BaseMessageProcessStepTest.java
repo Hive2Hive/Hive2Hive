@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common;
+package org.hive2hive.core.test.process.common.massages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -20,7 +20,8 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.messaging.TestMessageOneWay;
+import org.hive2hive.core.test.network.messages.TestMessageOneWay;
+import org.hive2hive.core.test.network.messages.TestMessageWithReply;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -35,7 +36,7 @@ import org.junit.Test;
  * 
  * @author Seppi
  */
-public class BaseMessageStepTest extends H2HJUnitTest {
+public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
@@ -43,7 +44,7 @@ public class BaseMessageStepTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = BaseMessageStepTest.class;
+		testClass = BaseMessageProcessStepTest.class;
 		beforeClass();
 	}
 
@@ -172,7 +173,60 @@ public class BaseMessageStepTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void baseMessageProcessStepTestWithARequestMessage() {
-		Assert.fail("Not implemented yet.");
+		// select two random nodes
+		final NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
+		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		// generate a random content key
+		final String contentKey = NetworkTestUtil.randomString();
+		// check if selected locations are empty
+		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
+		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		// create a message with target node B
+		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), nodeA.getPeerAddress(),
+				contentKey);
+
+		// initialize the process and the one and only step to test
+		Process process = new Process(nodeA) {
+		};
+		BaseMessageProcessStep step = new BaseMessageProcessStep(message, null) {
+			@Override
+			protected void handleRemovalResult(FutureRemove future) {
+				Assert.fail("Should be not used.");
+			}
+
+			@Override
+			public void handleResponseMessage(ResponseMessage responseMessage) {
+				// locally store on requesting node received data
+				String receivedSecret = (String) responseMessage.getContent();
+				nodeA.putLocal(nodeA.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+				// step finished go further
+				getProcess().setNextStep(nextStep);
+			}
+		};
+		process.setNextStep(step);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// wait till response message gets handled
+		waiter = new H2HWaiter(10);
+		Object tmp = null;
+		do {
+			waiter.tickASecond();
+			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
+		} while (tmp == null);
+		
+		// load and verify if same secret was shared
+		String receivedSecret = ((H2HTestData) tmp).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+
+		assertEquals(originalSecret, receivedSecret);
 	}
 
 	@Override

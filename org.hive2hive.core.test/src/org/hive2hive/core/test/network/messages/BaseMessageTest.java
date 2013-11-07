@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.network.messaging;
+package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
