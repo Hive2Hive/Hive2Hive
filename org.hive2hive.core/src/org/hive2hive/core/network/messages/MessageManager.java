@@ -15,6 +15,11 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 
+/**
+ * This class handles the sending of messages.
+ * 
+ * @author Seppi
+ */
 public class MessageManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageManager.class);
@@ -26,12 +31,22 @@ public class MessageManager {
 		networkManager = aNetworkManager;
 	}
 
+	/**
+	 * Send a message which gets routed to the next responsible node according the
+	 * {@link BaseMessage#getTargetKey()} key.
+	 * 
+	 * @param message
+	 *            a message to send
+	 * @return a future
+	 */
 	public FutureDirect send(BaseMessage message) {
+		if (message.getTargetKey() == null)
+			throw new IllegalArgumentException("target key can not be null");
+		
+		// prepare message
 		message.increaseSendingCounter();
 		message.setSenderAddress(networkManager.getPeerAddress());
-
 		configureCallbackHandlerIfNeeded(message);
-
 		RequestP2PConfiguration requestP2PConfiguration = createSendingConfiguration();
 
 		// send message to the peer which is responsible for the given key
@@ -45,32 +60,60 @@ public class MessageManager {
 		return futureDirect;
 	}
 
+	/**
+	 * Send a message directly to a node according the {@link BaseDirectMessage#getTargetAddress()} peer
+	 * address.
+	 * 
+	 * @param message
+	 *            a direct message to send
+	 * @return a future
+	 */
 	public FutureResponse sendDirect(BaseDirectMessage message) {
-		if (message.getTargetAddress() == null) {
+		if (message.getTargetAddress() == null)
 			throw new IllegalArgumentException("target address can not be null");
-		}
-		
+
+		// prepare message
 		message.increaseDirectSendingCounter();
 		message.setSenderAddress(networkManager.getPeerAddress());
-	
 		configureCallbackHandlerIfNeeded(message);
 
+		// send message directly to the peer with the given peer address
 		FutureResponse futureResponse = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(message).start();
 
 		logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
 				message.getTargetKey(), message.getMessageID()));
-		
+
 		return futureResponse;
 	}
 
-	// TODO: A full field is exposed to the user - this is not a good encapsulation - change it if
-	// possible.
-	public Map<String, IResponseCallBackHandler> getCallBackHandlers() {
-		return callBackHandlers;
+	public void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
+		callBackHandlers.put(messageId, handler);
 	}
 
-	protected RequestP2PConfiguration createSendingConfiguration() {
+	/**
+	 * Gets and removes a message callback handler
+	 * 
+	 * @param messageId
+	 *            a unique message id
+	 * @return a callback handler or <code>null</code> if doesn't exist
+	 */
+	public IResponseCallBackHandler getCallBackHandler(String messageId) {
+		return callBackHandlers.remove(messageId);
+	}
+
+	/**
+	 * Check if a message callback handler exists.
+	 * 
+	 * @param messageId
+	 *            a unique message id
+	 * @return <code>true</code> if exists and not <code>null</code>
+	 */
+	public boolean checkIfCallbackHandlerExists(String messageId) {
+		return (callBackHandlers.get(messageId) != null);
+	}
+
+	private RequestP2PConfiguration createSendingConfiguration() {
 		RequestP2PConfiguration requestP2PConfiguration = new RequestP2PConfiguration(1, 10, 0);
 		return requestP2PConfiguration;
 	}

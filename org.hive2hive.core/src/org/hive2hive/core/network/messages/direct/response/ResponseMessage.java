@@ -53,8 +53,7 @@ public class ResponseMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		IResponseCallBackHandler handler = networkManager.getMessageManager().getCallBackHandlers()
-				.remove(getMessageID());
+		IResponseCallBackHandler handler = networkManager.getMessageManager().getCallBackHandler(getMessageID());
 		if (handler != null) {
 			handler.handleResponseMessage(this);
 		} else {
@@ -66,7 +65,7 @@ public class ResponseMessage extends BaseDirectMessage {
 
 	@Override
 	public AcceptanceReply accept() {
-		if (networkManager.getMessageManager().getCallBackHandlers().get(getMessageID()) != null) {
+		if (networkManager.getMessageManager().checkIfCallbackHandlerExists(getMessageID())) {
 			return AcceptanceReply.OK;
 		}
 		return AcceptanceReply.NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE;

@@ -172,16 +172,13 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public abstract AcceptanceReply accept();
 
 	/**
-	 * This method is called if a failure is detected while sending this
-	 * message. The idea is that sending failures are handled by the message
-	 * itself, because the message is the only entity which knows how to perform
-	 * from the point of a failure on. Some messages don't need do be sent
-	 * again, while others need a redirect or wish to inform special (potential
-	 * several) customers about the failure.</br>
-	 * This abstract class implements
-	 * the default behavior for {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
-	 * Subclasses which need a different or more elaborated failure handling
-	 * have to extend or override this method.</br>
+	 * This method is called if a failure is detected while sending this message. The idea is that sending
+	 * failures are handled by the message itself, because the message is the only entity which knows how to
+	 * perform from the point of a failure on. Some messages don't need do be sent again, while others need a
+	 * redirect or wish to inform special (potential several) customers about the failure.</br>
+	 * This abstract class implements the default behavior for {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
+	 * Subclasses which need a different or more elaborated failure handling have to extend or override this
+	 * method.</br>
 	 * </br>
 	 * This method analyzes the reply and give <code>true</code> if a resend of the message is recommend and a
 	 * <code>false</code> if not.

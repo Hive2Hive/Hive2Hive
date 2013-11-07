@@ -15,7 +15,7 @@ import org.hive2hive.core.network.NetworkManager;
  * the sender node. This design allows a quick and non-blocking message
  * handling.
  * 
- * @author Seppi
+ * @author Nendor, Seppi
  */
 public class MessageReplyHandler implements ObjectDataReply {
 
