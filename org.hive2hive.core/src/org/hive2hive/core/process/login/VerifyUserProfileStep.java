@@ -7,6 +7,13 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 
+/**
+ * Verifies the answer of the @link{GetUserProfileStep}. If the user profile is not found or could not be
+ * decrypted, the process is stopped. Otherwise, it continues with adding this node to the locations.
+ * 
+ * @author Nico
+ * 
+ */
 public class VerifyUserProfileStep extends ProcessStep {
 
 	private GetUserProfileStep userProfileStep;
@@ -23,9 +30,12 @@ public class VerifyUserProfileStep extends ProcessStep {
 			// failed for some reason
 			getProcess().stop("User profile not found or wrong password");
 		} else if (!userProfile.getUserId().equalsIgnoreCase(userId)) {
-			// mismatch the userId --> should never happen
+			// mismatch the userId (should never happen)
 			getProcess().stop("UserId does not match the one in the profile");
 		} else {
+			// store the profile in the process
+			((LoginProcess) getProcess()).setUserProfile(userProfile);
+
 			// 1. GetLocationsStep: get the locations
 			// 2. AddMyselfToLocationsStep: add ourself to the location map
 			AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(userId);

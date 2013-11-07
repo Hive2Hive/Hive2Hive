@@ -12,13 +12,13 @@ import org.hive2hive.core.network.data.NetworkContent;
  * @author Nico
  * 
  */
-public class LocationsEntry extends NetworkContent {
+public class LocationEntry extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private PeerAddress address;
 	private boolean isMaster;
 
-	public LocationsEntry(PeerAddress location, boolean isMaster) {
+	public LocationEntry(PeerAddress location, boolean isMaster) {
 		this.setAddress(location);
 		this.setMaster(isMaster);
 	}

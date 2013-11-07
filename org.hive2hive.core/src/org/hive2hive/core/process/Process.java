@@ -133,7 +133,7 @@ public abstract class Process implements IProcess {
 		}
 	}
 
-	protected void finish() {
+	private void finish() {
 		if (state == ProcessState.RUNNING) {
 			state = ProcessState.FINISHED;
 			ProcessManager.getInstance().detachProcess(this);

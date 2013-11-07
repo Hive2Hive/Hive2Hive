@@ -87,7 +87,7 @@ public class PutProcessStep extends ProcessStep {
 	private void waitAMoment() {
 		try {
 			// wait a moment to give time to replicate the data
-			Thread.sleep(H2HConstants.PUT_VERIFICATION_WAITING_TIME);
+			Thread.sleep(H2HConstants.PUT_VERIFICATION_WAITING_TIME_MS);
 		} catch (InterruptedException e) {
 			logger.warn("Put verification woken up involuntarily.");
 		}

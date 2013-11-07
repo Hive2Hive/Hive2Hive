@@ -8,7 +8,9 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 
 public class H2HNode implements IH2HNode {
@@ -75,7 +77,21 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public IProcess login(String userId, String password, String pin) {
-		LoginProcess process = new LoginProcess(userId, password, pin, networkManager);
+		final LoginProcess process = new LoginProcess(userId, password, pin, networkManager);
+		process.addListener(new IProcessListener() {
+			@Override
+			public void onSuccess() {
+				// start the post login process
+				PostLoginProcess postLogin = new PostLoginProcess(process.getUserProfile(), process.getLocations(), networkManager);
+				postLogin.start();
+			}
+
+			@Override
+			public void onFail(String reason) {
+				// ignore here
+			}
+		});
+
 		if (autostartProcesses) {
 			process.start();
 		}

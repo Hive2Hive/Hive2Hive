@@ -1,5 +1,7 @@
 package org.hive2hive.core;
 
+import java.util.Date;
+
 public interface H2HConstants {
 
 	// standard port for the hive2hive network
@@ -24,11 +26,13 @@ public interface H2HConstants {
 	public static final String USER_MESSAGE_QUEUE_KEY = "USER_MESSAGE_QUEUE_KEY";
 
 	// waiting time (in milliseconds) after a put operation to verify if put succeeded
-	public static final long PUT_VERIFICATION_WAITING_TIME = 2000;
+	public static final long PUT_VERIFICATION_WAITING_TIME_MS = 2000;
 
 	// number of allowed tries to retry a put
 	public static final int PUT_RETRIES = 3;
 	// number of allowed tries to get for verification a put
 	public static final int GET_RETRIES = 3;
+
+	public static final long CONTACT_PEERS_AWAIT_MS = 15000;
 
 }
