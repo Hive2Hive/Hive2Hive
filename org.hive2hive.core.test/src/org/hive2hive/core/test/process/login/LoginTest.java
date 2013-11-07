@@ -22,6 +22,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Tests the login procedure. Should not be able to login if the credentials are wrong.
+ * 
+ * @author Nico
+ * 
+ */
 public class LoginTest extends H2HJUnitTest {
 
 	private static final int networkSize = 10;

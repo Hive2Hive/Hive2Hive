@@ -6,6 +6,13 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.GetUserProfileStep;
 import org.hive2hive.core.security.UserPassword;
 
+/**
+ * Process to log in. This process only logs in. When the credentials match, the locations get updated.
+ * This process does <strong>not</strong> synchronize the local files or handle the user message queue.
+ * 
+ * @author Nico
+ * 
+ */
 public class LoginProcess extends Process {
 
 	private UserProfile userProfile;
@@ -23,12 +30,6 @@ public class LoginProcess extends Process {
 
 		// define first step
 		setNextStep(userProfileStep);
-	}
-
-	@Override
-	protected void finish() {
-		// TODO start background process for updating / synchronizing
-		super.finish();
 	}
 
 	public void setUserProfile(UserProfile userProfile) {

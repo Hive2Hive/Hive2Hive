@@ -7,6 +7,13 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.GetLocationsStep;
 import org.hive2hive.core.process.common.GetUserProfileStep;
 
+/**
+ * Verifies the answer of the @link{GetUserProfileStep}. If the user profile is not found or could not be
+ * decrypted, the process is stopped. Otherwise, it continues with adding this node to the locations.
+ * 
+ * @author Nico
+ * 
+ */
 public class VerifyUserProfileStep extends ProcessStep {
 
 	private GetUserProfileStep userProfileStep;
