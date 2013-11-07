@@ -1,7 +1,7 @@
 package org.hive2hive.core.process.manager;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.hive2hive.core.process.IProcess;
 
@@ -17,7 +17,7 @@ public class ProcessManager {
 	private Map<Integer, IProcess> attachedProcesses;
 
 	private ProcessManager() {
-		attachedProcesses = new HashMap<Integer, IProcess>();
+		attachedProcesses = new ConcurrentHashMap<Integer, IProcess>();
 		pidCounter = 0;
 	}
 
@@ -30,9 +30,10 @@ public class ProcessManager {
 
 	/**
 	 * Returns a unique PID (process ID) for this {@link ProcessManager}.
+	 * 
 	 * @return A unique PID.
 	 */
-	public int getNewPID() {
+	public synchronized int getNewPID() {
 		return pidCounter++ % Integer.MAX_VALUE;
 	}
 
