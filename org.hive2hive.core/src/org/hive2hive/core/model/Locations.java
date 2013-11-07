@@ -19,42 +19,42 @@ public class Locations extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final String forUser;
-	private final Set<OnlinePeer> onlinePeers;
+	private final Set<LocationsEntry> locationsEntry;
 
 	public Locations(String forUser) {
 		this.forUser = forUser;
-		onlinePeers = new HashSet<OnlinePeer>();
+		locationsEntry = new HashSet<LocationsEntry>();
 	}
 
 	public String getUserId() {
 		return forUser;
 	}
 
-	public void addOnlinePeer(OnlinePeer onlinePeer) {
-		onlinePeers.add(onlinePeer);
+	public void addEntry(LocationsEntry entry) {
+		locationsEntry.add(entry);
 	}
 
-	public void removeOnlinePeer(OnlinePeer toRemove) {
-		onlinePeers.remove(toRemove);
+	public void removeEntry(LocationsEntry toRemove) {
+		locationsEntry.remove(toRemove);
 	}
 
-	public void removeOnlinePeer(PeerAddress toRemove) {
-		OnlinePeer removal = null;
-		for (OnlinePeer online : onlinePeers) {
+	public void removeEntry(PeerAddress toRemove) {
+		LocationsEntry removal = null;
+		for (LocationsEntry online : locationsEntry) {
 			if (online.getAddress().equals(toRemove)) {
 				removal = online;
 				break;
 			}
 		}
-		onlinePeers.remove(removal);
+		locationsEntry.remove(removal);
 	}
 
-	public Set<OnlinePeer> getOnlinePeers() {
-		return onlinePeers;
+	public Set<LocationsEntry> getLocationsEntry() {
+		return locationsEntry;
 	}
 
-	public OnlinePeer getMaster() {
-		for (OnlinePeer peer : onlinePeers) {
+	public LocationsEntry getMaster() {
+		for (LocationsEntry peer : locationsEntry) {
 			if (peer.isMaster())
 				return peer;
 		}

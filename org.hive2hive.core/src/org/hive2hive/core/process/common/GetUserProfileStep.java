@@ -42,7 +42,7 @@ public class GetUserProfileStep extends GetProcessStep {
 	protected void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			// could have been intended...
-			logger.debug("Did not find user profile");
+			logger.warn("Did not find user profile");
 		} else {
 			EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
 			logger.debug("Decrpting UserProfile with 256bit AES key from password");
@@ -55,7 +55,6 @@ public class GetUserProfileStep extends GetProcessStep {
 				userProfile = (UserProfile) decrypted;
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
-				getProcess().stop(e.getMessage());
 			}
 		}
 

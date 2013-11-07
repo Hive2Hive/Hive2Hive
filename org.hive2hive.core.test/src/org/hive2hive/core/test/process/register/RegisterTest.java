@@ -109,7 +109,7 @@ public class RegisterTest extends H2HJUnitTest {
 		// userId should match
 		Assert.assertEquals(userId, locations.getUserId());
 		// fresh location maps should be empty
-		Assert.assertTrue(locations.getOnlinePeers().isEmpty());
+		Assert.assertTrue(locations.getLocationsEntry().isEmpty());
 
 		// verify the new user message queue
 		FutureGet getQueue = otherClient.getGlobal(userId, H2HConstants.USER_MESSAGE_QUEUE_KEY);

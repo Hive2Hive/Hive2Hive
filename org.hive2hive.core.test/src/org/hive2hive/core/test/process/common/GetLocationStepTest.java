@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.OnlinePeer;
+import org.hive2hive.core.model.LocationsEntry;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.GetLocationsStep;
@@ -52,8 +52,8 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		OnlinePeer status = new OnlinePeer(putter.getPeerAddress(), true);
-		newLocations.addOnlinePeer(status);
+		LocationsEntry status = new LocationsEntry(putter.getPeerAddress(), true);
+		newLocations.addEntry(status);
 
 		// put the locations to the DHT
 		proxy.putLocal(userId, H2HConstants.USER_LOCATIONS, newLocations);
@@ -78,7 +78,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());
 
-		List<OnlinePeer> onlinePeers = new ArrayList<OnlinePeer>(found.getOnlinePeers());
+		List<LocationsEntry> onlinePeers = new ArrayList<LocationsEntry>(found.getLocationsEntry());
 		Assert.assertEquals(putter.getPeerAddress(), onlinePeers.get(0).getAddress());
 		Assert.assertTrue(onlinePeers.get(0).isMaster());
 	}

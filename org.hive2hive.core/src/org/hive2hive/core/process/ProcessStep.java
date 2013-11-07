@@ -9,7 +9,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 
 /**
- * This class represents a single step of a {@link Process}. This step calls the next step after being finished.
+ * This class represents a single step of a {@link Process}. This step calls the next step after being
+ * finished.
  * 
  * @author Nico
  * 
