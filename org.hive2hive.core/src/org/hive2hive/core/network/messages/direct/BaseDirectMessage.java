@@ -2,13 +2,11 @@ package org.hive2hive.core.network.messages.direct;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.PeerAddressDiscoveryMessage;
-import org.hive2hive.core.network.messages.request.callback.PeerAddressDiscoveryDirectMessagingCallBackHandler;
 
 public abstract class BaseDirectMessage extends BaseMessage {
 
@@ -19,54 +17,51 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	private PeerAddress targetPeerAddress;
 	private final boolean needsRedirectedSend;
 
+	private int directSendingCounter = 0;
+
 	/**
 	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.
 	 * 
-	 * @param messageID the ID of this message
-	 * @param targetKey the target key to which this message should be routed
-	 * @param targetPeerAddress the {@link PeerAddress} of the target node
-	 * @param needsRedirectedSend flag which indicates if this message should be rerouted if a direct sending
+	 * @param messageID
+	 *            the ID of this message
+	 * @param targetKey
+	 *            the target key to which this message should be routed
+	 * @param targetPeerAddress
+	 *            the {@link PeerAddress} of the target node
+	 * @param senderAddress
+	 *            the peer address of the sender
+	 * @param needsRedirectedSend
+	 *            flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
 	 */
 	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetPeerAddress,
-			boolean needsRedirectedSend) {
-		super(messageID, targetKey);
+			PeerAddress senderAddress, boolean needsRedirectedSend) {
+		super(messageID, targetKey, senderAddress);
 		this.targetPeerAddress = targetPeerAddress;
 		this.needsRedirectedSend = needsRedirectedSend;
 	}
 
-	/**
-	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.
-	 * 
-	 * @param aTargetKey the target key to which this message should be routed
-	 * @param aTargetPeerAddress the {@link PeerAddress} of the target node
-	 * @param aNeedsRedirectedSend flag which indicates if this message should be rerouted if a direct sending
-	 *            to the {@link PeerAddress} fails
-	 */
-	public BaseDirectMessage(String aTargetKey, PeerAddress aTargetPeerAddress, boolean aNeedsRedirectedSend,
-			boolean useDHTCachForAddress) {
-		this(createMessageID(), aTargetKey, aTargetPeerAddress, aNeedsRedirectedSend);
-	}
-
-	public boolean needsRedirectdSend() {
+	public boolean needsRedirectedSend() {
 		return needsRedirectedSend;
 	}
 
 	public PeerAddress getTargetAddress() {
 		return targetPeerAddress;
 	}
+	
+	public int getDirectSendingCounter() {
+		return directSendingCounter;
+	}
 
 	public void setTargetPeerAddress(PeerAddress aTargetPeerAddress) {
 		targetPeerAddress = aTargetPeerAddress;
 	}
 
-	public void discoverPeerAddressAndSendMe(NetworkManager aNetworkManager) {
-		PeerAddressDiscoveryMessage discoveryMessage = new PeerAddressDiscoveryMessage(getTargetKey(),
-				aNetworkManager.getPeerAddress());
-		PeerAddressDiscoveryDirectMessagingCallBackHandler handler = new PeerAddressDiscoveryDirectMessagingCallBackHandler(
-				aNetworkManager, this);
-		discoveryMessage.setCallBackHandler(handler);
-		aNetworkManager.send(discoveryMessage);
+	/**
+	 * Increases the internal sending counter of this direct message.
+	 */
+	public void increaseDirectSendingCounter() {
+		directSendingCounter++;
 	}
 
 	@Override
@@ -78,17 +73,30 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	}
 
 	@Override
-	public void handleSendingFailure(AcceptanceReply reply, NetworkManager aNetworkManager) {
-		logger.debug(String.format("Have to handle a sending failure. AcceptanceReply='%s'", reply));
-		if (AcceptanceReply.FUTURE_FAILURE == reply) {
-			logger.debug(String.format(
-					"Failure while sending this message directly using the peer address '%s' ",
-					getTargetAddress()));
-			if (needsRedirectdSend()) {
-				discoverPeerAddressAndSendMe(aNetworkManager);
-			}
-		} else {
-			super.handleSendingFailure(reply, aNetworkManager);
+	public boolean handleSendingFailure(AcceptanceReply reply) throws IllegalArgumentException {
+		logger.debug(String.format("Have to handle a sending failure. reply = '%s'", reply));
+		switch (reply) {
+			case WRONG_TARGET:
+				logger.error(String
+						.format("Wrong node responded while sending this message directly using the peer address '%s' ",
+								getTargetAddress()));
+			case FAILURE:
+			case FUTURE_FAILURE:
+				if (directSendingCounter < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
+					return true;
+				} else {
+					logger.debug(String.format(
+							"Failure while sending this message directly using the peer address '%s' ",
+							getTargetAddress()));
+					return false;
+				}
+			case OK:
+				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
+				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
+			default:
+				logger.error(String.format("Unkown AcceptanceReply argument: %s", reply));
+				throw new IllegalArgumentException(
+						String.format("Unkown AcceptanceReply argument: %s", reply));
 		}
 	}
 

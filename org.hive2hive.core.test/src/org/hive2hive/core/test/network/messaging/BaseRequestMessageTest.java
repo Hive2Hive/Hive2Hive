@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.messages.FutureDirectListener;
+import org.hive2hive.core.network.messages.IBaseMessageListener;
+import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
-import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -18,6 +20,7 @@ import org.hive2hive.core.test.network.messaging.TestMessageWithReply.TestCallBa
 import org.hive2hive.core.test.network.messaging.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,7 +54,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * Test if a asynchronous message (implementing the {@link IRequestMessage}) interface gets
 	 * properly handled. To verify this node A sends to node B a randomly created contentKey. Node B generates
 	 * a random secret. The secret gets locally stored (location key is node B's node id) and sent back
-	 * with a {@link ResponseMessage} to node A. A callback handler implementing {@link ICallBackHandler} at
+	 * with a {@link ResponseMessage} to node A. A callback handler implementing {@link IResponseCallBackHandler} at
 	 * node A handles the received response message and also locally puts the received secret into the DHT
 	 * (location key is node A's node id). Every think went right when under both location keys the same data
 	 * appears.
@@ -73,7 +76,17 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message);
+		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+			@Override
+			public void onSuccess() {
+			}
+
+			@Override
+			public void onFailure() {
+				// should not happen
+				Assert.fail("Should not failed.");
+			}
+		}, message, nodeA));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -112,7 +125,17 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message);
+		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+			@Override
+			public void onSuccess() {
+			}
+
+			@Override
+			public void onFailure() {
+				// should not happen
+				Assert.fail("Should not failed.");
+			}
+		}, message, nodeA));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);

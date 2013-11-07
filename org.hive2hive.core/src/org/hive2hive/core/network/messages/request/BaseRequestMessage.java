@@ -3,42 +3,30 @@ package org.hive2hive.core.network.messages.request;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
+import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 
 /**
  * Prototype of an abstract message which will create a reply.
  * 
- * @author Nendor
+ * @author Nendor, Seppi
  * 
  */
 public abstract class BaseRequestMessage extends BaseMessage implements
-		IRequestMessage {
+                IRequestMessage {
 
-	private static final long serialVersionUID = 4510609215735076075L;
+        private static final long serialVersionUID = 4510609215735076075L;
 
-	private PeerAddress senderAddress;
-	private ICallBackHandler callBackHandler;
+        private IResponseCallBackHandler callBackHandler;
 
-	public BaseRequestMessage(String aTargetKey, PeerAddress aSenderAddress) {
-		super(createMessageID(), aTargetKey);
-		senderAddress = aSenderAddress;
-	}
+        public BaseRequestMessage(String targetKey, PeerAddress senderAddress) {
+                super(createMessageID(), targetKey, senderAddress);
+        }
 
-	public ICallBackHandler getCallBackHandler() {
-		return callBackHandler;
-	}
+        public IResponseCallBackHandler getCallBackHandler() {
+                return callBackHandler;
+        }
 
-	public void setCallBackHandler(ICallBackHandler aHandler) {
-		callBackHandler = aHandler;
-	}
-
-	public PeerAddress getSenderAddress() {
-		return senderAddress;
-	}
-
-	@Override
-	public void setSenderAddress(PeerAddress aSenderAddress) {
-		senderAddress = aSenderAddress;
-	}
-
+        public void setCallBackHandler(IResponseCallBackHandler aHandler) {
+                callBackHandler = aHandler;
+        }
 }

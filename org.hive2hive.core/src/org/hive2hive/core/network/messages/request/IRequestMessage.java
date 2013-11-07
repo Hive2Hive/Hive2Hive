@@ -1,16 +1,22 @@
 package org.hive2hive.core.network.messages.request;
 
-import net.tomp2p.peers.PeerAddress;
-
-import org.hive2hive.core.network.messages.request.callback.ICallBackHandler;
+import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 
 public interface IRequestMessage {
 
-	public ICallBackHandler getCallBackHandler();
+	/**
+	 * Setter
+	 * 
+	 * @param aHandler
+	 *            a {@link IResponseCallBackHandler} for handling responses from receiver node
+	 */
+	public void setCallBackHandler(IResponseCallBackHandler aHandler);
+	
+	/**
+	 * Getter
+	 * 
+	 * @return the callback handler (if set)
+	 */
+	public IResponseCallBackHandler getCallBackHandler();
 
-	void setCallBackHandler(ICallBackHandler aCallBackHandler);
-
-	public PeerAddress getSenderAddress();
-
-	public void setSenderAddress(PeerAddress aSenderAddress);
 }
