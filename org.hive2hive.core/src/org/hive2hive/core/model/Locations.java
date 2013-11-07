@@ -49,7 +49,7 @@ public class Locations extends NetworkContent {
 		locationsEntry.remove(removal);
 	}
 
-	public Set<LocationsEntry> getLocationsEntry() {
+	public Set<LocationsEntry> getLocationsEntries() {
 		return locationsEntry;
 	}
 

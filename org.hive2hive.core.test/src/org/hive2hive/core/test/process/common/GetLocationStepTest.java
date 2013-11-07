@@ -78,7 +78,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());
 
-		List<LocationsEntry> onlinePeers = new ArrayList<LocationsEntry>(found.getLocationsEntry());
+		List<LocationsEntry> onlinePeers = new ArrayList<LocationsEntry>(found.getLocationsEntries());
 		Assert.assertEquals(putter.getPeerAddress(), onlinePeers.get(0).getAddress());
 		Assert.assertTrue(onlinePeers.get(0).isMaster());
 	}

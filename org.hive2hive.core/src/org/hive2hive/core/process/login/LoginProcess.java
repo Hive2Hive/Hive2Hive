@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.login;
 
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.GetUserProfileStep;
@@ -7,22 +8,17 @@ import org.hive2hive.core.security.UserPassword;
 
 public class LoginProcess extends Process {
 
-	private final String userId;
-	private final UserPassword userPassword;
+	private UserProfile userProfile;
 
 	public LoginProcess(String userId, String password, String pin, NetworkManager networkManager) {
-
 		super(networkManager);
-
-		this.userId = userId;
-		this.userPassword = new UserPassword(password, pin);
+		UserPassword userPassword = new UserPassword(password, pin);
 
 		// execution order:
 		// 1. GetUserProfileStep
 		// 2. Verify the user profile
 		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(userId);
-		GetUserProfileStep userProfileStep = new GetUserProfileStep(this.userId, this.userPassword,
-				verifyProfileStep);
+		GetUserProfileStep userProfileStep = new GetUserProfileStep(userId, userPassword, verifyProfileStep);
 		verifyProfileStep.setPreviousStep(userProfileStep);
 
 		// define first step
@@ -35,11 +31,11 @@ public class LoginProcess extends Process {
 		super.finish();
 	}
 
-	public String getUserId() {
-		return userId;
+	public void setUserProfile(UserProfile userProfile) {
+		this.userProfile = userProfile;
 	}
 
-	public UserPassword getUserPassword() {
-		return userPassword;
+	public UserProfile getUserProfile() {
+		return userProfile;
 	}
 }

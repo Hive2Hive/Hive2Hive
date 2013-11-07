@@ -23,9 +23,12 @@ public class VerifyUserProfileStep extends ProcessStep {
 			// failed for some reason
 			getProcess().stop("User profile not found or wrong password");
 		} else if (!userProfile.getUserId().equalsIgnoreCase(userId)) {
-			// mismatch the userId --> should never happen
+			// mismatch the userId (should never happen)
 			getProcess().stop("UserId does not match the one in the profile");
 		} else {
+			// store the profile in the process
+			((LoginProcess) getProcess()).setUserProfile(userProfile);
+
 			// 1. GetLocationsStep: get the locations
 			// 2. AddMyselfToLocationsStep: add ourself to the location map
 			AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(userId);
