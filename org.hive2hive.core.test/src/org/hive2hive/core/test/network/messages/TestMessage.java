@@ -13,14 +13,14 @@ import org.hive2hive.core.test.H2HTestData;
  * @author Seppi
  * 
  */
-public class TestMessageOneWay extends BaseMessage {
+public class TestMessage extends BaseMessage {
 
 	private static final long serialVersionUID = 880089170139661640L;
 
 	private final String contentKey;
 	private final H2HTestData wrapper;
 
-	public TestMessageOneWay(String targetKey, String contentKey, H2HTestData wrapper) {
+	public TestMessage(String targetKey, String contentKey, H2HTestData wrapper) {
 		super(createMessageID(), targetKey);
 		this.contentKey = contentKey;
 		this.wrapper = wrapper;

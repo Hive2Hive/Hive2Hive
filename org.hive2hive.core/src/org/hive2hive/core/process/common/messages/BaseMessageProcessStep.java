@@ -16,15 +16,19 @@ import org.hive2hive.core.process.ProcessStep;
  * This is a process step for sending a {@link BaseMessage}.
  * </br></br>
  * 
+ * <b>Important:</b> For sending a {@link BaseDirectMessage} please use {@link BaseDirectMessageProcessStep}
+ * which sends the message according a given {@link PeerAddress}.</br></br>
+ * 
  * <b>Design decision:</b>
  * <ul>
  * <li>When a request message (e.g. {@link BaseRequestMessage}) which implements the {@link IRequestMessage}
  * interface is sent, the process step acts also as a {@link IResponseCallBackHandler} callback handler for
- * this message. This means that a </li>
+ * this message. The whole callback functionality has to be (if desired) implemented in the
+ * {@link BaseMessageProcessStep#handleResponseMessage(ResponseMessage)} method.</li>
+ * <li>Because all message in <code>Hive2Hive</code> are sent asynchronously the message process step uses a
+ * {@link FutureDirectListener} adapter to gets notified about success or failure of sending the message. For
+ * that the process step implements the {@link IBaseMessageListener} interface.</li>
  * </ul>
- * 
- * <b>Important:</b> For sending a {@link BaseDirectMessage} please use {@link BaseDirectMessageProcessStep}
- * which sends the message according a given {@link PeerAddress}.
  * 
  * @author Seppi
  */
@@ -66,12 +70,14 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 		futureDirect.addListener(new FutureDirectListener(this, message, getNetworkManager()));
 	}
 
+	@Override
 	public void onSuccess() {
 		if (message instanceof IRequestMessage)
 			return;
 		getProcess().setNextStep(nextStep);
 	}
 
+	@Override
 	public void onFailure() {
 		if (message instanceof IRequestMessage)
 			return;

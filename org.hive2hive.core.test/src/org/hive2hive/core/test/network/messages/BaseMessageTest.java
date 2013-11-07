@@ -57,7 +57,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey,
+		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 		// send message
 		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
@@ -103,7 +103,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a test message which gets rejected several times
-		TestMessageOneWayMaxSending message = new TestMessageOneWayMaxSending(nodeB.getNodeId(), contentKey,
+		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 		// send message
 		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {

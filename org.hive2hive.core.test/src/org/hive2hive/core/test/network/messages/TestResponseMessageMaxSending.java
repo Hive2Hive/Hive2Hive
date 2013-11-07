@@ -8,6 +8,12 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 
+/**
+ * Test message to simulate rejecting requesting receiver nodes. For further details see
+ * {@link TestMessageWithReplyMaxSending}.
+ * 
+ * @author Seppi
+ */
 public class TestResponseMessageMaxSending extends ResponseMessage {
 
 	private static final long serialVersionUID = 9169072033631718522L;
@@ -19,7 +25,7 @@ public class TestResponseMessageMaxSending extends ResponseMessage {
 
 	@Override
 	public AcceptanceReply accept() {
-		// block the first tries
+		// reject all messages till last try
 		if (getDirectSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
 			return AcceptanceReply.FAILURE;
 		}

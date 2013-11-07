@@ -61,10 +61,12 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		this.targetPeerAddress = targetPeerAddress;
 		this.needsRedirectedSend = needsRedirectedSend;
 	}
-	
+
 	/**
 	 * Abstract base class for directly sending messages to a target peer.
-	 * @param targetPeerAddress The {@link PeerAddress} of the target.
+	 * 
+	 * @param targetPeerAddress
+	 *            the {@link PeerAddress} of the target.
 	 */
 	public BaseDirectMessage(PeerAddress targetPeerAddress) {
 		this(createMessageID(), null, targetPeerAddress, false);

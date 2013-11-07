@@ -50,7 +50,6 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 						Assert.fail("Should not failed.");
 					}
 				}, responseMessage, networkManager));
-		;
 	}
 
 	@Override

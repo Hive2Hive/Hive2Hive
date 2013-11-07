@@ -10,16 +10,17 @@ import org.hive2hive.core.test.H2HTestData;
  * 
  * @author Seppi
  */
-public class TestMessageOneWayMaxSending extends TestMessageOneWay {
+public class TestMessageMaxSending extends TestMessage {
 
 	private static final long serialVersionUID = -6955621718515026298L;
 
-	public TestMessageOneWayMaxSending(String targetKey, String contentKey, H2HTestData wrapper) {
+	public TestMessageMaxSending(String targetKey, String contentKey, H2HTestData wrapper) {
 		super(targetKey, contentKey, wrapper);
 	}
 
 	@Override
 	public AcceptanceReply accept() {
+		// reject all messages till last try
 		if (getSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING) {
 			return AcceptanceReply.FAILURE;
 		}

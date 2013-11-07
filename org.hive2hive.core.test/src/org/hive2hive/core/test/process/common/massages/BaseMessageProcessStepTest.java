@@ -20,7 +20,7 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.messages.TestMessageOneWay;
+import org.hive2hive.core.test.network.messages.TestMessage;
 import org.hive2hive.core.test.network.messages.TestMessageWithReply;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
@@ -73,7 +73,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey,
+		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 
 		// initialize the process and the one and only step to test
@@ -135,7 +135,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		TestMessageOneWay message = new TestMessageOneWay(nodeB.getNodeId(), contentKey,
+		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 
 		// initialize the process and the one and only step to test
