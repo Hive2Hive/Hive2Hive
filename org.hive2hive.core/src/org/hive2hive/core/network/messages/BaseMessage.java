@@ -40,9 +40,10 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	protected NetworkManager networkManager;
 
-	private final String messageID;
-	private final String targetKey;
-	private final PeerAddress senderAddress;
+	protected final String messageID;
+	protected final String targetKey;
+	protected final PeerAddress senderAddress;
+	
 	private final SendingBehavior sendingBehavior;
 
 	private int sendingCounter = 0;

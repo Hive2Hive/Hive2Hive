@@ -14,7 +14,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	private static final long serialVersionUID = 5080812282190501445L;
 
-	private PeerAddress targetPeerAddress;
+	protected PeerAddress targetPeerAddress;
 	private final boolean needsRedirectedSend;
 
 	private int directSendingCounter = 0;
@@ -39,6 +39,15 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		super(messageID, targetKey, senderAddress);
 		this.targetPeerAddress = targetPeerAddress;
 		this.needsRedirectedSend = needsRedirectedSend;
+	}
+	
+	/**
+	 * Abstract base class for directly sending messages to a target peer.
+	 * @param targetPeerAddress The {@link PeerAddress} of the target.
+	 * @param senderAddress The {@link PeerAddress} of the sender.
+	 */
+	public BaseDirectMessage(PeerAddress targetPeerAddress, PeerAddress senderAddress) {
+		this(createMessageID(), null, targetPeerAddress, senderAddress, false);
 	}
 
 	public boolean needsRedirectedSend() {

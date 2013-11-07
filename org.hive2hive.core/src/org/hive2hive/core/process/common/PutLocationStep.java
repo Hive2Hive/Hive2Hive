@@ -13,6 +13,8 @@ public class PutLocationStep extends PutProcessStep {
 
 	public PutLocationStep(Locations locations, ProcessStep nextStep) {
 		super(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, nextStep);
+		
+		// TODO throw exception in case multiple master peers are defined
 	}
 
 }

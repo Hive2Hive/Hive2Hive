@@ -85,7 +85,7 @@ public class LoginTest extends H2HJUnitTest {
 		futureGet.getFutureRequests().awaitUninterruptibly();
 
 		Locations locations = (Locations) futureGet.getData().object();
-		Assert.assertEquals(1, locations.getLocationsEntries().size());
+		Assert.assertEquals(1, locations.getLocationEntries().size());
 	}
 
 	@Test

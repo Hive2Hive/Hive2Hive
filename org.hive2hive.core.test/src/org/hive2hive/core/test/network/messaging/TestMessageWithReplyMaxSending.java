@@ -36,8 +36,7 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(), getTargetKey(),
-				networkManager.getPeerAddress(), getSenderAddress(), secret);
+		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(), networkManager.getPeerAddress(), getSenderAddress(), secret);
 		networkManager.sendDirect(responseMessage).addListener(new FutureResponseListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {

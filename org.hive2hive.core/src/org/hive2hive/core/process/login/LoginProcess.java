@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.login;
 
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -16,6 +17,7 @@ import org.hive2hive.core.security.UserPassword;
 public class LoginProcess extends Process {
 
 	private UserProfile userProfile;
+	private Locations locations;
 
 	public LoginProcess(String userId, String password, String pin, NetworkManager networkManager) {
 		super(networkManager);
@@ -38,5 +40,13 @@ public class LoginProcess extends Process {
 
 	public UserProfile getUserProfile() {
 		return userProfile;
+	}
+
+	public void setLocations(Locations locations) {
+		this.locations = locations;
+	}
+	
+	public Locations getLocations() {
+		return locations;
 	}
 }

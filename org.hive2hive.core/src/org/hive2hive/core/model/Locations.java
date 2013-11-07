@@ -18,29 +18,30 @@ import org.hive2hive.core.network.data.NetworkContent;
 public class Locations extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
-	private final String forUser;
-	private final Set<LocationsEntry> locationsEntry;
+	
+	private final String userId;
+	private final Set<LocationEntry> locationsEntry;
 
-	public Locations(String forUser) {
-		this.forUser = forUser;
-		locationsEntry = new HashSet<LocationsEntry>();
+	public Locations(String userId) {
+		this.userId = userId;
+		this.locationsEntry = new HashSet<LocationEntry>();
 	}
 
 	public String getUserId() {
-		return forUser;
+		return userId;
 	}
 
-	public void addEntry(LocationsEntry entry) {
+	public void addEntry(LocationEntry entry) {
 		locationsEntry.add(entry);
 	}
 
-	public void removeEntry(LocationsEntry toRemove) {
+	public void removeEntry(LocationEntry toRemove) {
 		locationsEntry.remove(toRemove);
 	}
-
+	
 	public void removeEntry(PeerAddress toRemove) {
-		LocationsEntry removal = null;
-		for (LocationsEntry online : locationsEntry) {
+		LocationEntry removal = null;
+		for (LocationEntry online : locationsEntry) {
 			if (online.getAddress().equals(toRemove)) {
 				removal = online;
 				break;
@@ -49,12 +50,12 @@ public class Locations extends NetworkContent {
 		locationsEntry.remove(removal);
 	}
 
-	public Set<LocationsEntry> getLocationsEntries() {
+	public Set<LocationEntry> getLocationEntries() {
 		return locationsEntry;
 	}
 
-	public LocationsEntry getMaster() {
-		for (LocationsEntry peer : locationsEntry) {
+	public LocationEntry getMaster() {
+		for (LocationEntry peer : locationsEntry) {
 			if (peer.isMaster())
 				return peer;
 		}

@@ -77,12 +77,12 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public IProcess login(String userId, String password, String pin) {
-		LoginProcess process = new LoginProcess(userId, password, pin, networkManager);
+		final LoginProcess process = new LoginProcess(userId, password, pin, networkManager);
 		process.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {
 				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(networkManager);
+				PostLoginProcess postLogin = new PostLoginProcess(process.getUserProfile(), process.getLocations(), networkManager);
 				postLogin.start();
 			}
 

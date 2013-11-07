@@ -12,9 +12,9 @@ public class TestResponseMessageMaxSending extends ResponseMessage {
 
 	private static final long serialVersionUID = 9169072033631718522L;
 
-	public TestResponseMessageMaxSending(String messageID, String targetKey, PeerAddress senderAddress,
+	public TestResponseMessageMaxSending(String messageID, PeerAddress senderAddress,
 			PeerAddress requesterAddress, Serializable someContent) {
-		super(messageID, targetKey, senderAddress, requesterAddress, someContent);
+		super(messageID, senderAddress, requesterAddress, someContent);
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class TestMessageWithReply extends BaseRequestMessage {
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getTargetKey(),
+		ResponseMessage responseMessage = new ResponseMessage(getMessageID(),
 				networkManager.getPeerAddress(), getSenderAddress(), secret);
 		networkManager.sendDirect(responseMessage);
 	}
