@@ -9,9 +9,8 @@ import java.util.Arrays;
 import javax.crypto.SecretKey;
 
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserPassword;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
+import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -82,13 +81,11 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int s = 0; s < sizes.length; s++) {
 
 			// test various UserPasswords
-			UserPassword[] upw = new UserPassword[5];
-			for (int i = 0; i < upw.length; i++) {
+			for (int i = 0; i < 5; i++) {
 
 				String randomPW = generateRandomString(20);
 				String randomPIN = generateRandomString(6);
 
-				upw[i] = new UserPassword(randomPW, randomPIN);
 				logger.debug(String.format("Testing %sbit AES key generation from user password and PIN:",
 						sizes[s].value()));
 				logger.debug(String.format("Random PW: %s", randomPW));
@@ -99,7 +96,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				for (int j = 0; j < aesKey.length; j++) {
 
 					// generate AES key
-					aesKey[j] = PasswordUtil.generateAESKeyFromPassword(upw[i], sizes[s]);
+					aesKey[j] = PasswordUtil.generateAESKeyFromPassword(randomPW, randomPIN, sizes[s]);
 
 					assertNotNull(aesKey[j]);
 					assertNotNull(aesKey[j].getEncoded());

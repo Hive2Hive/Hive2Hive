@@ -12,6 +12,7 @@ import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
+import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode {
 

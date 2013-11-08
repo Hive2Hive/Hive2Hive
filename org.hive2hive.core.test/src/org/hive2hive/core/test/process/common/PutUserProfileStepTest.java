@@ -17,11 +17,11 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserPassword;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -65,18 +65,16 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		NetworkManager client = network.get(1); // where the user profile is stored
 
 		// create the needed objects
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = generateRandomString(6);
-		UserPassword userPassword = new UserPassword(password, pin);
-		UserProfile testProfile = new UserProfile(userId,
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+
+		UserProfile testProfile = new UserProfile(credentials.getUserId(),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(testProfile, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(testProfile, credentials, null);
 		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -89,7 +87,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		FutureGet global = client.getGlobal(testProfile.getLocationKey(userPassword),
+		FutureGet global = client.getGlobal(UserProfile.getLocationKey(credentials),
 				H2HConstants.USER_PROFILE);
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
@@ -97,12 +95,12 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		Assert.assertNotNull(found);
 
 		// decrypt it using the same password as set above
-		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(userPassword,
-				AES_KEYLENGTH.BIT_256);
+		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+				credentials.getPin(), AES_KEYLENGTH.BIT_256);
 		UserProfile decrypted = (UserProfile) H2HEncryptionUtil.decryptAES(found, decryptionKeys);
 
 		// verify if both objects are the same
-		Assert.assertEquals(userId, decrypted.getUserId());
+		Assert.assertEquals(credentials.getUserId(), decrypted.getUserId());
 		Assert.assertEquals(testProfile.getTimestamp(), decrypted.getTimestamp());
 	}
 
@@ -113,18 +111,16 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		NetworkManager client = network.get(1); // where the user profile is stored
 
 		// create the needed objects
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = generateRandomString(6);
-		UserPassword userPassword = new UserPassword(password, pin);
-		UserProfile newProfile = new UserProfile(userId,
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+
+		UserProfile newProfile = new UserProfile(credentials.getUserId(),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(newProfile, userPassword, null);
+		PutUserProfileStep step = new PutUserProfileStep(newProfile, credentials, null);
 		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -144,7 +140,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		FutureGet global = client.getGlobal(newProfile.getLocationKey(userPassword),
+		FutureGet global = client.getGlobal(UserProfile.getLocationKey(credentials),
 				H2HConstants.USER_PROFILE);
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();

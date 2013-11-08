@@ -1,9 +1,8 @@
 package org.hive2hive.core.process.register;
 
-import org.hive2hive.core.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessContext;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 
 public final class RegisterProcessContext extends ProcessContext {
 

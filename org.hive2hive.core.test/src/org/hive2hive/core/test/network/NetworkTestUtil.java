@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.UserCredentials;
 
 public class NetworkTestUtil {
 
@@ -123,6 +124,10 @@ public class NetworkTestUtil {
 		return UUID.randomUUID().toString();
 	}
 
+	public static UserCredentials generateRandomCredentials() {
+		return new UserCredentials(NetworkTestUtil.randomString(), NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
+	}
+	
 	protected class Waiter {
 		private int counter = 0;
 		private final int maxAmoutOfTicks;

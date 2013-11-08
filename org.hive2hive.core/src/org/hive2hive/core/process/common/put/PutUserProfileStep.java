@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.UserCredentials;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
@@ -14,6 +13,7 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Generic process step to encrypt the {@link: UserProfile} and add it to the DHT

@@ -4,10 +4,9 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.UserCredentials;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * File which contains all keys and meta information about the files of the owner.
@@ -18,9 +17,10 @@ import org.hive2hive.core.security.UserPassword;
 public class UserProfile extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
-	private final KeyPair domainKeys;
+
 	private final String userId;
 	private final KeyPair encryptionKeys;
+	private final KeyPair domainKeys;
 	private FileTreeNode root;
 
 	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair domainKeys) {
@@ -29,16 +29,16 @@ public class UserProfile extends NetworkContent {
 		this.domainKeys = domainKeys;
 	}
 
-	public KeyPair getDomainKeys() {
-		return domainKeys;
-	}
-
 	public String getUserId() {
 		return userId;
 	}
 
 	public KeyPair getEncryptionKeys() {
 		return encryptionKeys;
+	}
+
+	public KeyPair getDomainKeys() {
+		return domainKeys;
 	}
 
 	public FileTreeNode getRoot() {
