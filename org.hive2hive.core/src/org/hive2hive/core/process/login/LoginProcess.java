@@ -2,6 +2,7 @@ package org.hive2hive.core.process.login;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -19,17 +20,20 @@ public class LoginProcess extends Process {
 	public LoginProcess(UserCredentials credentials, NetworkManager networkManager) {
 		super(networkManager);
 		
-		context = new LoginProcessContext(this);
-
 		// execution order:
 		// 1. GetUserProfileStep
-		// 2. Verify the user profile
-		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId());
-		GetUserProfileStep userProfileStep = new GetUserProfileStep(credentials, verifyProfileStep);
-		verifyProfileStep.setPreviousStep(userProfileStep);
+		// 2. VerifyUserProfileStep
+		// 3. GetLocationsStep: get the other client's locations
+		// 4. AddMyselfToLocationsStep: add this client to the locations map
+		AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(credentials.getUserId());
+		GetLocationsStep locationsStep = new GetLocationsStep(credentials.getUserId(), addToLocsStep);
+		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId(), locationsStep);
+		GetUserProfileStep profileStep = new GetUserProfileStep(credentials, verifyProfileStep);
+		
+		context = new LoginProcessContext(this, profileStep, locationsStep);
 
 		// define first step
-		setNextStep(userProfileStep);
+		setNextStep(profileStep);
 	}
 
 	@Override

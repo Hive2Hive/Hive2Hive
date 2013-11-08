@@ -72,8 +72,8 @@ public class LoginTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		Assert.assertNotNull(process.getContext().getUserProfile());
-		Assert.assertEquals(userProfile.getUserId(), process.getContext().getUserProfile().getUserId());
+		Assert.assertNotNull(process.getContext().getGetUserProfileStep().getUserProfile());
+		Assert.assertEquals(userProfile.getUserId(), process.getContext().getGetUserProfileStep().getUserProfile().getUserId());
 
 		// verify the locations map
 		FutureGet futureGet = client.getGlobal(userProfile.getUserId(), H2HConstants.USER_LOCATIONS);
@@ -90,7 +90,7 @@ public class LoginTest extends H2HJUnitTest {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), NetworkTestUtil.randomString(), userCredentials.getPin());
 		
 		LoginProcess process = loginAndWaitToFail(wrongCredentials);
-		Assert.assertNull(process.getContext().getUserProfile());
+		Assert.assertNull(process.getContext().getGetUserProfileStep().getUserProfile());
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class LoginTest extends H2HJUnitTest {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), userCredentials.getPassword(), NetworkTestUtil.randomString());
 		
 		LoginProcess process = loginAndWaitToFail(wrongCredentials);
-		Assert.assertNull(process.getContext().getUserProfile());
+		Assert.assertNull(process.getContext().getGetUserProfileStep().getUserProfile());
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class LoginTest extends H2HJUnitTest {
 		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(), userCredentials.getPassword(), userCredentials.getPin());
 		
 		LoginProcess process = loginAndWaitToFail(wrongCredentials);
-		Assert.assertNull(process.getContext().getUserProfile());
+		Assert.assertNull(process.getContext().getGetUserProfileStep().getUserProfile());
 	}
 
 	public LoginProcess loginAndWaitToFail(UserCredentials wrongCredentials) {

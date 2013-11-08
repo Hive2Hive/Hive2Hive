@@ -89,7 +89,7 @@ public class H2HNode implements IH2HNode {
 			@Override
 			public void onSuccess() {
 				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(process.getContext().getUserProfile(), process.getContext().getLocations(), networkManager);
+				PostLoginProcess postLogin = new PostLoginProcess(process.getContext().getGetUserProfileStep().getUserProfile(), process.getContext().getLocations(), networkManager);
 				postLogin.start();
 			}
 
