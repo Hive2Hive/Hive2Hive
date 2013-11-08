@@ -64,7 +64,9 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	}
 
 	/**
-	 * Returns the locations loaded by this step. If the step is still being executed or encountered an error, this returns <code>null</code>.
+	 * Returns the locations loaded by this step. If the step is still being executed or encountered an error,
+	 * this returns <code>null</code>.
+	 * 
 	 * @return The loaded locations or <code>null</code>
 	 */
 	public UserProfile getUserProfile() {

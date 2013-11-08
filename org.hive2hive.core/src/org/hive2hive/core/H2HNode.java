@@ -15,7 +15,7 @@ import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.security.UserCredentials;
 
-public class H2HNode implements IH2HNode {
+public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	private final int maxFileSize;
 	private final int maxNumOfVersions;
@@ -49,18 +49,22 @@ public class H2HNode implements IH2HNode {
 		fileManager = new FileManager(rootPath);
 	}
 
+	@Override
 	public int getMaxFileSize() {
 		return maxFileSize;
 	}
 
+	@Override
 	public int getMaxNumOfVersions() {
 		return maxNumOfVersions;
 	}
 
+	@Override
 	public int getMaxSizeAllVersions() {
 		return maxSizeAllVersions;
 	}
 
+	@Override
 	public int getChunkSize() {
 		return chunkSize;
 	}
@@ -82,7 +86,7 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public IProcess login(UserCredentials credentials) {
+	public IProcess login(final UserCredentials credentials) {
 		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
 		loginProcess.addListener(new IProcessListener() {
 
@@ -91,7 +95,8 @@ public class H2HNode implements IH2HNode {
 				// start the post login process
 				LoginProcessContext loginContext = loginProcess.getContext();
 				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getGetUserProfileStep()
-						.getUserProfile(), loginContext.getLocations(), networkManager, fileManager);
+						.getUserProfile(), credentials, loginContext.getLocations(), networkManager,
+						fileManager, H2HNode.this);
 				postLogin.start();
 			}
 
