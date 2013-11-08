@@ -1,10 +1,17 @@
 package org.hive2hive.core.security;
 
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 
 public final class H2HEncryptionUtil {
 
@@ -50,6 +57,50 @@ public final class H2HEncryptionUtil {
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey,
 				content.getInitVector());
+		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
+	}
+
+	/**
+	 * Asymmetrically encrypts content inheriting from {@link NetworkContent}.
+	 * 
+	 * @param content the content to be encrypted.
+	 * @param publicKey The asymmetric public key with which the content will be encrypted
+	 * @param keyLength the strength of the encryption
+	 * @return the encrypted content
+	 * @throws DataLengthException
+	 * @throws InvalidKeyException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 */
+	public static HybridEncryptedContent encryptDES(NetworkContent content, PublicKey publicKey,
+			AES_KEYLENGTH keyLength) throws DataLengthException, InvalidKeyException, IllegalStateException,
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
+		byte[] serialized = EncryptionUtil.serializeObject(content);
+
+		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey, keyLength);
+		encryptHybrid.setTimeToLive(content.getTimeToLive());
+		return encryptHybrid;
+	}
+
+	/**
+	 * Asymmetrically decrypts a prior content inheriting from {@link NetworkContent}.
+	 * 
+	 * @param content the encrypted content to be decrypted
+	 * @param privateKey the asymmetric private key that matches the public key at encryption
+	 * @return decrypted object
+	 * @throws InvalidKeyException
+	 * @throws DataLengthException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 */
+	public static NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
+			throws InvalidKeyException, DataLengthException, IllegalBlockSizeException, BadPaddingException,
+			IllegalStateException, InvalidCipherTextException {
+		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
 	}
 }

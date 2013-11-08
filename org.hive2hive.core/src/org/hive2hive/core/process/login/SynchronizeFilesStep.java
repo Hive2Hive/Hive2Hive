@@ -36,7 +36,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		// TODO wait for all processes to have finished (failed or not failed) until continuing with next
-		// step.
+		// step (user messages).
 	}
 
 	@Override

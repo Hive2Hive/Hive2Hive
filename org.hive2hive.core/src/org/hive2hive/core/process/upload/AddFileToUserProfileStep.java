@@ -24,8 +24,11 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 	private final File file;
 
 	public AddFileToUserProfileStep(File file, UserProfile userProfile, UserCredentials credentials) {
-		// TODO notify other clients as the next step
+		// TODO next steps:
+		// 1. notify other clients as the next step
+		// 2. check if too many versions of that file exist --> remove old versions if necessary
 		super(userProfile, credentials, null);
+
 		this.file = file;
 		this.userProfile = userProfile;
 	}
