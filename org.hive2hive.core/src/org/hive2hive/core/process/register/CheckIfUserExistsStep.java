@@ -36,7 +36,7 @@ public class CheckIfUserExistsStep extends ProcessStep {
 
 	private void continueWithNextStep() {
 		RegisterProcess process = (RegisterProcess) super.getProcess();
-		UserProfile userProfile = process.getUserProfile();
+		UserProfile userProfile = process.getContext().getUserProfile();
 
 		// create the next steps:
 		// first, put the new user profile
@@ -45,7 +45,7 @@ public class CheckIfUserExistsStep extends ProcessStep {
 		PutPublicKeyStep third = new PutPublicKeyStep(userProfile.getUserId(), userProfile
 				.getEncryptionKeys().getPublic());
 		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), third);
-		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getUserPassword(), second);
+		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getContext().getUserPassword(), second);
 		getProcess().setNextStep(first);
 	}
 

@@ -4,6 +4,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessContext;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.UserPassword;
 
@@ -48,5 +49,11 @@ public class LoginProcess extends Process {
 	
 	public Locations getLocations() {
 		return locations;
+	}
+
+	@Override
+	public ProcessContext getContext() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

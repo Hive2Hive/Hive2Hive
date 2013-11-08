@@ -4,6 +4,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessContext;
 
 /**
  * This process does all long-running tasks necessary after the login:
@@ -40,6 +41,12 @@ public class PostLoginProcess extends Process {
 	
 	public void setIsDefinedAsMaster(boolean isDefinedAsMaster) {
 		this.isDefinedAsMaster = isDefinedAsMaster;
+	}
+
+	@Override
+	public ProcessContext getContext() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

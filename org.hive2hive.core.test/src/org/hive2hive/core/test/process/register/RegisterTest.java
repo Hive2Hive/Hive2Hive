@@ -72,8 +72,8 @@ public class RegisterTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile and the password from the process
-		UserProfile userProfile = process.getUserProfile();
-		UserPassword userPassword = process.getUserPassword();
+		UserProfile userProfile = process.getContext().getUserProfile();
+		UserPassword userPassword = process.getContext().getUserPassword();
 		String profileLocation = userProfile.getLocationKey(userPassword);
 
 		// verify the new public key
@@ -83,7 +83,7 @@ public class RegisterTest extends H2HJUnitTest {
 		UserPublicKey publicKey = (UserPublicKey) getKey.getData().object();
 		Assert.assertNotNull(publicKey);
 		// key should match
-		Assert.assertEquals(process.getUserProfile().getEncryptionKeys().getPublic(),
+		Assert.assertEquals(process.getContext().getUserProfile().getEncryptionKeys().getPublic(),
 				publicKey.getPublicKey());
 
 		// verify the new user profile
