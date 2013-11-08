@@ -22,26 +22,28 @@ public class H2HNode implements IH2HNode {
 	private final int maxSizeAllVersions;
 	private final int chunkSize;
 	private final boolean autostartProcesses;
-	private final NetworkManager networkManager;
-	private final FileManager fileManager;
-	private final boolean isMaster;
+	private final boolean isMasterPeer;
 	private final InetAddress bootstrapAddress;
 
+	private final NetworkManager networkManager;
+	private final FileManager fileManager;
+
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
-			boolean autostartProcesses, boolean isMaster, InetAddress bootstrapAddress, String rootPath) {
+			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress, String rootPath) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
 		this.autostartProcesses = autostartProcesses;
-		this.isMaster = isMaster;
+		this.isMasterPeer = isMasterPeer;
 		this.bootstrapAddress = bootstrapAddress;
 
+		// TODO set appropriate node ID
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
-		if (isMaster) {
+		if (this.isMasterPeer) {
 			networkManager.connect();
 		} else {
-			networkManager.connect(bootstrapAddress);
+			networkManager.connect(this.bootstrapAddress);
 		}
 
 		fileManager = new FileManager(rootPath);
@@ -70,7 +72,9 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public IProcess register(UserCredentials credentials) {
-		RegisterProcess process = new RegisterProcess(credentials, networkManager);
+
+		final RegisterProcess process = new RegisterProcess(credentials, networkManager);
+
 		if (autostartProcesses) {
 			process.start();
 		}
@@ -86,8 +90,8 @@ public class H2HNode implements IH2HNode {
 			public void onSuccess() {
 				// start the post login process
 				LoginProcessContext loginContext = loginProcess.getContext();
-				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getUserProfile(), loginContext
-						.getLocations(), networkManager, fileManager);
+				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getGetUserProfileStep()
+						.getUserProfile(), loginContext.getLocations(), networkManager, fileManager);
 				postLogin.start();
 			}
 

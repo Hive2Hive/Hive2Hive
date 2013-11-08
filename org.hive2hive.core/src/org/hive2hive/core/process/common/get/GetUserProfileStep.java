@@ -19,7 +19,7 @@ import org.hive2hive.core.security.UserCredentials;
 /**
  * Generic process step to get the {@link: UserProfile} and decrypt it. It is then accessible in
  * 
- * @author Nico
+ * @author Nico, Christian
  * 
  */
 public class GetUserProfileStep extends BaseGetProcessStep {
@@ -32,22 +32,23 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep) {
 		super(UserProfile.getLocationKey(credentials), H2HConstants.USER_PROFILE);
-		
+
 		this.credentials = credentials;
 		this.nextStep = nextStep;
 	}
 
 	@Override
 	protected void handleGetResult(NetworkContent content) {
+
 		if (content == null) {
 			// could have been intended...
-			logger.warn("Did not find user profile");
+			logger.warn("Did not find user profile.");
 		} else {
 			EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
-			logger.debug("Decrpting UserProfile with 256bit AES key from password");
+			logger.debug("Decrypting user profile with 256-bit AES key from password.");
 
-			SecretKey encryptionKey = PasswordUtil
-					.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
+			SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+					credentials.getPin(), AES_KEYLENGTH.BIT_256);
 			NetworkContent decrypted;
 			try {
 				decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
@@ -57,14 +58,14 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 			}
 		}
 
+		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
+		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
 	}
 
 	/**
-	 * Returns an object of the user profile. This can be null if the get is not finished yet or it can be
-	 * null if the reply did not return anything.
-	 * 
-	 * @return
+	 * Returns the locations loaded by this step. If the step is still being executed or encountered an error, this returns <code>null</code>.
+	 * @return The loaded locations or <code>null</code>
 	 */
 	public UserProfile getUserProfile() {
 		return userProfile;

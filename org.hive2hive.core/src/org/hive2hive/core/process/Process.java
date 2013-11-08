@@ -107,6 +107,11 @@ public abstract class Process implements IProcess {
 			logger.warn("Process is already stopped or still rollbacking");
 		}
 	}
+	
+	@Override
+	public void terminate() {
+		setNextStep(null);
+	}
 
 	@Override
 	public final int getID() {

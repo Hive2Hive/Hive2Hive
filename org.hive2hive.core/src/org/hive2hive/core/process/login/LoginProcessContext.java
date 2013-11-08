@@ -1,26 +1,32 @@
 package org.hive2hive.core.process.login;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessContext;
+import org.hive2hive.core.process.common.get.GetLocationsStep;
+import org.hive2hive.core.process.common.get.GetUserProfileStep;
 
 public final class LoginProcessContext extends ProcessContext {
 
-	private UserProfile userProfile;
+	private final GetUserProfileStep profileStep;
+	private final GetLocationsStep locationsStep;
+	
 	private Locations locations;
 	
-	public LoginProcessContext(LoginProcess loginProcess) {
+	public LoginProcessContext(LoginProcess loginProcess, GetUserProfileStep profileStep, GetLocationsStep locationsStep) {
 		super(loginProcess);
+		
+		this.profileStep = profileStep;
+		this.locationsStep = locationsStep;
 	}
 	
-	public void setUserProfile(UserProfile userProfile) {
-		this.userProfile = userProfile;
+	public GetUserProfileStep getGetUserProfileStep() {
+		return profileStep;
 	}
 
-	public UserProfile getUserProfile() {
-		return userProfile;
+	public GetLocationsStep getGetLocationsStep() {
+		return locationsStep;
 	}
-
+	
 	public void setLocations(Locations locations) {
 		this.locations = locations;
 	}

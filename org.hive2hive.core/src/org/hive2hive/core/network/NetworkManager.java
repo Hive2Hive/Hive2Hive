@@ -52,9 +52,9 @@ public class NetworkManager {
 
 	public NetworkManager(String nodeId) {
 		this.nodeId = nodeId;
-		connection = new Connection(nodeId, this);
-		messageManager = new MessageManager(this);
-		dataManager = new DataManager(this);
+		this.connection = new Connection(nodeId, this);
+		this.messageManager = new MessageManager(this);
+		this.dataManager = new DataManager(this);
 	}
 
 	/**
@@ -98,11 +98,11 @@ public class NetworkManager {
 		if (!connection.isConnected())
 			return;
 		connection.disconnect();
-		logger.debug(String.format("Peer '%s' is shutdown", nodeId));
+		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 
 	/**
-	 * Sends a given message to the peer which is responsible to given key. </br>
+	 * Sends a given message to the peer which is responsible of the given key. </br>
 	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
 	 * <b>Important:</b> For an appropriate message handling like resends and error log, use and attach a
 	 * {@link FutureDirectListener} future listener.

@@ -16,8 +16,18 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public interface IH2HNode {
 
+	/**
+	 * Initiates and returns a register process.
+	 * @param credentials The user's credentials with which it shall be registered.
+	 * @return Returns an observable register process.
+	 */
 	IProcess register(UserCredentials credentials);
 
+	/**
+	 * Initiates and returns a login process.
+	 * @param credentials The user's credentials with which it shall be logged in.
+	 * @return Returns an observable login process.
+	 */
 	IProcess login(UserCredentials credentials);
 
 	/**
