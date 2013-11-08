@@ -45,7 +45,7 @@ public class AddMyselfToLocationsStep extends PutProcessStep {
 			put(userId, H2HConstants.USER_LOCATIONS, loadedLocations);
 
 			// terminate the LoginProcess
-			getProcess().setNextStep(null);
+			getProcess().terminate();
 		}
 	}
 }

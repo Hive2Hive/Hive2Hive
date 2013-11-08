@@ -38,6 +38,11 @@ public interface IProcess extends Runnable {
 	void stop(String reason);
 
 	/**
+	 * Terminates the process by signaling that no further steps have to be executed.
+	 */
+	void terminate();
+	
+	/**
 	 * Returns the per-{@link ProcessManager} unique PID of this process.
 	 * 
 	 * @return This process' PID.

@@ -119,6 +119,10 @@ public class ProcessManagerTest extends H2HJUnitTest {
 				// TODO Auto-generated method stub
 				return null;
 			}
+
+			@Override
+			public void terminate() {
+			}
 		};
 	}
 	

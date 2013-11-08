@@ -100,7 +100,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 			synchronized (testContent) {
 				tempContent = content;
 			}
-			getProcess().setNextStep(null);
+			getProcess().terminate();
 		}
 	}
 }
