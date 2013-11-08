@@ -1,7 +1,5 @@
 package org.hive2hive.core;
 
-import java.util.Date;
-
 public interface H2HConstants {
 
 	// standard port for the hive2hive network
