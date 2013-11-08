@@ -9,7 +9,7 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.put.PutProcessStep;
 
 /**
- * Verifies the anwser of the @link{GetLocationsStep} and adds this node to the list. Note, there is no
+ * Verifies the answer of the @link{GetLocationsStep} and adds this node to the list. Note, there is no
  * master-evaluation done here.
  * 
  * @author Nico
@@ -38,7 +38,7 @@ public class AddMyselfToLocationsStep extends PutProcessStep {
 			locations.addEntry(myStatus);
 			put(userId, H2HConstants.USER_LOCATIONS, locations);
 
-			((LoginProcess) getProcess()).setLocations(locations);
+			((LoginProcess) getProcess()).getContext().setLocations(locations);
 			getProcess().setNextStep(null);
 		}
 	}

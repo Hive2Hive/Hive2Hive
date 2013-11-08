@@ -34,7 +34,7 @@ public class VerifyUserProfileStep extends ProcessStep {
 			getProcess().stop("UserId does not match the one in the profile");
 		} else {
 			// store the profile in the process
-			((LoginProcess) getProcess()).setUserProfile(userProfile);
+			((LoginProcess) getProcess()).getContext().setUserProfile(userProfile);
 
 			// 1. GetLocationsStep: get the locations
 			// 2. AddMyselfToLocationsStep: add ourself to the location map

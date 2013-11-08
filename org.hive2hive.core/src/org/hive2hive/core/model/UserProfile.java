@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.UserCredentials;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserPassword;
@@ -53,14 +54,10 @@ public class UserProfile extends NetworkContent {
 		return TimeToLiveStore.getInstance().getUserProfile();
 	}
 
-	public String getLocationKey(UserPassword password) {
-		return getLocationKey(userId, password);
-	}
-
-	public static String getLocationKey(String userId, UserPassword password) {
+	public static String getLocationKey(UserCredentials credentials) {
 		// concatenate PIN + PW + UserId
-		String location = new StringBuilder().append(password.getPin()).append(password.getPassword())
-				.append(userId).toString();
+		String location = new StringBuilder().append(credentials.getPin()).append(credentials.getPassword())
+				.append(credentials.getUserId()).toString();
 
 		// create fixed salt based on location
 		byte[] fixedSalt = PasswordUtil.generateFixedSalt(location.getBytes());

@@ -10,14 +10,14 @@ import org.hive2hive.core.process.IProcess;
  * process may still be running in the background. The returned process object can be used to control
  * the call.
  * 
- * @author Nico
+ * @author Nico, Christian
  * 
  */
 public interface IH2HNode {
 
-	IProcess register(String userId, String password, String pin);
+	IProcess register(UserCredentials credentials);
 
-	IProcess login(String userId, String password, String pin);
+	IProcess login(UserCredentials credentials);
 
 	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in

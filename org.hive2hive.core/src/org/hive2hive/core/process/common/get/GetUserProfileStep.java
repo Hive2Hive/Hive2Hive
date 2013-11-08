@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.UserCredentials;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -26,15 +27,14 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserProfileStep.class);
 
-	private final UserPassword password;
+	private final UserCredentials credentials;
 	private final ProcessStep nextStep;
-
-	// reference for the userprofile
 	private UserProfile userProfile;
 
-	public GetUserProfileStep(String userId, UserPassword password, ProcessStep nextStep) {
-		super(UserProfile.getLocationKey(userId, password), H2HConstants.USER_PROFILE);
-		this.password = password;
+	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep) {
+		super(UserProfile.getLocationKey(credentials), H2HConstants.USER_PROFILE);
+		
+		this.credentials = credentials;
 		this.nextStep = nextStep;
 	}
 
@@ -48,7 +48,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 			logger.debug("Decrpting UserProfile with 256bit AES key from password");
 
 			SecretKey encryptionKey = PasswordUtil
-					.generateAESKeyFromPassword(password, AES_KEYLENGTH.BIT_256);
+					.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
 			NetworkContent decrypted;
 			try {
 				decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
