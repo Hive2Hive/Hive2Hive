@@ -10,6 +10,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.security.UserCredentials;
@@ -78,14 +79,15 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public IProcess login(UserCredentials credentials) {
-		
-		final LoginProcess process = new LoginProcess(credentials, networkManager);
-		process.addListener(new IProcessListener() {
-			
+		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
+		loginProcess.addListener(new IProcessListener() {
+
 			@Override
 			public void onSuccess() {
 				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(process.getContext().getUserProfile(), process.getContext().getLocations(), networkManager);
+				LoginProcessContext loginContext = loginProcess.getContext();
+				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getUserProfile(), loginContext
+						.getLocations(), networkManager, fileManager);
 				postLogin.start();
 			}
 
@@ -96,9 +98,9 @@ public class H2HNode implements IH2HNode {
 		});
 
 		if (autostartProcesses) {
-			process.start();
+			loginProcess.start();
 		}
-		return process;
+		return loginProcess;
 	}
 
 	@Override

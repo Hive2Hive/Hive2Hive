@@ -1,10 +1,10 @@
 package org.hive2hive.core.process.login;
 
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessContext;
 
 /**
  * This process does all long-running tasks necessary after the login:
@@ -20,16 +20,15 @@ import org.hive2hive.core.process.ProcessContext;
 public class PostLoginProcess extends Process {
 
 	private final PostLoginProcessContext context;
-	
-	public PostLoginProcess(UserProfile profile, Locations currentLocations, NetworkManager networkManager) {
+
+	public PostLoginProcess(UserProfile profile, Locations currentLocations, NetworkManager networkManager,
+			FileManager fileManager) {
 		super(networkManager);
-		
-		context = new PostLoginProcessContext(this, profile, currentLocations);
-		
+		context = new PostLoginProcessContext(this, profile, currentLocations, fileManager);
+
 		// execution order:
 		// 1. ContactPeersStep (-> PutLocationsStep)
 		// 2. SynchronizeFilesStep
-		
 		setNextStep(new ContactPeersStep(currentLocations));
 	}
 
