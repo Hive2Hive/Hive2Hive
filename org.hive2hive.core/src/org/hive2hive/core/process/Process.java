@@ -27,7 +27,6 @@ public abstract class Process implements IProcess {
 	private final NetworkManager networkManager;
 	private final int pid;
 	private ProcessState state;
-
 	private ProcessStep currentStep;
 
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
@@ -37,7 +36,7 @@ public abstract class Process implements IProcess {
 		this.networkManager = networkManager;
 		this.pid = ProcessManager.getInstance().getNewPID();
 		this.state = ProcessState.INITIALIZING;
-
+		
 		ProcessManager.getInstance().attachProcess(this);
 	}
 
@@ -124,6 +123,14 @@ public abstract class Process implements IProcess {
 		return executedSteps.size();
 	}
 
+	/**
+	 * Returns the process context. This methods should override this method and covariantly narrow down the return type.
+	 */
+	@Override
+	public ProcessContext getContext() {
+		return null;
+	}
+	 
 	@Override
 	public final void run() {
 		if (currentStep != null) {

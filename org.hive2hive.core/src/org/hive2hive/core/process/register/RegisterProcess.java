@@ -12,19 +12,19 @@ import org.hive2hive.core.security.UserPassword;
 
 public class RegisterProcess extends Process {
 
-	private final String userId;
-	private final UserPassword userPassword;
-	private final UserProfile userProfile;
-
+	private final RegisterProcessContext context;
+	
 	public RegisterProcess(String userId, String password, String pin, NetworkManager networkManager) {
 		super(networkManager);
-		this.userId = userId;
-		this.userPassword = new UserPassword(password, pin);
 
+		// create and set context
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		userProfile = new UserProfile(userId, encryptionKeys, domainKeys);
-
+		
+		UserPassword userPassword = new UserPassword(password, pin);
+		UserProfile userProfile = new UserProfile(userId, encryptionKeys, domainKeys);
+		context = new RegisterProcessContext(this, userPassword, userProfile);
+		
 		// get the locations map to check if a user with the same name is already existent
 		CheckIfUserExistsStep profileExistsStep = new CheckIfUserExistsStep();
 		GetLocationsStep getLocationsStep = new GetLocationsStep(userId, profileExistsStep);
@@ -32,15 +32,8 @@ public class RegisterProcess extends Process {
 		setNextStep(getLocationsStep);
 	}
 
-	public String getUserId() {
-		return userId;
-	}
-
-	public UserPassword getUserPassword() {
-		return userPassword;
-	}
-
-	public UserProfile getUserProfile() {
-		return userProfile;
+	@Override
+	public RegisterProcessContext getContext() {
+		return context;
 	}
 }

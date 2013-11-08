@@ -56,8 +56,8 @@ public class LoginTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		userProfile = process.getUserProfile();
-		userPassword = process.getUserPassword();
+		userProfile = process.getContext().getUserProfile();
+		userPassword = process.getContext().getUserPassword();
 	}
 
 	@Test

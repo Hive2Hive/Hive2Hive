@@ -10,7 +10,7 @@ import org.hive2hive.core.process.manager.ProcessManager;
  * 
  */
 public interface IProcess extends Runnable {
-
+	
 	/**
 	 * Starts the process, such that its state will be {@link ProcessState#RUNNING}. Only processes being in
 	 * {@link ProcessState#INITIALIZING} state can be started.
@@ -58,6 +58,12 @@ public interface IProcess extends Runnable {
 	 */
 	int getProgress();
 
+	/**
+	 * Returns the context of this process.
+	 * @return
+	 */
+	ProcessContext getContext();
+	
 	void addListener(IProcessListener listener);
 
 	boolean removeListener(IProcessListener listener);
