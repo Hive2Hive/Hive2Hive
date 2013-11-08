@@ -1,59 +1,39 @@
 package org.hive2hive.core.process.login;
 
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessContext;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Process to log in. This process only logs in. When the credentials match, the locations get updated.
  * This process does <strong>not</strong> synchronize the local files or handle the user message queue.
  * 
- * @author Nico
+ * @author Nico, Christian
  * 
  */
 public class LoginProcess extends Process {
 
-	private UserProfile userProfile;
-	private Locations locations;
+	private final LoginProcessContext context;
 
-	public LoginProcess(String userId, String password, String pin, NetworkManager networkManager) {
+	public LoginProcess(UserCredentials credentials, NetworkManager networkManager) {
 		super(networkManager);
-		UserPassword userPassword = new UserPassword(password, pin);
+		
+		context = new LoginProcessContext(this);
 
 		// execution order:
 		// 1. GetUserProfileStep
 		// 2. Verify the user profile
-		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(userId);
-		GetUserProfileStep userProfileStep = new GetUserProfileStep(userId, userPassword, verifyProfileStep);
+		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId());
+		GetUserProfileStep userProfileStep = new GetUserProfileStep(credentials, verifyProfileStep);
 		verifyProfileStep.setPreviousStep(userProfileStep);
 
 		// define first step
 		setNextStep(userProfileStep);
 	}
 
-	public void setUserProfile(UserProfile userProfile) {
-		this.userProfile = userProfile;
-	}
-
-	public UserProfile getUserProfile() {
-		return userProfile;
-	}
-
-	public void setLocations(Locations locations) {
-		this.locations = locations;
-	}
-	
-	public Locations getLocations() {
-		return locations;
-	}
-
 	@Override
-	public ProcessContext getContext() {
-		// TODO Auto-generated method stub
-		return null;
+	public LoginProcessContext getContext() {
+		return context;
 	}
 }

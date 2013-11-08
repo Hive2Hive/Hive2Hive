@@ -21,7 +21,7 @@ import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -64,19 +64,17 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		NetworkManager putter = network.get(0); // where the process runs
 
 		// create the needed objects
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = generateRandomString(6);
-		UserPassword userPassword = new UserPassword(password, pin);
-		UserProfile testProfile = new UserProfile(userId,
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+
+		UserProfile testProfile = new UserProfile(credentials.getUserId(),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		// add them already to the DHT
-		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(userPassword,
-				AES_KEYLENGTH.BIT_256);
+		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+				credentials.getPin(), AES_KEYLENGTH.BIT_256);
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
-		FuturePut putGlobal = putter.putGlobal(testProfile.getLocationKey(userPassword),
+		FuturePut putGlobal = putter.putGlobal(UserProfile.getLocationKey(credentials),
 				H2HConstants.USER_PROFILE, encrypted);
 		putGlobal.awaitUninterruptibly();
 		putGlobal.getFutureRequests().awaitUninterruptibly();
@@ -84,7 +82,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		GetUserProfileStep step = new GetUserProfileStep(userId, userPassword, null);
+		GetUserProfileStep step = new GetUserProfileStep(credentials, null);
 		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -99,7 +97,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		UserProfile profile = step.getUserProfile();
 
 		// verify if both objects are the same
-		Assert.assertEquals(userId, profile.getUserId());
+		Assert.assertEquals(credentials.getUserId(), profile.getUserId());
 		Assert.assertEquals(testProfile.getTimestamp(), profile.getTimestamp());
 	}
 

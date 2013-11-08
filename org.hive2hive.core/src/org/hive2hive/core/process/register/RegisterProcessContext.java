@@ -2,23 +2,22 @@ package org.hive2hive.core.process.register;
 
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessContext;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 
 public final class RegisterProcessContext extends ProcessContext {
 
-	private final UserPassword userPassword;
+	private final UserCredentials userCredentials;
 	private final UserProfile userProfile;
 	
-	
-	public RegisterProcessContext(RegisterProcess registerProcess, UserPassword password, UserProfile profile) {
+	public RegisterProcessContext(RegisterProcess registerProcess, UserCredentials credentials, UserProfile profile) {
 		super(registerProcess);
 		
-		this.userPassword = password;
+		this.userCredentials = credentials;
 		this.userProfile = profile;
 	}
 	
-	public UserPassword getUserPassword() {
-		return userPassword;
+	public UserCredentials getUserCredentials() {
+		return userCredentials;
 	}
 
 	public UserProfile getUserProfile() {

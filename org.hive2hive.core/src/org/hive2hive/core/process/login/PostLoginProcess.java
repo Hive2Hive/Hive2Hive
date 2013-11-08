@@ -19,34 +19,22 @@ import org.hive2hive.core.process.ProcessContext;
  */
 public class PostLoginProcess extends Process {
 
-	private final UserProfile profile;
-	private Locations locations;
-	private boolean isDefinedAsMaster = false;
-
+	private final PostLoginProcessContext context;
+	
 	public PostLoginProcess(UserProfile profile, Locations currentLocations, NetworkManager networkManager) {
 		super(networkManager);
-		this.profile = profile;
-		this.locations = currentLocations;
+		
+		context = new PostLoginProcessContext(this, profile, currentLocations);
 		
 		// execution order:
 		// 1. ContactPeersStep (-> PutLocationsStep)
 		// 2. SynchronizeFilesStep
 		
-		setNextStep(new ContactPeersStep(this.locations));
-	}
-
-	public void setNewLocations(Locations newLocations){
-		this.locations = newLocations;
-	}
-	
-	public void setIsDefinedAsMaster(boolean isDefinedAsMaster) {
-		this.isDefinedAsMaster = isDefinedAsMaster;
+		setNextStep(new ContactPeersStep(currentLocations));
 	}
 
 	@Override
-	public ProcessContext getContext() {
-		// TODO Auto-generated method stub
-		return null;
+	public PostLoginProcessContext getContext() {
+		return context;
 	}
-	
 }

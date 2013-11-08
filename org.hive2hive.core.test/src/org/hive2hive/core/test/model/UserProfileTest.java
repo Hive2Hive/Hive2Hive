@@ -1,11 +1,7 @@
 package org.hive2hive.core.test.model;
 
-import java.security.KeyPair;
-
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.UserPassword;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.Assert;
@@ -29,17 +25,9 @@ public class UserProfileTest extends H2HJUnitTest {
 	@Test
 	public void generateLocations() {
 		// random credentials
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = NetworkTestUtil.randomString();
-
-		// create profile and password
-		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		UserProfile profile = new UserProfile(userId, encryptionKeys, domainKeys);
-		UserPassword userPassword = new UserPassword(password, pin);
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// test if same result twice
-		Assert.assertEquals(profile.getLocationKey(userPassword), profile.getLocationKey(userPassword));
+		Assert.assertEquals(UserProfile.getLocationKey(credentials), UserProfile.getLocationKey(credentials));
 	}
 }

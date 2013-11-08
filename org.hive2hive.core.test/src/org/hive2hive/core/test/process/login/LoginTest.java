@@ -12,7 +12,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -33,20 +33,18 @@ public class LoginTest extends H2HJUnitTest {
 	private static final int networkSize = 10;
 	private static List<NetworkManager> network;
 	private static UserProfile userProfile;
-	private static UserPassword userPassword;
+	private static UserCredentials userCredentials;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = LoginTest.class;
 		beforeClass();
+		
 		network = NetworkTestUtil.createNetwork(networkSize);
-
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = NetworkTestUtil.randomString();
+		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		RegisterProcess process = new RegisterProcess(userId, password, pin, network.get(0));
+		RegisterProcess process = new RegisterProcess(userCredentials, network.get(0));
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -57,7 +55,6 @@ public class LoginTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		userProfile = process.getContext().getUserProfile();
-		userPassword = process.getContext().getUserPassword();
 	}
 
 	@Test
@@ -65,8 +62,7 @@ public class LoginTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
 		// login with valid credentials
-		LoginProcess process = new LoginProcess(userProfile.getUserId(), userPassword.getPassword(),
-				userPassword.getPin(), client);
+		LoginProcess process = new LoginProcess(userCredentials, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -76,8 +72,8 @@ public class LoginTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		Assert.assertNotNull(process.getUserProfile());
-		Assert.assertEquals(userProfile.getUserId(), process.getUserProfile().getUserId());
+		Assert.assertNotNull(process.getContext().getUserProfile());
+		Assert.assertEquals(userProfile.getUserId(), process.getContext().getUserProfile().getUserId());
 
 		// verify the locations map
 		FutureGet futureGet = client.getGlobal(userProfile.getUserId(), H2HConstants.USER_LOCATIONS);
@@ -90,28 +86,34 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test
 	public void testInvalidPassword() {
-		LoginProcess process = loginAndWaitToFail(userProfile.getUserId(), NetworkTestUtil.randomString(),
-				userPassword.getPin());
-		Assert.assertNull(process.getUserProfile());
+		
+		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), NetworkTestUtil.randomString(), userCredentials.getPin());
+		
+		LoginProcess process = loginAndWaitToFail(wrongCredentials);
+		Assert.assertNull(process.getContext().getUserProfile());
 	}
 
 	@Test
 	public void testInvalidPin() {
-		LoginProcess process = loginAndWaitToFail(userProfile.getUserId(), userPassword.getPassword(),
-				NetworkTestUtil.randomString());
-		Assert.assertNull(process.getUserProfile());
+		
+		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), userCredentials.getPassword(), NetworkTestUtil.randomString());
+		
+		LoginProcess process = loginAndWaitToFail(wrongCredentials);
+		Assert.assertNull(process.getContext().getUserProfile());
 	}
 
 	@Test
 	public void testInvalidUserId() {
-		LoginProcess process = loginAndWaitToFail(NetworkTestUtil.randomString(), userPassword.getPassword(),
-				userPassword.getPin());
-		Assert.assertNull(process.getUserProfile());
+		
+		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(), userCredentials.getPassword(), userCredentials.getPin());
+		
+		LoginProcess process = loginAndWaitToFail(wrongCredentials);
+		Assert.assertNull(process.getContext().getUserProfile());
 	}
 
-	public LoginProcess loginAndWaitToFail(String userId, String password, String pin) {
+	public LoginProcess loginAndWaitToFail(UserCredentials wrongCredentials) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		LoginProcess process = new LoginProcess(userId, password, pin, client);
+		LoginProcess process = new LoginProcess(wrongCredentials, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

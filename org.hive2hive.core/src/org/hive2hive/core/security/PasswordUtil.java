@@ -114,16 +114,16 @@ public final class PasswordUtil {
 	 * @return Returns the derived symmetric AES key of desired size.
 	 * @throws InvalidKeySpecException
 	 */
-	public static SecretKey generateAESKeyFromPassword(UserPassword upw, AES_KEYLENGTH keyLength) {
+	public static SecretKey generateAESKeyFromPassword(String password, String pin, AES_KEYLENGTH keyLength) {
 
 		// generate a fixed salt out of the PIN itself
-		byte[] pinEnlargementSalt = generateFixedSalt(upw.getPin().getBytes());
+		byte[] pinEnlargementSalt = generateFixedSalt(pin.getBytes());
 
 		// enlarge PIN with enlargement salt, such that PIN has same size as the hash
-		byte[] enlargedPin = getPBKDF2Hash(upw.getPin().toCharArray(), pinEnlargementSalt, SALT_BIT_SIZE);
+		byte[] enlargedPin = getPBKDF2Hash(pin.toCharArray(), pinEnlargementSalt, SALT_BIT_SIZE);
 
 		// use the enlarged PIN as salt to generate the symmetric AES key
-		byte[] secretKeyEncoded = getPBKDF2Hash(upw.getPassword().toCharArray(), enlargedPin,
+		byte[] secretKeyEncoded = getPBKDF2Hash(password.toCharArray(), enlargedPin,
 				keyLength.value());
 
 		return new SecretKeySpec(secretKeyEncoded, "AES");

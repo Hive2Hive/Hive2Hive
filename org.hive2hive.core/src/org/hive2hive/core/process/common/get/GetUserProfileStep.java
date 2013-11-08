@@ -14,7 +14,7 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Generic process step to get the {@link: UserProfile} and decrypt it. It is then accessible in
@@ -26,15 +26,14 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserProfileStep.class);
 
-	private final UserPassword password;
+	private final UserCredentials credentials;
 	private final ProcessStep nextStep;
-
-	// reference for the userprofile
 	private UserProfile userProfile;
 
-	public GetUserProfileStep(String userId, UserPassword password, ProcessStep nextStep) {
-		super(UserProfile.getLocationKey(userId, password), H2HConstants.USER_PROFILE);
-		this.password = password;
+	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep) {
+		super(UserProfile.getLocationKey(credentials), H2HConstants.USER_PROFILE);
+		
+		this.credentials = credentials;
 		this.nextStep = nextStep;
 	}
 
@@ -48,7 +47,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 			logger.debug("Decrpting UserProfile with 256bit AES key from password");
 
 			SecretKey encryptionKey = PasswordUtil
-					.generateAESKeyFromPassword(password, AES_KEYLENGTH.BIT_256);
+					.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
 			NetworkContent decrypted;
 			try {
 				decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);

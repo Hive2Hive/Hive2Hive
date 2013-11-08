@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -41,12 +42,11 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@Test
 	public void testRegisterLogin() throws InterruptedException, IOException, ClassNotFoundException {
-		String userName = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = NetworkTestUtil.randomString();
+
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcess registerProcess = registerNode.register(userName, password, pin);
+		IProcess registerProcess = registerNode.register(credentials);
 		TestProcessListener listener = new TestProcessListener();
 		registerProcess.addListener(listener);
 
@@ -57,7 +57,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		IH2HNode loginNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcess loginProcess = loginNode.login(userName, password, pin);
+		IProcess loginProcess = loginNode.login(credentials);
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
 

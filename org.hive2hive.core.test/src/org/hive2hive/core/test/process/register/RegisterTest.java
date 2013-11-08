@@ -21,7 +21,7 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserPassword;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -57,11 +57,9 @@ public class RegisterTest extends H2HJUnitTest {
 		NetworkManager client = network.get(0);
 		NetworkManager otherClient = network.get(1);
 
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = NetworkTestUtil.randomString();
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
-		RegisterProcess process = new RegisterProcess(userId, password, pin, client);
+		RegisterProcess process = new RegisterProcess(credentials, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -73,11 +71,10 @@ public class RegisterTest extends H2HJUnitTest {
 
 		// get the user profile and the password from the process
 		UserProfile userProfile = process.getContext().getUserProfile();
-		UserPassword userPassword = process.getContext().getUserPassword();
-		String profileLocation = userProfile.getLocationKey(userPassword);
+		String profileLocation = UserProfile.getLocationKey(credentials);
 
 		// verify the new public key
-		FutureGet getKey = otherClient.getGlobal(userId, H2HConstants.USER_PUBLIC_KEY);
+		FutureGet getKey = otherClient.getGlobal(credentials.getUserId(), H2HConstants.USER_PUBLIC_KEY);
 		getKey.awaitUninterruptibly();
 		getKey.getFutureRequests().awaitUninterruptibly();
 		UserPublicKey publicKey = (UserPublicKey) getKey.getData().object();
@@ -93,32 +90,32 @@ public class RegisterTest extends H2HJUnitTest {
 		EncryptedNetworkContent content = (EncryptedNetworkContent) getProfile.getData().object();
 		Assert.assertNotNull(content);
 		// decrypt it
-		SecretKey aesKeyFromPassword = PasswordUtil.generateAESKeyFromPassword(userPassword,
-				AES_KEYLENGTH.BIT_256);
+		SecretKey aesKeyFromPassword = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+				credentials.getPin(), AES_KEYLENGTH.BIT_256);
 		UserProfile gotUserProfile = (UserProfile) H2HEncryptionUtil.decryptAES(content, aesKeyFromPassword);
 		Assert.assertNotNull(gotUserProfile);
 		// profiles should match
-		Assert.assertEquals(userId, gotUserProfile.getUserId());
+		Assert.assertEquals(credentials.getUserId(), gotUserProfile.getUserId());
 
 		// verify the new locations map
-		FutureGet getLocations = otherClient.getGlobal(userId, H2HConstants.USER_LOCATIONS);
+		FutureGet getLocations = otherClient.getGlobal(credentials.getUserId(), H2HConstants.USER_LOCATIONS);
 		getLocations.awaitUninterruptibly();
 		getLocations.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) getLocations.getData().object();
 		Assert.assertNotNull(locations);
 		// userId should match
-		Assert.assertEquals(userId, locations.getUserId());
+		Assert.assertEquals(credentials.getUserId(), locations.getUserId());
 		// fresh location maps should be empty
 		Assert.assertTrue(locations.getLocationEntries().isEmpty());
 
 		// verify the new user message queue
-		FutureGet getQueue = otherClient.getGlobal(userId, H2HConstants.USER_MESSAGE_QUEUE_KEY);
+		FutureGet getQueue = otherClient.getGlobal(credentials.getUserId(), H2HConstants.USER_MESSAGE_QUEUE_KEY);
 		getQueue.awaitUninterruptibly();
 		getQueue.getFutureRequests().awaitUninterruptibly();
 		UserMessageQueue queue = (UserMessageQueue) getQueue.getData().object();
 		Assert.assertNotNull(queue);
 		// userId should match
-		Assert.assertEquals(userId, queue.getUserId());
+		Assert.assertEquals(credentials.getUserId(), queue.getUserId());
 		// fresh queue should be empty
 		Assert.assertTrue(queue.getMessageQueue().isEmpty());
 	}
@@ -127,17 +124,15 @@ public class RegisterTest extends H2HJUnitTest {
 	public void testRegisterProcessProfileExists() {
 		NetworkManager client = network.get(0);
 
-		String userId = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = NetworkTestUtil.randomString();
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// already put a locations map
-		FuturePut putProfile = client.putGlobal(userId, H2HConstants.USER_LOCATIONS, new Locations(userId));
+		FuturePut putProfile = client.putGlobal(credentials.getUserId(), H2HConstants.USER_LOCATIONS, new Locations(credentials.getUserId()));
 		putProfile.awaitUninterruptibly();
 		putProfile.getFutureRequests().awaitUninterruptibly();
 		Assert.assertTrue(putProfile.isSuccess());
 
-		RegisterProcess process = new RegisterProcess(userId, password, pin, client);
+		RegisterProcess process = new RegisterProcess(credentials, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

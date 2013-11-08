@@ -82,8 +82,8 @@ public class ContactPeersStep extends ProcessStep {
 			// add myself, set me as master if none exists
 			boolean isDefinedAsMaster = newLocations.getMaster() == null;
 			newLocations.addEntry(new LocationEntry(getNetworkManager().getPeerAddress(), isDefinedAsMaster));
-			((PostLoginProcess) getProcess()).setIsDefinedAsMaster(isDefinedAsMaster);
-			((PostLoginProcess) getProcess()).setNewLocations(newLocations);
+			((PostLoginProcess) getProcess()).getContext().setIsDefinedAsMaster(isDefinedAsMaster);
+			((PostLoginProcess) getProcess()).getContext().setNewLocations(newLocations);
 			
 			// evaluate whether a put is necessary
 			SynchronizeFilesStep nextStep = new SynchronizeFilesStep();

@@ -12,6 +12,7 @@ import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
+import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode {
 
@@ -67,8 +68,8 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public IProcess register(String userId, String password, String pin) {
-		RegisterProcess process = new RegisterProcess(userId, password, pin, networkManager);
+	public IProcess register(UserCredentials credentials) {
+		RegisterProcess process = new RegisterProcess(credentials, networkManager);
 		if (autostartProcesses) {
 			process.start();
 		}
@@ -76,13 +77,15 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public IProcess login(String userId, String password, String pin) {
-		final LoginProcess process = new LoginProcess(userId, password, pin, networkManager);
+	public IProcess login(UserCredentials credentials) {
+		
+		final LoginProcess process = new LoginProcess(credentials, networkManager);
 		process.addListener(new IProcessListener() {
+			
 			@Override
 			public void onSuccess() {
 				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(process.getUserProfile(), process.getLocations(), networkManager);
+				PostLoginProcess postLogin = new PostLoginProcess(process.getContext().getUserProfile(), process.getContext().getLocations(), networkManager);
 				postLogin.start();
 			}
 
