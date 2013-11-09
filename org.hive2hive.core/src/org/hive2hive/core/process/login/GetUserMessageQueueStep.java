@@ -29,19 +29,6 @@ public class GetUserMessageQueueStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	public void start() {
-
-		// check whether this client is master and allowed to execute this step
-		if (!((PostLoginProcess) getProcess()).getContext().getIsDefinedAsMaster()) {
-			logger.error("This client has not been defined as master client. The UserMessageQueue will not be loaded and this process terminated.");
-			getProcess().stop("Client is not master and not allowed to handle the user message queue.");
-		}
-
-		// get the UserMessageQueue
-		super.start();
-	}
-
-	@Override
 	protected void handleGetResult(NetworkContent content) {
 
 		if (content == null) {

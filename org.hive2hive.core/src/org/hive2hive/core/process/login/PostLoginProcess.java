@@ -26,9 +26,10 @@ public class PostLoginProcess extends Process {
 		// execution order:
 		// 1. ContactPeersStep (-> PutLocationsStep)
 		// 2. SynchronizeFilesStep
+		// if elected master:
 		// 3. GetUserMessageQueueStep
 		// 4. HandleUserMessageQueueStep
-		HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep();
+		HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(profile.getUserId());
 		GetUserMessageQueueStep umQueueStep = new GetUserMessageQueueStep(profile, handleUmQueueStep);
 		
 		context = new PostLoginProcessContext(this, profile, currentLocations, umQueueStep);
