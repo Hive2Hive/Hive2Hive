@@ -6,6 +6,8 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
@@ -24,11 +26,14 @@ public class NetworkGetUtil {
 		// only static methods
 	}
 
-	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials) {
-		GetUserProfileStep step = new GetUserProfileStep(credentials, null);
+	/**
+	 * Executes a process step and waits until it's done. This is a simple helper method to reduce code
+	 * clones.
+	 */
+	private static void executeStep(NetworkManager networkManager, ProcessStep toExecute) {
 		Process process = new Process(networkManager) {
 		};
-		process.setNextStep(step);
+		process.setNextStep(toExecute);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -37,12 +42,17 @@ public class NetworkGetUtil {
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
+	}
 
+	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials) {
+		GetUserProfileStep step = new GetUserProfileStep(credentials, null);
+		executeStep(networkManager, step);
 		return step.getUserProfile();
 	}
 
 	public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
-		// TODO
-		return null;
+		GetMetaDocumentStep step = new GetMetaDocumentStep(keys, null);
+		executeStep(networkManager, step);
+		return step.getMetaDocument();
 	}
 }

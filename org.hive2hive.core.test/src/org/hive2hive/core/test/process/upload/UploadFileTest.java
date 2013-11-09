@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.register.RegisterProcess;
@@ -100,11 +101,17 @@ public class UploadFileTest extends H2HJUnitTest {
 		FileTreeNode node = gotProfile.getRoot().getChildByName(fileName);
 		Assert.assertNotNull(node);
 
+		// get the meta file with the keys (decrypt it)
 		KeyPair metaFileKeys = node.getKeyPair();
+		MetaFile metaFile = (MetaFile) NetworkGetUtil.getMetaDocument(client, metaFileKeys);
+		Assert.assertNotNull(metaFile);
+		Assert.assertEquals(1, metaFile.getVersions().size());
+		Assert.assertEquals(1, metaFile.getVersions().get(0).getChunkIds().size());
+
+		KeyPair chunkKeyPair = metaFile.getVersions().get(0).getChunkIds().get(0);
 		// TODO
-		// 1. get the meta file with the keys (decrypt it)
-		// 2. get all version chunks with the keys in the meta file (decrypt them)
-		// 3. verify the content
+		// 1. get all version chunks with the keys in the meta file (decrypt them)
+		// 2. verify the content
 	}
 
 	@After

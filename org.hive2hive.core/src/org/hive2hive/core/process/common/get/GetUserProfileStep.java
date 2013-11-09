@@ -49,9 +49,8 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 			SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 					credentials.getPin(), AES_KEYLENGTH.BIT_256);
-			NetworkContent decrypted;
 			try {
-				decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
+				NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 				userProfile = (UserProfile) decrypted;
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
