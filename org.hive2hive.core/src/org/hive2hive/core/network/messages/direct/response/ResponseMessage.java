@@ -15,8 +15,8 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
  * {@link IRequestMessage} interface arrives.</br></br>
  * 
  * <b>Important</b> The message id of the response message has to be the same like the requesting message.
- * This necessary for the requesting peer to find the correct {@link IResponseCallBackHandler} callback
- * handler to handle the response message at the requesting node.</br></br>
+ * This is necessary for the requesting peer to find the correct {@link IResponseCallBackHandler} to handle
+ * the response message at the requesting node.</br></br>
  * 
  * <b>Design decisions:</b>
  * <ul>
@@ -53,7 +53,8 @@ public class ResponseMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		IResponseCallBackHandler handler = networkManager.getMessageManager().getCallBackHandler(getMessageID());
+		IResponseCallBackHandler handler = networkManager.getMessageManager().getCallBackHandler(
+				getMessageID());
 		if (handler != null) {
 			handler.handleResponseMessage(this);
 		} else {

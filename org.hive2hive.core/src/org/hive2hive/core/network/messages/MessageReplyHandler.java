@@ -42,7 +42,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			}
 			return reply;
 		}
-		logger.error("Received unknown Message.");
+		logger.error("Received unknown object.");
 		return null;
 	}
 

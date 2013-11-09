@@ -19,7 +19,7 @@ import org.hive2hive.core.network.messages.MessageManager;
  * <li>The parameter needsRedirectedSend in the constructor enables the fall back mechanism in case sending
  * failed. The direct message is then sent like a {@link BaseMessage} which gets routed to the next
  * responsible peer.</li>
- * <li>Beside the {@link BaseDirectMessage#getSendingCounter()} counter there is a
+ * <li>Besides the {@link BaseDirectMessage#getSendingCounter()} counter there is a
  * {@link BaseDirectMessage#getDirectSendingCounter()}. The {@link MessageManager} increments the direct
  * counter so that in case of a fail the direct message gets re-send according the
  * {@link H2HConstants#MAX_MESSAGE_SENDING_DIRECT} constant.</li>
@@ -37,7 +37,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	private static final long serialVersionUID = 5080812282190501445L;
 
-	protected PeerAddress targetPeerAddress;
+	protected PeerAddress targetAddress;
 	private final boolean needsRedirectedSend;
 
 	private int directSendingCounter = 0;
@@ -49,45 +49,47 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 *            the ID of this message
 	 * @param targetKey
 	 *            the target key to which this message should be routed
-	 * @param targetPeerAddress
+	 * @param targetAddress
 	 *            the {@link PeerAddress} of the target node
 	 * @param needsRedirectedSend
 	 *            flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
 	 */
-	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetPeerAddress,
+	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetAddress,
 			boolean needsRedirectedSend) {
 		super(messageID, targetKey);
-		this.targetPeerAddress = targetPeerAddress;
+		this.targetAddress = targetAddress;
 		this.needsRedirectedSend = needsRedirectedSend;
 	}
 
 	/**
-	 * Abstract base class for directly sending messages to a target peer.
-	 * 
-	 * @param targetPeerAddress
-	 *            the {@link PeerAddress} of the target.
-	 */
-	public BaseDirectMessage(PeerAddress targetPeerAddress) {
-		this(createMessageID(), null, targetPeerAddress, false);
-	}
-
-	/**
-	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node. A
-	 * message id will be created.
+	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.</br>
+	 * A message ID will be created.
 	 * 
 	 * @param targetKey
 	 *            the target key to which this message should be routed
-	 * @param targetPeerAddress
+	 * @param targetAddress
 	 *            the {@link PeerAddress} of the target node
 	 * @param needsRedirectedSend
 	 *            flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
 	 */
-	public BaseDirectMessage(String targetKey, PeerAddress targetPeerAddress, boolean needsRedirectedSend) {
+	public BaseDirectMessage(String targetKey, PeerAddress targetAddress, boolean needsRedirectedSend) {
 		super(createMessageID(), targetKey);
-		this.targetPeerAddress = targetPeerAddress;
+		this.targetAddress = targetAddress;
 		this.needsRedirectedSend = needsRedirectedSend;
+	}
+
+	/**
+	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.</br>
+	 * No targetKey has to be specified and no redirected sending is done in case of failure. </br>
+	 * A message ID will be created.
+	 * 
+	 * @param targetAddress
+	 *            the {@link PeerAddress} of the target.
+	 */
+	public BaseDirectMessage(PeerAddress targetAddress) {
+		this(createMessageID(), null, targetAddress, false);
 	}
 
 	/**
@@ -103,27 +105,27 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	}
 
 	public PeerAddress getTargetAddress() {
-		return targetPeerAddress;
+		return targetAddress;
 	}
 
 	public int getDirectSendingCounter() {
 		return directSendingCounter;
 	}
 
-	public void setTargetPeerAddress(PeerAddress aTargetPeerAddress) {
-		targetPeerAddress = aTargetPeerAddress;
+	public void setTargetAddress(PeerAddress targetAddress) {
+		this.targetAddress = targetAddress;
 	}
 
 	/**
 	 * Increases the internal sending counter of this direct message.
 	 */
-	public void increaseDirectSendingCounter() {
+	public final void increaseDirectSendingCounter() {
 		directSendingCounter++;
 	}
 
 	@Override
 	public AcceptanceReply accept() {
-		if (networkManager.getPeerAddress().equals(targetPeerAddress)) {
+		if (networkManager.getPeerAddress().equals(targetAddress)) {
 			return AcceptanceReply.OK;
 		}
 		return AcceptanceReply.WRONG_TARGET;

@@ -36,6 +36,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseMessage.class);
 
+	//TODO Seppi: this serialization ID should not be defined in the abstract class but rather in each subclass separately
 	private static final long serialVersionUID = 8896590561336373601L;
 
 	protected NetworkManager networkManager;
@@ -44,7 +45,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	protected final String targetKey;
 	protected PeerAddress senderAddress;
 	private final SendingBehavior sendingBehavior;
-
 
 	private int sendingCounter = 0;
 
