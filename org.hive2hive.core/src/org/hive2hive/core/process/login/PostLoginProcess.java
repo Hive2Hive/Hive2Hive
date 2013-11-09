@@ -16,7 +16,7 @@ import org.hive2hive.core.security.UserCredentials;
  * <li>If master, handle the user message queue</li>
  * </ul>
  * 
- * @author Nico
+ * @author Nico, Christian
  * 
  */
 public class PostLoginProcess extends Process {
@@ -26,12 +26,20 @@ public class PostLoginProcess extends Process {
 	public PostLoginProcess(UserProfile profile, UserCredentials credentials, Locations currentLocations,
 			NetworkManager networkManager, FileManager fileManager, IH2HFileConfiguration fileConfig) {
 		super(networkManager);
-		context = new PostLoginProcessContext(this, profile, credentials, currentLocations, fileManager,
-				fileConfig);
 
 		// execution order:
 		// 1. ContactPeersStep (-> PutLocationsStep)
 		// 2. SynchronizeFilesStep
+		// if elected master:
+		// 3. GetUserMessageQueueStep
+		// 4. HandleUserMessageQueueStep
+		HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(credentials.getUserId());
+		GetUserMessageQueueStep umQueueStep = new GetUserMessageQueueStep(
+				UserProfile.getLocationKey(credentials), handleUmQueueStep);
+
+		context = new PostLoginProcessContext(this, profile, credentials, currentLocations, fileManager,
+				fileConfig, umQueueStep);
+
 		setNextStep(new ContactPeersStep(currentLocations));
 	}
 

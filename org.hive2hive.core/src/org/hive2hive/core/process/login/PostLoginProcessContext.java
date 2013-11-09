@@ -11,28 +11,48 @@ public class PostLoginProcessContext extends ProcessContext {
 
 	private final UserProfile profile;
 	private Locations locations;
-	private boolean isDefinedAsMaster = false;
+	private boolean isElectedMaster = false;
+	private final GetUserMessageQueueStep umQueueStep;
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration fileConfig;
 	private final UserCredentials credentials;
 
 	public PostLoginProcessContext(PostLoginProcess postLoginProcess, UserProfile profile,
 			UserCredentials credentials, Locations currentLocations, FileManager fileManager,
-			IH2HFileConfiguration fileConfig) {
+			IH2HFileConfiguration fileConfig, GetUserMessageQueueStep umQueueStep) {
 		super(postLoginProcess);
 		this.profile = profile;
 		this.credentials = credentials;
 		this.locations = currentLocations;
 		this.fileManager = fileManager;
 		this.fileConfig = fileConfig;
+		this.umQueueStep = umQueueStep;
 	}
 
 	public void setNewLocations(Locations newLocations) {
 		this.locations = newLocations;
 	}
 
-	public void setIsDefinedAsMaster(boolean isDefinedAsMaster) {
-		this.isDefinedAsMaster = isDefinedAsMaster;
+	/**
+	 * Defines whether client is elected as master client.
+	 * 
+	 * @param isDefinedAsMaster True, if this client is the master client.
+	 */
+	public void setIsElectedMaster(boolean isDefinedAsMaster) {
+		this.isElectedMaster = isDefinedAsMaster;
+	}
+
+	/**
+	 * Gets whether this client is elected as master client.
+	 * 
+	 * @return True, if this client is the master client.
+	 */
+	public boolean getIsDefinedAsMaster() {
+		return isElectedMaster;
+	}
+
+	public GetUserMessageQueueStep getGetUserMessageQueueStep() {
+		return umQueueStep;
 	}
 
 	public UserProfile getUserProfile() {
@@ -41,10 +61,6 @@ public class PostLoginProcessContext extends ProcessContext {
 
 	public Locations getLocations() {
 		return locations;
-	}
-
-	public boolean isDefinedAsMaster() {
-		return isDefinedAsMaster;
 	}
 
 	public FileManager getFileManager() {

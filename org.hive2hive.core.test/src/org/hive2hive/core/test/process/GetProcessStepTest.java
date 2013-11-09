@@ -91,11 +91,6 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		public void rollBack() {
-			Assert.fail("Should not have rollbacked here");
-		}
-
-		@Override
 		protected void handleGetResult(NetworkContent content) {
 			synchronized (testContent) {
 				tempContent = content;

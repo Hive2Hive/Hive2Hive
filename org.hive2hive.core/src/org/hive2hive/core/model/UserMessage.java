@@ -8,7 +8,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 /**
  * An encrypted and signed message which is stored in the DHT. The user message
  * will be stored in a queue (see {@link UserMessageQueue}). This allows an asynchronous communication between
- * users (e.g. receiving user is currently offline)
+ * users (e.g. receiving user is currently offline).
  * 
  * @author Nico
  * 
@@ -16,6 +16,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 public class UserMessage extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
+	
 	private final String id;
 	private final String sender;
 	private final PeerAddress origin;

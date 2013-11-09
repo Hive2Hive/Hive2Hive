@@ -16,6 +16,11 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutLocationStep;
 
+/**
+ * 
+ * @author Christian, Nico
+ *
+ */
 public class ContactPeersStep extends ProcessStep {
 
 	private final Locations currentLocations;
@@ -56,6 +61,12 @@ public class ContactPeersStep extends ProcessStep {
 		}
 	}
 
+	@Override
+	public void rollBack() {
+		// TODO Auto-generated method stub
+	
+	}
+
 	private synchronized void updateLocationsMap() {
 
 		// ensure this method is executed only once
@@ -82,7 +93,7 @@ public class ContactPeersStep extends ProcessStep {
 			// add myself, set me as master if none exists
 			boolean isDefinedAsMaster = newLocations.getMaster() == null;
 			newLocations.addEntry(new LocationEntry(getNetworkManager().getPeerAddress(), isDefinedAsMaster));
-			((PostLoginProcess) getProcess()).getContext().setIsDefinedAsMaster(isDefinedAsMaster);
+			((PostLoginProcess) getProcess()).getContext().setIsElectedMaster(isDefinedAsMaster);
 			((PostLoginProcess) getProcess()).getContext().setNewLocations(newLocations);
 			
 			// evaluate whether a put is necessary
@@ -93,7 +104,6 @@ public class ContactPeersStep extends ProcessStep {
 			} else {
 				getProcess().setNextStep(nextStep);
 			}
-
 		}
 	}
 
@@ -111,12 +121,6 @@ public class ContactPeersStep extends ProcessStep {
 			return true;
 
 		return false;
-	}
-
-	@Override
-	public void rollBack() {
-		// TODO Auto-generated method stub
-
 	}
 
 	private final class HandleContactReply implements IResponseCallBackHandler {

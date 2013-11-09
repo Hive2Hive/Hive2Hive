@@ -15,6 +15,8 @@ import org.hive2hive.core.test.H2HTestData;
  */
 public class TestMessage extends BaseMessage {
 
+	// TODO Seppi: this class should be moved to the test project
+	
 	private static final long serialVersionUID = 880089170139661640L;
 
 	private final String contentKey;

@@ -89,7 +89,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	public IProcess login(final UserCredentials credentials) {
 		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
 		loginProcess.addListener(new IProcessListener() {
-
 			@Override
 			public void onSuccess() {
 				// start the post login process
