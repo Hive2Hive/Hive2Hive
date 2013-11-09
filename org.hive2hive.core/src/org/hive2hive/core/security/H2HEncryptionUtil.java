@@ -74,7 +74,7 @@ public final class H2HEncryptionUtil {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static HybridEncryptedContent encryptDES(NetworkContent content, PublicKey publicKey,
+	public static HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey,
 			AES_KEYLENGTH keyLength) throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
 		byte[] serialized = EncryptionUtil.serializeObject(content);

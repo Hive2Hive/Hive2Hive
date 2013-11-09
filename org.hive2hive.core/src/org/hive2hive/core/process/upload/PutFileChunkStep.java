@@ -80,7 +80,7 @@ public class PutFileChunkStep extends PutProcessStep {
 
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
-				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptDES(chunk,
+				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptHybrid(chunk,
 						chunkKey.getPublic(), AES_KEYLENGTH.BIT_256);
 
 				// start the put and continue with next chunk
