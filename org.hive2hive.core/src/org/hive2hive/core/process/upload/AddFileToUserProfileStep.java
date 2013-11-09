@@ -8,8 +8,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
-import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -22,14 +20,17 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 
 	private final UserProfile userProfile;
 	private final File file;
+	private final KeyPair fileKeys;
 
-	public AddFileToUserProfileStep(File file, UserProfile userProfile, UserCredentials credentials) {
+	public AddFileToUserProfileStep(File file, KeyPair fileKeys, UserProfile userProfile,
+			UserCredentials credentials) {
 		// TODO next steps:
 		// 1. notify other clients as the next step
 		// 2. check if too many versions of that file exist --> remove old versions if necessary
 		super(userProfile, credentials, null);
 
 		this.file = file;
+		this.fileKeys = fileKeys;
 		this.userProfile = userProfile;
 	}
 
@@ -79,7 +80,7 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 		}
 
 		// current is now the parent
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		return new FileTreeNode(current, keys, file.getName(), file.isDirectory());
+		// use the file keys generated in a previous step where the meta document is stored
+		return new FileTreeNode(current, fileKeys, file.getName(), file.isDirectory());
 	}
 }

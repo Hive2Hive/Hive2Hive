@@ -56,11 +56,11 @@ public class UploadFileProcess extends Process {
 			logger.debug("Adding a folder to the DHT");
 
 			// put the meta folder and update the user profile
-			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, userProfile,
-					credentials);
+			KeyPair folderKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+			MetaFolder folder = new MetaFolder(folderKeyPair.getPublic(), userProfile.getUserId());
 
-			KeyPair folderKey = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-			MetaFolder folder = new MetaFolder(folderKey.getPublic(), userProfile.getUserId());
+			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, folderKeyPair,
+					userProfile, credentials);
 			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(folder, updateProfileStep);
 			setNextStep(putMetaFolder);
 		}

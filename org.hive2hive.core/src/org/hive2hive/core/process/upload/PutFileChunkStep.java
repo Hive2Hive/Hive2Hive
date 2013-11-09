@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,20 +99,23 @@ public class PutFileChunkStep extends PutProcessStep {
 			// put the meta folder and update the user profile
 			UserProfile profile = context.getUserProfile();
 
-			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, profile,
-					context.getCredentials());
+			// generate the new key pair for the meta file (which are later stored in the user profile)
+			KeyPair fileKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+
+			MetaFile newMetaFile = createNewMetaFile(fileKeyPair.getPublic());
+
+			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, fileKeyPair,
+					profile, context.getCredentials());
 
 			// TODO check if file already existed. If not, create new Meta file. If yes, create new version in
 			// existing meta file
-			MetaFile newMetaFile = createNewMetaFile();
 			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(newMetaFile, updateProfileStep);
 			getProcess().setNextStep(putMetaFolder);
 		}
 	}
 
-	private MetaFile createNewMetaFile() {
-		KeyPair fileKey = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		MetaFile metaFile = new MetaFile(fileKey.getPublic());
+	private MetaFile createNewMetaFile(PublicKey id) {
+		MetaFile metaFile = new MetaFile(id);
 		FileVersion version = new FileVersion(0, getFileSize(), System.currentTimeMillis());
 		version.setChunkIds(chunkKeys);
 
