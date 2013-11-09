@@ -67,6 +67,9 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 		String[] split = relativePath.split(FileManager.FILE_SEP);
 		FileTreeNode current = userProfile.getRoot();
 		for (int i = 0; i < split.length; i++) {
+			if (split[i].isEmpty()) {
+				continue;
+			}
 			FileTreeNode child = current.getChildByName(split[i]);
 			if (child == null) {
 				throw new FileNotFoundException("Parent of the file to add does not exist");
