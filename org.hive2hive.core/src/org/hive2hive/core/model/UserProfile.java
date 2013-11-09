@@ -21,12 +21,13 @@ public class UserProfile extends NetworkContent {
 	private final String userId;
 	private final KeyPair encryptionKeys;
 	private final KeyPair domainKeys;
-	private FileTreeNode root;
+	private final FileTreeNode root;
 
 	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair domainKeys) {
 		this.userId = userId;
 		this.encryptionKeys = encryptionKeys;
 		this.domainKeys = domainKeys;
+		root = new FileTreeNode(encryptionKeys);
 	}
 
 	public String getUserId() {
@@ -43,10 +44,6 @@ public class UserProfile extends NetworkContent {
 
 	public FileTreeNode getRoot() {
 		return root;
-	}
-
-	public void setRoot(FileTreeNode root) {
-		this.root = root;
 	}
 
 	@Override

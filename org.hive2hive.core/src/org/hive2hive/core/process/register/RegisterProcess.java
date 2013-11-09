@@ -25,9 +25,9 @@ public class RegisterProcess extends Process {
 		context = new RegisterProcessContext(this, credentials, userProfile);
 		
 		// get the locations map to check if a user with the same name is already existent
-		CheckIfUserExistsStep profileExistsStep = new CheckIfUserExistsStep();
-		GetLocationsStep getLocationsStep = new GetLocationsStep(credentials.getUserId(), profileExistsStep);
-		profileExistsStep.setPreviousStep(getLocationsStep);
+		CheckIfUserExistsStep userExistsStep = new CheckIfUserExistsStep();
+		GetLocationsStep getLocationsStep = new GetLocationsStep(credentials.getUserId(), userExistsStep);
+		userExistsStep.setPreviousStep(getLocationsStep);
 		setNextStep(getLocationsStep);
 	}
 

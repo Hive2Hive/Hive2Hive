@@ -37,7 +37,7 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 	public void start() {
 		try {
 			// create a file tree node in the user profile
-			generateFileTreeNode();
+			addFileToUserProfile();
 
 			// start the encryption and the put
 			super.start();
@@ -55,7 +55,7 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	private FileTreeNode generateFileTreeNode() throws FileNotFoundException {
+	private FileTreeNode addFileToUserProfile() throws FileNotFoundException {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		File fileRoot = context.getFileManager().getRoot();
 

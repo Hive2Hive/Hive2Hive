@@ -27,9 +27,9 @@ public class PutProcessStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutProcessStep.class);
 
-	protected final String locationKey;
-	protected final String contentKey;
-	protected final NetworkContent content;
+	protected String locationKey;
+	protected String contentKey;
+	protected NetworkContent content;
 	protected ProcessStep nextStep;
 
 	// used to count put retries
@@ -50,6 +50,11 @@ public class PutProcessStep extends ProcessStep {
 	}
 
 	protected void put(final String locationKey, final String contentKey, NetworkContent content) {
+		// can be called from subclasses, make sure to store the correct attributes here
+		this.locationKey = locationKey;
+		this.contentKey = contentKey;
+		this.content = content;
+
 		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, content);
 		putFuture.addListener(new PutVerificationListener());
 	}

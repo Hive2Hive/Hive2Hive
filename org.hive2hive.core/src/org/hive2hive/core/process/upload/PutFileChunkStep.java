@@ -41,10 +41,10 @@ public class PutFileChunkStep extends PutProcessStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutFileChunkStep.class);
 
 	private final File file;
-	private final int offset;
+	private final long offset;
 	private final List<KeyPair> chunkKeys;
 
-	public PutFileChunkStep(File file, int offset, List<KeyPair> chunkKeys) {
+	public PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
 		super(null, H2HConstants.FILE_CHUNK, null, null);
 		this.file = file;
@@ -60,7 +60,8 @@ public class PutFileChunkStep extends PutProcessStep {
 		try {
 			// read the next chunk of the file considering the offset
 			RandomAccessFile rndAccessFile = new RandomAccessFile(file, "r");
-			read = rndAccessFile.read(data, offset, data.length);
+			rndAccessFile.seek(offset);
+			read = rndAccessFile.read(data);
 			rndAccessFile.close();
 		} catch (IOException e) {
 			logger.error("Could not read the file", e);
@@ -83,6 +84,7 @@ public class PutFileChunkStep extends PutProcessStep {
 						chunkKey.getPublic(), AES_KEYLENGTH.BIT_256);
 
 				// start the put and continue with next chunk
+				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getAbsolutePath());
 				put(chunk.getId().toString(), H2HConstants.FILE_CHUNK, encryptedContent);
 			} catch (DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
@@ -90,6 +92,8 @@ public class PutFileChunkStep extends PutProcessStep {
 				getProcess().stop(e.getMessage());
 			}
 		} else {
+			logger.debug("All chunks uploaded. Continue with meta data.");
+
 			// nothing read, stop putting chunks and start next step
 			// put the meta folder and update the user profile
 			UserProfile profile = context.getUserProfile();
