@@ -7,6 +7,7 @@ import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * This step is only important for a master client that has to handle all the buffered user messages.
@@ -21,9 +22,8 @@ public class GetUserMessageQueueStep extends BaseGetProcessStep {
 	private final HandleUserMessageQueueStep handleUmQueueStep;
 	private UserMessageQueue umQueue;
 
-	// TODO check where UserMessageQueue is actually stored: userId vs. location based on credentials
-	public GetUserMessageQueueStep(UserProfile profile, HandleUserMessageQueueStep handleUmQueueStep) {
-		super(profile.getUserId(), H2HConstants.USER_MESSAGE_QUEUE_KEY);
+	public GetUserMessageQueueStep(String locationKey, HandleUserMessageQueueStep handleUmQueueStep) {
+		super(locationKey, H2HConstants.USER_MESSAGE_QUEUE_KEY);
 
 		this.handleUmQueueStep = handleUmQueueStep;
 	}

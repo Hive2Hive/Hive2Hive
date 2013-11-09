@@ -81,7 +81,7 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public IProcess login(UserCredentials credentials) {
+	public IProcess login(final UserCredentials credentials) {
 		
 		final LoginProcess process = new LoginProcess(credentials, networkManager);
 		process.addListener(new IProcessListener() {
@@ -89,7 +89,7 @@ public class H2HNode implements IH2HNode {
 			@Override
 			public void onSuccess() {
 				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(process.getContext().getGetUserProfileStep().getUserProfile(), process.getContext().getLocations(), networkManager);
+				PostLoginProcess postLogin = new PostLoginProcess(credentials, process.getContext().getGetUserProfileStep().getUserProfile(), process.getContext().getLocations(), networkManager);
 				postLogin.start();
 			}
 
