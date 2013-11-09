@@ -10,7 +10,7 @@ import org.hive2hive.core.process.ProcessStep;
 
 /**
  * A process step which gets a {@link NetworkContent} object under the given keys. </br>
- * <b>Important:</b> Use only this process step to get some data into the network so that in case of failure a
+ * <b>Important:</b> Use only this process step to get some data from the network so that in case of failure a
  * appropriate handling is triggered.
  * 
  * @author Nico
@@ -38,7 +38,7 @@ public abstract class BaseGetProcessStep extends ProcessStep {
 	}
 
 	@Override
-	public void rollBack() {
+	public final void rollBack() {
 		// ignore because just a get
 	}
 

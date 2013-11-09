@@ -10,7 +10,7 @@ import org.hive2hive.core.process.manager.ProcessManager;
  * 
  */
 public interface IProcess extends Runnable {
-	
+
 	/**
 	 * Starts the process, such that its state will be {@link ProcessState#RUNNING}. Only processes being in
 	 * {@link ProcessState#INITIALIZING} state can be started.
@@ -38,10 +38,12 @@ public interface IProcess extends Runnable {
 	void stop(String reason);
 
 	/**
-	 * Terminates the process by signaling that no further steps have to be executed.
+	 * Terminates the process by signaling that no further steps have to be executed.</br>
+	 * <b>Note:</b> This method does not have the same effect as {@link Process#stop(String)} since here no
+	 * rollback will be initiated.
 	 */
 	void terminate();
-	
+
 	/**
 	 * Returns the per-{@link ProcessManager} unique PID of this process.
 	 * 
@@ -65,10 +67,11 @@ public interface IProcess extends Runnable {
 
 	/**
 	 * Returns the context of this process.
+	 * 
 	 * @return
 	 */
 	ProcessContext getContext();
-	
+
 	void addListener(IProcessListener listener);
 
 	boolean removeListener(IProcessListener listener);

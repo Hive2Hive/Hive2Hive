@@ -4,7 +4,6 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessContext;
 
 /**
  * This process does all long-running tasks necessary after the login:
@@ -14,7 +13,7 @@ import org.hive2hive.core.process.ProcessContext;
  * <li>If master, handle the user message queue</li>
  * </ul>
  * 
- * @author Nico
+ * @author Nico, Christian
  * 
  */
 public class PostLoginProcess extends Process {
@@ -24,12 +23,16 @@ public class PostLoginProcess extends Process {
 	public PostLoginProcess(UserProfile profile, Locations currentLocations, NetworkManager networkManager) {
 		super(networkManager);
 		
-		context = new PostLoginProcessContext(this, profile, currentLocations);
-		
 		// execution order:
 		// 1. ContactPeersStep (-> PutLocationsStep)
 		// 2. SynchronizeFilesStep
+		// 3. GetUserMessageQueueStep
+		// 4. HandleUserMessageQueueStep
+		HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep();
+		GetUserMessageQueueStep umQueueStep = new GetUserMessageQueueStep(profile, handleUmQueueStep);
 		
+		context = new PostLoginProcessContext(this, profile, currentLocations, umQueueStep);
+
 		setNextStep(new ContactPeersStep(currentLocations));
 	}
 
