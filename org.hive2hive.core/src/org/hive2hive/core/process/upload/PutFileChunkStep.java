@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.upload;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
@@ -41,15 +42,13 @@ public class PutFileChunkStep extends PutProcessStep {
 
 	private final File file;
 	private final int offset;
-	private final List<Chunk> uploadedChunks;
 	private final List<KeyPair> chunkKeys;
 
-	public PutFileChunkStep(File file, int offset, List<Chunk> uploadedChunks, List<KeyPair> chunkKeys) {
+	public PutFileChunkStep(File file, int offset, List<KeyPair> chunkKeys) {
 		// the details are set later
 		super(null, H2HConstants.FILE_CHUNK, null, null);
 		this.file = file;
 		this.offset = offset;
-		this.uploadedChunks = uploadedChunks;
 		this.chunkKeys = chunkKeys;
 	}
 
@@ -72,12 +71,11 @@ public class PutFileChunkStep extends PutProcessStep {
 		if (read > 0) {
 			// create a chunk
 			KeyPair chunkKey = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-			Chunk chunk = new Chunk(chunkKey.getPublic(), data, uploadedChunks.size(), read);
-			uploadedChunks.add(chunk);
+			Chunk chunk = new Chunk(chunkKey.getPublic(), data, chunkKeys.size(), read);
 			chunkKeys.add(chunkKey);
 
 			// more data to read (increase offset)
-			nextStep = new PutFileChunkStep(file, offset + data.length, uploadedChunks, chunkKeys);
+			nextStep = new PutFileChunkStep(file, offset + data.length, chunkKeys);
 
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
@@ -110,7 +108,7 @@ public class PutFileChunkStep extends PutProcessStep {
 	private MetaFile createNewMetaFile() {
 		KeyPair fileKey = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		MetaFile metaFile = new MetaFile(fileKey.getPublic());
-		FileVersion version = new FileVersion(0, getTotalSizeAllChunks(), System.currentTimeMillis());
+		FileVersion version = new FileVersion(0, getFileSize(), System.currentTimeMillis());
 		version.setChunkIds(chunkKeys);
 
 		List<FileVersion> versions = new ArrayList<FileVersion>(1);
@@ -120,11 +118,21 @@ public class PutFileChunkStep extends PutProcessStep {
 		return metaFile;
 	}
 
-	private int getTotalSizeAllChunks() {
-		int size = 0;
-		for (Chunk chunk : uploadedChunks) {
-			size += chunk.getSize();
+	/**
+	 * Note that file.length can be very slowly (see
+	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
+	 * 
+	 * @return the file size in bytes
+	 * @throws IOException
+	 */
+	private long getFileSize() {
+		try {
+			FileInputStream stream = new FileInputStream(file);
+			long size = stream.getChannel().size();
+			stream.close();
+			return size;
+		} catch (IOException e) {
+			return file.length();
 		}
-		return size;
 	}
 }

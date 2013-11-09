@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -51,8 +50,7 @@ public class UploadFileProcess extends Process {
 			logger.debug("Adding a file to the DHT");
 
 			// start chunking the file
-			PutFileChunkStep chunkingStep = new PutFileChunkStep(file, 0, new ArrayList<Chunk>(),
-					new ArrayList<KeyPair>());
+			PutFileChunkStep chunkingStep = new PutFileChunkStep(file, 0, new ArrayList<KeyPair>());
 			setNextStep(chunkingStep);
 		} else {
 			logger.debug("Adding a folder to the DHT");

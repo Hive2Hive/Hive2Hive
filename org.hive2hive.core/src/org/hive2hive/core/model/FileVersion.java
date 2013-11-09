@@ -18,11 +18,11 @@ public class FileVersion extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final int counter;
-	private final int size;
+	private final long size;
 	private final long date;
 	private List<KeyPair> chunkIds;
 
-	public FileVersion(int counter, int size, long date) {
+	public FileVersion(int counter, long size, long date) {
 		this.counter = counter;
 		this.size = size;
 		this.date = date;
@@ -41,7 +41,7 @@ public class FileVersion extends NetworkContent {
 		return counter;
 	}
 
-	public int getSize() {
+	public long getSize() {
 		return size;
 	}
 
