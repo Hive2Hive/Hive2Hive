@@ -4,10 +4,8 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserMessageQueue;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * This step is only important for a master client that has to handle all the buffered user messages.

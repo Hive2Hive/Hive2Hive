@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.LocationEntry;
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.put.PutLocationStep;

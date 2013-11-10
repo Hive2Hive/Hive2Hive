@@ -1,7 +1,6 @@
 package org.hive2hive.core.network;
 
 import java.net.InetAddress;
-import java.security.PublicKey;
 
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureGet;

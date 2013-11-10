@@ -6,7 +6,6 @@ import net.tomp2p.rpc.ObjectDataReply;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * This is the general message handler of each node. It checks if received

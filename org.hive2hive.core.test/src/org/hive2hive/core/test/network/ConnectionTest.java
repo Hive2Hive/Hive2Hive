@@ -1,6 +1,6 @@
 package org.hive2hive.core.test.network;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
