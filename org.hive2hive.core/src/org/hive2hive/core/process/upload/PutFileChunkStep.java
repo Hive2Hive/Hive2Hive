@@ -88,6 +88,10 @@ public class PutFileChunkStep extends PutProcessStep {
 
 		if (read > 0) {
 			// create a chunk
+
+			// the byte-Array may contain many empty slots if last chunk. Truncate it
+			data = truncateData(data, read);
+
 			KeyPair chunkKey = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 			Chunk chunk = new Chunk(chunkKey.getPublic(), data, chunkKeys.size(), read);
 			chunkKeys.add(chunkKey);
@@ -127,6 +131,26 @@ public class PutFileChunkStep extends PutProcessStep {
 			// existing meta file
 			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(newMetaFile, updateProfileStep);
 			getProcess().setNextStep(putMetaFolder);
+		}
+	}
+
+	/**
+	 * Truncates a byte array
+	 * 
+	 * @param data
+	 * @param read
+	 * @return a shorter byte array
+	 */
+	private byte[] truncateData(byte[] data, int numOfBytes) {
+		// shortcut
+		if (data.length == numOfBytes) {
+			return data;
+		} else {
+			byte[] truncated = new byte[numOfBytes];
+			for (int i = 0; i < truncated.length; i++) {
+				truncated[i] = data[i];
+			}
+			return truncated;
 		}
 	}
 
