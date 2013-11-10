@@ -49,7 +49,7 @@ public class PutProcessStep extends ProcessStep {
 		put(locationKey, contentKey, content);
 	}
 
-	protected void put(final String locationKey, final String contentKey, NetworkContent content) {
+	protected void put(String locationKey, String contentKey, NetworkContent content) {
 		// can be called from subclasses, make sure to store the correct attributes here
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;

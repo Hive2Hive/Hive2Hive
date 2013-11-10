@@ -106,7 +106,7 @@ public class PutFileChunkStep extends PutProcessStep {
 
 				// start the put and continue with next chunk
 				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getAbsolutePath());
-				put(chunk.getId().toString(), H2HConstants.FILE_CHUNK, encryptedContent);
+				put(key2String(chunk.getId()), H2HConstants.FILE_CHUNK, encryptedContent);
 			} catch (DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Could not encrypt the chunk", e);

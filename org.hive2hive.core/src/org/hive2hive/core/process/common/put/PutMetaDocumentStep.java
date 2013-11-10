@@ -30,7 +30,7 @@ public class PutMetaDocumentStep extends PutProcessStep {
 	private final MetaDocument metaDocument;
 
 	public PutMetaDocumentStep(MetaDocument metaDocument, ProcessStep nextStep) {
-		super(metaDocument.getId().toString(), H2HConstants.META_DOCUMENT, null, nextStep);
+		super(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, null, nextStep);
 		this.metaDocument = metaDocument;
 	}
 
@@ -41,7 +41,7 @@ public class PutMetaDocumentStep extends PutProcessStep {
 			logger.debug("Decrypting meta document in a hybrid manner");
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaDocument,
 					metaDocument.getId(), AES_KEYLENGTH.BIT_256);
-			put(metaDocument.getId().toString(), H2HConstants.META_DOCUMENT, encrypted);
+			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");

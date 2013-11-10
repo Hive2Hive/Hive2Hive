@@ -19,8 +19,8 @@ public abstract class BaseGetProcessStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(BaseGetProcessStep.class);
 
-	protected final String locationKey;
-	protected final String contentKey;
+	protected String locationKey;
+	protected String contentKey;
 
 	public BaseGetProcessStep(String locationKey, String contentKey) {
 		this.locationKey = locationKey;
@@ -32,7 +32,11 @@ public abstract class BaseGetProcessStep extends ProcessStep {
 		get(locationKey, contentKey);
 	}
 
-	protected void get(final String locationKey, final String contentKey) {
+	protected void get(String locationKey, String contentKey) {
+		// can be called from subclasses, make sure to store the correct attributes here
+		this.locationKey = locationKey;
+		this.contentKey = contentKey;
+
 		FutureGet getFuture = getNetworkManager().getGlobal(locationKey, contentKey);
 		getFuture.addListener(new GetListener());
 	}

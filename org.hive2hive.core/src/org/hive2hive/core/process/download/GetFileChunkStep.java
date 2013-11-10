@@ -70,7 +70,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 		KeyPair firstInList = chunksToGet.remove(0);
 		decryptionKey = firstInList.getPrivate(); // store current private key
 		logger.info("Downloading next chunk... " + chunksToGet.size() + " chunk(s) more to go.");
-		get(firstInList.getPublic().toString(), H2HConstants.FILE_CHUNK);
+		get(key2String(firstInList.getPublic()), H2HConstants.FILE_CHUNK);
 	}
 
 	@Override

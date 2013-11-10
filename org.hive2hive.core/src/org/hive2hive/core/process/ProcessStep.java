@@ -1,5 +1,8 @@
 package org.hive2hive.core.process;
 
+import java.security.PublicKey;
+
+import org.bouncycastle.util.encoders.Base64;
 import org.hive2hive.core.network.NetworkManager;
 
 /**
@@ -37,4 +40,7 @@ public abstract class ProcessStep {
 		return process.getNetworkManager();
 	}
 
+	protected static String key2String(PublicKey key) {
+		return new String(Base64.encode(key.getEncoded()));
+	}
 }

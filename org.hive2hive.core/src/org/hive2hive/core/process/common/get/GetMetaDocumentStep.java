@@ -35,7 +35,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	private MetaDocument metaDocument;
 
 	public GetMetaDocumentStep(KeyPair keyPair, ProcessStep nextStep) {
-		super(keyPair.getPublic().toString(), H2HConstants.META_DOCUMENT);
+		super(key2String(keyPair.getPublic()), H2HConstants.META_DOCUMENT);
 		this.keyPair = keyPair;
 		this.nextStep = nextStep;
 	}
