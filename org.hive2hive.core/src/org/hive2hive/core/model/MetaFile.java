@@ -54,6 +54,6 @@ public class MetaFile extends MetaDocument {
 			}
 		});
 
-		return versions.get(0);
+		return versions.get(versions.size() - 1);
 	}
 }

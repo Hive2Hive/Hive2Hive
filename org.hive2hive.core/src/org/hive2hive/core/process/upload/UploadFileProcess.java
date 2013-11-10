@@ -3,7 +3,6 @@ package org.hive2hive.core.process.upload;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
-import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.IH2HFileConfiguration;
@@ -50,7 +49,7 @@ public class UploadFileProcess extends Process {
 			logger.debug("Adding a file to the DHT");
 
 			// start chunking the file
-			PutFileChunkStep chunkingStep = new PutFileChunkStep(file, 0, new ArrayList<KeyPair>());
+			PutFileChunkStep chunkingStep = new PutFileChunkStep(file);
 			setNextStep(chunkingStep);
 		} else {
 			logger.debug("Adding a folder to the DHT");

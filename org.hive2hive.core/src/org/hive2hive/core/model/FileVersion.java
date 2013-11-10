@@ -17,9 +17,9 @@ import org.hive2hive.core.network.data.NetworkContent;
 public class FileVersion extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
-	private final int counter;
-	private final long size;
-	private final long date;
+	private final int counter; // version count
+	private final long size; // size of the version
+	private final long date; // date when it's created
 	private List<KeyPair> chunkIds;
 
 	public FileVersion(int counter, long size, long date) {

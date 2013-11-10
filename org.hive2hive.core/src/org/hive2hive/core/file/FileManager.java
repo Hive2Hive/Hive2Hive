@@ -1,7 +1,8 @@
 package org.hive2hive.core.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -14,11 +15,14 @@ public class FileManager {
 	private final File root;
 
 	public FileManager(String rootDirectory) {
-		root = new File(rootDirectory);
+		this(new File(rootDirectory));
 	}
 
 	public FileManager(File rootDirectory) {
 		root = rootDirectory;
+		if (!root.exists()) {
+			root.mkdirs();
+		}
 	}
 
 	/**
@@ -31,19 +35,34 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns the file on disk (if existent) from a file node of the user profile
+	 * Creates a file on disk for the given node
+	 * 
+	 * @param fileToCreate
+	 * @return whether the file creation was successful.
+	 * @throws IOException Can occur if the directory cannot be written
+	 */
+	public boolean createFileOnDisk(FileTreeNode fileToCreate) throws IOException {
+		File file = getFile(fileToCreate);
+		if (file.exists()) {
+			throw new FileAlreadyExistsException(fileToCreate.getFullPath());
+		}
+
+		if (fileToCreate.isFolder()) {
+			return file.mkdir();
+		} else {
+			return file.createNewFile();
+		}
+	}
+
+	/**
+	 * Returns the file on disk from a file node of the user profile
 	 * 
 	 * @param fileToFind
 	 * @return
-	 * @throws FileNotFoundException
 	 */
-	public File getFile(FileTreeNode fileToFind) throws FileNotFoundException {
-		File file = new File(root, fileToFind.getFullPath());
-		if (!file.exists()) {
-			throw new FileNotFoundException();
-		}
-
-		return file;
+	public File getFile(FileTreeNode fileToFind) {
+		String fullPath = root.getAbsolutePath() + fileToFind.getFullPath();
+		return new File(fullPath);
 	}
 
 	/**

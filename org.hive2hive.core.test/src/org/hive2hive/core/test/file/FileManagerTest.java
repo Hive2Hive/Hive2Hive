@@ -108,4 +108,17 @@ public class FileManagerTest extends H2HJUnitTest {
 					|| file.getName().equalsIgnoreCase("2dn") || file.getName().equalsIgnoreCase("2fn"));
 		}
 	}
+
+	@Test
+	public void testCreateFileOnDisk() throws IOException {
+		// creation of file works
+		Assert.assertTrue(fileManager.createFileOnDisk(child1));
+
+		// does not work because dir1 does not exist yet
+		Assert.assertFalse(fileManager.createFileOnDisk(dir2));
+		Assert.assertTrue(fileManager.createFileOnDisk(dir1));
+
+		// works now
+		Assert.assertTrue(fileManager.createFileOnDisk(dir2));
+	}
 }

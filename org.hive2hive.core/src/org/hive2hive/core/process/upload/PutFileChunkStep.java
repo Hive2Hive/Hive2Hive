@@ -45,7 +45,23 @@ public class PutFileChunkStep extends PutProcessStep {
 	private final long offset;
 	private final List<KeyPair> chunkKeys;
 
-	public PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
+	/**
+	 * Constructor for first call
+	 * 
+	 * @param file
+	 */
+	public PutFileChunkStep(File file) {
+		this(file, 0, new ArrayList<KeyPair>());
+	}
+
+	/**
+	 * Constructor needed when file has multiple chunks
+	 * 
+	 * @param file
+	 * @param offset
+	 * @param chunkKeys
+	 */
+	private PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
 		super(null, H2HConstants.FILE_CHUNK, null, null);
 		this.file = file;
