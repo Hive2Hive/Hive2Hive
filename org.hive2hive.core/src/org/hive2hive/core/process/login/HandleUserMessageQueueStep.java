@@ -4,8 +4,8 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.UserMessage;
 import org.hive2hive.core.model.UserMessageQueue;
+import org.hive2hive.core.network.messages.usermessages.UserMessage;
 import org.hive2hive.core.process.ProcessStep;
 
 public class HandleUserMessageQueueStep extends ProcessStep {

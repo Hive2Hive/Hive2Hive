@@ -1,20 +1,19 @@
-package org.hive2hive.core.process.login;
+package org.hive2hive.core.network.messages.usermessages;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 
-public class ContactPeerMessage extends BaseDirectMessage implements IRequestMessage {
+public class ContactPeerUserMessage extends UserMessage implements IRequestMessage {
 
 	private static final long serialVersionUID = -5335863637956648142L;
 	
+	private final String evidenceContent;
 	private IResponseCallBackHandler handler;
-	private String evidenceContent;
 
-	public ContactPeerMessage(PeerAddress targetPeerAddress, String evidenceContent) {
+	public ContactPeerUserMessage(PeerAddress targetPeerAddress, String evidenceContent) {
 		super(targetPeerAddress);
 		
 		this.evidenceContent = evidenceContent;

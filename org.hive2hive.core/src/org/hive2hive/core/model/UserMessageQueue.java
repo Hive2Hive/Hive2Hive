@@ -5,6 +5,7 @@ import java.util.Queue;
 
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.messages.usermessages.UserMessage;
 
 /**
  * The queue stores all {@link UserMessage}s that need to be processed by a client when he comes online. This

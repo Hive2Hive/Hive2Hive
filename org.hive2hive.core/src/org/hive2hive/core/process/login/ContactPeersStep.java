@@ -13,6 +13,7 @@ import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.usermessages.ContactPeerUserMessage;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutLocationStep;
 
@@ -54,7 +55,7 @@ public class ContactPeersStep extends ProcessStep {
 			// generate random verification content
 			final String evidenceContent = UUID.randomUUID().toString();
 
-			ContactPeerMessage contactMsg = new ContactPeerMessage(entry.getAddress(), evidenceContent);
+			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(), evidenceContent);
 
 			contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
 			getNetworkManager().sendDirect(contactMsg);
