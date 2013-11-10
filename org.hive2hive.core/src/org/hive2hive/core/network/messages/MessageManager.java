@@ -1,7 +1,12 @@
 package org.hive2hive.core.network.messages;
 
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
@@ -14,6 +19,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * This class handles the sending of messages.
@@ -24,11 +30,12 @@ public class MessageManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageManager.class);
 
-	private final Map<String, IResponseCallBackHandler> callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
 	private final NetworkManager networkManager;
+	private final Map<String, IResponseCallBackHandler> callBackHandlers;
 
-	public MessageManager(NetworkManager aNetworkManager) {
-		networkManager = aNetworkManager;
+	public MessageManager(NetworkManager networkManager) {
+		this.networkManager = networkManager;
+		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
 	}
 
 	/**
@@ -41,7 +48,7 @@ public class MessageManager {
 	 */
 	public FutureDirect send(BaseMessage message) {
 		if (message.getTargetKey() == null)
-			throw new IllegalArgumentException("target key can not be null");
+			throw new IllegalArgumentException("target key cannot be null");
 		
 		// prepare message
 		message.increaseSendingCounter();
@@ -70,7 +77,7 @@ public class MessageManager {
 	 */
 	public FutureResponse sendDirect(BaseDirectMessage message) {
 		if (message.getTargetAddress() == null)
-			throw new IllegalArgumentException("target address can not be null");
+			throw new IllegalArgumentException("target address cannot be null");
 
 		// prepare message
 		message.increaseDirectSendingCounter();
@@ -87,10 +94,39 @@ public class MessageManager {
 		return futureResponse;
 	}
 
+	public FutureResponse sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
+		if (message.getTargetAddress() == null)
+			throw new IllegalArgumentException("target address cannot be null");
+	
+		// prepare message
+		message.increaseDirectSendingCounter();
+		message.setSenderAddress(networkManager.getPeerAddress());
+		configureCallbackHandlerIfNeeded(message);
+	
+		// asymmetrically encrypt message
+		byte[] messageBytes = EncryptionUtil.serializeObject(message);
+		try {
+			byte[] encryptedMessage = EncryptionUtil.encryptRSA(messageBytes, targetPublicKey);
+			
+			// send message directly to the peer with the given peer address
+			FutureResponse futureResponse = networkManager.getConnection().getPeer()
+					.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
+			
+			logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
+					message.getTargetKey(), message.getMessageID()));
+			
+			return futureResponse;
+		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+			logger.error("An exception occured while encrypting the message. The message will not be sent.");
+		}
+		
+		return null;
+	}
+
 	public void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
 		callBackHandlers.put(messageId, handler);
 	}
-
+	
 	/**
 	 * Gets and removes a message callback handler
 	 * 
@@ -114,8 +150,7 @@ public class MessageManager {
 	}
 
 	private RequestP2PConfiguration createSendingConfiguration() {
-		RequestP2PConfiguration requestP2PConfiguration = new RequestP2PConfiguration(1, 10, 0);
-		return requestP2PConfiguration;
+		return new RequestP2PConfiguration(1, 10, 0);
 	}
 
 	private void configureCallbackHandlerIfNeeded(BaseMessage message) {

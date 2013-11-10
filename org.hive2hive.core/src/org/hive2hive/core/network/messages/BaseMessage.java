@@ -76,7 +76,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public BaseMessage(String messageID, String targetKey) {
 		this(messageID, targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
 	}
-
+	
 	/**
 	 * Getter
 	 * 

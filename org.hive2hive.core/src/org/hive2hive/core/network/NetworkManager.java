@@ -1,6 +1,7 @@
 package org.hive2hive.core.network;
 
 import java.net.InetAddress;
+import java.security.PublicKey;
 
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureGet;
@@ -17,6 +18,8 @@ import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
+import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the

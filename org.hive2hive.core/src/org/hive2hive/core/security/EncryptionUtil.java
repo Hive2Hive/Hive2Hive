@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -375,7 +376,7 @@ public final class EncryptionUtil {
 		// return setupSigner(false, data, publicKey).verifySignature(signature);
 	}
 
-	public static byte[] serializeObject(Object object) {
+	public static byte[] serializeObject(Serializable object) {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = null;

@@ -18,7 +18,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * Use this future adapter when sending a {@link BaseDirectMessage}. Attach this listener to the future which
- * gets returned at {@link MessageManager#sendDirect(BaseDirectMessage)} to enable a appropriate failure
+ * gets returned at {@link MessageManager#sendDirect(BaseDirectMessage)} to enable an appropriate failure
  * handling and notifying {@link IBaseMessageListener} listeners. In case of a successful sending
  * {@link IBaseMessageListener#onSuccess()} gets called. In case of a failed sending
  * {@link IBaseMessageListener#onFailure()} gets called. </br></br>
