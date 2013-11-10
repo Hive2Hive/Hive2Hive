@@ -9,9 +9,9 @@ import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -37,10 +37,10 @@ public class UploadFileProcess extends Process {
 	 * @param fileManager
 	 * @throws FileNotFoundException
 	 */
-	public UploadFileProcess(File file, UserProfile userProfile, UserCredentials credentials,
-			NetworkManager networkManager, FileManager fileManager, IH2HFileConfiguration config) {
+	public UploadFileProcess(File file, UserCredentials credentials, NetworkManager networkManager,
+			FileManager fileManager, IH2HFileConfiguration config) {
 		super(networkManager);
-		context = new UploadFileProcessContext(this, file, userProfile, credentials, fileManager, config);
+		context = new UploadFileProcessContext(this, file, credentials, fileManager, config);
 
 		// TODO validate the file size if valid
 
@@ -56,11 +56,16 @@ public class UploadFileProcess extends Process {
 
 			// put the meta folder and update the user profile
 			KeyPair folderKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-			MetaFolder folder = new MetaFolder(folderKeyPair.getPublic(), userProfile.getUserId());
+			MetaFolder folder = new MetaFolder(folderKeyPair.getPublic(), credentials.getUserId());
 
+			// 1. add the meta folder to the DHT
+			// 2. get the user profile
+			// 3. add the entry to the user profile
 			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, folderKeyPair,
-					userProfile, credentials);
-			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(folder, updateProfileStep);
+					credentials);
+			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(credentials, updateProfileStep);
+			context.setUserProfileStep(getUserProfileStep);
+			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(folder, getUserProfileStep);
 			setNextStep(putMetaFolder);
 		}
 	}

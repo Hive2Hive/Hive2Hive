@@ -1,14 +1,19 @@
 package org.hive2hive.core.test.network;
 
+import java.io.File;
 import java.security.KeyPair;
 
+import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
+import org.hive2hive.core.process.download.GetFileChunkStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -54,5 +59,12 @@ public class NetworkGetUtil {
 		GetMetaDocumentStep step = new GetMetaDocumentStep(keys, null);
 		executeStep(networkManager, step);
 		return step.getMetaDocument();
+	}
+
+	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, MetaFile metaFile,
+			FileManager fileManager) {
+		GetFileChunkStep step = new GetFileChunkStep(file, metaFile, fileManager);
+		executeStep(networkManager, step);
+		return step.getFile();
 	}
 }

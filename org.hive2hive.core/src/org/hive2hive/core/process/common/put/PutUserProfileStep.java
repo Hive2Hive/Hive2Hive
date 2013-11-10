@@ -25,13 +25,13 @@ public class PutUserProfileStep extends PutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutUserProfileStep.class);
 
-	private final UserProfile profile;
+	protected UserProfile userProfile;
 	private final UserCredentials credentials;
 
 	public PutUserProfileStep(UserProfile profile, UserCredentials credentials, ProcessStep nextStep) {
 		super(UserProfile.getLocationKey(credentials), H2HConstants.USER_PROFILE, null, nextStep);
-		
-		this.profile = profile;
+
+		this.userProfile = profile;
 		this.credentials = credentials;
 	}
 
@@ -39,9 +39,9 @@ public class PutUserProfileStep extends PutProcessStep {
 	public void start() {
 		logger.debug("Encrypting UserProfile with 256bit AES key from password");
 		try {
-			SecretKey encryptionKey = PasswordUtil
-					.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
-			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(profile,
+			SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+					credentials.getPin(), AES_KEYLENGTH.BIT_256);
+			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(userProfile,
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
 			put(locationKey, contentKey, encryptedUserProfile);

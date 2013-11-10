@@ -13,6 +13,7 @@ import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
+import org.hive2hive.core.process.upload.UploadFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
@@ -76,7 +77,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess register(UserCredentials credentials) {
-
 		final RegisterProcess process = new RegisterProcess(credentials, networkManager);
 
 		if (autostartProcesses) {
@@ -91,8 +91,9 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		loginProcess.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {
-				// start the post login process
 				LoginProcessContext loginContext = loginProcess.getContext();
+
+				// start the post login process
 				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getGetUserProfileStep()
 						.getUserProfile(), credentials, loginContext.getLocations(), networkManager,
 						fileManager, H2HNode.this);
@@ -108,16 +109,23 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		if (autostartProcesses) {
 			loginProcess.start();
 		}
+
 		return loginProcess;
 	}
 
 	@Override
-	public IProcess add(File file) throws IllegalFileLocation {
+	public IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation {
 		// file must be in the given root directory
 		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {
 			throw new IllegalFileLocation();
 		}
 
-		return null;
+		UploadFileProcess uploadProcess = new UploadFileProcess(file, credentials, networkManager,
+				fileManager, this);
+		if (autostartProcesses) {
+			uploadProcess.start();
+		}
+
+		return uploadProcess;
 	}
 }

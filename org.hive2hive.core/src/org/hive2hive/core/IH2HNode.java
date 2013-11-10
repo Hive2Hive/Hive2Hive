@@ -18,6 +18,7 @@ public interface IH2HNode {
 
 	/**
 	 * Initiates and returns a register process.
+	 * 
 	 * @param credentials The user's credentials with which it shall be registered.
 	 * @return Returns an observable register process.
 	 */
@@ -25,6 +26,7 @@ public interface IH2HNode {
 
 	/**
 	 * Initiates and returns a login process.
+	 * 
 	 * @param credentials The user's credentials with which it shall be logged in.
 	 * @return Returns an observable login process.
 	 */
@@ -35,7 +37,7 @@ public interface IH2HNode {
 	 * the
 	 * node configuration
 	 */
-	IProcess add(File file) throws IllegalFileLocation;
+	IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation;
 
 	void disconnect();
 }

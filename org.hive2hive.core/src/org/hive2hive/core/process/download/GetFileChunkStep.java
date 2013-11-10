@@ -84,17 +84,17 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 			if (chunksToGet.isEmpty()) {
 				// all chunks downloaded
 				if (chunkBuffer.isEmpty()) {
+					// normal case: done with the process.
+					getProcess().setNextStep(null);
+				} else {
 					// should be empty
 					logger.error("All chunks downloaded but still some in buffer.");
 					getProcess().stop(
 							"Could not write all chunks to disk. We're stuck at chunk " + currentChunkOrder);
-				} else {
-					// normal case: done with the process.
-					getProcess().setNextStep(null);
 				}
 			} else {
 				// more chunks to get. Continue with downloadint the next chunk
-				GetFileChunkStep nextStep = new GetFileChunkStep(file, currentChunkOrder, chunksToGet,
+				GetFileChunkStep nextStep = new GetFileChunkStep(getFile(), currentChunkOrder, chunksToGet,
 						chunkBuffer);
 				getProcess().setNextStep(nextStep);
 			}
@@ -112,14 +112,22 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	 * @throws IOException
 	 */
 	private void writeBufferToDisk() throws IOException {
-		boolean wroteSth = false;
+		List<Chunk> wroteToDisk = new ArrayList<Chunk>();
 		do {
+			wroteToDisk.clear();
 			for (Chunk chunk : chunkBuffer) {
 				if (chunk.getOrder() == currentChunkOrder) {
 					FileUtils.writeByteArrayToFile(file, chunk.getData(), true);
+					wroteToDisk.add(chunk);
 					currentChunkOrder++;
 				}
 			}
-		} while (wroteSth);
+
+			chunkBuffer.removeAll(wroteToDisk);
+		} while (!wroteToDisk.isEmpty());
+	}
+
+	public File getFile() {
+		return file;
 	}
 }

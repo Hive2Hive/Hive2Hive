@@ -30,7 +30,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		// synchronize the files that need to be uploaded into the DHT
 		Set<File> missingInTree = fileManager.getMissingInTree(userProfile.getRoot());
 		for (File file : missingInTree) {
-			UploadFileProcess process = new UploadFileProcess(file, userProfile, context.getCredentials(),
+			UploadFileProcess process = new UploadFileProcess(file, context.getCredentials(),
 					getNetworkManager(), fileManager, context.getFileConfig());
 			process.start();
 		}

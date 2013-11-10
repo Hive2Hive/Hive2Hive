@@ -78,10 +78,11 @@ public class UploadFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		String fileName = NetworkTestUtil.randomString();
 		File toUpload = new File(fileManager.getRoot(), fileName);
-		FileUtils.write(toUpload, NetworkTestUtil.randomString());
+		String fileContent = NetworkTestUtil.randomString();
+		FileUtils.write(toUpload, fileContent);
 
-		UploadFileProcess process = new UploadFileProcess(toUpload, userProfile, userCredentials, client,
-				fileManager, config);
+		UploadFileProcess process = new UploadFileProcess(toUpload, userCredentials, client, fileManager,
+				config);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -108,10 +109,12 @@ public class UploadFileTest extends H2HJUnitTest {
 		Assert.assertEquals(1, metaFile.getVersions().size());
 		Assert.assertEquals(1, metaFile.getVersions().get(0).getChunkIds().size());
 
-		KeyPair chunkKeyPair = metaFile.getVersions().get(0).getChunkIds().get(0);
-		// TODO
-		// 1. get all version chunks with the keys in the meta file (decrypt them)
-		// 2. verify the content
+		// create new filemanager
+		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager fileManager2 = new FileManager(root);
+		File file = NetworkGetUtil.downloadFile(client, node, metaFile, fileManager2);
+		Assert.assertTrue(file.exists());
+		Assert.assertEquals(fileContent, FileUtils.readFileToString(file));
 	}
 
 	@After

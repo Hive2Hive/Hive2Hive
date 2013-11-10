@@ -68,8 +68,8 @@ public class DownloadFileTest extends H2HJUnitTest {
 		String fileName = NetworkTestUtil.randomString();
 		uploadedFile = new File(root, fileName);
 		FileUtils.write(uploadedFile, testContent);
-		UploadFileProcess ulProcess = new UploadFileProcess(uploadedFile, userProfile, userCredentials,
-				client, uploaderFileManager, new TestH2HFileConfiguration());
+		UploadFileProcess ulProcess = new UploadFileProcess(uploadedFile, userCredentials, client,
+				uploaderFileManager, new TestH2HFileConfiguration());
 
 		listener = new TestProcessListener();
 		ulProcess.addListener(listener);

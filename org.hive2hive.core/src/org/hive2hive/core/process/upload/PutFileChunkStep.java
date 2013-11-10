@@ -21,7 +21,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -114,22 +114,22 @@ public class PutFileChunkStep extends PutProcessStep {
 			}
 		} else {
 			logger.debug("All chunks uploaded. Continue with meta data.");
-
 			// nothing read, stop putting chunks and start next step
 			// put the meta folder and update the user profile
-			UserProfile profile = context.getUserProfile();
 
 			// generate the new key pair for the meta file (which are later stored in the user profile)
 			KeyPair fileKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-
 			MetaFile newMetaFile = createNewMetaFile(fileKeyPair.getPublic());
 
 			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, fileKeyPair,
-					profile, context.getCredentials());
+					context.getCredentials());
+			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
+					updateProfileStep);
+			context.setUserProfileStep(getUserProfileStep);
 
 			// TODO check if file already existed. If not, create new Meta file. If yes, create new version in
 			// existing meta file
-			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(newMetaFile, updateProfileStep);
+			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(newMetaFile, getUserProfileStep);
 			getProcess().setNextStep(putMetaFolder);
 		}
 	}
