@@ -55,7 +55,7 @@ public class ContactPeersStep extends ProcessStep {
 			// generate random verification content
 			final String evidenceContent = UUID.randomUUID().toString();
 
-			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(), evidenceContent);
+			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(getNetworkManager().getPeerAddress(), entry.getAddress(), evidenceContent);
 
 			contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
 			getNetworkManager().sendDirect(contactMsg);
