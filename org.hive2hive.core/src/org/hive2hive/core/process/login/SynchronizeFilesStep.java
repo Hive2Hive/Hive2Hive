@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -14,6 +15,7 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.UploadFileProcess;
+import org.hive2hive.core.security.UserCredentials;
 
 public class SynchronizeFilesStep extends ProcessStep {
 
@@ -28,41 +30,11 @@ public class SynchronizeFilesStep extends ProcessStep {
 		FileManager fileManager = context.getFileManager();
 		UserProfile userProfile = context.getUserProfile();
 
-		// synchronize the files that need to be downloaded from the DHT. Since the missing files are returned
-		// in preorder, we can easily build a tree from the list. Each child waits for execution until the
-		// parent is executed.
-		List<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(userProfile.getRoot());
-		logger.debug("Found " + missingOnDisk.size() + " files/folders missing on disk");
-		NodeProcessTreeNode nodeRootProcess = new NodeProcessTreeNode();
-		for (FileTreeNode missing : missingOnDisk) {
-			ProcessTreeNode parent = getParent(nodeRootProcess, missing);
-			// initialize the process
-			DownloadFileProcess downloadProcess = new DownloadFileProcess(missing, getNetworkManager(),
-					fileManager);
-			new NodeProcessTreeNode(downloadProcess, parent, missing);
-		}
+		ProcessTreeNode downloadProcess = startSyncMissingOnDisk(fileManager, userProfile);
+		ProcessTreeNode uploadProcess = startSyncMissingInProfile(fileManager, userProfile,
+				context.getCredentials(), context.getFileConfig());
 
-		// start the download
-		logger.debug("Start downloading...");
-		nodeRootProcess.start();
-
-		// synchronize the files that need to be uploaded into the DHT
-		List<File> missingInTree = fileManager.getMissingInTree(userProfile.getRoot());
-		logger.debug("Found " + missingInTree.size() + " files/folders missing in the user profile");
-		FileProcessTreeNode fileRootProcess = new FileProcessTreeNode();
-		for (File file : missingInTree) {
-			ProcessTreeNode parent = getParent(fileRootProcess, file);
-			// initialize the process
-			UploadFileProcess uploadProcess = new UploadFileProcess(file, context.getCredentials(),
-					getNetworkManager(), fileManager, context.getFileConfig());
-			new FileProcessTreeNode(uploadProcess, parent, file);
-		}
-
-		// start the upload
-		logger.debug("Start uploading...");
-		fileRootProcess.start();
-
-		while (fileRootProcess.isDone() && nodeRootProcess.isDone()) {
+		while (!(downloadProcess.isDone() && uploadProcess.isDone())) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -76,6 +48,48 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		// TODO how detect files that have been deleted locally while offline?
+		// TODO how detect files that have been modified locally/remotely while offline?
+	}
+
+	private ProcessTreeNode startSyncMissingOnDisk(FileManager fileManager, UserProfile userProfile) {
+		// synchronize the files that need to be downloaded from the DHT. Since the missing files are returned
+		// in preorder, we can easily build a tree from the list. Each child waits for execution until the
+		// parent is executed.
+		List<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(userProfile.getRoot());
+		logger.debug("Found " + missingOnDisk.size() + " files/folders missing on disk");
+		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
+		for (FileTreeNode missing : missingOnDisk) {
+			ProcessTreeNode parent = getParent(rootProcess, missing);
+			// initialize the process
+			DownloadFileProcess downloadProcess = new DownloadFileProcess(missing, getNetworkManager(),
+					fileManager);
+			new NodeProcessTreeNode(downloadProcess, parent, missing);
+		}
+
+		// start the download
+		logger.debug("Start downloading...");
+		rootProcess.start();
+		return rootProcess;
+	}
+
+	private ProcessTreeNode startSyncMissingInProfile(FileManager fileManager, UserProfile userProfile,
+			UserCredentials credentials, IH2HFileConfiguration config) {
+		// synchronize the files that need to be uploaded into the DHT
+		List<File> missingInTree = fileManager.getMissingInTree(userProfile.getRoot());
+		logger.debug("Found " + missingInTree.size() + " files/folders missing in the user profile");
+		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
+		for (File file : missingInTree) {
+			ProcessTreeNode parent = getParent(rootProcess, file);
+			// initialize the process
+			UploadFileProcess uploadProcess = new UploadFileProcess(file, credentials, getNetworkManager(),
+					fileManager, config);
+			new FileProcessTreeNode(uploadProcess, parent, file);
+		}
+
+		// start the upload
+		logger.debug("Start uploading...");
+		rootProcess.start();
+		return rootProcess;
 	}
 
 	@Override
