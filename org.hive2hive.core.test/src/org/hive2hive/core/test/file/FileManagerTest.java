@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileManager;
@@ -102,7 +101,7 @@ public class FileManagerTest extends H2HJUnitTest {
 		FileUtils.writeStringToFile(new File(dir1File, "2fn"), NetworkTestUtil.randomString());
 		new File(dir1File, "2dn").mkdir();
 
-		Set<File> missingInTree = fileManager.getMissingInTree(root);
+		List<File> missingInTree = fileManager.getMissingInTree(root);
 		Assert.assertEquals(3, missingInTree.size());
 		for (File file : missingInTree) {
 			Assert.assertTrue(file.getName().equalsIgnoreCase("1f3")

@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 
 import org.hive2hive.core.model.FileTreeNode;
@@ -96,13 +94,14 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns the missing files that exist on disk but not in the file tree in the user profile
+	 * Returns the missing files that exist on disk but not in the file tree in the user profile. The list is
+	 * in pre-order
 	 * 
 	 * @param rootNode
 	 * @return
 	 */
-	public Set<File> getMissingInTree(FileTreeNode rootNode) {
-		Set<File> missingInTree = new HashSet<File>();
+	public List<File> getMissingInTree(FileTreeNode rootNode) {
+		List<File> missingInTree = new ArrayList<File>();
 
 		Stack<File> fileStack = new Stack<File>();
 		for (File file : root.listFiles()) {
