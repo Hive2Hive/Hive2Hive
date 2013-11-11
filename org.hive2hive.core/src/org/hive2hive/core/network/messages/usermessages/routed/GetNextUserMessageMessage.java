@@ -1,22 +1,23 @@
-package org.hive2hive.core.network.messages.usermessages;
+package org.hive2hive.core.network.messages.usermessages.routed;
 
 import java.io.Serializable;
 import java.util.Queue;
 
-import net.tomp2p.peers.PeerAddress;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserMessageQueue;
+import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
 
 // TODO this might actually not be a user message
-public class GetNextFromQueueMessage extends RequestUserMessage {
+public class GetNextUserMessageMessage extends RoutedRequestMessage {
 
 	private static final long serialVersionUID = 580669795666539208L;
 
 	private final String locationKey;
 
-	public GetNextFromQueueMessage(PeerAddress senderAddress, PeerAddress targetAddress, String locationKey) {
-		super(senderAddress, targetAddress);
+	public GetNextUserMessageMessage(String targetKey, String locationKey) {
+		super(targetKey);
 		this.locationKey = locationKey;
 	}
 
@@ -26,34 +27,41 @@ public class GetNextFromQueueMessage extends RequestUserMessage {
 		// load the next user message
 		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getLocal(locationKey,
 				H2HConstants.USER_MESSAGE_QUEUE_KEY);
-		Queue<UserMessage> messageQueue = umQueue.getMessageQueue();
+		Queue<BaseMessage> messageQueue = umQueue.getMessageQueue();
 
 		// response object
+		// TODO don't delete UM from queue, since it could fail to get handled
 		NextFromQueueResponse responseContent = new NextFromQueueResponse(messageQueue.poll(),
 				messageQueue.size());
 
 		// send it back in a ResponseMessage
-		sendResponse(createResponse(responseContent));
+		sendDirectResponse(createResponse(responseContent));
 	}
 
 	public final class NextFromQueueResponse implements Serializable {
 
 		private static final long serialVersionUID = -2850130135183154805L;
 
-		private final UserMessage userMessage;
+		private final BaseMessage userMessage;
 		private final int remainingCount;
 
-		public NextFromQueueResponse(UserMessage message, int remaining) {
+		public NextFromQueueResponse(BaseMessage message, int remaining) {
 			this.userMessage = message;
 			this.remainingCount = remaining;
 		}
 
-		public UserMessage getUserMessage() {
+		public BaseMessage getUserMessage() {
 			return userMessage;
 		}
 
 		public int getRemainingCount() {
 			return remainingCount;
 		}
+	}
+
+	@Override
+	public AcceptanceReply accept() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

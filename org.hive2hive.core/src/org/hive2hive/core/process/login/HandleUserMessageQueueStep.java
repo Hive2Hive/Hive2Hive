@@ -5,7 +5,7 @@ import java.util.Queue;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserMessageQueue;
-import org.hive2hive.core.network.messages.usermessages.UserMessage;
+import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.process.ProcessStep;
 
 public class HandleUserMessageQueueStep extends ProcessStep {
@@ -37,9 +37,9 @@ public class HandleUserMessageQueueStep extends ProcessStep {
 		}
 		
 		// handle the messages
-		Queue<UserMessage> queue = umQueue.getMessageQueue();
+		Queue<BaseMessage> queue = umQueue.getMessageQueue();
 		while (!queue.isEmpty()){
-			UserMessage message = queue.poll();
+			BaseMessage message = queue.poll();
 			
 			// TODO handle the UserMessages here
 			

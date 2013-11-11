@@ -8,7 +8,7 @@ import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
-import org.hive2hive.core.network.messages.request.BaseRequestMessage;
+import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -21,7 +21,7 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * <b>Design decision:</b>
  * <ul>
- * <li>When a request message (e.g. {@link BaseRequestMessage}) which implements the {@link IRequestMessage}
+ * <li>When a request message (e.g. {@link RoutedRequestMessage}) which implements the {@link IRequestMessage}
  * interface is sent, the process step acts also as a {@link IResponseCallBackHandler} callback handler for
  * this message. The whole callback functionality has to be (if desired) implemented in the
  * {@link BaseMessageProcessStep#handleResponseMessage(ResponseMessage)} method.</li>
