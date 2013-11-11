@@ -7,19 +7,22 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Random;
 
+import net.tomp2p.futures.BaseFutureListener;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
-import org.hive2hive.core.network.messages.usermessages.ContactPeerUserMessage;
-import org.hive2hive.core.network.messages.usermessages.GetNextFromQueueMessage;
-import org.hive2hive.core.network.messages.usermessages.GetNextFromQueueMessage.NextFromQueueResponse;
-import org.hive2hive.core.network.messages.usermessages.UserMessage;
+import org.hive2hive.core.network.messages.usermessages.direct.ContactPeerUserMessage;
+import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage;
+import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage.NextFromQueueResponse;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -61,7 +64,7 @@ public class UserMessageTests extends H2HJUnitTest {
 	}
 
 	private static boolean contactPeerUserMessageHandled;
-	private static boolean getNextFromQueueMessageHandled;
+	private static boolean getNextUserMessageMessageHandled;
 
 	@Test
 	public void ContactPeerUserMessageTest() {
@@ -72,18 +75,17 @@ public class UserMessageTests extends H2HJUnitTest {
 
 		// create message
 		final String evidence = NetworkTestUtil.randomString();
-		ContactPeerUserMessage message = new ContactPeerUserMessage(node1.getPeerAddress(),
-				node2.getPeerAddress(), evidence);
+		ContactPeerUserMessage message = new ContactPeerUserMessage(node2.getPeerAddress(), evidence);
 		message.setCallBackHandler(new IResponseCallBackHandler() {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// handle callback
-				contactPeerUserMessageHandled = true;
-				logger.debug("ContactPeerUserMessage got handled.");
-
 				String responseEvidence = (String) responseMessage.getContent();
 				assertNotNull(responseEvidence);
 				assertTrue(evidence.equals(responseEvidence));
+
+				logger.debug("ContactPeerUserMessage got handled.");
+				contactPeerUserMessageHandled = true;
 			}
 		});
 
@@ -109,72 +111,65 @@ public class UserMessageTests extends H2HJUnitTest {
 	@Test
 	public void GetNextFromQueueMessageTest() {
 
-		// TODO the request to the proxy actually should not happen this way, since the PeerAddress is unknown
-
-		// select two random nodes
+		// select random nodes
 		NetworkManager user = network.get(random.nextInt(network.size()));
-		NetworkManager proxy = network.get(random.nextInt(network.size()));
+		NetworkManager putter = network.get(random.nextInt(network.size()));
 
 		// define a random user
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
-		String userLocationKey = "mama";//UserProfile.getLocationKey(credentials);
 
-		// prepare and put a sample UserMessageQueue for the user from node2
+		// prepare a sample UserMessageQueue
 		UserMessageQueue umq = new UserMessageQueue(credentials.getUserId());
 		for (int i = 0; i < 10; i++) {
-			umq.getMessageQueue().add(new UserMessage(user.getPeerAddress()) {
-
-				private static final long serialVersionUID = -2306638328974008903L;
+			umq.getMessageQueue().add(new BaseMessage(credentials.getUserId()) {
+				
+				private static final long serialVersionUID = 1L;
 
 				@Override
 				public void run() {
-					// do nothing
+				}
+				
+				@Override
+				public AcceptanceReply accept() {
+					return AcceptanceReply.OK;
 				}
 			});
 		}
-		proxy.putLocal(userLocationKey, H2HConstants.USER_MESSAGE_QUEUE_KEY, umq);
-
-		// wait for proxy to put
-		H2HWaiter putWaiter = new H2HWaiter(60);
-		NetworkContent tmp = null;
-		do {
-			putWaiter.tickASecond();
-			tmp = proxy.getLocal(userLocationKey, H2HConstants.USER_MESSAGE_QUEUE_KEY);
-		} while (tmp == null);
+		
+		// putter globally puts queue (blocking)
+		putter.putGlobal(credentials.getUserId(), H2HConstants.USER_MESSAGE_QUEUE_KEY, umq).awaitUninterruptibly();
 		
 		// request the UserMessageQueue
-		GetNextFromQueueMessage message = new GetNextFromQueueMessage(user.getPeerAddress(),
-				proxy.getPeerAddress(), userLocationKey);
+		GetNextUserMessageMessage message = new GetNextUserMessageMessage(credentials.getUserId());
 		message.setCallBackHandler(new IResponseCallBackHandler() {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// handle callback
-				getNextFromQueueMessageHandled = true;
-				logger.debug("GetNextFromQueueMessage got handled.");
-
 				NextFromQueueResponse response = (NextFromQueueResponse) responseMessage.getContent();
 				assertNotNull(response);
 				assertNotNull(response.getUserMessage());
 				assertNotNull(response.getRemainingCount());
 				assertTrue(response.getRemainingCount() == 9);
+				
+				logger.debug("GetNextUserMessageMessage got handled.");
+				getNextUserMessageMessageHandled = true;
 			}
 		});
 
-		user.sendDirect(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+		user.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {			
 			@Override
 			public void onSuccess() {
-			}
-
+			}	
 			@Override
 			public void onFailure() {
 				fail("The sending of the message failed.");
 			}
 		}, message, user));
-
+		
 		// wait for callback handling
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
 			waiter.tickASecond();
-		} while (!getNextFromQueueMessageHandled);
+		} while (!getNextUserMessageMessageHandled);
 	}
 }

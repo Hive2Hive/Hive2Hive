@@ -1,5 +1,7 @@
 package org.hive2hive.core.test.process.common.massages;
 
+import java.io.Serializable;
+
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.NetworkManager;
@@ -71,6 +73,18 @@ public class TestDirectMessageWithReply extends BaseDirectMessage implements IRe
 			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
 		}
 
+	}
+
+	@Override
+	public ResponseMessage createResponse(Serializable content) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendDirectResponse(ResponseMessage response) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

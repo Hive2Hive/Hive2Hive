@@ -14,19 +14,17 @@ public class GetNextUserMessageMessage extends RoutedRequestMessage {
 
 	private static final long serialVersionUID = 580669795666539208L;
 
-	private final String locationKey;
-
-	public GetNextUserMessageMessage(String targetKey, String locationKey) {
+	public GetNextUserMessageMessage(String targetKey) {
 		super(targetKey);
-		this.locationKey = locationKey;
 	}
 
 	@Override
 	public synchronized void run() {
 
 		// load the next user message
-		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getLocal(locationKey,
+		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getLocal(targetKey,
 				H2HConstants.USER_MESSAGE_QUEUE_KEY);
+		// TODO null handling
 		Queue<BaseMessage> messageQueue = umQueue.getMessageQueue();
 
 		// response object
