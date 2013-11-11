@@ -123,7 +123,7 @@ public class MessageManager {
 		return null;
 	}
 
-	public void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
+	public synchronized void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
 		callBackHandlers.put(messageId, handler);
 	}
 	
@@ -134,7 +134,7 @@ public class MessageManager {
 	 *            a unique message id
 	 * @return a callback handler or <code>null</code> if doesn't exist
 	 */
-	public IResponseCallBackHandler getCallBackHandler(String messageId) {
+	public synchronized IResponseCallBackHandler getCallBackHandler(String messageId) {
 		return callBackHandlers.remove(messageId);
 	}
 
@@ -145,7 +145,7 @@ public class MessageManager {
 	 *            a unique message id
 	 * @return <code>true</code> if exists and not <code>null</code>
 	 */
-	public boolean checkIfCallbackHandlerExists(String messageId) {
+	public synchronized boolean checkIfCallbackHandlerExists(String messageId) {
 		return (callBackHandlers.get(messageId) != null);
 	}
 

@@ -1,5 +1,7 @@
 package org.hive2hive.core.test.process.common.remove;
 
+import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -62,6 +64,8 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
+		
+		assertNull(network.get(0).getLocal(locationKey, contentKey));
 	}
 	
 	@Test
