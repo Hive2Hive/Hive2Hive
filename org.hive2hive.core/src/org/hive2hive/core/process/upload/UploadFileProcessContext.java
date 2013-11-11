@@ -18,6 +18,7 @@ public class UploadFileProcessContext extends ProcessContext {
 	private final File file;
 	private GetUserProfileStep getUserProfileStep;
 	private List<KeyPair> chunkKeys;
+	private boolean fileAlreadyExists;
 
 	public UploadFileProcessContext(UploadFileProcess process, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config) {
@@ -58,5 +59,13 @@ public class UploadFileProcessContext extends ProcessContext {
 
 	public List<KeyPair> getChunkKeys() {
 		return chunkKeys;
+	}
+
+	public void setFileAlreadyExists(boolean fileAlreadyExists) {
+		this.fileAlreadyExists = fileAlreadyExists;
+	}
+
+	public boolean getFileAlreadyExists() {
+		return fileAlreadyExists;
 	}
 }

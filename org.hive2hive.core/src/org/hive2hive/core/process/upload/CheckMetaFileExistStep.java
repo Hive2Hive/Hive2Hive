@@ -32,7 +32,10 @@ public class CheckMetaFileExistStep extends ProcessStep {
 
 		File file = context.getFile();
 		FileManager fileManager = context.getFileManager();
-		if (fileAlreadyExists(userProfile, file, fileManager)) {
+		boolean fileAlreadyExists = fileAlreadyExists(userProfile, file, fileManager);
+		context.setFileAlreadyExists(fileAlreadyExists);
+
+		if (fileAlreadyExists) {
 			// TODO get and update the meta document
 		} else {
 			if (file.isDirectory()) {
