@@ -7,22 +7,20 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.BaseFutureListener;
+import net.tomp2p.futures.FuturePut;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserMessageQueue;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.messages.AcceptanceReply;
-import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
+import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 import org.hive2hive.core.network.messages.usermessages.direct.ContactPeerUserMessage;
 import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage;
 import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage.NextFromQueueResponse;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -90,11 +88,10 @@ public class UserMessageTests extends H2HJUnitTest {
 		});
 
 		// send message
-		node1.sendDirect(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+		node1.sendDirect(message).addListener(new FutureResponseListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {
 			}
-
 			@Override
 			public void onFailure() {
 				fail("The sending of the message failed.");
@@ -121,23 +118,16 @@ public class UserMessageTests extends H2HJUnitTest {
 		// prepare a sample UserMessageQueue
 		UserMessageQueue umq = new UserMessageQueue(credentials.getUserId());
 		for (int i = 0; i < 10; i++) {
-			umq.getMessageQueue().add(new BaseMessage(credentials.getUserId()) {
-				
-				private static final long serialVersionUID = 1L;
+			TestMessage userMessage = new TestMessage(credentials.getUserId(), "bla", null);
 
-				@Override
-				public void run() {
-				}
-				
-				@Override
-				public AcceptanceReply accept() {
-					return AcceptanceReply.OK;
-				}
-			});
+			EncryptionUtil.serializeObject(userMessage);
+			umq.getMessageQueue().add(userMessage);
 		}
 		
 		// putter globally puts queue (blocking)
-		putter.putGlobal(credentials.getUserId(), H2HConstants.USER_MESSAGE_QUEUE_KEY, umq).awaitUninterruptibly();
+		FuturePut putGlobal = putter.putGlobal(credentials.getUserId(), H2HConstants.USER_MESSAGE_QUEUE_KEY, umq);
+		putGlobal.awaitUninterruptibly();
+		putGlobal.getFutureRequests().awaitUninterruptibly();
 		
 		// request the UserMessageQueue
 		GetNextUserMessageMessage message = new GetNextUserMessageMessage(credentials.getUserId());

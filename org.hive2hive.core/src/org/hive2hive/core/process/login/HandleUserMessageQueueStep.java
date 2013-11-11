@@ -37,13 +37,13 @@ public class HandleUserMessageQueueStep extends ProcessStep {
 		}
 		
 		// handle the messages
-		Queue<BaseMessage> queue = umQueue.getMessageQueue();
-		while (!queue.isEmpty()){
-			BaseMessage message = queue.poll();
-			
-			// TODO handle the UserMessages here
-			
-		}
+//		Queue<BaseMessage> queue = umQueue.getMessageQueue();
+//		while (!queue.isEmpty()){
+//			BaseMessage message = queue.poll();
+//			
+//			// TODO handle the UserMessages here
+//			
+//		}
 		
 		// terminate the process
 		getProcess().terminate();

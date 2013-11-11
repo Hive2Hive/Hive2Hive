@@ -1,16 +1,26 @@
 package org.hive2hive.core.network.messages.usermessages.routed;
 
 import java.io.Serializable;
-import java.util.Queue;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
+import org.hive2hive.core.utils.SerializableLinkedList;
 
-// TODO this might actually not be a user message
+/**
+ * A routed message to the proxy node of a user in order to get the next user message that should be handled.
+ * 
+ * @author Christian
+ * 
+ */
 public class GetNextUserMessageMessage extends RoutedRequestMessage {
+
+	// TODO this might actually not be a user message
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetNextUserMessageMessage.class);
 
 	private static final long serialVersionUID = 580669795666539208L;
 
@@ -24,16 +34,16 @@ public class GetNextUserMessageMessage extends RoutedRequestMessage {
 		// load the next user message
 		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getLocal(targetKey,
 				H2HConstants.USER_MESSAGE_QUEUE_KEY);
-		// TODO null handling
-		Queue<BaseMessage> messageQueue = umQueue.getMessageQueue();
-
-		// response object
-		// TODO don't delete UM from queue, since it could fail to get handled
-		NextFromQueueResponse responseContent = new NextFromQueueResponse(messageQueue.poll(),
-				messageQueue.size());
-
-		// send it back in a ResponseMessage
-		sendDirectResponse(createResponse(responseContent));
+		
+		if (umQueue != null){
+			SerializableLinkedList<BaseMessage> messageQueue = umQueue.getMessageQueue();			
+			NextFromQueueResponse responseObject = new NextFromQueueResponse((BaseMessage) messageQueue.poll(), messageQueue.size());
+			
+			sendDirectResponse(createResponse(responseObject));
+		} else {
+			// TODO return a correct failure message
+			logger.error("The UserMessageQueue could not be loaded and returned null.");
+		}
 	}
 
 	public final class NextFromQueueResponse implements Serializable {
@@ -59,7 +69,7 @@ public class GetNextUserMessageMessage extends RoutedRequestMessage {
 
 	@Override
 	public AcceptanceReply accept() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO check!
+		return AcceptanceReply.OK;
 	}
 }
