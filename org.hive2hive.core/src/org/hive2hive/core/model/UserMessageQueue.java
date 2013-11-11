@@ -16,7 +16,7 @@ import org.hive2hive.core.network.messages.usermessages.UserMessage;
  */
 public class UserMessageQueue extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7764541495712181000L;
 	
 	private final String userId;
 	private final Queue<UserMessage> messageQueue;

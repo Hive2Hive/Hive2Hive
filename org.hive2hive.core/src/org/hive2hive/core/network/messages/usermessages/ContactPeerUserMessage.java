@@ -20,7 +20,7 @@ public class ContactPeerUserMessage extends RequestUserMessage {
 	public void run() {
 		
 		// send a response with the evidentContent -> proves this peer could decrypt and read the message
-		ResponseMessage response = createResponse(evidenceContent);
-		networkManager.sendDirect(response);
+		sendResponse(createResponse(evidenceContent));
+		
 	}
 }
