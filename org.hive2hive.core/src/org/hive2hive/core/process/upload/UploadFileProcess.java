@@ -2,19 +2,14 @@ package org.hive2hive.core.process.upload;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.security.KeyPair;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
-import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
-import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -40,33 +35,31 @@ public class UploadFileProcess extends Process {
 	public UploadFileProcess(File file, UserCredentials credentials, NetworkManager networkManager,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		super(networkManager);
-		context = new UploadFileProcessContext(this, credentials, fileManager, config);
+		context = new UploadFileProcessContext(this, file, credentials, fileManager, config);
 
 		// TODO shared files not considered yet
 
 		if (file.isFile()) {
 			// 1. validate the file size
 			// 2. split the file content, encrypt it and upload it to the DHT
-			// 3. create / update a meta file
-			// 4. update the user profile
+			// 3. check if meta file exists
+			// 4. create / update a meta file
+			// 5. update the user profile
+
 			logger.debug("Adding a file to the DHT");
 			setNextStep(new ValidateFileSizeStep(file));
 		} else {
-			logger.debug("Adding a folder to the DHT");
+			// 1. get the user profile
+			// 2. check if meta folder exists
+			// 3. create / update meta folder
+			// 4. add the entry to the user profile
 
-			// put the meta folder and update the user profile
-			KeyPair folderKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-			MetaFolder folder = new MetaFolder(folderKeyPair.getPublic(), credentials.getUserId());
-
-			// 1. add the meta folder to the DHT
-			// 2. get the user profile
-			// 3. add the entry to the user profile
-			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, folderKeyPair,
-					credentials);
-			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(credentials, updateProfileStep);
+			CheckMetaFileExistStep checkMetaExistsStep = new CheckMetaFileExistStep();
+			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(credentials, checkMetaExistsStep);
 			context.setUserProfileStep(getUserProfileStep);
-			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(folder, getUserProfileStep);
-			setNextStep(putMetaFolder);
+
+			logger.debug("Adding a folder to the DHT");
+			setNextStep(getUserProfileStep);
 		}
 	}
 

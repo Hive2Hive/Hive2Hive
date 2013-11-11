@@ -1,9 +1,11 @@
 package org.hive2hive.core.model;
 
+import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -79,5 +81,23 @@ public class UserProfile extends NetworkContent {
 			found = findById(child, fileId);
 		}
 		return found;
+	}
+
+	public FileTreeNode getFileByPath(String relativePath) throws FileNotFoundException {
+		String[] split = relativePath.split(FileManager.FILE_SEP);
+		FileTreeNode current = root;
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].isEmpty()) {
+				continue;
+			}
+			FileTreeNode child = current.getChildByName(split[i]);
+			if (child == null) {
+				throw new FileNotFoundException("Parent of the file to add does not exist");
+			} else {
+				current = child;
+			}
+		}
+
+		return current;
 	}
 }

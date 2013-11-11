@@ -1,5 +1,9 @@
 package org.hive2hive.core.process.upload;
 
+import java.io.File;
+import java.security.KeyPair;
+import java.util.List;
+
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.process.ProcessContext;
@@ -11,11 +15,14 @@ public class UploadFileProcessContext extends ProcessContext {
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration config;
 	private final UserCredentials credentials;
+	private final File file;
 	private GetUserProfileStep getUserProfileStep;
+	private List<KeyPair> chunkKeys;
 
-	public UploadFileProcessContext(UploadFileProcess process, UserCredentials credentials,
+	public UploadFileProcessContext(UploadFileProcess process, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		super(process);
+		this.file = file;
 		this.credentials = credentials;
 		this.fileManager = fileManager;
 		this.config = config;
@@ -39,5 +46,17 @@ public class UploadFileProcessContext extends ProcessContext {
 
 	public void setUserProfileStep(GetUserProfileStep getUserProfileStep) {
 		this.getUserProfileStep = getUserProfileStep;
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+	public void setChunkKeys(List<KeyPair> chunkKeys) {
+		this.chunkKeys = chunkKeys;
+	}
+
+	public List<KeyPair> getChunkKeys() {
+		return chunkKeys;
 	}
 }

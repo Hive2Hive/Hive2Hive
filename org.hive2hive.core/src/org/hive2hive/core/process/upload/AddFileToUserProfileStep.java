@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
 
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.security.UserCredentials;
@@ -36,17 +35,19 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 		super.userProfile = context.getUserProfileStep().getUserProfile();
 
 		if (userProfile == null) {
+			// this was handled before
 			getProcess().stop("Did not find user profile");
-		} else {
-			try {
-				// create a file tree node in the user profile
-				addFileToUserProfile();
+			return;
+		}
 
-				// start the encryption and the put
-				super.start();
-			} catch (FileNotFoundException e) {
-				getProcess().stop(e.getMessage());
-			}
+		try {
+			// create a file tree node in the user profile
+			addFileToUserProfile();
+
+			// start the encryption and the put
+			super.start();
+		} catch (FileNotFoundException e) {
+			getProcess().stop(e.getMessage());
 		}
 	}
 
@@ -68,22 +69,10 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 
 		// find the parent node using the relative path to navigate there
 		String relativePath = parent.getAbsolutePath().replaceFirst(fileRoot.getAbsolutePath(), "");
-		String[] split = relativePath.split(FileManager.FILE_SEP);
-		FileTreeNode current = userProfile.getRoot();
-		for (int i = 0; i < split.length; i++) {
-			if (split[i].isEmpty()) {
-				continue;
-			}
-			FileTreeNode child = current.getChildByName(split[i]);
-			if (child == null) {
-				throw new FileNotFoundException("Parent of the file to add does not exist");
-			} else {
-				current = child;
-			}
-		}
+		FileTreeNode node = userProfile.getFileByPath(relativePath);
 
 		// current is now the parent
 		// use the file keys generated in a previous step where the meta document is stored
-		return new FileTreeNode(current, fileKeys, file.getName(), file.isDirectory());
+		return new FileTreeNode(node, fileKeys, file.getName(), file.isDirectory());
 	}
 }

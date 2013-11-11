@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +15,10 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
-import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
@@ -31,8 +27,8 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Puts a chunk and recursively calls itself until all chunks are stored in the DHT.
- * Afterwards, it continues with putting the meta file object in the DHT.
+ * Puts a chunk and recursively calls itself recursively until all chunks are stored in the DHT.
+ * Afterwards, it continues with putting the {@link MetaFile} in the DHT.
  * 
  * @author Nico
  * 
@@ -115,22 +111,12 @@ public class PutFileChunkStep extends PutProcessStep {
 		} else {
 			logger.debug("All chunks uploaded. Continue with meta data.");
 			// nothing read, stop putting chunks and start next step
-			// put the meta folder and update the user profile
+			context.setChunkKeys(chunkKeys);
 
-			// generate the new key pair for the meta file (which are later stored in the user profile)
-			KeyPair fileKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-			MetaFile newMetaFile = createNewMetaFile(fileKeyPair.getPublic());
-
-			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, fileKeyPair,
-					context.getCredentials());
 			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
-					updateProfileStep);
+					new CheckMetaFileExistStep());
 			context.setUserProfileStep(getUserProfileStep);
-
-			// TODO check if file already existed. If not, create new Meta file. If yes, create new version in
-			// existing meta file
-			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(newMetaFile, getUserProfileStep);
-			getProcess().setNextStep(putMetaFolder);
+			getProcess().setNextStep(getUserProfileStep);
 		}
 	}
 
@@ -154,15 +140,4 @@ public class PutFileChunkStep extends PutProcessStep {
 		}
 	}
 
-	private MetaFile createNewMetaFile(PublicKey id) {
-		MetaFile metaFile = new MetaFile(id);
-		FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis());
-		version.setChunkIds(chunkKeys);
-
-		List<FileVersion> versions = new ArrayList<FileVersion>(1);
-		versions.add(version);
-		metaFile.setVersions(versions);
-
-		return metaFile;
-	}
 }
