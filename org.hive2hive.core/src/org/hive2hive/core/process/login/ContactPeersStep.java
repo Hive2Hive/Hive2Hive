@@ -36,7 +36,6 @@ public class ContactPeersStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		// TODO Chris: encrypt messages
 
 		// set timer to wait for callbacks
 		Timer timer = new Timer();

@@ -17,7 +17,8 @@ public class GetNextFromQueueMessage extends RequestUserMessage {
 
 		// load the next user message
 		
+		
 		// send it back in a ResponseMessage
-		ResponseMessage nextUmResponse = new ResponseMessage(messageID, senderAddress, null);
+		ResponseMessage nextUmResponse = createResponse(null);
 	}
 }

@@ -15,6 +15,8 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  */
 public abstract class UserMessage extends BaseDirectMessage {
 
+	// TODO this class might be removed in a later stage
+	
 	private static final long serialVersionUID = 53893717112672279L;
 
 	public UserMessage(PeerAddress targetPeerAddress) {

@@ -1,9 +1,12 @@
 package org.hive2hive.core.network.messages.usermessages;
 
-import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
-import org.hive2hive.core.network.messages.request.IRequestMessage;
+import java.io.Serializable;
 
 import net.tomp2p.peers.PeerAddress;
+
+import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
+import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.request.IRequestMessage;
 
 public abstract class RequestUserMessage extends UserMessage implements IRequestMessage {
 
@@ -26,5 +29,9 @@ public abstract class RequestUserMessage extends UserMessage implements IRequest
 	@Override
 	public IResponseCallBackHandler getCallBackHandler() {
 		return handler;
+	}
+	
+	protected ResponseMessage createResponse(Serializable content){
+		return new ResponseMessage(messageID, senderAddress, content);
 	}
 }
