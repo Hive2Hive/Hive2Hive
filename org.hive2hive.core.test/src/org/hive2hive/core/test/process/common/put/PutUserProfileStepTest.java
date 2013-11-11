@@ -112,7 +112,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
-		
+
 		UserProfile newProfile = new UserProfile(credentials.getUserId(),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
@@ -145,7 +145,6 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 
-		Assert.assertNull(global.getData());
 	}
 
 	@Override

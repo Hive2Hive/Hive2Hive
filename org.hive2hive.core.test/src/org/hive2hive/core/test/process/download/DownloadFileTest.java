@@ -59,7 +59,6 @@ public class DownloadFileTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		UserProfile userProfile = registerProcess.getContext().getUserProfile();
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		uploaderFileManager = new FileManager(root);
 
@@ -80,7 +79,8 @@ public class DownloadFileTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		file = userProfile.getRoot().getChildByName(fileName);
+		UserProfile up = ulProcess.getContext().getUserProfileStep().getUserProfile();
+		file = up.getRoot().getChildByName(fileName);
 	}
 
 	@Test

@@ -40,7 +40,7 @@ public class UploadFileProcess extends Process {
 	public UploadFileProcess(File file, UserCredentials credentials, NetworkManager networkManager,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		super(networkManager);
-		context = new UploadFileProcessContext(this, file, credentials, fileManager, config);
+		context = new UploadFileProcessContext(this, credentials, fileManager, config);
 
 		// TODO validate the file size if valid
 
