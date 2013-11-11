@@ -23,9 +23,9 @@ import org.junit.Test;
 
 public class BaseMessageTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
-	private static Random random = new Random();
+	private List<NetworkManager> network;
+	private final int networkSize = 10;
+	private Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {

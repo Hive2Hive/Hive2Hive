@@ -6,7 +6,7 @@ import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHand
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 
 /**
- * An interface which allows a {@link BaseMessage} or {@link BaseDirectMessage} message to have a
+ * An interface which allows a {@link BaseMessage} or {@link BaseDirectMessage} messages to have a
  * {@link IResponseCallBackHandler} callback handler. The callback handler gets called when a
  * {@link ResponseMessage} message with a response arrived at the requesting node.
  * 

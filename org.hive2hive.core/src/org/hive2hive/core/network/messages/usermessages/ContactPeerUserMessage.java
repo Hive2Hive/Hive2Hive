@@ -2,8 +2,6 @@ package org.hive2hive.core.network.messages.usermessages;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-
 public class ContactPeerUserMessage extends RequestUserMessage {
 
 	private static final long serialVersionUID = -5335863637956648142L;
