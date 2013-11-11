@@ -42,16 +42,15 @@ public class UploadFileProcess extends Process {
 		super(networkManager);
 		context = new UploadFileProcessContext(this, credentials, fileManager, config);
 
-		// TODO validate the file size if valid
 		// TODO shared files not considered yet
 
 		if (file.isFile()) {
-			// split the file content, encrypt it and upload it to the DHT
+			// 1. validate the file size
+			// 2. split the file content, encrypt it and upload it to the DHT
+			// 3. create / update a meta file
+			// 4. update the user profile
 			logger.debug("Adding a file to the DHT");
-
-			// start chunking the file
-			PutFileChunkStep chunkingStep = new PutFileChunkStep(file);
-			setNextStep(chunkingStep);
+			setNextStep(new ValidateFileSizeStep(file));
 		} else {
 			logger.debug("Adding a folder to the DHT");
 

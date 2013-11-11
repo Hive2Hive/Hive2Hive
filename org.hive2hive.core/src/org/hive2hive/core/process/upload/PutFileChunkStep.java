@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.upload;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
@@ -17,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileVersion;
@@ -156,7 +156,7 @@ public class PutFileChunkStep extends PutProcessStep {
 
 	private MetaFile createNewMetaFile(PublicKey id) {
 		MetaFile metaFile = new MetaFile(id);
-		FileVersion version = new FileVersion(0, getFileSize(), System.currentTimeMillis());
+		FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis());
 		version.setChunkIds(chunkKeys);
 
 		List<FileVersion> versions = new ArrayList<FileVersion>(1);
@@ -164,23 +164,5 @@ public class PutFileChunkStep extends PutProcessStep {
 		metaFile.setVersions(versions);
 
 		return metaFile;
-	}
-
-	/**
-	 * Note that file.length can be very slowly (see
-	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
-	 * 
-	 * @return the file size in bytes
-	 * @throws IOException
-	 */
-	private long getFileSize() {
-		try {
-			FileInputStream stream = new FileInputStream(file);
-			long size = stream.getChannel().size();
-			stream.close();
-			return size;
-		} catch (IOException e) {
-			return file.length();
-		}
 	}
 }
