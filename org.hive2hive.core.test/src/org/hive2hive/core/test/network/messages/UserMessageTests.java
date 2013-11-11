@@ -12,6 +12,7 @@ import net.tomp2p.futures.FuturePut;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -19,8 +20,7 @@ import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 import org.hive2hive.core.network.messages.usermessages.direct.ContactPeerUserMessage;
 import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage;
-import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage.NextFromQueueResponse;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.network.messages.usermessages.routed.NextFromQueueResponse;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -92,6 +92,7 @@ public class UserMessageTests extends H2HJUnitTest {
 			@Override
 			public void onSuccess() {
 			}
+
 			@Override
 			public void onFailure() {
 				fail("The sending of the message failed.");
@@ -118,9 +119,7 @@ public class UserMessageTests extends H2HJUnitTest {
 		// prepare a sample UserMessageQueue
 		UserMessageQueue umq = new UserMessageQueue(credentials.getUserId());
 		for (int i = 0; i < 10; i++) {
-			TestMessage userMessage = new TestMessage(credentials.getUserId(), "bla", null);
-
-			EncryptionUtil.serializeObject(userMessage);
+			BaseMessage userMessage = new TestRoutedUserMessage(credentials.getUserId());
 			umq.getMessageQueue().add(userMessage);
 		}
 		
@@ -157,7 +156,7 @@ public class UserMessageTests extends H2HJUnitTest {
 		}, message, user));
 		
 		// wait for callback handling
-		H2HWaiter waiter = new H2HWaiter(10);
+		H2HWaiter waiter = new H2HWaiter(100);
 		do {
 			waiter.tickASecond();
 		} while (!getNextUserMessageMessageHandled);

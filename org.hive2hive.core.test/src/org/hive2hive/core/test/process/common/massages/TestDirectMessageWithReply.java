@@ -1,15 +1,12 @@
 package org.hive2hive.core.test.process.common.massages;
 
-import java.io.Serializable;
-
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.request.IRequestMessage;
+import org.hive2hive.core.network.messages.request.DirectRequestMessage;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 
@@ -20,28 +17,15 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
  * 
  * @author Seppi
  */
-public class TestDirectMessageWithReply extends BaseDirectMessage implements IRequestMessage {
-
-	private IResponseCallBackHandler callBackHandler;
+public class TestDirectMessageWithReply extends DirectRequestMessage {
 
 	private static final long serialVersionUID = 6358613094488111567L;
 
 	private final String contentKey;
 
-	public TestDirectMessageWithReply(String targetKey, PeerAddress targetAddress, String contentKey,
-			boolean needsRedirectedSend) {
-		super(targetKey, targetAddress, needsRedirectedSend);
+	public TestDirectMessageWithReply(PeerAddress targetAddress, String contentKey) {
+		super(targetAddress);
 		this.contentKey = contentKey;
-	}
-
-	@Override
-	public IResponseCallBackHandler getCallBackHandler() {
-		return callBackHandler;
-	}
-
-	@Override
-	public void setCallBackHandler(IResponseCallBackHandler aHandler) {
-		callBackHandler = aHandler;
 	}
 
 	@Override
@@ -50,8 +34,7 @@ public class TestDirectMessageWithReply extends BaseDirectMessage implements IRe
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getSenderAddress(), secret);
-		networkManager.sendDirect(responseMessage);
+		sendDirectResponse(createResponse(secret));
 	}
 
 	@Override
@@ -73,18 +56,6 @@ public class TestDirectMessageWithReply extends BaseDirectMessage implements IRe
 			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
 		}
 
-	}
-
-	@Override
-	public ResponseMessage createResponse(Serializable content) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void sendDirectResponse(ResponseMessage response) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -1,7 +1,5 @@
 package org.hive2hive.core.network.messages.usermessages.routed;
 
-import java.io.Serializable;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -34,36 +32,16 @@ public class GetNextUserMessageMessage extends RoutedRequestMessage {
 		// load the next user message
 		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getLocal(targetKey,
 				H2HConstants.USER_MESSAGE_QUEUE_KEY);
-		
-		if (umQueue != null){
-			SerializableLinkedList<BaseMessage> messageQueue = umQueue.getMessageQueue();			
-			NextFromQueueResponse responseObject = new NextFromQueueResponse((BaseMessage) messageQueue.poll(), messageQueue.size());
-			
+
+		if (umQueue != null) {
+			SerializableLinkedList<BaseMessage> messageQueue = umQueue.getMessageQueue();
+			NextFromQueueResponse responseObject = new NextFromQueueResponse(
+					(BaseMessage) messageQueue.poll(), messageQueue.size());
+
 			sendDirectResponse(createResponse(responseObject));
 		} else {
 			// TODO return a correct failure message
 			logger.error("The UserMessageQueue could not be loaded and returned null.");
-		}
-	}
-
-	public final class NextFromQueueResponse implements Serializable {
-
-		private static final long serialVersionUID = -2850130135183154805L;
-
-		private final BaseMessage userMessage;
-		private final int remainingCount;
-
-		public NextFromQueueResponse(BaseMessage message, int remaining) {
-			this.userMessage = message;
-			this.remainingCount = remaining;
-		}
-
-		public BaseMessage getUserMessage() {
-			return userMessage;
-		}
-
-		public int getRemainingCount() {
-			return remainingCount;
 		}
 	}
 

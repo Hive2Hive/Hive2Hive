@@ -87,8 +87,9 @@ public class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 					// attach another future adapter to handle routed messaging results
 					futureDirect.addListener(new FutureDirectListener(listener, message, networkManager));
 				} else {
-					// notify the listener about the fail of sending the message		
-					listener.onFailure();
+					// notify the listener about the fail of sending the message	
+					if (listener != null)
+						listener.onFailure();
 				}
 			}
 		}

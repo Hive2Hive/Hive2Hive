@@ -18,11 +18,11 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 	private static final long serialVersionUID = 4510609215735076075L;
 
 	private IResponseCallBackHandler handler;
-	
+
 	public RoutedRequestMessage(String targetKey) {
 		super(targetKey);
 	}
-	
+
 	public final IResponseCallBackHandler getCallBackHandler() {
 		return handler;
 	}
@@ -30,12 +30,13 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 	public final void setCallBackHandler(IResponseCallBackHandler handler) {
 		this.handler = handler;
 	}
-	
+
 	public final ResponseMessage createResponse(Serializable content) {
 		return new ResponseMessage(messageID, senderAddress, content);
 	}
 	
-	public final void sendDirectResponse(ResponseMessage response) {
-		networkManager.sendDirect(response).addListener(new FutureResponseListener(null, response, networkManager));
+	public void sendDirectResponse(ResponseMessage response) {
+		networkManager.sendDirect(response).addListener(
+				new FutureResponseListener(null, response, networkManager));
 	}
 }
