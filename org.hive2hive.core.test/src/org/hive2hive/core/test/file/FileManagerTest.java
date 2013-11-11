@@ -3,6 +3,7 @@ package org.hive2hive.core.test.file;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -84,7 +85,7 @@ public class FileManagerTest extends H2HJUnitTest {
 		FileUtils.writeStringToFile(new File(rootFile, "1f1"), NetworkTestUtil.randomString());
 		FileUtils.writeStringToFile(new File(dir1File, "2f"), NetworkTestUtil.randomString());
 
-		Set<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(root);
+		List<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(root);
 		Assert.assertTrue(missingOnDisk.contains(child2));
 		Assert.assertTrue(missingOnDisk.contains(dir2));
 		Assert.assertEquals(2, missingOnDisk.size());

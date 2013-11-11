@@ -43,6 +43,7 @@ public class UploadFileProcess extends Process {
 		context = new UploadFileProcessContext(this, credentials, fileManager, config);
 
 		// TODO validate the file size if valid
+		// TODO shared files not considered yet
 
 		if (file.isFile()) {
 			// split the file content, encrypt it and upload it to the DHT
