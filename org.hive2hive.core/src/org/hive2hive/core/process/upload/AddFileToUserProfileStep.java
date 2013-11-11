@@ -35,14 +35,18 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		super.userProfile = context.getUserProfileStep().getUserProfile();
 
-		try {
-			// create a file tree node in the user profile
-			addFileToUserProfile();
+		if (userProfile == null) {
+			getProcess().stop("Did not find user profile");
+		} else {
+			try {
+				// create a file tree node in the user profile
+				addFileToUserProfile();
 
-			// start the encryption and the put
-			super.start();
-		} catch (FileNotFoundException e) {
-			getProcess().stop(e.getMessage());
+				// start the encryption and the put
+				super.start();
+			} catch (FileNotFoundException e) {
+				getProcess().stop(e.getMessage());
+			}
 		}
 	}
 
