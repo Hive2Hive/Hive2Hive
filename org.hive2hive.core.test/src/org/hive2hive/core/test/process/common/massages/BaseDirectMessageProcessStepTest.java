@@ -50,6 +50,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	public void beforeMethod() {
 		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
+		NetworkTestUtil.createKeyPairs(network);
 	}
 
 	/**
@@ -77,7 +78,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, null) {
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getKeyPair()
+				.getPublic(), null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
@@ -134,7 +136,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, null) {
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getKeyPair()
+				.getPublic(), null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
@@ -176,7 +179,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, null) {
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getKeyPair()
+				.getPublic(), null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data

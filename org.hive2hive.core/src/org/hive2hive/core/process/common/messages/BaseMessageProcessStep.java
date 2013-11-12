@@ -1,15 +1,17 @@
 package org.hive2hive.core.process.common.messages;
 
-import net.tomp2p.futures.FutureDirect;
+import java.security.PublicKey;
+
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
+import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
-import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
+import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
 
 /**
@@ -36,6 +38,7 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 		IResponseCallBackHandler {
 
 	protected final BaseMessage message;
+	protected final PublicKey receiverPublicKey;
 	protected final ProcessStep nextStep;
 
 	/**
@@ -43,11 +46,14 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 	 * 
 	 * @param message
 	 *            the message to send
+	 * @param receiverPublicKey
+	 *            the public key of the receiving node
 	 * @param nextStep
 	 *            the next process step
 	 */
-	public BaseMessageProcessStep(BaseMessage message, ProcessStep nextStep) {
+	public BaseMessageProcessStep(BaseMessage message, PublicKey receiverPublicKey, ProcessStep nextStep) {
 		this.message = message;
+		this.receiverPublicKey = receiverPublicKey;
 		this.nextStep = nextStep;
 	}
 
@@ -66,9 +72,7 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(this);
 		}
-		FutureDirect futureDirect = getNetworkManager().send(message);
-		// TODO add public key
-		futureDirect.addListener(new FutureRoutedListener(this, message, null, getNetworkManager()));
+		getNetworkManager().send(message, receiverPublicKey, this);
 	}
 
 	@Override

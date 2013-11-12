@@ -69,9 +69,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureDirect> {
 			boolean resending = message.handleSendingFailure(reply);
 			if (resending) {
 				// re-send the message
-				FutureDirect futureDirect = networkManager.send(message, receiverPublicKey);
-				// attach the future adapter himself to handle the new future
-				futureDirect.addListener(new FutureRoutedListener(listener, message, receiverPublicKey, networkManager));
+				networkManager.send(message, receiverPublicKey, listener);
 			} else {
 				// notify the listener about the fail of sending the message
 				if (listener != null)

@@ -31,8 +31,7 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 
 		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
-		ResponseMessage responseMessage = new ResponseMessage(getMessageID(), getSenderAddress(), secret);
-		networkManager.sendDirect(responseMessage);
+		sendDirectResponse(createResponse(secret));
 	}
 
 	@Override

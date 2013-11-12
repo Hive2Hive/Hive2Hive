@@ -1,15 +1,8 @@
 package org.hive2hive.core.network.messages;
 
-import java.security.InvalidKeyException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -54,8 +47,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		try {
 			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, networkManager.getKeyPair()
 					.getPrivate());
-		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-				| IllegalStateException | InvalidCipherTextException e) {
+		} catch (Exception e) {
 			logger.warn("Decryption of message failed.");
 			return AcceptanceReply.FAILURE;
 		}

@@ -22,6 +22,8 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
+import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -53,6 +55,7 @@ public class MessageManager {
 	 *            a message to send
 	 * @return a future
 	 */
+	@Deprecated
 	public FutureDirect send(BaseMessage message) {
 		if (message.getTargetKey() == null)
 			throw new IllegalArgumentException("target key cannot be null");
@@ -87,15 +90,19 @@ public class MessageManager {
 	 * Send a message which gets routed to the next responsible node according the
 	 * {@link BaseMessage#getTargetKey()} key.</br>
 	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.
+	 * sending to nodes, which have the according private key.</br></br>
+	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
+	 * listeners a {@link FutureRoutedListener} future listener gets attached to the {@link FutureDirect}
+	 * object.
 	 * 
 	 * @param message
 	 *            a message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @return a future
+	 * @param listener
+	 *            a listener which is interested in the result of sending
 	 */
-	public FutureDirect send(BaseMessage message, PublicKey targetPublicKey) {
+	public void send(BaseMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
 		if (message.getTargetKey() == null)
 			throw new IllegalArgumentException("target key cannot be null");
 		if (targetPublicKey == null)
@@ -111,17 +118,18 @@ public class MessageManager {
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = encryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null)
-			return null;
+			return;
 
 		// send message to the peer which is responsible for the given key
 		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
 				.setRequestP2PConfiguration(requestP2PConfiguration).start();
+		// attach a future listener to log, handle and notify events
+		futureDirect
+				.addListener(new FutureRoutedListener(listener, message, targetPublicKey, networkManager));
 
 		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
 				message.getTargetKey(), message.getMessageID()));
-
-		return futureDirect;
 	}
 
 	/**
@@ -134,6 +142,7 @@ public class MessageManager {
 	 *            a direct message to send
 	 * @return a future
 	 */
+	@Deprecated
 	public FutureResponse sendDirect(BaseDirectMessage message) {
 		if (message.getTargetAddress() == null)
 			throw new IllegalArgumentException("target address cannot be null");
@@ -166,15 +175,20 @@ public class MessageManager {
 	 * Send a message directly to a node according the {@link BaseDirectMessage#getTargetAddress()} peer
 	 * address.</br>
 	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.
+	 * sending to nodes, which have the according private key.</br></br>
+	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
+	 * listeners a {@link FutureDirectListener} future listener gets attached to the {@link FutureResponse}
+	 * object.
 	 * 
 	 * @param message
 	 *            a direct message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @return a future
+	 * @param listener
+	 *            a listener which is interested in the result of sending
 	 */
-	public FutureResponse sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
+	public void sendDirect(BaseDirectMessage message, PublicKey targetPublicKey,
+			IBaseMessageListener listener) {
 		if (message.getTargetAddress() == null)
 			throw new IllegalArgumentException("target address cannot be null");
 		if (targetPublicKey == null)
@@ -189,22 +203,23 @@ public class MessageManager {
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = encryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null)
-			return null;
+			return;
 
 		// send message directly to the peer with the given peer address
 		FutureResponse futureResponse = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
+		// attach a future listener to log, handle and notify events
+		futureResponse.addListener(new FutureDirectListener(listener, message, targetPublicKey,
+				networkManager));
 
 		logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
 				message.getTargetKey(), message.getMessageID()));
-
-		return futureResponse;
 	}
 
 	public synchronized void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
 		callBackHandlers.put(messageId, handler);
 	}
-	
+
 	/**
 	 * Gets and removes a message callback handler
 	 * 

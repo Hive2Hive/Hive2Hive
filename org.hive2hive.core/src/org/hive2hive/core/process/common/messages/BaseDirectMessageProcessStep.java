@@ -1,6 +1,6 @@
 package org.hive2hive.core.process.common.messages;
 
-import net.tomp2p.futures.FutureResponse;
+import java.security.PublicKey;
 
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
@@ -34,8 +34,8 @@ import org.hive2hive.core.process.ProcessStep;
  */
 abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
 
-	public BaseDirectMessageProcessStep(BaseDirectMessage message, ProcessStep nextStep) {
-		super(message, nextStep);
+	public BaseDirectMessageProcessStep(BaseDirectMessage message, PublicKey receiverPublicKey, ProcessStep nextStep) {
+		super(message, receiverPublicKey, nextStep);
 	}
 
 	@Override
@@ -49,9 +49,7 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(this);
 		}
-		FutureResponse futureResponse = getNetworkManager().sendDirect(message);
-		// TODO Add public keys
-		futureResponse.addListener(new FutureDirectListener(this, message, null, getNetworkManager()));
+		getNetworkManager().sendDirect(message, receiverPublicKey, this);
 	}
 
 	@Override

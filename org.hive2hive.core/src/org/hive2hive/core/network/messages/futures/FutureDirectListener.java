@@ -4,7 +4,6 @@ import java.security.PublicKey;
 import java.util.List;
 
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.message.Buffer;
 
@@ -78,9 +77,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
 			boolean directResending = message.handleSendingFailure(reply);
 			if (directResending) {
 				// re-send directly the message
-				FutureResponse futureResponse = networkManager.sendDirect(message, receiverPublicKey);
-				// attach the future adapter himself to handle the new future
-				futureResponse.addListener(new FutureDirectListener(listener, message, receiverPublicKey, networkManager));
+				networkManager.sendDirect(message, receiverPublicKey, listener);
 			} else {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
@@ -88,9 +85,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
 							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '&s' target address = '%s'",
 									message.getTargetKey(), message.getTargetAddress()));
 					// re-send the message (routed)
-					FutureDirect futureDirect = networkManager.send(message, receiverPublicKey);
-					// attach another future adapter to handle routed messaging results
-					futureDirect.addListener(new FutureRoutedListener(listener, message, receiverPublicKey, networkManager));
+					networkManager.send(message, receiverPublicKey, listener);
 				} else {
 					// notify the listener about the fail of sending the message
 					listener.onFailure();

@@ -4,11 +4,9 @@ import java.net.InetAddress;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -17,10 +15,9 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.network.messages.futures.FutureDirectListener;
-import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -115,104 +112,97 @@ public class NetworkManager {
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 
-	/**
-	 * Sends a given message to the peer which is responsible of the given key. </br>
-	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
-	 * <b>Important:</b>
-	 * <ul>
-	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureRoutedListener} future listener.</li>
-	 * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
-	 * nodes, which have the according private key.</li>
-	 * </ul>
-	 * 
-	 * @param message
-	 *            the message to send
-	 * @return future
-	 */
-	public FutureDirect send(BaseMessage message) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return null;
-		} else if (keyPair == null) {
-			logger.warn("Node's key pair is not set!");
-			return null;
-		}
-		return messageManager.send(message);
-	}
+	// /**
+	// * Sends a given message to the peer which is responsible of the given key. </br>
+	// * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
+	// * <b>Important:</b>
+	// * <ul>
+	// * <li>For an appropriate message handling like resends and error log, use and attach a
+	// * {@link FutureRoutedListener} future listener.</li>
+	// * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
+	// * nodes, which have the according private key.</li>
+	// * </ul>
+	// *
+	// * @param message
+	// * the message to send
+	// * @return future
+	// */
+	// public FutureDirect send(BaseMessage message) {
+	// if (!connection.isConnected()) {
+	// logger.warn("Node is not connected!");
+	// return null;
+	// } else if (keyPair == null) {
+	// logger.warn("Node's key pair is not set!");
+	// return null;
+	// }
+	// return messageManager.send(message);
+	// }
 
 	/**
 	 * Sends a given message to the peer which is responsible of the given key. </br>
 	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
-	 * <b>Important:</b>
-	 * <ul>
-	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureRoutedListener} future listener.</li>
-	 * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
-	 * nodes, which have the according private key.</li>
-	 * </ul>
+	 * <b>Important:</b> This message gets encrypted with the node's public key. Use this method for direct
+	 * sending to nodes, which have the according private key.
 	 * 
 	 * @param message
 	 *            the message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @return future
+	 * @param listener
+	 *            a listener which gets notified about success or failure of sending
 	 */
-	public FutureDirect send(BaseMessage message, PublicKey targetPublicKey) {
+	public void send(BaseMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
 		if (!connection.isConnected()) {
 			logger.warn("Node is not connected!");
-			return null;
+			return;
 		}
-		return messageManager.send(message, targetPublicKey);
+		messageManager.send(message, targetPublicKey, listener);
 	}
 
-	/**
-	 * Message is sent directly using TCP. </br></br>
-	 * <b>Important:</b>
-	 * <ul>
-	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureDirectListener} future listener.</li>
-	 * <li>This message gets encrypted with the given public key. Use this method for direct sending to nodes,
-	 * which have the according private key.</li>
-	 * </ul>
-	 * 
-	 * @param message
-	 *            the message to send
-	 * @return future
-	 */
-	public FutureResponse sendDirect(BaseDirectMessage message) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return null;
-		} else if (keyPair == null) {
-			logger.warn("Node's key pair is not set!");
-			return null;
-		}
-		return messageManager.sendDirect(message);
-	}
+	// /**
+	// * Message is sent directly using TCP. </br></br>
+	// * <b>Important:</b>
+	// * <ul>
+	// * <li>For an appropriate message handling like resends and error log, use and attach a
+	// * {@link FutureDirectListener} future listener.</li>
+	// * <li>This message gets encrypted with the given public key. Use this method for direct sending to
+	// nodes,
+	// * which have the according private key.</li>
+	// * </ul>
+	// *
+	// * @param message
+	// * the message to send
+	// * @return future
+	// */
+	// public FutureResponse sendDirect(BaseDirectMessage message) {
+	// if (!connection.isConnected()) {
+	// logger.warn("Node is not connected!");
+	// return null;
+	// } else if (keyPair == null) {
+	// logger.warn("Node's key pair is not set!");
+	// return null;
+	// }
+	// return messageManager.sendDirect(message);
+	// }
 
 	/**
 	 * Message is sent directly using TCP.</br></br>
-	 * <b>Important:</b>
-	 * <ul>
-	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureDirectListener} future listener.</li>
-	 * <li>This message gets encrypted with the given public key. Use this method for direct sending to nodes,
-	 * which have the according private key.</li>
-	 * </ul>
+	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
+	 * sending to nodes, which have the according private key.
 	 * 
 	 * @param message
 	 *            the message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @return future
+	 * @param listener
+	 *            a listener which gets notified about success or failure of sending
 	 */
-	public FutureResponse sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
+	public void sendDirect(BaseDirectMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
 		if (!connection.isConnected()) {
 			logger.warn("Node is not connected!");
-			return null;
+			return;
 		}
-		return messageManager.sendDirect(message, targetPublicKey);
+		messageManager.sendDirect(message, targetPublicKey, listener);
 	}
 
 	/**

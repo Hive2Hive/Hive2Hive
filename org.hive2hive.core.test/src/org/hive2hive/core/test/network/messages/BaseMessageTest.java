@@ -9,7 +9,6 @@ import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
-import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -61,18 +60,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 		// send message
 
-		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(
-				new FutureRoutedListener(new IBaseMessageListener() {
-					@Override
-					public void onSuccess() {
-					}
-
-					@Override
-					public void onFailure() {
-						// should not happen
-						Assert.fail("Should not failed.");
-					}
-				}, message, nodeB.getKeyPair().getPublic(), nodeA));
+		nodeA.send(message, nodeB.getKeyPair().getPublic(), new TestBaseMessageListener());
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
@@ -107,18 +95,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 		// send message
-		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(
-				new FutureRoutedListener(new IBaseMessageListener() {
-					@Override
-					public void onSuccess() {
-					}
-
-					@Override
-					public void onFailure() {
-						// should not happen
-						Assert.fail("Should not failed.");
-					}
-				}, message, nodeB.getKeyPair().getPublic(), nodeA));
+		nodeA.send(message, nodeB.getKeyPair().getPublic(), new TestBaseMessageListener());
 
 		// wait till message gets handled
 		// this might need some time

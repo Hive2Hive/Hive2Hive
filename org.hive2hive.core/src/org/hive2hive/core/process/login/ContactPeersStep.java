@@ -22,6 +22,7 @@ import org.hive2hive.core.process.common.put.PutLocationStep;
  * @author Christian, Nico
  *
  */
+// TODO Seppi rebuild the whole thing
 public class ContactPeersStep extends ProcessStep {
 
 	private final Locations currentLocations;
@@ -56,8 +57,9 @@ public class ContactPeersStep extends ProcessStep {
 
 			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(), evidenceContent);
 
-			contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
-			getNetworkManager().sendDirect(contactMsg);
+			// TODO Seppi refactor it
+//			contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
+//			getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic());
 		}
 	}
 
