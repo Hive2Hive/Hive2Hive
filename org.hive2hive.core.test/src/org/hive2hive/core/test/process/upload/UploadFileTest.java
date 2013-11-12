@@ -14,7 +14,7 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.register.RegisterProcess;
-import org.hive2hive.core.process.upload.UploadFileProcess;
+import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -104,7 +104,7 @@ public class UploadFileTest extends H2HJUnitTest {
 
 	private void startUploadProcess(File toUpload) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		UploadFileProcess process = new UploadFileProcess(toUpload, userCredentials, client, fileManager,
+		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager,
 				config);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -150,7 +150,7 @@ public class UploadFileTest extends H2HJUnitTest {
 		File file = createFileRandomContent(1);
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		UploadFileProcess process = new UploadFileProcess(file, userCredentials, client, fileManager, config);
+		NewFileProcess process = new NewFileProcess(file, userCredentials, client, fileManager, config);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

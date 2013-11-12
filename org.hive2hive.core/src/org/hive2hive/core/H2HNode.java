@@ -13,7 +13,7 @@ import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
-import org.hive2hive.core.process.upload.UploadFileProcess;
+import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
@@ -120,7 +120,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			throw new IllegalFileLocation();
 		}
 
-		UploadFileProcess uploadProcess = new UploadFileProcess(file, credentials, networkManager,
+		NewFileProcess uploadProcess = new NewFileProcess(file, credentials, networkManager,
 				fileManager, this);
 		if (autostartProcesses) {
 			uploadProcess.start();

@@ -14,7 +14,7 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.download.DownloadFileProcess;
-import org.hive2hive.core.process.upload.UploadFileProcess;
+import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 
 public class SynchronizeFilesStep extends ProcessStep {
@@ -81,7 +81,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		for (File file : missingInTree) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
 			// initialize the process
-			UploadFileProcess uploadProcess = new UploadFileProcess(file, credentials, getNetworkManager(),
+			NewFileProcess uploadProcess = new NewFileProcess(file, credentials, getNetworkManager(),
 					fileManager, config);
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}

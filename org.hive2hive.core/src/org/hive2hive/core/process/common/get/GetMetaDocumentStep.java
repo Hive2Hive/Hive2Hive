@@ -29,8 +29,8 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaDocumentStep.class);
 
-	private final KeyPair keyPair;
-	private final ProcessStep nextStep;
+	protected KeyPair keyPair;
+	protected ProcessStep nextStep;
 
 	private MetaDocument metaDocument;
 

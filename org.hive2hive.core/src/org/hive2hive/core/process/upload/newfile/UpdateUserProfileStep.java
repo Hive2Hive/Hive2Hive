@@ -1,12 +1,12 @@
-package org.hive2hive.core.process.upload;
+package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
+import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -29,23 +29,23 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 	@Override
 	public void start() {
 		// set the user profile from the previous step
-		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
+		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
 		super.userProfile = context.getUserProfileStep().getUserProfile();
 
 		if (userProfile == null) {
 			// this was handled before
 			getProcess().stop("Did not find user profile");
 			return;
-		} else if (context.getFileAlreadyExists()) {
-			// file already exists --> go to next step.
-			getProcess().setNextStep(getNextSteps());
-			return;
 		}
 
 		try {
 			// create a file tree node in the user profile
 			addFileToUserProfile();
-			nextStep = getNextSteps();
+
+			// TODO next steps:
+			// 1. notify other clients as the next step
+			// 2. check if too many versions of that file exist --> remove old versions if necessary
+			nextStep = null;
 
 			// start the encryption and the put
 			super.start();
@@ -63,7 +63,7 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 	 * @throws FileNotFoundException
 	 */
 	private void addFileToUserProfile() throws FileNotFoundException {
-		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
+		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
 		File fileRoot = context.getFileManager().getRoot();
 
 		// new file
@@ -76,12 +76,5 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 
 		// use the file keys generated in a previous step where the meta document is stored
 		new FileTreeNode(parentNode, fileKeys, file.getName(), file.isDirectory());
-	}
-
-	private ProcessStep getNextSteps() {
-		// TODO next steps:
-		// 1. notify other clients as the next step
-		// 2. check if too many versions of that file exist --> remove old versions if necessary
-		return null;
 	}
 }

@@ -12,7 +12,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
-import org.hive2hive.core.process.upload.UploadFileProcess;
+import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -67,7 +67,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		String fileName = NetworkTestUtil.randomString();
 		uploadedFile = new File(root, fileName);
 		FileUtils.write(uploadedFile, testContent);
-		UploadFileProcess ulProcess = new UploadFileProcess(uploadedFile, userCredentials, client,
+		NewFileProcess ulProcess = new NewFileProcess(uploadedFile, userCredentials, client,
 				uploaderFileManager, new TestH2HFileConfiguration());
 
 		listener = new TestProcessListener();

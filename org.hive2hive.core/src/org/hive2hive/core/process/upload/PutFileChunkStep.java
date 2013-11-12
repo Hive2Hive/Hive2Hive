@@ -15,10 +15,10 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.common.put.PutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
@@ -27,8 +27,8 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Puts a chunk and recursively calls itself recursively until all chunks are stored in the DHT.
- * Afterwards, it continues with putting the {@link MetaFile} in the DHT.
+ * First validates the file size according to the limits set in the {@link IH2HFileConfiguration} object.
+ * Then, puts a chunk and recursively calls itself until all chunks are stored in the DHT.
  * 
  * @author Nico
  * 
@@ -37,9 +37,9 @@ public class PutFileChunkStep extends PutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutFileChunkStep.class);
 
-	private final File file;
+	protected final File file;
 	private final long offset;
-	private final List<KeyPair> chunkKeys;
+	protected final List<KeyPair> chunkKeys;
 
 	/**
 	 * Constructor for first call
@@ -57,7 +57,7 @@ public class PutFileChunkStep extends PutProcessStep {
 	 * @param offset
 	 * @param chunkKeys
 	 */
-	private PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
+	protected PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
 		super(null, H2HConstants.FILE_CHUNK, null, null);
 		this.file = file;
@@ -67,7 +67,25 @@ public class PutFileChunkStep extends PutProcessStep {
 
 	@Override
 	public void start() {
-		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
+		// only put sth. if the file has content
+		if (file.isDirectory()) {
+			logger.debug("Nothing to put since the file is a folder");
+			return;
+		}
+
+		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
+
+		// first, validate the file size (only first time)
+		if (chunkKeys.isEmpty()) {
+			IH2HFileConfiguration config = context.getConfig();
+			long fileSize = FileUtil.getFileSize(file);
+
+			if (fileSize > config.getMaxFileSize()) {
+				getProcess().stop("File is too large");
+				return;
+			}
+		}
+
 		byte[] data = new byte[context.getConfig().getChunkSize()];
 		int read = -1;
 		try {
@@ -112,11 +130,6 @@ public class PutFileChunkStep extends PutProcessStep {
 			logger.debug("All chunks uploaded. Continue with meta data.");
 			// nothing read, stop putting chunks and start next step
 			context.setChunkKeys(chunkKeys);
-
-			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
-					new CheckMetaFileExistStep());
-			context.setUserProfileStep(getUserProfileStep);
-			getProcess().setNextStep(getUserProfileStep);
 		}
 	}
 
@@ -139,5 +152,4 @@ public class PutFileChunkStep extends PutProcessStep {
 			return truncated;
 		}
 	}
-
 }
