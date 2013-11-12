@@ -7,7 +7,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 
 /**
  * Abstract message type of a <b>direct</b> message that requests a response.
@@ -39,6 +39,6 @@ public abstract class DirectRequestMessage extends BaseDirectMessage implements 
 	
 	public void sendDirectResponse(ResponseMessage response) {
 		networkManager.sendDirect(response).addListener(
-				new FutureResponseListener(null, response, networkManager));
+				new FutureDirectListener(null, response, networkManager));
 	}
 }

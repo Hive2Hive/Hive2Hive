@@ -10,7 +10,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.futures.FutureDirectListener;
+import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -76,7 +76,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+		nodeA.send(message).addListener(new FutureRoutedListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {
 			}
@@ -125,7 +125,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+		nodeA.send(message).addListener(new FutureRoutedListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {
 			}

@@ -1,11 +1,11 @@
 package org.hive2hive.core.network.messages;
 
+import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 import org.hive2hive.core.process.common.messages.BaseMessageProcessStep;
 
 /**
- * An interface used in {@link FutureDirectListener} and {@link FutureResponseListener} to inform entities
+ * An interface used in {@link FutureRoutedListener} and {@link FutureDirectListener} to inform entities
  * about a success or fail while sending a message. </br>
  * <b>Example:</b> {@link BaseMessageProcessStep#onSuccess()} or {@link BaseMessageProcessStep#onFailure()}
  * 

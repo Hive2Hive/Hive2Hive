@@ -7,7 +7,7 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -39,7 +39,7 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(),
 				getSenderAddress(), secret);
 		networkManager.sendDirect(responseMessage).addListener(
-				new FutureResponseListener(new IBaseMessageListener() {
+				new FutureDirectListener(new IBaseMessageListener() {
 					@Override
 					public void onSuccess() {
 					}

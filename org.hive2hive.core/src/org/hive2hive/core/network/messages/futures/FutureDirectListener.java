@@ -1,6 +1,11 @@
 package org.hive2hive.core.network.messages.futures;
 
-import java.util.Collection;
+import java.util.List;
+
+import net.tomp2p.futures.BaseFutureAdapter;
+import net.tomp2p.futures.FutureDirect;
+import net.tomp2p.futures.FutureResponse;
+import net.tomp2p.message.Buffer;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -9,32 +14,34 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
-
-import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDirect;
+import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
- * Use this future adapter when sending a {@link BaseMessage}. Attach this listener to the future which gets
- * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling and notifying
- * {@link IBaseMessageListener} listeners. In case of a successful sending
+ * Use this future adapter when sending a {@link BaseDirectMessage}. Attach this listener to the future which
+ * gets returned at {@link MessageManager#sendDirect(BaseDirectMessage)} to enable a appropriate failure
+ * handling and notifying {@link IBaseMessageListener} listeners. In case of a successful sending
  * {@link IBaseMessageListener#onSuccess()} gets called. In case of a failed sending
  * {@link IBaseMessageListener#onFailure()} gets called. </br></br>
  * <b>Failure Handling</b></br>
- * Sending a message can fail when the future object failed, when the future object contains wrong data or the
+ * Sending a direct message can fail when the future object failed, when the future object contains wrong data
+ * or the
  * responding node detected a failure. See {@link AcceptanceReply} for possible failures. If sending of a
- * message fails the message gets re-send as long as {@link BaseMessage#handleSendingFailure(AcceptanceReply)}
- * of the sent message recommends to re-send. Because all re-sends are also asynchronous the future
- * listener attaches himself to the new future objects so that the adapter can finally notify his/her listener
- * about a success or failure.
+ * message fails the message gets re-send as long as
+ * {@link BaseDirectMessage#handleSendingFailure(AcceptanceReply)} of the sent message recommends to re-send.
+ * Depending on the {@link BaseDirectMessage#needsRedirectedSend()} flag a possible fall back is to use the
+ * routing mechanism of {@link MessageManager#send(BaseMessage)}. For that another adapter
+ * (see {@link FutureRoutedListener}) is attached. Because all re-sends are also asynchronous the future
+ * listener attaches himself to the new future objects (also in case of switching on the fall back mechanism)
+ * so that the adapter can finally notify his/her listener about a success or failure.
  * 
  * @author Seppi
  */
-public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
+public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureDirectListener.class);
 
 	private final IBaseMessageListener listener;
-	private final BaseMessage message;
+	private final BaseDirectMessage message;
 	private final NetworkManager networkManager;
 
 	/**
@@ -47,7 +54,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
-	public FutureDirectListener(IBaseMessageListener listener, BaseMessage message,
+	public FutureDirectListener(IBaseMessageListener listener, BaseDirectMessage message,
 			NetworkManager networkManager) {
 		this.listener = listener;
 		this.message = message;
@@ -55,24 +62,35 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	}
 
 	@Override
-	public void operationComplete(FutureDirect future) throws Exception {
+	public void operationComplete(FutureResponse future) throws Exception {
 		AcceptanceReply reply = extractAcceptanceReply(future);
 		if (reply == AcceptanceReply.OK) {
 			// notify the listener about the success of sending the message
 			if (listener != null)
 				listener.onSuccess();
 		} else {
-			// check if a re-send is necessary / wished
-			boolean resending = message.handleSendingFailure(reply);
-			if (resending) {
-				// re-send the message
-				FutureDirect futureDirect = networkManager.send(message);
+			// check if a direct re-send is necessary / wished
+			boolean directResending = message.handleSendingFailure(reply);
+			if (directResending) {
+				// re-send directly the message
+				FutureResponse futureResponse = networkManager.sendDirect(message);
 				// attach the future adapter himself to handle the new future
-				futureDirect.addListener(new FutureDirectListener(listener, message, networkManager));
+				futureResponse.addListener(new FutureDirectListener(listener, message, networkManager));
 			} else {
-				// notify the listener about the fail of sending the message
-				if (listener != null)
-					listener.onFailure();
+				// check if the routed sending fall back is allowed
+				if (message.needsRedirectedSend()) {
+					logger.warn(String
+							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '&s' target address = '%s'",
+									message.getTargetKey(), message.getTargetAddress()));
+					// re-send the message (routed)
+					FutureDirect futureDirect = networkManager.send(message);
+					// attach another future adapter to handle routed messaging results
+					futureDirect.addListener(new FutureRoutedListener(listener, message, networkManager));
+				} else {
+					// notify the listener about the fail of sending the message	
+					if (listener != null)
+						listener.onFailure();
+				}
 			}
 		}
 	}
@@ -85,23 +103,31 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 *            a future
 	 * @return a reply showing the result of sending
 	 */
-	private AcceptanceReply extractAcceptanceReply(FutureDirect future) {
+	private AcceptanceReply extractAcceptanceReply(FutureResponse future) {
 		String errorReason = "";
 		if (future.isSuccess()) {
-			Collection<Object> returndedObject = future.getRawDirectData2().values();
-			if (returndedObject == null) {
-				errorReason = "Returned object is null.";
-			} else if (returndedObject.isEmpty()) {
-				errorReason = "Returned raw data is empty.";
+			List<Buffer> returnedBuffer = future.getResponse().getBufferList();
+			if (returnedBuffer == null) {
+				errorReason = "Returned buffer is null.";
+			} else if (returnedBuffer.isEmpty()) {
+				errorReason = "Returned buffer is empty.";
 			} else {
-				Object firstReturnedObject = returndedObject.iterator().next();
-				if (firstReturnedObject == null) {
-					errorReason = "First returned object is null.";
-				} else if (firstReturnedObject instanceof AcceptanceReply) {
-					AcceptanceReply reply = (AcceptanceReply) firstReturnedObject;
-					return reply;
+				Buffer firstReturnedBuffer = returnedBuffer.iterator().next();
+				if (firstReturnedBuffer == null) {
+					errorReason = "First returned buffer is null.";
 				} else {
-					errorReason = "The returned object was not of type AcceptanceReply!";
+					Object responseObject;
+					try {
+						responseObject = firstReturnedBuffer.object();
+						if (responseObject instanceof AcceptanceReply) {
+							AcceptanceReply reply = (AcceptanceReply) responseObject;
+							return reply;
+						} else {
+							errorReason = "The returned object was not of type AcceptanceReply!";
+						}
+					} catch (Exception e) {
+						errorReason = "Exception occured while getting the object.";
+					}
 				}
 			}
 			logger.error(String.format("A failure while sending a message occured. reason = '%s'",

@@ -5,12 +5,12 @@ import java.io.Serializable;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 
 /**
  * Abstract message type of a <b>routed</b> message that requests a response.
  * 
- * @author Nendor, Seppi, Christian
+ * @author Christian
  * 
  */
 public abstract class RoutedRequestMessage extends BaseMessage implements IRequestMessage {
@@ -37,6 +37,6 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 	
 	public void sendDirectResponse(ResponseMessage response) {
 		networkManager.sendDirect(response).addListener(
-				new FutureResponseListener(null, response, networkManager));
+				new FutureDirectListener(null, response, networkManager));
 	}
 }

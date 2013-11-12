@@ -12,7 +12,7 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
  * {@link IResponseCallBackHandler} callback handler. The callback handler gets called when a
  * {@link ResponseMessage} message with a response arrived at the requesting node.
  * 
- * @author Nendor, Seppi
+ * @author Nendor, Seppi, Christian
  */
 public interface IRequestMessage {
 

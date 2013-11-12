@@ -16,8 +16,8 @@ import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
 import org.hive2hive.core.network.messages.usermessages.direct.ContactPeerUserMessage;
 import org.hive2hive.core.network.messages.usermessages.routed.GetNextUserMessageMessage;
 import org.hive2hive.core.network.messages.usermessages.routed.NextFromQueueResponse;
@@ -88,7 +88,7 @@ public class UserMessageTests extends H2HJUnitTest {
 		});
 
 		// send message
-		node1.sendDirect(message).addListener(new FutureResponseListener(new IBaseMessageListener() {
+		node1.sendDirect(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {
 			}
@@ -145,7 +145,7 @@ public class UserMessageTests extends H2HJUnitTest {
 			}
 		});
 
-		user.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {			
+		user.send(message).addListener(new FutureRoutedListener(new IBaseMessageListener() {			
 			@Override
 			public void onSuccess() {
 			}	
