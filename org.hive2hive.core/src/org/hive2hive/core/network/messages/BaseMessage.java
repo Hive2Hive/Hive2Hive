@@ -80,6 +80,19 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	}
 	
 	/**
+	 * Constructor for an asynchronous message.</br>
+	 * A message ID is generated.</br>
+	 * This constructor creates an asynchronous message with the default sending behavior
+	 * {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
+	 * 
+	 * @param targetKey
+	 *            the key identifying the target of this message
+	 */
+	public BaseMessage(String targetKey) {
+		this(createMessageID(), targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
+	}
+
+	/**
 	 * Getter
 	 * 
 	 * @return the ID of this message

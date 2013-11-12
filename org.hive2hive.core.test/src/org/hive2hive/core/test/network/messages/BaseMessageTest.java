@@ -9,7 +9,7 @@ import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
-import org.hive2hive.core.network.messages.futures.FutureDirectListener;
+import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -23,9 +23,9 @@ import org.junit.Test;
 
 public class BaseMessageTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
-	private static Random random = new Random();
+	private List<NetworkManager> network;
+	private final int networkSize = 10;
+	private Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -60,11 +60,11 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// create a message with target node B
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 		// send message
+
 		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(
-				new FutureDirectListener(new IBaseMessageListener() {
+				new FutureRoutedListener(new IBaseMessageListener() {
 					@Override
 					public void onSuccess() {
-
 					}
 
 					@Override
@@ -108,7 +108,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 				new H2HTestData(data));
 		// send message
 		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(
-				new FutureDirectListener(new IBaseMessageListener() {
+				new FutureRoutedListener(new IBaseMessageListener() {
 					@Override
 					public void onSuccess() {
 					}

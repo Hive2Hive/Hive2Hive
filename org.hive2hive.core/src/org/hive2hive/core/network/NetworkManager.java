@@ -20,7 +20,7 @@ import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
+import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -121,7 +121,7 @@ public class NetworkManager {
 	 * <b>Important:</b>
 	 * <ul>
 	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureDirectListener} future listener.</li>
+	 * {@link FutureRoutedListener} future listener.</li>
 	 * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
 	 * nodes, which have the according private key.</li>
 	 * </ul>
@@ -147,7 +147,7 @@ public class NetworkManager {
 	 * <b>Important:</b>
 	 * <ul>
 	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureDirectListener} future listener.</li>
+	 * {@link FutureRoutedListener} future listener.</li>
 	 * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
 	 * nodes, which have the according private key.</li>
 	 * </ul>
@@ -171,7 +171,7 @@ public class NetworkManager {
 	 * <b>Important:</b>
 	 * <ul>
 	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureResponseListener} future listener.</li>
+	 * {@link FutureDirectListener} future listener.</li>
 	 * <li>This message gets encrypted with the given public key. Use this method for direct sending to nodes,
 	 * which have the according private key.</li>
 	 * </ul>
@@ -196,7 +196,7 @@ public class NetworkManager {
 	 * <b>Important:</b>
 	 * <ul>
 	 * <li>For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureResponseListener} future listener.</li>
+	 * {@link FutureDirectListener} future listener.</li>
 	 * <li>This message gets encrypted with the given public key. Use this method for direct sending to nodes,
 	 * which have the according private key.</li>
 	 * </ul>

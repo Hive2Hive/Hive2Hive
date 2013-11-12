@@ -170,8 +170,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getNodeId(),
-				nodeB.getPeerAddress(), contentKey, false);
+		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getPeerAddress(),
+				contentKey);
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {

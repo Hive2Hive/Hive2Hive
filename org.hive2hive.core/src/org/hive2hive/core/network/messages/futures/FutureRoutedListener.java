@@ -30,9 +30,9 @@ import org.hive2hive.core.network.messages.MessageManager;
  * 
  * @author Seppi
  */
-public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
+public class FutureRoutedListener extends BaseFutureAdapter<FutureDirect> {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureDirectListener.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureRoutedListener.class);
 
 	private final IBaseMessageListener listener;
 	private final BaseMessage message;
@@ -46,12 +46,10 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 *            listener which gets notified when sending succeeded or failed
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
-	 * @param receiverPublicKey
-	 * 			  the receivers public key which was used for encryption
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
-	public FutureDirectListener(IBaseMessageListener listener, BaseMessage message,
+	public FutureRoutedListener(IBaseMessageListener listener, BaseMessage message,
 			PublicKey receiverPublicKey, NetworkManager networkManager) {
 		this.listener = listener;
 		this.message = message;
@@ -73,7 +71,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 				// re-send the message
 				FutureDirect futureDirect = networkManager.send(message, receiverPublicKey);
 				// attach the future adapter himself to handle the new future
-				futureDirect.addListener(new FutureDirectListener(listener, message, receiverPublicKey, networkManager));
+				futureDirect.addListener(new FutureRoutedListener(listener, message, receiverPublicKey, networkManager));
 			} else {
 				// notify the listener about the fail of sending the message
 				if (listener != null)

@@ -4,8 +4,8 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.UserMessage;
 import org.hive2hive.core.model.UserMessageQueue;
+import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.process.ProcessStep;
 
 public class HandleUserMessageQueueStep extends ProcessStep {
@@ -37,13 +37,13 @@ public class HandleUserMessageQueueStep extends ProcessStep {
 		}
 		
 		// handle the messages
-		Queue<UserMessage> queue = umQueue.getMessageQueue();
-		while (!queue.isEmpty()){
-			UserMessage message = queue.poll();
-			
-			// TODO handle the UserMessages here
-			
-		}
+//		Queue<BaseMessage> queue = umQueue.getMessageQueue();
+//		while (!queue.isEmpty()){
+//			BaseMessage message = queue.poll();
+//			
+//			// TODO handle the UserMessages here
+//			
+//		}
 		
 		// terminate the process
 		getProcess().terminate();
