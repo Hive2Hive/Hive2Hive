@@ -7,7 +7,7 @@ import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.futures.FutureResponseListener;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -26,7 +26,7 @@ import org.hive2hive.core.process.ProcessStep;
  * functionality has to be (if desired) implemented in the
  * {@link BaseDirectMessageProcessStep#handleResponseMessage(ResponseMessage)} method.</li>
  * <li>Because all message in <code>Hive2Hive</code> are sent asynchronously the message process step uses a
- * {@link FutureResponseListener} adapter to gets notified about success or failure of sending the message.
+ * {@link FutureDirectListener} adapter to gets notified about success or failure of sending the message.
  * For that the process step implements the {@link IBaseMessageListener} interface.</li>
  * </ul>
  * 
@@ -50,7 +50,7 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 			requestMessage.setCallBackHandler(this);
 		}
 		FutureResponse futureResponse = getNetworkManager().sendDirect(message);
-		futureResponse.addListener(new FutureResponseListener(this, message, getNetworkManager()));
+		futureResponse.addListener(new FutureDirectListener(this, message, getNetworkManager()));
 	}
 
 	@Override

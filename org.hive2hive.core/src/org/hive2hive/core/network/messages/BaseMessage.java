@@ -45,7 +45,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	protected PeerAddress senderAddress;
 	private final SendingBehavior sendingBehavior;
 
-
 	private int sendingCounter = 0;
 
 	/**
@@ -75,6 +74,19 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	public BaseMessage(String messageID, String targetKey) {
 		this(messageID, targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
+	}
+
+	/**
+	 * Constructor for an asynchronous message.</br>
+	 * A message ID is generated.</br>
+	 * This constructor creates an asynchronous message with the default sending behavior
+	 * {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
+	 * 
+	 * @param targetKey
+	 *            the key identifying the target of this message
+	 */
+	public BaseMessage(String targetKey) {
+		this(createMessageID(), targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
 	}
 
 	/**

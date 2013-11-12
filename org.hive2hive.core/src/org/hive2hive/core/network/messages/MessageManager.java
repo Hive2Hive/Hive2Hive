@@ -81,8 +81,8 @@ public class MessageManager {
 		FutureResponse futureResponse = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(message).start();
 
-		logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
-				message.getTargetKey(), message.getMessageID()));
+		logger.debug(String.format("Message sent (direct) target address = '%s' message id = '%s'",
+				message.getTargetAddress(), message.getMessageID()));
 
 		return futureResponse;
 	}
