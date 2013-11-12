@@ -48,6 +48,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	public void beforeMethod() {
 		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
+		NetworkTestUtil.createKeyPairs(network);
 	}
 
 	/**
@@ -76,7 +77,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(new FutureDirectListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {
 			}
@@ -86,7 +87,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 				// should not happen
 				Assert.fail("Should not failed.");
 			}
-		}, message, nodeA));
+		}, message, nodeB.getKeyPair().getPublic(), nodeA));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -125,7 +126,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
+		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(new FutureDirectListener(new IBaseMessageListener() {
 			@Override
 			public void onSuccess() {
 			}
@@ -135,7 +136,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 				// should not happen
 				Assert.fail("Should not failed.");
 			}
-		}, message, nodeA));
+		}, message, nodeB.getKeyPair().getPublic(), nodeA));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);

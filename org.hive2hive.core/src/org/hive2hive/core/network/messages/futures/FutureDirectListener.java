@@ -1,6 +1,10 @@
 package org.hive2hive.core.network.messages.futures;
 
+import java.security.PublicKey;
 import java.util.Collection;
+
+import net.tomp2p.futures.BaseFutureAdapter;
+import net.tomp2p.futures.FutureDirect;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -9,9 +13,6 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
-
-import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDirect;
 
 /**
  * Use this future adapter when sending a {@link BaseMessage}. Attach this listener to the future which gets
@@ -35,6 +36,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 
 	private final IBaseMessageListener listener;
 	private final BaseMessage message;
+	private final PublicKey receiverPublicKey;
 	private final NetworkManager networkManager;
 
 	/**
@@ -44,13 +46,16 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 *            listener which gets notified when sending succeeded or failed
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
+	 * @param receiverPublicKey
+	 * 			  the receivers public key which was used for encryption
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
 	public FutureDirectListener(IBaseMessageListener listener, BaseMessage message,
-			NetworkManager networkManager) {
+			PublicKey receiverPublicKey, NetworkManager networkManager) {
 		this.listener = listener;
 		this.message = message;
+		this.receiverPublicKey = receiverPublicKey;
 		this.networkManager = networkManager;
 	}
 
@@ -66,9 +71,9 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			boolean resending = message.handleSendingFailure(reply);
 			if (resending) {
 				// re-send the message
-				FutureDirect futureDirect = networkManager.send(message);
+				FutureDirect futureDirect = networkManager.send(message, receiverPublicKey);
 				// attach the future adapter himself to handle the new future
-				futureDirect.addListener(new FutureDirectListener(listener, message, networkManager));
+				futureDirect.addListener(new FutureDirectListener(listener, message, receiverPublicKey, networkManager));
 			} else {
 				// notify the listener about the fail of sending the message
 				if (listener != null)

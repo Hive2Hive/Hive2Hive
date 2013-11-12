@@ -1,6 +1,8 @@
 package org.hive2hive.core.network;
 
 import java.net.InetAddress;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureGet;
@@ -36,6 +38,8 @@ public class NetworkManager {
 	private final MessageManager messageManager;
 	private final DataManager dataManager;
 
+	private KeyPair keyPair;
+
 	public String getNodeId() {
 		return nodeId;
 	}
@@ -50,6 +54,14 @@ public class NetworkManager {
 
 	public PeerAddress getPeerAddress() {
 		return getConnection().getPeer().getPeerAddress();
+	}
+
+	public KeyPair getKeyPair() {
+		return keyPair;
+	}
+
+	public void setKeyPair(KeyPair keyPair) {
+		this.keyPair = keyPair;
 	}
 
 	public NetworkManager(String nodeId) {
@@ -106,32 +118,101 @@ public class NetworkManager {
 	/**
 	 * Sends a given message to the peer which is responsible of the given key. </br>
 	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
-	 * <b>Important:</b> For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureDirectListener} future listener.
+	 * <b>Important:</b>
+	 * <ul>
+	 * <li>For an appropriate message handling like resends and error log, use and attach a
+	 * {@link FutureDirectListener} future listener.</li>
+	 * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
+	 * nodes, which have the according private key.</li>
+	 * </ul>
 	 * 
 	 * @param message
 	 *            the message to send
 	 * @return future
 	 */
 	public FutureDirect send(BaseMessage message) {
-		if (!connection.isConnected())
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return null;
+		} else if (keyPair == null) {
+			logger.warn("Node's key pair is not set!");
+			return null;
+		}
 		return messageManager.send(message);
 	}
 
 	/**
+	 * Sends a given message to the peer which is responsible of the given key. </br>
+	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
+	 * <b>Important:</b>
+	 * <ul>
+	 * <li>For an appropriate message handling like resends and error log, use and attach a
+	 * {@link FutureDirectListener} future listener.</li>
+	 * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
+	 * nodes, which have the according private key.</li>
+	 * </ul>
+	 * 
+	 * @param message
+	 *            the message to send
+	 * @param targetPublicKey
+	 *            the public key of the receivers node to encrypt the message
+	 * @return future
+	 */
+	public FutureDirect send(BaseMessage message, PublicKey targetPublicKey) {
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
+			return null;
+		}
+		return messageManager.send(message, targetPublicKey);
+	}
+
+	/**
 	 * Message is sent directly using TCP. </br></br>
-	 * <b>Important:</b> For an appropriate message handling like resends and error log, use and attach a
-	 * {@link FutureResponseListener} future listener.
+	 * <b>Important:</b>
+	 * <ul>
+	 * <li>For an appropriate message handling like resends and error log, use and attach a
+	 * {@link FutureResponseListener} future listener.</li>
+	 * <li>This message gets encrypted with the given public key. Use this method for direct sending to nodes,
+	 * which have the according private key.</li>
+	 * </ul>
 	 * 
 	 * @param message
 	 *            the message to send
 	 * @return future
 	 */
 	public FutureResponse sendDirect(BaseDirectMessage message) {
-		if (!connection.isConnected())
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return null;
+		} else if (keyPair == null) {
+			logger.warn("Node's key pair is not set!");
+			return null;
+		}
 		return messageManager.sendDirect(message);
+	}
+
+	/**
+	 * Message is sent directly using TCP.</br></br>
+	 * <b>Important:</b>
+	 * <ul>
+	 * <li>For an appropriate message handling like resends and error log, use and attach a
+	 * {@link FutureResponseListener} future listener.</li>
+	 * <li>This message gets encrypted with the given public key. Use this method for direct sending to nodes,
+	 * which have the according private key.</li>
+	 * </ul>
+	 * 
+	 * @param message
+	 *            the message to send
+	 * @param targetPublicKey
+	 *            the public key of the receivers node to encrypt the message
+	 * @return future
+	 */
+	public FutureResponse sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
+			return null;
+		}
+		return messageManager.sendDirect(message, targetPublicKey);
 	}
 
 	/**
@@ -147,8 +228,10 @@ public class NetworkManager {
 	 * @return the future
 	 */
 	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent data) {
-		if (!connection.isConnected())
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return null;
+		}
 		return dataManager.putGlobal(locationKey, contentKey, data);
 	}
 
@@ -163,8 +246,10 @@ public class NetworkManager {
 	 * @return the desired content from the wrapper
 	 */
 	public FutureGet getGlobal(String locationKey, String contentKey) {
-		if (!connection.isConnected())
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return null;
+		}
 		return dataManager.getGlobal(locationKey, contentKey);
 	}
 
@@ -181,8 +266,10 @@ public class NetworkManager {
 	 *            the wrapper containing the content to be stored
 	 */
 	public void putLocal(String locationKey, String contentKey, NetworkContent data) {
-		if (!connection.isConnected())
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return;
+		}
 		dataManager.putLocal(locationKey, contentKey, data);
 	}
 
@@ -196,8 +283,10 @@ public class NetworkManager {
 	 * @return the desired content from the wrapper
 	 */
 	public NetworkContent getLocal(String locationKey, String contentKey) {
-		if (!connection.isConnected())
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return null;
+		}
 		return dataManager.getLocal(locationKey, contentKey);
 	}
 
@@ -210,6 +299,7 @@ public class NetworkManager {
 	 */
 	public FutureRemove remove(String locationKey, String contentKey) {
 		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
 			return null;
 		}
 		return dataManager.remove(locationKey, contentKey);

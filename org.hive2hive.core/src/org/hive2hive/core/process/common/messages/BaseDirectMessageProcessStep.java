@@ -50,7 +50,8 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 			requestMessage.setCallBackHandler(this);
 		}
 		FutureResponse futureResponse = getNetworkManager().sendDirect(message);
-		futureResponse.addListener(new FutureResponseListener(this, message, getNetworkManager()));
+		// TODO Add public keys
+		futureResponse.addListener(new FutureResponseListener(this, message, null, getNetworkManager()));
 	}
 
 	@Override

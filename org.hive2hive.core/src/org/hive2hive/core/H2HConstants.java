@@ -1,5 +1,7 @@
 package org.hive2hive.core;
 
+import org.hive2hive.core.security.EncryptionUtil;
+
 public interface H2HConstants {
 
 	// standard port for the hive2hive network
@@ -35,4 +37,8 @@ public interface H2HConstants {
 
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final long CONTACT_PEERS_AWAIT_MS = 15000;
+	
+	// key lengths for sending messages
+	public static final EncryptionUtil.RSA_KEYLENGTH H2H_RSA_KEYLENGTH = EncryptionUtil.RSA_KEYLENGTH.BIT_512;
+	public static final EncryptionUtil.AES_KEYLENGTH H2H_AES_KEYLENGTH = EncryptionUtil.AES_KEYLENGTH.BIT_128;
 }

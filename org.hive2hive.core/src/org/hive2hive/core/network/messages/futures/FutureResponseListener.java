@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.messages.futures;
 
+import java.security.PublicKey;
 import java.util.List;
 
 import net.tomp2p.futures.BaseFutureAdapter;
@@ -42,6 +43,7 @@ public class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 
 	private final IBaseMessageListener listener;
 	private final BaseDirectMessage message;
+	private final PublicKey receiverPublicKey;
 	private final NetworkManager networkManager;
 
 	/**
@@ -51,13 +53,16 @@ public class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 	 *            listener which gets notified when sending succeeded or failed
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
+	 * @param receiverPublicKey
+	 *            the receivers public key which was used for encryption
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
 	public FutureResponseListener(IBaseMessageListener listener, BaseDirectMessage message,
-			NetworkManager networkManager) {
+			PublicKey receiverPublicKey, NetworkManager networkManager) {
 		this.listener = listener;
 		this.message = message;
+		this.receiverPublicKey = receiverPublicKey;
 		this.networkManager = networkManager;
 	}
 
@@ -75,7 +80,7 @@ public class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 				// re-send directly the message
 				FutureResponse futureResponse = networkManager.sendDirect(message);
 				// attach the future adapter himself to handle the new future
-				futureResponse.addListener(new FutureResponseListener(listener, message, networkManager));
+				futureResponse.addListener(new FutureResponseListener(listener, message, receiverPublicKey, networkManager));
 			} else {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
@@ -85,9 +90,9 @@ public class FutureResponseListener extends BaseFutureAdapter<FutureResponse> {
 					// re-send the message (routed)
 					FutureDirect futureDirect = networkManager.send(message);
 					// attach another future adapter to handle routed messaging results
-					futureDirect.addListener(new FutureDirectListener(listener, message, networkManager));
+					futureDirect.addListener(new FutureDirectListener(listener, message, receiverPublicKey, networkManager));
 				} else {
-					// notify the listener about the fail of sending the message		
+					// notify the listener about the fail of sending the message
 					listener.onFailure();
 				}
 			}

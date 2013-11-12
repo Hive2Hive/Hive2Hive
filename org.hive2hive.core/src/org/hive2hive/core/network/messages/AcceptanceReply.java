@@ -12,6 +12,8 @@ public enum AcceptanceReply {
 	OK,
 	/** Default for 'something went wrong, I won't handle this message' */
 	FAILURE,
+	/** When decryption of message failed */
+	FAILURE_DECRYPTION,
 	/**
 	 * Basically used as replies for {@link AsynchronousReturnMessage}s. It indicates that there is no
 	 * {@link CallBackHandler} waiting for the return message on this 'sender' node.

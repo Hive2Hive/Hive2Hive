@@ -38,6 +38,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 	public void beforeMethod() {
 		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
+		NetworkTestUtil.createKeyPairs(network);
 	}
 
 	/**
@@ -57,21 +58,21 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// check if selected location is empty
 		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
-		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey,
-				new H2HTestData(data));
+		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 		// send message
-		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
-			@Override
-			public void onSuccess() {
+		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(
+				new FutureDirectListener(new IBaseMessageListener() {
+					@Override
+					public void onSuccess() {
 
-			}
+					}
 
-			@Override
-			public void onFailure() {
-				// should not happen
-				Assert.fail("Should not failed.");
-			}
-		}, message, nodeA));
+					@Override
+					public void onFailure() {
+						// should not happen
+						Assert.fail("Should not failed.");
+					}
+				}, message, nodeB.getKeyPair().getPublic(), nodeA));
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
@@ -106,17 +107,18 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 		// send message
-		nodeA.send(message).addListener(new FutureDirectListener(new IBaseMessageListener() {
-			@Override
-			public void onSuccess() {
-			}
+		nodeA.send(message, nodeB.getKeyPair().getPublic()).addListener(
+				new FutureDirectListener(new IBaseMessageListener() {
+					@Override
+					public void onSuccess() {
+					}
 
-			@Override
-			public void onFailure() {
-				// should not happen
-				Assert.fail("Should not failed.");
-			}
-		}, message, nodeA));
+					@Override
+					public void onFailure() {
+						// should not happen
+						Assert.fail("Should not failed.");
+					}
+				}, message, nodeB.getKeyPair().getPublic(), nodeA));
 
 		// wait till message gets handled
 		// this might need some time

@@ -68,7 +68,8 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 			requestMessage.setCallBackHandler(this);
 		}
 		FutureDirect futureDirect = getNetworkManager().send(message);
-		futureDirect.addListener(new FutureDirectListener(this, message, getNetworkManager()));
+		// TODO add public key
+		futureDirect.addListener(new FutureDirectListener(this, message, null, getNetworkManager()));
 	}
 
 	@Override

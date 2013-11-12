@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 
 public class NetworkTestUtil {
@@ -58,6 +60,18 @@ public class NetworkTestUtil {
 		}
 
 		return nodes;
+	}
+
+	/**
+	 * Generate and assign public/private key pairs to the nodes.
+	 * 
+	 * @param network
+	 *            list containing all nodes which has to be disconnected.
+	 */
+	public static void createKeyPairs(List<NetworkManager> network) {
+		for (NetworkManager node : network) {
+			node.setKeyPair(EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH));
+		}
 	}
 
 	/**
@@ -125,9 +139,10 @@ public class NetworkTestUtil {
 	}
 
 	public static UserCredentials generateRandomCredentials() {
-		return new UserCredentials(NetworkTestUtil.randomString(), NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
+		return new UserCredentials(NetworkTestUtil.randomString(), NetworkTestUtil.randomString(),
+				NetworkTestUtil.randomString());
 	}
-	
+
 	protected class Waiter {
 		private int counter = 0;
 		private final int maxAmoutOfTicks;

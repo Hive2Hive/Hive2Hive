@@ -2,6 +2,7 @@ package org.hive2hive.core.network.messages;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 
 import net.tomp2p.futures.FutureDHT;
@@ -36,14 +37,15 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseMessage.class);
 
-	//TODO Seppi: this serialization ID should not be defined in the abstract class but rather in each subclass separately
-	private static final long serialVersionUID = 8896590561336373601L;
+	private static final long serialVersionUID = 1L;
 
 	protected NetworkManager networkManager;
+	protected PeerAddress senderAddress;
+	protected PublicKey senderPublicKey;
 
 	protected final String messageID;
 	protected final String targetKey;
-	protected PeerAddress senderAddress;
+
 	private final SendingBehavior sendingBehavior;
 
 	private int sendingCounter = 0;
@@ -76,7 +78,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public BaseMessage(String messageID, String targetKey) {
 		this(messageID, targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
 	}
-	
+
 	/**
 	 * Getter
 	 * 
@@ -107,6 +109,15 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	/**
 	 * Getter
 	 * 
+	 * @return public key of the sender
+	 */
+	public PublicKey getSenderPublicKey() {
+		return senderPublicKey;
+	}
+
+	/**
+	 * Getter
+	 * 
 	 * @return the current value of this messages sending counter
 	 */
 	public int getSendingCounter() {
@@ -130,6 +141,16 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	public void setSenderAddress(PeerAddress senderAddress) {
 		this.senderAddress = senderAddress;
+	}
+
+	/**
+	 * Setter
+	 * 
+	 * @param senderPublicKey
+	 *            the public key of the sender node
+	 */
+	public void setSenderPublicKey(PublicKey senderPublicKey) {
+		this.senderPublicKey = senderPublicKey;
 	}
 
 	/**

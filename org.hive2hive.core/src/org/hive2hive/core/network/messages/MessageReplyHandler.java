@@ -1,11 +1,20 @@
 package org.hive2hive.core.network.messages;
 
+import java.security.InvalidKeyException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * This is the general message handler of each node. It checks if received
@@ -28,33 +37,47 @@ public class MessageReplyHandler implements ObjectDataReply {
 	}
 
 	@Override
-	public Object reply(PeerAddress sender, Object request) throws Exception {
-		
+	public Object reply(PeerAddress sender, Object request){
+		if (!(request instanceof HybridEncryptedContent)) {
+			logger.error("Received unknown object.");
+			return null;
+		}
+
+		if (networkManager.getKeyPair() == null) {
+			logger.warn("Currently no user logged in! Keys for decryption needed.");
+			return AcceptanceReply.FAILURE;
+		}
+
 		// asymmetrically decrypt message
-		// TODO replace null with the receiver's private key
-//		byte[] encryptedMessage = (byte[]) request;
-//		byte[] decryptedMessage = EncryptionUtil.decryptRSA(encryptedMessage, null);
-//		BaseMessage message = (BaseMessage) EncryptionUtil.deserializeObject(decryptedMessage);
-		
-		if (request instanceof BaseMessage) {
-			
-			BaseMessage receivedMessage = (BaseMessage) request;
+		HybridEncryptedContent encryptedMessage = (HybridEncryptedContent) request;
+		byte[] decryptedMessage = null;
+		try {
+			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, networkManager.getKeyPair()
+					.getPrivate());
+		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
+				| IllegalStateException | InvalidCipherTextException e) {
+			logger.warn("Decryption of message failed.");
+			return AcceptanceReply.FAILURE;
+		}
+		// deserialize decrypted message
+		Object message = EncryptionUtil.deserializeObject(decryptedMessage);
+
+		if (message != null && message instanceof BaseMessage) {
+			BaseMessage receivedMessage = (BaseMessage) message;
 			receivedMessage.setNetworkManager(networkManager);
 			AcceptanceReply reply = receivedMessage.accept();
 			if (AcceptanceReply.OK == reply) {
-				
 				// handle message in own thread
 				logger.debug("Received and accepted the message.");
 				new Thread(receivedMessage).start();
-				
 			} else {
 				logger.warn(String.format("Received but denied a message. Acceptance reply = '%s'.", reply));
 			}
 			return reply;
+		} else {
+			logger.error("Received unknown object.");
+			return null;
 		}
-		
-		logger.error("Received unknown object.");
-		return null;
 	}
 
 }

@@ -49,7 +49,7 @@ public class TestMessageWithReplyMaxSending extends BaseRequestMessage {
 						// should not happen
 						Assert.fail("Should not failed.");
 					}
-				}, responseMessage, networkManager));
+				}, responseMessage, getSenderPublicKey(), networkManager));
 	}
 
 	@Override
