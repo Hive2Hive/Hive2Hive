@@ -27,7 +27,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class PutMetaDocumentStep extends PutProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutMetaDocumentStep.class);
-	private final MetaDocument metaDocument;
+	protected MetaDocument metaDocument;
 
 	public PutMetaDocumentStep(MetaDocument metaDocument, ProcessStep nextStep) {
 		super(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, null, nextStep);

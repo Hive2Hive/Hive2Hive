@@ -7,6 +7,7 @@ import java.util.List;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.process.ProcessContext;
+import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -19,6 +20,7 @@ public class UploadFileProcessContext extends ProcessContext {
 	private GetUserProfileStep getUserProfileStep;
 	private List<KeyPair> chunkKeys;
 	private boolean fileAlreadyExists;
+	private GetMetaDocumentStep getMetaStep;
 
 	public UploadFileProcessContext(UploadFileProcess process, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config) {
@@ -67,5 +69,13 @@ public class UploadFileProcessContext extends ProcessContext {
 
 	public boolean getFileAlreadyExists() {
 		return fileAlreadyExists;
+	}
+
+	public void setGetMetaDocumentStep(GetMetaDocumentStep getMetaStep) {
+		this.getMetaStep = getMetaStep;
+	}
+
+	public GetMetaDocumentStep getMetaDocumentStep() {
+		return getMetaStep;
 	}
 }

@@ -8,11 +8,13 @@ import java.util.List;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -32,27 +34,41 @@ public class CheckMetaFileExistStep extends ProcessStep {
 
 		File file = context.getFile();
 		FileManager fileManager = context.getFileManager();
-		boolean fileAlreadyExists = fileAlreadyExists(userProfile, file, fileManager);
-		context.setFileAlreadyExists(fileAlreadyExists);
+		FileTreeNode fileNodeInUserProfile = fileAlreadyExists(userProfile, file, fileManager);
+		context.setFileAlreadyExists(fileNodeInUserProfile == null);
 
-		if (fileAlreadyExists) {
-			// TODO get and update the meta document
-		} else {
+		if (fileNodeInUserProfile == null) {
+			// create new file
 			if (file.isDirectory()) {
 				continueForNewFolder(file, context.getCredentials());
 			} else {
 				continueForNewFile(file, context.getCredentials(), context.getChunkKeys());
 			}
+		} else {
+			// get and update the meta document
+			KeyPair keyPair = fileNodeInUserProfile.getKeyPair();
+			UpdateMetaDocumentStep addToMetaStep = new UpdateMetaDocumentStep();
+			GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(keyPair, addToMetaStep);
+			context.setGetMetaDocumentStep(getMetaStep);
+			getProcess().setNextStep(getMetaStep);
 		}
 	}
 
-	private boolean fileAlreadyExists(UserProfile userProfile, File file, FileManager fileManager) {
+	/**
+	 * Checks in the user profile whether a file exists.
+	 * 
+	 * @param userProfile
+	 * @param file
+	 * @param fileManager null if the file does not exists yet.
+	 * @return
+	 */
+	private FileTreeNode fileAlreadyExists(UserProfile userProfile, File file, FileManager fileManager) {
 		String relativePath = file.getAbsolutePath()
 				.replaceFirst(fileManager.getRoot().getAbsolutePath(), "");
 		try {
-			return userProfile.getFileByPath(relativePath) == null;
+			return userProfile.getFileByPath(relativePath);
 		} catch (FileNotFoundException e) {
-			return false;
+			return null;
 		}
 	}
 
@@ -62,7 +78,7 @@ public class CheckMetaFileExistStep extends ProcessStep {
 
 		// 1. put the meta folder
 		// 2. update the user profile
-		AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(folder, folderKeyPair,
+		UpdateUserProfileStep updateProfileStep = new UpdateUserProfileStep(folder, folderKeyPair,
 				credentials);
 		PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(metaFolder, updateProfileStep);
 		getProcess().setNextStep(putMetaFolder);
@@ -82,8 +98,7 @@ public class CheckMetaFileExistStep extends ProcessStep {
 
 		// 1. put the meta file
 		// 2. update the user profile
-		AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, fileKeyPair,
-				credentials);
+		UpdateUserProfileStep updateProfileStep = new UpdateUserProfileStep(file, fileKeyPair, credentials);
 		PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(metaFile, updateProfileStep);
 		getProcess().setNextStep(putMetaFolder);
 	}

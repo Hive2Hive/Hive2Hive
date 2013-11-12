@@ -15,12 +15,12 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Nico
  * 
  */
-public class AddFileToUserProfileStep extends PutUserProfileStep {
+public class UpdateUserProfileStep extends PutUserProfileStep {
 
 	private final File file;
 	private final KeyPair fileKeys;
 
-	public AddFileToUserProfileStep(File file, KeyPair fileKeys, UserCredentials credentials) {
+	public UpdateUserProfileStep(File file, KeyPair fileKeys, UserCredentials credentials) {
 		super(null, credentials, null);
 		this.file = file;
 		this.fileKeys = fileKeys;
@@ -37,7 +37,7 @@ public class AddFileToUserProfileStep extends PutUserProfileStep {
 			getProcess().stop("Did not find user profile");
 			return;
 		} else if (context.getFileAlreadyExists()) {
-			// file already exists --> go to next step; in this case, we're done
+			// file already exists --> go to next step.
 			getProcess().setNextStep(getNextSteps());
 			return;
 		}
