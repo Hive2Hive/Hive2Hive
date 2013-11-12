@@ -40,12 +40,12 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	protected NetworkManager networkManager;
-	protected PeerAddress senderAddress;
 	protected PublicKey senderPublicKey;
 
 	protected final String messageID;
 	protected final String targetKey;
 
+	protected PeerAddress senderAddress;
 	private final SendingBehavior sendingBehavior;
 
 	private int sendingCounter = 0;
@@ -78,7 +78,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public BaseMessage(String messageID, String targetKey) {
 		this(messageID, targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
 	}
-
+	
 	/**
 	 * Getter
 	 * 

@@ -204,7 +204,7 @@ public class MessageManager {
 	public synchronized void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
 		callBackHandlers.put(messageId, handler);
 	}
-
+	
 	/**
 	 * Gets and removes a message callback handler
 	 * 
