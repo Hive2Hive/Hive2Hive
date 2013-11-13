@@ -1,5 +1,6 @@
 package org.hive2hive.core.model;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -81,6 +82,12 @@ public class UserProfile extends NetworkContent {
 			found = findById(child, fileId);
 		}
 		return found;
+	}
+
+	public FileTreeNode getFileByPath(File file, FileManager fileManager) throws FileNotFoundException {
+		String relativePath = file.getAbsolutePath()
+				.replaceFirst(fileManager.getRoot().getAbsolutePath(), "");
+		return getFileByPath(relativePath);
 	}
 
 	public FileTreeNode getFileByPath(String relativePath) throws FileNotFoundException {

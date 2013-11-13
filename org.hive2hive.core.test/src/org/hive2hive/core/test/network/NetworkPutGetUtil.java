@@ -15,9 +15,11 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
+import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.download.GetFileChunkStep;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
+import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -99,9 +101,22 @@ public class NetworkPutGetUtil {
 		return step.getFile();
 	}
 
+	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {
+		DownloadFileProcess process = new DownloadFileProcess(file, networkManager, fileManager);
+		executeProcess(process);
+		return fileManager.getFile(file);
+	}
+
 	public static void uploadNewFile(NetworkManager networkManager, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		NewFileProcess process = new NewFileProcess(file, credentials, networkManager, fileManager, config);
+		executeProcess(process);
+	}
+
+	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
+			UserCredentials credentials, FileManager fileManager, IH2HFileConfiguration config) {
+		NewVersionProcess process = new NewVersionProcess(file, credentials, networkManager, fileManager,
+				config);
 		executeProcess(process);
 	}
 }

@@ -117,7 +117,10 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 			wroteToDisk.clear();
 			for (Chunk chunk : chunkBuffer) {
 				if (chunk.getOrder() == currentChunkOrder) {
-					FileUtils.writeByteArrayToFile(file, chunk.getData(), true);
+					// append only if already written a chunk, else overwrite the possibly existent file
+					boolean append = currentChunkOrder != 0;
+
+					FileUtils.writeByteArrayToFile(file, chunk.getData(), append);
 					wroteToDisk.add(chunk);
 					currentChunkOrder++;
 				}
