@@ -69,11 +69,11 @@ public class FileManagerTest extends H2HJUnitTest {
 		// - 1d:
 		// - - 2f
 		// - - 2d (empty folder)
-		child1 = new FileTreeNode(root, keys, "1f1", false);
-		child2 = new FileTreeNode(root, keys, "1f2", false);
-		dir1 = new FileTreeNode(root, keys, "1d", true);
-		child3 = new FileTreeNode(dir1, keys, "2f", false);
-		dir2 = new FileTreeNode(dir1, keys, "2d", true);
+		child1 = new FileTreeNode(root, keys, "1f1", null);
+		child2 = new FileTreeNode(root, keys, "1f2", null);
+		dir1 = new FileTreeNode(root, keys, "1d");
+		child3 = new FileTreeNode(dir1, keys, "2f", null);
+		dir2 = new FileTreeNode(dir1, keys, "2d");
 	}
 
 	@Test

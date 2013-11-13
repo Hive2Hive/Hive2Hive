@@ -3,6 +3,7 @@ package org.hive2hive.core.security;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -34,6 +35,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.io.DigestInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -389,6 +391,33 @@ public final class EncryptionUtil {
 		digest.update(data, 0, data.length);
 		byte[] md5 = new byte[digest.getDigestSize()];
 		digest.doFinal(md5, 0);
+		return md5;
+	}
+
+	/**
+	 * Generates a MD5 hash of an input stream
+	 * 
+	 * @param stream
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] generateMD5Hash(InputStream stream) throws IOException {
+		MD5Digest digest = new MD5Digest();
+
+		byte[] buffer = new byte[1024];
+		int numRead;
+		DigestInputStream dis = new DigestInputStream(stream, digest);
+		do {
+			numRead = dis.read(buffer);
+			if (numRead > 0) {
+				digest.update(buffer, 0, numRead);
+			}
+		} while (numRead != -1);
+		dis.close();
+
+		byte[] md5 = new byte[digest.getDigestSize()];
+		digest.doFinal(md5, 0);
+
 		return md5;
 	}
 

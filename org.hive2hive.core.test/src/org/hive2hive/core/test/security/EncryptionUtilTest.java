@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.SignatureException;
@@ -15,6 +18,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -22,6 +26,7 @@ import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -281,13 +286,31 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void md5Test() {
+	public void md5DataTest() {
 		String data = generateRandomString(1000);
 		byte[] md5 = EncryptionUtil.generateMD5Hash(data.getBytes());
 		assertNotNull(md5);
 
 		// assert that hashing twice results in the same md5 hash
 		assertEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(data.getBytes())));
+
+		// assert that different data is hashed to different md5 hashes
+		String data2 = generateRandomString(1000);
+		assertNotEquals(data, data2);
+		assertNotEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(data2.getBytes())));
+	}
+
+	@Test
+	public void md5StreamTest() throws IOException {
+		String data = generateRandomString(5 * 1024);
+		File file = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file, data);
+
+		byte[] md5 = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+		assertNotNull(md5);
+
+		// assert that hashing twice results in the same md5 hash
+		assertEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(new FileInputStream(file))));
 
 		// assert that different data is hashed to different md5 hashes
 		String data2 = generateRandomString(1000);
