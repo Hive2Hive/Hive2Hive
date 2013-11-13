@@ -8,7 +8,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -33,11 +32,11 @@ public class NewFileProcess extends Process {
 		// 2. create a meta file
 		// 3. update the user profile
 		logger.debug("Adding a new file/folder to the DHT");
-		setNextStep(new PutNewFileChunkStep(file));
+		setNextStep(new PutNewFileChunkStep(file, context));
 	}
 
 	@Override
-	public BaseUploadFileProcessContext getContext() {
+	public NewFileProcessContext getContext() {
 		return context;
 	}
 

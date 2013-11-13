@@ -9,7 +9,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -21,7 +20,7 @@ import org.hive2hive.core.security.UserCredentials;
 public class NewVersionProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewVersionProcess.class);
-	private final BaseUploadFileProcessContext context;
+	private final NewVersionProcessContext context;
 
 	/**
 	 * Use this constructor if the most recent user profile is already present
@@ -47,14 +46,14 @@ public class NewVersionProcess extends Process {
 			// 5. update the user profile
 
 			logger.debug("Adding a file to the DHT");
-			setNextStep(new PutNewVersionChunkStep(file));
+			setNextStep(new PutNewVersionChunkStep(file, context));
 		} else {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
 	}
 
 	@Override
-	public BaseUploadFileProcessContext getContext() {
+	public NewVersionProcessContext getContext() {
 		return context;
 	}
 

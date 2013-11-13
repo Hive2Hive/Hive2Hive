@@ -12,23 +12,18 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
-import org.hive2hive.core.process.upload.PutFileChunkStep;
+import org.hive2hive.core.process.upload.PutChunkStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
-public class PutNewFileChunkStep extends PutFileChunkStep {
+public class PutNewFileChunkStep extends PutChunkStep {
 
-	public PutNewFileChunkStep(File file) {
+	public PutNewFileChunkStep(File file, NewFileProcessContext context) {
 		super(file, 0, new ArrayList<KeyPair>());
+		configureStepAfterUpload(context);
 	}
 
-	@Override
-	public void start() {
-		// upload all chunks (recursion included)
-		super.start();
-
-		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
-
+	private void configureStepAfterUpload(NewFileProcessContext context) {
 		// generate the new key pair for the meta file (which are later stored in the user profile)
 		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		MetaDocument metaDocument = null;
@@ -55,6 +50,7 @@ public class PutNewFileChunkStep extends PutFileChunkStep {
 				updateProfileStep);
 		context.setUserProfileStep(getProfileStep);
 		PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(metaDocument, getProfileStep);
-		getProcess().setNextStep(putMetaFolder);
+
+		setStepAfterPutting(putMetaFolder);
 	}
 }

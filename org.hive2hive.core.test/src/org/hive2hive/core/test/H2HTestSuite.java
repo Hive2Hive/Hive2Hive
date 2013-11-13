@@ -20,7 +20,7 @@ import org.hive2hive.core.test.process.common.remove.RemoveProcessStepTest;
 import org.hive2hive.core.test.process.download.DownloadFileTest;
 import org.hive2hive.core.test.process.manager.ProcessManagerTest;
 import org.hive2hive.core.test.process.register.RegisterTest;
-import org.hive2hive.core.test.process.upload.UploadFileTest;
+import org.hive2hive.core.test.process.upload.NewFileTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -57,7 +57,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		RegisterTest.class,
 
 		// Process: Upload
-		UploadFileTest.class,
+		NewFileTest.class,
 
 		// Process: Download
 		DownloadFileTest.class,

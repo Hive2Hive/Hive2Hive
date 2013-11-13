@@ -30,12 +30,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests uploading a file.
+ * Tests uploading a new file.
  * 
  * @author Nico
  * 
  */
-public class UploadFileTest extends H2HJUnitTest {
+public class NewFileTest extends H2HJUnitTest {
 
 	private final int networkSize = 10;
 	private List<NetworkManager> network;
@@ -45,7 +45,7 @@ public class UploadFileTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = UploadFileTest.class;
+		testClass = NewFileTest.class;
 		beforeClass();
 
 	}
@@ -104,8 +104,7 @@ public class UploadFileTest extends H2HJUnitTest {
 
 	private void startUploadProcess(File toUpload) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager,
-				config);
+		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager, config);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

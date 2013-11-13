@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.BadPaddingException;
@@ -19,6 +18,7 @@ import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
@@ -29,35 +29,34 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 /**
  * First validates the file size according to the limits set in the {@link IH2HFileConfiguration} object.
  * Then, puts a chunk and recursively calls itself until all chunks are stored in the DHT.
+ * This class is intended to be subclassed because there are two scenarios:
+ * <ul>
+ * <li>A new file is uploaded</li>
+ * <li>A new version of an existing is uploaded</li>
+ * </ul>
+ * The upload itself is not differing in these scenarios, but the subsequent steps might be.
  * 
  * @author Nico
  * 
  */
-public class PutFileChunkStep extends PutProcessStep {
+public class PutChunkStep extends PutProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(PutFileChunkStep.class);
+	private final static Logger logger = H2HLoggerFactory.getLogger(PutChunkStep.class);
 
 	protected final File file;
 	private final long offset;
 	protected final List<KeyPair> chunkKeys;
+	private ProcessStep stepAfterPutting;
 
 	/**
-	 * Constructor for first call
-	 * 
-	 * @param file
-	 */
-	public PutFileChunkStep(File file) {
-		this(file, 0, new ArrayList<KeyPair>());
-	}
-
-	/**
-	 * Constructor needed when file has multiple chunks
+	 * Constructor only usable with subclass. Remember to configure the steps after uploading before starting
+	 * this step. This ensures that the step knows what to do when all parts are uploaded.
 	 * 
 	 * @param file
 	 * @param offset
 	 * @param chunkKeys
 	 */
-	protected PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
+	protected PutChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
 		super(null, H2HConstants.FILE_CHUNK, null, null);
 		this.file = file;
@@ -111,7 +110,9 @@ public class PutFileChunkStep extends PutProcessStep {
 			chunkKeys.add(chunkKey);
 
 			// more data to read (increase offset)
-			nextStep = new PutFileChunkStep(file, offset + data.length, chunkKeys);
+			PutChunkStep nextChunkStep = new PutChunkStep(file, offset + data.length, chunkKeys);
+			nextChunkStep.setStepAfterPutting(stepAfterPutting);
+			nextStep = nextChunkStep;
 
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
@@ -130,6 +131,8 @@ public class PutFileChunkStep extends PutProcessStep {
 			logger.debug("All chunks uploaded. Continue with meta data.");
 			// nothing read, stop putting chunks and start next step
 			context.setChunkKeys(chunkKeys);
+
+			getProcess().setNextStep(stepAfterPutting);
 		}
 	}
 
@@ -151,5 +154,15 @@ public class PutFileChunkStep extends PutProcessStep {
 			}
 			return truncated;
 		}
+	}
+
+	/**
+	 * Sets the step that is executed as soon as all chunks are in the DHT. Remember to call this method
+	 * before starting this step, else, the process might finish earlier...
+	 * 
+	 * @param stepAfterPutting
+	 */
+	protected void setStepAfterPutting(ProcessStep stepAfterPutting) {
+		this.stepAfterPutting = stepAfterPutting;
 	}
 }

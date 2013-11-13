@@ -5,28 +5,24 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
-import org.hive2hive.core.process.upload.PutFileChunkStep;
+import org.hive2hive.core.process.upload.PutChunkStep;
 
-public class PutNewVersionChunkStep extends PutFileChunkStep {
+public class PutNewVersionChunkStep extends PutChunkStep {
 
 	/**
 	 * Constructor for first call
 	 * 
 	 * @param file
 	 */
-	public PutNewVersionChunkStep(File file) {
+	public PutNewVersionChunkStep(File file, NewVersionProcessContext context) {
 		super(file, 0, new ArrayList<KeyPair>());
+		configureStepAfterUpload(context);
 	}
 
-	@Override
-	public void start() {
-		// upload all chunks
-		super.start();
-
-		NewVersionProcessContext context = (NewVersionProcessContext) getProcess().getContext();
+	private void configureStepAfterUpload(NewVersionProcessContext context) {
 		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
 				new FindFileInUserProfileStep(file));
 		context.setUserProfileStep(getUserProfileStep);
-		getProcess().setNextStep(getUserProfileStep);
+		setStepAfterPutting(getUserProfileStep);
 	}
 }
