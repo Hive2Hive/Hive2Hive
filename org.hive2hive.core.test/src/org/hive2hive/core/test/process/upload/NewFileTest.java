@@ -17,6 +17,7 @@ import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
 import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -64,7 +65,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadSingleChunk() throws IOException {
-		File file = createFileRandomContent(1);
+		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 
 		startUploadProcess(file);
 		verifyUpload(file, 1);
@@ -73,24 +74,10 @@ public class NewFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadMultipleChunks() throws IOException {
 		// creates a file with length of at least 5 chunks
-		File file = createFileRandomContent(5);
+		File file = FileTestUtil.createFileRandomContent(5, fileManager, config);
 
 		startUploadProcess(file);
 		verifyUpload(file, 5);
-	}
-
-	private File createFileRandomContent(int numOfChunks) throws IOException {
-		// create file of size of multiple numbers of chunks
-		String random = "";
-		while (Math.ceil(1.0 * random.getBytes().length / config.getChunkSize()) < numOfChunks) {
-			random += generateRandomString(config.getChunkSize() - 1);
-		}
-
-		String fileName = NetworkTestUtil.randomString();
-		File file = new File(fileManager.getRoot(), fileName);
-		FileUtils.write(file, random);
-
-		return file;
 	}
 
 	private void startUploadProcess(File toUpload) {
@@ -137,7 +124,7 @@ public class NewFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadWrongCredentials() throws IOException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		File file = createFileRandomContent(1);
+		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		NewFileProcess process = new NewFileProcess(file, userCredentials, client, fileManager, config);

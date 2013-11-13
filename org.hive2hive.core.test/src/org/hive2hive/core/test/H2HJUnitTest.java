@@ -102,7 +102,7 @@ public class H2HJUnitTest {
 	 * 
 	 * @return
 	 */
-	protected static String generateRandomString(int maxLength) {
+	public static String generateRandomString(int maxLength) {
 
 		Random random = new Random();
 		char[] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();

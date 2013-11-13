@@ -3,6 +3,7 @@ package org.hive2hive.core.test.network;
 import java.io.File;
 import java.security.KeyPair;
 
+import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -16,6 +17,7 @@ import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.process.download.GetFileChunkStep;
 import org.hive2hive.core.process.register.RegisterProcess;
+import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -95,5 +97,11 @@ public class NetworkPutGetUtil {
 		GetFileChunkStep step = new GetFileChunkStep(file, metaFile, fileManager);
 		executeStep(networkManager, step);
 		return step.getFile();
+	}
+
+	public static void uploadNewFile(NetworkManager networkManager, File file, UserCredentials credentials,
+			FileManager fileManager, IH2HFileConfiguration config) {
+		NewFileProcess process = new NewFileProcess(file, credentials, networkManager, fileManager, config);
+		executeProcess(process);
 	}
 }
