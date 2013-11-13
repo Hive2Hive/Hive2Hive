@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -65,7 +66,7 @@ public class UserProfile extends NetworkContent {
 		// hash the location
 		byte[] locationKey = PasswordUtil.generateHash(location.toCharArray(), fixedSalt);
 
-		return new String(locationKey);
+		return new String(locationKey, H2HConstants.ENCODING_CHARSET);
 	}
 
 	public FileTreeNode getFileById(PublicKey fileId) {

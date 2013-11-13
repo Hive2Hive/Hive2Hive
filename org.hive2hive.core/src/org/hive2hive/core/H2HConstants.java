@@ -1,11 +1,16 @@
 package org.hive2hive.core;
 
+import java.nio.charset.Charset;
+
 import org.hive2hive.core.security.EncryptionUtil;
 
 public interface H2HConstants {
 
 	// standard port for the hive2hive network
 	public static final int H2H_PORT = 4622;
+
+	// define the default encoding charset (use explicitly)
+	public static final Charset ENCODING_CHARSET = Charset.forName("UTF-8");
 
 	// configurations for network messages
 	public static final int MAX_MESSAGE_SENDING = 5;
@@ -37,7 +42,7 @@ public interface H2HConstants {
 
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final long CONTACT_PEERS_AWAIT_MS = 15000;
-	
+
 	// key lengths for sending messages
 	public static final EncryptionUtil.RSA_KEYLENGTH H2H_RSA_KEYLENGTH = EncryptionUtil.RSA_KEYLENGTH.BIT_512;
 	public static final EncryptionUtil.AES_KEYLENGTH H2H_AES_KEYLENGTH = EncryptionUtil.AES_KEYLENGTH.BIT_128;
