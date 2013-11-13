@@ -1,13 +1,10 @@
 package org.hive2hive.core.process.upload;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.BadPaddingException;
@@ -17,12 +14,11 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.model.FileVersion;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
-import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
@@ -31,37 +27,36 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Puts a chunk and recursively calls itself until all chunks are stored in the DHT.
- * Afterwards, it continues with putting the meta file object in the DHT.
+ * First validates the file size according to the limits set in the {@link IH2HFileConfiguration} object.
+ * Then, puts a chunk and recursively calls itself until all chunks are stored in the DHT.
+ * This class is intended to be subclassed because there are two scenarios:
+ * <ul>
+ * <li>A new file is uploaded</li>
+ * <li>A new version of an existing is uploaded</li>
+ * </ul>
+ * The upload itself is not differing in these scenarios, but the subsequent steps might be.
  * 
  * @author Nico
  * 
  */
-public class PutFileChunkStep extends PutProcessStep {
+public class PutChunkStep extends PutProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(PutFileChunkStep.class);
+	private final static Logger logger = H2HLoggerFactory.getLogger(PutChunkStep.class);
 
-	private final File file;
+	protected final File file;
 	private final long offset;
-	private final List<KeyPair> chunkKeys;
+	protected final List<KeyPair> chunkKeys;
+	private ProcessStep stepAfterPutting;
 
 	/**
-	 * Constructor for first call
-	 * 
-	 * @param file
-	 */
-	public PutFileChunkStep(File file) {
-		this(file, 0, new ArrayList<KeyPair>());
-	}
-
-	/**
-	 * Constructor needed when file has multiple chunks
+	 * Constructor only usable with subclass. Remember to configure the steps after uploading before starting
+	 * this step. This ensures that the step knows what to do when all parts are uploaded.
 	 * 
 	 * @param file
 	 * @param offset
 	 * @param chunkKeys
 	 */
-	private PutFileChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
+	protected PutChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
 		super(null, H2HConstants.FILE_CHUNK, null, null);
 		this.file = file;
@@ -71,7 +66,25 @@ public class PutFileChunkStep extends PutProcessStep {
 
 	@Override
 	public void start() {
-		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
+		// only put sth. if the file has content
+		if (file.isDirectory()) {
+			logger.debug("Nothing to put since the file is a folder");
+			return;
+		}
+
+		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
+
+		// first, validate the file size (only first time)
+		if (chunkKeys.isEmpty()) {
+			IH2HFileConfiguration config = context.getConfig();
+			long fileSize = FileUtil.getFileSize(file);
+
+			if (fileSize > config.getMaxFileSize()) {
+				getProcess().stop("File is too large");
+				return;
+			}
+		}
+
 		byte[] data = new byte[context.getConfig().getChunkSize()];
 		int read = -1;
 		try {
@@ -97,7 +110,9 @@ public class PutFileChunkStep extends PutProcessStep {
 			chunkKeys.add(chunkKey);
 
 			// more data to read (increase offset)
-			nextStep = new PutFileChunkStep(file, offset + data.length, chunkKeys);
+			PutChunkStep nextChunkStep = new PutChunkStep(file, offset + data.length, chunkKeys);
+			nextChunkStep.setStepAfterPutting(stepAfterPutting);
+			nextStep = nextChunkStep;
 
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
@@ -115,22 +130,9 @@ public class PutFileChunkStep extends PutProcessStep {
 		} else {
 			logger.debug("All chunks uploaded. Continue with meta data.");
 			// nothing read, stop putting chunks and start next step
-			// put the meta folder and update the user profile
+			context.setChunkKeys(chunkKeys);
 
-			// generate the new key pair for the meta file (which are later stored in the user profile)
-			KeyPair fileKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-			MetaFile newMetaFile = createNewMetaFile(fileKeyPair.getPublic());
-
-			AddFileToUserProfileStep updateProfileStep = new AddFileToUserProfileStep(file, fileKeyPair,
-					context.getCredentials());
-			GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
-					updateProfileStep);
-			context.setUserProfileStep(getUserProfileStep);
-
-			// TODO check if file already existed. If not, create new Meta file. If yes, create new version in
-			// existing meta file
-			PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(newMetaFile, getUserProfileStep);
-			getProcess().setNextStep(putMetaFolder);
+			getProcess().setNextStep(stepAfterPutting);
 		}
 	}
 
@@ -154,33 +156,13 @@ public class PutFileChunkStep extends PutProcessStep {
 		}
 	}
 
-	private MetaFile createNewMetaFile(PublicKey id) {
-		MetaFile metaFile = new MetaFile(id);
-		FileVersion version = new FileVersion(0, getFileSize(), System.currentTimeMillis());
-		version.setChunkIds(chunkKeys);
-
-		List<FileVersion> versions = new ArrayList<FileVersion>(1);
-		versions.add(version);
-		metaFile.setVersions(versions);
-
-		return metaFile;
-	}
-
 	/**
-	 * Note that file.length can be very slowly (see
-	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
+	 * Sets the step that is executed as soon as all chunks are in the DHT. Remember to call this method
+	 * before starting this step, else, the process might finish earlier...
 	 * 
-	 * @return the file size in bytes
-	 * @throws IOException
+	 * @param stepAfterPutting
 	 */
-	private long getFileSize() {
-		try {
-			FileInputStream stream = new FileInputStream(file);
-			long size = stream.getChannel().size();
-			stream.close();
-			return size;
-		} catch (IOException e) {
-			return file.length();
-		}
+	protected void setStepAfterPutting(ProcessStep stepAfterPutting) {
+		this.stepAfterPutting = stepAfterPutting;
 	}
 }

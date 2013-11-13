@@ -29,8 +29,8 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaDocumentStep.class);
 
-	private final KeyPair keyPair;
-	private final ProcessStep nextStep;
+	protected KeyPair keyPair;
+	protected ProcessStep nextStep;
 
 	private MetaDocument metaDocument;
 
@@ -42,15 +42,18 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	@Override
 	protected void handleGetResult(NetworkContent content) {
-		HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
-		try {
-			NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
-			this.metaDocument = (MetaDocument) decrypted;
-		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-				| IllegalStateException | InvalidCipherTextException e) {
-			logger.error("Cannot decrypt the meta document.", e);
+		if (content == null) {
+			logger.error("Meta document not found");
+		} else {
+			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
+			try {
+				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
+				this.metaDocument = (MetaDocument) decrypted;
+			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
+					| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
+				logger.error("Cannot decrypt the meta document.", e);
+			}
 		}
-
 		// continue with next step
 		getProcess().setNextStep(nextStep);
 	}
