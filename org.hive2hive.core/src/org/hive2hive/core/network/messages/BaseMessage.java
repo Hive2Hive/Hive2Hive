@@ -48,7 +48,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	protected PeerAddress senderAddress;
 	private final SendingBehavior sendingBehavior;
 
-	private int sendingCounter = 0;
+	private int routedSendingCounter = 0;
 
 	/**
 	 * Constructor for an asynchronous message.
@@ -134,7 +134,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 * @return the current value of this messages sending counter
 	 */
 	public int getSendingCounter() {
-		return sendingCounter;
+		return routedSendingCounter;
 	}
 
 	/**
@@ -179,8 +179,8 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	/**
 	 * Increases the internal sending counter of this message.
 	 */
-	public void increaseSendingCounter() {
-		sendingCounter++;
+	public void increaseRoutedSendingCounter() {
+		routedSendingCounter++;
 	}
 
 	/**
@@ -229,12 +229,12 @@ public abstract class BaseMessage implements Runnable, Serializable {
 			case FAILURE:
 			case FUTURE_FAILURE:
 				if (SendingBehavior.SEND_MAX_ALLOWED_TIMES == sendingBehavior) {
-					if (sendingCounter < H2HConstants.MAX_MESSAGE_SENDING) {
+					if (routedSendingCounter < H2HConstants.MAX_MESSAGE_SENDING) {
 						return true;
 					} else {
 						logger.error(String
 								.format("Message does not getting accepted by the targets in %d tries. target key = '%s'",
-										sendingCounter, targetKey));
+										routedSendingCounter, targetKey));
 						return false;
 					}
 				} else {

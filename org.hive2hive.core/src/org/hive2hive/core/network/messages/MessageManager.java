@@ -33,7 +33,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public class MessageManager {
+public final class MessageManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageManager.class);
 
@@ -63,11 +63,8 @@ public class MessageManager {
 			throw new IllegalArgumentException("key pair has to be set at network manager");
 
 		// prepare message
-		message.increaseSendingCounter();
-		message.setSenderAddress(networkManager.getPeerAddress());
-		configureCallbackHandlerIfNeeded(message);
-		setPublicKeyIfNeeded(message);
-		RequestP2PConfiguration requestP2PConfiguration = createSendingConfiguration();
+		prepareMessage(message);
+		message.increaseRoutedSendingCounter();
 
 		// encrypt the message with the node's public key
 		HybridEncryptedContent encryptedMessage = encryptMessage(message, networkManager.getKeyPair()
@@ -78,7 +75,7 @@ public class MessageManager {
 		// send message to the peer which is responsible for the given key
 		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
-				.setRequestP2PConfiguration(requestP2PConfiguration).start();
+				.setRequestP2PConfiguration(createSendingConfiguration()).start();
 
 		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
 				message.getTargetKey(), message.getMessageID()));
@@ -109,11 +106,8 @@ public class MessageManager {
 			throw new IllegalArgumentException("target public key cannot be null");
 
 		// prepare message
-		message.increaseSendingCounter();
-		message.setSenderAddress(networkManager.getPeerAddress());
-		configureCallbackHandlerIfNeeded(message);
-		setPublicKeyIfNeeded(message);
-		RequestP2PConfiguration requestP2PConfiguration = createSendingConfiguration();
+		prepareMessage(message);
+		message.increaseRoutedSendingCounter();
 
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = encryptMessage(message, targetPublicKey);
@@ -123,7 +117,7 @@ public class MessageManager {
 		// send message to the peer which is responsible for the given key
 		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
-				.setRequestP2PConfiguration(requestP2PConfiguration).start();
+				.setRequestP2PConfiguration(createSendingConfiguration()).start();
 		// attach a future listener to log, handle and notify events
 		futureDirect
 				.addListener(new FutureRoutedListener(listener, message, targetPublicKey, networkManager));
@@ -150,10 +144,8 @@ public class MessageManager {
 			throw new IllegalArgumentException("key pair has to be set at network manager");
 
 		// prepare message
+		prepareMessage(message);
 		message.increaseDirectSendingCounter();
-		message.setSenderAddress(networkManager.getPeerAddress());
-		setPublicKeyIfNeeded(message);
-		configureCallbackHandlerIfNeeded(message);
 
 		// encrypt the message with the node's public key
 		HybridEncryptedContent encryptedMessage = encryptMessage(message, networkManager.getKeyPair()
@@ -195,10 +187,8 @@ public class MessageManager {
 			throw new IllegalArgumentException("target public key cannot be null");
 
 		// prepare message
+		prepareMessage(message);
 		message.increaseDirectSendingCounter();
-		message.setSenderAddress(networkManager.getPeerAddress());
-		setPublicKeyIfNeeded(message);
-		configureCallbackHandlerIfNeeded(message);
 
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = encryptMessage(message, targetPublicKey);
@@ -242,6 +232,13 @@ public class MessageManager {
 		return (callBackHandlers.get(messageId) != null);
 	}
 
+	private void prepareMessage(BaseMessage message) {
+	
+		message.setSenderAddress(networkManager.getPeerAddress());
+		configureCallbackHandlerIfNeeded(message);
+		setSenderPublicKeyIfNeeded(message);
+	}
+
 	private RequestP2PConfiguration createSendingConfiguration() {
 		return new RequestP2PConfiguration(1, 10, 0);
 	}
@@ -261,13 +258,14 @@ public class MessageManager {
 	 * @param message
 	 *            message which will be send
 	 */
-	private void setPublicKeyIfNeeded(BaseMessage message) {
+	private void setSenderPublicKeyIfNeeded(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
 			message.setSenderPublicKey(networkManager.getKeyPair().getPublic());
 		}
 	}
 
 	private HybridEncryptedContent encryptMessage(BaseMessage message, PublicKey targetPublicKey) {
+		
 		// asymmetrically encrypt message
 		byte[] messageBytes = EncryptionUtil.serializeObject(message);
 		try {
