@@ -2,6 +2,7 @@ package org.hive2hive.core.test.encryption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -196,7 +197,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				long start = System.currentTimeMillis();
 				KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(rsaSizes[s1]);
 				long stop = System.currentTimeMillis();
-				logger.debug(String.format("RSA Key Generation Time: %s ms", stop-start));
+				logger.debug(String.format("RSA Key Generation Time: %s ms", stop - start));
 
 				// encrypt data with public key
 				HybridEncryptedContent encryptedData = null;
@@ -204,7 +205,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 					start = System.currentTimeMillis();
 					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2]);
 					stop = System.currentTimeMillis();
-					logger.debug(String.format("Hybrid Encryption Time: %s ms", stop-start));
+					logger.debug(String.format("Hybrid Encryption Time: %s ms", stop - start));
 				} catch (DataLengthException | InvalidKeyException | IllegalStateException
 						| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception while testing hybrid encryption:", e);
@@ -222,13 +223,13 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 					start = System.currentTimeMillis();
 					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate());
 					stop = System.currentTimeMillis();
-					logger.debug(String.format("Hybrid Decryption Time: %s ms", stop-start));
+					logger.debug(String.format("Hybrid Decryption Time: %s ms", stop - start));
 				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 						| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
 					logger.error("Exception while testing hybrid decryption:", e);
 					e.printStackTrace();
 				}
-				
+
 				assertNotNull(decryptedData);
 				assertTrue(Arrays.equals(data, decryptedData));
 			}
@@ -277,6 +278,21 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			assertTrue(isVerified);
 		}
+	}
+
+	@Test
+	public void md5Test() {
+		String data = generateRandomString(1000);
+		byte[] md5 = EncryptionUtil.generateMD5Hash(data.getBytes());
+		assertNotNull(md5);
+
+		// assert that hashing twice results in the same md5 hash
+		assertEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(data.getBytes())));
+
+		// assert that different data is hashed to different md5 hashes
+		String data2 = generateRandomString(1000);
+		assertNotEquals(data, data2);
+		assertNotEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(data2.getBytes())));
 	}
 
 	@Test

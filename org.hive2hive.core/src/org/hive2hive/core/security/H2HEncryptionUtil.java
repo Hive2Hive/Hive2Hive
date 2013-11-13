@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 
@@ -102,5 +103,19 @@ public final class H2HEncryptionUtil {
 			IllegalStateException, InvalidCipherTextException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
+	}
+
+	/**
+	 * Compares if the data matches a given md5 hash
+	 * 
+	 * @param data the data to generate the md5 hash over it
+	 * @param expectedMD5 the expected md5 hash
+	 * @return
+	 */
+	public static boolean compareMD5(byte[] data, byte[] expectedMD5) {
+		// calculate the MD5 hash and compare it
+		byte[] dataMD5hash = EncryptionUtil.generateMD5Hash(data);
+		return new String(dataMD5hash, H2HConstants.ENCODING_CHARSET).equalsIgnoreCase(new String(
+				expectedMD5, H2HConstants.ENCODING_CHARSET));
 	}
 }
