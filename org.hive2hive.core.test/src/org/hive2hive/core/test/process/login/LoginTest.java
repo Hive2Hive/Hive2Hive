@@ -11,10 +11,10 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.LoginProcess;
-import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
@@ -43,18 +43,7 @@ public class LoginTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
-		// register a user
-		RegisterProcess process = new RegisterProcess(userCredentials, network.get(0));
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		userProfile = process.getContext().getUserProfile();
+		userProfile = NetworkPutGetUtil.register(network.get(0), userCredentials);
 	}
 
 	@Test

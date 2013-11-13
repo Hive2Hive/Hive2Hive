@@ -13,13 +13,12 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
-import org.hive2hive.core.test.network.NetworkGetUtil;
+import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
@@ -56,15 +55,7 @@ public class NewFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		RegisterProcess process = new RegisterProcess(userCredentials, network.get(0));
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		NetworkPutGetUtil.register(network.get(0), userCredentials);
 
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
@@ -122,7 +113,7 @@ public class NewFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
 		// test if there is something in the user profile
-		UserProfile gotProfile = NetworkGetUtil.getUserProfile(client, userCredentials);
+		UserProfile gotProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
 		FileTreeNode node = gotProfile.getRoot().getChildByName(originalFile.getName());
@@ -130,7 +121,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 		// get the meta file with the keys (decrypt it)
 		KeyPair metaFileKeys = node.getKeyPair();
-		MetaFile metaFile = (MetaFile) NetworkGetUtil.getMetaDocument(client, metaFileKeys);
+		MetaFile metaFile = (MetaFile) NetworkPutGetUtil.getMetaDocument(client, metaFileKeys);
 		Assert.assertNotNull(metaFile);
 		Assert.assertEquals(1, metaFile.getVersions().size());
 		Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkIds().size());
@@ -138,7 +129,7 @@ public class NewFileTest extends H2HJUnitTest {
 		// create new filemanager
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		FileManager fileManager2 = new FileManager(root);
-		File file = NetworkGetUtil.downloadFile(client, node, metaFile, fileManager2);
+		File file = NetworkPutGetUtil.downloadFile(client, node, metaFile, fileManager2);
 		Assert.assertTrue(file.exists());
 		Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
 	}

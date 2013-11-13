@@ -18,7 +18,7 @@ import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.network.NetworkGetUtil;
+import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
@@ -64,9 +64,6 @@ public class RegisterTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		// get the user profile and the password from the process
-		String profileLocation = UserProfile.getLocationKey(credentials);
-
 		// verify the new public key
 		FutureGet getKey = otherClient.getGlobal(credentials.getUserId(), H2HConstants.USER_PUBLIC_KEY);
 		getKey.awaitUninterruptibly();
@@ -78,7 +75,7 @@ public class RegisterTest extends H2HJUnitTest {
 				publicKey.getPublicKey());
 
 		// verify the new user profile
-		UserProfile gotUserProfile = NetworkGetUtil.getUserProfile(otherClient, credentials);
+		UserProfile gotUserProfile = NetworkPutGetUtil.getUserProfile(otherClient, credentials);
 		Assert.assertNotNull(gotUserProfile);
 		// profiles should match
 		Assert.assertEquals(credentials.getUserId(), gotUserProfile.getUserId());
