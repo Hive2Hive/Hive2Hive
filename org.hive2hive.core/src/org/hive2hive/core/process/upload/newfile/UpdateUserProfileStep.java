@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * A step adding the new file (node) into the user profile (tree)

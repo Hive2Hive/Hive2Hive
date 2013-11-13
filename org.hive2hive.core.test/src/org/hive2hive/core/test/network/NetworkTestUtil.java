@@ -11,9 +11,9 @@ import java.util.UUID;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.IH2HNode;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.UserCredentials;
 
 public class NetworkTestUtil {
 

@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
@@ -14,7 +15,6 @@ import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
-import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 

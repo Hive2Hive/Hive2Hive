@@ -7,13 +7,13 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Generic process step to encrypt the {@link: UserProfile} and add it to the DHT
@@ -29,7 +29,7 @@ public class PutUserProfileStep extends PutProcessStep {
 	private final UserCredentials credentials;
 
 	public PutUserProfileStep(UserProfile profile, UserCredentials credentials, ProcessStep nextStep) {
-		super(UserProfile.getLocationKey(credentials), H2HConstants.USER_PROFILE, null, nextStep);
+		super(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, null, nextStep);
 
 		this.userProfile = profile;
 		this.credentials = credentials;

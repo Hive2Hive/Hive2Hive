@@ -8,6 +8,7 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -20,7 +21,6 @@ import org.hive2hive.core.process.download.GetFileChunkStep;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
-import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.process.TestProcessListener;
 

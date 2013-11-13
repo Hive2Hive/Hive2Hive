@@ -3,9 +3,9 @@ package org.hive2hive.core.process.login;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessContext;
-import org.hive2hive.core.security.UserCredentials;
 
 public class PostLoginProcessContext extends ProcessContext {
 

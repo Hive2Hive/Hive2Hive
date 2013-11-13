@@ -1,7 +1,6 @@
 package org.hive2hive.core.test.model;
 
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
@@ -10,16 +9,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests the user profile behavior
+ * Tests the user credentials behavior
  * 
  * @author Nico
  * 
  */
-public class UserProfileTest extends H2HJUnitTest {
+public class UserCredentialsTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = UserProfileTest.class;
+		testClass = UserCredentialsTest.class;
 		beforeClass();
 	}
 
@@ -29,7 +28,7 @@ public class UserProfileTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// test if same result twice
-		Assert.assertEquals(UserProfile.getLocationKey(credentials), UserProfile.getLocationKey(credentials));
+		Assert.assertEquals(credentials.getProfileLocationKey(), credentials.getProfileLocationKey());
 	}
 
 	@AfterClass

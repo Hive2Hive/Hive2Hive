@@ -3,8 +3,8 @@ package org.hive2hive.core;
 import java.io.File;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Interface for all operations on a Hive2Hive peer. Note that all calls are returned immediately although the

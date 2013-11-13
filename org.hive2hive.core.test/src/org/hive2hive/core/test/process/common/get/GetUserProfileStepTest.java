@@ -11,6 +11,7 @@ import net.tomp2p.futures.FuturePut;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -21,7 +22,6 @@ import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
-import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -74,7 +74,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 				credentials.getPin(), AES_KEYLENGTH.BIT_256);
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
-		FuturePut putGlobal = putter.putGlobal(UserProfile.getLocationKey(credentials),
+		FuturePut putGlobal = putter.putGlobal(credentials.getProfileLocationKey(),
 				H2HConstants.USER_PROFILE, encrypted);
 		putGlobal.awaitUninterruptibly();
 		putGlobal.getFutureRequests().awaitUninterruptibly();

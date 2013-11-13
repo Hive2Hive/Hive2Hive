@@ -3,10 +3,10 @@ package org.hive2hive.core.process.login;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * This process does all long-running tasks necessary after the login:
@@ -35,7 +35,7 @@ public class PostLoginProcess extends Process {
 		// 4. HandleUserMessageQueueStep
 		HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(credentials.getUserId());
 		GetUserMessageQueueStep umQueueStep = new GetUserMessageQueueStep(
-				UserProfile.getLocationKey(credentials), handleUmQueueStep);
+				credentials.getProfileLocationKey(), handleUmQueueStep);
 
 		context = new PostLoginProcessContext(this, profile, credentials, currentLocations, fileManager,
 				fileConfig, umQueueStep);
