@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.IH2HNode;
-import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;

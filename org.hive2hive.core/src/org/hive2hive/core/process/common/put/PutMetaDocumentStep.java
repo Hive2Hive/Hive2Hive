@@ -37,7 +37,7 @@ public class PutMetaDocumentStep extends PutProcessStep {
 	@Override
 	public void start() {
 		try {
-			logger.debug("Decrypting meta document in a hybrid manner");
+			logger.debug("Encrypting meta document in a hybrid manner");
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaDocument,
 					metaDocument.getId(), AES_KEYLENGTH.BIT_256);
 			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted);

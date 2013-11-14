@@ -1,6 +1,6 @@
 package org.hive2hive.core.test.model;
 
-import org.hive2hive.core.model.UserCredentials;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;

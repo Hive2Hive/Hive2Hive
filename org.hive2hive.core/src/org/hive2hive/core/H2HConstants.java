@@ -9,7 +9,7 @@ public interface H2HConstants {
 	// standard port for the hive2hive network
 	public static final int H2H_PORT = 4622;
 
-	// define the default encoding charset (use explicitly)
+	// define the default encoding char set (use explicitly)
 	public static final Charset ENCODING_CHARSET = Charset.forName("UTF-8");
 
 	// configurations for network messages

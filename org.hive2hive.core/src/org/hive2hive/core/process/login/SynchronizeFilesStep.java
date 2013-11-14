@@ -9,7 +9,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
@@ -17,6 +16,7 @@ import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Synchronizes the local files with the entries in the user profile:

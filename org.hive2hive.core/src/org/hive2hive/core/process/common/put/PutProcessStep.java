@@ -18,7 +18,7 @@ import org.hive2hive.core.process.ProcessStep;
 
 /**
  * A process step which puts a {@link NetworkContent} object under the given keys. </br>
- * <b>Important:</b> Use only this process step to put some data into the network so that in case of failure a
+ * <b>Important:</b> Use only this process step to put some data into the network so that in case of failure an
  * appropriate handling is triggered.
  * 
  * @author Seppi
@@ -55,7 +55,7 @@ public class PutProcessStep extends ProcessStep {
 		this.contentKey = contentKey;
 		this.content = content;
 
-		FuturePut putFuture = getNetworkManager().putGlobal(locationKey, contentKey, content);
+		FuturePut putFuture = getNetworkManager().putGlobal(this.locationKey, this.contentKey, this.content);
 		putFuture.addListener(new PutVerificationListener());
 	}
 
