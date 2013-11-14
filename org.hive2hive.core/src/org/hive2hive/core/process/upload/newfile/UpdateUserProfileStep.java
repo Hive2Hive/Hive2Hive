@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 
@@ -80,7 +79,7 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 		if (file.isDirectory()) {
 			new FileTreeNode(parentNode, fileKeys, file.getName());
 		} else {
-			byte[] md5 = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+			byte[] md5 = EncryptionUtil.generateMD5Hash(file);
 			new FileTreeNode(parentNode, fileKeys, file.getName(), md5);
 		}
 	}

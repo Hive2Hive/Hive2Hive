@@ -12,6 +12,9 @@ public interface H2HConstants {
 	// define the default encoding charset (use explicitly)
 	public static final Charset ENCODING_CHARSET = Charset.forName("UTF-8");
 
+	// the configuration file name (lying in the root directory of the node)
+	public static final String META_FILE_NAME = "h2h.conf";
+
 	// configurations for network messages
 	public static final int MAX_MESSAGE_SENDING = 5;
 	public static final int MAX_MESSAGE_SENDING_DIRECT = 3;

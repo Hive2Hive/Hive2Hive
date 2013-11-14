@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.upload.newversion;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -58,11 +57,7 @@ public class FindFileInUserProfileStep extends ProcessStep {
 	private FileTreeNode getFileFromUserProfile(UserProfile userProfile, File file, FileManager fileManager) {
 		String relativePath = file.getAbsolutePath()
 				.replaceFirst(fileManager.getRoot().getAbsolutePath(), "");
-		try {
-			return userProfile.getFileByPath(relativePath);
-		} catch (FileNotFoundException e) {
-			return null;
-		}
+		return userProfile.getFileByPath(relativePath);
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.upload.newversion;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.List;
@@ -48,7 +47,7 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			UserProfile userProfile = context.getUserProfileStep().getUserProfile();
 			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
 			try {
-				byte[] newMD5 = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+				byte[] newMD5 = EncryptionUtil.generateMD5Hash(file);
 				fileNode.setMD5(newMD5);
 				PutUserProfileStep putUserProfile = new PutUserProfileStep(userProfile,
 						context.getCredentials(), getInformClientsStep());

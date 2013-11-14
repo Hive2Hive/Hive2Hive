@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -306,11 +305,11 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		File file = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		FileUtils.writeStringToFile(file, data);
 
-		byte[] md5 = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+		byte[] md5 = EncryptionUtil.generateMD5Hash(file);
 		assertNotNull(md5);
 
 		// assert that hashing twice results in the same md5 hash
-		assertEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(new FileInputStream(file))));
+		assertEquals(new String(md5), new String(EncryptionUtil.generateMD5Hash(file)));
 
 		// assert that different data is hashed to different md5 hashes
 		String data2 = generateRandomString(1000);

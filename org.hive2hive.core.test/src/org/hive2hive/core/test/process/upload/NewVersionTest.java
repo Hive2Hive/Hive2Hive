@@ -1,7 +1,6 @@
 package org.hive2hive.core.test.process.upload;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -87,7 +86,7 @@ public class NewVersionTest extends H2HJUnitTest {
 			// overwrite the content in the file
 			String newContent = NetworkTestUtil.randomString();
 			FileUtils.write(file, newContent, false);
-			byte[] md5UpdatedFile = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+			byte[] md5UpdatedFile = EncryptionUtil.generateMD5Hash(file);
 
 			// upload the new version
 			NetworkPutGetUtil.uploadNewFileVersion(uploader, file, userCredentials, fileManager, config);
