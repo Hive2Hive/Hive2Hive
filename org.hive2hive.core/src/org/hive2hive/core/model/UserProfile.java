@@ -74,7 +74,7 @@ public class UserProfile extends NetworkContent {
 		return getFileByPath(relativePath);
 	}
 
-	public FileTreeNode getFileByPath(String relativePath) throws FileNotFoundException {
+	public FileTreeNode getFileByPath(String relativePath) {
 		String[] split = relativePath.split(FileManager.FILE_SEP);
 		FileTreeNode current = root;
 		for (int i = 0; i < split.length; i++) {
@@ -83,7 +83,7 @@ public class UserProfile extends NetworkContent {
 			}
 			FileTreeNode child = current.getChildByName(split[i]);
 			if (child == null) {
-				throw new FileNotFoundException("Parent of the file to add does not exist");
+				return null;
 			} else {
 				current = child;
 			}

@@ -33,6 +33,13 @@ public interface IH2HNode {
 	IProcess login(UserCredentials credentials);
 
 	/**
+	 * Initiates and returns a logout process.
+	 * 
+	 * @return the observable logout process.
+	 */
+	IProcess logout();
+
+	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
 	 * the
 	 * node configuration

@@ -114,6 +114,15 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
+	public IProcess logout() {
+		// TODO start a logout process
+
+		// write the current state to a meta file
+		fileManager.writePersistentMetaData();
+		return null;
+	}
+
+	@Override
 	public IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation {
 		// file must be in the given root directory
 		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {

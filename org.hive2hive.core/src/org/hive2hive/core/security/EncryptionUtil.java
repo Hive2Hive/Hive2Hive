@@ -2,8 +2,9 @@ package org.hive2hive.core.security;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -401,12 +402,17 @@ public final class EncryptionUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static byte[] generateMD5Hash(InputStream stream) throws IOException {
+	public static byte[] generateMD5Hash(File file) throws IOException {
+		if (file.isDirectory()) {
+			return null;
+		}
+
 		MD5Digest digest = new MD5Digest();
 
 		byte[] buffer = new byte[1024];
 		int numRead;
-		DigestInputStream dis = new DigestInputStream(stream, digest);
+		FileInputStream fis = new FileInputStream(file);
+		DigestInputStream dis = new DigestInputStream(fis, digest);
 		do {
 			numRead = dis.read(buffer);
 			if (numRead > 0) {
@@ -414,6 +420,7 @@ public final class EncryptionUtil {
 			}
 		} while (numRead != -1);
 		dis.close();
+		fis.close();
 
 		byte[] md5 = new byte[digest.getDigestSize()];
 		digest.doFinal(md5, 0);

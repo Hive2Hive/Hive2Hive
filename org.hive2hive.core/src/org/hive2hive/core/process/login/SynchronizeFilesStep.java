@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -17,6 +18,7 @@ import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
+import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 
 /**
  * Synchronizes the local files with the entries in the user profile:
@@ -46,12 +48,41 @@ public class SynchronizeFilesStep extends ProcessStep {
 		FileManager fileManager = context.getFileManager();
 		UserProfile userProfile = context.getUserProfile();
 
-		ProcessTreeNode downloadProcess = startSyncMissingOnDisk(fileManager, userProfile);
-		ProcessTreeNode changedProcess = startSyncChanged(fileManager, userProfile);
-		ProcessTreeNode uploadProcess = startSyncMissingInProfile(fileManager, userProfile,
+		FileSynchronizer synchronizer = new FileSynchronizer(fileManager, userProfile);
+
+		/*
+		 * Download the remotely added and updated files
+		 */
+		List<FileTreeNode> toDownload = synchronizer.getAddedRemotely();
+		toDownload.addAll(synchronizer.getUpdatedRemotely());
+		ProcessTreeNode downloadProcess = startDownload(toDownload, fileManager);
+
+		/*
+		 * Upload the locally added and updated files
+		 */
+		List<File> toUploadNewFiles = synchronizer.getAddedLocally();
+		ProcessTreeNode uploadProcessNewFiles = startUploadNewFiles(toUploadNewFiles, fileManager,
+				context.getCredentials(), context.getFileConfig());
+		List<File> toUploadNewVersions = synchronizer.getUpdatedLocally();
+		ProcessTreeNode uploadProcessNewVersions = startUploadNewVersion(toUploadNewVersions, fileManager,
 				context.getCredentials(), context.getFileConfig());
 
-		while (!(downloadProcess.isDone() && changedProcess.isDone() && uploadProcess.isDone())) {
+		/*
+		 * Delete the files in the DHT
+		 */
+		List<FileTreeNode> toDeleteInDHT = synchronizer.getDeletedLocally();
+		// TODO delete in DHT
+
+		/*
+		 * Delete the remotely deleted files
+		 */
+		List<File> toDeleteOnDisk = synchronizer.getDeletedRemotely();
+		for (File file : toDeleteOnDisk) {
+			file.delete();
+		}
+
+		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone() && uploadProcessNewVersions
+				.isDone())) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -77,34 +108,30 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 	}
 
-	private ProcessTreeNode startSyncMissingOnDisk(FileManager fileManager, UserProfile userProfile) {
+	private ProcessTreeNode startDownload(List<FileTreeNode> toDownload, FileManager fileManager) {
 		// synchronize the files that need to be downloaded from the DHT. Since the missing files are returned
 		// in preorder, we can easily build a tree from the list. Each child waits for execution until the
 		// parent is executed.
-		List<FileTreeNode> missingOnDisk = fileManager.getMissingOnDisk(userProfile.getRoot());
-		logger.debug("Found " + missingOnDisk.size() + " files/folders missing on disk");
 		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
-		for (FileTreeNode missing : missingOnDisk) {
-			ProcessTreeNode parent = getParent(rootProcess, missing);
+		for (FileTreeNode node : toDownload) {
+			ProcessTreeNode parent = getParent(rootProcess, node);
 			// initialize the process
-			DownloadFileProcess downloadProcess = new DownloadFileProcess(missing, getNetworkManager(),
+			DownloadFileProcess downloadProcess = new DownloadFileProcess(node, getNetworkManager(),
 					fileManager);
-			new NodeProcessTreeNode(downloadProcess, parent, missing);
+			new NodeProcessTreeNode(downloadProcess, parent, node);
 		}
 
 		// start the download
-		logger.debug("Start downloading new files...");
+		logger.debug("Start downloading new and modified files...");
 		rootProcess.start();
 		return rootProcess;
 	}
 
-	private ProcessTreeNode startSyncMissingInProfile(FileManager fileManager, UserProfile userProfile,
+	private ProcessTreeNode startUploadNewFiles(List<File> toUpload, FileManager fileManager,
 			UserCredentials credentials, IH2HFileConfiguration config) {
 		// synchronize the files that need to be uploaded into the DHT
-		List<File> missingInTree = fileManager.getMissingInTree(userProfile.getRoot());
-		logger.debug("Found " + missingInTree.size() + " files/folders missing in the user profile");
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
-		for (File file : missingInTree) {
+		for (File file : toUpload) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
 			// initialize the process
 			NewFileProcess uploadProcess = new NewFileProcess(file, credentials, getNetworkManager(),
@@ -112,33 +139,24 @@ public class SynchronizeFilesStep extends ProcessStep {
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
-		// start the upload
-		logger.debug("Start uploading...");
+		logger.debug("Start uploading new files ");
 		rootProcess.start();
 		return rootProcess;
 	}
 
-	private ProcessTreeNode startSyncChanged(FileManager fileManager, UserProfile userProfile) {
-		// synchronize the files that have been changed during absence. This is done in flat structure, thus
-		// no process needs to wait for other processes. We create a 'tree' with only 1 level: the root node
-		// and all processes as its children.
-		List<FileTreeNode> changedFiles = fileManager.getChangedFiles(userProfile.getRoot());
-		ProcessTreeNode rootProcess = new ProcessTreeNode() {
-
-			@Override
-			public void onFail(String reason) {
-				problems.add(reason);
-			}
-		};
-
-		for (FileTreeNode changed : changedFiles) {
+	private ProcessTreeNode startUploadNewVersion(List<File> toUpload, FileManager fileManager,
+			UserCredentials credentials, IH2HFileConfiguration config) {
+		// synchronize the files that need to be uploaded into the DHT
+		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
+		for (File file : toUpload) {
+			ProcessTreeNode parent = getParent(rootProcess, file);
 			// initialize the process
-			DownloadFileProcess downloadProcess = new DownloadFileProcess(changed, getNetworkManager(),
-					fileManager);
-			new NodeProcessTreeNode(downloadProcess, rootProcess, changed);
+			NewVersionProcess uploadProcess = new NewVersionProcess(file, credentials, getNetworkManager(),
+					fileManager, config);
+			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
-		logger.debug("Start downloading changed files...");
+		logger.debug("Start uploading new versions of files ");
 		rootProcess.start();
 		return rootProcess;
 	}
