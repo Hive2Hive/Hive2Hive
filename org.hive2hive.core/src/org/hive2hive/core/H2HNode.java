@@ -95,8 +95,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 				// start the post login process
 				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getGetUserProfileStep()
-						.getUserProfile(), credentials, loginContext.getLocations(), networkManager,
-						fileManager, H2HNode.this);
+						.getUserProfile(), credentials, loginContext.getGetLocationsStep().getLocations(),
+						networkManager, fileManager, H2HNode.this);
 				postLogin.start();
 			}
 
@@ -120,8 +120,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			throw new IllegalFileLocation();
 		}
 
-		NewFileProcess uploadProcess = new NewFileProcess(file, credentials, networkManager,
-				fileManager, this);
+		NewFileProcess uploadProcess = new NewFileProcess(file, credentials, networkManager, fileManager,
+				this);
 		if (autostartProcesses) {
 			uploadProcess.start();
 		}

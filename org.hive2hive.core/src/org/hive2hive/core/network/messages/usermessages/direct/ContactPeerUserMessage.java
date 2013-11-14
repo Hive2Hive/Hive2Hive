@@ -4,6 +4,11 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
 
+/**
+ * A simple direct request message to contact and check if receiving node is alive.
+ * 
+ * @author Seppi, Nico, Christian
+ */
 public class ContactPeerUserMessage extends DirectRequestMessage {
 
 	private static final long serialVersionUID = -5335863637956648142L;
@@ -12,7 +17,6 @@ public class ContactPeerUserMessage extends DirectRequestMessage {
 
 	public ContactPeerUserMessage(PeerAddress targetAddress, String evidenceContent) {
 		super(targetAddress);
-
 		this.evidenceContent = evidenceContent;
 	}
 

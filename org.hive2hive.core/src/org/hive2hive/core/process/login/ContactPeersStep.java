@@ -1,10 +1,10 @@
 package org.hive2hive.core.process.login;
 
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -19,88 +19,79 @@ import org.hive2hive.core.process.common.put.PutLocationStep;
 
 /**
  * 
- * @author Christian, Nico
- * 
+ * @author Christian, Nico, Seppi
+ *
  */
 // TODO Seppi rebuild the whole thing
 public class ContactPeersStep extends ProcessStep {
 
-	private final Locations currentLocations;
-	private Map<PeerAddress, Void> responses;
-
-	private boolean isExecuted;
-
-	public ContactPeersStep(Locations locations) {
-		this.currentLocations = locations;
-		this.responses = new ConcurrentHashMap<PeerAddress, Void>();
+	private final PostLoginProcessContext context;
+	
+	// TODO change this to a synchronized set
+	private Set<PeerAddress> responses = new HashSet<PeerAddress>();
+	private boolean isExecuted = false;
+	
+	public ContactPeersStep(){
+		context = (PostLoginProcessContext) getProcess().getContext();
 	}
 
 	@Override
 	public void start() {
-
 		// set timer to wait for callbacks
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
-
 			@Override
 			public void run() {
 				updateLocationsMap();
-
 			}
 		}, H2HConstants.CONTACT_PEERS_AWAIT_MS);
 
 		// contact all peers
-		for (LocationEntry entry : currentLocations.getLocationEntries()) {
-
+		for (LocationEntry entry : context.getLocations().getLocationEntries()) {
 			// generate random verification content
 			final String evidenceContent = UUID.randomUUID().toString();
-
-			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(),
-					evidenceContent);
-
-			// TODO Seppi refactor it
-			// contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
-			// getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic());
+			// create a liveness check message
+			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(), evidenceContent);
+			contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
+			// send direct
+			getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic(), null);
 		}
 	}
 
 	@Override
 	public void rollBack() {
-		// TODO Auto-generated method stub
+		// nothing to roll back
 	}
 
 	private synchronized void updateLocationsMap() {
-
 		// ensure this method is executed only once
 		if (!isExecuted) {
 			isExecuted = true;
 
 			// replace the locations map
-			LocationEntry master = currentLocations.getMaster();
-			Locations newLocations = new Locations(currentLocations.getUserId());
+			LocationEntry master = context.getLocations().getMaster();
+			Locations newLocations = new Locations(context.getLocations().getUserId());
 
 			// add contacts that responded
-			for (PeerAddress peerAddress : responses.keySet()) {
-
+			for (PeerAddress peerAddress : responses) {
 				// check if this peer is master
 				boolean isMaster = false;
 				if (master != null && master.getAddress().equals(peerAddress)) {
 					isMaster = true;
 				}
-
 				newLocations.addEntry(new LocationEntry(peerAddress, isMaster));
-
 			}
 
 			// add myself, set me as master if none exists
-			boolean isDefinedAsMaster = newLocations.getMaster() == null;
+			boolean isDefinedAsMaster = (newLocations.getMaster() == null);
 			newLocations.addEntry(new LocationEntry(getNetworkManager().getPeerAddress(), isDefinedAsMaster));
-			((PostLoginProcess) getProcess()).getContext().setIsElectedMaster(isDefinedAsMaster);
-			((PostLoginProcess) getProcess()).getContext().setNewLocations(newLocations);
-
+			context.setIsElectedMaster(isDefinedAsMaster);
+			Locations oldLocations = context.getLocations();
+			context.setNewLocations(newLocations);
+			
 			// evaluate whether a put is necessary
 			SynchronizeFilesStep nextStep = new SynchronizeFilesStep();
-			if (isPutNecessary(newLocations)) {
+			if (isPutNecessary(oldLocations, newLocations)) {
 				PutLocationStep putStep = new PutLocationStep(newLocations, nextStep);
 				getProcess().setNextStep(putStep);
 			} else {
@@ -109,11 +100,12 @@ public class ContactPeersStep extends ProcessStep {
 		}
 	}
 
-	private boolean isPutNecessary(Locations newLocations) {
-		if (currentLocations.getLocationEntries().size() != newLocations.getLocationEntries().size())
+	// TODO this comparison is not complete
+	private boolean isPutNecessary(Locations oldLocations, Locations newLocations) {
+		if (oldLocations.getLocationEntries().size() != newLocations.getLocationEntries().size())
 			return true;
 
-		LocationEntry currentMaster = currentLocations.getMaster();
+		LocationEntry currentMaster = oldLocations.getMaster();
 		if (currentMaster == null)
 			return true;
 
@@ -136,16 +128,14 @@ public class ContactPeersStep extends ProcessStep {
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			// verify reply
 			if (evidenceContent.equals((String) responseMessage.getContent())) {
-
 				// add to map
-				responses.put(responseMessage.getSenderAddress(), null);
-				int totalResponses = responses.size();
-				if (totalResponses >= currentLocations.getLocationEntries().size()) {
+				responses.add(responseMessage.getSenderAddress());
+				// check if all peers responded
+				if (responses.size() >= context.getLocations().getLocationEntries().size()) {
 					// all peers answered
 					updateLocationsMap();
 				}
 			}
-
 		}
 	}
 }

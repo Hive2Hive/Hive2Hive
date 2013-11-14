@@ -78,7 +78,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public BaseMessage(String messageID, String targetKey) {
 		this(messageID, targetKey, SendingBehavior.SEND_MAX_ALLOWED_TIMES);
 	}
-	
+
 	/**
 	 * Constructor for an asynchronous message.</br>
 	 * A message ID is generated.</br>
@@ -242,6 +242,11 @@ public abstract class BaseMessage implements Runnable, Serializable {
 							"Message not accepted by the target after one try. target key = '%s'", targetKey));
 					return false;
 				}
+			case FAILURE_DECRYPTION:
+				logger.warn(String
+						.format("Message not accepted by the target. Decryption on target node failed. target key = '%s'",
+								targetKey));
+				return false;
 			case OK:
 				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");

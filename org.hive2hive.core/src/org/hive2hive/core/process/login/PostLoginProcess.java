@@ -36,7 +36,7 @@ public class PostLoginProcess extends Process {
 		context = new PostLoginProcessContext(this, profile, credentials, currentLocations, fileManager,
 				fileConfig);
 
-		setNextStep(new ContactPeersStep(currentLocations));
+		setNextStep(new ContactPeersStep());
 	}
 
 	@Override

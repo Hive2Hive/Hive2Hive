@@ -49,7 +49,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 					.getPrivate());
 		} catch (Exception e) {
 			logger.warn("Decryption of message failed.");
-			return AcceptanceReply.FAILURE;
+			return AcceptanceReply.FAILURE_DECRYPTION;
 		}
 		// deserialize decrypted message
 		Object message = EncryptionUtil.deserializeObject(decryptedMessage);
@@ -61,8 +61,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			if (AcceptanceReply.OK == reply) {
 				// handle message in own thread
 				logger.debug("Received and accepted the message.");
-				new Thread(receivedMessage).start();
-				
+				new Thread(receivedMessage).start();	
 			} else {
 				logger.warn(String.format("Received but denied a message. Acceptance reply = '%s'.", reply));
 			}
