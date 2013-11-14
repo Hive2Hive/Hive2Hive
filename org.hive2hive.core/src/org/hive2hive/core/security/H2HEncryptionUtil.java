@@ -1,5 +1,8 @@
 package org.hive2hive.core.security;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -10,6 +13,7 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 
@@ -102,5 +106,27 @@ public final class H2HEncryptionUtil {
 			IllegalStateException, InvalidCipherTextException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
+	}
+
+	/**
+	 * Compares if the file md5 matches a given md5 hash
+	 * 
+	 * @param file
+	 * @param expectedMD5
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean compareMD5(File file, byte[] expectedMD5) throws IOException {
+		if (!file.exists() && expectedMD5 == null) {
+			// both do not exist
+			return true;
+		} else if (file.isDirectory()) {
+			// directories always match
+			return true;
+		}
+
+		byte[] md5Hash = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+		return new String(md5Hash, H2HConstants.ENCODING_CHARSET).equalsIgnoreCase(new String(expectedMD5,
+				H2HConstants.ENCODING_CHARSET));
 	}
 }

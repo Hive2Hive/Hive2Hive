@@ -19,24 +19,43 @@ public class FileTreeNode extends NetworkContent {
 	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;
 	private final boolean isFolder;
+	private final FileTreeNode parent;
 	private String name;
-	private FileTreeNode parent;
+	private byte[] md5LatestVersion;
 	private KeyPair domainKeys;
 	private Set<FileTreeNode> children;
 
 	/**
-	 * Constructor for child nodes
+	 * Constructor for child nodes of type 'folder'
 	 * 
 	 * @param parent
 	 * @param keyPair
 	 * @param name
 	 * @param isFolder
 	 */
-	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder) {
+	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name) {
+		this(parent, keyPair, name, true, null);
+	}
+
+	/**
+	 * Constructor for child nodes of type 'file'
+	 * 
+	 * @param parent
+	 * @param keyPair
+	 * @param name
+	 * @param isFolder
+	 */
+	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, byte[] md5LatestVersion) {
+		this(parent, keyPair, name, false, md5LatestVersion);
+	}
+
+	private FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder,
+			byte[] md5LatestVersion) {
 		this.parent = parent;
 		this.keyPair = keyPair;
 		this.name = name;
 		this.isFolder = isFolder;
+		this.setMD5(md5LatestVersion);
 		parent.addChild(this);
 		setChildren(new HashSet<FileTreeNode>());
 	}
@@ -49,6 +68,7 @@ public class FileTreeNode extends NetworkContent {
 	public FileTreeNode(KeyPair keyPair) {
 		this.keyPair = keyPair;
 		this.isFolder = true;
+		this.parent = null;
 		setChildren(new HashSet<FileTreeNode>());
 	}
 
@@ -70,10 +90,6 @@ public class FileTreeNode extends NetworkContent {
 
 	public FileTreeNode getParent() {
 		return parent;
-	}
-
-	public void setParent(FileTreeNode parent) {
-		this.parent = parent;
 	}
 
 	public Set<FileTreeNode> getChildren() {
@@ -119,6 +135,14 @@ public class FileTreeNode extends NetworkContent {
 		} else {
 			throw new IllegalStateException("The tree object is a file, thus, cannot add a domain key here");
 		}
+	}
+
+	public byte[] getMD5() {
+		return md5LatestVersion;
+	}
+
+	public void setMD5(byte[] md5LatestVersion) {
+		this.md5LatestVersion = md5LatestVersion;
 	}
 
 	public boolean isRoot() {

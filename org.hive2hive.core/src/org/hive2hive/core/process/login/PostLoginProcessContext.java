@@ -6,27 +6,27 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessContext;
+import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
 
 public class PostLoginProcessContext extends ProcessContext {
 
 	private final UserProfile profile;
 	private Locations locations;
 	private boolean isElectedMaster = false;
-	private final GetUserMessageQueueStep umQueueStep;
+	private GetUserMessageQueueStep umQueueStep;
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration fileConfig;
 	private final UserCredentials credentials;
 
 	public PostLoginProcessContext(PostLoginProcess postLoginProcess, UserProfile profile,
 			UserCredentials credentials, Locations currentLocations, FileManager fileManager,
-			IH2HFileConfiguration fileConfig, GetUserMessageQueueStep umQueueStep) {
+			IH2HFileConfiguration fileConfig) {
 		super(postLoginProcess);
 		this.profile = profile;
 		this.credentials = credentials;
 		this.locations = currentLocations;
 		this.fileManager = fileManager;
 		this.fileConfig = fileConfig;
-		this.umQueueStep = umQueueStep;
 	}
 
 	public void setNewLocations(Locations newLocations) {
@@ -49,6 +49,10 @@ public class PostLoginProcessContext extends ProcessContext {
 	 */
 	public boolean getIsDefinedAsMaster() {
 		return isElectedMaster;
+	}
+
+	public void setUserMessageQueueStep(GetUserMessageQueueStep umQueueStep) {
+		this.umQueueStep = umQueueStep;
 	}
 
 	public GetUserMessageQueueStep getGetUserMessageQueueStep() {

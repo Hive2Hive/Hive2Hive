@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.encryption;
+package org.hive2hive.core.test.security;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

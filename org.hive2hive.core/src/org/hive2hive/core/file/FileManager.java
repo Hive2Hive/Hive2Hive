@@ -7,10 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public class FileManager {
 
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileManager.class);
 	public static final String FILE_SEP = System.getProperty("file.separator");
 	private final File root;
 
@@ -134,5 +138,44 @@ public class FileManager {
 		}
 
 		return missingInTree;
+	}
+
+	/**
+	 * Returns a list of files that have changed during offline time. The files are compared using md5 hashes.
+	 * This operation may take a while, depending on the number of files and on their size.
+	 * It does not recognize whether the file in the tree or the file on disk is newer. Missing files are
+	 * ignored.
+	 * 
+	 * @param rootNode
+	 * @return
+	 */
+	public List<FileTreeNode> getChangedFiles(FileTreeNode rootNode) {
+		List<FileTreeNode> changedFiles = new ArrayList<FileTreeNode>();
+
+		// visit all files in the tree and compare to disk
+		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
+		fileStack.push(rootNode);
+		while (!fileStack.isEmpty()) {
+			FileTreeNode top = fileStack.pop();
+			File topFile = new File(root, top.getFullPath());
+			// exists --> check md5
+			if (topFile.exists()) {
+				try {
+					if (!H2HEncryptionUtil.compareMD5(topFile, top.getMD5())) {
+						// md5 do not match
+						changedFiles.add(top);
+					}
+				} catch (IOException e) {
+					logger.error("Cannot compare MD5 hashes", e);
+				}
+			}
+
+			// add children to stack
+			for (FileTreeNode child : top.getChildren()) {
+				fileStack.push(child);
+			}
+		}
+
+		return changedFiles;
 	}
 }

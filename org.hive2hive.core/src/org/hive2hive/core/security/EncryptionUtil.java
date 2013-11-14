@@ -3,6 +3,7 @@ package org.hive2hive.core.security;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -32,7 +33,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.io.DigestInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -273,15 +276,16 @@ public final class EncryptionUtil {
 
 		// generate IV
 		byte[] initVector = generateIV();
-		
-		// concatenate symmetric encryption parameters -> max. 48 bytes (with AES 256) -> can be encrypted with RSA 512 bit
+
+		// concatenate symmetric encryption parameters -> max. 48 bytes (with AES 256) -> can be encrypted
+		// with RSA 512 bit
 		byte[] params = new byte[initVector.length + encodedAesKey.length];
 		System.arraycopy(initVector, 0, params, 0, initVector.length);
 		System.arraycopy(encodedAesKey, 0, params, initVector.length, encodedAesKey.length);
 
 		// encrypt data symmetrically
 		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector);
-	
+
 		// encrypt parameters asymmetrically
 		byte[] rsaEncryptedParams = encryptRSA(params, publicKey);
 
@@ -306,10 +310,10 @@ public final class EncryptionUtil {
 	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DataLengthException,
 			IllegalStateException, InvalidCipherTextException {
-		
+
 		// decrypt parameters asymmetrically
 		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey);
-		
+
 		// split symmetric encryption parameters
 		byte[] initVector = Arrays.copyOfRange(params, 0, IV_LENGTH);
 		byte[] encodedAesKey = Arrays.copyOfRange(params, IV_LENGTH, params.length);
@@ -374,6 +378,47 @@ public final class EncryptionUtil {
 		return false;
 
 		// return setupSigner(false, data, publicKey).verifySignature(signature);
+	}
+
+	/**
+	 * Generates a MD5 hash of a given data
+	 * 
+	 * @param data to calculate the MD5 hash over it
+	 * @return the md5 hash
+	 */
+	public static byte[] generateMD5Hash(byte[] data) {
+		MD5Digest digest = new MD5Digest();
+		digest.update(data, 0, data.length);
+		byte[] md5 = new byte[digest.getDigestSize()];
+		digest.doFinal(md5, 0);
+		return md5;
+	}
+
+	/**
+	 * Generates a MD5 hash of an input stream
+	 * 
+	 * @param stream
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] generateMD5Hash(InputStream stream) throws IOException {
+		MD5Digest digest = new MD5Digest();
+
+		byte[] buffer = new byte[1024];
+		int numRead;
+		DigestInputStream dis = new DigestInputStream(stream, digest);
+		do {
+			numRead = dis.read(buffer);
+			if (numRead > 0) {
+				digest.update(buffer, 0, numRead);
+			}
+		} while (numRead != -1);
+		dis.close();
+
+		byte[] md5 = new byte[digest.getDigestSize()];
+		digest.doFinal(md5, 0);
+
+		return md5;
 	}
 
 	public static byte[] serializeObject(Serializable object) {

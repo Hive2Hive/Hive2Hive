@@ -1,13 +1,15 @@
 package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * A step adding the new file (node) into the user profile (tree)
@@ -49,7 +51,7 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 
 			// start the encryption and the put
 			super.start();
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			getProcess().stop(e.getMessage());
 		}
 	}
@@ -60,9 +62,9 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 	 * @param file the file to be added
 	 * @param fileRoot the root file of this H2HNode instance
 	 * @param rootNode the root node in the tree
-	 * @throws FileNotFoundException
+	 * @throws IOException
 	 */
-	private void addFileToUserProfile() throws FileNotFoundException {
+	private void addFileToUserProfile() throws IOException {
 		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
 		File fileRoot = context.getFileManager().getRoot();
 
@@ -75,6 +77,11 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 		FileTreeNode parentNode = userProfile.getFileByPath(relativeParentPath);
 
 		// use the file keys generated in a previous step where the meta document is stored
-		new FileTreeNode(parentNode, fileKeys, file.getName(), file.isDirectory());
+		if (file.isDirectory()) {
+			new FileTreeNode(parentNode, fileKeys, file.getName());
+		} else {
+			byte[] md5 = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+			new FileTreeNode(parentNode, fileKeys, file.getName(), md5);
+		}
 	}
 }
