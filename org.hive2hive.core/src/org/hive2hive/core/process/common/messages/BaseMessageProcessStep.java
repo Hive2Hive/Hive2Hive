@@ -37,9 +37,9 @@ import org.hive2hive.core.process.ProcessStep;
 abstract public class BaseMessageProcessStep extends ProcessStep implements IBaseMessageListener,
 		IResponseCallBackHandler {
 
-	protected final BaseMessage message;
-	protected final PublicKey receiverPublicKey;
-	protected final ProcessStep nextStep;
+	protected BaseMessage message;
+	protected PublicKey receiverPublicKey;
+	protected ProcessStep nextStep;
 
 	/**
 	 * Constructor for a process step which sends a {@link BaseMessage}.

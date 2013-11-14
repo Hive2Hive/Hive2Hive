@@ -34,6 +34,10 @@ import org.hive2hive.core.process.ProcessStep;
  */
 abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
 
+	public BaseDirectMessageProcessStep() {
+		super(null, null, null);
+	}
+	
 	public BaseDirectMessageProcessStep(BaseDirectMessage message, PublicKey receiverPublicKey, ProcessStep nextStep) {
 		super(message, receiverPublicKey, nextStep);
 	}

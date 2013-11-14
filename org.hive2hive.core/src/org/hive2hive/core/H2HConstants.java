@@ -41,7 +41,7 @@ public interface H2HConstants {
 	public static final int GET_RETRIES = 3;
 
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
-	public static final long CONTACT_PEERS_AWAIT_MS = 15000;
+	public static final long CONTACT_PEERS_AWAIT_MS = 10000;
 
 	// key lengths for sending messages
 	public static final EncryptionUtil.RSA_KEYLENGTH H2H_RSA_KEYLENGTH = EncryptionUtil.RSA_KEYLENGTH.BIT_512;

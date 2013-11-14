@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -71,6 +72,19 @@ public class NetworkTestUtil {
 	public static void createKeyPairs(List<NetworkManager> network) {
 		for (NetworkManager node : network) {
 			node.setKeyPair(EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH));
+		}
+	}
+	
+	/**
+	 * Generate and assign a public/private key pair to all nodes.
+	 * 
+	 * @param network
+	 *            list containing all nodes which has to be disconnected.
+	 */
+	public static void createSameKeyPair(List<NetworkManager> network) {
+		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		for (NetworkManager node : network) {
+			node.setKeyPair(keyPair);
 		}
 	}
 
