@@ -1,5 +1,8 @@
 package org.hive2hive.core.security;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -106,16 +109,24 @@ public final class H2HEncryptionUtil {
 	}
 
 	/**
-	 * Compares if the data matches a given md5 hash
+	 * Compares if the file md5 matches a given md5 hash
 	 * 
-	 * @param data the data to generate the md5 hash over it
-	 * @param expectedMD5 the expected md5 hash
+	 * @param file
+	 * @param expectedMD5
 	 * @return
+	 * @throws IOException
 	 */
-	public static boolean compareMD5(byte[] data, byte[] expectedMD5) {
-		// calculate the MD5 hash and compare it
-		byte[] dataMD5hash = EncryptionUtil.generateMD5Hash(data);
-		return new String(dataMD5hash, H2HConstants.ENCODING_CHARSET).equalsIgnoreCase(new String(
-				expectedMD5, H2HConstants.ENCODING_CHARSET));
+	public static boolean compareMD5(File file, byte[] expectedMD5) throws IOException {
+		if (!file.exists() && expectedMD5 == null) {
+			// both do not exist
+			return true;
+		} else if (file.isDirectory()) {
+			// directories always match
+			return true;
+		}
+
+		byte[] md5Hash = EncryptionUtil.generateMD5Hash(new FileInputStream(file));
+		return new String(md5Hash, H2HConstants.ENCODING_CHARSET).equalsIgnoreCase(new String(expectedMD5,
+				H2HConstants.ENCODING_CHARSET));
 	}
 }

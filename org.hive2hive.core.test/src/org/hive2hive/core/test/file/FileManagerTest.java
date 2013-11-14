@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.file;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.List;
@@ -107,6 +108,40 @@ public class FileManagerTest extends H2HJUnitTest {
 			Assert.assertTrue(file.getName().equalsIgnoreCase("1f3")
 					|| file.getName().equalsIgnoreCase("2dn") || file.getName().equalsIgnoreCase("2fn"));
 		}
+	}
+
+	@Test
+	public void testChangedFiles() throws IOException {
+		// create similar structure on disk (2d missing)
+		File rootFile = fileManager.getRoot();
+		File dir1File = new File(rootFile, "1d");
+		File file1f1 = new File(rootFile, "1f1");
+		File file1f2 = new File(rootFile, "1f2");
+		File file2f = new File(dir1File, "2f");
+
+		FileUtils.writeStringToFile(file1f1, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file2f, NetworkTestUtil.randomString());
+
+		// set the correct md5 hashes
+		child1.setMD5(EncryptionUtil.generateMD5Hash(new FileInputStream(file1f1)));
+		child2.setMD5(EncryptionUtil.generateMD5Hash(new FileInputStream(file1f2)));
+		child3.setMD5(EncryptionUtil.generateMD5Hash(new FileInputStream(file2f)));
+
+		// no files are changed
+		List<FileTreeNode> changed = fileManager.getChangedFiles(root);
+		Assert.assertTrue(changed.isEmpty());
+
+		// write other random string to 1f2
+		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+		// simulate that other user changed hash in profile
+		child3.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+
+		// two files are now changed
+		changed = fileManager.getChangedFiles(root);
+		Assert.assertEquals(2, changed.size());
+		Assert.assertTrue(changed.contains(child2));
+		Assert.assertTrue(changed.contains(child3));
 	}
 
 	@Test
