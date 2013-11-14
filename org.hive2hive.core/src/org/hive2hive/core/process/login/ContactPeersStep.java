@@ -20,7 +20,7 @@ import org.hive2hive.core.process.common.put.PutLocationStep;
 /**
  * 
  * @author Christian, Nico
- *
+ * 
  */
 // TODO Seppi rebuild the whole thing
 public class ContactPeersStep extends ProcessStep {
@@ -55,18 +55,18 @@ public class ContactPeersStep extends ProcessStep {
 			// generate random verification content
 			final String evidenceContent = UUID.randomUUID().toString();
 
-			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(), evidenceContent);
+			ContactPeerUserMessage contactMsg = new ContactPeerUserMessage(entry.getAddress(),
+					evidenceContent);
 
 			// TODO Seppi refactor it
-//			contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
-//			getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic());
+			// contactMsg.setCallBackHandler(new HandleContactReply(evidenceContent));
+			// getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic());
 		}
 	}
 
 	@Override
 	public void rollBack() {
 		// TODO Auto-generated method stub
-	
 	}
 
 	private synchronized void updateLocationsMap() {
@@ -97,7 +97,7 @@ public class ContactPeersStep extends ProcessStep {
 			newLocations.addEntry(new LocationEntry(getNetworkManager().getPeerAddress(), isDefinedAsMaster));
 			((PostLoginProcess) getProcess()).getContext().setIsElectedMaster(isDefinedAsMaster);
 			((PostLoginProcess) getProcess()).getContext().setNewLocations(newLocations);
-			
+
 			// evaluate whether a put is necessary
 			SynchronizeFilesStep nextStep = new SynchronizeFilesStep();
 			if (isPutNecessary(newLocations)) {
@@ -110,7 +110,6 @@ public class ContactPeersStep extends ProcessStep {
 	}
 
 	private boolean isPutNecessary(Locations newLocations) {
-
 		if (currentLocations.getLocationEntries().size() != newLocations.getLocationEntries().size())
 			return true;
 
@@ -135,7 +134,6 @@ public class ContactPeersStep extends ProcessStep {
 
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
-
 			// verify reply
 			if (evidenceContent.equals((String) responseMessage.getContent())) {
 

@@ -14,9 +14,25 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
+import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 
+/**
+ * Synchronizes the local files with the entries in the user profile:
+ * <ul>
+ * <li>Files that have been added to the user profile while the client was offline --> missing on disk</li>
+ * <li>Files that have been added to the folder on disk while the client was offline --> missing in
+ * userprofile</li>
+ * <li>Files that have been changed during the client was offline. The changes could have been made in the
+ * userprofile or on the local disc. However, this step overwrites changes of the local file system while the
+ * client was offline.</li>
+ * <li>If a file was deleted on disk during offline phase, the file gets downloaded again.</li>
+ * </ul>
+ * 
+ * @author Nico
+ * 
+ */
 public class SynchronizeFilesStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SynchronizeFilesStep.class);
@@ -31,10 +47,11 @@ public class SynchronizeFilesStep extends ProcessStep {
 		UserProfile userProfile = context.getUserProfile();
 
 		ProcessTreeNode downloadProcess = startSyncMissingOnDisk(fileManager, userProfile);
+		ProcessTreeNode changedProcess = startSyncChanged(fileManager, userProfile);
 		ProcessTreeNode uploadProcess = startSyncMissingInProfile(fileManager, userProfile,
 				context.getCredentials(), context.getFileConfig());
 
-		while (!(downloadProcess.isDone() && uploadProcess.isDone())) {
+		while (!(downloadProcess.isDone() && changedProcess.isDone() && uploadProcess.isDone())) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -47,8 +64,17 @@ public class SynchronizeFilesStep extends ProcessStep {
 			logger.error("Problem occurred: " + problem);
 		}
 
-		// TODO how detect files that have been deleted locally while offline?
-		// TODO how detect files that have been modified locally/remotely while offline?
+		// TODO: next step
+		if (context.getIsDefinedAsMaster()) {
+			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(
+					userProfile.getUserId());
+			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userProfile.getUserId(),
+					handleUmQueueStep);
+			context.setUserMessageQueueStep(getUMQueueStep);
+			getProcess().setNextStep(getUMQueueStep);
+		} else {
+			getProcess().setNextStep(null);
+		}
 	}
 
 	private ProcessTreeNode startSyncMissingOnDisk(FileManager fileManager, UserProfile userProfile) {
@@ -67,7 +93,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		// start the download
-		logger.debug("Start downloading...");
+		logger.debug("Start downloading new files...");
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -88,6 +114,31 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		// start the upload
 		logger.debug("Start uploading...");
+		rootProcess.start();
+		return rootProcess;
+	}
+
+	private ProcessTreeNode startSyncChanged(FileManager fileManager, UserProfile userProfile) {
+		// synchronize the files that have been changed during absence. This is done in flat structure, thus
+		// no process needs to wait for other processes. We create a 'tree' with only 1 level: the root node
+		// and all processes as its children.
+		List<FileTreeNode> changedFiles = fileManager.getChangedFiles(userProfile.getRoot());
+		ProcessTreeNode rootProcess = new ProcessTreeNode() {
+
+			@Override
+			public void onFail(String reason) {
+				problems.add(reason);
+			}
+		};
+
+		for (FileTreeNode changed : changedFiles) {
+			// initialize the process
+			DownloadFileProcess downloadProcess = new DownloadFileProcess(changed, getNetworkManager(),
+					fileManager);
+			new NodeProcessTreeNode(downloadProcess, rootProcess, changed);
+		}
+
+		logger.debug("Start downloading changed files...");
 		rootProcess.start();
 		return rootProcess;
 	}

@@ -33,12 +33,8 @@ public class PostLoginProcess extends Process {
 		// if elected master:
 		// 3. GetUserMessageQueueStep
 		// 4. HandleUserMessageQueueStep
-		HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(credentials.getUserId());
-		GetUserMessageQueueStep umQueueStep = new GetUserMessageQueueStep(
-				credentials.getProfileLocationKey(), handleUmQueueStep);
-
 		context = new PostLoginProcessContext(this, profile, credentials, currentLocations, fileManager,
-				fileConfig, umQueueStep);
+				fileConfig);
 
 		setNextStep(new ContactPeersStep(currentLocations));
 	}
