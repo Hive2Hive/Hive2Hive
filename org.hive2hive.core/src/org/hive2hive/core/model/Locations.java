@@ -54,14 +54,6 @@ public class Locations extends NetworkContent {
 		return locationsEntry;
 	}
 
-	public LocationEntry getMaster() {
-		for (LocationEntry peer : locationsEntry) {
-			if (peer.isMaster())
-				return peer;
-		}
-		return null;
-	}
-
 	@Override
 	public int getTimeToLive() {
 		return TimeToLiveStore.getInstance().getLocations();

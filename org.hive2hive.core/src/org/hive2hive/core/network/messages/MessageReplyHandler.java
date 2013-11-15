@@ -30,7 +30,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 	}
 
 	@Override
-	public Object reply(PeerAddress sender, Object request){
+	public Object reply(PeerAddress sender, Object request) {
 		if (!(request instanceof HybridEncryptedContent)) {
 			logger.error("Received unknown object.");
 			return null;
@@ -60,10 +60,13 @@ public class MessageReplyHandler implements ObjectDataReply {
 			AcceptanceReply reply = receivedMessage.accept();
 			if (AcceptanceReply.OK == reply) {
 				// handle message in own thread
-				logger.debug("Received and accepted the message.");
-				new Thread(receivedMessage).start();	
+				logger.debug(String.format("Received and accepted the message. node id = '%s'",
+						networkManager.getNodeId()));
+				new Thread(receivedMessage).start();
 			} else {
-				logger.warn(String.format("Received but denied a message. Acceptance reply = '%s'.", reply));
+				logger.warn(String.format(
+						"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
+						networkManager.getNodeId()));
 			}
 			return reply;
 		} else {

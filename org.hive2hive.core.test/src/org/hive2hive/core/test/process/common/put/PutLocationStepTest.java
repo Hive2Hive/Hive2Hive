@@ -52,7 +52,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		LocationEntry status = new LocationEntry(putter.getPeerAddress(), true);
+		LocationEntry status = new LocationEntry(putter.getPeerAddress());
 		newLocations.addEntry(status);
 
 		// initialize the process and the one and only step to test
@@ -89,7 +89,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		LocationEntry status = new LocationEntry(putter.getPeerAddress(), true);
+		LocationEntry status = new LocationEntry(putter.getPeerAddress());
 		newLocations.addEntry(status);
 
 		// initialize the process and the one and only step to test

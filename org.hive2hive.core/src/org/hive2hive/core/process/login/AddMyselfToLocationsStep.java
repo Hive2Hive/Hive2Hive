@@ -39,7 +39,7 @@ public class AddMyselfToLocationsStep extends PutProcessStep {
 		} else {
 
 			// add this peer to the locations list and put it
-			LocationEntry myLocation = new LocationEntry(getNetworkManager().getPeerAddress(), false);
+			LocationEntry myLocation = new LocationEntry(getNetworkManager().getPeerAddress());
 			loadedLocations.addEntry(myLocation);
 
 			put(userId, H2HConstants.USER_LOCATIONS, loadedLocations);

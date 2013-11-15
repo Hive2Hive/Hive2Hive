@@ -52,7 +52,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		LocationEntry status = new LocationEntry(putter.getPeerAddress(), true);
+		LocationEntry status = new LocationEntry(putter.getPeerAddress());
 		newLocations.addEntry(status);
 
 		// put the locations to the DHT
@@ -80,7 +80,6 @@ public class GetLocationStepTest extends H2HJUnitTest {
 
 		List<LocationEntry> onlinePeers = new ArrayList<LocationEntry>(found.getLocationEntries());
 		Assert.assertEquals(putter.getPeerAddress(), onlinePeers.get(0).getAddress());
-		Assert.assertTrue(onlinePeers.get(0).isMaster());
 	}
 
 	@Override

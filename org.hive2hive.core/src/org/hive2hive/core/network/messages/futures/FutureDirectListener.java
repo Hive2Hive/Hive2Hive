@@ -88,7 +88,8 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
 					networkManager.send(message, receiverPublicKey, listener);
 				} else {
 					// notify the listener about the fail of sending the message
-					listener.onFailure();
+					if (listener != null)
+						listener.onFailure();
 				}
 			}
 		}

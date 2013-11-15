@@ -3,6 +3,11 @@ package org.hive2hive.core.network;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import net.tomp2p.peers.PeerAddress;
 
 public class NetworkUtils {
 
@@ -42,4 +47,23 @@ public class NetworkUtils {
 		return false;
 	}
 
+	/**
+	 * Selects the {@link PeerAddress} peer addresses with the lowest node id.
+	 * 
+	 * @param list
+	 *            a list of {@link PeerAddress} peer addresses
+	 * @return
+	 *         the peer address with the lowest node id
+	 */
+	public static PeerAddress choseFirstPeerAddress(List<PeerAddress> list) {
+		Collections.sort(list, new PeerAddressComperator());
+		return list.get(0);
+	}
+
+	private static class PeerAddressComperator implements Comparator<PeerAddress> {
+		@Override
+		public int compare(PeerAddress o1, PeerAddress o2) {
+			return o1.getPeerId().toString().compareTo(o2.getPeerId().toString());
+		}
+	}
 }

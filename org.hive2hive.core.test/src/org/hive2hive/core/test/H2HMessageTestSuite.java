@@ -4,6 +4,7 @@ import org.hive2hive.core.test.network.messages.BaseMessageTest;
 import org.hive2hive.core.test.network.messages.BaseRequestMessageTest;
 import org.hive2hive.core.test.process.common.massages.BaseDirectMessageProcessStepTest;
 import org.hive2hive.core.test.process.common.massages.BaseMessageProcessStepTest;
+import org.hive2hive.core.test.process.login.postLogin.ContactPeersStepTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -20,7 +21,10 @@ import org.junit.runners.Suite.SuiteClasses;
 		BaseMessageTest.class, BaseRequestMessageTest.class,
 
 		// Process: Common steps, Messages
-		BaseMessageProcessStepTest.class, BaseDirectMessageProcessStepTest.class
+		BaseMessageProcessStepTest.class, BaseDirectMessageProcessStepTest.class,
+		
+		// Process: Login steps
+		ContactPeersStepTest.class,
 		
 })
 public class H2HMessageTestSuite {

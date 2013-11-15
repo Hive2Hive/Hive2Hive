@@ -82,7 +82,7 @@ public class ResponseMessage extends BaseDirectMessage {
 			logger.warn(String.format(
 					"Receiving node has no callback handler for this message. message id = %s",
 					getMessageID()));
-			return true;
+			return false;
 		} else {
 			return super.handleSendingFailure(reply);
 		}

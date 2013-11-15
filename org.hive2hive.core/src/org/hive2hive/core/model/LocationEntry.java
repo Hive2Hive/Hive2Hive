@@ -16,11 +16,9 @@ public class LocationEntry extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private PeerAddress address;
-	private boolean isMaster;
 
-	public LocationEntry(PeerAddress location, boolean isMaster) {
+	public LocationEntry(PeerAddress location) {
 		this.setAddress(location);
-		this.setMaster(isMaster);
 	}
 
 	public PeerAddress getAddress() {
@@ -29,14 +27,6 @@ public class LocationEntry extends NetworkContent {
 
 	public void setAddress(PeerAddress address) {
 		this.address = address;
-	}
-
-	public boolean isMaster() {
-		return isMaster;
-	}
-
-	public void setMaster(boolean isMaster) {
-		this.isMaster = isMaster;
 	}
 
 	@Override

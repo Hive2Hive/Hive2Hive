@@ -149,6 +149,11 @@ public abstract class BaseDirectMessage extends BaseMessage {
 							getTargetAddress()));
 					return false;
 				}
+			case FAILURE_DECRYPTION:
+				logger.warn(String
+						.format("Message not accepted by the target. Decryption on target node failed. peer address = '%s'",
+								getTargetAddress()));
+				return false;
 			case OK:
 				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");

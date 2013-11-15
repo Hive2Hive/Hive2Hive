@@ -8,14 +8,12 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

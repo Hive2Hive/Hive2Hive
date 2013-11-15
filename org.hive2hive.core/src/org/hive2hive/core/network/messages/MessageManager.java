@@ -3,7 +3,6 @@ package org.hive2hive.core.network.messages;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -38,49 +37,11 @@ public final class MessageManager {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageManager.class);
 
 	private final NetworkManager networkManager;
-	private final Map<String, IResponseCallBackHandler> callBackHandlers;
+	private final HashMap<String, IResponseCallBackHandler> callBackHandlers;
 
 	public MessageManager(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
-	}
-
-	/**
-	 * Send a message which gets routed to the next responsible node according the
-	 * {@link BaseMessage#getTargetKey()} key.</br>
-	 * <b>Important:</b> This message gets encrypted with the node's public key. Use this method for direct
-	 * sending to nodes, which have the according private key.
-	 * 
-	 * @param message
-	 *            a message to send
-	 * @return a future
-	 */
-	@Deprecated
-	public FutureDirect send(BaseMessage message) {
-		if (message.getTargetKey() == null)
-			throw new IllegalArgumentException("target key cannot be null");
-		if (networkManager.getKeyPair() == null)
-			throw new IllegalArgumentException("key pair has to be set at network manager");
-
-		// prepare message
-		prepareMessage(message);
-		message.increaseRoutedSendingCounter();
-
-		// encrypt the message with the node's public key
-		HybridEncryptedContent encryptedMessage = encryptMessage(message, networkManager.getKeyPair()
-				.getPublic());
-		if (encryptedMessage == null)
-			return null;
-
-		// send message to the peer which is responsible for the given key
-		FutureDirect futureDirect = networkManager.getConnection().getPeer()
-				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
-				.setRequestP2PConfiguration(createSendingConfiguration()).start();
-
-		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
-				message.getTargetKey(), message.getMessageID()));
-
-		return futureDirect;
 	}
 
 	/**
@@ -129,43 +90,6 @@ public final class MessageManager {
 	/**
 	 * Send a message directly to a node according the {@link BaseDirectMessage#getTargetAddress()} peer
 	 * address.</br>
-	 * <b>Important:</b> This message gets encrypted with the node's public key. Use this method for direct
-	 * sending to nodes, which have the according private key.
-	 * 
-	 * @param message
-	 *            a direct message to send
-	 * @return a future
-	 */
-	@Deprecated
-	public FutureResponse sendDirect(BaseDirectMessage message) {
-		if (message.getTargetAddress() == null)
-			throw new IllegalArgumentException("target address cannot be null");
-		if (networkManager.getKeyPair() == null)
-			throw new IllegalArgumentException("key pair has to be set at network manager");
-
-		// prepare message
-		prepareMessage(message);
-		message.increaseDirectSendingCounter();
-
-		// encrypt the message with the node's public key
-		HybridEncryptedContent encryptedMessage = encryptMessage(message, networkManager.getKeyPair()
-				.getPublic());
-		if (encryptedMessage == null)
-			return null;
-
-		// send message directly to the peer with the given peer address
-		FutureResponse futureResponse = networkManager.getConnection().getPeer()
-				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
-
-		logger.debug(String.format("Message sent (direct) target address = '%s' message id = '%s'",
-				message.getTargetAddress(), message.getMessageID()));
-
-		return futureResponse;
-	}
-
-	/**
-	 * Send a message directly to a node according the {@link BaseDirectMessage#getTargetAddress()} peer
-	 * address.</br>
 	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
 	 * sending to nodes, which have the according private key.</br></br>
 	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
@@ -202,12 +126,8 @@ public final class MessageManager {
 		futureResponse.addListener(new FutureDirectListener(listener, message, targetPublicKey,
 				networkManager));
 
-		logger.debug(String.format("Message sent (direct) target key = '%s' message id = '%s'",
-				message.getTargetKey(), message.getMessageID()));
-	}
-
-	public synchronized void addCallBackHandler(String messageId, IResponseCallBackHandler handler) {
-		callBackHandlers.put(messageId, handler);
+		logger.debug(String.format("Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
+				message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
 	}
 
 	/**
@@ -217,7 +137,7 @@ public final class MessageManager {
 	 *            a unique message id
 	 * @return a callback handler or <code>null</code> if doesn't exist
 	 */
-	public synchronized IResponseCallBackHandler getCallBackHandler(String messageId) {
+	public IResponseCallBackHandler getCallBackHandler(String messageId) {
 		return callBackHandlers.remove(messageId);
 	}
 
@@ -228,12 +148,11 @@ public final class MessageManager {
 	 *            a unique message id
 	 * @return <code>true</code> if exists and not <code>null</code>
 	 */
-	public synchronized boolean checkIfCallbackHandlerExists(String messageId) {
+	public boolean checkIfCallbackHandlerExists(String messageId) {
 		return (callBackHandlers.get(messageId) != null);
 	}
 
 	private void prepareMessage(BaseMessage message) {
-	
 		message.setSenderAddress(networkManager.getPeerAddress());
 		configureCallbackHandlerIfNeeded(message);
 		setSenderPublicKeyIfNeeded(message);
