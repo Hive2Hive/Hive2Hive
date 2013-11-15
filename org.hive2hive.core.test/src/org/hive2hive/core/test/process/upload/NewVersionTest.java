@@ -11,6 +11,8 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
@@ -84,6 +86,7 @@ public class NewVersionTest extends H2HJUnitTest {
 			// overwrite the content in the file
 			String newContent = NetworkTestUtil.randomString();
 			FileUtils.write(file, newContent, false);
+			byte[] md5UpdatedFile = EncryptionUtil.generateMD5Hash(file);
 
 			// upload the new version
 			NetworkPutGetUtil.uploadNewFileVersion(uploader, file, userCredentials, fileManager, config);
@@ -99,6 +102,9 @@ public class NewVersionTest extends H2HJUnitTest {
 
 			// new content should be latest one
 			Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
+
+			// check the md5 hash
+			Assert.assertTrue(H2HEncryptionUtil.compareMD5(downloaded, md5UpdatedFile));
 		}
 	}
 
