@@ -137,6 +137,13 @@ public final class H2HEncryptionUtil {
 	 * @return
 	 */
 	public static boolean compareMD5(byte[] md5, byte[] expectedMD5) {
+		// both null values is ok
+		if (md5 == null) {
+			return expectedMD5 == null;
+		} else if (expectedMD5 == null) {
+			return md5 == null;
+		}
+
 		// calculate the MD5 hash and compare it
 		return new String(md5, H2HConstants.ENCODING_CHARSET).equalsIgnoreCase(new String(expectedMD5,
 				H2HConstants.ENCODING_CHARSET));

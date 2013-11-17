@@ -107,6 +107,10 @@ public class FileTreeNode extends NetworkContent {
 		children.add(child);
 	}
 
+	public void removeChild(FileTreeNode child) {
+		children.remove(child);
+	}
+
 	/**
 	 * Finds a child with a name. If the child does not exist, null is returned
 	 * 

@@ -52,10 +52,6 @@ public class FileSynchronizer {
 		}
 	}
 
-	public void startSync() {
-
-	}
-
 	/**
 	 * Returns a list of files that have been deleted from the disc during this client was offline
 	 * 
@@ -65,7 +61,7 @@ public class FileSynchronizer {
 		List<FileTreeNode> deletedLocally = new ArrayList<FileTreeNode>();
 
 		for (String path : before.keySet()) {
-			if (before.containsKey(path)) {
+			if (now.containsKey(path)) {
 				// skip, this file is still here
 				continue;
 			} else {
@@ -92,20 +88,10 @@ public class FileSynchronizer {
 	public List<File> getDeletedRemotely() {
 		List<File> deletedRemotely = new ArrayList<File>();
 
-		// visit all files in the tree and compare to disk
-		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
-		fileStack.push(profileRootNode);
-		while (!fileStack.isEmpty()) {
-			FileTreeNode top = fileStack.pop();
-			if (now.containsKey(top.getFullPath())) {
-				// is still here, but should have been deleted
-				deletedRemotely.add(fileManager.getFile(top));
-				logger.info("File " + top.getFullPath() + " has been deleted remotely during absence");
-			}
-
-			// add children to stack
-			for (FileTreeNode child : top.getChildren()) {
-				fileStack.push(child);
+		for (String path : now.keySet()) {
+			if (before.containsKey(path) && userProfile.getFileByPath(path) == null) {
+				// is on disk but deleted in the user profile
+				deletedRemotely.add(new File(fileManager.getRoot(), path));
 			}
 		}
 
@@ -158,7 +144,7 @@ public class FileSynchronizer {
 
 		// visit all files in the tree and compare to disk
 		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
-		fileStack.push(profileRootNode);
+		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
 			FileTreeNode top = fileStack.pop();
 			if (before.containsKey(top.getFullPath()) && now.containsKey(top.getFullPath())) {
@@ -231,13 +217,13 @@ public class FileSynchronizer {
 
 		// visit all files in the tree and compare to disk
 		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
-		fileStack.push(profileRootNode);
+		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
 			FileTreeNode top = fileStack.pop();
 			if (before.containsKey(top.getFullPath()) && now.containsKey(top.getFullPath())) {
 				// was here before and is still here
 				if (!H2HEncryptionUtil.compareMD5(top.getMD5(), now.get(top.getFullPath()))
-						&& H2HEncryptionUtil.compareMD5(top.getMD5(), before.get(top.getFullPath()))) {
+						&& !H2HEncryptionUtil.compareMD5(top.getMD5(), before.get(top.getFullPath()))) {
 					// different md5 hashes than 'before' and 'now'
 					logger.info("File " + top.getFullPath() + " has been updated remotely during absence");
 					updatedRemotely.add(top);

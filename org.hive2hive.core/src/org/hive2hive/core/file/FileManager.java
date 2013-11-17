@@ -2,7 +2,6 @@ package org.hive2hive.core.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
@@ -74,28 +73,6 @@ public class FileManager {
 		} catch (IOException e) {
 			logger.error("Cannot read the last meta data", e);
 			return new PersistentMetaData();
-		}
-	}
-
-	/**
-	 * Creates a file on disk for the given node
-	 * 
-	 * @param fileToCreate
-	 * @return whether the file creation was successful.
-	 * @throws IOException Can occur if the directory cannot be written
-	 */
-	@Deprecated
-	// never used
-	public boolean createFileOnDisk(FileTreeNode fileToCreate) throws IOException {
-		File file = getFile(fileToCreate);
-		if (file.exists()) {
-			throw new FileAlreadyExistsException(fileToCreate.getFullPath());
-		}
-
-		if (fileToCreate.isFolder()) {
-			return file.mkdir();
-		} else {
-			return file.createNewFile();
 		}
 	}
 
