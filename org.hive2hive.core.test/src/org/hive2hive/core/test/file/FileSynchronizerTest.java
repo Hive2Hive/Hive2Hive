@@ -195,4 +195,16 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertTrue(updatedRemotely.contains(node2f));
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
 	}
+
+	@Test
+	public void testNothingChanged() {
+		// nothing has changed --> should receive no file to upload/download
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
+		Assert.assertEquals(0, fileSynchronizer.getUpdatedRemotely().size());
+		Assert.assertEquals(0, fileSynchronizer.getUpdatedLocally().size());
+		Assert.assertEquals(0, fileSynchronizer.getAddedRemotely().size());
+		Assert.assertEquals(0, fileSynchronizer.getAddedLocally().size());
+		Assert.assertEquals(0, fileSynchronizer.getDeletedRemotely().size());
+		Assert.assertEquals(0, fileSynchronizer.getDeletedLocally().size());
+	}
 }
