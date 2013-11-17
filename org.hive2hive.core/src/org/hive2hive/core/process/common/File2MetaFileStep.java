@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.upload.newversion;
+package org.hive2hive.core.process.common;
 
 import java.io.File;
 
@@ -7,6 +7,8 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
+import org.hive2hive.core.process.context.IGetMetaContext;
+import org.hive2hive.core.process.context.IGetUserProfileContext;
 
 /**
  * Finds a given file in the user profile and gets the appropriate meta data
@@ -14,34 +16,39 @@ import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
  * @author Nico
  * 
  */
-public class FindFileInUserProfileStep extends ProcessStep {
+public class File2MetaFileStep extends ProcessStep {
 
 	private final File file;
+	private final IGetUserProfileContext profileContext;
+	private final IGetMetaContext metaContext;
+	private final FileManager fileManager;
+	private final ProcessStep nextStep;
 
-	public FindFileInUserProfileStep(File file) {
+	public File2MetaFileStep(File file, FileManager fileManager, IGetUserProfileContext profileContext,
+			IGetMetaContext metaContext, ProcessStep nextStep) {
 		this.file = file;
+		this.profileContext = profileContext;
+		this.fileManager = fileManager;
+		this.metaContext = metaContext;
+		this.nextStep = nextStep;
 	}
 
 	@Override
 	public void start() {
-		NewVersionProcessContext context = (NewVersionProcessContext) getProcess().getContext();
-		UserProfile userProfile = context.getUserProfile();
-
-		if (userProfile == null) {
+		if (profileContext.getUserProfile() == null) {
 			getProcess().stop("Could not get the user profile");
 			return;
 		}
 
-		FileManager fileManager = context.getFileManager();
-		FileTreeNode fileNode = getFileFromUserProfile(userProfile, file, fileManager);
+		FileTreeNode fileNode = getFileFromUserProfile(profileContext.getUserProfile());
 		if (fileNode == null) {
 			getProcess().stop("File does not exist in user profile. You might consider uploading a new file");
 			return;
 		}
 
 		// get the appropriate meta document and then update it
-		GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(fileNode.getKeyPair(),
-				new UpdateMetaDocumentStep(), context);
+		GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(fileNode.getKeyPair(), nextStep,
+				metaContext);
 		getProcess().setNextStep(getMetaStep);
 	}
 
@@ -49,11 +56,9 @@ public class FindFileInUserProfileStep extends ProcessStep {
 	 * Checks in the user profile whether a file exists.
 	 * 
 	 * @param userProfile
-	 * @param file
-	 * @param fileManager null if the file does not exists yet.
 	 * @return
 	 */
-	private FileTreeNode getFileFromUserProfile(UserProfile userProfile, File file, FileManager fileManager) {
+	private FileTreeNode getFileFromUserProfile(UserProfile userProfile) {
 		String relativePath = file.getAbsolutePath()
 				.replaceFirst(fileManager.getRoot().getAbsolutePath(), "");
 		return userProfile.getFileByPath(relativePath);
