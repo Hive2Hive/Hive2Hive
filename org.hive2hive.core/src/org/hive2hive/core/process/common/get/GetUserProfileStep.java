@@ -11,6 +11,7 @@ import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -28,13 +29,15 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	private final UserCredentials credentials;
 	private final ProcessStep nextStep;
-	private UserProfile userProfile;
+	private IGetUserProfileContext context;
 
-	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep) {
+	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep,
+			IGetUserProfileContext context) {
 		super(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 
 		this.credentials = credentials;
 		this.nextStep = nextStep;
+		this.context = context;
 	}
 
 	@Override
@@ -51,7 +54,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 					credentials.getPin(), AES_KEYLENGTH.BIT_256);
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
-				userProfile = (UserProfile) decrypted;
+				context.setUserProfile((UserProfile) decrypted);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
 			}
@@ -60,15 +63,5 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
 		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
-	}
-
-	/**
-	 * Returns the locations loaded by this step. If the step is still being executed or encountered an error,
-	 * this returns <code>null</code>.
-	 * 
-	 * @return The loaded locations or <code>null</code>
-	 */
-	public UserProfile getUserProfile() {
-		return userProfile;
 	}
 }

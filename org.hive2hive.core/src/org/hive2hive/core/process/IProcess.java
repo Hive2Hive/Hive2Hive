@@ -1,5 +1,6 @@
 package org.hive2hive.core.process;
 
+import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.manager.ProcessManager;
 

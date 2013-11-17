@@ -17,17 +17,17 @@ public class VerifyUserProfileStep extends ProcessStep {
 	private final GetLocationsStep locationsStep;
 
 	public VerifyUserProfileStep(String userId, GetLocationsStep locationsStep) {
-		
+
 		this.userId = userId;
 		this.locationsStep = locationsStep;
 	}
 
 	@Override
 	public void start() {
-		
+
 		// get the loaded profile from the process context
-		UserProfile loadedProfile = ((LoginProcess)getProcess()).getContext().getGetUserProfileStep().getUserProfile();
-		
+		UserProfile loadedProfile = ((LoginProcess) getProcess()).getContext().getUserProfile();
+
 		if (loadedProfile == null) {
 			// failed for some reason
 			getProcess().stop("User profile not found or wrong password.");
@@ -36,7 +36,8 @@ public class VerifyUserProfileStep extends ProcessStep {
 			getProcess().stop("UserId does not match the one in the profile.");
 		} else {
 
-			// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
+			// TODO check whether this step setting is necessary here. Alternative: only parent-process knows
+			// next
 			// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 			getProcess().setNextStep(locationsStep);
 		}

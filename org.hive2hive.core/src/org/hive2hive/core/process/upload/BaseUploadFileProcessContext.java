@@ -7,19 +7,20 @@ import java.util.List;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserCredentials;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessContext;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
+import org.hive2hive.core.process.context.IGetUserProfileContext;
+import org.hive2hive.core.process.context.ProcessContext;
 
-public abstract class BaseUploadFileProcessContext extends ProcessContext {
+public abstract class BaseUploadFileProcessContext extends ProcessContext implements IGetUserProfileContext {
 
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration config;
 	private final UserCredentials credentials;
 	private final File file;
 	private final boolean fileAlreadyExists;
-	private GetUserProfileStep getUserProfileStep;
 	private List<KeyPair> chunkKeys;
+	private UserProfile userProfile;
 
 	protected BaseUploadFileProcessContext(Process process, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config, boolean fileAlreadyExists) {
@@ -51,14 +52,6 @@ public abstract class BaseUploadFileProcessContext extends ProcessContext {
 		return fileAlreadyExists;
 	}
 
-	public GetUserProfileStep getUserProfileStep() {
-		return getUserProfileStep;
-	}
-
-	public void setUserProfileStep(GetUserProfileStep getUserProfileStep) {
-		this.getUserProfileStep = getUserProfileStep;
-	}
-
 	public void setChunkKeys(List<KeyPair> chunkKeys) {
 		this.chunkKeys = chunkKeys;
 	}
@@ -66,4 +59,15 @@ public abstract class BaseUploadFileProcessContext extends ProcessContext {
 	public List<KeyPair> getChunkKeys() {
 		return chunkKeys;
 	}
+
+	@Override
+	public void setUserProfile(UserProfile userProfile) {
+		this.userProfile = userProfile;
+	}
+
+	@Override
+	public UserProfile getUserProfile() {
+		return userProfile;
+	}
+
 }

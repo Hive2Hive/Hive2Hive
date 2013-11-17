@@ -31,7 +31,7 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 	public void start() {
 		// set the user profile from the previous step
 		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
-		super.userProfile = context.getUserProfileStep().getUserProfile();
+		super.userProfile = context.getUserProfile();
 
 		if (userProfile == null) {
 			// this was handled before

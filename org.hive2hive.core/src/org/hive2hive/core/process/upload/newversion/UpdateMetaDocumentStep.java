@@ -21,7 +21,7 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 	@Override
 	public void start() {
 		NewVersionProcessContext context = (NewVersionProcessContext) getProcess().getContext();
-		MetaDocument metaDocument = context.getMetaDocumentStep().getMetaDocument();
+		MetaDocument metaDocument = context.getMetaDocument();
 		if (metaDocument == null) {
 			getProcess()
 					.stop("Meta document does not exist, but file is in user profile. You are in an inconsistent state");
@@ -44,7 +44,7 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			// 2. put the meta document
 			// 3. put the user profile
 			// 4. inform other clients
-			UserProfile userProfile = context.getUserProfileStep().getUserProfile();
+			UserProfile userProfile = context.getUserProfile();
 			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
 			try {
 				byte[] newMD5 = EncryptionUtil.generateMD5Hash(file);

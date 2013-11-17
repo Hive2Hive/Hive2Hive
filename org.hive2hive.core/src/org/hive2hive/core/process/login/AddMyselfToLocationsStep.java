@@ -30,8 +30,7 @@ public class AddMyselfToLocationsStep extends PutProcessStep {
 	public void start() {
 
 		// get the loaded locations from the process context
-		Locations loadedLocations = ((LoginProcess) getProcess()).getContext().getGetLocationsStep()
-				.getLocations();
+		Locations loadedLocations = ((LoginProcess) getProcess()).getContext().getLocations();
 
 		if (loadedLocations == null) {
 			logger.error("Something went wrong at the registration: No locations found.");

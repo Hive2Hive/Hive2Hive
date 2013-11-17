@@ -94,9 +94,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 				LoginProcessContext loginContext = loginProcess.getContext();
 
 				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getGetUserProfileStep()
-						.getUserProfile(), credentials, loginContext.getGetLocationsStep().getLocations(),
-						networkManager, fileManager, H2HNode.this);
+				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getUserProfile(), credentials,
+						loginContext.getLocations(), networkManager, fileManager, H2HNode.this);
 				postLogin.start();
 			}
 

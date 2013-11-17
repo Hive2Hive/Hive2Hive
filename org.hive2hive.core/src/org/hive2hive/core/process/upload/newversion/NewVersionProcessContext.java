@@ -4,24 +4,27 @@ import java.io.File;
 
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserCredentials;
-import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
+import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
 
-public class NewVersionProcessContext extends BaseUploadFileProcessContext {
+public class NewVersionProcessContext extends BaseUploadFileProcessContext implements IGetMetaContext {
 
-	private GetMetaDocumentStep getMetaStep;
+	private MetaDocument metaDocument;
 
 	public NewVersionProcessContext(NewVersionProcess process, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		super(process, file, credentials, fileManager, config, true);
 	}
 
-	public void setGetMetaDocumentStep(GetMetaDocumentStep getMetaStep) {
-		this.getMetaStep = getMetaStep;
+	@Override
+	public void setMetaDocument(MetaDocument metaDocument) {
+		this.metaDocument = metaDocument;
 	}
 
-	public GetMetaDocumentStep getMetaDocumentStep() {
-		return getMetaStep;
+	@Override
+	public MetaDocument getMetaDocument() {
+		return metaDocument;
 	}
 }

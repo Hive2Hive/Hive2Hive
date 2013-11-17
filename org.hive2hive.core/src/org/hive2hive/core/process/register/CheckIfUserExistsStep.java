@@ -5,7 +5,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.put.PutLocationStep;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 
@@ -18,12 +17,13 @@ import org.hive2hive.core.process.common.put.PutUserProfileStep;
 public class CheckIfUserExistsStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CheckIfUserExistsStep.class);
-	private GetLocationsStep previousStep;
 
 	@Override
 	public void start() {
 		logger.debug("Checking if a user profile already exists.");
-		if (previousStep.getLocations() == null) {
+		RegisterProcessContext context = (RegisterProcessContext) getProcess().getContext();
+
+		if (context.getLocations() == null) {
 			// ok, does not exist
 			continueWithNextStep();
 		} else {
@@ -43,16 +43,13 @@ public class CheckIfUserExistsStep extends ProcessStep {
 		PutPublicKeyStep third = new PutPublicKeyStep(userProfile.getUserId(), userProfile
 				.getEncryptionKeys().getPublic());
 		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), third);
-		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getContext().getUserCredentials(), second);
+		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getContext()
+				.getUserCredentials(), second);
 		getProcess().setNextStep(first);
 	}
 
 	@Override
 	public void rollBack() {
 		// only a get call which has no effect
-	}
-
-	public void setPreviousStep(GetLocationsStep locationsStep) {
-		previousStep = locationsStep;
 	}
 }

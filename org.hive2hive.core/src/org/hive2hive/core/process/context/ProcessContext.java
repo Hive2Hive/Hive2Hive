@@ -1,4 +1,6 @@
-package org.hive2hive.core.process;
+package org.hive2hive.core.process.context;
+
+import org.hive2hive.core.process.Process;
 
 /**
  * The context of a process. Basically the context just holds process-specific data.

@@ -1,27 +1,39 @@
 package org.hive2hive.core.process.login;
 
-import org.hive2hive.core.process.ProcessContext;
-import org.hive2hive.core.process.common.get.GetLocationsStep;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
+import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.process.context.IGetLocationsContext;
+import org.hive2hive.core.process.context.IGetUserProfileContext;
+import org.hive2hive.core.process.context.ProcessContext;
 
-public final class LoginProcessContext extends ProcessContext {
+public final class LoginProcessContext extends ProcessContext implements IGetUserProfileContext,
+		IGetLocationsContext {
 
-	private final GetUserProfileStep profileStep;
-	private final GetLocationsStep locationsStep;
-	
-	public LoginProcessContext(LoginProcess loginProcess, GetUserProfileStep profileStep, GetLocationsStep locationsStep) {
+	private Locations locations;
+	private UserProfile userProfile;
+
+	public LoginProcessContext(LoginProcess loginProcess) {
 		super(loginProcess);
-		
-		this.profileStep = profileStep;
-		this.locationsStep = locationsStep;
-	}
-	
-	public GetUserProfileStep getGetUserProfileStep() {
-		return profileStep;
 	}
 
-	public GetLocationsStep getGetLocationsStep() {
-		return locationsStep;
+	@Override
+	public void setLocation(Locations locations) {
+		this.locations = locations;
 	}
-	
+
+	@Override
+	public Locations getLocations() {
+		return locations;
+	}
+
+	@Override
+	public void setUserProfile(UserProfile userProfile) {
+		this.userProfile = userProfile;
+	}
+
+	@Override
+	public UserProfile getUserProfile() {
+		return userProfile;
+	}
+
 }

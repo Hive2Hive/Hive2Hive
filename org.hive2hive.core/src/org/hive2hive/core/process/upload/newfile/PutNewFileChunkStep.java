@@ -47,8 +47,7 @@ public class PutNewFileChunkStep extends PutChunkStep {
 		UpdateUserProfileStep updateProfileStep = new UpdateUserProfileStep(file, metaKeyPair,
 				context.getCredentials());
 		GetUserProfileStep getProfileStep = new GetUserProfileStep(context.getCredentials(),
-				updateProfileStep);
-		context.setUserProfileStep(getProfileStep);
+				updateProfileStep, context);
 		PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(metaDocument, getProfileStep);
 
 		setStepAfterPutting(putMetaFolder);

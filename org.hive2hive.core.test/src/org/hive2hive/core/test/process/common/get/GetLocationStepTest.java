@@ -7,12 +7,9 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -58,22 +55,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// put the locations to the DHT
 		proxy.putLocal(userId, H2HConstants.USER_LOCATIONS, newLocations);
 
-		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		GetLocationsStep step = new GetLocationsStep(userId, null);
-		process.setNextStep(step);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		Locations found = step.getLocations();
+		Locations found = NetworkPutGetUtil.getLocations(putter, userId);
 
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());

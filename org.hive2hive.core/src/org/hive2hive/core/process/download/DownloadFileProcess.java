@@ -23,6 +23,7 @@ public class DownloadFileProcess extends Process {
 	 */
 	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager, FileManager fileManager) {
 		super(networkManager);
+		context = new DownloadFileProcessContext(this, file, fileManager);
 
 		if (file.isFolder()) {
 			logger.info("No download of the file needed since it's a folder");
@@ -35,10 +36,10 @@ public class DownloadFileProcess extends Process {
 			// 2. evaluate the meta file
 			// 3. download all chunks
 			EvaluateMetaDocumentStep evalMetaDoc = new EvaluateMetaDocumentStep();
-			GetMetaDocumentStep metaDocumentStep = new GetMetaDocumentStep(file.getKeyPair(), evalMetaDoc);
+			GetMetaDocumentStep metaDocumentStep = new GetMetaDocumentStep(file.getKeyPair(), evalMetaDoc,
+					context);
 			setNextStep(metaDocumentStep);
 
-			context = new DownloadFileProcessContext(this, file, metaDocumentStep, fileManager);
 		}
 	}
 

@@ -21,8 +21,7 @@ public class PutNewVersionChunkStep extends PutChunkStep {
 
 	private void configureStepAfterUpload(NewVersionProcessContext context) {
 		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
-				new FindFileInUserProfileStep(file));
-		context.setUserProfileStep(getUserProfileStep);
+				new FindFileInUserProfileStep(file), context);
 		setStepAfterPutting(getUserProfileStep);
 	}
 }

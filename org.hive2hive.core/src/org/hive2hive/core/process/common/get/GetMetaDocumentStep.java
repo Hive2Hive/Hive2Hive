@@ -16,6 +16,7 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
@@ -32,12 +33,13 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	protected KeyPair keyPair;
 	protected ProcessStep nextStep;
 
-	private MetaDocument metaDocument;
+	private IGetMetaContext context;
 
-	public GetMetaDocumentStep(KeyPair keyPair, ProcessStep nextStep) {
+	public GetMetaDocumentStep(KeyPair keyPair, ProcessStep nextStep, IGetMetaContext context) {
 		super(key2String(keyPair.getPublic()), H2HConstants.META_DOCUMENT);
 		this.keyPair = keyPair;
 		this.nextStep = nextStep;
+		this.context = context;
 	}
 
 	@Override
@@ -48,7 +50,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
-				this.metaDocument = (MetaDocument) decrypted;
+				context.setMetaDocument((MetaDocument) decrypted);
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the meta document.", e);
@@ -56,9 +58,5 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 		}
 		// continue with next step
 		getProcess().setNextStep(nextStep);
-	}
-
-	public MetaDocument getMetaDocument() {
-		return metaDocument;
 	}
 }

@@ -14,8 +14,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
@@ -23,9 +21,8 @@ import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -79,22 +76,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		putGlobal.awaitUninterruptibly();
 		putGlobal.getFutureRequests().awaitUninterruptibly();
 
-		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		GetUserProfileStep step = new GetUserProfileStep(credentials, null);
-		process.setNextStep(step);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		UserProfile profile = step.getUserProfile();
+		UserProfile profile = NetworkPutGetUtil.getUserProfile(putter, credentials);
 
 		// verify if both objects are the same
 		Assert.assertEquals(credentials.getUserId(), profile.getUserId());

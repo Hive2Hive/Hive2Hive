@@ -27,9 +27,10 @@ import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
  * <li>Files that have been added to the folder on disk while the client was offline --> missing in
  * userprofile</li>
  * <li>Files that have been changed during the client was offline. The changes could have been made in the
- * userprofile or on the local disc. However, this step overwrites changes of the local file system while the
- * client was offline.</li>
- * <li>If a file was deleted on disk during offline phase, the file gets downloaded again.</li>
+ * userprofile or on the local disc. If changes on both locations have been made, the version in the user
+ * profile wins.</li>
+ * <li>If a file was deleted on disk during offline phase, the file gets deleted in the DHT too.</li>
+ * <li>If a file was deleted in the user profile, the file gets deleted on disk too.</li>
  * </ul>
  * 
  * @author Nico

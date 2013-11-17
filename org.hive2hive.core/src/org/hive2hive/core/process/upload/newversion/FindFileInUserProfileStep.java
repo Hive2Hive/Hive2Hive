@@ -25,7 +25,7 @@ public class FindFileInUserProfileStep extends ProcessStep {
 	@Override
 	public void start() {
 		NewVersionProcessContext context = (NewVersionProcessContext) getProcess().getContext();
-		UserProfile userProfile = context.getUserProfileStep().getUserProfile();
+		UserProfile userProfile = context.getUserProfile();
 
 		if (userProfile == null) {
 			getProcess().stop("Could not get the user profile");
@@ -41,8 +41,7 @@ public class FindFileInUserProfileStep extends ProcessStep {
 
 		// get the appropriate meta document and then update it
 		GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(fileNode.getKeyPair(),
-				new UpdateMetaDocumentStep());
-		context.setGetMetaDocumentStep(getMetaStep);
+				new UpdateMetaDocumentStep(), context);
 		getProcess().setNextStep(getMetaStep);
 	}
 
