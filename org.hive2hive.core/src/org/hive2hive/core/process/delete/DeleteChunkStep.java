@@ -19,7 +19,7 @@ public class DeleteChunkStep extends RemoveProcessStep {
 
 		context = (DeleteFileProcessContext) getProcess().getContext();
 		chunksToDelete = new ArrayList<KeyPair>();
-		if (!context.getFile().isDirectory()) {
+		if (!context.isDirectory()) {
 			// no chunks to delete when directory
 			MetaFile metaFile = (MetaFile) context.getMetaDocument();
 			for (FileVersion version : metaFile.getVersions()) {

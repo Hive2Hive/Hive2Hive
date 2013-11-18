@@ -16,6 +16,7 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
+import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -72,7 +73,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		 * Delete the files in the DHT
 		 */
 		List<FileTreeNode> toDeleteInDHT = synchronizer.getDeletedLocally();
-		// TODO delete in DHT
+		ProcessTreeNode deleteProcess = startDelete(toDeleteInDHT, fileManager, context.getCredentials());
 
 		/*
 		 * Delete the remotely deleted files
@@ -82,8 +83,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 			file.delete();
 		}
 
-		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone() && uploadProcessNewVersions
-				.isDone())) {
+		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone()
+				&& uploadProcessNewVersions.isDone() && deleteProcess.isDone())) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -158,6 +159,25 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		logger.debug("Start uploading new versions of files ");
+		rootProcess.start();
+		return rootProcess;
+	}
+
+	private ProcessTreeNode startDelete(List<FileTreeNode> toDelete, FileManager fileManager,
+			UserCredentials credentials) {
+		// delete the files in the DHT that are deleted while offline
+		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
+		for (FileTreeNode node : toDelete) {
+			// TODO get parent means get the child files --> start deletion at children
+			ProcessTreeNode parent = getParent(rootProcess, node);
+			// initialize the process
+			DeleteFileProcess deleteProcess = new DeleteFileProcess(node, fileManager, getNetworkManager(),
+					credentials);
+			new NodeProcessTreeNode(deleteProcess, parent, node);
+		}
+
+		// start the download
+		logger.debug("Start deleting files in DHT...");
 		rootProcess.start();
 		return rootProcess;
 	}

@@ -25,10 +25,22 @@ public class File2MetaFileStep extends ProcessStep {
 	private final IGetMetaContext metaContext;
 	private final FileManager fileManager;
 	private final ProcessStep nextStep;
+	private FileTreeNode fileNode;
 
 	public File2MetaFileStep(File file, FileManager fileManager, IGetUserProfileContext profileContext,
 			IGetMetaContext metaContext, ProcessStep nextStep) {
+		this(file, null, fileManager, profileContext, metaContext, nextStep);
+	}
+
+	public File2MetaFileStep(FileTreeNode fileNode, FileManager fileManager,
+			IGetUserProfileContext profileContext, IGetMetaContext metaContext, ProcessStep nextStep) {
+		this(null, fileNode, fileManager, profileContext, metaContext, nextStep);
+	}
+
+	private File2MetaFileStep(File file, FileTreeNode fileNode, FileManager fileManager,
+			IGetUserProfileContext profileContext, IGetMetaContext metaContext, ProcessStep nextStep) {
 		this.file = file;
+		this.fileNode = fileNode;
 		this.profileContext = profileContext;
 		this.fileManager = fileManager;
 		this.metaContext = metaContext;
@@ -42,10 +54,13 @@ public class File2MetaFileStep extends ProcessStep {
 			return;
 		}
 
-		FileTreeNode fileNode = getFileFromUserProfile(profileContext.getUserProfile());
 		if (fileNode == null) {
-			getProcess().stop("File does not exist in user profile. You might consider uploading a new file");
-			return;
+			fileNode = getFileFromUserProfile(profileContext.getUserProfile());
+			if (fileNode == null) {
+				getProcess().stop(
+						"File does not exist in user profile. You might consider uploading a new file");
+				return;
+			}
 		}
 
 		// get the appropriate meta document and then update it
