@@ -43,7 +43,8 @@ public class NewVersionProcess extends Process {
 			// 2. get the user profile
 			// 3. get the meta file
 			// 4. update the meta file
-			// 5. update the user profile
+			// 5. update the parent meta folder
+			// 6. update the user profile
 
 			logger.debug("Adding a file to the DHT");
 			setNextStep(new PutNewVersionChunkStep(file, context));

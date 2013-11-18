@@ -29,8 +29,11 @@ public class NewFileProcess extends Process {
 		// TODO shared files not considered yet
 
 		// 1. validate file size, split the file content, encrypt it and upload it to the DHT
-		// 2. create a meta file
-		// 3. update the user profile
+		// 2. get the user profile
+		// 3. get the parent meta document
+		// 4. put the new meta file
+		// 5. update the parent meta document
+		// 6. update the user profile
 		logger.debug("Adding a new file/folder to the DHT");
 		setNextStep(new PutNewFileChunkStep(file, context));
 	}

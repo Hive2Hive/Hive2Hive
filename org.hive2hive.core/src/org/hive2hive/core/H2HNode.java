@@ -15,6 +15,7 @@ import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
+import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
@@ -125,8 +126,11 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	public IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation {
 		// file must be in the given root directory
 		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {
-			throw new IllegalFileLocation();
+			throw new IllegalFileLocation("File must be in root of the H2H directory.");
 		}
+
+		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
+		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
 
 		NewFileProcess uploadProcess = new NewFileProcess(file, credentials, networkManager, fileManager,
 				this);
@@ -135,5 +139,16 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		}
 
 		return uploadProcess;
+	}
+
+	@Override
+	public IProcess update(File file, UserCredentials credentials) {
+		NewVersionProcess process = new NewVersionProcess(file, credentials, networkManager, fileManager,
+				this);
+		if (autostartProcesses) {
+			process.start();
+		}
+
+		return process;
 	}
 }

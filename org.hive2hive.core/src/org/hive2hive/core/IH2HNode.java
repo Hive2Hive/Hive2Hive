@@ -41,10 +41,18 @@ public interface IH2HNode {
 
 	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
-	 * the
-	 * node configuration
+	 * the node configuration
 	 */
 	IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation;
+
+	/**
+	 * Update a file or a folder in the network.
+	 * 
+	 * @param file the file to be updated
+	 * @param credentials the user credentials
+	 * @return
+	 */
+	IProcess update(File file, UserCredentials credentials);
 
 	void disconnect();
 }

@@ -32,8 +32,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	protected KeyPair keyPair;
 	protected ProcessStep nextStep;
-
-	private IGetMetaContext context;
+	protected IGetMetaContext context;
 
 	public GetMetaDocumentStep(KeyPair keyPair, ProcessStep nextStep, IGetMetaContext context) {
 		super(key2String(keyPair.getPublic()), H2HConstants.META_DOCUMENT);
