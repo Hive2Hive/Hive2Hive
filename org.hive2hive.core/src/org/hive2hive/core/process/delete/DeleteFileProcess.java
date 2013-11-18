@@ -27,8 +27,10 @@ public class DeleteFileProcess extends Process {
 	private final DeleteFileProcessContext context;
 
 	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
-			UserCredentials credentials) {
+			UserCredentials credentials) throws IllegalArgumentException {
 		super(networkManager);
+		verify(file);
+
 		context = new DeleteFileProcessContext(this, fileManager, file.isDirectory(), credentials);
 
 		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, fileManager, context, context,
@@ -37,14 +39,30 @@ public class DeleteFileProcess extends Process {
 		setNextStep(getUserProfileStep);
 	}
 
-	public DeleteFileProcess(FileTreeNode file, FileManager fileManager, NetworkManager networkManager,
-			UserCredentials credentials) {
+	public DeleteFileProcess(FileTreeNode fileNode, FileManager fileManager, NetworkManager networkManager,
+			UserCredentials credentials) throws IllegalArgumentException {
 		super(networkManager);
-		context = new DeleteFileProcessContext(this, fileManager, file.isFolder(), credentials);
+		File file = fileManager.getFile(fileNode);
+		if (file.exists()) {
+			// verfiy file only if it exists on disk
+			verify(file);
+		}
+
+		context = new DeleteFileProcessContext(this, fileManager, fileNode.isFolder(), credentials);
 
 		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, fileManager, context, context, null /* TODO */);
 		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(credentials, file2MetaStep, context);
 		setNextStep(getUserProfileStep);
+	}
+
+	private void verify(File file) throws IllegalArgumentException {
+		if (file == null) {
+			throw new IllegalArgumentException("File may not be null");
+		}
+
+		if (file.isDirectory() && file.listFiles().length > 0) {
+			throw new IllegalArgumentException("Folder is not empty");
+		}
 	}
 
 	@Override
