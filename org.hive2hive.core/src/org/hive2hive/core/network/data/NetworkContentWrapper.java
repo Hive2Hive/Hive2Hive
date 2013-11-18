@@ -4,7 +4,7 @@ public class NetworkContentWrapper<T> extends NetworkContent {
 
 	private static final long serialVersionUID = -3011847530347265233L;
 	
-	private T content;
+	private final T content;
 	
 	public NetworkContentWrapper(T content) {
 		this.content = content;
