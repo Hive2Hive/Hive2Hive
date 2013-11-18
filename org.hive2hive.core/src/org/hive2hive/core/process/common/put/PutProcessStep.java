@@ -8,7 +8,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.storage.StorageGeneric.PutStatus;
+import net.tomp2p.storage.StorageLayer.PutStatus;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;

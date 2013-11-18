@@ -5,10 +5,10 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.List;
 
-import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
-import net.tomp2p.storage.StorageMemory;
 
+import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.remove.RemoveProcessStep;
@@ -105,9 +105,14 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class FakeGetTestStorage extends StorageMemory {
+	private class FakeGetTestStorage extends H2HStorageMemory {
+		
+		public FakeGetTestStorage() {
+			super(null);
+		}
+
 		@Override
-		public Data get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
+		public Data get(Number640 key) {
 			Data fakeData = null;
 			try {
 				fakeData = new Data(new H2HTestData(data));

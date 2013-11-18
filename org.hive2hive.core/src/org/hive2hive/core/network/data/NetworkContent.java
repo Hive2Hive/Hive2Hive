@@ -2,7 +2,6 @@ package org.hive2hive.core.network.data;
 
 import java.io.Serializable;
 
-import net.tomp2p.p2p.builder.DHTBuilder;
 import net.tomp2p.peers.Number160;
 
 /**
@@ -19,10 +18,9 @@ public abstract class NetworkContent implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Some data has a domain key (used to sign content). This is the default domain key, however, by changing
-	 * it, the content get signed, once it's put.
+	 * Some data has a version key (used to differentiate versions).
 	 */
-	private Number160 signature = DHTBuilder.DEFAULT_DOMAIN;
+	private Number160 versionKey = Number160.ZERO;
 
 	/**
 	 * All data stored in the
@@ -48,11 +46,11 @@ public abstract class NetworkContent implements Serializable {
 		return timestamp;
 	}
 
-	public Number160 getSignature() {
-		return signature;
+	public Number160 getVersionKey() {
+		return versionKey;
 	}
 
-	protected void setSignature(Number160 signature) {
-		this.signature = signature;
+	protected void setVersionKey(Number160 versionKey) {
+		this.versionKey = versionKey;
 	}
 }

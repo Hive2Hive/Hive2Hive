@@ -1,18 +1,20 @@
 package org.hive2hive.core.network.data;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.p2p.builder.DHTBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * This class offers an interface for storing into and loading from the network.
@@ -24,31 +26,26 @@ public class DataManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DataManager.class);
 
+	private final Number160 TOMP2P_DEFAULT_KEY = Number160.ZERO;
+
 	private final NetworkManager networkManager;
 
 	public DataManager(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 	}
 
-	/**
-	 * Stores the content into the DHT at the location under the given content
-	 * key
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param content
-	 *            the wrapper containing the content to be stored
-	 * @return the future
-	 */
+	public FuturePut putGlobalWithVersionKey(String locationKey, String contentKey, NetworkContent content) {
+		content.setVersionKey(createVersionKey(content));
+		return putGlobal(locationKey, contentKey, content);
+	}
+
 	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent content) {
 		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Data data = new Data(content);
 			data.ttlSeconds(content.getTimeToLive());
 			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
-					.setData(Number160.createHash(contentKey), data).setDomainKey(content.getSignature())
+					.setData(Number160.createHash(contentKey), data).setVersionKey(content.getVersionKey())
 					.start();
 		} catch (IOException e) {
 			logger.error(String
@@ -58,72 +55,51 @@ public class DataManager {
 		}
 	}
 
-	/**
-	 * Loads the content with the given location and content keys from the
-	 * DHT.</br> <b>Important:</b>
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @return the future
-	 */
 	public FutureGet getGlobal(String locationKey, String contentKey) {
-		logger.debug(String.format("global get key = '%s' content key = '%s'", locationKey, contentKey));
-		return networkManager.getConnection().getPeer().get(Number160.createHash(locationKey))
-				.setContentKey(Number160.createHash(contentKey)).start();
+		return getGlobal(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
 	}
 
-	/**
-	 * Stores the given content with the key in the storage of the peer.</br>
-	 * The content key allows to store several objects for the same key.
-	 * <b>Important:</b> This method blocks till the storage succeeded.
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param wrapper
-	 *            the wrapper containing the content to be stored
-	 */
-	public void putLocal(String locationKey, String contentKey, NetworkContent wrapper) {
+	public FutureGet getGlobal(String locationKey, String contentKey, Number160 versionKey) {
+		logger.debug(String.format("global get key = '%s' content key = '%s'", locationKey, contentKey));
+		return networkManager.getConnection().getPeer().get(Number160.createHash(locationKey))
+				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
+	}
+
+
+	public void putLocalWithVersionKey(String locationKey, String contentKey, NetworkContent content) {
+		content.setVersionKey(createVersionKey(content));
+		putLocal(locationKey, contentKey, content);
+	}
+
+	public void putLocal(String locationKey, String contentKey, NetworkContent content) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
-			// TODO: How to use the domain key?
-			Data data = new Data(wrapper);
-			data.ttlSeconds(wrapper.getTimeToLive());
-			networkManager
-					.getConnection()
-					.getPeer()
-					.getPeerBean()
-					.storage()
-					.put(Number160.createHash(locationKey), DHTBuilder.DEFAULT_DOMAIN,
-							Number160.createHash(contentKey), data);
+			Number640 key = new Number640(Number160.createHash(locationKey), TOMP2P_DEFAULT_KEY,
+					Number160.createHash(contentKey), content.getVersionKey());
+			Data data = new Data(content);
+			data.ttlSeconds(content.getTimeToLive());
+			// TODO add public key for content protection
+			// TODO for what is this putIfAbsent flag?
+			// TODO what is the domainProtaction flag?
+			networkManager.getConnection().getPeer().getPeerBean().storage()
+					.put(key, data, null, false, false);
 		} catch (IOException e) {
 			logger.error(String
 					.format("Local put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
-							wrapper.toString(), locationKey, contentKey, e.getMessage()));
+							content.toString(), locationKey, contentKey, e.getMessage()));
 		}
 	}
 
-	/**
-	 * Loads the content with the key directly from the storage of the peer
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @return the desired content from the wrapper
-	 */
 	public NetworkContent getLocal(String locationKey, String contentKey) {
-		logger.debug(String.format("local get key = '%s' content key = '%s'", locationKey, contentKey));
-		Data data = networkManager
-				.getConnection()
-				.getPeer()
-				.getPeerBean()
-				.storage()
-				.get(Number160.createHash(locationKey), DHTBuilder.DEFAULT_DOMAIN,
-						Number160.createHash(contentKey));
+		return getLocal(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
+	}
+
+	public NetworkContent getLocal(String locationKey, String contentKey, Number160 versionKey) {
+		logger.debug(String.format("local get key = '%s' content key = '%s' version key = '%s'", locationKey,
+				contentKey, versionKey));
+		Number640 key = new Number640(Number160.createHash(locationKey), TOMP2P_DEFAULT_KEY,
+				Number160.createHash(contentKey), versionKey);
+		Data data = networkManager.getConnection().getPeer().getPeerBean().storage().get(key);
 		if (data != null) {
 			try {
 				return (NetworkContent) data.object();
@@ -136,16 +112,21 @@ public class DataManager {
 		return null;
 	}
 
-	/**
-	 * Removes a content from the DHT
-	 * 
-	 * @param locationKey the unique id of the content
-	 * @param contentKey the content key - please choose one from {@link H2HConstants}
-	 * @return the future
-	 */
+
 	public FutureRemove remove(String locationKey, String contentKey) {
+		return remove(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
+	}
+	
+	public FutureRemove remove(String locationKey, String contentKey, Number160 versionKey) {
 		logger.debug(String.format("remove key = '%s' content key = '%s'", locationKey, contentKey));
 		return networkManager.getConnection().getPeer().remove(Number160.createHash(locationKey))
-				.setContentKey(Number160.createHash(contentKey)).start();
+				.setContentKey(Number160.createHash(contentKey))
+				.setVersionKey(versionKey).start();
+	}
+
+	private Number160 createVersionKey(NetworkContent content) {
+		long timestamp = new Date().getTime();
+		byte[] hash = EncryptionUtil.generateMD5Hash(EncryptionUtil.serializeObject(content));
+		return new Number160(timestamp, new Number160(Arrays.copyOf(hash, Number160.BYTE_ARRAY_SIZE)));
 	}
 }
