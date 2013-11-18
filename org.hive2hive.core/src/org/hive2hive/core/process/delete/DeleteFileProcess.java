@@ -16,7 +16,9 @@ public class DeleteFileProcess extends Process {
 	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
 			UserCredentials credentials) {
 		super(networkManager);
-		context = new DeleteFileProcessContext(this, fileManager);
+		context = new DeleteFileProcessContext(this, fileManager, file);
+
+		// TODO verify if the file is a folder. If yes, either delete recursively or deny deletion
 
 		// 1. get user profile and find the {@link FileTreeNode} in there. Check if write-access to this file
 		// 2. get the meta file / folder

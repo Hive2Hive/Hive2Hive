@@ -7,11 +7,13 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
+import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 
 /**
- * Finds a given file in the user profile and gets the appropriate meta data
+ * Finds a given file in the user profile and gets the appropriate meta data. Note that a
+ * {@link GetUserProfileStep} must be run before this step is run.
  * 
  * @author Nico
  * 

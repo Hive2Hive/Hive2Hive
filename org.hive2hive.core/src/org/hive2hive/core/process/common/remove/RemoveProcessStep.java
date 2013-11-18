@@ -23,8 +23,8 @@ public class RemoveProcessStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(RemoveProcessStep.class);
 
-	protected final String locationKey;
-	protected final String contentKey;
+	protected String locationKey;
+	protected String contentKey;
 	protected ProcessStep nextStep;
 
 	// used to count remove retries
@@ -42,6 +42,9 @@ public class RemoveProcessStep extends ProcessStep {
 	}
 
 	protected void remove(final String locationKey, final String contentKey) {
+		this.locationKey = locationKey;
+		this.contentKey = contentKey;
+
 		FutureRemove removeFuture = getNetworkManager().remove(locationKey, contentKey);
 		removeFuture.addListener(new RemoveListener());
 	}

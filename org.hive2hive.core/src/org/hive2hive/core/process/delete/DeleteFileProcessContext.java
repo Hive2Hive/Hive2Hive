@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.delete;
 
+import java.io.File;
+
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
@@ -12,12 +14,14 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetUser
 		IGetMetaContext {
 
 	private final FileManager fileManager;
+	private final File file;
 	private MetaDocument metaDocument;
 	private UserProfile userProfile;
 
-	public DeleteFileProcessContext(Process process, FileManager fileManager) {
+	public DeleteFileProcessContext(Process process, FileManager fileManager, File file) {
 		super(process);
 		this.fileManager = fileManager;
+		this.file = file;
 	}
 
 	public FileManager getFileManager() {
@@ -42,5 +46,9 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetUser
 	@Override
 	public UserProfile getUserProfile() {
 		return userProfile;
+	}
+
+	public File getFile() {
+		return file;
 	}
 }
