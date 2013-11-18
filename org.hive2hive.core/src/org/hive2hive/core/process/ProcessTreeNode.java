@@ -16,6 +16,7 @@ public abstract class ProcessTreeNode extends Process {
 	private final Process process;
 	private final List<ProcessTreeNode> childProcesses;
 	private boolean done;
+	private final ProcessTreeNode parent;
 
 	/**
 	 * For the root node (does not do anything except holding children and starting them simultanously
@@ -34,6 +35,7 @@ public abstract class ProcessTreeNode extends Process {
 	public ProcessTreeNode(Process process, ProcessTreeNode parent) {
 		super(null);
 		this.process = process;
+		this.parent = parent;
 		this.childProcesses = new ArrayList<ProcessTreeNode>();
 		this.done = false;
 		if (parent != null) {
@@ -49,6 +51,10 @@ public abstract class ProcessTreeNode extends Process {
 		return childProcesses;
 	}
 
+	public ProcessTreeNode getParent() {
+		return parent;
+	}
+
 	/**
 	 * Returns whether all children are done as well
 	 * 
@@ -61,6 +67,14 @@ public abstract class ProcessTreeNode extends Process {
 		}
 
 		return done && allChildrenDone;
+	}
+
+	public int getDepth() {
+		if (parent == null) {
+			return 0;
+		} else {
+			return parent.getDepth() + 1;
+		}
 	}
 
 	@Override

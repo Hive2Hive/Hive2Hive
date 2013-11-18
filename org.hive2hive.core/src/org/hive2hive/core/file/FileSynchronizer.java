@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,10 @@ public class FileSynchronizer {
 			}
 		}
 
-		// TODO order in pre-order (by path name)
+		// delete from behind
+		sortNodesPreorder(deletedLocally);
+		Collections.reverseOrder();
+
 		logger.debug("Found " + deletedLocally.size()
 				+ " files/folders that have been deleted locally during absence");
 		return deletedLocally;
@@ -128,7 +133,7 @@ public class FileSynchronizer {
 			}
 		}
 
-		// TODO order in pre-order (by path name)
+		sortFilesPreorder(addedLocally);
 		logger.debug("Found " + addedLocally.size()
 				+ " files/folders that have been added locally during absence");
 		return addedLocally;
@@ -161,6 +166,7 @@ public class FileSynchronizer {
 			}
 		}
 
+		sortNodesPreorder(addedRemotely);
 		logger.debug("Found " + addedRemotely.size()
 				+ " files/folders that have been added remotely during absence");
 		return addedRemotely;
@@ -201,7 +207,7 @@ public class FileSynchronizer {
 			}
 		}
 
-		// TODO order in pre-order (by path name)
+		sortFilesPreorder(updatedLocally);
 		logger.debug("Found " + updatedLocally.size()
 				+ " files/folders that have been updated locally during absence");
 		return updatedLocally;
@@ -239,5 +245,35 @@ public class FileSynchronizer {
 		logger.debug("Found " + updatedRemotely.size()
 				+ " files/folders that have been updated remotely during absence");
 		return updatedRemotely;
+	}
+
+	/**
+	 * Sorts a list of {@link FileTreeNode} in pre-order style
+	 * 
+	 * @param deletedLocally
+	 */
+	private void sortNodesPreorder(List<FileTreeNode> fileList) {
+		Collections.sort(fileList, new Comparator<FileTreeNode>() {
+
+			@Override
+			public int compare(FileTreeNode node1, FileTreeNode node2) {
+				return new String(node1.getFullPath()).compareTo(node2.getFullPath());
+			}
+		});
+	}
+
+	/**
+	 * Sorts a list of files in pre-order style
+	 * 
+	 * @param deletedLocally
+	 */
+	private void sortFilesPreorder(List<File> fileList) {
+		Collections.sort(fileList, new Comparator<File>() {
+
+			@Override
+			public int compare(File file1, File file2) {
+				return new String(file1.getAbsolutePath()).compareTo(file2.getAbsolutePath());
+			}
+		});
 	}
 }

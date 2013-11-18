@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.login;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -97,7 +98,6 @@ public class SynchronizeFilesStep extends ProcessStep {
 			logger.error("Problem occurred: " + problem);
 		}
 
-		// TODO: next step
 		if (context.getIsDefinedAsMaster()) {
 			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(
 					userProfile.getUserId());
@@ -165,21 +165,45 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	private ProcessTreeNode startDelete(List<FileTreeNode> toDelete, FileManager fileManager,
 			UserCredentials credentials) {
-		// delete the files in the DHT that are deleted while offline
+		// delete the files in the DHT that are deleted while offline. First create a normal tree, but the
+		// order must be reverse. With the created tree, reverse it in a 2nd step.
+		List<ProcessTreeNode> allNodes = new ArrayList<ProcessTreeNode>();
 		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
 		for (FileTreeNode node : toDelete) {
-			// TODO get parent means get the child files --> start deletion at children
 			ProcessTreeNode parent = getParent(rootProcess, node);
 			// initialize the process
 			DeleteFileProcess deleteProcess = new DeleteFileProcess(node, fileManager, getNetworkManager(),
 					credentials);
-			new NodeProcessTreeNode(deleteProcess, parent, node);
+			allNodes.add(new NodeProcessTreeNode(deleteProcess, parent, node));
+		}
+
+		// files are deleted in reverse order (not pre-order)
+		// get parent means get the child files --> start deletion at children,
+		// thus the tree must be reversed (by using the depth)
+		NodeProcessTreeNode reverseRootProcess = new NodeProcessTreeNode();
+		ProcessTreeNode currentParent = reverseRootProcess;
+		int currentDepth = allNodes.size();
+		while (!allNodes.isEmpty()) {
+			for (ProcessTreeNode processNode : allNodes) {
+				if (processNode.getDepth() == currentDepth) {
+					currentParent.addChild(processNode);
+				}
+			}
+
+			if (currentParent.getChildren() != null && !currentParent.getChildren().isEmpty()) {
+				// children are filled --> take first child as new parent
+				currentParent = currentParent.getChildren().get(0);
+			}
+
+			// decrease depth
+			currentDepth--;
 		}
 
 		// start the download
 		logger.debug("Start deleting files in DHT...");
-		rootProcess.start();
-		return rootProcess;
+		reverseRootProcess.start();
+
+		return reverseRootProcess;
 	}
 
 	@Override
