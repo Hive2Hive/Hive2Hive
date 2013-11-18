@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
@@ -15,13 +16,16 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetUser
 
 	private final FileManager fileManager;
 	private final File file;
+	private final UserCredentials credentials;
 	private MetaDocument metaDocument;
 	private UserProfile userProfile;
 
-	public DeleteFileProcessContext(Process process, FileManager fileManager, File file) {
+	public DeleteFileProcessContext(Process process, FileManager fileManager, File file,
+			UserCredentials credentials) {
 		super(process);
 		this.fileManager = fileManager;
 		this.file = file;
+		this.credentials = credentials;
 	}
 
 	public FileManager getFileManager() {
@@ -50,5 +54,9 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetUser
 
 	public File getFile() {
 		return file;
+	}
+
+	public UserCredentials getCredentials() {
+		return credentials;
 	}
 }

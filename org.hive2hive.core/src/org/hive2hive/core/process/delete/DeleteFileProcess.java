@@ -16,7 +16,7 @@ public class DeleteFileProcess extends Process {
 	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
 			UserCredentials credentials) {
 		super(networkManager);
-		context = new DeleteFileProcessContext(this, fileManager, file);
+		context = new DeleteFileProcessContext(this, fileManager, file, credentials);
 
 		// TODO verify if the file is a folder. If yes, either delete recursively or deny deletion
 
