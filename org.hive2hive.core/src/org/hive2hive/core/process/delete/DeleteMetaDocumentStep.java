@@ -21,10 +21,15 @@ public class DeleteMetaDocumentStep extends RemoveProcessStep {
 
 		// delete node from user profile
 		FileTreeNode fileNode = userProfile.getFileById(metaDocument.getId());
+		if (!fileNode.getChildren().isEmpty()) {
+			getProcess().stop("Can only delete empty directory");
+			return;
+		}
+
 		FileTreeNode parent = fileNode.getParent();
 		parent.removeChild(fileNode);
 		nextStep = new PutUserProfileStep(userProfile, context.getCredentials(), /* TODO notify other clients */
-				null);
+		null);
 
 		// start the deletion
 		remove(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT);
