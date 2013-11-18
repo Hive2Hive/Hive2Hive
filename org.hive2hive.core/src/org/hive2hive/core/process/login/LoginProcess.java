@@ -1,10 +1,10 @@
 package org.hive2hive.core.process.login;
 
-import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Process to log in. This process only logs in. When the credentials match, the locations get updated.

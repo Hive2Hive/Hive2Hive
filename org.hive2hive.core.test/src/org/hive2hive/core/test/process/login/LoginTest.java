@@ -8,10 +8,10 @@ import net.tomp2p.futures.FutureGet;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkPutGetUtil;

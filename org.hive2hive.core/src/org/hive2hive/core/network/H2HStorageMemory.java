@@ -161,7 +161,7 @@ public class H2HStorageMemory extends StorageMemory {
 	private VersionKey getParent(VersionKey child, Map<Number160, Data> history) {
 		for (Number160 key : history.keySet()) {
 			Data data = history.get(key);
-			// TODO verify why 'hash()' returns only 160bit instad of 96bit number
+			// TODO verify why 'hash()' returns only 160bit instead of 96bit number
 			// TODO how to compare two hashes?
 			if (data.hash().equals(child.getPreviousHash())) {
 				return new VersionKey(key);

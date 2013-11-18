@@ -1,7 +1,6 @@
-package org.hive2hive.core.model;
+package org.hive2hive.core.security;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.security.PasswordUtil;
 
 /**
  * This stores a user's credentials. Do not change the password or the PIN manually by using
@@ -35,6 +34,7 @@ public final class UserCredentials {
 	}
 
 	public String getProfileLocationKey() {
+		
 		// concatenate PIN + PW + UserId
 		String location = new StringBuilder().append(pin).append(password).append(userId).toString();
 

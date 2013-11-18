@@ -6,9 +6,9 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Process to upload a new file into the DHT

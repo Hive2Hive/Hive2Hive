@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.messages.usermessages.direct;
+package org.hive2hive.core.network.messages.direct;
 
 import net.tomp2p.peers.PeerAddress;
 

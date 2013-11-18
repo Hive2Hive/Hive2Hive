@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.UserCredentials;
 
 public abstract class BaseUploadFileProcessContext extends ProcessContext implements IGetUserProfileContext {
 

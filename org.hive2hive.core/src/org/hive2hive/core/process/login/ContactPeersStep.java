@@ -16,9 +16,9 @@ import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
+import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.usermessages.direct.ContactPeerMessage;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutLocationStep;
 

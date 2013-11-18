@@ -9,7 +9,7 @@ public interface H2HConstants {
 	// standard port for the hive2hive network
 	public static final int H2H_PORT = 4622;
 
-	// define the default encoding charset (use explicitly)
+	// define the default encoding char set (use explicitly)
 	public static final Charset ENCODING_CHARSET = Charset.forName("UTF-8");
 
 	// the configuration file name (lying in the root directory of the node)
@@ -49,4 +49,6 @@ public interface H2HConstants {
 	// key lengths for sending messages
 	public static final EncryptionUtil.RSA_KEYLENGTH H2H_RSA_KEYLENGTH = EncryptionUtil.RSA_KEYLENGTH.BIT_512;
 	public static final EncryptionUtil.AES_KEYLENGTH H2H_AES_KEYLENGTH = EncryptionUtil.AES_KEYLENGTH.BIT_128;
+
+	public static final String UM_CONTENT_KEY_PREFIX = "USER-MESSAGE-PREFIX";
 }
