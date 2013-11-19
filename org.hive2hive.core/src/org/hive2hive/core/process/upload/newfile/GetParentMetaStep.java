@@ -58,6 +58,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 				// 3. update the user profile
 				nextStep = new PutMetaDocumentStep(newMetaDocument, new UpdateParentMetaStep());
 
+				super.keyPair = parentNode.getKeyPair();
 				super.context = context;
 				super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
 			} catch (FileNotFoundException e) {

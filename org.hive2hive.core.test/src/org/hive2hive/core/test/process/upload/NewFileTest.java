@@ -91,6 +91,19 @@ public class NewFileTest extends H2HJUnitTest {
 		verifyUpload(folder, 0);
 	}
 
+	@Test
+	public void testUploadFolderWithFile() throws IOException {
+		// create a container
+		File folder = new File(fileManager.getRoot(), "folder-with-file");
+		folder.mkdirs();
+		startUploadProcess(folder);
+
+		File file = new File(folder, "test-file");
+		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
+		startUploadProcess(file);
+		verifyUpload(file, 1);
+	}
+
 	private void startUploadProcess(File toUpload) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager, config);
@@ -114,7 +127,7 @@ public class NewFileTest extends H2HJUnitTest {
 		UserProfile gotProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
-		FileTreeNode node = gotProfile.getRoot().getChildByName(originalFile.getName());
+		FileTreeNode node = gotProfile.getFileByPath(originalFile, fileManager);
 		Assert.assertNotNull(node);
 
 		// verify the meta document
