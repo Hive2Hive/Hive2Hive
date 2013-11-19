@@ -14,13 +14,14 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
+import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 
 public class UpdateMetaDocumentStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		NewVersionProcessContext context = (NewVersionProcessContext) getProcess().getContext();
+		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		MetaDocument metaDocument = context.getMetaDocument();
 		if (metaDocument == null) {
 			getProcess()

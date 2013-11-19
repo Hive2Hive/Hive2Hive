@@ -72,7 +72,7 @@ public class PutChunkStep extends PutProcessStep {
 			return;
 		}
 
-		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
+		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 
 		// first, validate the file size (only first time)
 		if (chunkKeys.isEmpty()) {

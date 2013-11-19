@@ -6,13 +6,16 @@ import java.util.List;
 
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.context.ProcessContext;
 
-public abstract class BaseUploadFileProcessContext extends ProcessContext implements IGetUserProfileContext {
+public class UploadFileProcessContext extends ProcessContext implements IGetUserProfileContext,
+		IGetMetaContext {
 
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration config;
@@ -21,8 +24,9 @@ public abstract class BaseUploadFileProcessContext extends ProcessContext implem
 	private final boolean fileAlreadyExists;
 	private List<KeyPair> chunkKeys;
 	private UserProfile userProfile;
+	private MetaDocument metaDocument;
 
-	protected BaseUploadFileProcessContext(Process process, File file, UserCredentials credentials,
+	public UploadFileProcessContext(Process process, File file, UserCredentials credentials,
 			FileManager fileManager, IH2HFileConfiguration config, boolean fileAlreadyExists) {
 		super(process);
 		this.file = file;
@@ -70,4 +74,13 @@ public abstract class BaseUploadFileProcessContext extends ProcessContext implem
 		return userProfile;
 	}
 
+	@Override
+	public void setMetaDocument(MetaDocument metaDocument) {
+		this.metaDocument = metaDocument;
+	}
+
+	@Override
+	public MetaDocument getMetaDocument() {
+		return metaDocument;
+	}
 }

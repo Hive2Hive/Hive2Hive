@@ -10,6 +10,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.upload.UploadFileProcessContext;
 
 /**
  * Process to upload a file into the DHT
@@ -20,7 +21,7 @@ import org.hive2hive.core.process.Process;
 public class NewVersionProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewVersionProcess.class);
-	private final NewVersionProcessContext context;
+	private final UploadFileProcessContext context;
 
 	/**
 	 * Use this constructor if the most recent user profile is already present
@@ -34,7 +35,7 @@ public class NewVersionProcess extends Process {
 	public NewVersionProcess(File file, UserCredentials credentials, NetworkManager networkManager,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		super(networkManager);
-		context = new NewVersionProcessContext(this, file, credentials, fileManager, config);
+		context = new UploadFileProcessContext(this, file, credentials, fileManager, config, true);
 
 		// TODO shared files not considered yet
 
@@ -54,7 +55,7 @@ public class NewVersionProcess extends Process {
 	}
 
 	@Override
-	public NewVersionProcessContext getContext() {
+	public UploadFileProcessContext getContext() {
 		return context;
 	}
 

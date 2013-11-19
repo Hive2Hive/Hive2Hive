@@ -7,7 +7,7 @@ import java.security.KeyPair;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
-import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
+import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
@@ -53,7 +53,7 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 	 * @throws IOException
 	 */
 	private void addFileToUserProfile(File file, KeyPair fileKeys) throws IOException {
-		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
+		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		File fileRoot = context.getFileManager().getRoot();
 
 		// new file
