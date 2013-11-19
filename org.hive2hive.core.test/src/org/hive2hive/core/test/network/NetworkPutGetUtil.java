@@ -8,7 +8,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -22,7 +21,6 @@ import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.download.DownloadFileProcess;
-import org.hive2hive.core.process.download.GetFileChunkStep;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -148,13 +146,6 @@ public class NetworkPutGetUtil {
 		GetLocationsStep step = new GetLocationsStep(userId, null, context);
 		executeStep(networkManager, step);
 		return context.getLocations();
-	}
-
-	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, MetaFile metaFile,
-			FileManager fileManager) {
-		GetFileChunkStep step = new GetFileChunkStep(file, metaFile, fileManager);
-		executeStep(networkManager, step);
-		return step.getFile();
 	}
 
 	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {

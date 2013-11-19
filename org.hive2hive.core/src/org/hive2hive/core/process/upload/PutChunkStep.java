@@ -68,7 +68,8 @@ public class PutChunkStep extends PutProcessStep {
 	public void start() {
 		// only put sth. if the file has content
 		if (file.isDirectory()) {
-			logger.debug("Nothing to put since the file is a folder");
+			logger.debug("No data to put because the file is a folder");
+			getProcess().setNextStep(stepAfterPutting);
 			return;
 		}
 
