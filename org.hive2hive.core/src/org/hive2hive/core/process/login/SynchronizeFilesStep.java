@@ -205,8 +205,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		// start the download
 		if (toDelete.size() > 0)
 			logger.debug("Start deleting files in DHT...");
-		reverseRootProcess.start();
 
+		reverseRootProcess.start();
 		return reverseRootProcess;
 	}
 

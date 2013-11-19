@@ -47,7 +47,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		FileTreeNode parent = fileNode.getParent();
 		parent.removeChild(fileNode);
 
-		if (parent.equals(context.getFileManager().getRoot())) {
+		if (parent.equals(userProfile.getRoot())) {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the parent meta folder and update the profile directly");
 

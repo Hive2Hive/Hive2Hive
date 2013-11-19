@@ -55,7 +55,8 @@ public class File2MetaFileStep extends ProcessStep {
 		}
 
 		if (fileNode == null) {
-			fileNode = getFileFromUserProfile(profileContext.getUserProfile());
+			UserProfile userProfile = profileContext.getUserProfile();
+			fileNode = userProfile.getFileByPath(file, fileManager);
 			if (fileNode == null) {
 				getProcess().stop(
 						"File does not exist in user profile. You might consider uploading a new file");
@@ -67,18 +68,6 @@ public class File2MetaFileStep extends ProcessStep {
 		GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(fileNode.getKeyPair(), nextStep,
 				metaContext);
 		getProcess().setNextStep(getMetaStep);
-	}
-
-	/**
-	 * Checks in the user profile whether a file exists.
-	 * 
-	 * @param userProfile
-	 * @return
-	 */
-	private FileTreeNode getFileFromUserProfile(UserProfile userProfile) {
-		String relativePath = file.getAbsolutePath()
-				.replaceFirst(fileManager.getRoot().getAbsolutePath(), "");
-		return userProfile.getFileByPath(relativePath);
 	}
 
 	@Override

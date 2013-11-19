@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
@@ -49,21 +48,22 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		} else {
 			// normal case when file is not in root
 			logger.debug("Get the meta folder of the parent");
-			try {
-				FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
+			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
 
-				// initialize the next steps
-				// 1. put the new meta document
-				// 2. update the parent meta document
-				// 3. update the user profile
-				nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
-
-				super.keyPair = parentNode.getKeyPair();
-				super.context = context;
-				super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
-			} catch (FileNotFoundException e) {
+			if (parentNode == null) {
 				getProcess().stop("Parent file is not in user profile");
+				return;
 			}
+
+			// initialize the next steps
+			// 1. put the new meta document
+			// 2. update the parent meta document
+			// 3. update the user profile
+			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
+
+			super.keyPair = parentNode.getKeyPair();
+			super.context = context;
+			super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
 		}
 	}
 

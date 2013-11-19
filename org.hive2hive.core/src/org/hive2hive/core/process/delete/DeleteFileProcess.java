@@ -13,51 +13,64 @@ import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
- * 1. get user profile and find the {@link FileTreeNode} in there. Check if write-access to this file
- * 2. get the meta file / folder
- * 3. delete all chunks of all versions from the DHT
- * 4. delete the meta file / folder
- * 5. remove tree node from user profile and update it
- * 6. notify other clients
+ * 1. delete the file on disk if it is still here
+ * 2. get user profile and find the {@link FileTreeNode} in there. Check if write-access to this file
+ * 3. get the meta file / folder
+ * 4. delete all chunks of all versions from the DHT
+ * 5. delete the meta file / folder
+ * 6. get the parent meta file
+ * 7. update the parent meta file
+ * 8. remove tree node from user profile and update it
+ * 9. notify other clients
  * 
  * @author Nico
  * 
  */
-// TODO verify if the file is a folder. If yes, either delete recursively or deny deletion
 public class DeleteFileProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteFileProcess.class);
 	private final DeleteFileProcessContext context;
 
+	/**
+	 * Default constructor that also deletes the file on disc.
+	 * 
+	 * @param file the file to delete
+	 * @param fileManager the file manager
+	 * @param networkManager the network manager, connected to the H2H network
+	 * @param credentials the credentials of the user
+	 * @throws IllegalArgumentException if the file cannot be deleted
+	 */
 	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
 			UserCredentials credentials) throws IllegalArgumentException {
 		super(networkManager);
 		logger.info("Deleting file/folder from the DHT");
 
+		// verify if the file can be deleted
 		verify(file);
 
 		context = new DeleteFileProcessContext(this, fileManager, file.isDirectory(), credentials);
 
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, fileManager, context, context,
-				new DeleteChunkStep());
-		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(credentials, file2MetaStep, context);
-		setNextStep(getUserProfileStep);
+		// start by deleting the file
+		setNextStep(new DeleteFileOnDiskStep(file));
 	}
 
+	/**
+	 * Use this constructor to apply a file deletion during the absence of a user.
+	 * 
+	 * @param fileNode the file node in the user profile that needs to be deleted
+	 * @param fileManager the file manager
+	 * @param networkManager the network manager, connected to the H2H network
+	 * @param credentials the credentials of the user
+	 * @throws IllegalArgumentException if the file cannot be deleted
+	 */
 	public DeleteFileProcess(FileTreeNode fileNode, FileManager fileManager, NetworkManager networkManager,
 			UserCredentials credentials) throws IllegalArgumentException {
 		super(networkManager);
 		logger.info("Deleting file/folder from the DHT");
-
-		File file = fileManager.getFile(fileNode);
-		if (file.exists()) {
-			// verfiy file only if it exists on disk
-			verify(file);
-		}
-
 		context = new DeleteFileProcessContext(this, fileManager, fileNode.isFolder(), credentials);
 
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, fileManager, context, context, null /* TODO */);
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, fileManager, context, context,
+				new DeleteChunkStep());
 		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(credentials, file2MetaStep, context);
 		setNextStep(getUserProfileStep);
 	}

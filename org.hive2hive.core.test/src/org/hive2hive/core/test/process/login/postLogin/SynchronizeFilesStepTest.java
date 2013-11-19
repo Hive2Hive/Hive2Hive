@@ -64,19 +64,24 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		// create default tree that can be used later. Upload it to the DHT
 		// - file 1
+		// - file 2
 		// - folder 1
-		// - - file 2
+		// - - file 3
 		File file1 = new File(fileManager0.getRoot(), "file 1");
 		FileUtils.writeStringToFile(file1, NetworkTestUtil.randomString());
 		NetworkPutGetUtil.uploadNewFile(network.get(0), file1, userCredentials, fileManager0, config);
+
+		File file2 = new File(fileManager0.getRoot(), "file 2");
+		FileUtils.writeStringToFile(file2, NetworkTestUtil.randomString());
+		NetworkPutGetUtil.uploadNewFile(network.get(0), file2, userCredentials, fileManager0, config);
 
 		File folder1 = new File(fileManager0.getRoot(), "folder 1");
 		folder1.mkdir();
 		NetworkPutGetUtil.uploadNewFile(network.get(0), folder1, userCredentials, fileManager0, config);
 
-		File file2 = new File(folder1, "file 2");
-		FileUtils.writeStringToFile(file2, NetworkTestUtil.randomString());
-		NetworkPutGetUtil.uploadNewFile(network.get(0), file2, userCredentials, fileManager0, config);
+		File file3 = new File(folder1, "file 2");
+		FileUtils.writeStringToFile(file3, NetworkTestUtil.randomString());
+		NetworkPutGetUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
 
 		// copy the content to the other client such that they are in sync
 		FileUtils.copyDirectory(fileManager0.getRoot(), fileManager1.getRoot());
@@ -104,15 +109,20 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// add a file
 		FileUtils.write(new File(fileManager1.getRoot(), "added-file"), NetworkTestUtil.randomString());
 
-		// delete a file
+		// delete file 1
 		File file1 = new File(fileManager1.getRoot(), "file 1");
 		file1.delete();
 
 		/** do some modifications on the remote **/
-		// add a file within folder 1
-		File file3 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 3");
+		// add a file 3 within folder 1
+		File file3 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 4");
 		FileUtils.write(file3, NetworkTestUtil.randomString());
 		NetworkPutGetUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
+
+		// delete file 2
+		File file2 = new File(fileManager0.getRoot(), "file 2");
+		file2.delete();
+		NetworkPutGetUtil.deleteFile(network.get(0), file2, userCredentials, fileManager0);
 
 		/** start sync **/
 		// the client that logs in
@@ -120,13 +130,15 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		startSync(client, fileManager1, 60);
 
 		/** verify if the remote changes are applied **/
-		file3 = new File(new File(fileManager1.getRoot(), "folder 1"), "file 3");
-		Assert.assertTrue(file3.exists());
+		file3 = new File(new File(fileManager1.getRoot(), "folder 1"), "file 4");
+		Assert.assertTrue(file3.exists()); // added file is now here
+		file2 = new File(fileManager1.getRoot(), "file 2");
+		Assert.assertFalse(file2.exists()); // deleted file is not here
 
 		/** verify if the local changes have been uploaded **/
 		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
-		Assert.assertTrue(userProfile.getFileByPath("added-file") != null);
-		Assert.assertTrue(userProfile.getFileByPath("file 1") == null);
+		Assert.assertTrue(userProfile.getFileByPath("added-file") != null); // added file is here
+		Assert.assertTrue(userProfile.getFileByPath("file 1") == null); // deleted file is not in UP
 	}
 
 	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS) {

@@ -23,7 +23,7 @@ public class FileTreeNode extends NetworkContent {
 	private String name;
 	private byte[] md5LatestVersion;
 	private KeyPair domainKeys;
-	private Set<FileTreeNode> children;
+	private final Set<FileTreeNode> children;
 
 	/**
 	 * Constructor for child nodes of type 'folder'
@@ -57,7 +57,7 @@ public class FileTreeNode extends NetworkContent {
 		this.isFolder = isFolder;
 		this.setMD5(md5LatestVersion);
 		parent.addChild(this);
-		setChildren(new HashSet<FileTreeNode>());
+		children = new HashSet<FileTreeNode>();
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class FileTreeNode extends NetworkContent {
 		this.keyPair = keyPair;
 		this.isFolder = true;
 		this.parent = null;
-		setChildren(new HashSet<FileTreeNode>());
+		children = new HashSet<FileTreeNode>();
 	}
 
 	public KeyPair getKeyPair() {
@@ -96,14 +96,7 @@ public class FileTreeNode extends NetworkContent {
 		return children;
 	}
 
-	public void setChildren(Set<FileTreeNode> children) {
-		this.children = children;
-	}
-
 	public void addChild(FileTreeNode child) {
-		if (children == null) {
-			children = new HashSet<FileTreeNode>();
-		}
 		children.add(child);
 	}
 
