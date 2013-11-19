@@ -2,7 +2,9 @@ package org.hive2hive.core.process.delete;
 
 import java.io.File;
 
+import org.apache.log4j.Logger;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserCredentials;
 import org.hive2hive.core.network.NetworkManager;
@@ -24,11 +26,14 @@ import org.hive2hive.core.process.common.get.GetUserProfileStep;
 // TODO verify if the file is a folder. If yes, either delete recursively or deny deletion
 public class DeleteFileProcess extends Process {
 
+	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteFileProcess.class);
 	private final DeleteFileProcessContext context;
 
 	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
 			UserCredentials credentials) throws IllegalArgumentException {
 		super(networkManager);
+		logger.info("Deleting file/folder from the DHT");
+
 		verify(file);
 
 		context = new DeleteFileProcessContext(this, fileManager, file.isDirectory(), credentials);
@@ -42,6 +47,8 @@ public class DeleteFileProcess extends Process {
 	public DeleteFileProcess(FileTreeNode fileNode, FileManager fileManager, NetworkManager networkManager,
 			UserCredentials credentials) throws IllegalArgumentException {
 		super(networkManager);
+		logger.info("Deleting file/folder from the DHT");
+
 		File file = fileManager.getFile(fileNode);
 		if (file.exists()) {
 			// verfiy file only if it exists on disk

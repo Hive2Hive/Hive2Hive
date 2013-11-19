@@ -51,6 +51,7 @@ public class DeleteChunkStep extends RemoveProcessStep {
 		if (chunksToDelete.isEmpty()) {
 			// continue with next steps:
 			// 1. delete the meta document
+			// 2. update the parent meta document
 			// 2. update the user profile
 			// 3. put the updated user profile
 

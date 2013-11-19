@@ -18,13 +18,13 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetParentMetaStep.class);
 
-	private final MetaDocument newMetaDocument;
+	private final MetaDocument childMetaDocument;
 
-	public GetParentMetaStep(MetaDocument newMetaDocument) {
+	public GetParentMetaStep(MetaDocument childMetaDocument) {
 		// TODO this keypair ist just for omitting a NullPointerException at the superclass.
 		// There should be a super-constructor not taking any arguments
 		super(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), null, null);
-		this.newMetaDocument = newMetaDocument;
+		this.childMetaDocument = childMetaDocument;
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		if (parent.equals(context.getFileManager().getRoot())) {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the meta folder and update the profile directly");
-			nextStep = new PutMetaDocumentStep(newMetaDocument, new UpdateUserProfileStep(
+			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateUserProfileStep(
 					context.getCredentials()));
 			getProcess().setNextStep(nextStep);
 		} else {
@@ -56,7 +56,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 				// 1. put the new meta document
 				// 2. update the parent meta document
 				// 3. update the user profile
-				nextStep = new PutMetaDocumentStep(newMetaDocument, new UpdateParentMetaStep());
+				nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
 
 				super.keyPair = parentNode.getKeyPair();
 				super.context = context;

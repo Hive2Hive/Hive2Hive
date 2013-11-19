@@ -9,7 +9,7 @@ import org.hive2hive.core.process.common.remove.RemoveProcessStep;
 
 /**
  * Deletes the meta document of the deleted file. After successful deletion, the entry is also removed from
- * the file tree in the user profile.
+ * the parent meta folder and then from the file tree in the user profile.
  * 
  * @author Nico
  * 

@@ -15,13 +15,13 @@ import java.util.List;
 public class MetaFolder extends MetaDocument {
 
 	private static final long serialVersionUID = 1L;
-	private List<UserPermission> userPermissions;
-	private List<KeyPair> childDocuments; // TODO really used??
+	private final List<UserPermission> userPermissions;
+	private final List<KeyPair> childDocuments; // TODO really used??
 
 	public MetaFolder(PublicKey id, String creatorName) {
 		super(id);
 		userPermissions = new ArrayList<UserPermission>();
-		setChildDocuments(new ArrayList<KeyPair>());
+		childDocuments = new ArrayList<KeyPair>();
 
 		// creator receives write permissions by default
 		userPermissions.add(new UserPermission(creatorName, PermissionType.WRITE));
@@ -31,23 +31,31 @@ public class MetaFolder extends MetaDocument {
 		return userPermissions;
 	}
 
-	public void setUserPermissions(List<UserPermission> userPermissions) {
-		this.userPermissions = userPermissions;
+	public void addUserPermissions(UserPermission userPermission) {
+		userPermissions.add(userPermission);
+	}
+
+	public void removeUserPermissions(String userId) {
+		UserPermission toDelete = null;
+		for (UserPermission permission : userPermissions) {
+			if (permission.getUserId().equalsIgnoreCase(userId)) {
+				toDelete = permission;
+				break;
+			}
+		}
+
+		userPermissions.remove(toDelete);
 	}
 
 	public List<KeyPair> getChildDocuments() {
 		return childDocuments;
 	}
 
-	public void setChildDocuments(List<KeyPair> childDocuments) {
-		this.childDocuments = childDocuments;
-	}
-
 	public void addChildDocument(KeyPair child) {
-		if (childDocuments == null) {
-			childDocuments = new ArrayList<KeyPair>();
-		}
 		childDocuments.add(child);
 	}
 
+	public void removeChildDocument(KeyPair child) {
+		childDocuments.remove(child);
+	}
 }
