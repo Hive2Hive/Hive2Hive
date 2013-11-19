@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.login;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -15,6 +16,7 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
+import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -72,7 +74,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		 * Delete the files in the DHT
 		 */
 		List<FileTreeNode> toDeleteInDHT = synchronizer.getDeletedLocally();
-		// TODO delete in DHT
+		ProcessTreeNode deleteProcess = startDelete(toDeleteInDHT, fileManager, context.getCredentials());
 
 		/*
 		 * Delete the remotely deleted files
@@ -82,8 +84,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 			file.delete();
 		}
 
-		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone() && uploadProcessNewVersions
-				.isDone())) {
+		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone()
+				&& uploadProcessNewVersions.isDone() && deleteProcess.isDone())) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -96,7 +98,6 @@ public class SynchronizeFilesStep extends ProcessStep {
 			logger.error("Problem occurred: " + problem);
 		}
 
-		// TODO: next step
 		if (context.getIsDefinedAsMaster()) {
 			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(
 					userProfile.getUserId());
@@ -123,7 +124,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		// start the download
-		logger.debug("Start downloading new and modified files...");
+		if (toDownload.size() > 0)
+			logger.debug("Start downloading new and modified files...");
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -140,7 +142,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
-		logger.debug("Start uploading new files ");
+		if (toUpload.size() > 0)
+			logger.debug("Start uploading new files ");
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -157,9 +160,54 @@ public class SynchronizeFilesStep extends ProcessStep {
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
-		logger.debug("Start uploading new versions of files ");
+		if (toUpload.size() > 0)
+			logger.debug("Start uploading new versions of files ");
 		rootProcess.start();
 		return rootProcess;
+	}
+
+	private ProcessTreeNode startDelete(List<FileTreeNode> toDelete, FileManager fileManager,
+			UserCredentials credentials) {
+		// delete the files in the DHT that are deleted while offline. First create a normal tree, but the
+		// order must be reverse. With the created tree, reverse it in a 2nd step.
+		List<ProcessTreeNode> allNodes = new ArrayList<ProcessTreeNode>();
+		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
+		for (FileTreeNode node : toDelete) {
+			ProcessTreeNode parent = getParent(rootProcess, node);
+			// initialize the process
+			DeleteFileProcess deleteProcess = new DeleteFileProcess(node, fileManager, getNetworkManager(),
+					credentials);
+			allNodes.add(new NodeProcessTreeNode(deleteProcess, parent, node));
+		}
+
+		// files are deleted in reverse order (not pre-order)
+		// get parent means get the child files --> start deletion at children,
+		// thus the tree must be reversed (by using the depth)
+		NodeProcessTreeNode reverseRootProcess = new NodeProcessTreeNode();
+		ProcessTreeNode currentParent = reverseRootProcess;
+		int currentDepth = allNodes.size();
+		while (currentDepth >= 0) {
+			for (ProcessTreeNode processNode : allNodes) {
+				if (processNode.getDepth() == currentDepth) {
+					currentParent.addChild(processNode);
+				}
+			}
+
+			if (currentParent.getChildren() != null && !currentParent.getChildren().isEmpty()) {
+				// children are filled --> take first child as new parent
+				currentParent = currentParent.getChildren().get(0);
+			}
+
+			// decrease depth
+			currentDepth--;
+		}
+
+		// start the download
+		if (toDelete.size() > 0)
+			logger.debug("Start deleting files in DHT...");
+		reverseRootProcess.start();
+
+		return reverseRootProcess;
 	}
 
 	@Override

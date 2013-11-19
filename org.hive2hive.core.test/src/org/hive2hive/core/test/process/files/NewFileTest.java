@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.upload;
+package org.hive2hive.core.test.process.files;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,9 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
@@ -80,6 +82,41 @@ public class NewFileTest extends H2HJUnitTest {
 		verifyUpload(file, 5);
 	}
 
+	@Test
+	public void testUploadFolder() throws IOException {
+		File folder = new File(fileManager.getRoot(), "folder1");
+		folder.mkdirs();
+
+		startUploadProcess(folder);
+		verifyUpload(folder, 0);
+	}
+
+	@Test
+	public void testUploadFolderWithFile() throws IOException {
+		// create a container
+		File folder = new File(fileManager.getRoot(), "folder-with-file");
+		folder.mkdirs();
+		startUploadProcess(folder);
+
+		File file = new File(folder, "test-file");
+		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
+		startUploadProcess(file);
+		verifyUpload(file, 1);
+	}
+
+	@Test
+	public void testUploadFolderWithFolder() throws IOException {
+		File folder = new File(fileManager.getRoot(), "folder-with-folder");
+		folder.mkdirs();
+		startUploadProcess(folder);
+
+		File innerFolder = new File(fileManager.getRoot(), "inner-folder");
+		innerFolder.mkdir();
+		startUploadProcess(innerFolder);
+
+		verifyUpload(innerFolder, 0);
+	}
+
 	private void startUploadProcess(File toUpload) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager, config);
@@ -103,22 +140,35 @@ public class NewFileTest extends H2HJUnitTest {
 		UserProfile gotProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
-		FileTreeNode node = gotProfile.getRoot().getChildByName(originalFile.getName());
+		FileTreeNode node = gotProfile.getFileByPath(originalFile, fileManager);
 		Assert.assertNotNull(node);
 
-		// get the meta file with the keys (decrypt it)
+		// verify the meta document
 		KeyPair metaFileKeys = node.getKeyPair();
-		MetaFile metaFile = (MetaFile) NetworkPutGetUtil.getMetaDocument(client, metaFileKeys);
-		Assert.assertNotNull(metaFile);
-		Assert.assertEquals(1, metaFile.getVersions().size());
-		Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkIds().size());
+		MetaDocument metaDocument = NetworkPutGetUtil.getMetaDocument(client, metaFileKeys);
+		if (originalFile.isFile()) {
+			// get the meta file with the keys (decrypt it)
+			MetaFile metaFile = (MetaFile) metaDocument;
+			Assert.assertNotNull(metaFile);
+			Assert.assertEquals(1, metaFile.getVersions().size());
+			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkIds().size());
+		} else {
+			// get meta folder
+			MetaFolder metaFolder = (MetaFolder) metaDocument;
+			Assert.assertNotNull(metaFolder);
+			Assert.assertEquals(originalFile.list().length, metaFolder.getChildDocuments().size());
+		}
 
 		// create new filemanager
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		FileManager fileManager2 = new FileManager(root);
-		File file = NetworkPutGetUtil.downloadFile(client, node, metaFile, fileManager2);
+
+		// verify the file after downloadig it
+		File file = NetworkPutGetUtil.downloadFile(client, node, fileManager2);
 		Assert.assertTrue(file.exists());
-		Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
+		if (originalFile.isFile()) {
+			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
+		}
 	}
 
 	@Test

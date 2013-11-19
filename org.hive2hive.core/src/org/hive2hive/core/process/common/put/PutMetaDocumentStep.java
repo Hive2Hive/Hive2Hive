@@ -34,6 +34,14 @@ public class PutMetaDocumentStep extends PutProcessStep {
 		this.metaDocument = metaDocument;
 	}
 
+	/**
+	 * Note, if this constructor is used, the null arguments here need to be overwritten in the 'start'
+	 * method.
+	 */
+	protected PutMetaDocumentStep() {
+		super(null, H2HConstants.META_DOCUMENT, null, null);
+	}
+
 	@Override
 	public void start() {
 		try {

@@ -35,9 +35,8 @@ public class DownloadFileProcess extends Process {
 			// 1. get the meta file
 			// 2. evaluate the meta file
 			// 3. download all chunks
-			EvaluateMetaDocumentStep evalMetaDoc = new EvaluateMetaDocumentStep();
-			GetMetaDocumentStep metaDocumentStep = new GetMetaDocumentStep(file.getKeyPair(), evalMetaDoc,
-					context);
+			GetMetaDocumentStep metaDocumentStep = new GetMetaDocumentStep(file.getKeyPair(),
+					new EvaluateMetaDocumentStep(), context);
 			setNextStep(metaDocumentStep);
 
 		}

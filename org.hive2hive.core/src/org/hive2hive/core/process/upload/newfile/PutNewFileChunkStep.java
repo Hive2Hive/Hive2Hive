@@ -11,7 +11,6 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
-import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.upload.PutChunkStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -26,6 +25,8 @@ public class PutNewFileChunkStep extends PutChunkStep {
 	private void configureStepAfterUpload(NewFileProcessContext context) {
 		// generate the new key pair for the meta file (which are later stored in the user profile)
 		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+		context.setNewMetaKeyPair(metaKeyPair);
+
 		MetaDocument metaDocument = null;
 		if (file.isDirectory()) {
 			// create a new meta folder
@@ -41,15 +42,15 @@ public class PutNewFileChunkStep extends PutChunkStep {
 			metaDocument = metaFile;
 		}
 
-		// 1. put the meta document
-		// 2. get the user profile
-		// 3. update the user profile
-		UpdateUserProfileStep updateProfileStep = new UpdateUserProfileStep(file, metaKeyPair,
-				context.getCredentials());
-		GetUserProfileStep getProfileStep = new GetUserProfileStep(context.getCredentials(),
-				updateProfileStep, context);
-		PutMetaDocumentStep putMetaFolder = new PutMetaDocumentStep(metaDocument, getProfileStep);
+		// 1. get the user profile
+		// 2. get the parent meta document
+		// 3. put the new meta document
+		// 4. update the parent meta document
+		// 5. update the user profile
+		GetParentMetaStep getParentMeta = new GetParentMetaStep(metaDocument);
+		GetUserProfileStep getProfileStep = new GetUserProfileStep(context.getCredentials(), getParentMeta,
+				context);
 
-		setStepAfterPutting(putMetaFolder);
+		setStepAfterPutting(getProfileStep);
 	}
 }

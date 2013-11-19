@@ -8,7 +8,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -20,8 +19,8 @@ import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
+import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
-import org.hive2hive.core.process.download.GetFileChunkStep;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -69,7 +68,7 @@ public class NetworkPutGetUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
@@ -150,13 +149,6 @@ public class NetworkPutGetUtil {
 		return context.getLocations();
 	}
 
-	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, MetaFile metaFile,
-			FileManager fileManager) {
-		GetFileChunkStep step = new GetFileChunkStep(file, metaFile, fileManager);
-		executeStep(networkManager, step);
-		return step.getFile();
-	}
-
 	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {
 		DownloadFileProcess process = new DownloadFileProcess(file, networkManager, fileManager);
 		executeProcess(process);
@@ -175,4 +167,11 @@ public class NetworkPutGetUtil {
 				config);
 		executeProcess(process);
 	}
+
+	public static void deleteFile(NetworkManager networkManager, File file, UserCredentials credentials,
+			FileManager fileManager) {
+		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, credentials);
+		executeProcess(process);
+	}
+
 }

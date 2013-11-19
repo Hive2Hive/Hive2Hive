@@ -16,6 +16,7 @@ public abstract class ProcessTreeNode extends Process {
 	private final Process process;
 	private final List<ProcessTreeNode> childProcesses;
 	private boolean done;
+	private final ProcessTreeNode parent;
 
 	/**
 	 * For the root node (does not do anything except holding children and starting them simultanously
@@ -34,6 +35,7 @@ public abstract class ProcessTreeNode extends Process {
 	public ProcessTreeNode(Process process, ProcessTreeNode parent) {
 		super(null);
 		this.process = process;
+		this.parent = parent;
 		this.childProcesses = new ArrayList<ProcessTreeNode>();
 		this.done = false;
 		if (parent != null) {
@@ -47,6 +49,10 @@ public abstract class ProcessTreeNode extends Process {
 
 	public List<ProcessTreeNode> getChildren() {
 		return childProcesses;
+	}
+
+	public ProcessTreeNode getParent() {
+		return parent;
 	}
 
 	/**
@@ -63,6 +69,14 @@ public abstract class ProcessTreeNode extends Process {
 		return done && allChildrenDone;
 	}
 
+	public int getDepth() {
+		if (parent == null) {
+			return 0;
+		} else {
+			return parent.getDepth() + 1;
+		}
+	}
+
 	@Override
 	public void start() {
 		if (process == null) {
@@ -74,31 +88,19 @@ public abstract class ProcessTreeNode extends Process {
 			done = true;
 		} else {
 			// after the current process is done, start the next process
-			for (final ProcessTreeNode child : childProcesses) {
-				process.addListener(new IProcessListener() {
-					@Override
-					public void onSuccess() {
-						// start the child
-						child.start();
-					}
-
-					@Override
-					public void onFail(String reason) {
-						// do not start the child processes
-						ProcessTreeNode.this.onFail(reason);
-					}
-				});
-			}
-
 			process.addListener(new IProcessListener() {
 				@Override
 				public void onSuccess() {
 					done = true;
+					for (ProcessTreeNode child : childProcesses) {
+						child.start();
+					}
 				}
 
 				@Override
 				public void onFail(String reason) {
 					done = true;
+					onFail(reason);
 				}
 			});
 

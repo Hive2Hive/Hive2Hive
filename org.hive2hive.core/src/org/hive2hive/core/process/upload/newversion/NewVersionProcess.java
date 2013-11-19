@@ -9,6 +9,7 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -20,7 +21,7 @@ import org.hive2hive.core.security.UserCredentials;
 public class NewVersionProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewVersionProcess.class);
-	private final NewVersionProcessContext context;
+	private final UploadFileProcessContext context;
 
 	/**
 	 * Use this constructor if the most recent user profile is already present
@@ -34,7 +35,7 @@ public class NewVersionProcess extends Process {
 	public NewVersionProcess(File file, UserCredentials credentials, NetworkManager networkManager,
 			FileManager fileManager, IH2HFileConfiguration config) {
 		super(networkManager);
-		context = new NewVersionProcessContext(this, file, credentials, fileManager, config);
+		context = new UploadFileProcessContext(this, file, credentials, fileManager, config, true);
 
 		// TODO shared files not considered yet
 
@@ -43,7 +44,8 @@ public class NewVersionProcess extends Process {
 			// 2. get the user profile
 			// 3. get the meta file
 			// 4. update the meta file
-			// 5. update the user profile
+			// 5. update the parent meta folder
+			// 6. update the user profile
 
 			logger.debug("Adding a file to the DHT");
 			setNextStep(new PutNewVersionChunkStep(file, context));
@@ -53,7 +55,7 @@ public class NewVersionProcess extends Process {
 	}
 
 	@Override
-	public NewVersionProcessContext getContext() {
+	public UploadFileProcessContext getContext() {
 		return context;
 	}
 

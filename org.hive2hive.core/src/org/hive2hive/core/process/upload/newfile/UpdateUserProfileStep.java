@@ -6,7 +6,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
-import org.hive2hive.core.process.upload.BaseUploadFileProcessContext;
+import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -18,30 +18,19 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public class UpdateUserProfileStep extends PutUserProfileStep {
 
-	private final File file;
-	private final KeyPair fileKeys;
-
-	public UpdateUserProfileStep(File file, KeyPair fileKeys, UserCredentials credentials) {
+	public UpdateUserProfileStep(UserCredentials credentials) {
 		super(null, credentials, null);
-		this.file = file;
-		this.fileKeys = fileKeys;
 	}
 
 	@Override
 	public void start() {
 		// set the user profile from the previous step
-		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
+		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 		super.userProfile = context.getUserProfile();
-
-		if (userProfile == null) {
-			// this was handled before
-			getProcess().stop("Did not find user profile");
-			return;
-		}
 
 		try {
 			// create a file tree node in the user profile
-			addFileToUserProfile();
+			addFileToUserProfile(context.getFile(), context.getNewMetaKeyPair());
 
 			// TODO next steps:
 			// 1. notify other clients as the next step
@@ -63,8 +52,8 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 	 * @param rootNode the root node in the tree
 	 * @throws IOException
 	 */
-	private void addFileToUserProfile() throws IOException {
-		BaseUploadFileProcessContext context = (BaseUploadFileProcessContext) getProcess().getContext();
+	private void addFileToUserProfile(File file, KeyPair fileKeys) throws IOException {
+		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		File fileRoot = context.getFileManager().getRoot();
 
 		// new file

@@ -41,7 +41,7 @@ public abstract class ProcessStep {
 		return process.getNetworkManager();
 	}
 
-	protected static String key2String(PublicKey key) {
+	public static String key2String(PublicKey key) {
 		return new String(Base64.encode(key.getEncoded()), H2HConstants.ENCODING_CHARSET);
 	}
 }
