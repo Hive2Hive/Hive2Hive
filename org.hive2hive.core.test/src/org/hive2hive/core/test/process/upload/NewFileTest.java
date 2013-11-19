@@ -104,6 +104,19 @@ public class NewFileTest extends H2HJUnitTest {
 		verifyUpload(file, 1);
 	}
 
+	@Test
+	public void testUploadFolderWithFolder() throws IOException {
+		File folder = new File(fileManager.getRoot(), "folder-with-folder");
+		folder.mkdirs();
+		startUploadProcess(folder);
+
+		File innerFolder = new File(fileManager.getRoot(), "inner-folder");
+		innerFolder.mkdir();
+		startUploadProcess(innerFolder);
+
+		verifyUpload(innerFolder, 0);
+	}
+
 	private void startUploadProcess(File toUpload) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager, config);
