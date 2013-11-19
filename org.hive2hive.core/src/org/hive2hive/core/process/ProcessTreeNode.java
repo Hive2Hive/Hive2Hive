@@ -88,31 +88,19 @@ public abstract class ProcessTreeNode extends Process {
 			done = true;
 		} else {
 			// after the current process is done, start the next process
-			for (final ProcessTreeNode child : childProcesses) {
-				process.addListener(new IProcessListener() {
-					@Override
-					public void onSuccess() {
-						// start the child
-						child.start();
-					}
-
-					@Override
-					public void onFail(String reason) {
-						// do not start the child processes
-						ProcessTreeNode.this.onFail(reason);
-					}
-				});
-			}
-
 			process.addListener(new IProcessListener() {
 				@Override
 				public void onSuccess() {
 					done = true;
+					for (ProcessTreeNode child : childProcesses) {
+						child.start();
+					}
 				}
 
 				@Override
 				public void onFail(String reason) {
 					done = true;
+					onFail(reason);
 				}
 			});
 

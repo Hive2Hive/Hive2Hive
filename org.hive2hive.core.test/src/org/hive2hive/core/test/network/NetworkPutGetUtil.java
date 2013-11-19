@@ -67,7 +67,7 @@ public class NetworkPutGetUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(2000);
+		H2HWaiter waiter = new H2HWaiter(20);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());

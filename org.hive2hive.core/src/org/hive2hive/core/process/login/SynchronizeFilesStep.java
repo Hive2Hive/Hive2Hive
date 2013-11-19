@@ -124,7 +124,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		// start the download
-		logger.debug("Start downloading new and modified files...");
+		if (toDownload.size() > 0)
+			logger.debug("Start downloading new and modified files...");
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -141,7 +142,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
-		logger.debug("Start uploading new files ");
+		if (toUpload.size() > 0)
+			logger.debug("Start uploading new files ");
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -158,7 +160,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
-		logger.debug("Start uploading new versions of files ");
+		if (toUpload.size() > 0)
+			logger.debug("Start uploading new versions of files ");
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -183,7 +186,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		NodeProcessTreeNode reverseRootProcess = new NodeProcessTreeNode();
 		ProcessTreeNode currentParent = reverseRootProcess;
 		int currentDepth = allNodes.size();
-		while (!allNodes.isEmpty()) {
+		while (currentDepth >= 0) {
 			for (ProcessTreeNode processNode : allNodes) {
 				if (processNode.getDepth() == currentDepth) {
 					currentParent.addChild(processNode);
@@ -200,7 +203,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		// start the download
-		logger.debug("Start deleting files in DHT...");
+		if (toDelete.size() > 0)
+			logger.debug("Start deleting files in DHT...");
 		reverseRootProcess.start();
 
 		return reverseRootProcess;
