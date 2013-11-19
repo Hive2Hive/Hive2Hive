@@ -20,6 +20,7 @@ import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
+import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
@@ -67,7 +68,7 @@ public class NetworkPutGetUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
@@ -166,4 +167,11 @@ public class NetworkPutGetUtil {
 				config);
 		executeProcess(process);
 	}
+
+	public static void deleteFile(NetworkManager networkManager, File file, UserCredentials credentials,
+			FileManager fileManager) {
+		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, credentials);
+		executeProcess(process);
+	}
+
 }

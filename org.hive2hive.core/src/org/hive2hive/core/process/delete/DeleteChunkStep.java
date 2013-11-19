@@ -9,23 +9,20 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.process.common.remove.RemoveProcessStep;
 
+/**
+ * Deletes chunks in the DHT. After deleting a chunk, it calls itself recursively until all chunks of all
+ * versions are deleted.
+ * 
+ * @author Nico
+ * 
+ */
 public class DeleteChunkStep extends RemoveProcessStep {
 
-	private DeleteFileProcessContext context;
 	private List<KeyPair> chunksToDelete;
 
 	public DeleteChunkStep() {
 		super(null, H2HConstants.FILE_CHUNK, null);
 
-		context = (DeleteFileProcessContext) getProcess().getContext();
-		chunksToDelete = new ArrayList<KeyPair>();
-		if (!context.isDirectory()) {
-			// no chunks to delete when directory
-			MetaFile metaFile = (MetaFile) context.getMetaDocument();
-			for (FileVersion version : metaFile.getVersions()) {
-				chunksToDelete.addAll(version.getChunkIds());
-			}
-		}
 	}
 
 	private DeleteChunkStep(List<KeyPair> chunksToDelete) {
@@ -35,9 +32,29 @@ public class DeleteChunkStep extends RemoveProcessStep {
 
 	@Override
 	public void start() {
+		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
+
+		if (chunksToDelete == null) {
+			// first time called, initialize the list
+			chunksToDelete = new ArrayList<KeyPair>();
+			if (!context.isDirectory()) {
+				// no chunks to delete when directory
+				// TODO sort the deletion by version --> if there is an error, the newest version may not be
+				// gone
+				MetaFile metaFile = (MetaFile) context.getMetaDocument();
+				for (FileVersion version : metaFile.getVersions()) {
+					chunksToDelete.addAll(version.getChunkIds());
+				}
+			}
+		}
+
 		if (chunksToDelete.isEmpty()) {
-			// TODO
-			// continue with next step
+			// continue with next steps:
+			// 1. delete the meta document
+			// 2. update the user profile
+			// 3. put the updated user profile
+
+			getProcess().setNextStep(new DeleteMetaDocumentStep());
 			return;
 		}
 
