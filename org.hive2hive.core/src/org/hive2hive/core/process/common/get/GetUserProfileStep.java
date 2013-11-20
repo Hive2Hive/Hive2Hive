@@ -29,7 +29,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	private final UserCredentials credentials;
 	private final ProcessStep nextStep;
-	private IGetUserProfileContext context;
+	private final IGetUserProfileContext context;
 
 	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep,
 			IGetUserProfileContext context) {
@@ -41,8 +41,17 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(NetworkContent content) {
+	public void start() {
+		if (context.getUserProfile() == null) {
+			super.start();
+		} else {
+			logger.warn("UserProfile is already in context. We do not fetch it again");
+			getProcess().setNextStep(nextStep);
+		}
+	}
 
+	@Override
+	protected void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			// could have been intended...
 			logger.warn("Did not find user profile.");
@@ -64,4 +73,5 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
 	}
+
 }

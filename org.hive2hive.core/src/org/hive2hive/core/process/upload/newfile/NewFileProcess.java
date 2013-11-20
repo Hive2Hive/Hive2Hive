@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.security.UserCredentials;
@@ -36,6 +37,16 @@ public class NewFileProcess extends Process {
 		// 6. update the user profile
 		logger.debug("Adding a new file/folder to the DHT");
 		setNextStep(new PutNewFileChunkStep(file, context));
+	}
+
+	/**
+	 * May be used when the user profile is already existent. Thus, the step getting and decrypting the user
+	 * profile can be omitted
+	 * 
+	 * @param userProfile the recent user profile
+	 */
+	public void setUserProfile(UserProfile userProfile) {
+		context.setUserProfile(userProfile);
 	}
 
 	@Override

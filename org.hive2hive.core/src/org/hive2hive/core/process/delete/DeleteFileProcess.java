@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.File2MetaFileStep;
@@ -83,6 +84,16 @@ public class DeleteFileProcess extends Process {
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			throw new IllegalArgumentException("Folder is not empty");
 		}
+	}
+
+	/**
+	 * May be used when the user profile is already existent. Thus, the step getting and decrypting the user
+	 * profile can be omitted
+	 * 
+	 * @param userProfile the recent user profile
+	 */
+	public void setUserProfile(UserProfile userProfile) {
+		context.setUserProfile(userProfile);
 	}
 
 	@Override
