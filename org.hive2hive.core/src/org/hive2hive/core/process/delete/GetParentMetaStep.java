@@ -58,7 +58,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			// normal case when file is not in root
 			logger.debug("Get the meta folder of the parent");
 
-			super.nextStep = new UpdateParentMetaStep(fileNode.getKeyPair());
+			super.nextStep = new UpdateParentMetaStep(metaDocumentToDelete.getId());
 			super.keyPair = parent.getKeyPair();
 			super.context = context;
 			super.get(key2String(parent.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);

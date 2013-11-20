@@ -55,7 +55,15 @@ public class MetaFolder extends MetaDocument {
 		childDocuments.add(child);
 	}
 
-	public void removeChildDocument(KeyPair child) {
-		childDocuments.remove(child);
+	public void removeChildDocument(PublicKey childKey) {
+		KeyPair toRemove = null;
+		for (KeyPair child : childDocuments) {
+			if (child.getPublic().equals(childKey)) {
+				toRemove = child;
+				break;
+			}
+		}
+
+		childDocuments.remove(toRemove);
 	}
 }

@@ -1,6 +1,6 @@
 package org.hive2hive.core.process.delete;
 
-import java.security.KeyPair;
+import java.security.PublicKey;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -17,9 +17,9 @@ import org.hive2hive.core.process.common.put.PutUserProfileStep;
 public class UpdateParentMetaStep extends PutMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
-	private final KeyPair childKey;
+	private final PublicKey childKey;
 
-	public UpdateParentMetaStep(KeyPair childKey) {
+	public UpdateParentMetaStep(PublicKey childKey) {
 		this.childKey = childKey;
 	}
 

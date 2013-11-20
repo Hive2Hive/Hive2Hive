@@ -47,6 +47,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	@Override
 	public void start() {
+		// TODO do not in parallel to omit conflicts!
 		PostLoginProcessContext context = (PostLoginProcessContext) getProcess().getContext();
 		FileManager fileManager = context.getFileManager();
 		UserProfile userProfile = context.getUserProfile();

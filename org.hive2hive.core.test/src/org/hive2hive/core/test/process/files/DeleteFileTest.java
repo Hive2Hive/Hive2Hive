@@ -8,12 +8,14 @@ import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.ProcessStep;
@@ -59,7 +61,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(0);
 
 		// add a file to the network
-		// create a file
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		FileManager fileManager = new FileManager(root);
@@ -97,11 +98,59 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
+	public void testDeleteFileInFolder() throws IOException {
+		NetworkManager client = network.get(0);
+
+		// add a folder to the network
+		String randomName = NetworkTestUtil.randomString();
+		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
+		FileManager fileManager = new FileManager(root);
+		File folder = new File(root, "test-folder");
+		folder.mkdir();
+		NetworkPutGetUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
+
+		// add a file to the network
+		File file = new File(folder, "test-file");
+		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
+		NetworkPutGetUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
+
+		// store some things to be able to test later
+		UserProfile userProfileBeforeDeletion = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
+		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, fileManager).getKeyPair();
+		MetaFolder metaFolderBeforeDeletion = (MetaFolder) NetworkPutGetUtil.getMetaDocument(client,
+				metaKeyPairFolder);
+		MetaFile metaFileBeforeDeletion = (MetaFile) NetworkPutGetUtil.getMetaDocument(client,
+				metaKeyPairFile);
+		Assert.assertNotNull(metaFolderBeforeDeletion);
+		Assert.assertNotNull(metaFileBeforeDeletion);
+		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
+
+		// delete the file
+		NetworkPutGetUtil.deleteFile(client, file, userCredentials, fileManager);
+
+		// check if the file is still in the DHT
+		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		Assert.assertNull(userProfile.getFileById(metaKeyPairFile.getPublic()));
+
+		// check if the folder is still in the DHT
+		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
+
+		// check the meta file is still in the DHT
+		MetaDocument metaFile = NetworkPutGetUtil.getMetaDocument(client, metaKeyPairFile);
+		Assert.assertNull(metaFile);
+
+		// check if the child is also gone
+		MetaFolder metaFolder = (MetaFolder) NetworkPutGetUtil.getMetaDocument(client, metaKeyPairFolder);
+		Assert.assertNotNull(metaFolder);
+		Assert.assertEquals(0, metaFolder.getChildDocuments().size());
+	}
+
+	@Test
 	public void testDeleteFolder() throws FileNotFoundException {
 		NetworkManager client = network.get(0);
 
 		// add a folder to the network
-		// create a file
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		FileManager fileManager = new FileManager(root);
