@@ -7,6 +7,7 @@ import java.security.PublicKey;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -112,32 +113,6 @@ public class NetworkManager {
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 
-	// /**
-	// * Sends a given message to the peer which is responsible of the given key. </br>
-	// * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
-	// * <b>Important:</b>
-	// * <ul>
-	// * <li>For an appropriate message handling like resends and error log, use and attach a
-	// * {@link FutureRoutedListener} future listener.</li>
-	// * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
-	// * nodes, which have the according private key.</li>
-	// * </ul>
-	// *
-	// * @param message
-	// * the message to send
-	// * @return future
-	// */
-	// public FutureDirect send(BaseMessage message) {
-	// if (!connection.isConnected()) {
-	// logger.warn("Node is not connected!");
-	// return null;
-	// } else if (keyPair == null) {
-	// logger.warn("Node's key pair is not set!");
-	// return null;
-	// }
-	// return messageManager.send(message);
-	// }
-
 	/**
 	 * Sends a given message to the peer which is responsible of the given key. </br>
 	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
@@ -158,32 +133,6 @@ public class NetworkManager {
 		}
 		messageManager.send(message, targetPublicKey, listener);
 	}
-
-	// /**
-	// * Message is sent directly using TCP. </br></br>
-	// * <b>Important:</b>
-	// * <ul>
-	// * <li>For an appropriate message handling like resends and error log, use and attach a
-	// * {@link FutureDirectListener} future listener.</li>
-	// * <li>This message gets encrypted with the given public key. Use this method for direct sending to
-	// nodes,
-	// * which have the according private key.</li>
-	// * </ul>
-	// *
-	// * @param message
-	// * the message to send
-	// * @return future
-	// */
-	// public FutureResponse sendDirect(BaseDirectMessage message) {
-	// if (!connection.isConnected()) {
-	// logger.warn("Node is not connected!");
-	// return null;
-	// } else if (keyPair == null) {
-	// logger.warn("Node's key pair is not set!");
-	// return null;
-	// }
-	// return messageManager.sendDirect(message);
-	// }
 
 	/**
 	 * Message is sent directly using TCP.</br></br>
@@ -293,5 +242,13 @@ public class NetworkManager {
 			return null;
 		}
 		return dataManager.remove(locationKey, contentKey);
+	}
+	
+	public FutureRemove remove(String locationKey, String contentKey, Number160 versionKey) {
+		if (!connection.isConnected()) {
+			logger.warn("Node is not connected!");
+			return null;
+		}
+		return dataManager.remove(locationKey, contentKey, versionKey);
 	}
 }

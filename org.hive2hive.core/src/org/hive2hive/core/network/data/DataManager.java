@@ -1,8 +1,6 @@
 package org.hive2hive.core.network.data;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
@@ -14,7 +12,6 @@ import net.tomp2p.storage.Data;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * This class offers an interface for storing into and loading from the network.
@@ -34,23 +31,19 @@ public class DataManager {
 		this.networkManager = networkManager;
 	}
 
-	public FuturePut putGlobalWithVersionKey(String locationKey, String contentKey, NetworkContent content) {
-		content.setVersionKey(createVersionKey(content));
-		return putGlobal(locationKey, contentKey, content);
-	}
-
-	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent content) {
-		logger.debug(String.format("global put key = '%s' content key = '%s'", locationKey, contentKey));
+	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent newContent) {
+		logger.debug(String.format("global put key = '%s' content key = '%s' version key = '%s'",
+				locationKey, contentKey, newContent.getVersionKey()));
 		try {
-			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive());
+			Data data = new Data(newContent);
+			data.ttlSeconds(newContent.getTimeToLive()).basedOn(newContent.getBasedOnKey());
 			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
-					.setData(Number160.createHash(contentKey), data).setVersionKey(content.getVersionKey())
-					.start();
+					.setData(Number160.createHash(contentKey), data)
+					.setVersionKey(newContent.getVersionKey()).start();
 		} catch (IOException e) {
 			logger.error(String
 					.format("Global put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
-							content.toString(), locationKey, contentKey, e.getMessage()));
+							newContent.toString(), locationKey, contentKey, e.getMessage()));
 			return null;
 		}
 	}
@@ -65,19 +58,13 @@ public class DataManager {
 				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
 	}
 
-
-	public void putLocalWithVersionKey(String locationKey, String contentKey, NetworkContent content) {
-		content.setVersionKey(createVersionKey(content));
-		putLocal(locationKey, contentKey, content);
-	}
-
 	public void putLocal(String locationKey, String contentKey, NetworkContent content) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
 			Number640 key = new Number640(Number160.createHash(locationKey), TOMP2P_DEFAULT_KEY,
 					Number160.createHash(contentKey), content.getVersionKey());
 			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive());
+			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
 			// TODO add public key for content protection
 			// TODO for what is this putIfAbsent flag?
 			// TODO what is the domainProtaction flag?
@@ -112,21 +99,14 @@ public class DataManager {
 		return null;
 	}
 
-
 	public FutureRemove remove(String locationKey, String contentKey) {
 		return remove(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
 	}
-	
+
 	public FutureRemove remove(String locationKey, String contentKey, Number160 versionKey) {
 		logger.debug(String.format("remove key = '%s' content key = '%s'", locationKey, contentKey));
 		return networkManager.getConnection().getPeer().remove(Number160.createHash(locationKey))
-				.setContentKey(Number160.createHash(contentKey))
-				.setVersionKey(versionKey).start();
+				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
 	}
 
-	private Number160 createVersionKey(NetworkContent content) {
-		long timestamp = new Date().getTime();
-		byte[] hash = EncryptionUtil.generateMD5Hash(EncryptionUtil.serializeObject(content));
-		return new Number160(timestamp, new Number160(Arrays.copyOf(hash, Number160.BYTE_ARRAY_SIZE)));
-	}
 }

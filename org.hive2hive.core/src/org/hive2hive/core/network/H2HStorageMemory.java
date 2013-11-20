@@ -1,8 +1,15 @@
 package org.hive2hive.core.network;
 
+import java.security.PublicKey;
+import java.util.SortedMap;
+
+import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
+import net.tomp2p.storage.Data;
 import net.tomp2p.storage.StorageLayer;
 import net.tomp2p.storage.StorageMemory;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
@@ -18,154 +25,128 @@ public class H2HStorageMemory extends StorageLayer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HStorageMemory.class);
 
-	private final NetworkManager networkManager;
+	public enum PUT_STATUS_H2H {
+		OK,
+		FAILED_NOT_ABSENT,
+		FAILED_SECURITY,
+		FAILED,
+		VERSION_CONFLICT,
+		VERSION_CONLICT_NO_VERSION_KEY,
+		VERSION_CONFLICT_NO_BASED_ON,
+		VERSION_CONFLICT_OLD_TIMESTAMP,
+	};
 
-	public H2HStorageMemory(NetworkManager networkManager) {
+	public H2HStorageMemory() {
 		super(new StorageMemory());
-		this.networkManager = networkManager;
 	}
 
-//	@Override
-//	public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
-//			PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
-//		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
-//			@Deprecated
-//			Number160 versionKey = null;
-//
-//			logger.debug("Start verification of locationKey: " + locationKey + " domainKey: " + domainKey
-//					+ " contentKey: " + contentKey + " versionKey: " + versionKey);
-//			PutStatus status = validateVersion(locationKey, domainKey, contentKey, versionKey);
-//			if (status == PutStatus.OK) {
-//				// TODO: add the version key here
-//				status = super.put(locationKey, domainKey, contentKey, newData, publicKey, putIfAbsent,
-//						domainProtection);
-//
-//				// After adding the content to the memory, old versions should be cleaned up. How many old
-//				// versions we keep can be parameterized in the constants.
-//				cleanupVersions(locationKey, domainKey, contentKey, versionKey);
-//			}
-//
-//			logger.debug("Finished verification (" + status + ") of locationKey: " + locationKey
-//					+ " domainKey: " + domainKey + " contentKey: " + contentKey + " versionKey: "
-//					+ versionKey);
-//			return status;
-//		} else {
-//			logger.debug("Disabled the put verification strategy on the remote peer");
-//			// TODO: add the version key here
-//			return super.put(locationKey, domainKey, contentKey, newData, publicKey, putIfAbsent,
-//					domainProtection);
-//		}
-//		// TODO this method receives another Number160 parameter for the version
-//		// this serves as stub
-//
-//	}
-//
-//	private PutStatus validateVersion(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-//			Number160 versionKey) {
-//		/** 0. get all versions for this locationKey, domainKey and contentKey combination **/
-//		Map<Number160, Data> history = getHistoryOnStorage(locationKey, domainKey, contentKey);
-//
-//		/** 1. if version is null and no history yet, it is the first entry here **/
-//		if (versionKey == null) {
-//			// no version key given
-//			if (history.isEmpty()) {
-//				logger.debug("First version of a content is added");
-//				return PutStatus.OK;
-//			} else {
-//				logger.error("No version key given but history is not empty");
-//				return PutStatus.VERSION_CONFLICT;
-//			}
-//		}
-//
-//		/** 2. check if previous exists **/
-//		VersionKey newVersionKey = new VersionKey(versionKey);
-//		VersionKey parentKey = getParent(newVersionKey, history);
-//
-//		if (parentKey == null) {
-//			// previous version not found
-//			logger.error("Previous version with key " + newVersionKey.getPreviousHash() + " not found");
-//			return PutStatus.VERSION_CONFLICT;
-//		}
-//
-//		/** 3. Check if previous version is latest one **/
-//		Data parentData = history.get(parentKey.getVersionKey());
-//		VersionKey latestVersionKey = getLatestVersion(history);
-//		if (latestVersionKey == null) {
-//			logger.error("Latest version not found. This should have never happened");
-//			return PutStatus.VERSION_CONFLICT;
-//		}
-//
-//		Data latestVersion = history.get(latestVersionKey.getVersionKey());
-//		if (latestVersion.equals(parentData)) {
-//			// previous version is the latest one (continue).
-//			logger.debug("New content is based on latest version.");
-//			return PutStatus.OK;
-//		} else {
-//			// previous version is already outdated (or not existent)
-//			logger.error("New content does not base on latest version in storage");
-//			return PutStatus.VERSION_CONFLICT;
-//		}
-//	}
-//
-//	private void cleanupVersions(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-//			Number160 versionKey) {
-//		Map<Number160, Data> history = getHistoryOnStorage(locationKey, domainKey, contentKey);
-//
-//		// add them to a list and sort them
-//		List<VersionKey> versionKeys = new ArrayList<VersionKey>();
-//		for (Number160 key : history.keySet()) {
-//			versionKeys.add(new VersionKey(key));
-//		}
-//
-//		// TODO check if order is correct such that the oldest ones get removed
-//		Collections.sort(versionKeys, new Comparator<VersionKey>() {
-//			@Override
-//			public int compare(VersionKey o1, VersionKey o2) {
-//				return new Long(o1.getTimestamp()).compareTo(o2.getTimestamp());
-//			}
-//		});
-//
-//		long now = System.currentTimeMillis();
-//		while (versionKeys.size() >= H2HConstants.MAX_VERSIONS_HISTORY) {
-//			VersionKey toRemove = versionKeys.get(0);
-//			if (toRemove.getTimestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS > now) {
-//				// stop removal because oldest version is too 'young'
-//				break;
-//			} else {
-//				remove(locationKey, domainKey, contentKey /* , toRemove.getVersionKey() */);
-//			}
-//		}
-//	}
-//
-//	private VersionKey getLatestVersion(Map<Number160, Data> history) {
-//		VersionKey latestVersionKey = null;
-//		for (Number160 key : history.keySet()) {
-//			VersionKey version = new VersionKey(key);
-//			if (latestVersionKey == null || latestVersionKey.getTimestamp() < version.getTimestamp()) {
-//				latestVersionKey = version;
-//			}
-//		}
-//
-//		return latestVersionKey;
-//	}
-//
-//	private VersionKey getParent(VersionKey child, Map<Number160, Data> history) {
-//		for (Number160 key : history.keySet()) {
-//			Data data = history.get(key);
-//			// TODO verify why 'hash()' returns only 160bit instad of 96bit number
-//			// TODO how to compare two hashes?
-//			if (data.hash().equals(child.getPreviousHash())) {
-//				return new VersionKey(key);
-//			}
-//		}
-//
-//		return null;
-//	}
-//
-//	private Map<Number160, Data> getHistoryOnStorage(Number160 locationKey, Number160 domainKey,
-//			Number160 contentKey) {
-//		// TODO This list is only a stub, get it from the local storage (key = versionKey, value = data)
-//		/* return get(locationKey, domainKey, contentKey) */
-//		return new HashMap<Number160, Data>();
-//	}
+	@Override
+	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
+			boolean domainProtection) {
+		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
+			logger.debug(String.format(
+					"Start put verification. location key = '%s' content key = '%s' version key = '%s' ",
+					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
+			Enum<?> status = validateVersion(key, newData);
+			if (status == PUT_STATUS_H2H.OK) {
+				status = super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+
+				// after adding the content to the memory, old versions should be cleaned up. How many old
+				// versions we keep can be parameterized in the constants.
+				cleanupVersions(key);
+			}
+
+			logger.debug(String.format(
+					"Put verification finished. location key = '%s' content key = '%s' version key = '%s' ",
+					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
+			return status;
+		} else {
+			logger.debug("Disabled the put verification strategy on the remote peer");
+			return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+		}
+	}
+
+	/**
+	 * Version keys are optimal and have to be in this case {@link Number160#ZERO}. Putting new data with no
+	 * version keys is allowed in following cases:
+	 * <ul>
+	 * <li>Under the given {@link Number640} key has no other entries.</li>
+	 * <li>Under the given {@link Number640} key is one and only one entry, where the version key is
+	 * {@link Number160#ZERO}.</li>
+	 * </ul>
+	 * 
+	 * @param key
+	 * @param newData
+	 * @return
+	 */
+	private PUT_STATUS_H2H validateVersion(Number640 key, Data newData) {
+		/** 0. get all versions for this locationKey, domainKey and contentKey combination **/
+		SortedMap<Number640, Data> history = getHistoryOnStorage(key);
+
+		/** 1. if version key is zero **/
+		if (key.getVersionKey().equals(Number160.ZERO)) {
+			if (history.isEmpty()) {
+				logger.debug("Initialy putting content with no version key.");
+				return PUT_STATUS_H2H.OK;
+			} else if (history.size() == 1 && history.firstKey().getVersionKey().equals(Number160.ZERO)) {
+				logger.debug("Overwriting content with no versioning.");
+				return PUT_STATUS_H2H.OK;
+			} else {
+				logger.warn("Trying to overwrite current version with content with no version key.");
+				return PUT_STATUS_H2H.VERSION_CONLICT_NO_VERSION_KEY;
+			}
+		}
+
+		/** 1. if version is null or zero and no history yet, it is the first entry here **/
+		if (newData.basedOn().equals(Number160.ZERO)) {
+			if (history.isEmpty()) {
+				logger.debug("First version of a content is added");
+				return PUT_STATUS_H2H.OK;
+			} else {
+				logger.warn("History is not empty and no based on key given.");
+				return PUT_STATUS_H2H.VERSION_CONFLICT_NO_BASED_ON;
+			}
+		}
+
+		/** 2. check if previous exists **/
+		if (!history.lastKey().getVersionKey().equals(newData.basedOn())) {
+			logger.warn(String.format(
+					"New data is not based on previous version. previous version key = '%s' ",
+					key.getVersionKey()));
+			return PUT_STATUS_H2H.VERSION_CONFLICT;
+		}
+
+		/** 3. Check if previous version is latest one **/
+		if (newData.basedOn().timestamp() < key.getVersionKey().timestamp()) {
+			// previous version is the latest one (continue).
+			logger.debug("New content is based on latest version.");
+			return PUT_STATUS_H2H.OK;
+		} else {
+			// previous version is newer than the new one
+			logger.warn("New content has a older timestamp than the previous version.");
+			return PUT_STATUS_H2H.VERSION_CONFLICT_OLD_TIMESTAMP;
+		}
+	}
+
+	private void cleanupVersions(Number640 key) {
+		SortedMap<Number640, Data> history = getHistoryOnStorage(key);
+
+		long now = System.currentTimeMillis();
+		while (history.size() >= H2HConstants.MAX_VERSIONS_HISTORY) {
+			Number640 toRemove = history.firstKey();
+			if (toRemove.getVersionKey().timestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS > now) {
+				// stop removal because oldest version is too 'young'
+				break;
+			} else {
+				// TODO add public key for removing
+				super.remove(toRemove, null);
+			}
+		}
+	}
+
+	private SortedMap<Number640, Data> getHistoryOnStorage(Number640 key) {
+		return super.get(new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(),
+				Number160.ZERO), new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(),
+				Number160.MAX_VALUE));
+	}
 }
