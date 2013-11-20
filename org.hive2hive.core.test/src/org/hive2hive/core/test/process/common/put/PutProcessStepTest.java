@@ -197,21 +197,21 @@ public class PutProcessStepTest extends H2HJUnitTest {
 	private class DenyingPutTestStorage extends H2HStorageMemory {
 
 		public DenyingPutTestStorage() {
-			super(null);
+			super();
 		}
 
 		@Override
-		public PutStatus put(Number640 key, Data value, PublicKey publicKey, boolean putIfAbsent,
+		public PutStatusH2H put(Number640 key, Data value, PublicKey publicKey, boolean putIfAbsent,
 				boolean domainProtection) {
 			// doesn't accept any data
-			return PutStatus.FAILED;
+			return PutStatusH2H.FAILED;
 		}
 	}
 
 	private class DenyingGetTestStorage extends H2HStorageMemory {
 
 		public DenyingGetTestStorage() {
-			super(null);
+			super();
 		}
 
 		@Override
@@ -223,14 +223,14 @@ public class PutProcessStepTest extends H2HJUnitTest {
 	private class VersionConflictTestStorage extends H2HStorageMemory {
 
 		public VersionConflictTestStorage() {
-			super(null);
+			super();
 		}
 
 		@Override
-		public PutStatus put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
+		public PutStatusH2H put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
 				boolean domainProtection) {
 			// imitate a version conflict
-			return PutStatus.VERSION_CONFLICT;
+			return PutStatusH2H.VERSION_CONFLICT;
 		}
 	}
 }

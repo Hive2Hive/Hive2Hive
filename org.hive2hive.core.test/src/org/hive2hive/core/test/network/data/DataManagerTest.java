@@ -41,11 +41,9 @@ public class DataManagerTest extends H2HJUnitTest {
 		String data = NetworkTestUtil.randomString();
 		FuturePut future = node.putGlobal(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
-		future.getFutureRequests().awaitUninterruptibly();
 
 		FutureGet futureGet = node.getGlobal(locationKey, contentKey);
 		futureGet.awaitUninterruptibly();
-		futureGet.getFutureRequests().awaitUninterruptibly();
 
 		String result = (String) ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(data, result);
@@ -62,11 +60,9 @@ public class DataManagerTest extends H2HJUnitTest {
 		String data = NetworkTestUtil.randomString();
 		FuturePut future = nodeA.putGlobal(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
-		future.getFutureRequests().awaitUninterruptibly();
 
 		FutureGet futureGet = nodeB.getGlobal(locationKey, contentKey);
 		futureGet.awaitUninterruptibly();
-		futureGet.getFutureRequests().awaitUninterruptibly();
 
 		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(data, result);
@@ -97,7 +93,6 @@ public class DataManagerTest extends H2HJUnitTest {
 		String data = NetworkTestUtil.randomString();
 		FuturePut future = nodeA.putGlobal(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
-		future.getFutureRequests().awaitUninterruptibly();
 
 		String result = (String) ((H2HTestData) nodeB.getLocal(locationKey, contentKey)).getTestString();
 		assertEquals(data, result);
@@ -120,7 +115,6 @@ public class DataManagerTest extends H2HJUnitTest {
 		String data2 = NetworkTestUtil.randomString();
 		FuturePut future2 = node.putGlobal(locationKey, contentKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
-		future2.getFutureRequests().awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
 		FuturePut future3 = node.putGlobal(locationKey, contentKey3, new H2HTestData(data3));

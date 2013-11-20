@@ -80,7 +80,6 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 
 		// verify if both objects are the same
 		Assert.assertEquals(credentials.getUserId(), profile.getUserId());
-		Assert.assertEquals(testProfile.getTimestamp(), profile.getTimestamp());
 	}
 
 	@Override

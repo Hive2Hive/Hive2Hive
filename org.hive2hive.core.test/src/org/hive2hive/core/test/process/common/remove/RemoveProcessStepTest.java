@@ -108,7 +108,7 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 	private class FakeGetTestStorage extends H2HStorageMemory {
 		
 		public FakeGetTestStorage() {
-			super(null);
+			super();
 		}
 
 		@Override
