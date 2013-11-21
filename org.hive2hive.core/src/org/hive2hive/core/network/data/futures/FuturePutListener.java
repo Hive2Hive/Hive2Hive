@@ -8,7 +8,6 @@ import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
@@ -17,10 +16,27 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.IPutListener;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 
+/**
+ * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
+ * notifying {@link IPutListener} listeners. In case of a successful put {@link IPutListener#onSuccess()} gets
+ * called. In case of a failed put {@link IPutListener#onFailure()} gets called. </br></br>
+ * <b>Failure Handling</b></br>
+ * Putting can fail when the future object failed, when the future object contains wrong data or the
+ * responding node detected a failure. See {@link PutStatusH2H} for possible failures. If putting fails the
+ * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). For that another adapter
+ * (see {@link FutureDirectListener}) is attached. After a successful put the adapter waits a moment and
+ * verifies with a get if no concurrent modification happened. All puts are asynchronous. That's why the
+ * future listener attaches himself to the new future objects so that the adapter can finally notify his/her
+ * listener
+ * about a success or failure.
+ * 
+ * @author Seppi
+ */
 public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(FuturePutListener.class);
@@ -29,20 +45,34 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private final String contentKey;
 	private final NetworkContent content;
 	private final IPutListener listener;
-	private final NetworkManager networkManager;
+	private final DataManager dataManager;
 
 	// used to count put retries
 	private int putTries = 0;
 	// used to count get tries
 	private int getTries = 0;
 
+	/**
+	 * Constructor for the put future adapter.
+	 * 
+	 * @param locationKey
+	 *            the location key
+	 * @param contentKey
+	 *            the content key
+	 * @param content
+	 *            the content to put
+	 * @param listener
+	 *            a listener which gets notifies about success or failure, can be also <code>null</code>
+	 * @param dataManager
+	 *            reference needed for put, get and remove
+	 */
 	public FuturePutListener(String locationKey, String contentKey, NetworkContent content,
-			IPutListener listener, NetworkManager networkManager) {
+			IPutListener listener, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
 		this.listener = listener;
-		this.networkManager = networkManager;
+		this.dataManager = dataManager;
 	}
 
 	@Override
@@ -104,7 +134,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			 * 4. determine who has newer one, this one wins the version conflict
 			 * 4a. if necessary remove succeeded peers
 			 * 5. verify with a delayed get
-			 * 6. inform listener 
+			 * 6. inform listener
 			 */
 		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
 			// majority of the contacted nodes responded with ok
@@ -117,15 +147,17 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 	}
 
+	/**
+	 * Retries a put till a certain threshold is reached (see {@link H2HConstants.PUT_RETRIES}). Removes first
+	 * the possibly succeeded puts. A {@link RetryPutListener} tries to put again the given content.
+	 */
 	private void retryPut() {
 		if (putTries++ < H2HConstants.PUT_RETRIES) {
 			logger.warn(String.format(
 					"Put retry #%s. location key = '%s' content key = '%s' version key = '%s'", putTries,
 					locationKey, contentKey, content.getVersionKey()));
 			// remove succeeded puts
-			networkManager.getConnection().getPeer().remove(Number160.createHash(locationKey))
-					.setContentKey(Number160.createHash(contentKey)).setVersionKey(content.getVersionKey())
-					.start().addListener(new RetryPutListener());
+			dataManager.remove(locationKey, contentKey, content.getVersionKey()).addListener(new RetryPutListener());
 		} else {
 			logger.error(String
 					.format("Put verification failed. Couldn't put data after %s tries. location key = '%s' content key = '%s' version key = '%s'",
@@ -135,6 +167,11 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 	}
 
+	/**
+	 * Puts given content under given keys into the network.
+	 * 
+	 * @author Seppi
+	 */
 	private class RetryPutListener extends BaseFutureAdapter<FutureRemove> {
 		@Override
 		public void operationComplete(FutureRemove future) throws Exception {
@@ -145,16 +182,51 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			try {
 				Data data = new Data(content);
 				data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
-				FuturePut futurePut = networkManager.getConnection().getPeer()
-						.put(Number160.createHash(locationKey))
-						.setData(Number160.createHash(contentKey), data)
-						.setVersionKey(content.getVersionKey()).start();
-				futurePut.addListener(FuturePutListener.this);
+				dataManager.putGlobal(locationKey, contentKey, content).addListener(FuturePutListener.this);
 			} catch (IOException e) {
 				logger.error(String.format("Exception while creating data object! exception = '%s'",
 						e.getMessage()));
 				if (listener != null)
 					listener.onFailure();
+			}
+		}
+	}
+
+	/**
+	 * Sleeps a moment.
+	 */
+	private void waitAMoment() {
+		try {
+			// wait a moment to give time to replicate the data
+			Thread.sleep(H2HConstants.PUT_VERIFICATION_WAITING_TIME_MS);
+		} catch (InterruptedException e) {
+			logger.warn("Put verification woken up involuntarily.");
+		}
+	}
+
+	private void verifyWithADelayedGet() {
+		if (getTries++ < H2HConstants.GET_RETRIES) {
+			// get data to verify if everything went correct
+			dataManager.getGlobal(locationKey, contentKey).addListener(new DelayedGetListener());
+		} else {
+			logger.error(String
+					.format("Put verification failed. Couldn't get data after %s tries. location key = '%s' content key = '%s'",
+							getTries - 1, locationKey, contentKey));
+			if (listener != null)
+				listener.onFailure();
+		}
+	}
+
+	private class DelayedGetListener extends BaseFutureAdapter<FutureGet> {
+		@Override
+		public void operationComplete(FutureGet future) throws Exception {
+			if (future.isFailed() || future.getData() == null) {
+				logger.warn(String
+						.format("Put verification failed. Couldn't get data. Try #%s. location key = '%s' content key = '%s' version key = '%s'",
+								getTries, locationKey, contentKey, content.getVersionKey()));
+				verifyWithADelayedGet();
+			} else {
+				checkVersionKey();
 			}
 		}
 	}
@@ -183,43 +255,5 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				listener.onFailure();
 		}
 	}
-
-	private void waitAMoment() {
-		try {
-			// wait a moment to give time to replicate the data
-			Thread.sleep(H2HConstants.PUT_VERIFICATION_WAITING_TIME_MS);
-		} catch (InterruptedException e) {
-			logger.warn("Put verification woken up involuntarily.");
-		}
-	}
-
-	private void verifyWithADelayedGet() {
-		if (getTries++ < H2HConstants.GET_RETRIES) {
-			// get data to verify if everything went correct
-			FutureGet getFuture = networkManager.getConnection().getPeer()
-					.get(Number160.createHash(locationKey)).setContentKey(Number160.createHash(contentKey))
-					.start();
-			getFuture.addListener(new DelayedGetListener());
-		} else {
-			logger.error(String
-					.format("Put verification failed. Couldn't get data after %s tries. location key = '%s' content key = '%s'",
-							getTries - 1, locationKey, contentKey));
-			if (listener != null)
-				listener.onFailure();
-		}
-	}
-
-	private class DelayedGetListener extends BaseFutureAdapter<FutureGet> {
-		@Override
-		public void operationComplete(FutureGet future) throws Exception {
-			if (future.isFailed() || future.getData() == null) {
-				logger.warn(String
-						.format("Put verification failed. Couldn't get data. Try #%s. location key = '%s' content key = '%s' version key = '%s'",
-								getTries, locationKey, contentKey, content.getVersionKey()));
-				verifyWithADelayedGet();
-			} else {
-				checkVersionKey();
-			}
-		}
-	}
+	
 }

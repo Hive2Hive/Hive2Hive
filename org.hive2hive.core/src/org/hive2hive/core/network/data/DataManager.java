@@ -5,6 +5,7 @@ import java.io.IOException;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
+import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -12,6 +13,9 @@ import net.tomp2p.storage.Data;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.futures.FutureGetListener;
+import org.hive2hive.core.network.data.futures.FuturePutListener;
+import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 
 /**
  * This class offers an interface for storing into and loading from the network.
@@ -31,31 +35,34 @@ public class DataManager {
 		this.networkManager = networkManager;
 	}
 
-	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent newContent) {
+	private Peer getPeer() {
+		return networkManager.getConnection().getPeer();
+	}
+
+	public void putGlobal(String locationKey, String contentKey, NetworkContent content, IPutListener listener) {
+		FuturePut putFuture = putGlobal(locationKey, contentKey, content);
+		if (putFuture == null && listener != null) {
+			listener.onFailure();
+			return;
+		}
+		putFuture.addListener(new FuturePutListener(locationKey, contentKey, content, listener, this));
+	}
+
+	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent content) {
 		logger.debug(String.format("global put key = '%s' content key = '%s' version key = '%s'",
-				locationKey, contentKey, newContent.getVersionKey()));
+				locationKey, contentKey, content.getVersionKey()));
 		try {
-			Data data = new Data(newContent);
-			data.ttlSeconds(newContent.getTimeToLive()).basedOn(newContent.getBasedOnKey());
-			return networkManager.getConnection().getPeer().put(Number160.createHash(locationKey))
-					.setData(Number160.createHash(contentKey), data)
-					.setVersionKey(newContent.getVersionKey()).start();
+			Data data = new Data(content);
+			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
+			return getPeer().put(Number160.createHash(locationKey))
+					.setData(Number160.createHash(contentKey), data).setVersionKey(content.getVersionKey())
+					.start();
 		} catch (IOException e) {
 			logger.error(String
 					.format("Global put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
-							newContent.toString(), locationKey, contentKey, e.getMessage()));
+							content.toString(), locationKey, contentKey, e.getMessage()));
 			return null;
 		}
-	}
-
-	public FutureGet getGlobal(String locationKey, String contentKey) {
-		return getGlobal(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
-	}
-
-	public FutureGet getGlobal(String locationKey, String contentKey, Number160 versionKey) {
-		logger.debug(String.format("global get key = '%s' content key = '%s'", locationKey, contentKey));
-		return networkManager.getConnection().getPeer().get(Number160.createHash(locationKey))
-				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
 	}
 
 	public void putLocal(String locationKey, String contentKey, NetworkContent content) {
@@ -68,13 +75,32 @@ public class DataManager {
 			// TODO add public key for content protection
 			// TODO for what is this putIfAbsent flag?
 			// TODO what is the domainProtaction flag?
-			networkManager.getConnection().getPeer().getPeerBean().storage()
-					.put(key, data, null, false, false);
+			getPeer().getPeerBean().storage().put(key, data, null, false, false);
 		} catch (IOException e) {
 			logger.error(String
 					.format("Local put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
 							content.toString(), locationKey, contentKey, e.getMessage()));
 		}
+	}
+
+	public void getGlobal(String locationKey, String contentKey, IGetListener listener) {
+		getGlobal(locationKey, contentKey, TOMP2P_DEFAULT_KEY, listener);
+	}
+
+	public void getGlobal(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
+		FutureGet futureGet = getGlobal(locationKey, contentKey, versionKey);
+		futureGet.addListener(new FutureGetListener(locationKey, contentKey, versionKey, listener));
+	}
+
+	public FutureGet getGlobal(String locationKey, String contentKey) {
+		return getGlobal(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
+	}
+
+	public FutureGet getGlobal(String locationKey, String contentKey, Number160 versionKey) {
+		logger.debug(String.format("global get key = '%s' content key = '%s' version key = '%s'",
+				locationKey, contentKey, versionKey));
+		return getPeer().get(Number160.createHash(locationKey))
+				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
 	}
 
 	public NetworkContent getLocal(String locationKey, String contentKey) {
@@ -86,7 +112,7 @@ public class DataManager {
 				contentKey, versionKey));
 		Number640 key = new Number640(Number160.createHash(locationKey), TOMP2P_DEFAULT_KEY,
 				Number160.createHash(contentKey), versionKey);
-		Data data = networkManager.getConnection().getPeer().getPeerBean().storage().get(key);
+		Data data = getPeer().getPeerBean().storage().get(key);
 		if (data != null) {
 			try {
 				return (NetworkContent) data.object();
@@ -99,13 +125,16 @@ public class DataManager {
 		return null;
 	}
 
-	public FutureRemove remove(String locationKey, String contentKey) {
-		return remove(locationKey, contentKey, TOMP2P_DEFAULT_KEY);
+	public void remove(String locationKey, String contentKey, Number160 versionKey, IRemoveListener listener) {
+		FutureRemove futureRemove = remove(locationKey, contentKey, versionKey);
+		futureRemove
+				.addListener(new FutureRemoveListener(locationKey, contentKey, versionKey, listener, this));
 	}
 
 	public FutureRemove remove(String locationKey, String contentKey, Number160 versionKey) {
-		logger.debug(String.format("remove key = '%s' content key = '%s'", locationKey, contentKey));
-		return networkManager.getConnection().getPeer().remove(Number160.createHash(locationKey))
+		logger.debug(String.format("remove key = '%s' content key = '%s' version key = '%s", locationKey,
+				contentKey, versionKey));
+		return getPeer().remove(Number160.createHash(locationKey))
 				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
 	}
 
