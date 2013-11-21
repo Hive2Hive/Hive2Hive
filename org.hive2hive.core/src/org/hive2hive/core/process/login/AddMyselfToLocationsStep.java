@@ -5,7 +5,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.process.common.put.PutProcessStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
 /**
  * Verifies the answer of the @link{GetLocationsStep} and adds this client's peer to the locations list. </br>
@@ -14,14 +14,14 @@ import org.hive2hive.core.process.common.put.PutProcessStep;
  * @author Nico, Christian
  * 
  */
-public class AddMyselfToLocationsStep extends PutProcessStep {
+public class AddMyselfToLocationsStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(AddMyselfToLocationsStep.class);
 
 	private final String userId;
 
 	public AddMyselfToLocationsStep(String userId) {
-		super(userId, H2HConstants.USER_LOCATIONS, null, null);
+		super(null);
 
 		this.userId = userId;
 	}

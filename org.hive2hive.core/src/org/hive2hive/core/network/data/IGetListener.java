@@ -11,14 +11,6 @@ import org.hive2hive.core.process.common.get.BaseGetProcessStep;
  */
 public interface IGetListener {
 
-	/**
-	 * Put has succeeded.
-	 */
-	public void onSuccess(NetworkContent content);
-
-	/**
-	 * Put has failed.
-	 */
-	public void onFailure();
+	public void handleGetResult(NetworkContent content);
 
 }

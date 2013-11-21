@@ -28,7 +28,7 @@ public class GetLocationsStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(NetworkContent content) {
+	public void handleGetResult(NetworkContent content) {
 
 		if (content == null) {
 			logger.debug("Did not find the locations.");

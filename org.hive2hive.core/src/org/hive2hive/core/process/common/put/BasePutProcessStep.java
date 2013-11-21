@@ -12,29 +12,22 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public class PutProcessStep extends ProcessStep implements IPutListener {
+public abstract class BasePutProcessStep extends ProcessStep implements IPutListener {
 
 	protected String locationKey;
 	protected String contentKey;
 	protected NetworkContent content;
 	protected ProcessStep nextStep;
 
-	public PutProcessStep(String locationKey, String contentKey, NetworkContent content, ProcessStep nextStep) {
-		this.locationKey = locationKey;
-		this.contentKey = contentKey;
-		this.content = content;
+	public BasePutProcessStep(ProcessStep nextStep) {
 		this.nextStep = nextStep;
-	}
-
-	@Override
-	public void start() {
-		put(locationKey, contentKey, content);
 	}
 
 	protected void put(String locationKey, String contentKey, NetworkContent content) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
+		
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");

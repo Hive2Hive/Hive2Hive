@@ -9,10 +9,18 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public class PutLocationStep extends PutProcessStep {
+public class PutLocationStep extends BasePutProcessStep {
+
+	private final Locations locations;
 
 	public PutLocationStep(Locations locations, ProcessStep nextStep) {
-		super(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, nextStep);
+		super(nextStep);
+		this.locations = locations;
+	}
+
+	@Override
+	public void start() {
+		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations);
 	}
 
 }

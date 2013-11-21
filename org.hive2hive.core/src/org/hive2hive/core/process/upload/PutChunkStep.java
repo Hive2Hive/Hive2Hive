@@ -19,7 +19,7 @@ import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.common.put.PutProcessStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -39,7 +39,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * @author Nico
  * 
  */
-public class PutChunkStep extends PutProcessStep {
+public class PutChunkStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutChunkStep.class);
 
@@ -58,7 +58,7 @@ public class PutChunkStep extends PutProcessStep {
 	 */
 	protected PutChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
-		super(null, H2HConstants.FILE_CHUNK, null, null);
+		super(null);
 		this.file = file;
 		this.offset = offset;
 		this.chunkKeys = chunkKeys;

@@ -73,8 +73,6 @@ public class DataManager {
 			Data data = new Data(content);
 			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
 			// TODO add public key for content protection
-			// TODO for what is this putIfAbsent flag?
-			// TODO what is the domainProtaction flag?
 			getPeer().getPeerBean().storage().put(key, data, null, false, false);
 		} catch (IOException e) {
 			logger.error(String

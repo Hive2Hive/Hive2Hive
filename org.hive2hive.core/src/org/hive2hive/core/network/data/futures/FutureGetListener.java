@@ -26,10 +26,10 @@ public class FutureGetListener extends BaseFutureAdapter<FutureGet> {
 	public void operationComplete(FutureGet future) throws Exception {
 		if (future.isFailed() || future.getData() == null) {
 			if (listener != null)
-				listener.onFailure();
+				listener.handleGetResult(null);
 		} else {
 			if (listener != null)
-				listener.onSuccess((NetworkContent) future.getData().object());
+				listener.handleGetResult((NetworkContent) future.getData().object());
 		}
 	}
 

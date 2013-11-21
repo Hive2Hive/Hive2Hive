@@ -41,15 +41,4 @@ public abstract class BaseGetProcessStep extends ProcessStep implements IGetList
 		// ignore because just a get
 	}
 
-	protected abstract void handleGetResult(NetworkContent content);
-
-	@Override
-	public void onSuccess(NetworkContent content) {
-		handleGetResult(content);
-	}
-
-	@Override
-	public void onFailure() {
-		getProcess().stop("Get failed.");
-	}
 }

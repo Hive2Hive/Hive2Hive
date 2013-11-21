@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process;
+package org.hive2hive.core.test.process.common.get;
 
 import java.io.IOException;
 import java.util.List;
@@ -91,7 +91,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void handleGetResult(NetworkContent content) {
+		public void handleGetResult(NetworkContent content) {
 			synchronized (testContent) {
 				tempContent = content;
 			}

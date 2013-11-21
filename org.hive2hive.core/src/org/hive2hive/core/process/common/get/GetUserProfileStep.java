@@ -41,7 +41,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(NetworkContent content) {
+	public void handleGetResult(NetworkContent content) {
 
 		if (content == null) {
 			// could have been intended...

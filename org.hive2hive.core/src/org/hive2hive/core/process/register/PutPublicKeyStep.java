@@ -5,7 +5,7 @@ import java.security.PublicKey;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.model.UserPublicKey;
-import org.hive2hive.core.process.common.put.PutProcessStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
 /**
  * Puts the user's public key to the network (which is used for encryption of messages and other
@@ -14,13 +14,19 @@ import org.hive2hive.core.process.common.put.PutProcessStep;
  * @author Nico
  * 
  */
-public class PutPublicKeyStep extends PutProcessStep {
+public class PutPublicKeyStep extends BasePutProcessStep {
+
+	private final String userId;
+	private final PublicKey publicKey;
 
 	protected PutPublicKeyStep(String userId, PublicKey publicKey) {
-		super(userId, H2HConstants.USER_PUBLIC_KEY, new UserPublicKey(publicKey), null);
+		super(new PutUserMessageQueue(new UserMessageQueue(userId)));
+		this.userId = userId;
+		this.publicKey = publicKey;
+	}
 
-		// initialize next and final step
-		UserMessageQueue queue = new UserMessageQueue(userId);
-		nextStep = new PutProcessStep(userId, H2HConstants.USER_MESSAGE_QUEUE_KEY, queue, null);
+	@Override
+	public void start() {
+		put(userId, H2HConstants.USER_PUBLIC_KEY, new UserPublicKey(publicKey));
 	}
 }

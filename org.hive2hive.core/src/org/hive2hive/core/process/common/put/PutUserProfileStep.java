@@ -21,7 +21,7 @@ import org.hive2hive.core.security.PasswordUtil;
  * @author Nico, Seppi
  * 
  */
-public class PutUserProfileStep extends PutProcessStep {
+public class PutUserProfileStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutUserProfileStep.class);
 
@@ -29,8 +29,7 @@ public class PutUserProfileStep extends PutProcessStep {
 	private final UserCredentials credentials;
 
 	public PutUserProfileStep(UserProfile profile, UserCredentials credentials, ProcessStep nextStep) {
-		super(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, null, nextStep);
-
+		super(nextStep);
 		this.userProfile = profile;
 		this.credentials = credentials;
 	}
@@ -44,7 +43,7 @@ public class PutUserProfileStep extends PutProcessStep {
 			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(userProfile,
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
-			put(locationKey, contentKey, encryptedUserProfile);
+			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().stop(e.getMessage());
