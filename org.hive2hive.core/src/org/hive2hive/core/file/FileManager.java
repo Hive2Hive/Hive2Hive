@@ -71,7 +71,7 @@ public class FileManager {
 			PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
 			return metaData;
 		} catch (IOException e) {
-			logger.error("Cannot read the last meta data", e);
+			logger.error("Cannot read the last meta data");
 			return new PersistentMetaData();
 		}
 	}

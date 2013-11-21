@@ -78,8 +78,10 @@ public abstract class ProcessTreeNode extends Process {
 	}
 
 	@Override
-	public void start() {
+	public void run() {
 		if (process == null) {
+			setNextStep(null);
+
 			// is root node --> start all children
 			for (ProcessTreeNode child : childProcesses) {
 				child.start();

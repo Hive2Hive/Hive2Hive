@@ -138,7 +138,7 @@ public abstract class Process implements IProcess {
 	}
 
 	@Override
-	public final void run() {
+	public void run() {
 		if (currentStep != null) {
 			currentStep.start();
 		} else {

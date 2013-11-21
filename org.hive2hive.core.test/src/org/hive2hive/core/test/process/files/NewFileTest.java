@@ -40,7 +40,7 @@ import org.junit.Test;
  */
 public class NewFileTest extends H2HJUnitTest {
 
-	private final int networkSize = 10;
+	private final int networkSize = 5;
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;
 	private FileManager fileManager;

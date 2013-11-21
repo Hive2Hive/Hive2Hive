@@ -176,4 +176,9 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 		return process;
 	}
+
+	@Override
+	public File getRootDirectory() {
+		return fileManager.getRoot();
+	}
 }

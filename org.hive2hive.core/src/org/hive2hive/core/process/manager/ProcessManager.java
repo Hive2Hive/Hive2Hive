@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.manager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +41,10 @@ public class ProcessManager {
 
 	public IProcess getProcess(int processID) {
 		return attachedProcesses.get(processID);
+	}
+
+	public List<IProcess> getAllProcesses() {
+		return new ArrayList<IProcess>(attachedProcesses.values());
 	}
 
 	/**

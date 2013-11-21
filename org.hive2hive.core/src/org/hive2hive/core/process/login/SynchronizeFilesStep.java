@@ -19,6 +19,7 @@ import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
+import org.hive2hive.core.process.manager.ProcessManager;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.UserCredentials;
@@ -132,6 +133,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		// start the download
 		if (toDownload.size() > 0)
 			logger.debug("Start downloading new and modified files...");
+
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -155,6 +157,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		if (toUpload.size() > 0)
 			logger.debug("Start uploading new files ");
+
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -174,6 +177,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		if (toUpload.size() > 0)
 			logger.debug("Start uploading new versions of files ");
+
 		rootProcess.start();
 		return rootProcess;
 	}
@@ -192,6 +196,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 			deleteProcess.setUserProfile(userProfile);
 			allNodes.add(new NodeProcessTreeNode(deleteProcess, parent, node));
 		}
+
+		// remove the rootProcess from the process manager because it will never be started
+		ProcessManager.getInstance().detachProcess(rootProcess);
 
 		// files are deleted in reverse order (not pre-order)
 		// get parent means get the child files --> start deletion at children,

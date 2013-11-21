@@ -121,8 +121,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, fileManager).getKeyPair();
 		MetaFolder metaFolderBeforeDeletion = (MetaFolder) ProcessTestUtil.getMetaDocument(client,
 				metaKeyPairFolder);
-		MetaFile metaFileBeforeDeletion = (MetaFile) ProcessTestUtil.getMetaDocument(client,
-				metaKeyPairFile);
+		MetaFile metaFileBeforeDeletion = (MetaFile) ProcessTestUtil.getMetaDocument(client, metaKeyPairFile);
 		Assert.assertNotNull(metaFolderBeforeDeletion);
 		Assert.assertNotNull(metaFileBeforeDeletion);
 		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
@@ -159,6 +158,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		folder.mkdir();
 		ProcessTestUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
 
+		// store some keys before deletion
 		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
 		MetaDocument metaDocumentBeforeDeletion = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
