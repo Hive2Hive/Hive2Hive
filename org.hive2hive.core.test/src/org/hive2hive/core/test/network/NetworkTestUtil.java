@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.network;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.IH2HNode;
@@ -118,13 +120,17 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create a master
-		IH2HNode master = new H2HNodeBuilder().setMaster(true).build();
+		File tempDirectory = FileUtils.getTempDirectory();
+		File root = new File(tempDirectory, randomString());
+		IH2HNode master = new H2HNodeBuilder().setMaster(true).setRootPath(root.getAbsolutePath()).build();
 		nodes.add(master);
 
 		try {
 			InetAddress bootstrapAddress = InetAddress.getByName("127.0.0.1");
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = new H2HNodeBuilder().setBootstrapAddress(bootstrapAddress).build();
+				root = new File(tempDirectory, randomString());
+				IH2HNode node = new H2HNodeBuilder().setBootstrapAddress(bootstrapAddress)
+						.setRootPath(root.getAbsolutePath()).build();
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {

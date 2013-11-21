@@ -42,7 +42,6 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@Test
 	public void testRegisterLogin() throws InterruptedException, IOException, ClassNotFoundException {
-
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
