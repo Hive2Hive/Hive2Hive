@@ -1,11 +1,8 @@
 package org.hive2hive.core.process.login;
 
-import java.util.Queue;
-
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserMessageQueue;
-import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.process.ProcessStep;
 
 public class HandleUserMessageQueueStep extends ProcessStep {
@@ -21,19 +18,12 @@ public class HandleUserMessageQueueStep extends ProcessStep {
 	@Override
 	public void start() {
 
-		final PostLoginProcessContext context = ((PostLoginProcess) getProcess()).getContext();
-		final UserMessageQueue umQueue = context.getGetUserMessageQueueStep().getUserMessageQueue();		
+		final PostLoginProcessContext context = ((PostLoginProcess) getProcess()).getContext();	
 		
 		// check whether this client is master and allowed to execute this step
 		if (!context.getIsDefinedAsMaster()) {
 			logger.error("This client has not been defined as master client. The UserMessageQueue will not be handled and this process terminated.");
 			getProcess().terminate();
-		}
-		
-		// check whether correct user message queue has been loaded
-		if (!umQueue.getUserId().equals(userId)){
-			logger.error("A UserMessageQueue of the wrong userId was loaded. The UserMessageQueue will not be handled and this process stopped.");
-			getProcess().stop("A UserMessageQueue of the wrong userId was loaded.");
 		}
 		
 		// handle the messages

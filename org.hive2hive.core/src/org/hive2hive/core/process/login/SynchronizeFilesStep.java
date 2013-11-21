@@ -15,7 +15,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
-import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
+import org.hive2hive.core.process.common.get.GetUserMessageStep;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
@@ -103,10 +103,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		if (context.getIsDefinedAsMaster()) {
 			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(
 					userProfile.getUserId());
-			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userProfile.getUserId(),
-					handleUmQueueStep);
-			context.setUserMessageQueueStep(getUMQueueStep);
-			getProcess().setNextStep(getUMQueueStep);
+			getProcess().setNextStep(handleUmQueueStep);
 		} else {
 			getProcess().setNextStep(null);
 		}
