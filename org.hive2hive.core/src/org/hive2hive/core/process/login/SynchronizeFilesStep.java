@@ -220,7 +220,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// TODO Auto-generated method stub
+		getProcess().nextRollBackStep();
 	}
 
 	private ProcessTreeNode getParent(NodeProcessTreeNode root, FileTreeNode node) {

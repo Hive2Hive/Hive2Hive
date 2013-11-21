@@ -65,6 +65,7 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IBas
 	@Override
 	public void rollBack() {
 		// nothing to rollback
+		getProcess().nextRollBackStep();
 	}
 
 	protected void send(BaseMessage message) {

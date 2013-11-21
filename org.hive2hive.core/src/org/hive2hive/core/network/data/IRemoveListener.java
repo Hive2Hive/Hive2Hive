@@ -15,11 +15,11 @@ public interface IRemoveListener {
 	/**
 	 * Remove has succeeded.
 	 */
-	public void onSuccess();
+	public void onRemoveSuccess();
 
 	/**
 	 * Remove has failed.
 	 */
-	public void onFailure();
+	public void onRemoveFailure();
 
 }

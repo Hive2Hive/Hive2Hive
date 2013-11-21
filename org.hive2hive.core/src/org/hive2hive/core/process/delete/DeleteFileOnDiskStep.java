@@ -32,6 +32,7 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// TODO move the file to trash only, thus it can be recoverable
+		getProcess().nextRollBackStep();
 	}
 
 }

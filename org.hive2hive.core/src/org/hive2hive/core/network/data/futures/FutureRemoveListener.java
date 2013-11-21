@@ -53,7 +53,7 @@ public class FutureRemoveListener  extends BaseFutureAdapter<FutureRemove> {
 					.format("Remove verification failed. Data is not null after %s tries. location key = '%s' content key = '%s'",
 							removeTries-1, locationKey, contentKey));
 			if (listener != null)
-				listener.onFailure();
+				listener.onRemoveFailure();
 		}
 	}
 
@@ -76,7 +76,7 @@ public class FutureRemoveListener  extends BaseFutureAdapter<FutureRemove> {
 						"Verification for remove completed. location key = '%s' content key = '%s'",
 						locationKey, contentKey));
 				if (listener != null)
-					listener.onSuccess();
+					listener.onRemoveSuccess();
 			}
 		});
 	}

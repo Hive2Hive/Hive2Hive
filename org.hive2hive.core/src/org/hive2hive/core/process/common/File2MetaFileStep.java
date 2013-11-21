@@ -73,5 +73,6 @@ public class File2MetaFileStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// nothing to do
+		getProcess().nextRollBackStep();
 	}
 }

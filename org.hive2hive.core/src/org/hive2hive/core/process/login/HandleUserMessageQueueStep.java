@@ -51,7 +51,6 @@ public class HandleUserMessageQueueStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// TODO Auto-generated method stub
-
+		getProcess().nextRollBackStep();
 	}
 }

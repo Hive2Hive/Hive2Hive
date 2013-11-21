@@ -42,7 +42,7 @@ public class DataManager {
 	public void putGlobal(String locationKey, String contentKey, NetworkContent content, IPutListener listener) {
 		FuturePut putFuture = putGlobal(locationKey, contentKey, content);
 		if (putFuture == null && listener != null) {
-			listener.onFailure();
+			listener.onPutFailure();
 			return;
 		}
 		putFuture.addListener(new FuturePutListener(locationKey, contentKey, content, listener, this));

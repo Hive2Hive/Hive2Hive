@@ -98,6 +98,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 	@Override
 	public void rollBack() {
 		// nothing to roll back
+		getProcess().nextRollBackStep();
 	}
 
 	private synchronized void updateLocationsMap() {

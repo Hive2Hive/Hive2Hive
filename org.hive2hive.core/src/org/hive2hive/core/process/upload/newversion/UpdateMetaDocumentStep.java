@@ -69,5 +69,6 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// nothing to do
+		getProcess().nextRollBackStep();
 	}
 }

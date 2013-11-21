@@ -45,6 +45,6 @@ public class VerifyUserProfileStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// do nothing
+		getProcess().nextRollBackStep();
 	}
 }

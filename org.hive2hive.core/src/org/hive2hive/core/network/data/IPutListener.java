@@ -14,11 +14,11 @@ public interface IPutListener {
 	/**
 	 * Put has succeeded.
 	 */
-	public void onSuccess();
+	public void onPutSuccess();
 
 	/**
 	 * Put has failed.
 	 */
-	public void onFailure();
+	public void onPutFailure();
 
 }

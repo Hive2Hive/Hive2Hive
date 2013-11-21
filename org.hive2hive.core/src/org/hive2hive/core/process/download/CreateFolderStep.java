@@ -44,6 +44,7 @@ public class CreateFolderStep extends ProcessStep {
 			File folder = fileManager.getFile(file);
 			folder.delete();
 		}
+		getProcess().nextRollBackStep();
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.hive2hive.core.process;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.hive2hive.core.log.H2HLogger;
@@ -37,7 +36,7 @@ public abstract class Process implements IProcess {
 		this.networkManager = networkManager;
 		this.pid = ProcessManager.getInstance().getNewPID();
 		this.state = ProcessState.INITIALIZING;
-		
+
 		ProcessManager.getInstance().attachProcess(this);
 	}
 
@@ -108,7 +107,7 @@ public abstract class Process implements IProcess {
 			logger.warn("Process is already stopped or still rollbacking");
 		}
 	}
-	
+
 	@Override
 	public void terminate() {
 		setNextStep(null);
@@ -130,13 +129,14 @@ public abstract class Process implements IProcess {
 	}
 
 	/**
-	 * Returns the process context. This methods should override this method and covariantly narrow down the return type.
+	 * Returns the process context. This methods should override this method and covariantly narrow down the
+	 * return type.
 	 */
 	@Override
 	public ProcessContext getContext() {
 		return null;
 	}
-	 
+
 	@Override
 	public final void run() {
 		if (currentStep != null) {
@@ -161,17 +161,28 @@ public abstract class Process implements IProcess {
 		state = ProcessState.ROLLBACKING;
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
 
-		// roll back current step
+		// start roll back from current step
 		currentStep.rollBack();
 
-		// rollback already executed steps
-		Collections.reverse(executedSteps);
-		for (ProcessStep step : executedSteps) {
-			step.rollBack();
-		}
+//		// rollback already executed steps
+//		Collections.reverse(executedSteps);
+//		for (ProcessStep step : executedSteps) {
+//			step.rollBack();
+//		}
 
 		for (IProcessListener listener : listeners) {
 			listener.onFail(reason);
+		}
+	}
+
+	public void nextRollBackStep() {
+		if (ProcessState.ROLLBACKING == state) {
+			if (!executedSteps.isEmpty()){
+				// get last executed element
+				ProcessStep step = executedSteps.get(executedSteps.size()-1);
+				// trigger rollback for this step
+				step.rollBack();
+			}
 		}
 	}
 

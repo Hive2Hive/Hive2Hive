@@ -163,7 +163,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					.format("Put verification failed. Couldn't put data after %s tries. location key = '%s' content key = '%s' version key = '%s'",
 							putTries - 1, locationKey, contentKey, content.getVersionKey()));
 			if (listener != null)
-				listener.onFailure();
+				listener.onPutFailure();
 		}
 	}
 
@@ -187,7 +187,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				logger.error(String.format("Exception while creating data object! exception = '%s'",
 						e.getMessage()));
 				if (listener != null)
-					listener.onFailure();
+					listener.onPutFailure();
 			}
 		}
 	}
@@ -213,7 +213,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					.format("Put verification failed. Couldn't get data after %s tries. location key = '%s' content key = '%s'",
 							getTries - 1, locationKey, contentKey));
 			if (listener != null)
-				listener.onFailure();
+				listener.onPutFailure();
 		}
 	}
 
@@ -246,13 +246,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 							locationKey, contentKey, content.getVersionKey()));
 			// everything is ok
 			if (listener != null)
-				listener.onSuccess();
+				listener.onPutSuccess();
 		} else {
 			logger.warn(String
 					.format("Put verification failed. Concurrent modification happened. location key = '%s' content key = '%s' version key = '%s'",
 							locationKey, contentKey, content.getVersionKey()));
 			if (listener != null)
-				listener.onFailure();
+				listener.onPutFailure();
 		}
 	}
 	

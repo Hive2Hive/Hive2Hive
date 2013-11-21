@@ -51,5 +51,6 @@ public class CheckIfUserExistsStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// only a get call which has no effect
+		getProcess().nextRollBackStep();
 	}
 }

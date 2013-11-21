@@ -24,6 +24,7 @@ public class EvaluateMetaDocumentStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// nothing to do
+		getProcess().nextRollBackStep();
 	}
 
 }
