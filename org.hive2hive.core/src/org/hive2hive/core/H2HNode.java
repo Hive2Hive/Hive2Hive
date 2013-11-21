@@ -9,6 +9,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.LoginProcessContext;
@@ -142,14 +143,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess add(File file) throws IllegalFileLocation, NoSessionException {
-		// file must be in the given root directory
-		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {
-			throw new IllegalFileLocation("File must be in root of the H2H directory.");
-		}
-
 		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
 		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
-
 		NewFileProcess uploadProcess = new NewFileProcess(file, getSessionCredentials(), networkManager,
 				fileManager, this);
 		if (autostartProcesses) {
@@ -163,6 +158,18 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	public IProcess update(File file) throws NoSessionException {
 		NewVersionProcess process = new NewVersionProcess(file, getSessionCredentials(), networkManager,
 				fileManager, this);
+		if (autostartProcesses) {
+			process.start();
+		}
+
+		return process;
+	}
+
+	@Override
+	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
+		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager,
+				getSessionCredentials());
+
 		if (autostartProcesses) {
 			process.start();
 		}

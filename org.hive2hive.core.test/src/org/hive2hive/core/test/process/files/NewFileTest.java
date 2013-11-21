@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -66,7 +67,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSingleChunk() throws IOException {
+	public void testUploadSingleChunk() throws IOException, IllegalFileLocation {
 		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 
 		startUploadProcess(file);
@@ -74,7 +75,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadMultipleChunks() throws IOException {
+	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation {
 		// creates a file with length of at least 5 chunks
 		File file = FileTestUtil.createFileRandomContent(5, fileManager, config);
 
@@ -83,7 +84,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolder() throws IOException {
+	public void testUploadFolder() throws IOException, IllegalFileLocation {
 		File folder = new File(fileManager.getRoot(), "folder1");
 		folder.mkdirs();
 
@@ -92,7 +93,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolderWithFile() throws IOException {
+	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation {
 		// create a container
 		File folder = new File(fileManager.getRoot(), "folder-with-file");
 		folder.mkdirs();
@@ -105,7 +106,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolderWithFolder() throws IOException {
+	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation {
 		File folder = new File(fileManager.getRoot(), "folder-with-folder");
 		folder.mkdirs();
 		startUploadProcess(folder);
@@ -117,7 +118,7 @@ public class NewFileTest extends H2HJUnitTest {
 		verifyUpload(innerFolder, 0);
 	}
 
-	private void startUploadProcess(File toUpload) {
+	private void startUploadProcess(File toUpload) throws IllegalFileLocation {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager, config);
 		TestProcessListener listener = new TestProcessListener();
@@ -172,7 +173,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadWrongCredentials() throws IOException {
+	public void testUploadWrongCredentials() throws IOException, IllegalFileLocation {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 

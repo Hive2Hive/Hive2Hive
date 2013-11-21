@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
@@ -23,8 +24,14 @@ public class NewFileProcess extends Process {
 	private final NewFileProcessContext context;
 
 	public NewFileProcess(File file, UserCredentials credentials, NetworkManager networkManager,
-			FileManager fileManager, IH2HFileConfiguration config) {
+			FileManager fileManager, IH2HFileConfiguration config) throws IllegalFileLocation {
 		super(networkManager);
+
+		// file must be in the given root directory
+		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {
+			throw new IllegalFileLocation("File must be in root of the H2H directory.");
+		}
+
 		context = new NewFileProcessContext(this, file, credentials, fileManager, config);
 
 		// TODO shared files not considered yet

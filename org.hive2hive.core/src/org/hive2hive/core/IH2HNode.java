@@ -54,6 +54,14 @@ public interface IH2HNode {
 	 */
 	IProcess update(File file) throws NoSessionException;
 
+	/**
+	 * Delete the file or the folder in the network. Note that the folder must be empty to delete
+	 * 
+	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
+	 */
+	IProcess delete(File file) throws IllegalArgumentException, NoSessionException;
+
 	// TODO this must not be part of the H2H interface
 	void disconnect();
 }

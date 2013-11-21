@@ -11,6 +11,7 @@ import net.tomp2p.futures.FutureGet;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -57,7 +58,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFile() throws IOException {
+	public void testDeleteFile() throws IOException, IllegalFileLocation {
 		NetworkManager client = network.get(0);
 
 		// add a file to the network
@@ -98,7 +99,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFileInFolder() throws IOException {
+	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation {
 		NetworkManager client = network.get(0);
 
 		// add a folder to the network
@@ -147,7 +148,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFolder() throws FileNotFoundException {
+	public void testDeleteFolder() throws FileNotFoundException, IllegalFileLocation {
 		NetworkManager client = network.get(0);
 
 		// add a folder to the network

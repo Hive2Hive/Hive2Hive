@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -49,7 +50,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void setupFiles() throws IOException {
+	public void setupFiles() throws IOException, IllegalFileLocation {
 		network = NetworkTestUtil.createNetwork(networkSize);
 
 		// first, register a new user
@@ -104,7 +105,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testAdditionsDeletions() throws IOException {
+	public void testAdditionsDeletions() throws IOException, IllegalFileLocation {
 		/** do some modifications on client **/
 		// add a file
 		FileUtils.write(new File(fileManager1.getRoot(), "added-file"), NetworkTestUtil.randomString());

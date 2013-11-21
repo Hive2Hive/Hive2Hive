@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
@@ -141,11 +142,15 @@ public class SynchronizeFilesStep extends ProcessStep {
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
 		for (File file : toUpload) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
-			// initialize the process
-			NewFileProcess uploadProcess = new NewFileProcess(file, credentials, getNetworkManager(),
-					fileManager, config);
-			uploadProcess.setUserProfile(userProfile);
-			new FileProcessTreeNode(uploadProcess, parent, file);
+			try {
+				// initialize the process
+				NewFileProcess uploadProcess = new NewFileProcess(file, credentials, getNetworkManager(),
+						fileManager, config);
+				uploadProcess.setUserProfile(userProfile);
+				new FileProcessTreeNode(uploadProcess, parent, file);
+			} catch (IllegalFileLocation e) {
+				logger.error("File cannot be uploaded", e);
+			}
 		}
 
 		if (toUpload.size() > 0)

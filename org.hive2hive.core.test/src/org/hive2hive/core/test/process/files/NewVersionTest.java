@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -49,7 +50,7 @@ public class NewVersionTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void createProfileUploadBaseFile() throws IOException {
+	public void createProfileUploadBaseFile() throws IOException, IllegalFileLocation {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
