@@ -30,8 +30,11 @@ public class PutProcessStep extends ProcessStep implements IPutListener {
 	public void start() {
 		put(locationKey, contentKey, content);
 	}
-	
+
 	protected void put(String locationKey, String contentKey, NetworkContent content) {
+		this.locationKey = locationKey;
+		this.contentKey = contentKey;
+		this.content = content;
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");

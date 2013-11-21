@@ -28,7 +28,7 @@ public class TestMessage extends BaseMessage {
 
 	@Override
 	public void run() {
-		networkManager.putLocal(networkManager.getNodeId(), contentKey, wrapper);
+		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, wrapper);
 	}
 
 	@Override

@@ -69,7 +69,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		// check if selected location is empty
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 
 		// create a message with target node B
 		TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
@@ -101,7 +101,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		Object tmp = null;
 		do {
 			w.tickASecond();
-			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
+			tmp = nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
 		// verify that data arrived
@@ -124,7 +124,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		// check if selected location is empty
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 
 		// assign a denying message handler at target node
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
@@ -155,7 +155,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		} while (!listener.hasFailed());
 
 		// check if selected location is still empty
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 	}
 
 	/**
@@ -170,8 +170,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// generate a random content key
 		final String contentKey = NetworkTestUtil.randomString();
 		// check if selected locations are empty
-		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
 		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getPeerAddress(),
 				contentKey);
@@ -185,7 +185,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
-				nodeA.putLocal(nodeA.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+				nodeA.getDataManager().putLocal(nodeA.getNodeId(), contentKey, new H2HTestData(receivedSecret));
 				// step finished go further
 				getProcess().setNextStep(nextStep);
 			}
@@ -206,12 +206,12 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		Object tmp = null;
 		do {
 			waiter.tickASecond();
-			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
+			tmp = nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey);
 		} while (tmp == null);
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}

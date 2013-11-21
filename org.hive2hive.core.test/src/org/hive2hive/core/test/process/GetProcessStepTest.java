@@ -64,7 +64,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		// put in the memory of 2nd peer
-		holder.putLocal(locationKey, contentKey, data);
+		holder.getDataManager().putLocal(locationKey, contentKey, data);
 
 		DummyGetProcessStep step = new DummyGetProcessStep(locationKey, contentKey);
 		Process process = new Process(getter) {
@@ -72,7 +72,7 @@ public class GetProcessStepTest extends H2HJUnitTest {
 		process.setNextStep(step);
 
 		// check that receiver does not have any content
-		Assert.assertNull(holder.getLocal(contentKey, contentKey));
+		Assert.assertNull(holder.getDataManager().getLocal(contentKey, contentKey));
 
 		process.start();
 

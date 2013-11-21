@@ -29,7 +29,7 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
+		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
 		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(),
 				getSenderAddress(), secret);
@@ -52,7 +52,7 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+			networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
 		}
 
 	}

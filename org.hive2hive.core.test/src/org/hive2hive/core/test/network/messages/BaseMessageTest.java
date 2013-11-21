@@ -53,7 +53,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		String data = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 		// check if selected location is empty
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 		// send message
@@ -65,7 +65,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		Object tmp = null;
 		do {
 			w.tickASecond();
-			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
+			tmp = nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
 		// verify that data arrived
@@ -88,7 +88,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		String data = NetworkTestUtil.randomString();
 		// check if selected location is empty
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a test message which gets rejected several times
 		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
@@ -101,7 +101,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		Object tmp = null;
 		do {
 			w.tickASecond();
-			tmp = nodeB.getLocal(nodeB.getNodeId(), contentKey);
+			tmp = nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey);
 		} while (tmp == null);
 
 		// verify that data arrived

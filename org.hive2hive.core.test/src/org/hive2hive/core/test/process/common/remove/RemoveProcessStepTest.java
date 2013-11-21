@@ -47,13 +47,14 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void testRemoveProcessStep() {
 		String locationKey = network.get(0).getNodeId();
+		H2HTestData testData = new H2HTestData(data);
 		// put some data to remove
-		network.get(0).putGlobal(locationKey, locationKey, new H2HTestData(data)).awaitUninterruptibly();
+		network.get(0).getDataManager().putGlobal(locationKey, locationKey, testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		RemoveProcessStep putStep = new RemoveProcessStep(locationKey, contentKey, null);
+		RemoveProcessStep putStep = new RemoveProcessStep(locationKey, contentKey, testData, null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -65,22 +66,22 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 		
-		assertNull(network.get(0).getLocal(locationKey, contentKey));
+		assertNull(network.get(0).getDataManager().getLocal(locationKey, contentKey));
 	}
 	
 	@Test
 	public void testRemoveProcessStepFailing() {
 		String locationKey = network.get(0).getNodeId();
-		
+		H2HTestData testData = new H2HTestData(data);
 		// manipulate the node, remove will not work
 		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage());
 		// put some data to remove
-		network.get(0).putGlobal(locationKey, locationKey, new H2HTestData(data)).awaitUninterruptibly();
+		network.get(0).getDataManager().putGlobal(locationKey, locationKey, testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		RemoveProcessStep putStep = new RemoveProcessStep(locationKey, contentKey, null);
+		RemoveProcessStep putStep = new RemoveProcessStep(locationKey, contentKey, testData, null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
