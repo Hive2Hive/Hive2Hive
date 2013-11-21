@@ -223,7 +223,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 	
 	@Test
-	public void putNewVersionWithOldTimestampTest() {
+	public void putNewVersionWithOldTimestampTest() throws InterruptedException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -232,6 +232,10 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
 		data2.generateVersionKey();
 
+		synchronized (this) {
+			Thread.sleep(100);
+		}
+		
 		H2HTestData data1 = new H2HTestData(NetworkTestUtil.randomString());
 		data1.generateVersionKey();
 
