@@ -21,7 +21,7 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Nico, Seppi
  * 
  */
-public class PutUserProfileStep extends PutProcessStep {
+public class PutUserProfileStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutUserProfileStep.class);
 
@@ -29,8 +29,7 @@ public class PutUserProfileStep extends PutProcessStep {
 	private final UserCredentials credentials;
 
 	public PutUserProfileStep(UserProfile profile, UserCredentials credentials, ProcessStep nextStep) {
-		super(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, null, nextStep);
-
+		super(nextStep);
 		this.userProfile = profile;
 		this.credentials = credentials;
 	}

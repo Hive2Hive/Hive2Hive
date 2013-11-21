@@ -30,7 +30,7 @@ public class GetNextUserMessageMessage extends RoutedRequestMessage {
 	public synchronized void run() {
 
 		// load the next user message
-		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getLocal(targetKey,
+		UserMessageQueue umQueue = (UserMessageQueue) networkManager.getDataManager().getLocal(targetKey,
 				H2HConstants.USER_MESSAGE_QUEUE_KEY);
 
 		if (umQueue != null) {

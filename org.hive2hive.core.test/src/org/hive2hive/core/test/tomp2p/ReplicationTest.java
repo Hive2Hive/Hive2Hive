@@ -5,8 +5,8 @@ import java.io.IOException;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
-import net.tomp2p.p2p.builder.DHTBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -40,7 +40,7 @@ public class ReplicationTest extends H2HJUnitTest {
 		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 
 		FuturePut putFuture = p2.put(Number160.createHash("key"))
-				.setData(DHTBuilder.DEFAULT_DOMAIN, Number160.ZERO, new Data("test")).start();
+				.setData(Number160.ZERO, Number160.ZERO, new Data("test")).start();
 		putFuture.awaitUninterruptibly();
 		putFuture.getFutureRequests().awaitUninterruptibly();
 		Assert.assertEquals(2, putFuture.getFutureRequests().getSuccessCounter());
@@ -51,8 +51,10 @@ public class ReplicationTest extends H2HJUnitTest {
 		Data tmp = null;
 		do {
 			w.tickASecond();
-			tmp = p3.getPeerBean().storage()
-					.get(Number160.createHash("key"), DHTBuilder.DEFAULT_DOMAIN, Number160.ZERO);
+			tmp = p3.getPeerBean()
+					.storage()
+					.get(new Number640(Number160.createHash("key"), Number160.ZERO, Number160.ZERO,
+							Number160.ZERO));
 		} while (tmp == null);
 
 		Assert.assertNotNull(tmp);

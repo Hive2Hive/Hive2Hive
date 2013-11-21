@@ -4,7 +4,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
-import org.hive2hive.core.process.common.remove.RemoveProcessStep;
+import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 
 /**
  * Deletes the meta document of the deleted file. After successful deletion, the entry is also removed from
@@ -13,10 +13,10 @@ import org.hive2hive.core.process.common.remove.RemoveProcessStep;
  * @author Nico
  * 
  */
-public class DeleteMetaDocumentStep extends RemoveProcessStep {
+public class DeleteMetaDocumentStep extends BaseRemoveProcessStep {
 
 	public DeleteMetaDocumentStep() {
-		super(null, H2HConstants.META_DOCUMENT, null);
+		super(null);
 	}
 
 	@Override
@@ -29,6 +29,6 @@ public class DeleteMetaDocumentStep extends RemoveProcessStep {
 				metaDocument));
 
 		// start the deletion
-		remove(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT);
+		remove(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, metaDocument);
 	}
 }

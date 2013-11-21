@@ -51,8 +51,8 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// check if selected locations are empty
-		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
 		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getPeerAddress(),
 				contentKey);
@@ -67,12 +67,12 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		Object tmp = null;
 		do {
 			w.tickASecond();
-			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
+			tmp = nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey);
 		} while (tmp == null);
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}
@@ -84,8 +84,8 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// check if selected locations are empty
-		assertNull(nodeA.getLocal(nodeA.getNodeId(), contentKey));
-		assertNull(nodeB.getLocal(nodeB.getNodeId(), contentKey));
+		assertNull(nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey));
+		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
 		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(
 				nodeB.getPeerAddress(), contentKey);
@@ -100,12 +100,12 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		Object tmp = null;
 		do {
 			w.tickASecond();
-			tmp = nodeA.getLocal(nodeA.getNodeId(), contentKey);
+			tmp = nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey);
 		} while (tmp == null);
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}

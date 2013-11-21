@@ -32,7 +32,7 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
+		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
 
 		sendDirectResponse(createResponse(secret));
 	}
@@ -53,7 +53,7 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-			networkManager.putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+			networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
 		}
 
 	}

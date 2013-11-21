@@ -4,16 +4,11 @@ import java.net.InetAddress;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
@@ -112,32 +107,6 @@ public class NetworkManager {
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 
-	// /**
-	// * Sends a given message to the peer which is responsible of the given key. </br>
-	// * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
-	// * <b>Important:</b>
-	// * <ul>
-	// * <li>For an appropriate message handling like resends and error log, use and attach a
-	// * {@link FutureRoutedListener} future listener.</li>
-	// * <li>This message gets encrypted with the node's public key. Use this method for direct sending to
-	// * nodes, which have the according private key.</li>
-	// * </ul>
-	// *
-	// * @param message
-	// * the message to send
-	// * @return future
-	// */
-	// public FutureDirect send(BaseMessage message) {
-	// if (!connection.isConnected()) {
-	// logger.warn("Node is not connected!");
-	// return null;
-	// } else if (keyPair == null) {
-	// logger.warn("Node's key pair is not set!");
-	// return null;
-	// }
-	// return messageManager.send(message);
-	// }
-
 	/**
 	 * Sends a given message to the peer which is responsible of the given key. </br>
 	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
@@ -159,32 +128,6 @@ public class NetworkManager {
 		messageManager.send(message, targetPublicKey, listener);
 	}
 
-	// /**
-	// * Message is sent directly using TCP. </br></br>
-	// * <b>Important:</b>
-	// * <ul>
-	// * <li>For an appropriate message handling like resends and error log, use and attach a
-	// * {@link FutureDirectListener} future listener.</li>
-	// * <li>This message gets encrypted with the given public key. Use this method for direct sending to
-	// nodes,
-	// * which have the according private key.</li>
-	// * </ul>
-	// *
-	// * @param message
-	// * the message to send
-	// * @return future
-	// */
-	// public FutureResponse sendDirect(BaseDirectMessage message) {
-	// if (!connection.isConnected()) {
-	// logger.warn("Node is not connected!");
-	// return null;
-	// } else if (keyPair == null) {
-	// logger.warn("Node's key pair is not set!");
-	// return null;
-	// }
-	// return messageManager.sendDirect(message);
-	// }
-
 	/**
 	 * Message is sent directly using TCP.</br></br>
 	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
@@ -204,94 +147,12 @@ public class NetworkManager {
 		}
 		messageManager.sendDirect(message, targetPublicKey, listener);
 	}
-
-	/**
-	 * Stores the content into the DHT at the location under the given content
-	 * key
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param data
-	 *            the wrapper containing the content to be stored
-	 * @return the future
-	 */
-	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent data) {
+	
+	public DataManager getDataManager(){
 		if (!connection.isConnected()) {
 			logger.warn("Node is not connected!");
 			return null;
 		}
-		return dataManager.putGlobal(locationKey, contentKey, data);
-	}
-
-	/**
-	 * Loads the content with the given location and content keys from the
-	 * DHT.</br> <b>Important:</b> This method blocks till the load succeeded.
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @return the desired content from the wrapper
-	 */
-	public FutureGet getGlobal(String locationKey, String contentKey) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return null;
-		}
-		return dataManager.getGlobal(locationKey, contentKey);
-	}
-
-	/**
-	 * Stores the given content with the key in the storage of the peer.</br>
-	 * The content key allows to store several objects for the same key.
-	 * <b>Important:</b> This method blocks till the storage succeeded.
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @param data
-	 *            the wrapper containing the content to be stored
-	 */
-	public void putLocal(String locationKey, String contentKey, NetworkContent data) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return;
-		}
-		dataManager.putLocal(locationKey, contentKey, data);
-	}
-
-	/**
-	 * Loads the content with the key directly from the storage of the peer
-	 * 
-	 * @param locationKey
-	 *            the unique id of the content
-	 * @param contentKey
-	 *            the content key - please choose one from {@link H2HConstants}
-	 * @return the desired content from the wrapper
-	 */
-	public NetworkContent getLocal(String locationKey, String contentKey) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return null;
-		}
-		return dataManager.getLocal(locationKey, contentKey);
-	}
-
-	/**
-	 * Removes a content from the DHT
-	 * 
-	 * @param locationKey the unique id of the content
-	 * @param contentKey the content key - please choose one from {@link H2HConstants}
-	 * @return the future
-	 */
-	public FutureRemove remove(String locationKey, String contentKey) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return null;
-		}
-		return dataManager.remove(locationKey, contentKey);
+		return dataManager;
 	}
 }

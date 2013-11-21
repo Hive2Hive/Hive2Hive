@@ -74,7 +74,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void handleGetResult(NetworkContent content) {
+	public void handleGetResult(NetworkContent content) {
 		HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 		try {
 			NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, decryptionKey);

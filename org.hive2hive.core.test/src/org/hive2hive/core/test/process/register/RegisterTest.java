@@ -65,7 +65,7 @@ public class RegisterTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// verify the new public key
-		FutureGet getKey = otherClient.getGlobal(credentials.getUserId(), H2HConstants.USER_PUBLIC_KEY);
+		FutureGet getKey = otherClient.getDataManager().getGlobal(credentials.getUserId(), H2HConstants.USER_PUBLIC_KEY);
 		getKey.awaitUninterruptibly();
 		getKey.getFutureRequests().awaitUninterruptibly();
 		UserPublicKey publicKey = (UserPublicKey) getKey.getData().object();
@@ -81,7 +81,7 @@ public class RegisterTest extends H2HJUnitTest {
 		Assert.assertEquals(credentials.getUserId(), gotUserProfile.getUserId());
 
 		// verify the new locations map
-		FutureGet getLocations = otherClient.getGlobal(credentials.getUserId(), H2HConstants.USER_LOCATIONS);
+		FutureGet getLocations = otherClient.getDataManager().getGlobal(credentials.getUserId(), H2HConstants.USER_LOCATIONS);
 		getLocations.awaitUninterruptibly();
 		getLocations.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) getLocations.getData().object();
@@ -92,7 +92,7 @@ public class RegisterTest extends H2HJUnitTest {
 		Assert.assertTrue(locations.getLocationEntries().isEmpty());
 
 		// verify the new user message queue
-		FutureGet getQueue = otherClient.getGlobal(credentials.getUserId(),
+		FutureGet getQueue = otherClient.getDataManager().getGlobal(credentials.getUserId(),
 				H2HConstants.USER_MESSAGE_QUEUE_KEY);
 		getQueue.awaitUninterruptibly();
 		getQueue.getFutureRequests().awaitUninterruptibly();
@@ -112,7 +112,7 @@ public class RegisterTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// already put a locations map
-		FuturePut putProfile = client.putGlobal(credentials.getUserId(), H2HConstants.USER_LOCATIONS,
+		FuturePut putProfile = client.getDataManager().putGlobal(credentials.getUserId(), H2HConstants.USER_LOCATIONS,
 				new Locations(credentials.getUserId()));
 		putProfile.awaitUninterruptibly();
 		putProfile.getFutureRequests().awaitUninterruptibly();

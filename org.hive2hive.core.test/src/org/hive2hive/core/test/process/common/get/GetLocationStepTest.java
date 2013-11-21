@@ -53,7 +53,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		newLocations.addEntry(status);
 
 		// put the locations to the DHT
-		proxy.putLocal(userId, H2HConstants.USER_LOCATIONS, newLocations);
+		proxy.getDataManager().putLocal(userId, H2HConstants.USER_LOCATIONS, newLocations);
 
 		Locations found = NetworkPutGetUtil.getLocations(putter, userId);
 

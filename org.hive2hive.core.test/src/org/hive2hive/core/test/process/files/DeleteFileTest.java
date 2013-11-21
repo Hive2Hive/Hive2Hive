@@ -86,7 +86,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		MetaFile metaFileBeforeDeletion = (MetaFile) metaDocumentBeforeDeletion;
 		for (FileVersion version : metaFileBeforeDeletion.getVersions()) {
 			for (KeyPair key : version.getChunkIds()) {
-				FutureGet get = client.getGlobal(ProcessStep.key2String(key.getPublic()),
+				FutureGet get = client.getDataManager().getGlobal(ProcessStep.key2String(key.getPublic()),
 						H2HConstants.FILE_CHUNK);
 				get.awaitUninterruptibly();
 				get.getFutureRequests().awaitUninterruptibly();

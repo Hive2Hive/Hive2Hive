@@ -32,7 +32,7 @@ public class TestDirectMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		networkManager.putLocal(networkManager.getNodeId(), contentKey, wrapper);
+		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, wrapper);
 	}
 
 	@Override

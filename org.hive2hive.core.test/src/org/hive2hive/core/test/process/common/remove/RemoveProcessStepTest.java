@@ -5,13 +5,13 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.List;
 
-import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
-import net.tomp2p.storage.StorageMemory;
 
+import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.remove.RemoveProcessStep;
+import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -47,13 +47,14 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void testRemoveProcessStep() {
 		String locationKey = network.get(0).getNodeId();
+		H2HTestData testData = new H2HTestData(data);
 		// put some data to remove
-		network.get(0).putGlobal(locationKey, locationKey, new H2HTestData(data)).awaitUninterruptibly();
+		network.get(0).getDataManager().putGlobal(locationKey, locationKey, testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		RemoveProcessStep putStep = new RemoveProcessStep(locationKey, contentKey, null);
+		BaseRemoveProcessStep putStep = new BaseRemoveProcessStep(locationKey, contentKey, testData, null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -65,22 +66,22 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 		
-		assertNull(network.get(0).getLocal(locationKey, contentKey));
+		assertNull(network.get(0).getDataManager().getLocal(locationKey, contentKey));
 	}
 	
 	@Test
 	public void testRemoveProcessStepFailing() {
 		String locationKey = network.get(0).getNodeId();
-		
+		H2HTestData testData = new H2HTestData(data);
 		// manipulate the node, remove will not work
 		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage());
 		// put some data to remove
-		network.get(0).putGlobal(locationKey, locationKey, new H2HTestData(data)).awaitUninterruptibly();
+		network.get(0).getDataManager().putGlobal(locationKey, locationKey, testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		RemoveProcessStep putStep = new RemoveProcessStep(locationKey, contentKey, null);
+		BaseRemoveProcessStep putStep = new BaseRemoveProcessStep(locationKey, contentKey, testData, null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -105,9 +106,14 @@ public class RemoveProcessStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class FakeGetTestStorage extends StorageMemory {
+	private class FakeGetTestStorage extends H2HStorageMemory {
+		
+		public FakeGetTestStorage() {
+			super();
+		}
+
 		@Override
-		public Data get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
+		public Data get(Number640 key) {
 			Data fakeData = null;
 			try {
 				fakeData = new Data(new H2HTestData(data));

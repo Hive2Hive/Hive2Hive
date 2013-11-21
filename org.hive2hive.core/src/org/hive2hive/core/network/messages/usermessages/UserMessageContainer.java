@@ -1,7 +1,7 @@
 package org.hive2hive.core.network.messages.usermessages;
 
+import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.NetworkContentWrapper;
 
 /**
  * Holds the user message bytes and its signature. This class wraps those two parameters and can be stored< as
@@ -10,23 +10,29 @@ import org.hive2hive.core.network.data.NetworkContentWrapper;
  * @author Christian
  * 
  */
-public class UserMessageContainer extends NetworkContentWrapper<byte[]> {
+public class UserMessageContainer extends NetworkContent{
 
 	private static final long serialVersionUID = -2450838549852395277L;
 
 	private final byte[] signature;
+	private final byte[] messageBytes;
 
 	public UserMessageContainer(byte[] messageBytes, byte[] signature) {
-		super(messageBytes);
+		this.messageBytes = messageBytes;
 		this.signature = signature;
 	}
 
 	public byte[] getMessageBytes() {
-		return getContent();
+		return messageBytes;
 	}
 
 	// TODO rename to getSignature()
 	public byte[] getMessageSignature() {
 		return signature;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getUserMessageQueue();
 	}
 }

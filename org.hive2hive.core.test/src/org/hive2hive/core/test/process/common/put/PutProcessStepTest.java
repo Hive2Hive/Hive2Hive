@@ -3,13 +3,13 @@ package org.hive2hive.core.test.process.common.put;
 import java.security.PublicKey;
 import java.util.List;
 
-import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
-import net.tomp2p.storage.StorageMemory;
 
+import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.put.PutProcessStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -48,7 +48,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		BasePutProcessStep putStep = new BasePutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -72,7 +72,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		BasePutProcessStep putStep = new BasePutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -96,7 +96,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		BasePutProcessStep putStep = new BasePutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -119,7 +119,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		BasePutProcessStep putStep = new BasePutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -144,7 +144,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		BasePutProcessStep putStep = new BasePutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -169,7 +169,7 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
 		};
-		PutProcessStep putStep = new PutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
+		BasePutProcessStep putStep = new BasePutProcessStep(locationKey, contentKey, new H2HTestData(data), null);
 		process.setNextStep(putStep);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -194,28 +194,43 @@ public class PutProcessStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class DenyingPutTestStorage extends StorageMemory {
+	private class DenyingPutTestStorage extends H2HStorageMemory {
+
+		public DenyingPutTestStorage() {
+			super();
+		}
+
 		@Override
-		public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
-				PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
+		public PutStatusH2H put(Number640 key, Data value, PublicKey publicKey, boolean putIfAbsent,
+				boolean domainProtection) {
 			// doesn't accept any data
-			return PutStatus.FAILED;
+			return PutStatusH2H.FAILED;
 		}
 	}
 
-	private class DenyingGetTestStorage extends StorageMemory {
+	private class DenyingGetTestStorage extends H2HStorageMemory {
+
+		public DenyingGetTestStorage() {
+			super();
+		}
+
 		@Override
-		public Data get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
+		public Data get(Number640 key) {
 			return null;
 		}
 	}
 
-	private class VersionConflictTestStorage extends StorageMemory {
+	private class VersionConflictTestStorage extends H2HStorageMemory {
+
+		public VersionConflictTestStorage() {
+			super();
+		}
+
 		@Override
-		public PutStatus put(Number160 locationKey, Number160 domainKey, Number160 contentKey, Data newData,
-				PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
+		public PutStatusH2H put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
+				boolean domainProtection) {
 			// imitate a version conflict
-			return PutStatus.VERSION_CONFLICT;
+			return PutStatusH2H.VERSION_CONFLICT;
 		}
 	}
 }

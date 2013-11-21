@@ -87,7 +87,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		FutureGet global = client.getGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
+		FutureGet global = client.getDataManager().getGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
@@ -100,7 +100,6 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 		// verify if both objects are the same
 		Assert.assertEquals(credentials.getUserId(), decrypted.getUserId());
-		Assert.assertEquals(testProfile.getTimestamp(), decrypted.getTimestamp());
 	}
 
 	@Test
@@ -139,7 +138,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		FutureGet global = client.getGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
+		FutureGet global = client.getDataManager().getGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 

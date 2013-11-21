@@ -7,7 +7,7 @@ import java.util.List;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.process.common.remove.RemoveProcessStep;
+import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 
 /**
  * Deletes chunks in the DHT. After deleting a chunk, it calls itself recursively until all chunks of all
@@ -16,17 +16,17 @@ import org.hive2hive.core.process.common.remove.RemoveProcessStep;
  * @author Nico
  * 
  */
-public class DeleteChunkStep extends RemoveProcessStep {
+public class DeleteChunkStep extends BaseRemoveProcessStep {
 
 	private List<KeyPair> chunksToDelete;
 
 	public DeleteChunkStep() {
-		super(null, H2HConstants.FILE_CHUNK, null);
+		super(null);
 
 	}
 
 	private DeleteChunkStep(List<KeyPair> chunksToDelete) {
-		super(null, H2HConstants.FILE_CHUNK, null);
+		super(null);
 		this.chunksToDelete = chunksToDelete;
 	}
 
@@ -61,6 +61,6 @@ public class DeleteChunkStep extends RemoveProcessStep {
 
 		KeyPair toDelete = chunksToDelete.remove(0);
 		nextStep = new DeleteChunkStep(chunksToDelete);
-		remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK);
+		remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, null);
 	}
 }

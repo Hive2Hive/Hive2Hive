@@ -71,7 +71,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the locations which should be stored at the proxy
-		Locations found = (Locations) proxy.getLocal(userId, H2HConstants.USER_LOCATIONS);
+		Locations found = (Locations) proxy.getDataManager().getLocal(userId, H2HConstants.USER_LOCATIONS);
 		Assert.assertNotNull(found);
 
 		// verify if both objects are the same
@@ -116,7 +116,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		} while (!listener.hasFailed());
 
 		// get the locations which should be stored at the proxy --> they should be null
-		Assert.assertNull(proxy.getLocal(userId, H2HConstants.USER_LOCATIONS));
+		Assert.assertNull(proxy.getDataManager().getLocal(userId, H2HConstants.USER_LOCATIONS));
 	}
 
 	@Override

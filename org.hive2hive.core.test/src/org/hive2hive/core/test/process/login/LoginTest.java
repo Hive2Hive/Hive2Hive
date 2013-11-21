@@ -65,7 +65,7 @@ public class LoginTest extends H2HJUnitTest {
 		Assert.assertEquals(userProfile.getUserId(), process.getContext().getUserProfile().getUserId());
 
 		// verify the locations map
-		FutureGet futureGet = client.getGlobal(userProfile.getUserId(), H2HConstants.USER_LOCATIONS);
+		FutureGet futureGet = client.getDataManager().getGlobal(userProfile.getUserId(), H2HConstants.USER_LOCATIONS);
 		futureGet.awaitUninterruptibly();
 		futureGet.getFutureRequests().awaitUninterruptibly();
 

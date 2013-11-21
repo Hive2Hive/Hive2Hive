@@ -24,13 +24,13 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * @author Nico
  * 
  */
-public class PutMetaDocumentStep extends PutProcessStep {
+public class PutMetaDocumentStep extends BasePutProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutMetaDocumentStep.class);
 	protected MetaDocument metaDocument;
 
 	public PutMetaDocumentStep(MetaDocument metaDocument, ProcessStep nextStep) {
-		super(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, null, nextStep);
+		super(nextStep);
 		this.metaDocument = metaDocument;
 	}
 
@@ -39,7 +39,7 @@ public class PutMetaDocumentStep extends PutProcessStep {
 	 * method.
 	 */
 	protected PutMetaDocumentStep() {
-		super(null, H2HConstants.META_DOCUMENT, null, null);
+		super(null);
 	}
 
 	@Override

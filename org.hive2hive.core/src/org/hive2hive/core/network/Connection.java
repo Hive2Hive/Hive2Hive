@@ -151,7 +151,7 @@ public class Connection {
 			peer = new PeerMaker(Number160.createHash(nodeId)).ports(port).setEnableIndirectReplication(true)
 					.makeAndListen();
 			// override the put method for validation tasks
-			peer.getPeerBean().storage(new H2HStorageMemory(networkManager));
+			peer.getPeerBean().storage(new H2HStorageMemory());
 			// attach a reply handler for messages
 			peer.setObjectDataReply(new MessageReplyHandler(networkManager));
 			return true;
