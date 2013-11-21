@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.IProcess;
@@ -29,6 +30,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	private final NetworkManager networkManager;
 	private final FileManager fileManager;
+
+	private UserCredentials userCredentials;
 
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
 			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress, String rootPath) {
@@ -76,6 +79,13 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		networkManager.disconnect();
 	}
 
+	private UserCredentials getSessionCredentials() throws NoSessionException {
+		if (userCredentials == null) {
+			throw new NoSessionException();
+		}
+		return userCredentials;
+	}
+
 	@Override
 	public IProcess register(UserCredentials credentials) {
 		final RegisterProcess process = new RegisterProcess(credentials, networkManager);
@@ -92,12 +102,9 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		loginProcess.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {
+				userCredentials = credentials;
 				LoginProcessContext loginContext = loginProcess.getContext();
-
-				// start the post login process
-				PostLoginProcess postLogin = new PostLoginProcess(loginContext.getUserProfile(), credentials,
-						loginContext.getLocations(), networkManager, fileManager, H2HNode.this);
-				postLogin.start();
+				startPostLoginProcess(loginContext, credentials);
 			}
 
 			@Override
@@ -113,9 +120,20 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		return loginProcess;
 	}
 
+	private void startPostLoginProcess(LoginProcessContext loginContext, UserCredentials credentials) {
+		// start the post login process
+		PostLoginProcess postLogin = new PostLoginProcess(loginContext.getUserProfile(), credentials,
+				loginContext.getLocations(), networkManager, fileManager, H2HNode.this);
+		postLogin.start();
+	}
+
 	@Override
 	public IProcess logout() {
 		// TODO start a logout process
+		// TODO stop all other processes of this user
+
+		// quit the session
+		userCredentials = null;
 
 		// write the current state to a meta file
 		fileManager.writePersistentMetaData();
@@ -123,7 +141,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
-	public IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation {
+	public IProcess add(File file) throws IllegalFileLocation, NoSessionException {
 		// file must be in the given root directory
 		if (!file.getAbsolutePath().startsWith(fileManager.getRoot().getAbsolutePath())) {
 			throw new IllegalFileLocation("File must be in root of the H2H directory.");
@@ -132,8 +150,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
 		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
 
-		NewFileProcess uploadProcess = new NewFileProcess(file, credentials, networkManager, fileManager,
-				this);
+		NewFileProcess uploadProcess = new NewFileProcess(file, getSessionCredentials(), networkManager,
+				fileManager, this);
 		if (autostartProcesses) {
 			uploadProcess.start();
 		}
@@ -142,9 +160,9 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
-	public IProcess update(File file, UserCredentials credentials) {
-		NewVersionProcess process = new NewVersionProcess(file, credentials, networkManager, fileManager,
-				this);
+	public IProcess update(File file) throws NoSessionException {
+		NewVersionProcess process = new NewVersionProcess(file, getSessionCredentials(), networkManager,
+				fileManager, this);
 		if (autostartProcesses) {
 			process.start();
 		}

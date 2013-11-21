@@ -3,6 +3,7 @@ package org.hive2hive.core;
 import java.io.File;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -43,16 +44,16 @@ public interface IH2HNode {
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
 	 * the node configuration
 	 */
-	IProcess add(File file, UserCredentials credentials) throws IllegalFileLocation;
+	IProcess add(File file) throws IllegalFileLocation, NoSessionException;
 
 	/**
 	 * Update a file or a folder in the network.
 	 * 
 	 * @param file the file to be updated
-	 * @param credentials the user credentials
 	 * @return
 	 */
-	IProcess update(File file, UserCredentials credentials);
+	IProcess update(File file) throws NoSessionException;
 
+	// TODO this must not be part of the H2H interface
 	void disconnect();
 }
