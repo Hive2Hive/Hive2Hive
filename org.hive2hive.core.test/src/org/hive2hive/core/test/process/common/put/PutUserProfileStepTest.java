@@ -1,5 +1,7 @@
 package org.hive2hive.core.test.process.common.put;
 
+import static org.junit.Assert.assertFalse;
+
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
@@ -17,26 +19,24 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
+import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests the generic step that puts the user profile into the DHT
+ * Tests the generic step that puts the user profile into the DHT.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class PutUserProfileStepTest extends H2HJUnitTest {
@@ -48,12 +48,6 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = PutUserProfileStepTest.class;
 		beforeClass();
-	}
-
-	@Override
-	@Before
-	public void beforeMethod() {
-		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
 	}
 
@@ -81,13 +75,15 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
+			assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		FutureGet global = client.getDataManager().getGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
+		FutureGet global = client.getDataManager().getGlobal(credentials.getProfileLocationKey(),
+				H2HConstants.USER_PROFILE);
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
@@ -103,56 +99,41 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException, ClassNotFoundException, IOException,
-			DataLengthException, IllegalStateException, InvalidCipherTextException {
+	public void testStepRollback() throws InterruptedException {
 		NetworkManager putter = network.get(0); // where the process runs
-		NetworkManager client = network.get(1); // where the user profile is stored
+		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		NetworkManager proxy = network.get(1); // where the user profile is stored
+		proxy.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
-
-		UserProfile newProfile = new UserProfile(credentials.getUserId(),
+		UserProfile testProfile = new UserProfile(credentials.getUserId(),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutUserProfileStep step = new PutUserProfileStep(newProfile, credentials, null);
+		PutUserProfileStep step = new PutUserProfileStep(testProfile, credentials, null);
 		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		// rollback
-		process.stop("Testing the rollback");
-
-		waiter = new H2HWaiter(20);
-		do {
+			assertFalse(listener.hasSucceeded());
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		FutureGet global = client.getDataManager().getGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-		global.awaitUninterruptibly();
-		global.getFutureRequests().awaitUninterruptibly();
-
-	}
-
-	@Override
-	@After
-	public void afterMethod() {
-		NetworkTestUtil.shutdownNetwork(network);
-		super.afterMethod();
+		// get the locations which should be stored at the proxy --> they should be null
+		Assert.assertNull(proxy.getDataManager().getLocal(credentials.getProfileLocationKey(), H2HConstants.USER_LOCATIONS));
 	}
 
 	@AfterClass
 	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 }

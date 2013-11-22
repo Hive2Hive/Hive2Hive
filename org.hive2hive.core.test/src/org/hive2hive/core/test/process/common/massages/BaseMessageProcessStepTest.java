@@ -22,10 +22,8 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.messages.TestMessage;
 import org.hive2hive.core.test.network.messages.TestMessageWithReply;
 import org.hive2hive.core.test.process.TestProcessListener;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,12 +43,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = BaseMessageProcessStepTest.class;
 		beforeClass();
-	}
-
-	@Override
-	@Before
-	public void beforeMethod() {
-		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkTestUtil.createKeyPairs(network);
 	}
@@ -73,14 +65,13 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 
 		// create a message with target node B
-		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey,
-				new H2HTestData(data));
+		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseMessageProcessStep step = new BaseMessageProcessStep(message, nodeB.getKeyPair()
-				.getPublic(), null) {
+		BaseMessageProcessStep step = new BaseMessageProcessStep(message, nodeB.getKeyPair().getPublic(),
+				null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
@@ -131,14 +122,13 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey,
-				new H2HTestData(data));
+		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseMessageProcessStep step = new BaseMessageProcessStep(message, nodeB.getKeyPair()
-				.getPublic(), null) {
+		BaseMessageProcessStep step = new BaseMessageProcessStep(message, nodeB.getKeyPair().getPublic(),
+				null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
@@ -179,13 +169,14 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseMessageProcessStep step = new BaseMessageProcessStep(message, nodeB.getKeyPair()
-				.getPublic(), null) {
+		BaseMessageProcessStep step = new BaseMessageProcessStep(message, nodeB.getKeyPair().getPublic(),
+				null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
-				nodeA.getDataManager().putLocal(nodeA.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+				nodeA.getDataManager().putLocal(nodeA.getNodeId(), contentKey,
+						new H2HTestData(receivedSecret));
 				// step finished go further
 				getProcess().setNextStep(nextStep);
 			}
@@ -211,20 +202,15 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey))
+				.getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}
 
-	@Override
-	@After
-	public void afterMethod() {
-		NetworkTestUtil.shutdownNetwork(network);
-		super.afterMethod();
-	}
-
 	@AfterClass
 	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 

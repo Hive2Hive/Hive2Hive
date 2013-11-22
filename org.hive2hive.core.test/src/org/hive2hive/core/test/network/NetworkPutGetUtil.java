@@ -128,27 +128,6 @@ public class NetworkPutGetUtil {
 		return context.getMetaDocument();
 	}
 
-	public static Locations getLocations(NetworkManager networkManager, String userId) {
-		IGetLocationsContext context = new IGetLocationsContext() {
-
-			private Locations locations;
-
-			@Override
-			public void setLocation(Locations locations) {
-				this.locations = locations;
-			}
-
-			@Override
-			public Locations getLocations() {
-				return locations;
-			}
-		};
-
-		GetLocationsStep step = new GetLocationsStep(userId, null, context);
-		executeStep(networkManager, step);
-		return context.getLocations();
-	}
-
 	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {
 		DownloadFileProcess process = new DownloadFileProcess(file, networkManager, fileManager);
 		executeProcess(process);

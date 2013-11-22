@@ -57,7 +57,6 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	 */
 	private GetFileChunkStep(File file, int currentChunkOrder, List<KeyPair> chunksToGet,
 			List<Chunk> chunkBuffer) {
-		super(null, H2HConstants.FILE_CHUNK);
 		this.file = file;
 		this.currentChunkOrder = currentChunkOrder;
 		this.chunksToGet = chunksToGet;

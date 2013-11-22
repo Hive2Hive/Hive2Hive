@@ -20,10 +20,8 @@ import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,12 +41,6 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = BaseDirectMessageProcessStepTest.class;
 		beforeClass();
-	}
-
-	@Override
-	@Before
-	public void beforeMethod() {
-		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkTestUtil.createKeyPairs(network);
 	}
@@ -216,15 +208,9 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertEquals(originalSecret, receivedSecret);
 	}
 
-	@Override
-	@After
-	public void afterMethod() {
-		NetworkTestUtil.shutdownNetwork(network);
-		super.afterMethod();
-	}
-
 	@AfterClass
 	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 

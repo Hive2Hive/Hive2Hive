@@ -33,8 +33,6 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep,
 			IGetUserProfileContext context) {
-		super(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-
 		this.credentials = credentials;
 		this.nextStep = nextStep;
 		this.context = context;
@@ -43,7 +41,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	@Override
 	public void start() {
 		if (context.getUserProfile() == null) {
-			super.start();
+			get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		} else {
 			logger.warn("UserProfile is already in context. We do not fetch it again");
 			getProcess().setNextStep(nextStep);
@@ -68,9 +66,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 				logger.error("Cannot decrypt the user profile.", e);
 			}
 		}
-
-		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
-		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
+		
 		getProcess().setNextStep(nextStep);
 	}
 

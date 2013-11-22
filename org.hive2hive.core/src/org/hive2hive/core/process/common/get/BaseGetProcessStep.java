@@ -14,19 +14,6 @@ import org.hive2hive.core.process.ProcessStep;
  */
 public abstract class BaseGetProcessStep extends ProcessStep implements IGetListener {
 
-	protected String locationKey;
-	protected String contentKey;
-
-	public BaseGetProcessStep(String locationKey, String contentKey) {
-		this.locationKey = locationKey;
-		this.contentKey = contentKey;
-	}
-
-	@Override
-	public void start() {
-		get(locationKey, contentKey);
-	}
-
 	protected void get(String locationKey, String contentKey) {
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {

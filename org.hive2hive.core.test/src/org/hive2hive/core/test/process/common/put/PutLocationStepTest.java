@@ -1,11 +1,14 @@
 package org.hive2hive.core.test.process.common.put;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.put.PutLocationStep;
@@ -21,9 +24,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests the generic step that puts the location into the DHT
+ * Tests the generic step that puts the location into the DHT.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class PutLocationStepTest extends H2HJUnitTest {
@@ -47,7 +50,9 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepSuccessful() throws InterruptedException {
 		NetworkManager putter = network.get(0); // where the process runs
+		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
+		proxy.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 
 		// create the needed objects
 		String userId = proxy.getNodeId();
@@ -65,8 +70,9 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
+			assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
@@ -84,7 +90,9 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepRollback() throws InterruptedException {
 		NetworkManager putter = network.get(0); // where the process runs
+		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
+		proxy.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 
 		// create the needed objects
 		String userId = proxy.getNodeId();
@@ -102,16 +110,9 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		// rollback
-		process.stop("Testing the rollback");
-
-		waiter = new H2HWaiter(20);
-		do {
+			assertFalse(listener.hasSucceeded());
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 

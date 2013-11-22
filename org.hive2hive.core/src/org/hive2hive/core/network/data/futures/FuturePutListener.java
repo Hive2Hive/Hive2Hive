@@ -1,8 +1,8 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureGet;
@@ -94,8 +94,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 
 		// analyze returned put status
-		Map<Number640, PeerAddress> versionConflict = new HashMap<Number640, PeerAddress>();
-		Map<Number640, PeerAddress> fail = new HashMap<Number640, PeerAddress>();
+		List<PeerAddress> versionConflict = new ArrayList<PeerAddress>();
+		List<PeerAddress> fail = new ArrayList<PeerAddress>();
 		for (PeerAddress peeradress : future.getRawResult().keySet()) {
 			for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
 				byte status = future.getRawResult().get(peeradress).get(key);
@@ -109,7 +109,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 								.format("A node denied putting data. reason = '%s' location key = '%s' content key = '%s' version key = '%s'",
 										PutStatusH2H.values()[status], locationKey, contentKey,
 										content.getVersionKey()));
-						fail.put(key, peeradress);
+						fail.add(peeradress);
 						break;
 					case VERSION_CONFLICT:
 					case VERSION_CONFLICT_NO_BASED_ON:
@@ -119,7 +119,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 								.format("A version conflict detected. reason = '%s' location key = '%s' content key = '%s' version key = '%s'",
 										PutStatusH2H.values()[status], locationKey, contentKey,
 										content.getVersionKey()));
-						versionConflict.put(key, peeradress);
+						versionConflict.add(peeradress);
 						break;
 				}
 			}
@@ -157,7 +157,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					"Put retry #%s. location key = '%s' content key = '%s' version key = '%s'", putTries,
 					locationKey, contentKey, content.getVersionKey()));
 			// remove succeeded puts
-			dataManager.remove(locationKey, contentKey, content.getVersionKey()).addListener(new RetryPutListener());
+			dataManager.remove(locationKey, contentKey, content.getVersionKey()).addListener(
+					new RetryPutListener());
 		} else {
 			logger.error(String
 					.format("Put verification failed. Couldn't put data after %s tries. location key = '%s' content key = '%s' version key = '%s'",
@@ -255,5 +256,5 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				listener.onPutFailure();
 		}
 	}
-	
+
 }

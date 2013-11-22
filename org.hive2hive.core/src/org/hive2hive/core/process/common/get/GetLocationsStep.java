@@ -11,33 +11,35 @@ import org.hive2hive.core.process.context.IGetLocationsContext;
 /**
  * Generic process step to get the {@link: UserProfile} and decrypt it. It is then accessible in
  * 
- * @author Nico, Christian
+ * @author Nico, Christian, Seppi
  * 
  */
 public class GetLocationsStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetLocationsStep.class);
 
+	private final String userId;
 	private final ProcessStep nextStep;
 	private IGetLocationsContext context;
 
 	public GetLocationsStep(String userId, ProcessStep nextStep, IGetLocationsContext context) {
-		super(userId, H2HConstants.USER_LOCATIONS);
+		this.userId = userId;
 		this.nextStep = nextStep;
 		this.context = context;
+	}
+	
+	@Override
+	public void start() {
+		get(userId, H2HConstants.USER_LOCATIONS);
 	}
 
 	@Override
 	public void handleGetResult(NetworkContent content) {
-
 		if (content == null) {
 			logger.debug("Did not find the locations.");
 		} else {
 			context.setLocation((Locations) content);
 		}
-
-		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
-		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
 	}
 }

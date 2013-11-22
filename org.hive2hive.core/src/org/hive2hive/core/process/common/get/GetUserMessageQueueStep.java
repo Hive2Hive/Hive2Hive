@@ -17,12 +17,18 @@ public class GetUserMessageQueueStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserMessageQueueStep.class);
 
+	private final String userId;
 	private final ProcessStep nextStep;
 	private UserMessageQueue umQueue;
 
 	public GetUserMessageQueueStep(String userId, ProcessStep nextStep) {
-		super(userId, H2HConstants.USER_MESSAGE_QUEUE_KEY);
+		this.userId = userId;
 		this.nextStep = nextStep;
+	}
+	
+	@Override
+	public void start() {
+		get(userId, H2HConstants.USER_MESSAGE_QUEUE_KEY);
 	}
 
 	@Override
