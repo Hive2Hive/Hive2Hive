@@ -16,8 +16,8 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
-import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -54,7 +54,7 @@ public class NewVersionTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		NetworkPutGetUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(network.get(0), userCredentials);
 
 		// create a file
 		String randomName = NetworkTestUtil.randomString();
@@ -62,7 +62,7 @@ public class NewVersionTest extends H2HJUnitTest {
 		fileManager = new FileManager(root);
 		file = FileTestUtil.createFileRandomContent(3, fileManager, config);
 		originalContent = FileUtils.readFileToString(file);
-		NetworkPutGetUtil.uploadNewFile(network.get(0), file, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file, userCredentials, fileManager, config);
 	}
 
 	@Test
@@ -74,11 +74,11 @@ public class NewVersionTest extends H2HJUnitTest {
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			FileManager downloaderFileManager = new FileManager(root);
 
-			UserProfile userProfile = NetworkPutGetUtil.getUserProfile(downloader, userCredentials);
+			UserProfile userProfile = ProcessTestUtil.getUserProfile(downloader, userCredentials);
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
 
 			// verify the original content
-			File downloaded = NetworkPutGetUtil.downloadFile(downloader, fileNode, downloaderFileManager);
+			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, downloaderFileManager);
 			Assert.assertEquals(originalContent, FileUtils.readFileToString(downloaded));
 		}
 
@@ -89,16 +89,16 @@ public class NewVersionTest extends H2HJUnitTest {
 			byte[] md5UpdatedFile = EncryptionUtil.generateMD5Hash(file);
 
 			// upload the new version
-			NetworkPutGetUtil.uploadNewFileVersion(uploader, file, userCredentials, fileManager, config);
+			ProcessTestUtil.uploadNewFileVersion(uploader, file, userCredentials, fileManager, config);
 
 			// use different file manager for not overriding the original file
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			FileManager downloaderFileManager = new FileManager(root);
 
 			// download the file and check if version is newer
-			UserProfile userProfile = NetworkPutGetUtil.getUserProfile(downloader, userCredentials);
+			UserProfile userProfile = ProcessTestUtil.getUserProfile(downloader, userCredentials);
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
-			File downloaded = NetworkPutGetUtil.downloadFile(downloader, fileNode, downloaderFileManager);
+			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, downloaderFileManager);
 
 			// new content should be latest one
 			Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));

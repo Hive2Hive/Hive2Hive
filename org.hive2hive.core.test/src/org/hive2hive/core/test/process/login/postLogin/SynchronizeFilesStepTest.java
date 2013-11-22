@@ -15,8 +15,8 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
-import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,7 +54,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		// first, register a new user
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		NetworkPutGetUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(network.get(0), userCredentials);
 
 		// create two filemanagers
 		File root1 = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
@@ -69,19 +69,19 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// - - file 3
 		File file1 = new File(fileManager0.getRoot(), "file 1");
 		FileUtils.writeStringToFile(file1, NetworkTestUtil.randomString());
-		NetworkPutGetUtil.uploadNewFile(network.get(0), file1, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file1, userCredentials, fileManager0, config);
 
 		File file2 = new File(fileManager0.getRoot(), "file 2");
 		FileUtils.writeStringToFile(file2, NetworkTestUtil.randomString());
-		NetworkPutGetUtil.uploadNewFile(network.get(0), file2, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file2, userCredentials, fileManager0, config);
 
 		File folder1 = new File(fileManager0.getRoot(), "folder 1");
 		folder1.mkdir();
-		NetworkPutGetUtil.uploadNewFile(network.get(0), folder1, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), folder1, userCredentials, fileManager0, config);
 
 		File file3 = new File(folder1, "file 2");
 		FileUtils.writeStringToFile(file3, NetworkTestUtil.randomString());
-		NetworkPutGetUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
 
 		// copy the content to the other client such that they are in sync
 		FileUtils.copyDirectory(fileManager0.getRoot(), fileManager1.getRoot());
@@ -117,12 +117,12 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// add a file 3 within folder 1
 		File file3 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 4");
 		FileUtils.write(file3, NetworkTestUtil.randomString());
-		NetworkPutGetUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
 
 		// delete file 2
 		File file2 = new File(fileManager0.getRoot(), "file 2");
 		file2.delete();
-		NetworkPutGetUtil.deleteFile(network.get(0), file2, userCredentials, fileManager0);
+		ProcessTestUtil.deleteFile(network.get(0), file2, userCredentials, fileManager0);
 
 		/** start sync **/
 		// the client that logs in
@@ -136,13 +136,13 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		Assert.assertFalse(file2.exists()); // deleted file is not here
 
 		/** verify if the local changes have been uploaded **/
-		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertTrue(userProfile.getFileByPath("added-file") != null); // added file is here
 		Assert.assertTrue(userProfile.getFileByPath("file 1") == null); // deleted file is not in UP
 	}
 
 	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS) {
-		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, userProfile,
 				fileManager);
 		TestProcessListener listener = new TestProcessListener();

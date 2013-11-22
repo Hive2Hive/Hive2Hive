@@ -3,18 +3,13 @@ package org.hive2hive.core.test.network;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.tomp2p.peers.Number640;
-import net.tomp2p.storage.Data;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.IH2HNode;
-import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;

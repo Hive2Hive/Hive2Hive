@@ -16,8 +16,8 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
-import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -49,7 +49,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		NetworkPutGetUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(network.get(0), userCredentials);
 
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		uploaderFileManager = new FileManager(root);

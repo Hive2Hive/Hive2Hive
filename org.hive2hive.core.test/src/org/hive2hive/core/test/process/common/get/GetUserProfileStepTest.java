@@ -27,8 +27,8 @@ import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -73,7 +73,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 				H2HConstants.USER_PROFILE, encrypted);
 		putGlobal.awaitUninterruptibly();
 
-		UserProfile profile = NetworkPutGetUtil.getUserProfile(putter, credentials);
+		UserProfile profile = ProcessTestUtil.getUserProfile(putter, credentials);
 
 		// verify if both objects are the same
 		Assert.assertEquals(credentials.getUserId(), profile.getUserId());

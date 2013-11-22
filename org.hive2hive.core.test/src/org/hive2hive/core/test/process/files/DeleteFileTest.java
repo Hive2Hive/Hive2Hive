@@ -23,8 +23,8 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
-import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -52,7 +52,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		NetworkPutGetUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(network.get(0), userCredentials);
 
 	}
 
@@ -65,22 +65,22 @@ public class DeleteFileTest extends H2HJUnitTest {
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		FileManager fileManager = new FileManager(root);
 		File file = FileTestUtil.createFileRandomContent(3, fileManager, config);
-		NetworkPutGetUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
 
 		// store the keys of the meta file to verify them later
-		UserProfile userProfileBeforeDeletion = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, fileManager).getKeyPair();
-		MetaDocument metaDocumentBeforeDeletion = NetworkPutGetUtil.getMetaDocument(client, metaKeyPair);
+		MetaDocument metaDocumentBeforeDeletion = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the file
-		NetworkPutGetUtil.deleteFile(client, file, userCredentials, fileManager);
+		ProcessTestUtil.deleteFile(client, file, userCredentials, fileManager);
 
 		// check if the file is still in the DHT
-		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
 
-		MetaDocument metaDocument = NetworkPutGetUtil.getMetaDocument(client, metaKeyPair);
+		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNull(metaDocument);
 
 		MetaFile metaFileBeforeDeletion = (MetaFile) metaDocumentBeforeDeletion;
@@ -107,41 +107,41 @@ public class DeleteFileTest extends H2HJUnitTest {
 		FileManager fileManager = new FileManager(root);
 		File folder = new File(root, "test-folder");
 		folder.mkdir();
-		NetworkPutGetUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
 
 		// add a file to the network
 		File file = new File(folder, "test-file");
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
-		NetworkPutGetUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
 
 		// store some things to be able to test later
-		UserProfile userProfileBeforeDeletion = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, fileManager).getKeyPair();
-		MetaFolder metaFolderBeforeDeletion = (MetaFolder) NetworkPutGetUtil.getMetaDocument(client,
+		MetaFolder metaFolderBeforeDeletion = (MetaFolder) ProcessTestUtil.getMetaDocument(client,
 				metaKeyPairFolder);
-		MetaFile metaFileBeforeDeletion = (MetaFile) NetworkPutGetUtil.getMetaDocument(client,
+		MetaFile metaFileBeforeDeletion = (MetaFile) ProcessTestUtil.getMetaDocument(client,
 				metaKeyPairFile);
 		Assert.assertNotNull(metaFolderBeforeDeletion);
 		Assert.assertNotNull(metaFileBeforeDeletion);
 		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
 
 		// delete the file
-		NetworkPutGetUtil.deleteFile(client, file, userCredentials, fileManager);
+		ProcessTestUtil.deleteFile(client, file, userCredentials, fileManager);
 
 		// check if the file is still in the DHT
-		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPairFile.getPublic()));
 
 		// check if the folder is still in the DHT
 		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
 
 		// check the meta file is still in the DHT
-		MetaDocument metaFile = NetworkPutGetUtil.getMetaDocument(client, metaKeyPairFile);
+		MetaDocument metaFile = ProcessTestUtil.getMetaDocument(client, metaKeyPairFile);
 		Assert.assertNull(metaFile);
 
 		// check if the child is also gone
-		MetaFolder metaFolder = (MetaFolder) NetworkPutGetUtil.getMetaDocument(client, metaKeyPairFolder);
+		MetaFolder metaFolder = (MetaFolder) ProcessTestUtil.getMetaDocument(client, metaKeyPairFolder);
 		Assert.assertNotNull(metaFolder);
 		Assert.assertEquals(0, metaFolder.getChildDocuments().size());
 	}
@@ -156,21 +156,21 @@ public class DeleteFileTest extends H2HJUnitTest {
 		FileManager fileManager = new FileManager(root);
 		File folder = new File(root, "test-folder");
 		folder.mkdir();
-		NetworkPutGetUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
 
-		UserProfile userProfileBeforeDeletion = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
-		MetaDocument metaDocumentBeforeDeletion = NetworkPutGetUtil.getMetaDocument(client, metaKeyPair);
+		MetaDocument metaDocumentBeforeDeletion = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the folder
-		NetworkPutGetUtil.deleteFile(client, folder, userCredentials, fileManager);
+		ProcessTestUtil.deleteFile(client, folder, userCredentials, fileManager);
 
 		// check if the folder is still in the DHT
-		UserProfile userProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
 
-		MetaDocument metaDocument = NetworkPutGetUtil.getMetaDocument(client, metaKeyPair);
+		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNull(metaDocument);
 	}
 

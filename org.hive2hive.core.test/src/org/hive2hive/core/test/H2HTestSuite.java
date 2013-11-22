@@ -6,9 +6,11 @@ import org.hive2hive.core.test.model.FileTreeNodeTest;
 import org.hive2hive.core.test.model.MetaFileTest;
 import org.hive2hive.core.test.model.UserCredentialsTest;
 import org.hive2hive.core.test.network.ConnectionTest;
+import org.hive2hive.core.test.network.H2HStorageMemoryTest;
 import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.network.messages.BaseMessageTest;
 import org.hive2hive.core.test.network.messages.BaseRequestMessageTest;
+import org.hive2hive.core.test.network.messages.direct.BaseDirectRequestMessageTest;
 import org.hive2hive.core.test.process.ProcessTest;
 import org.hive2hive.core.test.process.common.get.BaseGetProcessStepTest;
 import org.hive2hive.core.test.process.common.get.GetLocationStepTest;
@@ -35,24 +37,27 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-// TomP2P
+		// TomP2P
 		ReplicationTest.class,
 
 		// Network
-		ConnectionTest.class, DataManagerTest.class, BaseMessageTest.class, BaseRequestMessageTest.class,
+		H2HStorageMemoryTest.class, ConnectionTest.class,
+		// Network, Data
+		DataManagerTest.class,
+		// Network, Message
+		BaseMessageTest.class, BaseRequestMessageTest.class,
+		// Network, Message, Direct
+		BaseDirectRequestMessageTest.class,
 
 		// Processes
 		ProcessTest.class, ProcessManagerTest.class,
 
 		// ProcessStep, Common, Get
 		BaseGetProcessStepTest.class, GetLocationStepTest.class, GetUserProfileStepTest.class,
-
 		// ProcessStep, Common, Put
 		BasePutProcessStepTest.class, PutLocationStepTest.class, PutUserProfileStepTest.class,
-
 		// ProcessStep, Common, Remove
 		BaseRemoveProcessStepTest.class,
-
 		// ProcessStep, Common, Message
 		BaseMessageProcessStepTest.class, BaseDirectMessageProcessStepTest.class,
 

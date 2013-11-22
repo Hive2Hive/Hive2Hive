@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.network;
+package org.hive2hive.core.test.process;
 
 import java.io.File;
 import java.security.KeyPair;
@@ -26,7 +26,6 @@ import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.process.TestProcessListener;
 
 /**
  * Helper class for JUnit tests to get some documents from the DHT.
@@ -35,9 +34,9 @@ import org.hive2hive.core.test.process.TestProcessListener;
  * @author Nico
  * 
  */
-public class NetworkPutGetUtil {
+public class ProcessTestUtil {
 
-	private NetworkPutGetUtil() {
+	private ProcessTestUtil() {
 		// only static methods
 	}
 

@@ -21,8 +21,8 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
-import org.hive2hive.core.test.network.NetworkPutGetUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,7 +58,7 @@ public class NewFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		NetworkPutGetUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(network.get(0), userCredentials);
 
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
@@ -137,7 +137,7 @@ public class NewFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
 		// test if there is something in the user profile
-		UserProfile gotProfile = NetworkPutGetUtil.getUserProfile(client, userCredentials);
+		UserProfile gotProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
 		FileTreeNode node = gotProfile.getFileByPath(originalFile, fileManager);
@@ -145,7 +145,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 		// verify the meta document
 		KeyPair metaFileKeys = node.getKeyPair();
-		MetaDocument metaDocument = NetworkPutGetUtil.getMetaDocument(client, metaFileKeys);
+		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaFileKeys);
 		if (originalFile.isFile()) {
 			// get the meta file with the keys (decrypt it)
 			MetaFile metaFile = (MetaFile) metaDocument;
@@ -164,7 +164,7 @@ public class NewFileTest extends H2HJUnitTest {
 		FileManager fileManager2 = new FileManager(root);
 
 		// verify the file after downloadig it
-		File file = NetworkPutGetUtil.downloadFile(client, node, fileManager2);
+		File file = ProcessTestUtil.downloadFile(client, node, fileManager2);
 		Assert.assertTrue(file.exists());
 		if (originalFile.isFile()) {
 			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));

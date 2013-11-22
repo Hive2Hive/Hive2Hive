@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.process.common.massages;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -190,6 +191,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// wait for the process to finish
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
+			assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
