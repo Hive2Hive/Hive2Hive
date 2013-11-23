@@ -3,12 +3,14 @@ package org.hive2hive.core.process.upload.newfile;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.security.PublicKey;
 
 import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.process.common.put.PutUserProfileStep;
+import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * A step adding the new file (node) into the user profile (tree)
@@ -16,43 +18,45 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Nico
  * 
  */
-public class UpdateUserProfileStep extends PutUserProfileStep {
+public class UpdateUserProfileStep extends ProcessStep {
 
-	public UpdateUserProfileStep(UserCredentials credentials) {
-		super(null, credentials, null);
-	}
+	private PublicKey parentKey;
 
 	@Override
 	public void start() {
 		// set the user profile from the previous step
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
-		super.userProfile = context.getUserProfile();
+		UserProfileManager profileManager = context.getProfileManager();
+		UserProfile userProfile = profileManager.getUserProfile(getProcess());
+		profileManager.startModification(getProcess());
 
 		try {
 			// create a file tree node in the user profile
-			addFileToUserProfile(context.getFile(), context.getNewMetaKeyPair());
-
-			// TODO next steps:
-			// 1. notify other clients as the next step
-			// 2. check if too many versions of that file exist --> remove old versions if necessary
-			nextStep = null;
-
-			// start the encryption and the put
-			super.start();
+			addFileToUserProfile(userProfile, context.getFile(), context.getNewMetaKeyPair());
 		} catch (IOException e) {
 			getProcess().stop(e.getMessage());
 		}
+
+		profileManager.putUserProfile(getProcess());
+
+		// TODO next steps:
+		// 1. notify other clients as the next step
+		// 2. check if too many versions of that file exist --> remove old versions if necessary
+		getProcess().setNextStep(null);
 	}
 
 	/**
 	 * Generates a {@link FileTreeNode} that can be added to the DHT
+	 * 
+	 * @param userProfile
 	 * 
 	 * @param file the file to be added
 	 * @param fileRoot the root file of this H2HNode instance
 	 * @param rootNode the root node in the tree
 	 * @throws IOException
 	 */
-	private void addFileToUserProfile(File file, KeyPair fileKeys) throws IOException {
+	private void addFileToUserProfile(UserProfile userProfile, File file, KeyPair fileKeys)
+			throws IOException {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		File fileRoot = context.getFileManager().getRoot();
 
@@ -63,6 +67,7 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 		// find the parent node using the relative path to navigate there
 		String relativeParentPath = parent.getAbsolutePath().replaceFirst(fileRoot.getAbsolutePath(), "");
 		FileTreeNode parentNode = userProfile.getFileByPath(relativeParentPath);
+		parentKey = parentNode.getKeyPair().getPublic();
 
 		// use the file keys generated in a previous step where the meta document is stored
 		if (file.isDirectory()) {
@@ -71,5 +76,20 @@ public class UpdateUserProfileStep extends PutUserProfileStep {
 			byte[] md5 = EncryptionUtil.generateMD5Hash(file);
 			new FileTreeNode(parentNode, fileKeys, file.getName(), md5);
 		}
+	}
+
+	@Override
+	public void rollBack() {
+		// TODO remove the file from the user profile
+		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
+		UserProfileManager profileManager = context.getProfileManager();
+		UserProfile userProfile = profileManager.getUserProfile(getProcess());
+		profileManager.startModification(getProcess());
+
+		FileTreeNode parentNode = userProfile.getFileById(parentKey);
+		FileTreeNode childNode = parentNode.getChildByName(context.getFile().getName());
+		parentNode.removeChild(childNode);
+
+		profileManager.putUserProfile(getProcess());
 	}
 }

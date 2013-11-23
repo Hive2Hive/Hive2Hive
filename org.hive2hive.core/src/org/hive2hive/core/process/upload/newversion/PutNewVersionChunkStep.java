@@ -5,7 +5,6 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 
 import org.hive2hive.core.process.common.File2MetaFileStep;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.upload.PutChunkStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 
@@ -22,10 +21,8 @@ public class PutNewVersionChunkStep extends PutChunkStep {
 	}
 
 	private void configureStepAfterUpload(UploadFileProcessContext context) {
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getFileManager(), context,
-				context, new UpdateMetaDocumentStep());
-		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
-				file2MetaStep, context);
-		setStepAfterPutting(getUserProfileStep);
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getProfileManager(),
+				context.getFileManager(), context, new UpdateMetaDocumentStep());
+		setStepAfterPutting(file2MetaStep);
 	}
 }

@@ -3,27 +3,24 @@ package org.hive2hive.core.process.login;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
 public class PostLoginProcessContext extends ProcessContext {
 
-	private final UserProfile profile;
+	private final UserProfileManager profileManager;
 	private Locations locations;
 	private boolean isElectedMaster = false;
 	private GetUserMessageQueueStep umQueueStep;
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration fileConfig;
-	private final UserCredentials credentials;
 
-	public PostLoginProcessContext(PostLoginProcess postLoginProcess, UserProfile profile,
-			UserCredentials credentials, Locations currentLocations, FileManager fileManager,
-			IH2HFileConfiguration fileConfig) {
+	public PostLoginProcessContext(PostLoginProcess postLoginProcess, UserProfileManager profileManager,
+			Locations currentLocations, FileManager fileManager, IH2HFileConfiguration fileConfig) {
 		super(postLoginProcess);
-		this.profile = profile;
-		this.credentials = credentials;
+		this.profileManager = profileManager;
 		this.locations = currentLocations;
 		this.fileManager = fileManager;
 		this.fileConfig = fileConfig;
@@ -59,8 +56,12 @@ public class PostLoginProcessContext extends ProcessContext {
 		return umQueueStep;
 	}
 
-	public UserProfile getUserProfile() {
-		return profile;
+	public UserProfileManager getProfileManager() {
+		return profileManager;
+	}
+
+	public UserCredentials getCredentials() {
+		return profileManager.getUserCredentials();
 	}
 
 	public Locations getLocations() {
@@ -73,9 +74,5 @@ public class PostLoginProcessContext extends ProcessContext {
 
 	public IH2HFileConfiguration getFileConfig() {
 		return fileConfig;
-	}
-
-	public UserCredentials getCredentials() {
-		return credentials;
 	}
 }

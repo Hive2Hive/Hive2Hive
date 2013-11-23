@@ -6,8 +6,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
-import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
@@ -34,7 +34,8 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 	@Override
 	public void start() {
 		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
-		UserProfile userProfile = context.getUserProfile();
+		UserProfileManager profileManager = context.getProfileManager();
+		UserProfile userProfile = profileManager.getUserProfile(getProcess());
 
 		// update the profile here because it does not matter whether the parent meta data needs to be updated
 		// or not.
@@ -44,16 +45,17 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			return;
 		}
 
+		profileManager.startModification(getProcess());
 		FileTreeNode parent = fileNode.getParent();
 		parent.removeChild(fileNode);
+		profileManager.putUserProfile(getProcess());
 
 		if (parent.equals(userProfile.getRoot())) {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the parent meta folder and update the profile directly");
 
 			// TODO notify other clients
-			nextStep = new PutUserProfileStep(userProfile, context.getCredentials(), null);
-			getProcess().setNextStep(nextStep);
+			getProcess().setNextStep(null);
 		} else {
 			// normal case when file is not in root
 			logger.debug("Get the meta folder of the parent");

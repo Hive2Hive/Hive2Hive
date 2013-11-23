@@ -9,6 +9,10 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
 
+	protected UpdateParentMetaStep() {
+		super(new UpdateUserProfileStep());
+	}
+
 	@Override
 	public void start() {
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
@@ -22,7 +26,6 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 		parentMeta.addChildDocument(context.getNewMetaKeyPair());
 		logger.debug("MetaFolder has new child. Total children = " + parentMeta.getChildDocuments().size());
 
-		super.nextStep = new UpdateUserProfileStep(context.getCredentials());
 		super.metaDocument = parentMeta;
 		super.start();
 	}

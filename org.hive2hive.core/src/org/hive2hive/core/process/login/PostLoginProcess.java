@@ -3,10 +3,9 @@ package org.hive2hive.core.process.login;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * This process does all long-running tasks necessary after the login:
@@ -23,7 +22,7 @@ public class PostLoginProcess extends Process {
 
 	private final PostLoginProcessContext context;
 
-	public PostLoginProcess(UserProfile profile, UserCredentials credentials, Locations currentLocations,
+	public PostLoginProcess(UserProfileManager profileManager, Locations currentLocations,
 			NetworkManager networkManager, FileManager fileManager, IH2HFileConfiguration fileConfig) {
 		super(networkManager);
 
@@ -33,8 +32,7 @@ public class PostLoginProcess extends Process {
 		// if elected master:
 		// 3. GetUserMessageQueueStep
 		// 4. HandleUserMessageQueueStep
-		context = new PostLoginProcessContext(this, profile, credentials, currentLocations, fileManager,
-				fileConfig);
+		context = new PostLoginProcessContext(this, profileManager, currentLocations, fileManager, fileConfig);
 
 		setNextStep(new ContactPeersStep());
 	}

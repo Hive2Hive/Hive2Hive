@@ -30,7 +30,7 @@ public class LoginProcess extends Process {
 		GetLocationsStep locationsStep = new GetLocationsStep(credentials.getUserId(), addToLocsStep, context);
 		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId(),
 				locationsStep);
-		GetUserProfileStep profileStep = new GetUserProfileStep(credentials, verifyProfileStep, context);
+		GetUserProfileStep profileStep = new GetUserProfileStep(credentials, context, verifyProfileStep);
 
 		// define first step
 		setNextStep(profileStep);

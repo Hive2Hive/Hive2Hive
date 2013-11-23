@@ -10,6 +10,7 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
@@ -56,10 +57,11 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		// upload a file
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 		String fileName = NetworkTestUtil.randomString();
 		uploadedFile = new File(root, fileName);
 		FileUtils.write(uploadedFile, testContent);
-		NewFileProcess ulProcess = new NewFileProcess(uploadedFile, userCredentials, client,
+		NewFileProcess ulProcess = new NewFileProcess(uploadedFile, profileManager, client,
 				uploaderFileManager, new TestH2HFileConfiguration());
 
 		TestProcessListener listener = new TestProcessListener();
@@ -71,7 +73,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		UserProfile up = ulProcess.getContext().getUserProfile();
+		UserProfile up = profileManager.getUserProfile(ulProcess);
 		file = up.getRoot().getChildByName(fileName);
 	}
 

@@ -147,8 +147,8 @@ public class NetworkManager {
 		}
 		messageManager.sendDirect(message, targetPublicKey, listener);
 	}
-	
-	public DataManager getDataManager(){
+
+	public DataManager getDataManager() {
 		if (!connection.isConnected()) {
 			logger.warn("Node is not connected!");
 			return null;

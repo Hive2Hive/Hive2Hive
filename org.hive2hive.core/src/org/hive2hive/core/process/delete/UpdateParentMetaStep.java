@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
-import org.hive2hive.core.process.common.put.PutUserProfileStep;
 
 /**
  * Updates the parent meta data such that the child is removed from the list
@@ -20,6 +19,7 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 	private final PublicKey childKey;
 
 	public UpdateParentMetaStep(PublicKey childKey) {
+		super(null);
 		this.childKey = childKey;
 	}
 
@@ -37,10 +37,8 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 		logger.debug("Removed child from meta folder. Total children = "
 				+ parentMeta.getChildDocuments().size());
 
-		// Hint: The user profile has already been updated before
-
 		// TODO notify other clients
-		super.nextStep = new PutUserProfileStep(context.getUserProfile(), context.getCredentials(), null);
+		// nextStep = ...
 		super.metaDocument = parentMeta;
 		super.start();
 	}

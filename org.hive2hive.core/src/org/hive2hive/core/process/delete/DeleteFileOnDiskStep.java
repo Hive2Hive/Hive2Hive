@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.File2MetaFileStep;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
 
 public class DeleteFileOnDiskStep extends ProcessStep {
 
@@ -22,11 +21,9 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 
 		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
 
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getFileManager(), context,
-				context, new DeleteChunkStep());
-		GetUserProfileStep getUserProfileStep = new GetUserProfileStep(context.getCredentials(),
-				file2MetaStep, context);
-		getProcess().setNextStep(getUserProfileStep);
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getProfileManager(),
+				context.getFileManager(), context, new DeleteChunkStep());
+		getProcess().setNextStep(file2MetaStep);
 	}
 
 	@Override

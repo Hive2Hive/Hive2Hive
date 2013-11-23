@@ -16,6 +16,7 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -40,11 +41,11 @@ import org.junit.Test;
  */
 public class NewFileTest extends H2HJUnitTest {
 
-	private final int networkSize = 5;
+	private final int networkSize = 3;
 	private List<NetworkManager> network;
-	private UserCredentials userCredentials;
 	private FileManager fileManager;
 	private IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private UserCredentials userCredentials;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -120,7 +121,8 @@ public class NewFileTest extends H2HJUnitTest {
 
 	private void startUploadProcess(File toUpload) throws IllegalFileLocation {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		NewFileProcess process = new NewFileProcess(toUpload, userCredentials, client, fileManager, config);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		NewFileProcess process = new NewFileProcess(toUpload, profileManager, client, fileManager, config);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -178,7 +180,9 @@ public class NewFileTest extends H2HJUnitTest {
 		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		NewFileProcess process = new NewFileProcess(file, userCredentials, client, fileManager, config);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+
+		NewFileProcess process = new NewFileProcess(file, profileManager, client, fileManager, config);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

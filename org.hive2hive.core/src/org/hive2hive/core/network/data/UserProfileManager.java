@@ -2,6 +2,8 @@ package org.hive2hive.core.network.data;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,8 +36,10 @@ public class UserProfileManager {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileManager.class);
 
-	private static final long MAX_DELAY_MS = 15 * 1000;
-	private static final long MIN_MODIFICATION_TIME_MS = 2000;
+	private static final long PUT_GET_HEARTBEAT = 2 * 1000;
+	private static final long WAITING_HEARTBEAT = 500;
+	private static final long MIN_MODIFICATION_TIME_MS = 500;
+	private static final long CONSECUTIVE_ERRORS_ALLOWED = 10;
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
 
@@ -64,7 +68,11 @@ public class UserProfileManager {
 		currentPhase = Phase.ACCEPT_GET;
 
 		putGetTask = new PutGetUserProfileTask();
-		new Thread(putGetTask).start();
+		new Timer("PutGetUserProfile").schedule(putGetTask, 0, PUT_GET_HEARTBEAT);
+	}
+
+	public UserCredentials getUserCredentials() {
+		return credentials;
 	}
 
 	/**
@@ -74,7 +82,7 @@ public class UserProfileManager {
 		// wait until the task accepts get requests
 		while (currentPhase != Phase.ACCEPT_GET) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(WAITING_HEARTBEAT);
 			} catch (InterruptedException e) {
 				// ignore
 			}
@@ -84,10 +92,10 @@ public class UserProfileManager {
 		long now = System.currentTimeMillis();
 		waitingForGet.put(process, System.currentTimeMillis());
 
-		// wait until the newest profile is here
+		// wait until the newest profile is here or until a timeout happened
 		while (now > putGetTask.lastGetTime.get()) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(WAITING_HEARTBEAT);
 			} catch (InterruptedException e) {
 				// ignore
 			}
@@ -104,7 +112,7 @@ public class UserProfileManager {
 		// wait until the task is done with processing
 		while (currentPhase == Phase.PROCESSING) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(WAITING_HEARTBEAT);
 			} catch (InterruptedException e) {
 				// ignore
 			}
@@ -130,7 +138,7 @@ public class UserProfileManager {
 		// wait until the task accepts put requests
 		while (currentPhase != Phase.ACCEPT_PUT) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(WAITING_HEARTBEAT);
 			} catch (InterruptedException e) {
 				// ignore
 			}
@@ -143,7 +151,7 @@ public class UserProfileManager {
 		// wait until the newest profile is pushed
 		while (now > putGetTask.lastPutTime.get()) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(WAITING_HEARTBEAT);
 			} catch (InterruptedException e) {
 				// ignore
 			}
@@ -151,15 +159,16 @@ public class UserProfileManager {
 	}
 
 	/**
-	 * Puts and gets a user profile with given schedule (running forever)
+	 * Puts and gets a user profile with given schedule
 	 * 
 	 * @author Nico
 	 * 
 	 */
-	private class PutGetUserProfileTask implements Runnable {
+	private class PutGetUserProfileTask extends TimerTask {
 
 		public final AtomicLong lastGetTime;
 		public final AtomicLong lastPutTime;
+		private int consecutiveErrors = 0;
 
 		public PutGetUserProfileTask() {
 			lastGetTime = new AtomicLong(-1);
@@ -168,57 +177,66 @@ public class UserProfileManager {
 
 		@Override
 		public void run() {
-			while (true) {
-				try {
-					if (currentPhase == Phase.ACCEPT_GET && waitingForGet.isEmpty()
-							&& !waitingForPut.isEmpty()) {
-						// someone is waiting to put --> switch faster
-						Thread.sleep(MAX_DELAY_MS / 5);
-					} else if (currentPhase == Phase.ACCEPT_PUT && waitingForPut.isEmpty()
-							&& !waitingForGet.isEmpty()) {
-						// someone is waiting to get --> switch faster
-						Thread.sleep(MAX_DELAY_MS / 5);
-					} else {
-						// sleep a given time such that processes have time to modify the user profile
-						Thread.sleep(MAX_DELAY_MS - MIN_MODIFICATION_TIME_MS);
-					}
-				} catch (InterruptedException e) {
-					// ignore
-				}
-
-				// then perform the put or the get
+			try {
+				// perform the put or the get
 				if (currentPhase == Phase.ACCEPT_PUT) {
 					currentPhase = Phase.PROCESSING;
 					put();
+					lastPutTime.set(System.currentTimeMillis());
+					waitingForPut.clear(); // clear the waiting list
+
 					// we putted the latest profile, users are now able to get
 					currentPhase = Phase.ACCEPT_GET;
 				} else {
 					currentPhase = Phase.PROCESSING;
 					get();
+					lastGetTime.set(System.currentTimeMillis());
+					waitingForGet.clear(); // clear the waiting list
+
 					// the latest profile is fetched, now users are allowed to put
 					currentPhase = Phase.ACCEPT_PUT;
+				}
+
+				consecutiveErrors = 0; // reset
+			} catch (Exception e) {
+				consecutiveErrors++;
+				logger.error(e.getMessage());
+
+				if (consecutiveErrors > CONSECUTIVE_ERRORS_ALLOWED) {
+					// stop all processes waiting
+					onGetFail();
+					onPutFail();
+					consecutiveErrors = 0;
 				}
 			}
 		}
 
-		private void get() {
+		private void get() throws IllegalStateException {
 			if (waitingForGet.isEmpty()) {
 				// no need to get
 				return;
 			}
 
 			logger.debug("Getting the user profile from the DHT");
-			FutureGet future = networkManager.getGlobal(credentials.getProfileLocationKey(),
-					H2HConstants.USER_PROFILE);
-			future.awaitUninterruptibly();
+			DataManager dataManager = networkManager.getDataManager();
+			if (dataManager == null) {
+				throw new IllegalStateException("Node is not connected to the network");
+			}
 
-			if (future.getData() == null) {
+			FutureGet futureGet = dataManager.getGlobal(credentials.getProfileLocationKey(),
+					H2HConstants.USER_PROFILE);
+			futureGet.awaitUninterruptibly(10000);
+
+			if (futureGet.isFailed() || futureGet.getData() == null) {
 				logger.warn("Did not find user profile.");
 				latestUserProfile = null;
+				onGetFail();
 			} else {
 				try {
 					// decrypt it
-					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) future.getData().object();
+					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) futureGet.getData()
+							.object();
+
 					logger.debug("Decrypting user profile with 256-bit AES key from password.");
 
 					SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(
@@ -226,7 +244,6 @@ public class UserProfileManager {
 
 					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 					latestUserProfile = (UserProfile) decrypted;
-					onGetSuccess();
 				} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
 						| ClassNotFoundException | IOException e) {
 					logger.error("Cannot decrypt the user profile.", e);
@@ -241,20 +258,9 @@ public class UserProfileManager {
 			for (Process process : waitingForGet.keySet()) {
 				process.stop("Getting the user profile failed");
 			}
-
-			// clean the map
-			waitingForGet.clear();
 		}
 
-		private void onGetSuccess() {
-			// successful, processes depending on current get can continue
-			lastGetTime.set(System.currentTimeMillis());
-
-			// clean the map
-			waitingForGet.clear();
-		}
-
-		private void put() {
+		private void put() throws IllegalStateException {
 			if (waitingForPut.isEmpty()) {
 				// no need to put
 				return;
@@ -287,9 +293,13 @@ public class UserProfileManager {
 						latestUserProfile, encryptionKey);
 				logger.debug("Putting UserProfile into the DHT");
 
-				networkManager.putGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
+				DataManager dataManager = networkManager.getDataManager();
+				if (dataManager == null) {
+					throw new IllegalStateException("Node is not connected to the network");
+				}
+
+				dataManager.putGlobal(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
 						encryptedUserProfile).awaitUninterruptibly();
-				onPutSuccess();
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				onPutFail();
@@ -303,16 +313,6 @@ public class UserProfileManager {
 				process.stop("Putting the user profile failed");
 			}
 
-			// clean the map
-			waitingForPut.clear();
-		}
-
-		private void onPutSuccess() {
-			// successful, processes depending on current put can continue
-			lastPutTime.set(System.currentTimeMillis());
-
-			// clean the map
-			waitingForPut.clear();
 		}
 	}
 }

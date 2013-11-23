@@ -9,6 +9,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
@@ -18,7 +19,8 @@ import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
- * Generic process step to get the {@link: UserProfile} and decrypt it. It is then accessible in
+ * Generic process step to get the {@link: UserProfile} and decrypt it. Only use it when the
+ * {@link UserProfileManager} is not available
  * 
  * @author Nico, Christian
  * 
@@ -31,21 +33,16 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	private final ProcessStep nextStep;
 	private final IGetUserProfileContext context;
 
-	public GetUserProfileStep(UserCredentials credentials, ProcessStep nextStep,
-			IGetUserProfileContext context) {
+	public GetUserProfileStep(UserCredentials credentials, IGetUserProfileContext context,
+			ProcessStep nextStep) {
 		this.credentials = credentials;
-		this.nextStep = nextStep;
 		this.context = context;
+		this.nextStep = nextStep;
 	}
 
 	@Override
 	public void start() {
-		if (context.getUserProfile() == null) {
-			get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-		} else {
-			logger.warn("UserProfile is already in context. We do not fetch it again");
-			getProcess().setNextStep(nextStep);
-		}
+		get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 	}
 
 	@Override
@@ -66,8 +63,9 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 				logger.error("Cannot decrypt the user profile.", e);
 			}
 		}
-		
+
+		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
+		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
 	}
-
 }

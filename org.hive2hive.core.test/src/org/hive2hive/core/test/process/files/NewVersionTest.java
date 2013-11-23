@@ -11,6 +11,7 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -34,7 +35,7 @@ import org.junit.Test;
  */
 public class NewVersionTest extends H2HJUnitTest {
 
-	private final int networkSize = 10;
+	private final int networkSize = 5;
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;
 	private FileManager fileManager;
@@ -63,7 +64,8 @@ public class NewVersionTest extends H2HJUnitTest {
 		fileManager = new FileManager(root);
 		file = FileTestUtil.createFileRandomContent(3, fileManager, config);
 		originalContent = FileUtils.readFileToString(file);
-		ProcessTestUtil.uploadNewFile(network.get(0), file, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file, new UserProfileManager(network.get(0),
+				userCredentials), fileManager, config);
 	}
 
 	@Test
@@ -90,7 +92,8 @@ public class NewVersionTest extends H2HJUnitTest {
 			byte[] md5UpdatedFile = EncryptionUtil.generateMD5Hash(file);
 
 			// upload the new version
-			ProcessTestUtil.uploadNewFileVersion(uploader, file, userCredentials, fileManager, config);
+			ProcessTestUtil.uploadNewFileVersion(uploader, file, new UserProfileManager(uploader,
+					userCredentials), fileManager, config);
 
 			// use different file manager for not overriding the original file
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());

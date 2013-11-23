@@ -7,30 +7,27 @@ import java.util.List;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
-import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
-public class UploadFileProcessContext extends ProcessContext implements IGetUserProfileContext,
-		IGetMetaContext {
+public class UploadFileProcessContext extends ProcessContext implements IGetMetaContext {
 
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration config;
-	private final UserCredentials credentials;
 	private final File file;
 	private final boolean fileAlreadyExists;
+	private final UserProfileManager profileManager;
 	private List<KeyPair> chunkKeys;
-	private UserProfile userProfile;
 	private MetaDocument metaDocument;
 
-	public UploadFileProcessContext(Process process, File file, UserCredentials credentials,
+	public UploadFileProcessContext(Process process, File file, UserProfileManager profileManager,
 			FileManager fileManager, IH2HFileConfiguration config, boolean fileAlreadyExists) {
 		super(process);
 		this.file = file;
-		this.credentials = credentials;
+		this.profileManager = profileManager;
 		this.fileManager = fileManager;
 		this.config = config;
 		this.fileAlreadyExists = fileAlreadyExists;
@@ -44,8 +41,12 @@ public class UploadFileProcessContext extends ProcessContext implements IGetUser
 		return config;
 	}
 
+	public UserProfileManager getProfileManager() {
+		return profileManager;
+	}
+
 	public UserCredentials getCredentials() {
-		return credentials;
+		return profileManager.getUserCredentials();
 	}
 
 	public File getFile() {
@@ -62,16 +63,6 @@ public class UploadFileProcessContext extends ProcessContext implements IGetUser
 
 	public List<KeyPair> getChunkKeys() {
 		return chunkKeys;
-	}
-
-	@Override
-	public void setUserProfile(UserProfile userProfile) {
-		this.userProfile = userProfile;
-	}
-
-	@Override
-	public UserProfile getUserProfile() {
-		return userProfile;
 	}
 
 	@Override

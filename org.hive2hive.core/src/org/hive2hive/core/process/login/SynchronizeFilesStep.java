@@ -13,6 +13,7 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
@@ -22,7 +23,6 @@ import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.manager.ProcessManager;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Synchronizes the local files with the entries in the user profile:
@@ -52,8 +52,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 		// TODO do not in parallel to omit conflicts!
 		PostLoginProcessContext context = (PostLoginProcessContext) getProcess().getContext();
 		FileManager fileManager = context.getFileManager();
-		UserProfile userProfile = context.getUserProfile();
+		UserProfileManager profileManager = context.getProfileManager();
 
+		UserProfile userProfile = profileManager.getUserProfile(getProcess());
 		FileSynchronizer synchronizer = new FileSynchronizer(fileManager, userProfile);
 
 		/*
@@ -68,17 +69,16 @@ public class SynchronizeFilesStep extends ProcessStep {
 		 */
 		List<File> toUploadNewFiles = synchronizer.getAddedLocally();
 		ProcessTreeNode uploadProcessNewFiles = startUploadNewFiles(toUploadNewFiles, fileManager,
-				userProfile, context.getCredentials(), context.getFileConfig());
+				profileManager, context.getFileConfig());
 		List<File> toUploadNewVersions = synchronizer.getUpdatedLocally();
 		ProcessTreeNode uploadProcessNewVersions = startUploadNewVersion(toUploadNewVersions, fileManager,
-				userProfile, context.getCredentials(), context.getFileConfig());
+				profileManager, context.getFileConfig());
 
 		/*
 		 * Delete the files in the DHT
 		 */
 		List<FileTreeNode> toDeleteInDHT = synchronizer.getDeletedLocally();
-		ProcessTreeNode deleteProcess = startDelete(toDeleteInDHT, fileManager, userProfile,
-				context.getCredentials());
+		ProcessTreeNode deleteProcess = startDelete(toDeleteInDHT, fileManager, profileManager);
 
 		/*
 		 * Delete the remotely deleted files
@@ -139,16 +139,15 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private ProcessTreeNode startUploadNewFiles(List<File> toUpload, FileManager fileManager,
-			UserProfile userProfile, UserCredentials credentials, IH2HFileConfiguration config) {
+			UserProfileManager profileManager, IH2HFileConfiguration config) {
 		// synchronize the files that need to be uploaded into the DHT
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
 		for (File file : toUpload) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
 			try {
 				// initialize the process
-				NewFileProcess uploadProcess = new NewFileProcess(file, credentials, getNetworkManager(),
+				NewFileProcess uploadProcess = new NewFileProcess(file, profileManager, getNetworkManager(),
 						fileManager, config);
-				uploadProcess.setUserProfile(userProfile);
 				new FileProcessTreeNode(uploadProcess, parent, file);
 			} catch (IllegalFileLocation e) {
 				logger.error("File cannot be uploaded", e);
@@ -163,15 +162,14 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private ProcessTreeNode startUploadNewVersion(List<File> toUpload, FileManager fileManager,
-			UserProfile userProfile, UserCredentials credentials, IH2HFileConfiguration config) {
+			UserProfileManager profileManager, IH2HFileConfiguration config) {
 		// synchronize the files that need to be uploaded into the DHT
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
 		for (File file : toUpload) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
 			// initialize the process
-			NewVersionProcess uploadProcess = new NewVersionProcess(file, credentials, getNetworkManager(),
-					fileManager, config);
-			uploadProcess.setUserProfile(userProfile);
+			NewVersionProcess uploadProcess = new NewVersionProcess(file, profileManager,
+					getNetworkManager(), fileManager, config);
 			new FileProcessTreeNode(uploadProcess, parent, file);
 		}
 
@@ -183,7 +181,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private ProcessTreeNode startDelete(List<FileTreeNode> toDelete, FileManager fileManager,
-			UserProfile userProfile, UserCredentials credentials) {
+			UserProfileManager profileManager) {
 		// delete the files in the DHT that are deleted while offline. First create a normal tree, but the
 		// order must be reverse. With the created tree, reverse it in a 2nd step.
 		List<ProcessTreeNode> allNodes = new ArrayList<ProcessTreeNode>();
@@ -191,9 +189,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		for (FileTreeNode node : toDelete) {
 			ProcessTreeNode parent = getParent(rootProcess, node);
 			// initialize the process
-			DeleteFileProcess deleteProcess = new DeleteFileProcess(node, fileManager, getNetworkManager(),
-					credentials);
-			deleteProcess.setUserProfile(userProfile);
+			DeleteFileProcess deleteProcess = new DeleteFileProcess(node, profileManager, fileManager,
+					getNetworkManager());
 			allNodes.add(new NodeProcessTreeNode(deleteProcess, parent, node));
 		}
 

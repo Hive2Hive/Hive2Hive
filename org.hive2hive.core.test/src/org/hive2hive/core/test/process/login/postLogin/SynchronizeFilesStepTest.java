@@ -10,6 +10,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.login.SynchronizeFilesStep;
 import org.hive2hive.core.security.UserCredentials;
@@ -56,6 +57,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// first, register a new user
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		ProcessTestUtil.register(network.get(0), userCredentials);
+		UserProfileManager profileManager = new UserProfileManager(network.get(0), userCredentials);
 
 		// create two filemanagers
 		File root1 = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
@@ -70,19 +72,19 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// - - file 3
 		File file1 = new File(fileManager0.getRoot(), "file 1");
 		FileUtils.writeStringToFile(file1, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(network.get(0), file1, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file1, profileManager, fileManager0, config);
 
 		File file2 = new File(fileManager0.getRoot(), "file 2");
 		FileUtils.writeStringToFile(file2, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(network.get(0), file2, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file2, profileManager, fileManager0, config);
 
 		File folder1 = new File(fileManager0.getRoot(), "folder 1");
 		folder1.mkdir();
-		ProcessTestUtil.uploadNewFile(network.get(0), folder1, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), folder1, profileManager, fileManager0, config);
 
 		File file3 = new File(folder1, "file 2");
 		FileUtils.writeStringToFile(file3, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(network.get(0), file3, profileManager, fileManager0, config);
 
 		// copy the content to the other client such that they are in sync
 		FileUtils.copyDirectory(fileManager0.getRoot(), fileManager1.getRoot());
@@ -115,15 +117,18 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		file1.delete();
 
 		/** do some modifications on the remote **/
+		NetworkManager remoteClient = network.get(0);
+		UserProfileManager profileManager = new UserProfileManager(remoteClient, userCredentials);
+
 		// add a file 3 within folder 1
 		File file3 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 4");
 		FileUtils.write(file3, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(network.get(0), file3, userCredentials, fileManager0, config);
+		ProcessTestUtil.uploadNewFile(remoteClient, file3, profileManager, fileManager0, config);
 
 		// delete file 2
 		File file2 = new File(fileManager0.getRoot(), "file 2");
 		file2.delete();
-		ProcessTestUtil.deleteFile(network.get(0), file2, userCredentials, fileManager0);
+		ProcessTestUtil.deleteFile(remoteClient, file2, profileManager, fileManager0);
 
 		/** start sync **/
 		// the client that logs in
@@ -143,9 +148,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS) {
-		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
-		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, userProfile,
-				fileManager);
+		UserProfileManager manager = new UserProfileManager(client, userCredentials);
+		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, manager, fileManager);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -177,9 +181,9 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	 */
 	private class SynchronizePostLoginProcess extends PostLoginProcess {
 
-		public SynchronizePostLoginProcess(NetworkManager networkManager, UserProfile userProfile,
+		public SynchronizePostLoginProcess(NetworkManager networkManager, UserProfileManager profileManager,
 				FileManager fileManager) {
-			super(userProfile, userCredentials, null, networkManager, fileManager, config);
+			super(profileManager, null, networkManager, fileManager, config);
 			super.getContext().setIsElectedMaster(false);
 			setNextStep(new SynchronizeFilesStep());
 		}

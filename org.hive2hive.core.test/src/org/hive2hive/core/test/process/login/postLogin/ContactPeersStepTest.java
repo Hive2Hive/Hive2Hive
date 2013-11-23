@@ -239,7 +239,7 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 	 */
 	private class TestProcessContatctPeers extends PostLoginProcess {
 		public TestProcessContatctPeers(Locations locations, NetworkManager networkManager) {
-			super(null, null, locations, networkManager, null, null);
+			super(null, locations, networkManager, null, null);
 		}
 	}
 

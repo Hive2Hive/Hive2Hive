@@ -19,6 +19,7 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -59,14 +60,15 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation {
-		NetworkManager client = network.get(0);
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
 		// add a file to the network
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		FileManager fileManager = new FileManager(root);
 		File file = FileTestUtil.createFileRandomContent(3, fileManager, config);
-		ProcessTestUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
 
 		// store the keys of the meta file to verify them later
 		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
@@ -75,7 +77,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the file
-		ProcessTestUtil.deleteFile(client, file, userCredentials, fileManager);
+		ProcessTestUtil.deleteFile(client, file, profileManager, fileManager);
 
 		// check if the file is still in the DHT
 		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
@@ -100,7 +102,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation {
-		NetworkManager client = network.get(0);
+		NetworkManager client = network.get(1);
+		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
 		// add a folder to the network
 		String randomName = NetworkTestUtil.randomString();
@@ -108,12 +111,12 @@ public class DeleteFileTest extends H2HJUnitTest {
 		FileManager fileManager = new FileManager(root);
 		File folder = new File(root, "test-folder");
 		folder.mkdir();
-		ProcessTestUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);
 
 		// add a file to the network
 		File file = new File(folder, "test-file");
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(client, file, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, file, manager, fileManager, config);
 
 		// store some things to be able to test later
 		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
@@ -127,7 +130,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
 
 		// delete the file
-		ProcessTestUtil.deleteFile(client, file, userCredentials, fileManager);
+		ProcessTestUtil.deleteFile(client, file, manager, fileManager);
 
 		// check if the file is still in the DHT
 		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
@@ -148,7 +151,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFolder() throws FileNotFoundException, IllegalFileLocation {
-		NetworkManager client = network.get(0);
+		NetworkManager client = network.get(1);
+		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
 		// add a folder to the network
 		String randomName = NetworkTestUtil.randomString();
@@ -156,7 +160,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		FileManager fileManager = new FileManager(root);
 		File folder = new File(root, "test-folder");
 		folder.mkdir();
-		ProcessTestUtil.uploadNewFile(client, folder, userCredentials, fileManager, config);
+		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);
 
 		// store some keys before deletion
 		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
@@ -165,7 +169,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the folder
-		ProcessTestUtil.deleteFile(client, folder, userCredentials, fileManager);
+		ProcessTestUtil.deleteFile(client, folder, manager, fileManager);
 
 		// check if the folder is still in the DHT
 		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
@@ -61,6 +62,7 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 
 		KeyPair toDelete = chunksToDelete.remove(0);
 		nextStep = new DeleteChunkStep(chunksToDelete);
-		remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, null);
+		// TODO: original chunk is not here in case a rollback happens.
+		remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0));
 	}
 }

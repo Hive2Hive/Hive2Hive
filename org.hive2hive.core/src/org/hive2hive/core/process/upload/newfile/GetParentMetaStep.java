@@ -8,6 +8,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -33,7 +34,8 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 		File parent = context.getFile().getParentFile();
 
-		UserProfile userProfile = context.getUserProfile();
+		UserProfileManager profileManager = context.getProfileManager();
+		UserProfile userProfile = profileManager.getUserProfile(getProcess());
 		if (userProfile == null) {
 			getProcess().stop("Could not find user profile");
 			return;
@@ -42,8 +44,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		if (parent.equals(context.getFileManager().getRoot())) {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the meta folder and update the profile directly");
-			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateUserProfileStep(
-					context.getCredentials()));
+			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateUserProfileStep());
 			getProcess().setNextStep(nextStep);
 		} else {
 			// normal case when file is not in root

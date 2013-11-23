@@ -35,11 +35,11 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 	}
 
 	/**
-	 * Note, if this constructor is used, the null arguments here need to be overwritten in the 'start'
-	 * method.
+	 * Note, if this constructor is used, the meta document to put needs to be set in an overwritten start
+	 * method
 	 */
-	protected PutMetaDocumentStep() {
-		super(null);
+	protected PutMetaDocumentStep(ProcessStep nextStep) {
+		super(nextStep);
 	}
 
 	@Override

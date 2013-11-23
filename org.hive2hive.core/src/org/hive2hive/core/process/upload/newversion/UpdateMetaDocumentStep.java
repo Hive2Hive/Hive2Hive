@@ -11,13 +11,16 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
-import org.hive2hive.core.process.common.put.PutUserProfileStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 
 public class UpdateMetaDocumentStep extends ProcessStep {
+
+	private byte[] originalMD5;
+	private MetaFile metaFile;
 
 	@Override
 	public void start() {
@@ -34,7 +37,7 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			// no need to put because meta folder remains the same
 			getProcess().setNextStep(getInformClientsStep());
 		} else {
-			MetaFile metaFile = (MetaFile) metaDocument;
+			metaFile = (MetaFile) metaDocument;
 			List<KeyPair> chunkKeys = context.getChunkKeys();
 			FileVersion version = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(file),
 					System.currentTimeMillis());
@@ -45,17 +48,24 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			// 2. put the meta document
 			// 3. put the user profile
 			// 4. inform other clients
-			UserProfile userProfile = context.getUserProfile();
+			UserProfileManager profileManager = context.getProfileManager();
+			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			profileManager.startModification(getProcess());
+
 			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
 			try {
+				// store for backup
+				originalMD5 = fileNode.getMD5();
 				byte[] newMD5 = EncryptionUtil.generateMD5Hash(file);
-				fileNode.setMD5(newMD5);
-				PutUserProfileStep putUserProfile = new PutUserProfileStep(userProfile,
-						context.getCredentials(), getInformClientsStep());
 
-				PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile, putUserProfile);
+				// make and put modifications
+				fileNode.setMD5(newMD5);
+				profileManager.putUserProfile(getProcess());
+
+				PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile, getInformClientsStep());
 				getProcess().setNextStep(putMetaStep);
 			} catch (IOException e) {
+				profileManager.stopModification(getProcess());
 				getProcess().stop("The MD5 hash in the user profile could not be generated");
 			}
 		}
@@ -68,7 +78,15 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// nothing to do
-		getProcess().nextRollBackStep();
+		if (metaFile != null) {
+			// return to original MD5 and put the userProfile
+			UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
+			UserProfileManager profileManager = context.getProfileManager();
+			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			profileManager.startModification(getProcess());
+			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
+			fileNode.setMD5(originalMD5);
+			profileManager.putUserProfile(getProcess());
+		}
 	}
 }

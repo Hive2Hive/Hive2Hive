@@ -5,16 +5,16 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
-import org.hive2hive.core.security.UserCredentials;
 
 public class NewFileProcessContext extends UploadFileProcessContext {
 
 	private KeyPair keyPair;
 
-	public NewFileProcessContext(NewFileProcess process, File file, UserCredentials credentials,
+	public NewFileProcessContext(NewFileProcess process, File file, UserProfileManager profileManager,
 			FileManager fileManager, IH2HFileConfiguration config) {
-		super(process, file, credentials, fileManager, config, false);
+		super(process, file, profileManager, fileManager, config, false);
 	}
 
 	public KeyPair getNewMetaKeyPair() {

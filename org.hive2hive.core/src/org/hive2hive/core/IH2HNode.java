@@ -38,7 +38,7 @@ public interface IH2HNode {
 	 * 
 	 * @return the observable logout process.
 	 */
-	IProcess logout();
+	IProcess logout() throws NoSessionException;
 
 	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in

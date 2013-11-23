@@ -10,7 +10,6 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.process.upload.PutChunkStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -42,15 +41,10 @@ public class PutNewFileChunkStep extends PutChunkStep {
 			metaDocument = metaFile;
 		}
 
-		// 1. get the user profile
-		// 2. get the parent meta document
-		// 3. put the new meta document
-		// 4. update the parent meta document
-		// 5. update the user profile
-		GetParentMetaStep getParentMeta = new GetParentMetaStep(metaDocument);
-		GetUserProfileStep getProfileStep = new GetUserProfileStep(context.getCredentials(), getParentMeta,
-				context);
-
-		setStepAfterPutting(getProfileStep);
+		// 1. get the parent meta document
+		// 2. put the new meta document
+		// 3. update the parent meta document
+		// 4. update the user profile
+		setStepAfterPutting(new GetParentMetaStep(metaDocument));
 	}
 }

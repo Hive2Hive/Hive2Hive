@@ -6,8 +6,8 @@ import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.context.ProcessContext;
 
-public final class LoginProcessContext extends ProcessContext implements IGetUserProfileContext,
-		IGetLocationsContext {
+public final class LoginProcessContext extends ProcessContext implements IGetLocationsContext,
+		IGetUserProfileContext {
 
 	private Locations locations;
 	private UserProfile userProfile;
@@ -35,5 +35,4 @@ public final class LoginProcessContext extends ProcessContext implements IGetUse
 	public UserProfile getUserProfile() {
 		return userProfile;
 	}
-
 }
