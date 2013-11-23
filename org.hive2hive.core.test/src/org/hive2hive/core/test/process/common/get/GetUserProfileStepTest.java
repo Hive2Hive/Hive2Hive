@@ -84,8 +84,8 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		TestGetUserProfileContext context = new TestGetUserProfileContext();
-		
-		GetUserProfileStep getStep = new GetUserProfileStep(credentials, null, context);
+
+		GetUserProfileStep getStep = new GetUserProfileStep(credentials, context, null);
 
 		Process process = new Process(network.get(0)) {
 		};
@@ -100,7 +100,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 			assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
-		
+
 		Assert.assertNull(context.getUserProfile());
 	}
 

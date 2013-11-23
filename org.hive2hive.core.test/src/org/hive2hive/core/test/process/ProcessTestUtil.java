@@ -4,12 +4,14 @@ import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetLocationsStep;
@@ -95,7 +97,7 @@ public class ProcessTestUtil {
 			}
 		};
 
-		GetUserProfileStep step = new GetUserProfileStep(credentials, null, context);
+		GetUserProfileStep step = new GetUserProfileStep(credentials, context, null);
 		executeStep(networkManager, step);
 		return context.getUserProfile();
 	}
@@ -127,28 +129,50 @@ public class ProcessTestUtil {
 		return context.getMetaDocument();
 	}
 
+	public static Locations getLocations(NetworkManager networkManager, String userId) {
+		IGetLocationsContext context = new IGetLocationsContext() {
+
+			private Locations locations;
+
+			@Override
+			public void setLocation(Locations locations) {
+				this.locations = locations;
+			}
+
+			@Override
+			public Locations getLocations() {
+				return locations;
+			}
+		};
+
+		GetLocationsStep step = new GetLocationsStep(userId, null, context);
+		executeStep(networkManager, step);
+		return context.getLocations();
+	}
+
 	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {
 		DownloadFileProcess process = new DownloadFileProcess(file, networkManager, fileManager);
 		executeProcess(process);
 		return fileManager.getFile(file);
 	}
 
-	public static void uploadNewFile(NetworkManager networkManager, File file, UserCredentials credentials,
-			FileManager fileManager, IH2HFileConfiguration config) {
-		NewFileProcess process = new NewFileProcess(file, credentials, networkManager, fileManager, config);
+	public static void uploadNewFile(NetworkManager networkManager, File file,
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
+			throws IllegalFileLocation {
+		NewFileProcess process = new NewFileProcess(file, profileManager, networkManager, fileManager, config);
 		executeProcess(process);
 	}
 
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
-			UserCredentials credentials, FileManager fileManager, IH2HFileConfiguration config) {
-		NewVersionProcess process = new NewVersionProcess(file, credentials, networkManager, fileManager,
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+		NewVersionProcess process = new NewVersionProcess(file, profileManager, networkManager, fileManager,
 				config);
 		executeProcess(process);
 	}
 
-	public static void deleteFile(NetworkManager networkManager, File file, UserCredentials credentials,
-			FileManager fileManager) {
-		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, credentials);
+	public static void deleteFile(NetworkManager networkManager, File file,
+			UserProfileManager profileManager, FileManager fileManager) {
+		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, profileManager);
 		executeProcess(process);
 	}
 

@@ -6,6 +6,7 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.GetUserProfileStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -28,7 +29,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	public void setup() {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		client = NetworkTestUtil.createNetwork(1).get(0);
-		NetworkPutGetUtil.register(client, userCredentials);
+		ProcessTestUtil.register(client, userCredentials);
 	}
 
 	@Test
