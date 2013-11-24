@@ -14,11 +14,26 @@ public final class UserCredentials {
 	private final String userId;
 	private final String password;
 	private final String pin;
+	private final String profileLocationKey;
 
 	public UserCredentials(String userId, String password, String pin) {
 		this.userId = userId;
 		this.password = password;
 		this.pin = pin;
+		this.profileLocationKey = generateProfileLocationKey();
+	}
+
+	private String generateProfileLocationKey() {
+		// concatenate PIN + PW + UserId
+		String location = new StringBuilder().append(pin).append(password).append(userId).toString();
+
+		// create fixed salt based on location
+		byte[] fixedSalt = PasswordUtil.generateFixedSalt(location.getBytes());
+
+		// hash the location
+		byte[] locationKey = PasswordUtil.generateHash(location.toCharArray(), fixedSalt);
+
+		return new String(locationKey, H2HConstants.ENCODING_CHARSET);
 	}
 
 	public String getUserId() {
@@ -34,16 +49,6 @@ public final class UserCredentials {
 	}
 
 	public String getProfileLocationKey() {
-		
-		// concatenate PIN + PW + UserId
-		String location = new StringBuilder().append(pin).append(password).append(userId).toString();
-
-		// create fixed salt based on location
-		byte[] fixedSalt = PasswordUtil.generateFixedSalt(location.getBytes());
-
-		// hash the location
-		byte[] locationKey = PasswordUtil.generateHash(location.toCharArray(), fixedSalt);
-
-		return new String(locationKey, H2HConstants.ENCODING_CHARSET);
+		return profileLocationKey;
 	}
 }

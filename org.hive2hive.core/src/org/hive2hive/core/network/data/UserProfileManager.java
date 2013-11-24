@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
 
@@ -15,6 +16,8 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -48,6 +51,8 @@ public class UserProfileManager {
 	private final Map<Process, Long> modifying; // key = process, value = start of modification
 	private final PutGetUserProfileTask putGetTask;
 	private Phase currentPhase;
+	private AtomicBoolean putSuccess = new AtomicBoolean(true);
+	private AtomicBoolean getSuccess = new AtomicBoolean(true);
 
 	// multiple threads change this object
 	private volatile UserProfile latestUserProfile;
@@ -76,8 +81,12 @@ public class UserProfileManager {
 
 	/**
 	 * Gets the user profile, if not existent, the call blocks until the most recent profile is here.
+	 * 
+	 * @param process the process that calls this method
+	 * @return never null
+	 * @throws GetFailedException if the profile cannot be fetched
 	 */
-	public UserProfile getUserProfile(Process process) {
+	public UserProfile getUserProfile(Process process) throws GetFailedException {
 		// sign in that we want to get the newest profile
 		Long waiter = System.currentTimeMillis();
 		waitingForGet.put(process, waiter);
@@ -91,7 +100,11 @@ public class UserProfileManager {
 			// ignore
 		}
 
-		return latestUserProfile;
+		if (getSuccess.get() && latestUserProfile != null) {
+			return latestUserProfile;
+		} else {
+			throw new GetFailedException("Getting the user profile failed");
+		}
 	}
 
 	/**
@@ -122,7 +135,7 @@ public class UserProfileManager {
 	 * Waits until the put of the user profile is done. It also assumes that the process is done with the
 	 * modifications on the profile.
 	 */
-	public void putUserProfile(Process process) {
+	public void putUserProfile(Process process) throws PutFailedException {
 		stopModification(process);
 
 		// sign in that we want to put the newest profile
@@ -136,6 +149,10 @@ public class UserProfileManager {
 			}
 		} catch (InterruptedException e) {
 			// ignore
+		}
+
+		if (!putSuccess.get()) {
+			throw new PutFailedException("Putting the user profile failed");
 		}
 	}
 
@@ -201,15 +218,11 @@ public class UserProfileManager {
 		 */
 		private void notifyAll(Map<Process, Long> toNotify, boolean success) {
 			logger.debug("Notifying " + toNotify.size() + " process(es) to continue");
+
 			for (Process process : toNotify.keySet()) {
 				Long waiter = toNotify.get(process);
 				synchronized (waiter) {
 					waiter.notify(); // notify
-				}
-
-				if (!success) {
-					// an error occurred, stop the processes
-					process.stop("Putting / Getting the user profile failed");
 				}
 			}
 
@@ -228,6 +241,7 @@ public class UserProfileManager {
 			logger.debug("Getting the user profile from the DHT");
 			DataManager dataManager = networkManager.getDataManager();
 			if (dataManager == null) {
+				getSuccess.set(false);
 				throw new IllegalStateException("Node is not connected to the network");
 			}
 
@@ -238,6 +252,7 @@ public class UserProfileManager {
 			if (futureGet.isFailed() || futureGet.getData() == null) {
 				logger.warn("Did not find user profile.");
 				latestUserProfile = null;
+				getSuccess.set(false);
 				notifyAll(waitingForGet, false);
 			} else {
 				try {
@@ -252,10 +267,12 @@ public class UserProfileManager {
 
 					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 					latestUserProfile = (UserProfile) decrypted;
+					getSuccess.set(true);
 					notifyAll(waitingForGet, true);
 				} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
 						| ClassNotFoundException | IOException e) {
 					logger.error("Cannot decrypt the user profile.", e);
+					getSuccess.set(false);
 					notifyAll(waitingForGet, false);
 				}
 			}
@@ -289,14 +306,11 @@ public class UserProfileManager {
 						H2HConstants.USER_PROFILE, encryptedUserProfile);
 				futurePut.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
-				if (futurePut.isFailed()) {
-					logger.error("Could not put the user profile, a timeout occurred");
-					notifyAll(waitingForPut, false);
-				} else {
-					notifyAll(waitingForPut, true);
-				}
+				putSuccess.set(futurePut.isSuccess());
+				notifyAll(waitingForPut, futurePut.isSuccess());
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);
+				putSuccess.set(false);
 				notifyAll(waitingForPut, false);
 			}
 		}
@@ -317,6 +331,7 @@ public class UserProfileManager {
 			}
 
 			if (!modifying.isEmpty()) {
+				// TODO kill processes from this thread?
 				logger.info(modifying.size() + " processes are still modifying the profile. Quit them.");
 				for (Process process : modifying.keySet()) {
 					process.stop("Profile modificatin was too long");

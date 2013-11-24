@@ -119,6 +119,25 @@ public class NewFileTest extends H2HJUnitTest {
 		verifyUpload(innerFolder, 0);
 	}
 
+	@Test
+	public void testUploadWrongCredentials() throws IOException, IllegalFileLocation {
+		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
+
+		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+
+		NewFileProcess process = new NewFileProcess(file, profileManager, client, fileManager, config);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		H2HWaiter waiter = new H2HWaiter(40);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
+
 	private void startUploadProcess(File toUpload) throws IllegalFileLocation {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
@@ -172,26 +191,6 @@ public class NewFileTest extends H2HJUnitTest {
 		if (originalFile.isFile()) {
 			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
 		}
-	}
-
-	@Test
-	public void testUploadWrongCredentials() throws IOException, IllegalFileLocation {
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
-
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-
-		NewFileProcess process = new NewFileProcess(file, profileManager, client, fileManager, config);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		// wait maximally 1m because files could be large
-		H2HWaiter waiter = new H2HWaiter(40);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
 	}
 
 	@After

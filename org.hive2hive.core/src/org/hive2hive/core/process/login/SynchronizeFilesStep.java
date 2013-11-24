@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
@@ -49,13 +50,18 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		// TODO do not in parallel to omit conflicts!
 		PostLoginProcessContext context = (PostLoginProcessContext) getProcess().getContext();
 		FileManager fileManager = context.getFileManager();
 		UserProfileManager profileManager = context.getProfileManager();
 
-		UserProfile userProfile = profileManager.getUserProfile(getProcess());
-		FileSynchronizer synchronizer = new FileSynchronizer(fileManager, userProfile);
+		FileSynchronizer synchronizer = null;
+		try {
+			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			synchronizer = new FileSynchronizer(fileManager, userProfile);
+		} catch (GetFailedException e1) {
+			getProcess().stop(e1.getMessage());
+			return;
+		}
 
 		/*
 		 * Download the remotely added and updated files
@@ -103,13 +109,13 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		if (context.getIsDefinedAsMaster()) {
-			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(
-					userProfile.getUserId());
-			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userProfile.getUserId(),
-					handleUmQueueStep);
+			String userId = profileManager.getUserCredentials().getUserId();
+			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
+			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId, handleUmQueueStep);
 			context.setUserMessageQueueStep(getUMQueueStep);
 			getProcess().setNextStep(getUMQueueStep);
 		} else {
+			// done with the post login process
 			getProcess().setNextStep(null);
 		}
 	}

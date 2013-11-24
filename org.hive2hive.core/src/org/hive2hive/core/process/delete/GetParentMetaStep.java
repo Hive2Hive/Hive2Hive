@@ -2,6 +2,8 @@ package org.hive2hive.core.process.delete;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -35,7 +37,13 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 	public void start() {
 		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
 		UserProfileManager profileManager = context.getProfileManager();
-		UserProfile userProfile = profileManager.getUserProfile(getProcess());
+		UserProfile userProfile = null;
+		try {
+			userProfile = profileManager.getUserProfile(getProcess());
+		} catch (GetFailedException e1) {
+			getProcess().stop(e1.getMessage());
+			return;
+		}
 
 		// update the profile here because it does not matter whether the parent meta data needs to be updated
 		// or not.
@@ -48,7 +56,12 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		profileManager.startModification(getProcess());
 		FileTreeNode parent = fileNode.getParent();
 		parent.removeChild(fileNode);
-		profileManager.putUserProfile(getProcess());
+		try {
+			profileManager.putUserProfile(getProcess());
+		} catch (PutFailedException e) {
+			getProcess().stop(e.getMessage());
+			return;
+		}
 
 		if (parent.equals(userProfile.getRoot())) {
 			// no parent to update since the file is in root

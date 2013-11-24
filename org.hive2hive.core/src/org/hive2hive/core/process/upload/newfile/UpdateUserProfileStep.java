@@ -33,22 +33,23 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 		// set the user profile from the previous step
 		UserProfileManager profileManager = context.getProfileManager();
-		UserProfile userProfile = profileManager.getUserProfile(getProcess());
-		profileManager.startModification(getProcess());
 
 		try {
+			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			profileManager.startModification(getProcess());
+
 			// create a file tree node in the user profile
 			addFileToUserProfile(userProfile, context.getFile(), context.getNewMetaKeyPair());
-		} catch (IOException e) {
+
+			profileManager.putUserProfile(getProcess());
+
+			// TODO next steps:
+			// 1. notify other clients as the next step
+			// 2. check if too many versions of that file exist --> remove old versions if necessary
+			getProcess().setNextStep(null);
+		} catch (Exception e) {
 			getProcess().stop(e.getMessage());
 		}
-
-		profileManager.putUserProfile(getProcess());
-
-		// TODO next steps:
-		// 1. notify other clients as the next step
-		// 2. check if too many versions of that file exist --> remove old versions if necessary
-		getProcess().setNextStep(null);
 	}
 
 	/**
@@ -89,13 +90,19 @@ public class UpdateUserProfileStep extends ProcessStep {
 		// remove the file from the user profile
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 		UserProfileManager profileManager = context.getProfileManager();
-		UserProfile userProfile = profileManager.getUserProfile(getProcess());
-		profileManager.startModification(getProcess());
 
-		FileTreeNode parentNode = userProfile.getFileById(parentKey);
-		FileTreeNode childNode = parentNode.getChildByName(context.getFile().getName());
-		parentNode.removeChild(childNode);
+		try {
+			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			profileManager.startModification(getProcess());
 
-		profileManager.putUserProfile(getProcess());
+			FileTreeNode parentNode = userProfile.getFileById(parentKey);
+			FileTreeNode childNode = parentNode.getChildByName(context.getFile().getName());
+			parentNode.removeChild(childNode);
+			profileManager.putUserProfile(getProcess());
+		} catch (Exception e) {
+			// ignore
+		}
+
+		getProcess().nextRollBackStep();
 	}
 }

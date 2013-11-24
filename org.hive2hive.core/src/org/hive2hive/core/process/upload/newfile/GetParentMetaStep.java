@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -47,9 +48,11 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			logger.debug("Get the meta folder of the parent (lookup in user profile)");
 
 			UserProfileManager profileManager = context.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(getProcess());
-			if (userProfile == null) {
-				getProcess().stop("Could not find user profile");
+			UserProfile userProfile = null;
+			try {
+				userProfile = profileManager.getUserProfile(getProcess());
+			} catch (GetFailedException e) {
+				getProcess().stop(e.getMessage());
 				return;
 			}
 

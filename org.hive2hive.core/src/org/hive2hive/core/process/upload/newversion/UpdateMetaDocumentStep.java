@@ -49,11 +49,12 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			// 3. put the user profile
 			// 4. inform other clients
 			UserProfileManager profileManager = context.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(getProcess());
-			profileManager.startModification(getProcess());
-
-			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
 			try {
+				UserProfile userProfile = profileManager.getUserProfile(getProcess());
+				profileManager.startModification(getProcess());
+
+				FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
+
 				// store for backup
 				originalMD5 = fileNode.getMD5();
 				byte[] newMD5 = EncryptionUtil.generateMD5Hash(file);
@@ -67,6 +68,8 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			} catch (IOException e) {
 				profileManager.stopModification(getProcess());
 				getProcess().stop("The MD5 hash in the user profile could not be generated");
+			} catch (Exception e) {
+				getProcess().stop(e.getMessage());
 			}
 		}
 	}
@@ -82,11 +85,17 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 			// return to original MD5 and put the userProfile
 			UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 			UserProfileManager profileManager = context.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(getProcess());
-			profileManager.startModification(getProcess());
-			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
-			fileNode.setMD5(originalMD5);
-			profileManager.putUserProfile(getProcess());
+			try {
+				UserProfile userProfile = profileManager.getUserProfile(getProcess());
+				profileManager.startModification(getProcess());
+				FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
+				fileNode.setMD5(originalMD5);
+				profileManager.putUserProfile(getProcess());
+			} catch (Exception e) {
+				// ignore
+			}
 		}
+
+		getProcess().nextRollBackStep();
 	}
 }

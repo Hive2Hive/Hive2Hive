@@ -1,12 +1,15 @@
 package org.hive2hive.core.test.network;
 
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.get.GetUserProfileStep;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.process.ProcessTestUtil;
+import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -33,16 +36,31 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetOnly() {
+	public void testGetOnly() throws GetFailedException, InterruptedException {
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
-		TestGetUserProfileProcess proc1 = new TestGetUserProfileProcess();
-		TestGetUserProfileProcess proc2 = new TestGetUserProfileProcess();
-		TestGetUserProfileProcess proc3 = new TestGetUserProfileProcess();
+		TestGetUserProfileProcess proc1 = new TestGetUserProfileProcess(manager, client);
+		TestGetUserProfileProcess proc2 = new TestGetUserProfileProcess(manager, client);
+		TestGetUserProfileProcess proc3 = new TestGetUserProfileProcess(manager, client);
 
-		Assert.assertNotNull(manager.getUserProfile(proc1));
-		Assert.assertNotNull(manager.getUserProfile(proc2));
-		Assert.assertNotNull(manager.getUserProfile(proc3));
+		TestProcessListener listener1 = new TestProcessListener();
+		proc1.addListener(listener1);
+		TestProcessListener listener2 = new TestProcessListener();
+		proc2.addListener(listener2);
+		TestProcessListener listener3 = new TestProcessListener();
+		proc3.addListener(listener3);
+
+		// start, but not all at the same time
+		proc1.start();
+		Thread.sleep(200);
+		proc2.start();
+		Thread.sleep(250);
+		proc3.start();
+
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!(listener1.hasSucceeded() && listener2.hasSucceeded() && listener3.hasSucceeded()));
 	}
 
 	@After
@@ -57,9 +75,35 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	private class TestGetUserProfileProcess extends Process {
 
-		public TestGetUserProfileProcess() {
-			super(null);
-			setNextStep(new GetUserProfileStep(userCredentials, null, null));
+		public TestGetUserProfileProcess(UserProfileManager profileManager, NetworkManager networkManager) {
+			super(networkManager);
+			setNextStep(new TestGetUserProfileStep(profileManager));
 		}
+	}
+
+	private class TestGetUserProfileStep extends ProcessStep {
+
+		private UserProfileManager profileManager;
+
+		public TestGetUserProfileStep(UserProfileManager profileManager) {
+			this.profileManager = profileManager;
+		}
+
+		@Override
+		public void start() {
+			try {
+				profileManager.getUserProfile(getProcess());
+				getProcess().setNextStep(null);
+			} catch (GetFailedException e) {
+				getProcess().stop(e.getMessage());
+				Assert.fail();
+			}
+		}
+
+		@Override
+		public void rollBack() {
+			Assert.fail();
+		}
+
 	}
 }
