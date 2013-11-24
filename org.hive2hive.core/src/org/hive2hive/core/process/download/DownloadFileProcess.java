@@ -16,10 +16,6 @@ public class DownloadFileProcess extends Process {
 
 	/**
 	 * Download a file that is already in the user profile but not on disk yet
-	 * 
-	 * @param file
-	 * @param networkManager
-	 * @param fileManager
 	 */
 	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager, FileManager fileManager) {
 		super(networkManager);

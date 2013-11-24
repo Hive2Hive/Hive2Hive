@@ -188,7 +188,7 @@ public class NewFileTest extends H2HJUnitTest {
 		process.start();
 
 		// wait maximally 1m because files could be large
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(40);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());

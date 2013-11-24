@@ -68,7 +68,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		ulProcess.addListener(listener);
 		ulProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());

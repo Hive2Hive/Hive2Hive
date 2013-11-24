@@ -20,7 +20,7 @@ import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Generic process step to get the {@link: UserProfile} and decrypt it. Only use it when the
- * {@link UserProfileManager} is not available
+ * {@link UserProfileManager} is not available (yet).
  * 
  * @author Nico, Christian
  * 

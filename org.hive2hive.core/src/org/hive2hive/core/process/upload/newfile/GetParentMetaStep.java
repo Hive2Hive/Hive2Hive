@@ -37,13 +37,6 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 		File parent = file.getParentFile();
 
-		UserProfileManager profileManager = context.getProfileManager();
-		UserProfile userProfile = profileManager.getUserProfile(getProcess());
-		if (userProfile == null) {
-			getProcess().stop("Could not find user profile");
-			return;
-		}
-
 		if (parent.equals(context.getFileManager().getRoot())) {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the meta folder and update the profile directly");
@@ -51,7 +44,15 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			getProcess().setNextStep(nextStep);
 		} else {
 			// normal case when file is not in root
-			logger.debug("Get the meta folder of the parent");
+			logger.debug("Get the meta folder of the parent (lookup in user profile)");
+
+			UserProfileManager profileManager = context.getProfileManager();
+			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			if (userProfile == null) {
+				getProcess().stop("Could not find user profile");
+				return;
+			}
+
 			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
 
 			if (parentNode == null) {

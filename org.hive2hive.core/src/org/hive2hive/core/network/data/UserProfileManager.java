@@ -37,7 +37,8 @@ public class UserProfileManager {
 	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileManager.class);
 
 	private static final long PUT_GET_HEARTBEAT_MS = 2 * 1000;
-	private static final long MIN_MODIFICATION_TIME_MS = 500;
+	private static final long PUT_GET_AWAIT_TIMEOUT = 5000;
+	private static final long MIN_MODIFICATION_TIME_MS = 1000;
 	private static final long CONSECUTIVE_ERRORS_ALLOWED = 5;
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
@@ -46,11 +47,10 @@ public class UserProfileManager {
 	private final Map<Process, Long> waitingForPut;
 	private final Map<Process, Long> modifying; // key = process, value = start of modification
 	private final PutGetUserProfileTask putGetTask;
+	private Phase currentPhase;
 
 	// multiple threads change this object
 	private volatile UserProfile latestUserProfile;
-
-	private Phase currentPhase;
 
 	private enum Phase {
 		PUT,
@@ -196,7 +196,11 @@ public class UserProfileManager {
 
 		}
 
+		/**
+		 * Notifies all waiting processes that the task is done
+		 */
 		private void notifyAll(Map<Process, Long> toNotify, boolean success) {
+			logger.debug("Notifying " + toNotify.size() + " process(es) to continue");
 			for (Process process : toNotify.keySet()) {
 				Long waiter = toNotify.get(process);
 				synchronized (waiter) {
@@ -212,6 +216,9 @@ public class UserProfileManager {
 			toNotify.clear();
 		}
 
+		/**
+		 * Performs a get call (blocking) and decrypts the received user profile.
+		 */
 		private void get() throws IllegalStateException {
 			if (waitingForGet.isEmpty()) {
 				// no need to get
@@ -226,7 +233,7 @@ public class UserProfileManager {
 
 			FutureGet futureGet = dataManager.getGlobal(credentials.getProfileLocationKey(),
 					H2HConstants.USER_PROFILE);
-			futureGet.awaitUninterruptibly(10000);
+			futureGet.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
 			if (futureGet.isFailed() || futureGet.getData() == null) {
 				logger.warn("Did not find user profile.");
@@ -254,6 +261,9 @@ public class UserProfileManager {
 			}
 		}
 
+		/**
+		 * Encrypts the modified user profile and puts it (blocking).
+		 */
 		private void put() throws IllegalStateException {
 			if (waitingForPut.isEmpty()) {
 				// no need to put
@@ -275,11 +285,11 @@ public class UserProfileManager {
 					throw new IllegalStateException("Node is not connected to the network");
 				}
 
-				FuturePut putGlobal = dataManager.putGlobal(credentials.getProfileLocationKey(),
+				FuturePut futurePut = dataManager.putGlobal(credentials.getProfileLocationKey(),
 						H2HConstants.USER_PROFILE, encryptedUserProfile);
-				putGlobal.awaitUninterruptibly(10000);
+				futurePut.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
-				if (putGlobal.isFailed()) {
+				if (futurePut.isFailed()) {
 					logger.error("Could not put the user profile, a timeout occurred");
 					notifyAll(waitingForPut, false);
 				} else {
@@ -291,6 +301,9 @@ public class UserProfileManager {
 			}
 		}
 
+		/**
+		 * Some processes could still be modifying that user profile. Give them an extra time to finish.
+		 */
 		private void waitForModifyingProcesses() {
 			if (!modifying.isEmpty()) {
 				try {

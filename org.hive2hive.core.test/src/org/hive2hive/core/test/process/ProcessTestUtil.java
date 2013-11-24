@@ -54,7 +54,7 @@ public class ProcessTestUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
@@ -69,7 +69,7 @@ public class ProcessTestUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(30);
+		H2HWaiter waiter = new H2HWaiter(60);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
