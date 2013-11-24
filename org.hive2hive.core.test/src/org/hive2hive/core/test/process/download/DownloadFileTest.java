@@ -20,8 +20,10 @@ import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,12 +35,12 @@ import org.junit.Test;
  */
 public class DownloadFileTest extends H2HJUnitTest {
 
-	private final static int networkSize = 10;
-	private static List<NetworkManager> network;
+	private final static int networkSize = 5;
 	private final static String testContent = "DownloadFileTest";
-	private static FileManager uploaderFileManager;
-	private static File uploadedFile;
-	private static FileTreeNode file;
+	private static List<NetworkManager> network;
+	private FileManager uploaderFileManager;
+	private File uploadedFile;
+	private FileTreeNode file;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -47,6 +49,10 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		/** create a network, register a user and add a file **/
 		network = NetworkTestUtil.createNetwork(networkSize);
+	}
+
+	@Before
+	public void uploadFile() throws Exception {
 		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
@@ -102,10 +108,14 @@ public class DownloadFileTest extends H2HJUnitTest {
 		Assert.assertEquals(testContent, content);
 	}
 
+	@After
+	public void delete() throws IOException {
+		FileUtils.deleteDirectory(uploaderFileManager.getRoot());
+	}
+
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderFileManager.getRoot());
 		afterClass();
 	}
 }
