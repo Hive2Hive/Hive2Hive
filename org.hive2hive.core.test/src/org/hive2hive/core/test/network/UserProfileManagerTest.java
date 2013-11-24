@@ -1,6 +1,13 @@
 package org.hive2hive.core.test.network;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
@@ -17,10 +24,23 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Test the {@link UserProfileManager} which handles concurrency when editing a user profile with multiple
+ * processes. Many combinations of get, put and modify are tested.
+ * 
+ * @author Nico
+ * 
+ */
 public class UserProfileManagerTest extends H2HJUnitTest {
 
 	private UserCredentials userCredentials;
 	private NetworkManager client;
+
+	private enum Operation {
+		PUT,
+		GET,
+		MODIFY
+	}
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -37,30 +57,72 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetOnly() throws GetFailedException, InterruptedException {
+		executeProcesses(Operation.GET, Operation.GET, Operation.GET, Operation.GET);
+	}
+
+	@Test
+	public void testPutSingle() throws GetFailedException, InterruptedException {
+		executeProcesses(Operation.GET, Operation.PUT, Operation.GET);
+	}
+
+	@Test
+	public void testPutMultiple() throws GetFailedException, InterruptedException {
+		executeProcesses(Operation.PUT, Operation.PUT, Operation.PUT);
+	}
+
+	@Test
+	public void testModifySingle() throws GetFailedException, InterruptedException {
+		executeProcesses(Operation.PUT, Operation.MODIFY, Operation.PUT);
+	}
+
+	@Test
+	public void testModifyMultiple() throws GetFailedException, InterruptedException {
+		executeProcesses(Operation.MODIFY, Operation.MODIFY, Operation.MODIFY);
+	}
+
+	@Test
+	public void testAllMixed() throws GetFailedException, InterruptedException {
+		executeProcesses(Operation.PUT, Operation.GET, Operation.MODIFY, Operation.GET, Operation.PUT,
+				Operation.MODIFY, Operation.MODIFY, Operation.GET, Operation.GET, Operation.PUT,
+				Operation.PUT, Operation.GET);
+	}
+
+	/**
+	 * Transforms the operations into a set of processes and starts them all. The processes are started with a
+	 * small delay, but in the same order as the parameters. The method blocks until all processes are done.
+	 */
+	private void executeProcesses(Operation... operations) throws GetFailedException, InterruptedException {
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
-		TestGetUserProfileProcess proc1 = new TestGetUserProfileProcess(manager, client);
-		TestGetUserProfileProcess proc2 = new TestGetUserProfileProcess(manager, client);
-		TestGetUserProfileProcess proc3 = new TestGetUserProfileProcess(manager, client);
+		List<TestUserProfileProcess> processes = new ArrayList<TestUserProfileProcess>(operations.length);
+		List<TestProcessListener> listeners = new ArrayList<TestProcessListener>(operations.length);
 
-		TestProcessListener listener1 = new TestProcessListener();
-		proc1.addListener(listener1);
-		TestProcessListener listener2 = new TestProcessListener();
-		proc2.addListener(listener2);
-		TestProcessListener listener3 = new TestProcessListener();
-		proc3.addListener(listener3);
+		for (int i = 0; i < operations.length; i++) {
+			TestUserProfileProcess proc = new TestUserProfileProcess(manager, client, operations[i]);
+			TestProcessListener listener = new TestProcessListener();
+			proc.addListener(listener);
+
+			processes.add(proc);
+			listeners.add(listener);
+		}
 
 		// start, but not all at the same time
-		proc1.start();
-		Thread.sleep(200);
-		proc2.start();
-		Thread.sleep(250);
-		proc3.start();
+		for (TestUserProfileProcess process : processes) {
+			process.start();
+			// sleep for random time
+			Thread.sleep(Math.abs(new Random().nextLong() % 1000));
+		}
 
 		H2HWaiter waiter = new H2HWaiter(20);
+		boolean allFinished;
 		do {
 			waiter.tickASecond();
-		} while (!(listener1.hasSucceeded() && listener2.hasSucceeded() && listener3.hasSucceeded()));
+			allFinished = true;
+
+			for (TestProcessListener listener : listeners) {
+				allFinished &= listener.hasSucceeded();
+			}
+		} while (!allFinished);
 	}
 
 	@After
@@ -73,28 +135,74 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class TestGetUserProfileProcess extends Process {
+	/**
+	 * Test class that executes a single step getting the user profile
+	 * 
+	 * @author Nico
+	 * 
+	 */
+	private class TestUserProfileProcess extends Process {
 
-		public TestGetUserProfileProcess(UserProfileManager profileManager, NetworkManager networkManager) {
+		public TestUserProfileProcess(UserProfileManager profileManager, NetworkManager networkManager,
+				Operation operation) {
 			super(networkManager);
-			setNextStep(new TestGetUserProfileStep(profileManager));
+			switch (operation) {
+				case PUT:
+					setNextStep(new TestUserProfileStep(profileManager, true, false));
+					break;
+				case GET:
+					setNextStep(new TestUserProfileStep(profileManager, false, false));
+					break;
+				case MODIFY:
+					setNextStep(new TestUserProfileStep(profileManager, true, true));
+					break;
+				default:
+					Assert.fail();
+					break;
+			}
 		}
 	}
 
-	private class TestGetUserProfileStep extends ProcessStep {
+	/**
+	 * Gets the user profile using the {@link UserProfileManager}.
+	 * 
+	 * @author Nico
+	 * 
+	 */
+	private class TestUserProfileStep extends ProcessStep {
 
-		private UserProfileManager profileManager;
+		private final UserProfileManager profileManager;
+		private final boolean modify;
+		private final boolean put;
 
-		public TestGetUserProfileStep(UserProfileManager profileManager) {
+		/**
+		 * 
+		 * @param profileManager
+		 * @param put if true, it performs a put operation
+		 * @param modify if true, it does a modification
+		 */
+		public TestUserProfileStep(UserProfileManager profileManager, boolean put, boolean modify) {
 			this.profileManager = profileManager;
+			this.put = put;
+			this.modify = modify;
 		}
 
 		@Override
 		public void start() {
 			try {
-				profileManager.getUserProfile(getProcess());
+				UserProfile userProfile = profileManager.getUserProfile(getProcess());
+
+				if (modify) {
+					profileManager.startModification(getProcess());
+					new FileTreeNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
+				}
+
+				if (put) {
+					profileManager.putUserProfile(getProcess());
+				}
+
 				getProcess().setNextStep(null);
-			} catch (GetFailedException e) {
+			} catch (GetFailedException | PutFailedException e) {
 				getProcess().stop(e.getMessage());
 				Assert.fail();
 			}
@@ -104,6 +212,5 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		public void rollBack() {
 			Assert.fail();
 		}
-
 	}
 }
