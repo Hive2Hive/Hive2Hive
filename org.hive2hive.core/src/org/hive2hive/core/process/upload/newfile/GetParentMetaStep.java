@@ -29,10 +29,13 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 	@Override
 	public void start() {
-		// get and set the process context
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 
-		File parent = context.getFile().getParentFile();
+		// get and set the process context
+		File file = context.getFile();
+		logger.debug("Start getting the parent meta folder of file: " + file.getName());
+
+		File parent = file.getParentFile();
 
 		UserProfileManager profileManager = context.getProfileManager();
 		UserProfile userProfile = profileManager.getUserProfile(getProcess());

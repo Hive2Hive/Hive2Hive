@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -20,12 +22,16 @@ import org.hive2hive.core.security.EncryptionUtil;
  */
 public class UpdateUserProfileStep extends ProcessStep {
 
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(UpdateUserProfileStep.class);
+
 	private PublicKey parentKey;
 
 	@Override
 	public void start() {
-		// set the user profile from the previous step
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
+		logger.debug("Start updating the user profile where adding the file: " + context.getFile().getName());
+
+		// set the user profile from the previous step
 		UserProfileManager profileManager = context.getProfileManager();
 		UserProfile userProfile = profileManager.getUserProfile(getProcess());
 		profileManager.startModification(getProcess());
@@ -80,7 +86,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	@Override
 	public void rollBack() {
-		// TODO remove the file from the user profile
+		// remove the file from the user profile
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 		UserProfileManager profileManager = context.getProfileManager();
 		UserProfile userProfile = profileManager.getUserProfile(getProcess());

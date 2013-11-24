@@ -16,6 +16,7 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 	@Override
 	public void start() {
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
+		logger.debug("Start updating the parent meta folder of file: " + context.getFile().getName());
 
 		// add child to the parent meta data
 		MetaFolder parentMeta = (MetaFolder) context.getMetaDocument();

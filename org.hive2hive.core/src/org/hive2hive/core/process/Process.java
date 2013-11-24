@@ -164,11 +164,11 @@ public abstract class Process implements IProcess {
 		// start roll back from current step
 		currentStep.rollBack();
 
-//		// rollback already executed steps
-//		Collections.reverse(executedSteps);
-//		for (ProcessStep step : executedSteps) {
-//			step.rollBack();
-//		}
+		// // rollback already executed steps
+		// Collections.reverse(executedSteps);
+		// for (ProcessStep step : executedSteps) {
+		// step.rollBack();
+		// }
 
 		for (IProcessListener listener : listeners) {
 			listener.onFail(reason);
@@ -177,9 +177,9 @@ public abstract class Process implements IProcess {
 
 	public void nextRollBackStep() {
 		if (ProcessState.ROLLBACKING == state) {
-			if (!executedSteps.isEmpty()){
+			if (!executedSteps.isEmpty()) {
 				// get last executed element
-				ProcessStep step = executedSteps.get(executedSteps.size()-1);
+				ProcessStep step = executedSteps.remove(executedSteps.size() - 1);
 				// trigger rollback for this step
 				step.rollBack();
 			}
