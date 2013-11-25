@@ -16,7 +16,7 @@ public class MetaFolder extends MetaDocument {
 
 	private static final long serialVersionUID = 1L;
 	private final List<UserPermission> userPermissions;
-	private final List<KeyPair> childDocuments; // TODO really used??
+	private final List<KeyPair> childDocuments;
 
 	public MetaFolder(PublicKey id, String creatorName) {
 		super(id);

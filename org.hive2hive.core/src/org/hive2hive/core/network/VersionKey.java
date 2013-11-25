@@ -12,6 +12,8 @@ import net.tomp2p.peers.Number160;
  * @author Nico
  * 
  */
+// TODO this class is never used. @ippes: delete it?
+@Deprecated
 public class VersionKey {
 	private final byte[] timestamp = new byte[8];
 	private final byte[] previousHash = new byte[12];
