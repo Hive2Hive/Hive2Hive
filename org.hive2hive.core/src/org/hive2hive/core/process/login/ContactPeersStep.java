@@ -12,7 +12,6 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
@@ -48,17 +47,17 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 	public void start() {
 		context = (PostLoginProcessContext) getProcess().getContext();
 
-		LocationEntry myself = null;
-		for (LocationEntry location : context.getLocations().getLocationEntries()) {
-			if (location.getAddress().equals(getNetworkManager().getPeerAddress())) {
+		PeerAddress myself = null;
+		for (PeerAddress location : context.getLocations().getPeerAddresses()) {
+			if (location.equals(getNetworkManager().getPeerAddress())) {
 				myself = location;
 			}
 		}
 		if (myself != null)
-			context.getLocations().getLocationEntries().remove(myself);
+			context.getLocations().getPeerAddresses().remove(myself);
 
 		// check if other client nodes has to be contacted
-		if (!context.getLocations().getLocationEntries().isEmpty()) {
+		if (!context.getLocations().getPeerAddresses().isEmpty()) {
 			// set timer to guarantee that the process step goes further because not coming response messages
 			// may block the step
 			Timer timer = new Timer();
@@ -70,8 +69,8 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 			}, H2HConstants.CONTACT_PEERS_AWAIT_MS);
 
 			// contact all peers
-			for (LocationEntry entry : context.getLocations().getLocationEntries()) {
-				sendContactPeerMessage(entry);
+			for (PeerAddress address : context.getLocations().getPeerAddresses()) {
+				sendContactPeerMessage(address);
 			}
 		} else {
 			updateLocationsMap();
@@ -82,17 +81,17 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 	 * Necessary method to enable single step testing. A test can overwrite this method and can send preperad
 	 * messages.
 	 */
-	protected void sendContactPeerMessage(LocationEntry entry) {
+	protected void sendContactPeerMessage(PeerAddress address) {
 		// generate random verification content
 		String evidenceContent = UUID.randomUUID().toString();
 		// create a liveness check message
-		ContactPeerMessage contactMsg = new ContactPeerMessage(entry.getAddress(), evidenceContent);
-		evidenceMap.put(entry.getAddress(), evidenceContent);
+		ContactPeerMessage contactMsg = new ContactPeerMessage(address, evidenceContent);
+		evidenceMap.put(address, evidenceContent);
 		// the process step is expecting a response
 		contactMsg.setCallBackHandler(this);
 		// send direct
 		getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic(),
-				new ContactPeerMessageListener(entry.getAddress()));
+				new ContactPeerMessageListener(address));
 	}
 
 	@Override
@@ -114,7 +113,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 			for (PeerAddress peerAddress : responses.keySet()) {
 				// check if response was ok or failed
 				if (responses.get(peerAddress)) {
-					newLocations.addEntry(new LocationEntry(peerAddress));
+					newLocations.addPeerAddress(peerAddress);
 					listToDetectMaster.add(peerAddress);
 				} else {
 					logger.warn(String
@@ -134,7 +133,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 				isDefinedAsMaster = true;
 			}
 			// add myself
-			newLocations.addEntry(new LocationEntry(getNetworkManager().getPeerAddress()));
+			newLocations.addPeerAddress(getNetworkManager().getPeerAddress());
 			// put all into context
 			context.setIsElectedMaster(isDefinedAsMaster);
 			context.setNewLocations(newLocations);
@@ -171,7 +170,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 			// add to map and label success
 			responses.put(responseMessage.getSenderAddress(), true);
 			// check if all peers responded
-			if (responses.size() >= context.getLocations().getLocationEntries().size()) {
+			if (responses.size() >= context.getLocations().getPeerAddresses().size()) {
 				// all peers answered
 				updateLocationsMap();
 			}

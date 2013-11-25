@@ -3,7 +3,6 @@ package org.hive2hive.core.process.login;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
@@ -38,8 +37,7 @@ public class AddMyselfToLocationsStep extends BasePutProcessStep {
 		} else {
 
 			// add this peer to the locations list and put it
-			LocationEntry myLocation = new LocationEntry(getNetworkManager().getPeerAddress());
-			loadedLocations.addEntry(myLocation);
+			loadedLocations.addPeerAddress(getNetworkManager().getPeerAddress());
 
 			put(userId, H2HConstants.USER_LOCATIONS, loadedLocations);
 

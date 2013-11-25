@@ -5,8 +5,9 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -47,8 +48,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		LocationEntry status = new LocationEntry(getter.getPeerAddress());
-		newLocations.addEntry(status);
+		newLocations.addPeerAddress(getter.getPeerAddress());
 		TestGetLocationContext context = new TestGetLocationContext();
 
 		// put the locations to the DHT
@@ -76,9 +76,9 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// verify if both objects are the same
 		Assert.assertEquals(userId, context.getLocations().getUserId());
 
-		List<LocationEntry> onlinePeers = new ArrayList<LocationEntry>(context.getLocations()
-				.getLocationEntries());
-		Assert.assertEquals(getter.getPeerAddress(), onlinePeers.get(0).getAddress());
+		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(context.getLocations()
+				.getPeerAddresses());
+		Assert.assertEquals(getter.getPeerAddress(), onlinePeers.get(0));
 	}
 
 	@Test

@@ -26,6 +26,8 @@ public class LoginProcess extends Process {
 		// 2. VerifyUserProfileStep
 		// 3. GetLocationsStep: get the other client's locations
 		// 4. AddMyselfToLocationsStep: add this client to the locations map
+
+		// TODO add myself to locations here or in PostLoginProcess?
 		AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(credentials.getUserId());
 		GetLocationsStep locationsStep = new GetLocationsStep(credentials.getUserId(), addToLocsStep, context);
 		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId(),

@@ -9,8 +9,8 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
 
 /**
- * A list of unique addresses of peers that are currently online. If there is at least one client online,
- * exactly one client becomes the master. Holding these addresses is necessary to locate clients.
+ * A list of unique addresses of peers that are currently online. Holding these addresses is necessary to
+ * locate clients.
  * 
  * @author Nico
  * 
@@ -18,40 +18,29 @@ import org.hive2hive.core.network.data.NetworkContent;
 public class Locations extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private final String userId;
-	private final Set<LocationEntry> locationsEntry;
+	private final Set<PeerAddress> addresses;
 
 	public Locations(String userId) {
 		this.userId = userId;
-		this.locationsEntry = new HashSet<LocationEntry>();
+		this.addresses = new HashSet<PeerAddress>();
 	}
 
 	public String getUserId() {
 		return userId;
 	}
 
-	public void addEntry(LocationEntry entry) {
-		locationsEntry.add(entry);
+	public void addPeerAddress(PeerAddress address) {
+		addresses.add(address);
 	}
 
-	public void removeEntry(LocationEntry toRemove) {
-		locationsEntry.remove(toRemove);
-	}
-	
-	public void removeEntry(PeerAddress toRemove) {
-		LocationEntry removal = null;
-		for (LocationEntry online : locationsEntry) {
-			if (online.getAddress().equals(toRemove)) {
-				removal = online;
-				break;
-			}
-		}
-		locationsEntry.remove(removal);
+	public void removePeerAddress(PeerAddress toRemove) {
+		addresses.remove(toRemove);
 	}
 
-	public Set<LocationEntry> getLocationEntries() {
-		return locationsEntry;
+	public Set<PeerAddress> getPeerAddresses() {
+		return addresses;
 	}
 
 	@Override

@@ -5,8 +5,9 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.LocationEntry;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
@@ -57,8 +58,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		LocationEntry status = new LocationEntry(putter.getPeerAddress());
-		newLocations.addEntry(status);
+		newLocations.addPeerAddress(putter.getPeerAddress());
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
@@ -83,8 +83,8 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());
 
-		List<LocationEntry> onlinePeers = new ArrayList<LocationEntry>(found.getLocationEntries());
-		Assert.assertEquals(putter.getPeerAddress(), onlinePeers.get(0).getAddress());
+		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(found.getPeerAddresses());
+		Assert.assertEquals(putter.getPeerAddress(), onlinePeers.get(0));
 	}
 
 	@Test
@@ -97,8 +97,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		LocationEntry status = new LocationEntry(putter.getPeerAddress());
-		newLocations.addEntry(status);
+		newLocations.addPeerAddress(putter.getPeerAddress());
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
