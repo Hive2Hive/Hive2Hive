@@ -4,7 +4,7 @@ import java.security.PublicKey;
 import java.util.Collection;
 
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDirect;
+import net.tomp2p.futures.FutureSend;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -30,7 +30,7 @@ import org.hive2hive.core.network.messages.MessageManager;
  * 
  * @author Seppi
  */
-public class FutureRoutedListener extends BaseFutureAdapter<FutureDirect> {
+public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureRoutedListener.class);
 
@@ -58,7 +58,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureDirect> {
 	}
 
 	@Override
-	public void operationComplete(FutureDirect future) throws Exception {
+	public void operationComplete(FutureSend future) throws Exception {
 		AcceptanceReply reply = extractAcceptanceReply(future);
 		if (reply == AcceptanceReply.OK) {
 			// notify the listener about the success of sending the message
@@ -86,7 +86,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureDirect> {
 	 *            a future
 	 * @return a reply showing the result of sending
 	 */
-	private AcceptanceReply extractAcceptanceReply(FutureDirect future) {
+	private AcceptanceReply extractAcceptanceReply(FutureSend future) {
 		String errorReason = "";
 		if (future.isSuccess()) {
 			Collection<Object> returndedObject = future.getRawDirectData2().values();
