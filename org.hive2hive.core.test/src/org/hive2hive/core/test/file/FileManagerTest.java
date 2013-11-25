@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.PersistentMetaData;
-import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
@@ -17,15 +16,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Test the file manager used for the H2H node.
+ * 
+ * @author Nico
+ * 
+ */
 public class FileManagerTest extends H2HJUnitTest {
 
 	private FileManager fileManager;
-	private FileTreeNode root;
-	private FileTreeNode child1;
-	private FileTreeNode child2;
-	private FileTreeNode dir1;
-	private FileTreeNode child3;
-	private FileTreeNode dir2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {

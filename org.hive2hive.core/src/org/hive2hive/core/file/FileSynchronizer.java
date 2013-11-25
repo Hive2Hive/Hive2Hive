@@ -1,7 +1,6 @@
 package org.hive2hive.core.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -60,8 +59,6 @@ public class FileSynchronizer {
 	 * @return
 	 */
 	public List<FileTreeNode> getDeletedLocally() {
-		// TODO check if file has been modified remotely --> then do not delete!
-
 		List<FileTreeNode> deletedLocally = new ArrayList<FileTreeNode>();
 
 		for (String path : before.keySet()) {
@@ -72,8 +69,12 @@ public class FileSynchronizer {
 				// test whether it is in the user profile
 				FileTreeNode node = userProfile.getFileByPath(path);
 				if (node != null) {
-					logger.info("File " + path + " has been deleted locally during absence");
-					deletedLocally.add(node);
+					// file is still in user profile
+					if (H2HEncryptionUtil.compareMD5(node.getMD5(), before.get(path))) {
+						// file has not been modified remotely, delete it
+						logger.debug("File " + path + " has been deleted locally during absence");
+						deletedLocally.add(node);
+					}
 				}
 			}
 		}
@@ -82,7 +83,7 @@ public class FileSynchronizer {
 		sortNodesPreorder(deletedLocally);
 		Collections.reverseOrder();
 
-		logger.debug("Found " + deletedLocally.size()
+		logger.info("Found " + deletedLocally.size()
 				+ " files/folders that have been deleted locally during absence");
 		return deletedLocally;
 	}
@@ -93,14 +94,15 @@ public class FileSynchronizer {
 	 * @return
 	 */
 	public List<File> getDeletedRemotely() {
-		// TODO check if file has been modified locally --> then do not delete!
-
 		List<File> deletedRemotely = new ArrayList<File>();
 
 		for (String path : now.keySet()) {
 			if (before.containsKey(path) && userProfile.getFileByPath(path) == null) {
 				// is on disk but deleted in the user profile
-				deletedRemotely.add(new File(fileManager.getRoot(), path));
+				if (H2HEncryptionUtil.compareMD5(before.get(path), now.get(path))) {
+					// only delete the file, if it was not modified locally
+					deletedRemotely.add(new File(fileManager.getRoot(), path));
+				}
 			}
 		}
 
@@ -119,21 +121,12 @@ public class FileSynchronizer {
 		List<File> addedLocally = new ArrayList<File>();
 
 		for (String path : now.keySet()) {
-			if (before.containsKey(path)) {
-				// skip, was here before
-				continue;
-			} else {
-				try {
-					// test whether it is in the user profile
-					FileTreeNode node = userProfile.getFileByPath(path);
-					if (node == null) {
-						throw new FileNotFoundException();
-					}
-				} catch (FileNotFoundException e) {
-					// not in profile --> it has been added locally
-					logger.debug("File " + path + " has been added locally during absence");
-					addedLocally.add(new File(fileManager.getRoot(), path));
-				}
+			// test whether it is in the user profile
+			FileTreeNode node = userProfile.getFileByPath(path);
+			if (node == null) {
+				// not in profile --> it has been added locally
+				logger.debug("File " + path + " has been added locally during absence");
+				addedLocally.add(new File(fileManager.getRoot(), path));
 			}
 		}
 
@@ -156,7 +149,7 @@ public class FileSynchronizer {
 		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
 			FileTreeNode top = fileStack.pop();
-			if (before.containsKey(top.getFullPath())) {
+			if (now.containsKey(top.getFullPath())) {
 				// was here before and is still here --> nothing to add
 				logger.trace("File " + top.getFullPath() + " was already here");
 			} else {
@@ -203,7 +196,6 @@ public class FileSynchronizer {
 
 			// has been modified --> check if profile has same md5 as 'before'. If not, there are three
 			// different versions. Thus, the profile wins.
-			// TODO handle conflicts if three different versions
 			if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))
 					&& !H2HEncryptionUtil.compareMD5(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File " + path + " has been updated locally during absence");

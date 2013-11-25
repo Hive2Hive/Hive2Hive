@@ -101,12 +101,12 @@ public class ProcessManagerTest extends H2HJUnitTest {
 
 			@Override
 			public void run() {
-				
+
 			}
 
 			@Override
 			public void addListener(IProcessListener listener) {
-				
+
 			}
 
 			@Override
@@ -116,7 +116,6 @@ public class ProcessManagerTest extends H2HJUnitTest {
 
 			@Override
 			public ProcessContext getContext() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
@@ -125,7 +124,7 @@ public class ProcessManagerTest extends H2HJUnitTest {
 			}
 		};
 	}
-	
+
 	@AfterClass
 	public static void cleanAfterClass() {
 		afterClass();

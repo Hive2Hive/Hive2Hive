@@ -184,16 +184,6 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertEquals(2, updatedRemotely.size());
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
 		Assert.assertTrue(updatedRemotely.contains(node2f));
-
-		// change file on disk as well --> should occur as updated remotely since there is a conflict and the
-		// profile wins
-		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
-
-		fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		updatedRemotely = fileSynchronizer.getUpdatedRemotely();
-		Assert.assertEquals(2, updatedRemotely.size());
-		Assert.assertTrue(updatedRemotely.contains(node2f));
-		Assert.assertTrue(updatedRemotely.contains(node1f2));
 	}
 
 	@Test
@@ -206,5 +196,74 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertEquals(0, fileSynchronizer.getAddedLocally().size());
 		Assert.assertEquals(0, fileSynchronizer.getDeletedRemotely().size());
 		Assert.assertEquals(0, fileSynchronizer.getDeletedLocally().size());
+	}
+
+	@Test
+	public void testConflictUpdateLocallyDeleteRemotely() throws IOException {
+		// change a file locally
+		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+
+		// delete the same file remotely
+		root.removeChild(node1f2);
+
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
+		List<File> addedLocally = fileSynchronizer.getAddedLocally();
+		Assert.assertEquals(1, addedLocally.size());
+		Assert.assertTrue(addedLocally.contains(file1f2));
+
+		List<File> deletedRemotely = fileSynchronizer.getDeletedRemotely();
+		Assert.assertTrue(deletedRemotely.isEmpty());
+	}
+
+	@Test
+	public void testConflictUpdateRemotelyDeleteLocally() throws IOException {
+		// delete a file locally
+		file1f2.delete();
+
+		// modify the same file remotely
+		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
+		List<FileTreeNode> addedRemotely = fileSynchronizer.getAddedRemotely();
+		Assert.assertEquals(1, addedRemotely.size());
+		Assert.assertTrue(addedRemotely.contains(node1f2));
+
+		List<FileTreeNode> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
+		Assert.assertTrue(updatedRemotely.isEmpty());
+
+		List<FileTreeNode> deletedLocally = fileSynchronizer.getDeletedLocally();
+		Assert.assertTrue(deletedLocally.isEmpty());
+	}
+
+	@Test
+	public void testConflictUpdateRemotelyAndLocally() throws IOException {
+		// change a file in the user profile
+		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+
+		// change file on disk as well --> should occur as updated remotely since there is a conflict and the
+		// profile wins
+		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
+		List<FileTreeNode> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
+		Assert.assertEquals(1, updatedRemotely.size());
+		Assert.assertTrue(updatedRemotely.contains(node1f2));
+
+		List<File> updatedLocally = fileSynchronizer.getUpdatedLocally();
+		Assert.assertTrue(updatedLocally.isEmpty());
+	}
+
+	@Test
+	public void testConflictDeleteRemotelyAndLocally() throws IOException {
+		// remove a file in the user profile and on disk
+		root.removeChild(node1f2);
+		file1f2.delete();
+
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
+		List<FileTreeNode> deletedRemotely = fileSynchronizer.getDeletedLocally();
+		Assert.assertTrue(deletedRemotely.isEmpty());
+
+		List<File> updatedLocally = fileSynchronizer.getDeletedRemotely();
+		Assert.assertTrue(updatedLocally.isEmpty());
 	}
 }
