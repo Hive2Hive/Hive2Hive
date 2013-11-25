@@ -64,8 +64,6 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 			}
 		}
 
-		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
-		// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
 	}
 }

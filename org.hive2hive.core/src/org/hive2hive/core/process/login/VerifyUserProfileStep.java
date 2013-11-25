@@ -35,10 +35,6 @@ public class VerifyUserProfileStep extends ProcessStep {
 			// mismatch the userId (should never happen)
 			getProcess().stop("UserId does not match the one in the profile.");
 		} else {
-
-			// TODO check whether this step setting is necessary here. Alternative: only parent-process knows
-			// next
-			// step and this GetUserProfileStep calls getProcess().stop() and initiates a rollback
 			getProcess().setNextStep(locationsStep);
 		}
 	}

@@ -1,7 +1,9 @@
 package org.hive2hive.core;
 
+import java.io.File;
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.security.EncryptionUtil;
 
 public interface H2HConstants {
@@ -14,6 +16,9 @@ public interface H2HConstants {
 
 	// the configuration file name (lying in the root directory of the node)
 	public static final String META_FILE_NAME = "h2h.conf";
+
+	// the trash directory, where deleted files are moved
+	public static final File TRASH_DIRECTORY = new File(FileUtils.getTempDirectory(), "H2HTrash");
 
 	// configurations for network messages
 	public static final int MAX_MESSAGE_SENDING = 5;
