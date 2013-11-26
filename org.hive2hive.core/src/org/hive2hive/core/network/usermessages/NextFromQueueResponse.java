@@ -1,9 +1,10 @@
-package org.hive2hive.core.network.messages.usermessages.routed;
+package org.hive2hive.core.network.usermessages;
 
 import java.io.Serializable;
 
 import org.hive2hive.core.network.messages.BaseMessage;
 
+@Deprecated
 public final class NextFromQueueResponse implements Serializable {
 
 	private static final long serialVersionUID = -2850130135183154805L;

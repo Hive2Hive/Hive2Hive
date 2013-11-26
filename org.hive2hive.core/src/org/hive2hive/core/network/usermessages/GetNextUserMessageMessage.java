@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.messages.usermessages.routed;
+package org.hive2hive.core.network.usermessages;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
@@ -15,6 +15,7 @@ import org.hive2hive.core.utils.SerializableLinkedList;
  * @author Christian
  * 
  */
+@Deprecated
 public class GetNextUserMessageMessage extends RoutedRequestMessage {
 
 	// TODO this might actually not be a user message

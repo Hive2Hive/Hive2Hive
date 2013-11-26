@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.messages.usermessages;
+package org.hive2hive.core.network.usermessages;
 
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
