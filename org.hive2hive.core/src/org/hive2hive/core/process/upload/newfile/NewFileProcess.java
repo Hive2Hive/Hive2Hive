@@ -3,6 +3,7 @@ package org.hive2hive.core.process.upload.newfile;
 import java.io.File;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
@@ -42,6 +43,12 @@ public class NewFileProcess extends Process {
 		// 5. update the user profile
 		logger.debug("Adding a new file/folder to the DHT");
 		setNextStep(new PutNewFileChunkStep(file, context));
+	}
+
+	public NewFileProcess(File file, H2HSession session, NetworkManager networkManager)
+			throws IllegalFileLocation {
+		this(file, session.getProfileManager(), networkManager, session.getFileManager(), session
+				.getFileConfiguration());
 	}
 
 	@Override

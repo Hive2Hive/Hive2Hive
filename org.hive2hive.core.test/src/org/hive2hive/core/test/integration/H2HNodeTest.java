@@ -2,10 +2,12 @@ package org.hive2hive.core.test.integration;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HNode;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -31,7 +33,7 @@ import org.junit.Test;
  */
 public class H2HNodeTest extends H2HJUnitTest {
 
-	private static final int NETWORK_SIZE = 10;
+	private static final int NETWORK_SIZE = 5;
 	private static List<IH2HNode> network;
 	private final Random random = new Random();
 
@@ -84,8 +86,14 @@ public class H2HNodeTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException {
-		File rootDirectory = loggedInNode.getRootDirectory();
+	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		// use reflections to get the private field 'rootPath'
+		Field privateRootDir = H2HNode.class.getDeclaredField("rootPath");
+		privateRootDir.setAccessible(true);
+		String fieldValue = (String) privateRootDir.get((H2HNode) loggedInNode);
+
+		File rootDirectory = new File(fieldValue);
 		File testFile = new File(rootDirectory, "test-file");
 		FileUtils.write(testFile, "Hello World");
 
@@ -94,7 +102,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		process.addListener(listener);
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(2000);
+		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
@@ -105,7 +113,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		process.addListener(listener);
 
 		// wait for the process to finish
-		waiter = new H2HWaiter(20);
+		waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());

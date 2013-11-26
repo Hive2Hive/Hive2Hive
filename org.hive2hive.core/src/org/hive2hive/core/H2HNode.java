@@ -27,14 +27,12 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	private final int maxNumOfVersions;
 	private final int maxSizeAllVersions;
 	private final int chunkSize;
-	private final boolean autostartProcesses;
-	private final boolean isMasterPeer;
-	private final InetAddress bootstrapAddress;
+	private final String rootPath;
 
 	private final NetworkManager networkManager;
-	private final FileManager fileManager;
+	private final boolean autostartProcesses;
 
-	private UserProfileManager profileManager;
+	private H2HSession session;
 
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
 			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress, String rootPath) {
@@ -43,18 +41,15 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		this.maxSizeAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
 		this.autostartProcesses = autostartProcesses;
-		this.isMasterPeer = isMasterPeer;
-		this.bootstrapAddress = bootstrapAddress;
+		this.rootPath = rootPath;
 
 		// TODO set appropriate node ID
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
-		if (this.isMasterPeer) {
+		if (isMasterPeer) {
 			networkManager.connect();
 		} else {
-			networkManager.connect(this.bootstrapAddress);
+			networkManager.connect(bootstrapAddress);
 		}
-
-		fileManager = new FileManager(rootPath);
 	}
 
 	@Override
@@ -83,7 +78,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	private void validateSession() throws NoSessionException {
-		if (profileManager == null) {
+		if (session == null) {
 			throw new NoSessionException();
 		}
 	}
@@ -104,7 +99,11 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		loginProcess.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {
-				profileManager = new UserProfileManager(networkManager, credentials);
+				// create a session
+				UserProfileManager profileManager = new UserProfileManager(networkManager, credentials);
+				FileManager fileManager = new FileManager(rootPath);
+				session = new H2HSession(null /* TODO */, profileManager, H2HNode.this, fileManager);
+
 				LoginProcessContext loginContext = loginProcess.getContext();
 				startPostLoginProcess(loginContext.getLocations());
 			}
@@ -124,8 +123,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	private void startPostLoginProcess(Locations locations) {
 		// start the post login process
-		PostLoginProcess postLogin = new PostLoginProcess(profileManager, locations, networkManager,
-				fileManager, H2HNode.this);
+		PostLoginProcess postLogin = new PostLoginProcess(session, locations, networkManager);
 		postLogin.start();
 	}
 
@@ -136,11 +134,12 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		// TODO start a logout process
 		// TODO stop all other processes of this user
 
-		// quit the session
-		profileManager = null;
-
 		// write the current state to a meta file
-		fileManager.writePersistentMetaData();
+		session.getFileManager().writePersistentMetaData();
+
+		// quit the session
+		session = null;
+
 		return null;
 	}
 
@@ -150,8 +149,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
 		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
-		NewFileProcess uploadProcess = new NewFileProcess(file, profileManager, networkManager, fileManager,
-				this);
+		NewFileProcess uploadProcess = new NewFileProcess(file, session, networkManager);
 		if (autostartProcesses) {
 			uploadProcess.start();
 		}
@@ -163,8 +161,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	public IProcess update(File file) throws NoSessionException {
 		validateSession();
 
-		NewVersionProcess process = new NewVersionProcess(file, profileManager, networkManager, fileManager,
-				this);
+		NewVersionProcess process = new NewVersionProcess(file, session, networkManager);
 		if (autostartProcesses) {
 			process.start();
 		}
@@ -176,17 +173,12 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
 		validateSession();
 
-		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, profileManager);
+		DeleteFileProcess process = new DeleteFileProcess(file, session, networkManager);
 
 		if (autostartProcesses) {
 			process.start();
 		}
 
 		return process;
-	}
-
-	@Override
-	public File getRootDirectory() {
-		return fileManager.getRoot();
 	}
 }

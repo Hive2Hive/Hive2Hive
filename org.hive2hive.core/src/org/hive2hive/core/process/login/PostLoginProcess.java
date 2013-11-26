@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.login;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
@@ -35,6 +36,11 @@ public class PostLoginProcess extends Process {
 		context = new PostLoginProcessContext(this, profileManager, currentLocations, fileManager, fileConfig);
 
 		setNextStep(new ContactPeersStep());
+	}
+
+	public PostLoginProcess(H2HSession session, Locations locations, NetworkManager networkManager) {
+		this(session.getProfileManager(), locations, networkManager, session.getFileManager(), session
+				.getFileConfiguration());
 	}
 
 	@Override

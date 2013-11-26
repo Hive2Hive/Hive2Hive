@@ -62,14 +62,6 @@ public interface IH2HNode {
 	 */
 	IProcess delete(File file) throws IllegalArgumentException, NoSessionException;
 
-	/**
-	 * Returns the root directory of the H2HNode. The files of the user are synchronized there. Configure the
-	 * root directory with the {@link H2HNodeBuilder} when creating the node.
-	 * 
-	 * @return the root directory
-	 */
-	File getRootDirectory();
-
 	// TODO this must not be part of the H2H interface
 	void disconnect();
 }

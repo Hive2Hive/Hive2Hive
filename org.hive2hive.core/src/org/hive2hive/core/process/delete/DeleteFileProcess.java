@@ -3,6 +3,7 @@ package org.hive2hive.core.process.delete;
 import java.io.File;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -51,6 +52,10 @@ public class DeleteFileProcess extends Process {
 
 		// start by deleting the file
 		setNextStep(new DeleteFileOnDiskStep(file));
+	}
+
+	public DeleteFileProcess(File file, H2HSession session, NetworkManager networkManager) {
+		this(file, session.getFileManager(), networkManager, session.getProfileManager());
 	}
 
 	/**

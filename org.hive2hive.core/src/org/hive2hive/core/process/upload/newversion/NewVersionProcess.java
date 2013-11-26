@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -52,6 +53,11 @@ public class NewVersionProcess extends Process {
 		} else {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
+	}
+
+	public NewVersionProcess(File file, H2HSession session, NetworkManager networkManager) {
+		this(file, session.getProfileManager(), networkManager, session.getFileManager(), session
+				.getFileConfiguration());
 	}
 
 	@Override
