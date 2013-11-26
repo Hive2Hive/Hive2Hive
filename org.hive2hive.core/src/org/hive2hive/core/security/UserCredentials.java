@@ -14,13 +14,14 @@ public final class UserCredentials {
 	private final String userId;
 	private final String password;
 	private final String pin;
-	private final String profileLocationKey;
+
+	private final String locationCache;
 
 	public UserCredentials(String userId, String password, String pin) {
 		this.userId = userId;
 		this.password = password;
 		this.pin = pin;
-		this.profileLocationKey = generateProfileLocationKey();
+		this.locationCache = calculateLocationCache();
 	}
 
 	private String generateProfileLocationKey() {
@@ -49,6 +50,27 @@ public final class UserCredentials {
 	}
 
 	public String getProfileLocationKey() {
-		return profileLocationKey;
+		return locationCache;
+	}
+
+	/**
+	 * Calculates the location for this {@link UserCredentials}. Once calculated, the location gets cached and
+	 * directly returned on further invokes.
+	 * 
+	 * @return The location key associated with this credentials.
+	 */
+	private String calculateLocationCache() {
+
+		// concatenate PIN + PW + UserId
+		String appendage = new StringBuilder().append(pin).append(password).append(userId).toString();
+
+		// create fixed salt based on location
+		byte[] fixedSalt = PasswordUtil.generateFixedSalt(appendage.getBytes());
+
+		// hash the location
+		byte[] locationKey = PasswordUtil.generateHash(appendage.toCharArray(), fixedSalt);
+
+		String location = new String(locationKey, H2HConstants.ENCODING_CHARSET);
+		return location;
 	}
 }

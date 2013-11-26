@@ -31,7 +31,6 @@ public class PostLoginProcess extends Process {
 		// 1. ContactPeersStep (-> PutLocationsStep)
 		// 2. SynchronizeFilesStep
 		// if elected master:
-		// 3. GetUserMessageQueueStep
 		// 4. HandleUserMessageQueueStep
 		context = new PostLoginProcessContext(this, profileManager, currentLocations, fileManager, fileConfig);
 
