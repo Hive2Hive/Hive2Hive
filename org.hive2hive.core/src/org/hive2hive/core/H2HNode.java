@@ -102,10 +102,12 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 				// create a session
 				UserProfileManager profileManager = new UserProfileManager(networkManager, credentials);
 				FileManager fileManager = new FileManager(rootPath);
-				session = new H2HSession(null /* TODO */, profileManager, H2HNode.this, fileManager);
-				networkManager.setSession(session);
 
 				LoginProcessContext loginContext = loginProcess.getContext();
+				session = new H2HSession(loginContext.getUserProfile().getEncryptionKeys(), profileManager,
+						H2HNode.this, fileManager);
+				networkManager.setSession(session);
+
 				startPostLoginProcess(loginContext.getLocations());
 			}
 

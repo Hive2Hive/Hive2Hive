@@ -2,7 +2,6 @@ package org.hive2hive.core.process.login;
 
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.common.get.GetLocationsStep;
 
 /**
  * Verifies the answer of the @link{GetUserProfileStep}. If the user profile is not found or could not be
@@ -14,12 +13,12 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 public class VerifyUserProfileStep extends ProcessStep {
 
 	private final String userId;
-	private final GetLocationsStep locationsStep;
+	private final ProcessStep nextStep;
 
-	public VerifyUserProfileStep(String userId, GetLocationsStep locationsStep) {
+	public VerifyUserProfileStep(String userId, ProcessStep nextStep) {
 
 		this.userId = userId;
-		this.locationsStep = locationsStep;
+		this.nextStep = nextStep;
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class VerifyUserProfileStep extends ProcessStep {
 			// mismatch the userId (should never happen)
 			getProcess().stop("UserId does not match the one in the profile.");
 		} else {
-			getProcess().setNextStep(locationsStep);
+			getProcess().setNextStep(nextStep);
 		}
 	}
 

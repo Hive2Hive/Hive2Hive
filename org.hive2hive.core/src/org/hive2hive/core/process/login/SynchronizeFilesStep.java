@@ -113,7 +113,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
 			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId, handleUmQueueStep);
 			context.setUserMessageQueueStep(getUMQueueStep);
-			getProcess().setNextStep(getUMQueueStep);
+			// TODO set when step is implemented
+			// getProcess().setNextStep(getUMQueueStep);
+			getProcess().setNextStep(null);
 		} else {
 			// done with the post login process
 			getProcess().setNextStep(null);

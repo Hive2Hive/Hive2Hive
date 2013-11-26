@@ -24,8 +24,9 @@ public class LoginProcess extends Process {
 		// execution order:
 		// 1. GetUserProfileStep
 		// 2. VerifyUserProfileStep
-		// 3. GetLocationsStep: get the other client's locations
-		// 4. AddMyselfToLocationsStep: add this client to the locations map
+		// 3. GetPublicKeyStep
+		// 4. GetLocationsStep: get the other client's locations
+		// 5. AddMyselfToLocationsStep: add this client to the locations map
 
 		// TODO add myself to locations here or in PostLoginProcess?
 		AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(credentials.getUserId());

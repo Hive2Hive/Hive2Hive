@@ -36,8 +36,6 @@ public abstract class Process implements IProcess {
 		this.networkManager = networkManager;
 		this.pid = ProcessManager.getInstance().getNewPID();
 		this.state = ProcessState.INITIALIZING;
-
-		ProcessManager.getInstance().attachProcess(this);
 	}
 
 	/**
@@ -66,6 +64,7 @@ public abstract class Process implements IProcess {
 	public void start() {
 		if (state == ProcessState.INITIALIZING) {
 			state = ProcessState.RUNNING;
+			ProcessManager.getInstance().attachProcess(this);
 			new Thread(this).start();
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot start.");
@@ -162,7 +161,8 @@ public abstract class Process implements IProcess {
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
 
 		// start roll back from current step
-		currentStep.rollBack();
+		if (currentStep != null)
+			currentStep.rollBack();
 
 		// // rollback already executed steps
 		// Collections.reverse(executedSteps);
