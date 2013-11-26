@@ -3,7 +3,6 @@ package org.hive2hive.core.process.common.get;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -13,13 +12,14 @@ import org.hive2hive.core.process.ProcessStep;
  * @author Christian
  * 
  */
+@Deprecated
 public class GetUserMessageQueueStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserMessageQueueStep.class);
 
 	private final String userId;
 	private final ProcessStep nextStep;
-	private UserMessageQueue umQueue;
+//	private UserMessageQueue umQueue;
 
 	public GetUserMessageQueueStep(String userId, ProcessStep nextStep) {
 		this.userId = userId;
@@ -36,15 +36,11 @@ public class GetUserMessageQueueStep extends BaseGetProcessStep {
 		if (content == null) {
 			logger.debug("Did not find the user message queue.");
 		} else {
-			umQueue = (UserMessageQueue) content;
+//			umQueue = (UserMessageQueue) content;
 		}
 
 		// TODO check whether this step setting is necessary here. Alternative: only parent-process knows next
 		// step and this GetUserMessageQueueStep calls getProcess().stop() and initiates a rollback
 		getProcess().setNextStep(nextStep);
-	}
-
-	public UserMessageQueue getUserMessageQueue() {
-		return umQueue;
 	}
 }

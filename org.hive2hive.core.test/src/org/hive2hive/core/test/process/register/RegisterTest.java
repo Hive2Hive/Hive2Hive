@@ -10,7 +10,6 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
@@ -91,15 +90,15 @@ public class RegisterTest extends H2HJUnitTest {
 		// fresh location maps should be empty
 		Assert.assertTrue(locations.getPeerAddresses().isEmpty());
 
-		// verify the new user message queue
-		FutureGet getQueue = otherClient.getDataManager().getGlobal(credentials.getUserId(),
-				H2HConstants.USER_MESSAGE_QUEUE_KEY);
-		getQueue.awaitUninterruptibly();
-		getQueue.getFutureRequests().awaitUninterruptibly();
-		UserMessageQueue queue = (UserMessageQueue) getQueue.getData().object();
-		Assert.assertNotNull(queue);
-		// userId should match
-		Assert.assertEquals(credentials.getUserId(), queue.getUserId());
+//		// verify the new user message queue
+//		FutureGet getQueue = otherClient.getDataManager().getGlobal(credentials.getUserId(),
+//				H2HConstants.USER_MESSAGE_QUEUE_KEY);
+//		getQueue.awaitUninterruptibly();
+//		getQueue.getFutureRequests().awaitUninterruptibly();
+//		UserMessageQueue queue = (UserMessageQueue) getQueue.getData().object();
+//		Assert.assertNotNull(queue);
+//		// userId should match
+//		Assert.assertEquals(credentials.getUserId(), queue.getUserId());
 		// fresh queue should be empty
 		// TODO uncomment
 //		Assert.assertTrue(queue.getMessageQueue().isEmpty());

@@ -3,8 +3,8 @@ package org.hive2hive.core.process.register;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.UserMessageQueue;
 import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
 /**
@@ -19,8 +19,8 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 	private final String userId;
 	private final PublicKey publicKey;
 
-	protected PutPublicKeyStep(String userId, PublicKey publicKey) {
-		super(new PutUserMessageQueue(new UserMessageQueue(userId)));
+	protected PutPublicKeyStep(String userId, PublicKey publicKey, ProcessStep nextStep) {
+		super(nextStep);
 		this.userId = userId;
 		this.publicKey = publicKey;
 	}
