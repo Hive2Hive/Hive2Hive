@@ -11,18 +11,22 @@ import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
- * The base class of all UserMessage objects, representing an encrypted and signed message that is stored on
- * the receiving user's proxy.
+ * The base class of all {@link UserProfileTask}s.</br>
+ * An encrypted and signed task ({@link Runnable}) which is stored on
+ * the proxy node of the receiving user. This task will be stored in a “queue”-like data structure. This
+ * allows an asynchronous communication between users (i.e., between friends).</br>
+ * This task is used in case a client needs to update its profile< due to changes introduced by
+ * friends.
  * 
  * @author Christian
  * 
  */
-public abstract class UserMessage extends NetworkContent implements Runnable {
+public abstract class UserProfileTask extends NetworkContent implements Runnable {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(UserMessage.class);
-	
+	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileTask.class);
+
 	private static final long serialVersionUID = -773794512479641000L;
-	
+
 	private byte[] objectSignState; // serialized state of this object when signed
 	private byte[] signature;
 
@@ -41,6 +45,7 @@ public abstract class UserMessage extends NetworkContent implements Runnable {
 
 	/**
 	 * Verify this user message such that the sender can be uniquely identified.
+	 * 
 	 * @param senderPublicKey The public key of the assumed/accepted sender.
 	 */
 	public final boolean verify(PublicKey senderPublicKey) {
@@ -62,12 +67,12 @@ public abstract class UserMessage extends NetworkContent implements Runnable {
 	public final void run() {
 		execute();
 	}
-	
+
 	/**
 	 * The execution part of this user message.
 	 */
 	protected abstract void execute();
-	
+
 	public final byte[] getSignature() {
 		return signature;
 	}

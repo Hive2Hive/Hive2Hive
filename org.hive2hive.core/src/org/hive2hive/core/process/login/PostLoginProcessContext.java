@@ -52,9 +52,6 @@ public class PostLoginProcessContext extends ProcessContext {
 		this.umQueueStep = umQueueStep;
 	}
 
-	public GetUserMessageStep getGetUserMessageQueueStep() {
-		return umQueueStep;
-	}
 
 	public UserProfileManager getProfileManager() {
 		return profileManager;
