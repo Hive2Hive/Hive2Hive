@@ -50,5 +50,6 @@ public interface H2HConstants {
 	public static final EncryptionUtil.RSA_KEYLENGTH H2H_RSA_KEYLENGTH = EncryptionUtil.RSA_KEYLENGTH.BIT_512;
 	public static final EncryptionUtil.AES_KEYLENGTH H2H_AES_KEYLENGTH = EncryptionUtil.AES_KEYLENGTH.BIT_128;
 
-	public static final String UM_CONTENT_KEY_PREFIX = "USER-MESSAGE-PREFIX";
+	public static final String UM_DOMAIN = "USER-MESSAGE";
+	public static final String UM_CONTENT_KEY_PREFIX = "USER-MESSAGE";
 }
