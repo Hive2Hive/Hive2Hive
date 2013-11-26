@@ -71,8 +71,9 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getKeyPair()
-				.getPublic(), null) {
+
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getPublicKey(),
+				null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
@@ -129,8 +130,9 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getKeyPair()
-				.getPublic(), null) {
+
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getPublicKey(),
+				null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
@@ -172,13 +174,15 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		Process process = new Process(nodeA) {
 		};
-		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getKeyPair()
-				.getPublic(), null) {
+
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(message, nodeB.getPublicKey(),
+				null) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
-				nodeA.getDataManager().putLocal(nodeA.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+				nodeA.getDataManager().putLocal(nodeA.getNodeId(), contentKey,
+						new H2HTestData(receivedSecret));
 				// step finished go further
 				getProcess().setNextStep(nextStep);
 			}
@@ -205,7 +209,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey))
+				.getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}

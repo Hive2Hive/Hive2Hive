@@ -90,7 +90,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 		// the process step is expecting a response
 		contactMsg.setCallBackHandler(this);
 		// send direct
-		getNetworkManager().sendDirect(contactMsg, getNetworkManager().getKeyPair().getPublic(),
+		getNetworkManager().sendDirect(contactMsg, getNetworkManager().getPublicKey(),
 				new ContactPeerMessageListener(address));
 	}
 

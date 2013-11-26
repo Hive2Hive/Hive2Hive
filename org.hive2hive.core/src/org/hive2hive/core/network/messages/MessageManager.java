@@ -103,8 +103,7 @@ public final class MessageManager {
 	 * @param listener
 	 *            a listener which is interested in the result of sending
 	 */
-	public void sendDirect(BaseDirectMessage message, PublicKey targetPublicKey,
-			IBaseMessageListener listener) {
+	public void sendDirect(BaseDirectMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
 		if (message.getTargetAddress() == null)
 			throw new IllegalArgumentException("target address cannot be null");
 		if (targetPublicKey == null)
@@ -126,7 +125,8 @@ public final class MessageManager {
 		futureResponse.addListener(new FutureDirectListener(listener, message, targetPublicKey,
 				networkManager));
 
-		logger.debug(String.format("Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
+		logger.debug(String.format(
+				"Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
 				message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
 	}
 
@@ -179,12 +179,12 @@ public final class MessageManager {
 	 */
 	private void setSenderPublicKeyIfNeeded(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
-			message.setSenderPublicKey(networkManager.getKeyPair().getPublic());
+			message.setSenderPublicKey(networkManager.getPublicKey());
 		}
 	}
 
 	private HybridEncryptedContent encryptMessage(BaseMessage message, PublicKey targetPublicKey) {
-		
+
 		// asymmetrically encrypt message
 		byte[] messageBytes = EncryptionUtil.serializeObject(message);
 		try {

@@ -74,7 +74,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message, nodeB.getKeyPair().getPublic(), new TestBaseMessageListener());
+		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -86,7 +86,8 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey))
+				.getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}
@@ -113,7 +114,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
 		// send message
-		nodeA.send(message, nodeB.getKeyPair().getPublic(), new TestBaseMessageListener());
+		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -125,7 +126,8 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey)).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey))
+				.getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}

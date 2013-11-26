@@ -58,7 +58,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 		// send message
 
-		nodeA.send(message, nodeB.getKeyPair().getPublic(), new TestBaseMessageListener());
+		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
@@ -93,7 +93,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
 				new H2HTestData(data));
 		// send message
-		nodeA.send(message, nodeB.getKeyPair().getPublic(), new TestBaseMessageListener());
+		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
 
 		// wait till message gets handled
 		// this might need some time

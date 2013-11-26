@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HNodeBuilder;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -72,11 +73,12 @@ public class NetworkTestUtil {
 	 * Generate and assign public/private key pairs to the nodes.
 	 * 
 	 * @param network
-	 *            list containing all nodes which has to be disconnected.
+	 *            list containing all nodes which have different key pairs
 	 */
 	public static void createKeyPairs(List<NetworkManager> network) {
 		for (NetworkManager node : network) {
-			node.setKeyPair(EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH));
+			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+			node.setSession(new H2HSession(keyPair, null, null, null));
 		}
 	}
 
@@ -84,12 +86,13 @@ public class NetworkTestUtil {
 	 * Generate and assign a public/private key pair to all nodes.
 	 * 
 	 * @param network
-	 *            list containing all nodes which has to be disconnected.
+	 *            list containing all nodes which need to have the same key pair
 	 */
 	public static void createSameKeyPair(List<NetworkManager> network) {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		H2HSession session = new H2HSession(keyPair, null, null, null);
 		for (NetworkManager node : network) {
-			node.setKeyPair(keyPair);
+			node.setSession(session);
 		}
 	}
 

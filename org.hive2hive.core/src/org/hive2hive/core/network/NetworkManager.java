@@ -1,11 +1,11 @@
 package org.hive2hive.core.network;
 
 import java.net.InetAddress;
-import java.security.KeyPair;
 import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -30,7 +30,14 @@ public class NetworkManager {
 	private final MessageManager messageManager;
 	private final DataManager dataManager;
 
-	private KeyPair keyPair;
+	private H2HSession session;
+
+	public NetworkManager(String nodeId) {
+		this.nodeId = nodeId;
+		this.connection = new Connection(nodeId, this);
+		this.messageManager = new MessageManager(this);
+		this.dataManager = new DataManager(this);
+	}
 
 	public String getNodeId() {
 		return nodeId;
@@ -48,19 +55,27 @@ public class NetworkManager {
 		return getConnection().getPeer().getPeerAddress();
 	}
 
-	public KeyPair getKeyPair() {
-		return keyPair;
+	/**
+	 * If a user logged in, set the session in order to receive messages
+	 */
+	public void setSession(H2HSession session) {
+		this.session = session;
 	}
 
-	public void setKeyPair(KeyPair keyPair) {
-		this.keyPair = keyPair;
+	/**
+	 * Returns the session of the currently logged in user
+	 */
+	public H2HSession getSession() {
+		return session;
 	}
 
-	public NetworkManager(String nodeId) {
-		this.nodeId = nodeId;
-		this.connection = new Connection(nodeId, this);
-		this.messageManager = new MessageManager(this);
-		this.dataManager = new DataManager(this);
+	/**
+	 * Helper method that returns the public key of the currently logged in user
+	 */
+	public PublicKey getPublicKey() {
+		if (session == null)
+			return null;
+		return session.getKeyPair().getPublic();
 	}
 
 	/**

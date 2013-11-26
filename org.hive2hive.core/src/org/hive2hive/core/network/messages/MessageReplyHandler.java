@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.messages;
 
+import java.security.KeyPair;
+
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
@@ -36,7 +38,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			return null;
 		}
 
-		if (networkManager.getKeyPair() == null) {
+		if (networkManager.getSession() == null) {
 			logger.warn("Currently no user logged in! Keys for decryption needed.");
 			return AcceptanceReply.FAILURE;
 		}
@@ -45,8 +47,8 @@ public class MessageReplyHandler implements ObjectDataReply {
 		HybridEncryptedContent encryptedMessage = (HybridEncryptedContent) request;
 		byte[] decryptedMessage = null;
 		try {
-			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, networkManager.getKeyPair()
-					.getPrivate());
+			KeyPair keys = networkManager.getSession().getKeyPair();
+			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, keys.getPrivate());
 		} catch (Exception e) {
 			logger.warn("Decryption of message failed.");
 			return AcceptanceReply.FAILURE_DECRYPTION;

@@ -103,6 +103,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 				UserProfileManager profileManager = new UserProfileManager(networkManager, credentials);
 				FileManager fileManager = new FileManager(rootPath);
 				session = new H2HSession(null /* TODO */, profileManager, H2HNode.this, fileManager);
+				networkManager.setSession(session);
 
 				LoginProcessContext loginContext = loginProcess.getContext();
 				startPostLoginProcess(loginContext.getLocations());
@@ -139,6 +140,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 		// quit the session
 		session = null;
+		networkManager.setSession(null);
 
 		return null;
 	}
