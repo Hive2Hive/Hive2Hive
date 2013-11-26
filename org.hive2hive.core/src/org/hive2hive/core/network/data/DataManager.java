@@ -19,7 +19,6 @@ import org.hive2hive.core.network.data.futures.FutureGetUserMessageListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FuturePutUserMessageListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
-import org.hive2hive.core.network.messages.usermessages.UserMessageContainer;
 
 /**
  * This class offers an interface for storing into and loading from the network.
@@ -85,7 +84,7 @@ public class DataManager {
 		}
 	}
 
-	public void putUserMessage(String locationKey, Number160 contentKey, UserMessageContainer content,
+	public void putUserMessage(String locationKey, Number160 contentKey, NetworkContent content,
 			IPutListener listener) {
 		logger.debug(String.format("User message put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
