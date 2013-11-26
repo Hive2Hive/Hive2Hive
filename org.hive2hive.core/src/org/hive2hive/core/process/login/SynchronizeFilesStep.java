@@ -18,7 +18,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
-import org.hive2hive.core.process.common.get.GetUserMessageQueueStep;
+import org.hive2hive.core.process.common.get.GetUserMessageStep;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.manager.ProcessManager;
@@ -110,11 +110,13 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		if (context.getIsDefinedAsMaster()) {
 			String userId = profileManager.getUserCredentials().getUserId();
-			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
-			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId, handleUmQueueStep);
-			context.setUserMessageQueueStep(getUMQueueStep);
+			
+			
 			// TODO set when step is implemented
-			// getProcess().setNextStep(getUMQueueStep);
+//			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
+//			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId, handleUmQueueStep);
+//			context.setUserMessageQueueStep(getUMQueueStep);
+//			 getProcess().setNextStep(getUMQueueStep);
 			getProcess().setNextStep(null);
 		} else {
 			// done with the post login process
