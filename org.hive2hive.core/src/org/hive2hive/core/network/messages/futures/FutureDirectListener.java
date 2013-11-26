@@ -1,11 +1,9 @@
 package org.hive2hive.core.network.messages.futures;
 
 import java.security.PublicKey;
-import java.util.List;
 
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureResponse;
-import net.tomp2p.message.Buffer;
+import net.tomp2p.futures.FutureDirect;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -36,7 +34,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  * 
  * @author Seppi
  */
-public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
+public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureDirectListener.class);
 
@@ -66,7 +64,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
 	}
 
 	@Override
-	public void operationComplete(FutureResponse future) throws Exception {
+	public void operationComplete(FutureDirect future) throws Exception {
 		AcceptanceReply reply = extractAcceptanceReply(future);
 		if (reply == AcceptanceReply.OK) {
 			// notify the listener about the success of sending the message
@@ -103,32 +101,22 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureResponse> {
 	 *            a future
 	 * @return a reply showing the result of sending
 	 */
-	private AcceptanceReply extractAcceptanceReply(FutureResponse future) {
+	private AcceptanceReply extractAcceptanceReply(FutureDirect future) {
 		String errorReason = "";
 		if (future.isSuccess()) {
-			List<Buffer> returnedBuffer = future.getResponse().getBufferList();
-			if (returnedBuffer == null) {
-				errorReason = "Returned buffer is null.";
-			} else if (returnedBuffer.isEmpty()) {
-				errorReason = "Returned buffer is empty.";
-			} else {
-				Buffer firstReturnedBuffer = returnedBuffer.iterator().next();
-				if (firstReturnedBuffer == null) {
-					errorReason = "First returned buffer is null.";
+			Object responseObject;
+			try {
+				responseObject = future.object();
+				if (responseObject == null) {
+					errorReason = "Returned object is null";
+				} else if (responseObject instanceof AcceptanceReply) {
+					AcceptanceReply reply = (AcceptanceReply) responseObject;
+					return reply;
 				} else {
-					Object responseObject;
-					try {
-						responseObject = firstReturnedBuffer.object();
-						if (responseObject instanceof AcceptanceReply) {
-							AcceptanceReply reply = (AcceptanceReply) responseObject;
-							return reply;
-						} else {
-							errorReason = "The returned object was not of type AcceptanceReply!";
-						}
-					} catch (Exception e) {
-						errorReason = "Exception occured while getting the object.";
-					}
+					errorReason = "The returned object was not of type AcceptanceReply!";
 				}
+			} catch (Exception e) {
+				errorReason = "Exception occured while getting the object.";
 			}
 			logger.error(String.format("A failure while sending a message occured. reason = '%s'",
 					errorReason));

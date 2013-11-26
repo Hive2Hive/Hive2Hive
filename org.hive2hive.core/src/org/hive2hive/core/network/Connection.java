@@ -100,7 +100,7 @@ public class Connection {
 		if (!createPeer())
 			return false;
 
-		FutureDiscover futureDiscover = peer.discover().setInetAddress(bootstrapInetAddress).setPorts(port)
+		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapInetAddress).ports(port)
 				.start();
 		futureDiscover.awaitUninterruptibly();
 

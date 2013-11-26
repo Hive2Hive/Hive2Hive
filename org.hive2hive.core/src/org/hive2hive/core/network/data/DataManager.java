@@ -10,12 +10,16 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
+import org.hive2hive.core.network.data.futures.FutureGetUserMessageListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
+import org.hive2hive.core.network.data.futures.FuturePutUserMessageListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
+import org.hive2hive.core.network.messages.usermessages.UserMessageContainer;
 
 /**
  * This class offers an interface for storing into and loading from the network.
@@ -81,6 +85,26 @@ public class DataManager {
 		}
 	}
 
+	public void putUserMessage(String locationKey, Number160 contentKey, UserMessageContainer content,
+			IPutListener listener) {
+		logger.debug(String.format("User message put key = '%s' content key = '%s'", locationKey, contentKey));
+		try {
+			Data data = new Data(content);
+			data.ttlSeconds(content.getTimeToLive());
+			FuturePut putFuture = getPeer().put(Number160.createHash(locationKey))
+					.setDomainKey(Number160.createHash(H2HConstants.UM_DOMAIN)).setData(contentKey, data)
+					.start();
+			putFuture.addListener(new FuturePutUserMessageListener(locationKey, contentKey, content,
+					listener, this));
+		} catch (IOException e) {
+			logger.error(String.format(
+					"User message put failed. location key = '%s' content key = '%s' exception = '%s'",
+					locationKey, contentKey, e.getMessage()));
+			if (listener != null)
+				listener.onPutFailure();
+		}
+	}
+
 	public void getGlobal(String locationKey, String contentKey, IGetListener listener) {
 		getGlobal(locationKey, contentKey, TOMP2P_DEFAULT_KEY, listener);
 	}
@@ -99,6 +123,13 @@ public class DataManager {
 				locationKey, contentKey, versionKey));
 		return getPeer().get(Number160.createHash(locationKey))
 				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
+	}
+
+	public void getNextUserMessage(String locationKey, IGetUserMessageListener listener) {
+		logger.debug(String.format("get next user message location key = '%s'", locationKey));
+		// TODO get data with smallest content key
+		FutureGet futureGet = getPeer().get(Number160.createHash(locationKey)).setDomainKey(Number160.createHash(H2HConstants.UM_DOMAIN)).start();
+		futureGet.addListener(new FutureGetUserMessageListener(locationKey, listener));
 	}
 
 	public NetworkContent getLocal(String locationKey, String contentKey) {

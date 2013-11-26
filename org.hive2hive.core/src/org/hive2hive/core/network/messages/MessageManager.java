@@ -9,6 +9,7 @@ import javax.crypto.IllegalBlockSizeException;
 
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
+import net.tomp2p.futures.FutureSend;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 
@@ -76,11 +77,11 @@ public final class MessageManager {
 			return;
 
 		// send message to the peer which is responsible for the given key
-		FutureDirect futureDirect = networkManager.getConnection().getPeer()
+		FutureSend futureSend = networkManager.getConnection().getPeer()
 				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
 				.setRequestP2PConfiguration(createSendingConfiguration()).start();
 		// attach a future listener to log, handle and notify events
-		futureDirect
+		futureSend
 				.addListener(new FutureRoutedListener(listener, message, targetPublicKey, networkManager));
 
 		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
@@ -119,10 +120,10 @@ public final class MessageManager {
 			return;
 
 		// send message directly to the peer with the given peer address
-		FutureResponse futureResponse = networkManager.getConnection().getPeer()
+		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
-		futureResponse.addListener(new FutureDirectListener(listener, message, targetPublicKey,
+		futureDirect.addListener(new FutureDirectListener(listener, message, targetPublicKey,
 				networkManager));
 
 		logger.debug(String.format(
