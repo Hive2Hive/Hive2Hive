@@ -1,6 +1,7 @@
 package org.hive2hive.core;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
 
 import net.tomp2p.peers.Number160;
@@ -10,6 +11,16 @@ import org.hive2hive.core.security.EncryptionUtil;
 
 public interface H2HConstants {
 
+	// H2HNode default values
+	public static final int DEFAULT_MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+	public static final int DEFAULT_MAX_NUM_OF_VERSIONS = 100;
+	public static final int DEFAULT_MAX_SIZE_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE * DEFAULT_MAX_NUM_OF_VERSIONS;
+	public static final int DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1 MB
+	public static final boolean DEFAULT_AUTOSTART_PROCESSES = true;
+	public static final boolean DEFAULT_IS_MASTER_PEER = false;
+	public static final InetAddress DEFAULT_BOOTSTRAP_ADDRESS = null;
+	public static final String DEFAULT_ROOT_PATH = new File(System.getProperty("user.home"), "Hive2Hive").getAbsolutePath();
+	
 	// standard port for the hive2hive network
 	public static final int H2H_PORT = 4622;
 

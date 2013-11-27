@@ -33,8 +33,7 @@ public class ConsoleMenu {
 		}
 		
 		if (chosen > items.size() || chosen < 1){
-			System.out.println("Invalid option.\nPress enter to continue...");
-			input.nextLine();
+			System.out.println("Invalid option. Press enter to continue...");
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);

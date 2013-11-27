@@ -1,6 +1,7 @@
 package org.hive2hive.core;
 
 import java.io.File;
+import java.net.InetAddress;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -16,7 +17,7 @@ import org.hive2hive.core.security.UserCredentials;
  * 
  */
 public interface IH2HNode {
-
+	
 	/**
 	 * Initiates and returns a register process.
 	 * 
@@ -64,4 +65,20 @@ public interface IH2HNode {
 
 	// TODO this must not be part of the H2H interface
 	void disconnect();
+	
+	public IH2HNode setMaxFileSize(int maxFileSize);
+
+	public IH2HNode setMaxNumOfVersions(int maxNumOfVersions);
+
+	public IH2HNode setMaxSizeAllVersions(int maxSizeAllVersions);
+
+	public IH2HNode setChunkSize(int chunkSize);
+
+	public IH2HNode setAutostartProcesses(boolean autostart);
+
+	public IH2HNode setMaster(boolean isMaster);
+
+	public IH2HNode setBootstrapAddress(InetAddress bootstrapAddress);
+
+	public IH2HNode setRootPath(String rootPath);
 }
