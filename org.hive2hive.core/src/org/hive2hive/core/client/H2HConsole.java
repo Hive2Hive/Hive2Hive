@@ -165,11 +165,15 @@ public class H2HConsole extends WindowAdapter implements WindowListener, Runnabl
 		return input;
 	}
 
-	private void consoleAppend(String text) {
+	public void consoleAppend(String text) {
 		textArea.append(text);
 		textArea.setCaretPosition(textArea.getDocument().getLength());
 	}
-
+	
+	public void clear() {
+		textArea.setText("");
+	}
+	
 	@Override
 	public void windowClosed(WindowEvent e) {
 		
