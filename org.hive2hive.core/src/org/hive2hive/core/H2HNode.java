@@ -23,24 +23,39 @@ import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
-	private final int maxFileSize;
-	private final int maxNumOfVersions;
-	private final int maxSizeAllVersions;
-	private final int chunkSize;
-	private final String rootPath;
+	private int maxFileSize;
+	private int maxNumOfVersions;
+	private int maxSizeAllVersions;
+	private int chunkSize;
+	private boolean autostartProcesses;
+	private boolean isMasterPeer;
+	private InetAddress bootstrapAddress;
+	private String rootPath;
 
 	private final NetworkManager networkManager;
-	private final boolean autostartProcesses;
 
 	private H2HSession session;
 
+	/**
+	 * Configures an instance of {@link H2HNode}. Use {@link H2HNodeBuilder} to create specific types of instances with specific values.
+	 * @param maxFileSize
+	 * @param maxNumOfVersions
+	 * @param maxSizeAllVersions
+	 * @param chunkSize
+	 * @param autostartProcesses
+	 * @param isMasterPeer
+	 * @param bootstrapAddress
+	 * @param rootPath
+	 */
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
 			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress, String rootPath) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
+		this.isMasterPeer = isMasterPeer;
 		this.autostartProcesses = autostartProcesses;
+		this.bootstrapAddress = bootstrapAddress;
 		this.rootPath = rootPath;
 
 		// TODO set appropriate node ID
@@ -50,26 +65,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		} else {
 			networkManager.connect(bootstrapAddress);
 		}
-	}
-
-	@Override
-	public int getMaxFileSize() {
-		return maxFileSize;
-	}
-
-	@Override
-	public int getMaxNumOfVersions() {
-		return maxNumOfVersions;
-	}
-
-	@Override
-	public int getMaxSizeAllVersions() {
-		return maxSizeAllVersions;
-	}
-
-	@Override
-	public int getChunkSize() {
-		return chunkSize;
 	}
 
 	@Override
@@ -184,5 +179,73 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		}
 
 		return process;
+	}
+
+	@Override
+	public H2HNode setMaxFileSize(int maxFileSize) {
+		this.maxFileSize = maxFileSize;
+		return this;
+	}
+
+	@Override
+	public H2HNode setMaxNumOfVersions(int maxNumOfVersions) {
+		this.maxNumOfVersions = maxNumOfVersions;
+		return this;
+	}
+
+	@Override
+	public H2HNode setMaxSizeAllVersions(int maxSizeAllVersions) {
+		this.maxSizeAllVersions = maxSizeAllVersions;
+		return this;
+	}
+
+	@Override
+	public H2HNode setChunkSize(int chunkSize) {
+		this.chunkSize = chunkSize;
+		return this;
+	}
+
+	@Override
+	public H2HNode setAutostartProcesses(boolean autostartProcesses) {
+		this.autostartProcesses = autostartProcesses;
+		return this;
+	}
+
+	@Override
+	public H2HNode setMaster(boolean isMasterPeer) {
+		this.isMasterPeer = isMasterPeer;
+		return this;
+	}
+
+	@Override
+	public H2HNode setBootstrapAddress(InetAddress bootstrapAddress) {
+		this.bootstrapAddress = bootstrapAddress;
+		return this;
+	}
+
+	@Override
+	public H2HNode setRootPath(String rootPath) {
+		this.rootPath = rootPath;
+		return this;
+	}
+	
+	@Override
+	public int getMaxFileSize() {
+		return maxFileSize;
+	}
+
+	@Override
+	public int getMaxNumOfVersions() {
+		return maxNumOfVersions;
+	}
+
+	@Override
+	public int getMaxSizeAllVersions() {
+		return maxSizeAllVersions;
+	}
+
+	@Override
+	public int getChunkSize() {
+		return chunkSize;
 	}
 }

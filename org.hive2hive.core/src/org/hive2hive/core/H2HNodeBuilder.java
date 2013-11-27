@@ -1,69 +1,22 @@
 package org.hive2hive.core;
 
-import java.io.File;
-import java.net.InetAddress;
-
+/**
+ * A builder class for building specific types of {@link IH2HNode}s.
+ * 
+ * @author Christian
+ * 
+ */
 public class H2HNodeBuilder {
 
-	// File size configuration
-	private int maxFileSize = 25 * 1024 * 1024; // 25Mb
-	private int maxNumOfVersions = 100;
-	private int maxSizeAllVersions = maxFileSize * maxNumOfVersions;
-	private int chunkSize = 1024 * 1024; // 1Mb
-	private boolean autostartProcesses = true;
-	private boolean isMaster = false;
-	private InetAddress bootstrapAddress = null;
-	private String rootPath = new File(System.getProperty("user.home"), "H2H").getAbsolutePath();
-
-	public IH2HNode build() {
-		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, autostartProcesses,
-				isMaster, bootstrapAddress, rootPath);
-	}
-
 	/**
-	 * Set the max size in bytes
+	 * Build a default {@link H2HNode} with the default values specified in {@link H2HConstants}.
 	 * 
-	 * @param fileSize in bytes
-	 * @return the builder according to the builder pattern
+	 * @return default {@link H2HNode}
 	 */
-	public H2HNodeBuilder setMaxFileSize(int maxFileSize) {
-		this.maxFileSize = maxFileSize;
-		return this;
+	public IH2HNode build() {
+		return new H2HNode(H2HConstants.DEFAULT_MAX_FILE_SIZE, H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS,
+				H2HConstants.DEFAULT_MAX_SIZE_ALL_VERSIONS, H2HConstants.DEFAULT_CHUNK_SIZE,
+				H2HConstants.DEFAULT_AUTOSTART_PROCESSES, H2HConstants.DEFAULT_IS_MASTER_PEER,
+				H2HConstants.DEFAULT_BOOTSTRAP_ADDRESS, H2HConstants.DEFAULT_ROOT_PATH);
 	}
-
-	public H2HNodeBuilder setMaxNumOfVersions(int maxNumOfVersions) {
-		this.maxNumOfVersions = maxNumOfVersions;
-		return this;
-	}
-
-	public H2HNodeBuilder setMaxSizeAllVersions(int maxSizeAllVersions) {
-		this.maxSizeAllVersions = maxSizeAllVersions;
-		return this;
-	}
-
-	public H2HNodeBuilder setChunkSize(int chunkSize) {
-		this.chunkSize = chunkSize;
-		return this;
-	}
-
-	public H2HNodeBuilder setAutostartProcesses(boolean autostart) {
-		this.autostartProcesses = autostart;
-		return this;
-	}
-
-	public H2HNodeBuilder setMaster(boolean isMaster) {
-		this.isMaster = isMaster;
-		return this;
-	}
-
-	public H2HNodeBuilder setBootstrapAddress(InetAddress bootstrapAddress) {
-		this.bootstrapAddress = bootstrapAddress;
-		return this;
-	}
-
-	public H2HNodeBuilder setRootPath(String rootPath) {
-		this.rootPath = rootPath;
-		return this;
-	}
-
 }
