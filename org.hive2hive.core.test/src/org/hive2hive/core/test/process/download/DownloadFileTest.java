@@ -80,7 +80,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		UserProfile up = profileManager.getUserProfile(ulProcess);
+		UserProfile up = profileManager.getUserProfile(ulProcess.getID(), false);
 		file = up.getRoot().getChildByName(fileName);
 	}
 

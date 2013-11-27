@@ -39,9 +39,9 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		UserProfileManager profileManager = context.getProfileManager();
 		UserProfile userProfile = null;
 		try {
-			userProfile = profileManager.getUserProfile(getProcess());
-		} catch (GetFailedException e1) {
-			getProcess().stop(e1.getMessage());
+			userProfile = profileManager.getUserProfile(getProcess().getID(), true);
+		} catch (GetFailedException e) {
+			getProcess().stop(e.getMessage());
 			return;
 		}
 
@@ -53,11 +53,10 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			return;
 		}
 
-		profileManager.startModification(getProcess());
 		FileTreeNode parent = fileNode.getParent();
 		parent.removeChild(fileNode);
 		try {
-			profileManager.putUserProfile(getProcess());
+			profileManager.readyToPut(userProfile, getProcess().getID());
 		} catch (PutFailedException e) {
 			getProcess().stop(e.getMessage());
 			return;

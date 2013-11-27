@@ -10,7 +10,7 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.network.data.UserProfileManager2;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.UserCredentials;
@@ -94,7 +94,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 * small delay, but in the same order as the parameters. The method blocks until all processes are done.
 	 */
 	private void executeProcesses(Operation... operations) throws GetFailedException, InterruptedException {
-		UserProfileManager2 manager = new UserProfileManager2(client, userCredentials);
+		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
 		List<TestUserProfileProcess> processes = new ArrayList<TestUserProfileProcess>(operations.length);
 		List<TestProcessListener> listeners = new ArrayList<TestProcessListener>(operations.length);
@@ -145,7 +145,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 */
 	private class TestUserProfileProcess extends Process {
 
-		public TestUserProfileProcess(UserProfileManager2 profileManager, NetworkManager networkManager,
+		public TestUserProfileProcess(UserProfileManager profileManager, NetworkManager networkManager,
 				Operation operation) {
 			super(networkManager);
 			switch (operation) {
@@ -173,7 +173,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 */
 	private class TestUserProfileStep extends ProcessStep {
 
-		private final UserProfileManager2 profileManager;
+		private final UserProfileManager profileManager;
 		private final boolean modify;
 		private final boolean put;
 
@@ -183,7 +183,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		 * @param put if true, it performs a put operation
 		 * @param modify if true, it does a modification
 		 */
-		public TestUserProfileStep(UserProfileManager2 profileManager, boolean put, boolean modify) {
+		public TestUserProfileStep(UserProfileManager profileManager, boolean put, boolean modify) {
 			this.profileManager = profileManager;
 			this.put = put;
 			this.modify = modify;
