@@ -13,7 +13,7 @@ public class H2HNodeBuilder {
 	 * 
 	 * @return default {@link H2HNode}
 	 */
-	public IH2HNode build() {
+	public static H2HNode buildDefault() {
 		return new H2HNode(H2HConstants.DEFAULT_MAX_FILE_SIZE, H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS,
 				H2HConstants.DEFAULT_MAX_SIZE_ALL_VERSIONS, H2HConstants.DEFAULT_CHUNK_SIZE,
 				H2HConstants.DEFAULT_AUTOSTART_PROCESSES, H2HConstants.DEFAULT_IS_MASTER_PEER,

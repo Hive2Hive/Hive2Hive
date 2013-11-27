@@ -3,21 +3,46 @@ package org.hive2hive.core.client;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class ConsoleMenu {
+public abstract class ConsoleMenu {
 
-	private final H2HConsole console;
+	protected final H2HConsole console;
 	private final ArrayList<ConsoleMenuItem> items;
 	
+	private boolean exited;
+
 	public ConsoleMenu(H2HConsole console) {
 		this.console = console;
 		this.items = new ArrayList<ConsoleMenuItem>();
+		this.exited = false;
+		
+		addMenuHandlers();
+		
+		add("Exit", new IConsoleMenuCallback() {
+			
+			@Override
+			public void invoke() {
+				System.out.println("Selected Option: Exit");
+				exitHandler();				
+			}
+		});
 	}
 	
-	public boolean add(String displayText, IConsoleMenuCallback callback) {
+	protected final boolean add(String displayText, IConsoleMenuCallback callback) {
 		return items.add(new ConsoleMenuItem(displayText, callback));
 	}
 	
-	public void show() {
+	protected abstract void addMenuHandlers();
+
+	public void open() {
+		
+		while (!exited) {
+			console.clear();
+			System.out.println(getInstruction());
+			show();
+		}
+	}
+
+	private final void show() {
 		
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
@@ -42,4 +67,10 @@ public class ConsoleMenu {
 		}
 		input.close();
 	}
+
+	private void exitHandler() {
+		exited = true;
+	}
+	
+	public abstract String getInstruction();
 }
