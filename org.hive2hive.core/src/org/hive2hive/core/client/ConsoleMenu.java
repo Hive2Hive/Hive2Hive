@@ -46,7 +46,7 @@ public abstract class ConsoleMenu {
 		
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
-			System.out.print(String.format("[%s] %s\n", i + 1, item.getDisplayText()));
+			System.out.print(String.format("    [%s] %s\n", i + 1, item.getDisplayText()));
 		}
 		System.out.println();
 		
@@ -58,7 +58,7 @@ public abstract class ConsoleMenu {
 		}
 		
 		if (chosen > items.size() || chosen < 1){
-			System.out.println("Invalid option. Press enter to continue...");
+			System.out.println("Invalid option.");
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
