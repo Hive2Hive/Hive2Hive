@@ -60,10 +60,12 @@ public class UserProfileManager {
 	}
 
 	/**
-	 * Gets the user profile, if not existent, the call blocks until the most recent profile is here.
+	 * Gets the user profile. The call blocks until the most recent profile is here.
 	 * 
-	 * @param process the process that calls this method
-	 * @return never null
+	 * @param pid the process identifier
+	 * @param intendsToPut whether the process intends modifying and putting the user profile. After the
+	 *            get-call, the profile has a given time to make its modification.
+	 * @param the user profile
 	 * @throws GetFailedException if the profile cannot be fetched
 	 */
 	public UserProfile getUserProfile(int pid, boolean intendsToPut) throws GetFailedException {
@@ -91,18 +93,14 @@ public class UserProfileManager {
 	}
 
 	/**
-	 * Notifies that a process is done with a modification on the user profile.
-	 */
-	public void stopModification(int pid) {
-		// test whether is the current modifying process
-		if (modifying != null && modifying.equals(pid)) {
-			modifying.abort();
-		}
-	}
-
-	/**
-	 * Waits until the put of the user profile is done. It also assumes that the process is done with the
-	 * modifications on the profile.
+	 * A process notifies that he is ready to put the new profile. Note that the profile in the argument must
+	 * be a modification of the profile in the DHT.
+	 * 
+	 * @param profile the modified user profile
+	 * @param pid the process identifier
+	 * @throws PutFailedException if putting has failed (because of network errors or the profile is invalid).
+	 *             An error is also thrown when the process is not allowed to put (because he did not register
+	 *             himself as intending to put)
 	 */
 	public void readyToPut(UserProfile profile, int pid) throws PutFailedException {
 		if (modifying != null && modifying.equals(pid)) {
@@ -111,6 +109,16 @@ public class UserProfileManager {
 			modifying.waitForPut();
 		} else {
 			throw new PutFailedException("Not allowed to put anymore");
+		}
+	}
+
+	/**
+	 * Notifies that a process is done with a modification on the user profile.
+	 */
+	private void stopModification(int pid) {
+		// test whether is the current modifying process
+		if (modifying != null && modifying.equals(pid)) {
+			modifying.abort();
 		}
 	}
 
