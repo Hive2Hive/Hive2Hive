@@ -3,6 +3,7 @@ package org.hive2hive.core.client;
 import java.util.Scanner;
 
 import org.hive2hive.core.H2HNode;
+import org.hive2hive.core.H2HNodeBuilder;
 
 /**
  * A console-based client to use the Hive2Hive library.
@@ -19,7 +20,7 @@ public class ConsoleClient {
 
 	public static void main(String[] args) {
 
-//		h2hNode = H2HNodeBuilder.buildDefault();
+		h2hNode = H2HNodeBuilder.buildDefault();
 		
 		console = new H2HConsole();
 		scanner = new Scanner(System.in);
