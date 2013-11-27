@@ -19,7 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class H2HConsole extends WindowAdapter implements WindowListener, Runnable {
+public final class H2HConsole extends WindowAdapter implements WindowListener, Runnable {
 
 	private JFrame frame;
 	private JTextArea textArea;
@@ -94,7 +94,7 @@ public class H2HConsole extends WindowAdapter implements WindowListener, Runnabl
 			System.setIn(new PipedInputStream(pos3));
 
 		} catch (IOException | SecurityException e) {
-			consoleAppend("Couldn't redirect one of the streams to this console\n" + e.getMessage());
+			print("Couldn't redirect one of the streams to this console\n" + e.getMessage());
 		}
 	}
 
@@ -142,12 +142,12 @@ public class H2HConsole extends WindowAdapter implements WindowListener, Runnabl
 		try {
 			if (pis.available() != 0) {
 				String input = readLine(pis);
-				consoleAppend(input);
+				print(input);
 			}
 			if (quit)
 				return;
 		} catch (IOException e) {
-			consoleAppend("Console reports an internal error:\n" + e);
+			print("Console reports an internal error:\n" + e);
 		}
 	}
 
@@ -165,7 +165,7 @@ public class H2HConsole extends WindowAdapter implements WindowListener, Runnabl
 		return input;
 	}
 
-	public void consoleAppend(String text) {
+	public void print(String text) {
 		textArea.append(text);
 		textArea.setCaretPosition(textArea.getDocument().getLength());
 	}
