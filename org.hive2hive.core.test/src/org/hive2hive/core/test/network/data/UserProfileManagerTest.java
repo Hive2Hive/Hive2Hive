@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.network;
+package org.hive2hive.core.test.network.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +10,13 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.UserProfileManager2;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
@@ -92,7 +94,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 * small delay, but in the same order as the parameters. The method blocks until all processes are done.
 	 */
 	private void executeProcesses(Operation... operations) throws GetFailedException, InterruptedException {
-		UserProfileManager manager = new UserProfileManager(client, userCredentials);
+		UserProfileManager2 manager = new UserProfileManager2(client, userCredentials);
 
 		List<TestUserProfileProcess> processes = new ArrayList<TestUserProfileProcess>(operations.length);
 		List<TestProcessListener> listeners = new ArrayList<TestProcessListener>(operations.length);
@@ -143,7 +145,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 */
 	private class TestUserProfileProcess extends Process {
 
-		public TestUserProfileProcess(UserProfileManager profileManager, NetworkManager networkManager,
+		public TestUserProfileProcess(UserProfileManager2 profileManager, NetworkManager networkManager,
 				Operation operation) {
 			super(networkManager);
 			switch (operation) {
@@ -171,7 +173,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 */
 	private class TestUserProfileStep extends ProcessStep {
 
-		private final UserProfileManager profileManager;
+		private final UserProfileManager2 profileManager;
 		private final boolean modify;
 		private final boolean put;
 
@@ -181,7 +183,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		 * @param put if true, it performs a put operation
 		 * @param modify if true, it does a modification
 		 */
-		public TestUserProfileStep(UserProfileManager profileManager, boolean put, boolean modify) {
+		public TestUserProfileStep(UserProfileManager2 profileManager, boolean put, boolean modify) {
 			this.profileManager = profileManager;
 			this.put = put;
 			this.modify = modify;
@@ -190,15 +192,14 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		@Override
 		public void start() {
 			try {
-				UserProfile userProfile = profileManager.getUserProfile(getProcess());
+				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), put);
 
 				if (modify) {
-					profileManager.startModification(getProcess());
 					new FileTreeNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
 				}
 
 				if (put) {
-					profileManager.putUserProfile(getProcess());
+					profileManager.readyToPut(userProfile, getProcess().getID());
 				}
 
 				getProcess().setNextStep(null);
