@@ -20,54 +20,6 @@ public class RegisterMenu extends ConsoleMenu {
 
 			}
 		});
-
-		add("Set MaxFileSize", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set MaxNumOfVersions", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set MaxSizeAllVersions", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set ChunkSize", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set AutostartProcesses", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set IsMasterPeer", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set BootstrapAddress", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
-
-		add("Set RootPath", new IConsoleMenuCallback() {
-			public void invoke() {
-
-			}
-		});
 	}
 
 	@Override

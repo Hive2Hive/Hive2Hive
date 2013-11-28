@@ -9,18 +9,41 @@ public class TopLevelMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuHandlers() {
 		
+		add("User Configuration", new IConsoleMenuCallback() {
+			public void invoke() {
+				printMenuSelection("User Configuration");
+				userConfigurationHandler();
+			}
+		});
+		add("Network Configuration", new IConsoleMenuCallback() {
+			public void invoke() {
+				printMenuSelection("Network Configuration");
+				networkConfigurationHandler();
+			}
+		});
 		add("Register", new IConsoleMenuCallback() {
 			public void invoke() {
-				System.out.println("Selected Option: Register");
+				printMenuSelection("Register");
 				registerHandler();
 			}
 		});
 		add("Login", new IConsoleMenuCallback() {
 			public void invoke() {
-				System.out.println("Selected Option: Login");
+				printMenuSelection("Login");
+				loginHandler();
 			}
 		});
 
+	}
+	
+	private void userConfigurationHandler() {
+		
+	}
+	
+	private void networkConfigurationHandler() {
+		
+		NetworkMenu menu = new NetworkMenu(console);
+		menu.open();
 	}
 
 	private void registerHandler() {
@@ -29,6 +52,11 @@ public class TopLevelMenu extends ConsoleMenu {
 		menu.open();
 	}
 
+	private void loginHandler() {
+		
+		
+	}
+	
 	@Override
 	public String getInstruction() {
 		return "Please select an option.";

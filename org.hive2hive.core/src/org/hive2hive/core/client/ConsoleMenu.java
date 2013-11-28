@@ -27,8 +27,8 @@ public abstract class ConsoleMenu {
 		});
 	}
 	
-	protected final boolean add(String displayText, IConsoleMenuCallback callback) {
-		return items.add(new ConsoleMenuItem(displayText, callback));
+	protected final void add(String displayText, IConsoleMenuCallback callback) {
+		items.add(new ConsoleMenuItem(displayText, callback));
 	}
 	
 	protected abstract void addMenuHandlers();
@@ -58,7 +58,7 @@ public abstract class ConsoleMenu {
 		}
 		
 		if (chosen > items.size() || chosen < 1){
-			System.out.println("Invalid option.");
+			System.out.println(String.format("Invalid option. Select an option from 1 to %s.", items.size()));
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
@@ -72,5 +72,9 @@ public abstract class ConsoleMenu {
 		exited = true;
 	}
 	
-	public abstract String getInstruction();
+	protected void printMenuSelection(String selectedOption){
+		System.out.println("Selected Option: " + selectedOption);
+	}
+	
+	protected abstract String getInstruction();
 }
