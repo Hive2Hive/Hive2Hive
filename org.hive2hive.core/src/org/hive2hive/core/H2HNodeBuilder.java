@@ -49,7 +49,7 @@ public class H2HNodeBuilder {
 		return this;
 	}
 
-	public H2HNodeBuilder setMaster(boolean isMasterPeer) {
+	public H2HNodeBuilder setIsMaster(boolean isMasterPeer) {
 		this.isMasterPeer = isMasterPeer;
 		return this;
 	}
