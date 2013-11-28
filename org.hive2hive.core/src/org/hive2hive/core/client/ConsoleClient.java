@@ -1,6 +1,8 @@
 package org.hive2hive.core.client;
 
-import org.hive2hive.core.H2HNode;
+import java.io.IOException;
+
+import org.hive2hive.core.log.H2HLoggerFactory;
 
 /**
  * A console-based client to use the Hive2Hive library.
@@ -10,19 +12,22 @@ import org.hive2hive.core.H2HNode;
  */
 public class ConsoleClient {
 
-	private static H2HNode h2hNode;
-
+	private static SessionInstance session;
 	private static H2HConsole console;
 
 	public static void main(String[] args) {
 
-//		h2hNode = H2HNodeBuilder.buildDefault();
-		
 		console = new H2HConsole();
 
+		try {
+			H2HLoggerFactory.initFactory();
+		} catch (IOException e){
+			System.out.println("H2HLoggerFactory could not be initialized.");
+		}
+		
 		System.out.println("Welcome to the Hive2Hive console client!\n");
 
-		TopLevelMenu menu = new TopLevelMenu(console);
+		TopLevelMenu menu = new TopLevelMenu(console, session);
 		menu.open();
 
 		System.exit(0);

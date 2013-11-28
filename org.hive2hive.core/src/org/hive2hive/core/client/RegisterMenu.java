@@ -8,8 +8,8 @@ package org.hive2hive.core.client;
  */
 public class RegisterMenu extends ConsoleMenu {
 
-	public RegisterMenu(H2HConsole console) {
-		super(console);
+	public RegisterMenu(H2HConsole console, SessionInstance session) {
+		super(console, session);
 	}
 
 	@Override

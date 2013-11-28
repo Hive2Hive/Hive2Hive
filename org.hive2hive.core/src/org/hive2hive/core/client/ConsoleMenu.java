@@ -6,12 +6,14 @@ import java.util.Scanner;
 public abstract class ConsoleMenu {
 
 	protected final H2HConsole console;
+	protected final SessionInstance session;
 	private final ArrayList<ConsoleMenuItem> items;
 	
 	private boolean exited;
 
-	public ConsoleMenu(H2HConsole console) {
+	public ConsoleMenu(H2HConsole console, SessionInstance session) {
 		this.console = console;
+		this.session = session;
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 		
@@ -34,38 +36,43 @@ public abstract class ConsoleMenu {
 	protected abstract void addMenuHandlers();
 
 	public void open() {
-		
 		while (!exited) {
 			console.clear();
-			System.out.println(getInstruction());
 			show();
 		}
 	}
 
 	private final void show() {
 		
+		int chosen = 0;
+		Scanner input = new Scanner(System.in);
+
+		System.out.println(getInstruction());
+
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
-			System.out.print(String.format("    [%s] %s\n", i + 1, item.getDisplayText()));
+			System.out.println(String.format("    [%s] %s", i + 1, item.getDisplayText()));
 		}
 		System.out.println();
 		
-		Scanner input = new Scanner(System.in);
-		int chosen = 0;
 		try {
 			chosen = input.nextInt();
 		} catch (Exception e) {
 		}
 		
+		console.clear();
+		
 		if (chosen > items.size() || chosen < 1){
 			System.out.println(String.format("Invalid option. Select an option from 1 to %s.", items.size()));
+			System.out.println("Press enter to continue...");
+			input.nextLine();
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
 			IConsoleMenuCallback callback = item.getCallback();
 			callback.invoke();
 		}
-		input.close();
+//		input.close();
 	}
 
 	private void exitHandler() {

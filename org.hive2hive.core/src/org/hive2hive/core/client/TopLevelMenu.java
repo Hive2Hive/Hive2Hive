@@ -2,8 +2,8 @@ package org.hive2hive.core.client;
 
 public class TopLevelMenu extends ConsoleMenu {
 
-	public TopLevelMenu(H2HConsole console) {
-		super(console);
+	public TopLevelMenu(H2HConsole console, SessionInstance session) {
+		super(console, session);
 	}
 
 	@Override
@@ -42,13 +42,13 @@ public class TopLevelMenu extends ConsoleMenu {
 	
 	private void networkConfigurationHandler() {
 		
-		NetworkMenu menu = new NetworkMenu(console);
+		NetworkMenu menu = new NetworkMenu(console, session);
 		menu.open();
 	}
 
 	private void registerHandler() {
 
-		RegisterMenu menu = new RegisterMenu(console);
+		RegisterMenu menu = new RegisterMenu(console, session);
 		menu.open();
 	}
 
