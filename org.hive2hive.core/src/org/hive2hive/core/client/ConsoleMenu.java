@@ -53,14 +53,13 @@ public abstract class ConsoleMenu {
 		}
 		System.out.println();
 
-		chosen = Integer.parseInt(awaitParameter());
+		chosen = awaitIntParameter();
 
 		console.clear();
 
 		if (chosen > items.size() || chosen < 1) {
 			System.out.println(String.format("Invalid option. Select an option from 1 to %s.", items.size()));
 			System.out.println("Press enter to continue...");
-			input.nextLine();
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
@@ -71,7 +70,7 @@ public abstract class ConsoleMenu {
 		// do not close input
 	}
 
-	protected String awaitParameter() {
+	protected String awaitStringParameter() {
 		
 		Scanner input = new Scanner(System.in);
 		String parameter;
@@ -85,6 +84,11 @@ public abstract class ConsoleMenu {
 		// do not close input
 		
 		return parameter;
+	}
+	
+	protected int awaitIntParameter() {
+		
+		return Integer.parseInt(awaitStringParameter());
 	}
 	
 	private void exitHandler() {

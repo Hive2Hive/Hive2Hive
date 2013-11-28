@@ -25,7 +25,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	private int maxFileSize;
 	private int maxNumOfVersions;
-	private int maxSizeAllVersions;
+	private int maxSizeOfAllVersions;
 	private int chunkSize;
 	private boolean autostartProcesses;
 	private boolean isMasterPeer;
@@ -51,7 +51,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress, String rootPath) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
-		this.maxSizeAllVersions = maxSizeAllVersions;
+		this.maxSizeOfAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
 		this.isMasterPeer = isMasterPeer;
 		this.autostartProcesses = autostartProcesses;
@@ -182,54 +182,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
-	public H2HNode setMaxFileSize(int maxFileSize) {
-		this.maxFileSize = maxFileSize;
-		return this;
-	}
-
-	@Override
-	public H2HNode setMaxNumOfVersions(int maxNumOfVersions) {
-		this.maxNumOfVersions = maxNumOfVersions;
-		return this;
-	}
-
-	@Override
-	public H2HNode setMaxSizeAllVersions(int maxSizeAllVersions) {
-		this.maxSizeAllVersions = maxSizeAllVersions;
-		return this;
-	}
-
-	@Override
-	public H2HNode setChunkSize(int chunkSize) {
-		this.chunkSize = chunkSize;
-		return this;
-	}
-
-	@Override
-	public H2HNode setAutostartProcesses(boolean autostartProcesses) {
-		this.autostartProcesses = autostartProcesses;
-		return this;
-	}
-
-	@Override
-	public H2HNode setMaster(boolean isMasterPeer) {
-		this.isMasterPeer = isMasterPeer;
-		return this;
-	}
-
-	@Override
-	public H2HNode setBootstrapAddress(InetAddress bootstrapAddress) {
-		this.bootstrapAddress = bootstrapAddress;
-		return this;
-	}
-
-	@Override
-	public H2HNode setRootPath(String rootPath) {
-		this.rootPath = rootPath;
-		return this;
-	}
-	
-	@Override
 	public int getMaxFileSize() {
 		return maxFileSize;
 	}
@@ -241,7 +193,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public int getMaxSizeAllVersions() {
-		return maxSizeAllVersions;
+		return maxSizeOfAllVersions;
 	}
 
 	@Override

@@ -14,7 +14,7 @@ public interface H2HConstants {
 	// H2HNode default values
 	public static final int DEFAULT_MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 	public static final int DEFAULT_MAX_NUM_OF_VERSIONS = 100;
-	public static final int DEFAULT_MAX_SIZE_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE * DEFAULT_MAX_NUM_OF_VERSIONS;
+	public static final int DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE * DEFAULT_MAX_NUM_OF_VERSIONS;
 	public static final int DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1 MB
 	public static final boolean DEFAULT_AUTOSTART_PROCESSES = true;
 	public static final boolean DEFAULT_IS_MASTER_PEER = false;
