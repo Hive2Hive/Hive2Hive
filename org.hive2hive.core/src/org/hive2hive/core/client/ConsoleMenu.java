@@ -19,9 +19,8 @@ public abstract class ConsoleMenu {
 
 		addMenuHandlers();
 
-		add("Exit", new IConsoleMenuCallback() {
+		add("Back", new IConsoleMenuCallback() {
 			public void invoke() {
-				printMenuSelection("Exit");
 				exitHandler();
 			}
 		});
