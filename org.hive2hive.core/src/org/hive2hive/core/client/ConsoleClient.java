@@ -18,13 +18,14 @@ public class ConsoleClient {
 	public static void main(String[] args) {
 
 		console = new H2HConsole();
+		session = new SessionInstance();
 
 		try {
 			H2HLoggerFactory.initFactory();
 		} catch (IOException e){
 			System.out.println("H2HLoggerFactory could not be initialized.");
 		}
-		
+
 		System.out.println("Welcome to the Hive2Hive console client!\n");
 
 		TopLevelMenu menu = new TopLevelMenu(console, session);

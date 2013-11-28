@@ -49,7 +49,7 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 		textArea.setEditable(true);
 
 		frame = new JFrame("Hive2Hive Console");
-//		frame.setIconImage(image);
+		// frame.setIconImage(image);
 		frame.setBounds(frameSize.width / 2, frameSize.height / 2, frameSize.width, frameSize.height);
 		frame.getContentPane().setLayout(new BorderLayout());
 		frame.getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
@@ -75,7 +75,7 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 		readerThread1.setName("H2HConsole Reader 2");
 		readerThread2.setDaemon(true);
 		readerThread2.start();
-		
+
 		quit = false;
 	}
 
@@ -169,31 +169,34 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 		textArea.append(text);
 		textArea.setCaretPosition(textArea.getDocument().getLength());
 	}
-	
+
 	public void clear() {
 		textArea.setText("");
 	}
-	
+
 	@Override
 	public void windowClosed(WindowEvent e) {
-		
+
 		quit = true;
 		this.notifyAll(); // stop all threads
-		
+
 		try {
 			readerThread1.join(1000);
 			pis1.close();
-		} catch (Exception ex) {}
-		
+		} catch (Exception ex) {
+		}
+
 		try {
 			readerThread2.join(1000);
 			pis2.close();
-		} catch (Exception ex) {}
-		
+		} catch (Exception ex) {
+		}
+
 		try {
 			pos3.close();
-		} catch (Exception ex) {}
-		
+		} catch (Exception ex) {
+		}
+
 		System.exit(0);
 	}
 
@@ -202,4 +205,21 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 		frame.setVisible(false);
 		frame.dispose();
 	}
+
+	public Font getFont() {
+		return textArea.getFont();
+	}
+
+	public void setFont(Font font) {
+		textArea.setFont(font);
+	}
+	
+//	public void setBoldness(boolean isBold) {
+//		Font current = textArea.getFont();
+//		if (isBold) {
+//			setFont(new Font(current.getFamily(), Font.BOLD, current.getSize()));
+//		} else {
+//			setFont(new Font(current.getFamily(), Font.PLAIN, current.getSize()));
+//		}
+//	}
 }
