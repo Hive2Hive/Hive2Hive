@@ -8,7 +8,7 @@ public abstract class ConsoleMenu {
 	protected final H2HConsole console;
 	protected final SessionInstance session;
 	private final ArrayList<ConsoleMenuItem> items;
-	
+
 	private boolean exited;
 
 	public ConsoleMenu(H2HConsole console, SessionInstance session) {
@@ -16,24 +16,22 @@ public abstract class ConsoleMenu {
 		this.session = session;
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
-		
+
 		addMenuHandlers();
-		
+
 		add("Exit", new IConsoleMenuCallback() {
-			
-			@Override
 			public void invoke() {
-				System.out.println("Selected Option: Exit");
-				exitHandler();				
+				printMenuSelection("Exit");
+				exitHandler();
 			}
 		});
 	}
-	
+
+	protected abstract void addMenuHandlers();
+
 	protected final void add(String displayText, IConsoleMenuCallback callback) {
 		items.add(new ConsoleMenuItem(displayText, callback));
 	}
-	
-	protected abstract void addMenuHandlers();
 
 	public void open() {
 		while (!exited) {
@@ -43,7 +41,7 @@ public abstract class ConsoleMenu {
 	}
 
 	private final void show() {
-		
+
 		int chosen = 0;
 		Scanner input = new Scanner(System.in);
 
@@ -54,15 +52,12 @@ public abstract class ConsoleMenu {
 			System.out.println(String.format("    [%s] %s", i + 1, item.getDisplayText()));
 		}
 		System.out.println();
-		
-		try {
-			chosen = input.nextInt();
-		} catch (Exception e) {
-		}
-		
+
+		chosen = Integer.parseInt(awaitParameter());
+
 		console.clear();
-		
-		if (chosen > items.size() || chosen < 1){
+
+		if (chosen > items.size() || chosen < 1) {
 			System.out.println(String.format("Invalid option. Select an option from 1 to %s.", items.size()));
 			System.out.println("Press enter to continue...");
 			input.nextLine();
@@ -72,16 +67,33 @@ public abstract class ConsoleMenu {
 			IConsoleMenuCallback callback = item.getCallback();
 			callback.invoke();
 		}
-//		input.close();
+
+		// do not close input
 	}
 
+	protected String awaitParameter() {
+		
+		Scanner input = new Scanner(System.in);
+		String parameter;
+		try {
+			parameter = input.next();
+		} catch (Exception e) {
+			System.out.println("Exception while parsing the parameter.");
+			input.nextLine();
+			return null;
+		}
+		// do not close input
+		
+		return parameter;
+	}
+	
 	private void exitHandler() {
 		exited = true;
 	}
-	
-	protected void printMenuSelection(String selectedOption){
+
+	protected void printMenuSelection(String selectedOption) {
 		System.out.println("Selected Option: " + selectedOption);
 	}
-	
+
 	protected abstract String getInstruction();
 }

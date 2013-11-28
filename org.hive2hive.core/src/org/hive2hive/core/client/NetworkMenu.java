@@ -5,8 +5,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hive2hive.core.H2HNode;
-import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.network.NetworkManager;
 
 public class NetworkMenu extends ConsoleMenu {
@@ -79,6 +77,8 @@ public class NetworkMenu extends ConsoleMenu {
 		// specify parameters
 		// nr of nodes
 		
+		System.out.println("Specify number of nodes.");
+		System.out.println();
 		
 		int nrOfNodes = 10;
 		
