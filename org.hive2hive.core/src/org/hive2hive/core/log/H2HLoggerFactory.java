@@ -10,8 +10,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.spi.RootLogger;
 
 public final class H2HLoggerFactory {
+	
 	private static final H2HLoggerFactory factory = new H2HLoggerFactory();
-	private Hierarchy log4jHierarchy;
+	private Hierarchy log4jHierarchy = new H2HLogHierarchy(new RootLogger(Level.DEBUG));
 	private boolean isConfigured;
 
 	private H2HLoggerFactory() {
@@ -37,11 +38,10 @@ public final class H2HLoggerFactory {
 		if (propertiesInputStream != null) {
 			Properties props = new Properties();
 			props.load(propertiesInputStream);
-			log4jHierarchy = new H2HLogHierarchy(new RootLogger(Level.DEBUG));
 			new PropertyConfigurator().doConfigure(props, log4jHierarchy);
+			
+			propertiesInputStream.close();
 		}
-
-		propertiesInputStream.close();
 
 		factory.isConfigured = true;
 	}
