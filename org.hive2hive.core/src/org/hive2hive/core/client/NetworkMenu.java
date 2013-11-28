@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.network.NetworkManager;
 
 public class NetworkMenu extends ConsoleMenu {
@@ -22,10 +23,19 @@ public class NetworkMenu extends ConsoleMenu {
 				createNetworkHandler();
 			}
 		});
-
+		
+		add("Create H2H Node", new IConsoleMenuCallback() {
+			public void invoke() {
+				printMenuSelection("Create H2H Node");
+				session.setH2HNode(session.getNodeBuilder().build());
+			}
+		});
+		
 		add("Set MaxFileSize", new IConsoleMenuCallback() {
 			public void invoke() {
-
+				printMenuSelection("Set MaxFileSize");
+				System.out.println("Specify Max File Size:\n");
+				session.getNodeBuilder().setMaxFileSize(awaitIntParameter());
 			}
 		});
 
@@ -78,7 +88,7 @@ public class NetworkMenu extends ConsoleMenu {
 
 		// specify number of nodes
 		System.out.println("Specify number of nodes:\n");
-		int nrOfNodes = Integer.parseInt(awaitParameter());
+		int nrOfNodes = awaitIntParameter();
 		if (nrOfNodes < 1) {
 			System.out.println("Invalid number of nodes.\n");
 			createNetworkHandler();
@@ -107,7 +117,7 @@ public class NetworkMenu extends ConsoleMenu {
 
 		// TODO wait here until the operation has completed
 	}
-
+	
 	@Override
 	public String getInstruction() {
 		return "Please select a network configuration option.\n";

@@ -9,16 +9,16 @@ public class TopLevelMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuHandlers() {
 		
-		add("User Configuration", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("User Configuration");
-				userConfigurationHandler();
-			}
-		});
 		add("Network Configuration", new IConsoleMenuCallback() {
 			public void invoke() {
 				printMenuSelection("Network Configuration");
 				networkConfigurationHandler();
+			}
+		});
+		add("User Configuration", new IConsoleMenuCallback() {
+			public void invoke() {
+				printMenuSelection("User Configuration");
+				userConfigurationHandler();
 			}
 		});
 		add("Register", new IConsoleMenuCallback() {
