@@ -22,10 +22,10 @@ public class NetworkMenu extends ConsoleMenu {
 				createNetworkHandler();
 			}
 		});
-		
+
 		add("Set MaxFileSize", new IConsoleMenuCallback() {
 			public void invoke() {
-  
+
 			}
 		});
 
@@ -71,21 +71,19 @@ public class NetworkMenu extends ConsoleMenu {
 			}
 		});
 	}
-	
+
 	private void createNetworkHandler() {
-		
-		// specify parameters
-		// nr of nodes
-		
-		System.out.println("Specify number of nodes.");
-		System.out.println();
-		
-		int nrOfNodes = 10;
-		
-		if (nrOfNodes < 1)
-			throw new IllegalArgumentException("Invalid size of network.");
-		List<NetworkManager> nodes = new ArrayList<NetworkManager>(nrOfNodes);
-		
+
+		// TODO this whole procedure should exist as separate process
+
+		// specify number of nodes
+		System.out.println("Specify number of nodes:\n");
+		int nrOfNodes = Integer.parseInt(awaitParameter());
+		if (nrOfNodes < 1) {
+			System.out.println("Invalid number of nodes.\n");
+			createNetworkHandler();
+		}
+		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(nrOfNodes);
 
 		// create the first node (master)
 		NetworkManager master = new NetworkManager("master");
@@ -97,17 +95,22 @@ public class NetworkMenu extends ConsoleMenu {
 		for (int i = 1; i < nrOfNodes; i++) {
 			NetworkManager node = new NetworkManager(String.format("node %s", ++letter));
 			try {
+				// TODO check whether this is correct
 				node.connect(InetAddress.getByName("127.0.0.1"));
 			} catch (UnknownHostException e) {
-				// should not happen
 			}
 			nodes.add(node);
 		}
+
+		// store the nodes in the session instance
+		session.setNetwork(nodes);
+
+		// TODO wait here until the operation has completed
 	}
 
 	@Override
 	public String getInstruction() {
-		return "Please select a network configuration option.";
+		return "Please select a network configuration option.\n";
 	}
 
 }

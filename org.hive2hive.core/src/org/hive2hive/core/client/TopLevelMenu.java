@@ -59,6 +59,6 @@ public class TopLevelMenu extends ConsoleMenu {
 	
 	@Override
 	public String getInstruction() {
-		return "Please select an option.";
+		return "Please select an option:\n";
 	}
 }
