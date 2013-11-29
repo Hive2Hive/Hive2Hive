@@ -19,7 +19,7 @@ public class ConsoleClient {
 
 	public static void main(String[] args) {
 
-		console = new Console();
+		console = new Console("Hive2Hive Console");
 		session = new SessionInstance();
 
 		try {
@@ -27,11 +27,9 @@ public class ConsoleClient {
 		} catch (IOException e){
 			System.out.println("H2HLoggerFactory could not be initialized.");
 		}
-
 		System.out.println("Welcome to the Hive2Hive console client!\n");
 
-		TopLevelMenu menu = new TopLevelMenu(console, session);
-		menu.open();
+		new TopLevelMenu(console, session).open();
 
 		System.exit(0);
 	}

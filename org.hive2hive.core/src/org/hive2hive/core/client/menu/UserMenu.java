@@ -14,51 +14,54 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public final class UserMenu extends ConsoleMenu {
 
+	public H2HConsoleMenuItem SetUserID;
+	public H2HConsoleMenuItem SetUserPassword;
+	public H2HConsoleMenuItem SetUserPin;
+	public H2HConsoleMenuItem CreateUserCredentials;
+	
 	public UserMenu(Console console, SessionInstance session) {
 		super(console, session);
 	}
 
 	@Override
-	protected void addMenuItems() {
-
-		add(new H2HConsoleMenuItem("Set User ID") {
+	protected void createItems() {
+		SetUserID = new H2HConsoleMenuItem("Set User ID") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user ID:");
 				session.setUserId(awaitStringParameter());
 				printSuccess();
 			}
-		});
-		add(new H2HConsoleMenuItem("Set User Password") {
+		};
+		SetUserPassword = new H2HConsoleMenuItem("Set User Password") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user password:");
 				session.setPassword(awaitStringParameter());
 				printSuccess();
 			}
-		});
-		add(new H2HConsoleMenuItem("Set User PIN") {
+		};
+		SetUserPin = new H2HConsoleMenuItem("Set User PIN") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user PIN:");
 				session.setPin(awaitStringParameter());
 				printSuccess();
 			}
-		});
-		add(new H2HConsoleMenuItem("Create User Credentials") {
+		};
+		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
 			@Override
 			protected boolean preconditionsSatisfied() {
-				boolean satisfied = true;
 				if (session.getUserId() == null) {
-					System.out.println("User Credentials cannot be created: User ID not yet set.\n");
-					satisfied = false;
+					printPreconditionError("User Credentials cannot be created: Please set User ID first.");
+					SetUserID.invoke();
 				}
 				if (session.getPassword() == null) {
-					System.out.println("User Credentials cannot be created: User password not yet set.\n");
-					satisfied = false;
+					printPreconditionError("User Credentials cannot be created: Please set User Password first.");
+					SetUserPassword.invoke();
 				}
 				if (session.getPin() == null) {
-					System.out.println("User Credentials cannot be created: User PIN not yet set.\n");
-					satisfied = false;
+					printPreconditionError("User Credentials cannot be created: Please set User PIN first.");
+					SetUserPin.invoke();
 				}
-				return satisfied;
+				return true;
 			}
 
 			protected void execute() throws Exception {
@@ -66,7 +69,16 @@ public final class UserMenu extends ConsoleMenu {
 						session.getPin()));
 				printSuccess();
 			}
-		});
+		};
+	}
+	
+	@Override
+	protected void addMenuItems() {
+
+		add(SetUserID);
+		add(SetUserPassword);
+		add(SetUserPin);
+		add(CreateUserCredentials);
 	}
 
 	@Override

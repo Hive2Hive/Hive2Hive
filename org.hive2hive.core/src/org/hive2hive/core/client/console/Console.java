@@ -42,7 +42,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 
 	private boolean quit;
 
-	public Console() {
+	public Console(String title) {
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = new Dimension(screenSize.width / 2, screenSize.height / 2);
@@ -57,7 +57,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 		textArea.setEditable(true);
 		textArea.setMargin(new Insets(10, 10, 10, 10));
 
-		frame = new JFrame("Hive2Hive Console");
+		frame = new JFrame(title);
 		frame.setIconImage(new ImageIcon(getClass().getResource("/res/logo.png")).getImage());
 		frame.setBounds(frameSize.width / 2, frameSize.height / 2, frameSize.width, frameSize.height);
 		frame.getContentPane().setLayout(new BorderLayout());

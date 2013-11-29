@@ -5,6 +5,7 @@ import org.hive2hive.core.client.SessionInstance;
 import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
  * The top-level menu of the {@link ConsoleClient}.
@@ -31,6 +32,18 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 		});
 		add(new H2HConsoleMenuItem("Register") {
+			@Override
+			protected boolean preconditionsSatisfied() {
+				if (session.getH2HNode() == null){
+					printPreconditionError("Cannot register: Please create a H2HNode first.");
+					new NetworkMenu(console, session).CreateH2HNodeMenutItem.invoke();
+				}
+				if (session.getCredentials() == null) {
+					printPreconditionError("Cannot register: Please create UserCredentials first.");
+					new UserMenu(console, session).CreateUserCredentials.invoke();
+				}
+				return true;
+			}
 			protected void execute() {
 				registerHandler();
 			}
@@ -45,6 +58,20 @@ public final class TopLevelMenu extends ConsoleMenu {
 	private void registerHandler() {
 
 		IProcess registerProcess = session.getH2HNode().register(session.getCredentials());
+		registerProcess.addListener(new IProcessListener() {
+			
+			@Override
+			public void onSuccess() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onFail(String reason) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 
 	private void loginHandler() {

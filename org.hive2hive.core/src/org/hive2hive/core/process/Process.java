@@ -8,7 +8,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.manager.ProcessManager;
 
 /**
  * This abstract process is used for executing workflows. It keeps the order of the process steps.
