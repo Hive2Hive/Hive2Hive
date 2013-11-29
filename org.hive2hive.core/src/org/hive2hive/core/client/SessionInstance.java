@@ -15,9 +15,9 @@ public class SessionInstance {
 	private H2HNode node;
 	
 	// user configuration parameters
-	private String userId;
-	private String password;
-	private String pin;
+	private String userId = null;
+	private String password = null;
+	private String pin = null;
 	private UserCredentials credentials;
 	
 	public void setH2HNode(H2HNode node){

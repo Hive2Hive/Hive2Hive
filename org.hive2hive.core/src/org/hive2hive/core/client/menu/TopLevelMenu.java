@@ -18,32 +18,21 @@ public class TopLevelMenu extends ConsoleMenu {
 				networkConfigurationHandler();
 			}
 		});
-		
-//		add("Network Configuration", new IConsoleMenuCallback() {
-//			public void invoke() {
-//				printMenuSelection("Network Configuration");
-//				networkConfigurationHandler();
-//			}
-//		});
-//		add("User Configuration", new IConsoleMenuCallback() {
-//			public void invoke() {
-//				printMenuSelection("User Configuration");
-//				userConfigurationHandler();
-//			}
-//		});
-//		add("Register", new IConsoleMenuCallback() {
-//			public void invoke() {
-//				printMenuSelection("Register");
-//				registerHandler();
-//			}
-//		});
-//		add("Login", new IConsoleMenuCallback() {
-//			public void invoke() {
-//				printMenuSelection("Login");
-//				loginHandler();
-//			}
-//		});
-
+		add(new H2HConsoleMenuItem("User Configuration") {
+			protected void execute() {
+				userConfigurationHandler();
+			}
+		});
+		add(new H2HConsoleMenuItem("Register") {
+			protected void execute() {
+				registerHandler();
+			}
+		});
+		add(new H2HConsoleMenuItem("Login") {
+			protected void execute() {
+				loginHandler();
+			}
+		});
 	}
 	
 	private void networkConfigurationHandler() {
