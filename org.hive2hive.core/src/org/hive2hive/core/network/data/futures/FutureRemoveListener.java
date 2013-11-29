@@ -11,12 +11,19 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.IRemoveListener;
+import org.hive2hive.core.network.data.listener.IRemoveListener;
 
-public class FutureRemoveListener  extends BaseFutureAdapter<FutureRemove> {
+/**
+ * A future listener for a remove. After the operation completed the listener verifies with a get if all data
+ * has been deleted. If not, the listener retries the remove (see {@link H2HConstants#REMOVE_RETRIES}). In
+ * both cases the given {@link IRemoveListener} listener gets notified. </br></br>
+ * For further details see {@link DataManager#remove(String, String, Number160, IRemoveListener)}
+ * @author Seppi
+ */
+public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(FutureRemoveListener.class);
-	
+
 	// used to count remove retries
 	private int removeTries = 0;
 
@@ -25,7 +32,7 @@ public class FutureRemoveListener  extends BaseFutureAdapter<FutureRemove> {
 	protected final Number160 versionKey;
 	protected final IRemoveListener listener;
 	protected final DataManager dataManager;
-	
+
 	public FutureRemoveListener(String locationKey, String contentKey, Number160 versionKey,
 			IRemoveListener listener, DataManager dataManager) {
 		this.locationKey = locationKey;
@@ -43,7 +50,7 @@ public class FutureRemoveListener  extends BaseFutureAdapter<FutureRemove> {
 	}
 
 	private void retryRemove() {
-		if (removeTries++ < H2HConstants.PUT_RETRIES) {
+		if (removeTries++ < H2HConstants.REMOVE_RETRIES) {
 			logger.warn(String
 					.format("Remove verification failed. Data is not null. Try #%s. location key = '%s' content key = '%s'",
 							removeTries, locationKey, contentKey));
@@ -51,7 +58,7 @@ public class FutureRemoveListener  extends BaseFutureAdapter<FutureRemove> {
 		} else {
 			logger.error(String
 					.format("Remove verification failed. Data is not null after %s tries. location key = '%s' content key = '%s'",
-							removeTries-1, locationKey, contentKey));
+							removeTries - 1, locationKey, contentKey));
 			if (listener != null)
 				listener.onRemoveFailure();
 		}

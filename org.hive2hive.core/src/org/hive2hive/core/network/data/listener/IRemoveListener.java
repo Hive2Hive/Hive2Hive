@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data;
+package org.hive2hive.core.network.data.listener;
 
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;

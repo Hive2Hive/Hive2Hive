@@ -3,9 +3,9 @@ package org.hive2hive.core.process.common.put;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.IPutListener;
-import org.hive2hive.core.network.data.IRemoveListener;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.listener.IPutListener;
+import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.process.ProcessStep;
 
 /**

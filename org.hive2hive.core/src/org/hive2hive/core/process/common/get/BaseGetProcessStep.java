@@ -1,8 +1,8 @@
 package org.hive2hive.core.process.common.get;
 
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.IGetListener;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.process.ProcessStep;
 
 /**
@@ -10,7 +10,7 @@ import org.hive2hive.core.process.ProcessStep;
  * <b>Important:</b> Use only this process step to get some data from the network so that in case of failure a
  * appropriate handling is triggered.
  * 
- * @author Nico
+ * @author Nico, Seppi
  */
 public abstract class BaseGetProcessStep extends ProcessStep implements IGetListener {
 
