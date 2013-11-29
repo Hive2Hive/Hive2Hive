@@ -20,19 +20,19 @@ public abstract class ConsoleMenu {
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 
-		addMenuHandlers();
+		addMenuItems();
 
-		add("Back", new IConsoleMenuCallback() {
-			public void invoke() {
+		add(new H2HConsoleMenuItem("Back") {
+			protected void execute() {
 				exitHandler();
 			}
 		});
 	}
 
-	protected abstract void addMenuHandlers();
+	protected abstract void addMenuItems();
 
-	protected final void add(String displayText, IConsoleMenuCallback callback) {
-		items.add(new ConsoleMenuItem(displayText, callback));
+	protected final void add(ConsoleMenuItem menuItem) {
+		items.add(menuItem);
 	}
 
 	public void open() {
@@ -65,8 +65,9 @@ public abstract class ConsoleMenu {
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
-			IConsoleMenuCallback callback = item.getCallback();
-			callback.invoke();
+//			IConsoleMenuCallback callback = item.getCallback();
+//			callback.invoke();
+			item.invoke();
 		}
 
 		// do not close input
@@ -95,10 +96,6 @@ public abstract class ConsoleMenu {
 	
 	private void exitHandler() {
 		exited = true;
-	}
-
-	protected void printMenuSelection(String selectedOption) {
-		System.out.println("Selected Option: " + selectedOption);
 	}
 
 	protected abstract String getInstruction();
