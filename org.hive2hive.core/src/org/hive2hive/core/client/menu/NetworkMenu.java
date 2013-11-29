@@ -18,10 +18,55 @@ import org.hive2hive.core.network.NetworkManager;
  */
 public final class NetworkMenu extends ConsoleMenu {
 
+	public H2HConsoleMenuItem SetBootStrapMenuItem;
+	public H2HConsoleMenuItem CreateNetworkMenuItem;
+	public H2HConsoleMenuItem CreateH2HNodeMenutItem;
+	
 	public NetworkMenu(Console console, SessionInstance session) {
 		super(console, session);
 	}
 
+	@Override
+	protected void createItems() {
+		SetBootStrapMenuItem = new H2HConsoleMenuItem("Set BootsrapAddress") {
+			protected void execute() throws UnknownHostException {
+				System.out.println("Specify BootstrapAddress:\n");
+				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
+				session.getNodeBuilder().setBootstrapAddress(bootstrapAddress);
+				session.setBootstrapAddress(bootstrapAddress);
+				printSuccess();
+			}
+		};
+		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create Network") {
+			protected boolean preconditionsSatisfied() {
+				// check if bootstrap address is set
+				if (session.getBootstrapAddress() == null){
+					printPreconditionError("Cannot create network: Please specify a bootstrap address first.");
+					SetBootStrapMenuItem.invoke();
+				}
+				return true;
+			};
+			protected void execute() {
+				createNetworkHandler();
+				printSuccess();
+			}
+		};
+		CreateH2HNodeMenutItem = new H2HConsoleMenuItem("Create H2H Node") {
+			protected boolean preconditionsSatisfied() {
+				if (session.getNetwork() == null) {
+					printPreconditionError("Cannot create H2H Node: Please create a network first.");
+					new NetworkMenu(console, session).CreateNetworkMenuItem.invoke();
+				}
+				return true;
+			}
+
+			protected void execute() {
+				session.setH2HNode(session.getNodeBuilder().build());
+				printSuccess();
+			}
+		};
+	}
+	
 	@Override
 	protected void addMenuItems() {
 
@@ -67,13 +112,7 @@ public final class NetworkMenu extends ConsoleMenu {
 				printSuccess();
 			}
 		});
-		add(new H2HConsoleMenuItem("Set BootsrapAddress") {
-			protected void execute() throws UnknownHostException {
-				System.out.println("Specify BootstrapAddress:\n");
-				session.getNodeBuilder().setBootstrapAddress(InetAddress.getByName(awaitStringParameter()));
-				printSuccess();
-			}
-		});
+		add(SetBootStrapMenuItem);
 		add(new H2HConsoleMenuItem("Set RootPath") {
 			protected void execute() {
 				System.out.println("Specify RootPath:\n");
@@ -81,30 +120,10 @@ public final class NetworkMenu extends ConsoleMenu {
 				printSuccess();
 			}
 		});
-		add(new H2HConsoleMenuItem("Create Network") {
-			protected void execute() {
-				createNetworkHandler();
-				printSuccess();
-			}
-		});
-		add(new H2HConsoleMenuItem("Create H2H Node") {
-			@Override
-			protected boolean preconditionsSatisfied() {
-				boolean satisfied = true;
-				if (session.getNetwork() == null) {
-					System.out.println("Cannot create H2H Node: No network created yet.\n");
-					satisfied = false;
-				}
-				return satisfied;
-			}
-
-			protected void execute() {
-				session.setH2HNode(session.getNodeBuilder().build());
-				printSuccess();
-			}
-		});
+		add(CreateNetworkMenuItem);
+		add(CreateH2HNodeMenutItem);
 	}
-
+	
 	private void createNetworkHandler() {
 
 		// TODO this whole procedure should exist as separate process
@@ -144,5 +163,4 @@ public final class NetworkMenu extends ConsoleMenu {
 	public String getInstruction() {
 		return "Please select a network configuration option:\n";
 	}
-
 }

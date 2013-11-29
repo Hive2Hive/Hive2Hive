@@ -91,6 +91,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	@Override
 	public IProcess login(final UserCredentials credentials) {
 		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
+		
+		// TODO this makes no sense actually, since the IProcess is returned...
 		loginProcess.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {

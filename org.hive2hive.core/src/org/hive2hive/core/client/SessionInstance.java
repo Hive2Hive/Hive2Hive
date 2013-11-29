@@ -1,5 +1,6 @@
 package org.hive2hive.core.client;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 import org.hive2hive.core.H2HNode;
@@ -19,6 +20,7 @@ public final class SessionInstance {
 	private ArrayList<NetworkManager> network = null;
 	private final H2HNodeBuilder nodeBuilder = new H2HNodeBuilder();
 	private H2HNode node;
+	private InetAddress bootstrapAddress = null;
 
 	// user configuration parameters
 	private String userId = null;
@@ -76,6 +78,14 @@ public final class SessionInstance {
 
 	public void setCredentials(UserCredentials credentials) {
 		this.credentials = credentials;
+	}
+
+	public InetAddress getBootstrapAddress() {
+		return bootstrapAddress;
+	}
+
+	public void setBootstrapAddress(InetAddress bootstrapAddress) {
+		this.bootstrapAddress = bootstrapAddress;
 	}
 
 }

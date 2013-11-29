@@ -2,7 +2,6 @@ package org.hive2hive.core.process;
 
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.manager.ProcessManager;
 
 /**
  * This interface provides the default methods of a process which represents a use case.

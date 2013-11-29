@@ -28,6 +28,7 @@ public abstract class ConsoleMenu {
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 
+		createItems();
 		addMenuItems();
 
 		add(new H2HConsoleMenuItem("Back") {
@@ -37,6 +38,19 @@ public abstract class ConsoleMenu {
 		});
 	}
 
+	/**
+	 * Specifies the {@link H2HConsoleMenuItem}s of this menu.<br/>
+	 * <b>Note:</b> Not all {@link H2HConsoleMenuItem}s are specified here, as they might also be specified
+	 * in-line in {@link ConsoleMenu#addMenuItems()}.</br>
+	 * <b>Note:</b> {@link H2HConsoleMenuItem}s with preconditions should be specified by this method.
+	 */
+	protected void createItems() {
+		// do nothing by default
+	}
+
+	/**
+	 * Enlists the {@link H2HConsoleMenuItem}s of this menu.
+	 */
 	protected abstract void addMenuItems();
 
 	protected final void add(ConsoleMenuItem menuItem) {
@@ -73,14 +87,13 @@ public abstract class ConsoleMenu {
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
-			// IConsoleMenuCallback callback = item.getCallback();
-			// callback.invoke();
 			item.invoke();
 		}
 
 		// do not close input
 	}
 
+	// TODO correct parameter input methods
 	protected String awaitStringParameter() {
 
 		Scanner input = new Scanner(System.in);
@@ -98,7 +111,6 @@ public abstract class ConsoleMenu {
 	}
 
 	protected int awaitIntParameter() {
-
 		return Integer.parseInt(awaitStringParameter());
 	}
 

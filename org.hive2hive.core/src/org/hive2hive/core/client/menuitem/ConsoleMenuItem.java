@@ -21,7 +21,9 @@ public abstract class ConsoleMenuItem {
 		try {
 			execute();
 		} catch (Exception e) {
-			System.err.println(String.format("An exception has been thrown:\n%s\n", e.getMessage()));
+			System.err.println("An exception has been thrown:");
+			e.printStackTrace();
+			System.out.println();
 		} finally {
 			end();
 		}
