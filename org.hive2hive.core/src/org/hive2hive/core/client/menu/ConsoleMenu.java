@@ -37,7 +37,6 @@ public abstract class ConsoleMenu {
 
 	public void open() {
 		while (!exited) {
-			console.clear();
 			show();
 		}
 	}
@@ -51,7 +50,7 @@ public abstract class ConsoleMenu {
 
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
-			System.out.println(String.format("    [%s] %s", i + 1, item.getDisplayText()));
+			System.out.println(String.format("    [%s]  %s", i + 1, item.getDisplayText()));
 		}
 		System.out.println();
 
@@ -92,6 +91,10 @@ public abstract class ConsoleMenu {
 	protected int awaitIntParameter() {
 		
 		return Integer.parseInt(awaitStringParameter());
+	}
+	
+	protected boolean awaitBooleanParameter() {
+		return Boolean.parseBoolean(awaitStringParameter());
 	}
 	
 	private void exitHandler() {
