@@ -45,31 +45,13 @@ public final class TopLevelMenu extends ConsoleMenu {
 				return true;
 			}
 			protected void execute() {
-				registerHandler();
+				IProcess registerProcess = session.getH2HNode().register(session.getCredentials());
+				// TODO notify client when process is finished
 			}
 		});
 		add(new H2HConsoleMenuItem("Login") {
 			protected void execute() {
 				loginHandler();
-			}
-		});
-	}
-
-	private void registerHandler() {
-
-		IProcess registerProcess = session.getH2HNode().register(session.getCredentials());
-		registerProcess.addListener(new IProcessListener() {
-			
-			@Override
-			public void onSuccess() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onFail(String reason) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
 	}
