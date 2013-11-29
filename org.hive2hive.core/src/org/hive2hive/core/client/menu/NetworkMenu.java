@@ -86,12 +86,11 @@ public class NetworkMenu extends ConsoleMenu {
 //			}
 //		});
 //		
-//		add("Create Network", new IConsoleMenuCallback() {
-//			public void invoke() {
-//				printMenuSelection("Create Network");
-//				createNetworkHandler();
-//			}
-//		});
+		add(new H2HConsoleMenuItem("Create Network") {
+			protected void execute() {
+				createNetworkHandler();
+			}
+		});
 //		
 //		add("Create H2H Node", new IConsoleMenuCallback() {
 //			public void invoke() {
@@ -109,8 +108,7 @@ public class NetworkMenu extends ConsoleMenu {
 		System.out.println("Specify number of nodes:\n");
 		int nrOfNodes = awaitIntParameter();
 		if (nrOfNodes < 1) {
-			System.out.println("Invalid number of nodes.\n");
-			createNetworkHandler();
+			throw new IllegalArgumentException("Invalid number of nodes.");
 		}
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(nrOfNodes);
 
