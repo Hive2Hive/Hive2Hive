@@ -1,7 +1,7 @@
 package org.hive2hive.core.network.data.listener;
 
 import org.hive2hive.core.network.data.futures.FutureGetUserProfileTaskListener;
-import org.hive2hive.core.network.usermessages.UserProfileTask;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
  * An interface used in {@link FutureGetUserProfileTaskListener} to inform entities about a success or fail of

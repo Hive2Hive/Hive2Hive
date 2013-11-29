@@ -4,7 +4,7 @@ import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureGet;
 
 import org.hive2hive.core.network.data.listener.IGetUserProfileTaskListener;
-import org.hive2hive.core.network.usermessages.UserProfileTask;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
  * A future listener for a get of a {@link UserProfileTask} object. Returns the given

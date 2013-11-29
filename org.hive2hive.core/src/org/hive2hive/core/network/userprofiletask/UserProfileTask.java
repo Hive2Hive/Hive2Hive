@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.usermessages;
+package org.hive2hive.core.network.userprofiletask;
 
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;

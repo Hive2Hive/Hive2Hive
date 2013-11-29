@@ -16,7 +16,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.listener.IPutUserProfileTaskListener;
-import org.hive2hive.core.network.usermessages.UserProfileTask;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
  * A put future adapter for verifying a put of a {@link UserProfileTask} object. Provides failure handling and

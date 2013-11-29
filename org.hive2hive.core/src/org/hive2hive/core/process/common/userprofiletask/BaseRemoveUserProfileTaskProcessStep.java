@@ -7,7 +7,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.listener.IPutUserProfileTaskListener;
 import org.hive2hive.core.network.data.listener.IRemoveUserProfileTaskListener;
-import org.hive2hive.core.network.usermessages.UserProfileTask;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 
 public abstract class BaseRemoveUserProfileTaskProcessStep extends ProcessStep implements

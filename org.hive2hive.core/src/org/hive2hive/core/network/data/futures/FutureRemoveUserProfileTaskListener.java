@@ -12,7 +12,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.listener.IRemoveUserProfileTaskListener;
-import org.hive2hive.core.network.usermessages.UserProfileTask;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
  * A future listener for a remove of a {@link UserProfileTask} object. After the operation completed the

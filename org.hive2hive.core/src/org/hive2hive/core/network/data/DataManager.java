@@ -26,7 +26,7 @@ import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IPutUserProfileTaskListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.data.listener.IRemoveUserProfileTaskListener;
-import org.hive2hive.core.network.usermessages.UserProfileTask;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
  * This class offers an interface for putting, getting and removing data from the network. Data can be stored
