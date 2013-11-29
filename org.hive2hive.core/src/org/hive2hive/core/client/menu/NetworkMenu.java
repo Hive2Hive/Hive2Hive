@@ -4,14 +4,21 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import org.hive2hive.core.client.H2HConsole;
+import org.hive2hive.core.client.ConsoleClient;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.network.NetworkManager;
 
-public class NetworkMenu extends ConsoleMenu {
+/**
+ * The network configuration menu of the {@link ConsoleClient}.
+ * 
+ * @author Christian
+ * 
+ */
+public final class NetworkMenu extends ConsoleMenu {
 
-	public NetworkMenu(H2HConsole console, SessionInstance session) {
+	public NetworkMenu(Console console, SessionInstance session) {
 		super(console, session);
 	}
 
@@ -84,12 +91,13 @@ public class NetworkMenu extends ConsoleMenu {
 			@Override
 			protected boolean preconditionsSatisfied() {
 				boolean satisfied = true;
-				if (session.getNetwork() == null){
+				if (session.getNetwork() == null) {
 					System.out.println("Cannot create H2H Node: No network created yet.\n");
 					satisfied = false;
 				}
 				return satisfied;
 			}
+
 			protected void execute() {
 				session.setH2HNode(session.getNodeBuilder().build());
 				printSuccess();
@@ -131,7 +139,7 @@ public class NetworkMenu extends ConsoleMenu {
 
 		// TODO wait here until the operation has completed
 	}
-	
+
 	@Override
 	public String getInstruction() {
 		return "Please select a network configuration option:\n";

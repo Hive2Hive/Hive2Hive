@@ -1,13 +1,19 @@
 package org.hive2hive.core.client.menu;
 
-import org.hive2hive.core.client.H2HConsole;
+import org.hive2hive.core.client.ConsoleClient;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.process.IProcess;
 
-public class TopLevelMenu extends ConsoleMenu {
+/**
+ * The top-level menu of the {@link ConsoleClient}.
+ * @author Christian
+ *
+ */
+public final class TopLevelMenu extends ConsoleMenu {
 
-	public TopLevelMenu(H2HConsole console, SessionInstance session) {
+	public TopLevelMenu(Console console, SessionInstance session) {
 		super(console, session);
 	}
 

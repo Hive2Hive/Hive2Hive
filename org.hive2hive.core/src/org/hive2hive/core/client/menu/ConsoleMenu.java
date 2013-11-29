@@ -3,20 +3,26 @@ package org.hive2hive.core.client.menu;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.hive2hive.core.client.H2HConsole;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menuitem.ConsoleMenuItem;
 import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 
+/**
+ * An abstract console menu to be used with a {@link Console}.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class ConsoleMenu {
 
-	protected final H2HConsole console;
+	protected final Console console;
 	protected final SessionInstance session;
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
 
-	public ConsoleMenu(H2HConsole console, SessionInstance session) {
+	public ConsoleMenu(Console console, SessionInstance session) {
 		this.console = console;
 		this.session = session;
 		this.items = new ArrayList<ConsoleMenuItem>();
@@ -67,8 +73,8 @@ public abstract class ConsoleMenu {
 			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
-//			IConsoleMenuCallback callback = item.getCallback();
-//			callback.invoke();
+			// IConsoleMenuCallback callback = item.getCallback();
+			// callback.invoke();
 			item.invoke();
 		}
 
@@ -76,7 +82,7 @@ public abstract class ConsoleMenu {
 	}
 
 	protected String awaitStringParameter() {
-		
+
 		Scanner input = new Scanner(System.in);
 		String parameter;
 		try {
@@ -87,19 +93,19 @@ public abstract class ConsoleMenu {
 			return null;
 		}
 		// do not close input
-		
+
 		return parameter;
 	}
-	
+
 	protected int awaitIntParameter() {
-		
+
 		return Integer.parseInt(awaitStringParameter());
 	}
-	
+
 	protected boolean awaitBooleanParameter() {
 		return Boolean.parseBoolean(awaitStringParameter());
 	}
-	
+
 	private void exitHandler() {
 		exited = true;
 	}

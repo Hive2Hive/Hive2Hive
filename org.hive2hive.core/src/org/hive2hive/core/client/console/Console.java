@@ -1,4 +1,4 @@
-package org.hive2hive.core.client;
+package org.hive2hive.core.client.console;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,13 +16,18 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public final class H2HConsole extends WindowAdapter implements WindowListener, Runnable {
+/**
+ * A Java swing console that reassigns the standard channels STDIN, STDOUT and STDERR to itself.
+ * 
+ * @author Christian
+ * 
+ */
+public final class Console extends WindowAdapter implements WindowListener, Runnable {
 
 	private JFrame frame;
 	private JTextArea textArea;
@@ -37,7 +42,7 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 
 	private boolean quit;
 
-	public H2HConsole() {
+	public Console() {
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = new Dimension(screenSize.width / 2, screenSize.height / 2);
@@ -53,10 +58,6 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 		textArea.setMargin(new Insets(10, 10, 10, 10));
 
 		frame = new JFrame("Hive2Hive Console");
-//		try {
-//			frame.setIconImage(ImageIO.read(H2HConsole.class.getResource("/resources/h2h_logo.png")));
-//		} catch (IOException e) {
-//		}
 		frame.setIconImage(new ImageIcon(getClass().getResource("/res/logo.png")).getImage());
 		frame.setBounds(frameSize.width / 2, frameSize.height / 2, frameSize.width, frameSize.height);
 		frame.getContentPane().setLayout(new BorderLayout());
@@ -221,13 +222,13 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 	public void setFont(Font font) {
 		textArea.setFont(font);
 	}
-	
-//	public void setBoldness(boolean isBold) {
-//		Font current = textArea.getFont();
-//		if (isBold) {
-//			setFont(new Font(current.getFamily(), Font.BOLD, current.getSize()));
-//		} else {
-//			setFont(new Font(current.getFamily(), Font.PLAIN, current.getSize()));
-//		}
-//	}
+
+	// public void setBoldness(boolean isBold) {
+	// Font current = textArea.getFont();
+	// if (isBold) {
+	// setFont(new Font(current.getFamily(), Font.BOLD, current.getSize()));
+	// } else {
+	// setFont(new Font(current.getFamily(), Font.PLAIN, current.getSize()));
+	// }
+	// }
 }

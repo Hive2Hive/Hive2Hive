@@ -7,24 +7,30 @@ import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 
-public class SessionInstance {
+/**
+ * A data class for the {@link ConsoleClient} that is necessary to store the client's session data.
+ * 
+ * @author Christian
+ * 
+ */
+public final class SessionInstance {
 
 	// network configuration parameters
 	private ArrayList<NetworkManager> network = null;
 	private final H2HNodeBuilder nodeBuilder = new H2HNodeBuilder();
 	private H2HNode node;
-	
+
 	// user configuration parameters
 	private String userId = null;
 	private String password = null;
 	private String pin = null;
 	private UserCredentials credentials;
-	
-	public void setH2HNode(H2HNode node){
+
+	public void setH2HNode(H2HNode node) {
 		this.node = node;
 	}
-	
-	public H2HNode getH2HNode(){
+
+	public H2HNode getH2HNode() {
 		return node;
 	}
 
@@ -71,5 +77,5 @@ public class SessionInstance {
 	public void setCredentials(UserCredentials credentials) {
 		this.credentials = credentials;
 	}
-	
+
 }

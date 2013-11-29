@@ -1,13 +1,20 @@
 package org.hive2hive.core.client.menu;
 
-import org.hive2hive.core.client.H2HConsole;
+import org.hive2hive.core.client.ConsoleClient;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.security.UserCredentials;
 
-public class UserMenu extends ConsoleMenu {
+/**
+ * The user configuration menu of the {@link ConsoleClient}.
+ * 
+ * @author Christian
+ * 
+ */
+public final class UserMenu extends ConsoleMenu {
 
-	public UserMenu(H2HConsole console, SessionInstance session) {
+	public UserMenu(Console console, SessionInstance session) {
 		super(console, session);
 	}
 
@@ -39,20 +46,21 @@ public class UserMenu extends ConsoleMenu {
 			@Override
 			protected boolean preconditionsSatisfied() {
 				boolean satisfied = true;
-				if (session.getUserId() == null){
+				if (session.getUserId() == null) {
 					System.out.println("User Credentials cannot be created: User ID not yet set.\n");
 					satisfied = false;
 				}
-				if (session.getPassword() == null){
+				if (session.getPassword() == null) {
 					System.out.println("User Credentials cannot be created: User password not yet set.\n");
 					satisfied = false;
 				}
-				if (session.getPin() == null){
+				if (session.getPin() == null) {
 					System.out.println("User Credentials cannot be created: User PIN not yet set.\n");
 					satisfied = false;
 				}
 				return satisfied;
 			}
+
 			protected void execute() throws Exception {
 				session.setCredentials(new UserCredentials(session.getUserId(), session.getPassword(),
 						session.getPin()));

@@ -1,5 +1,11 @@
 package org.hive2hive.core.client.menuitem;
 
+/**
+ * A specified console menu item. Allows to check preconditions before execution the operation.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 
 	public H2HConsoleMenuItem(String displayText) {
@@ -9,11 +15,11 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	@Override
 	public void invoke() {
 		// check preconditions before invoking
-		if (preconditionsSatisfied()){
+		if (preconditionsSatisfied()) {
 			super.invoke();
 		}
 	}
-	
+
 	@Override
 	protected final void initialize() {
 		printSelection();
@@ -31,7 +37,7 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 		// accept by default
 		return true;
 	}
-	
+
 	private void printSelection() {
 		System.out.println(String.format("Selected Option: %s\n", displayText));
 	}

@@ -2,6 +2,7 @@ package org.hive2hive.core.client;
 
 import java.io.IOException;
 
+import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menu.TopLevelMenu;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
@@ -14,11 +15,11 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 public class ConsoleClient {
 
 	private static SessionInstance session;
-	private static H2HConsole console;
+	private static Console console;
 
 	public static void main(String[] args) {
 
-		console = new H2HConsole();
+		console = new Console();
 		session = new SessionInstance();
 
 		try {
