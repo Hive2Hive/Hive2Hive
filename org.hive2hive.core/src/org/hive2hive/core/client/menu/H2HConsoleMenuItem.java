@@ -7,7 +7,15 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	}
 
 	@Override
-	protected void initialize() {
+	public void invoke() {
+		// check preconditions before invoking
+		if (preconditionsSatisfied()){
+			super.invoke();
+		}
+	}
+	
+	@Override
+	protected final void initialize() {
 		printSelection();
 	}
 
@@ -16,9 +24,14 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 
 	@Override
 	protected void end() {
-		// do nothing as default
+		// do nothing by default
 	}
 
+	protected boolean preconditionsSatisfied() {
+		// accept by default
+		return true;
+	}
+	
 	private void printSelection() {
 		System.out.println(String.format("Selected Option: %s\n", displayText));
 	}

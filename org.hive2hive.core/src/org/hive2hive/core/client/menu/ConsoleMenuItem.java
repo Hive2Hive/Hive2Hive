@@ -1,6 +1,5 @@
 package org.hive2hive.core.client.menu;
 
-import org.hive2hive.core.client.H2HConsole;
 
 /**
  * A console menu item representing an option.
@@ -12,15 +11,12 @@ public abstract class ConsoleMenuItem {
 
 	protected String displayText;
 
-	protected abstract void initialize();
-	protected abstract void execute() throws Exception;
-	protected abstract void end();
 		
 	public ConsoleMenuItem(String displayText) {
 		this.displayText = displayText;
 	}
 	
-	public final void invoke() {
+	public void invoke() {
 		
 		initialize();
 		try {
@@ -31,6 +27,12 @@ public abstract class ConsoleMenuItem {
 			end();
 		}
 	}
+
+	protected abstract void initialize();
+	
+	protected abstract void execute() throws Exception;
+
+	protected abstract void end();
 
 	public String getDisplayText() {
 		return displayText;
