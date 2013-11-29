@@ -2,6 +2,7 @@ package org.hive2hive.core.client.menu;
 
 import org.hive2hive.core.client.H2HConsole;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.security.UserCredentials;
 
 public class UserMenu extends ConsoleMenu {
@@ -39,15 +40,15 @@ public class UserMenu extends ConsoleMenu {
 			protected boolean preconditionsSatisfied() {
 				boolean satisfied = true;
 				if (session.getUserId() == null){
-					System.out.println("User Credentials cannot be created: User ID not yet set.");
+					System.out.println("User Credentials cannot be created: User ID not yet set.\n");
 					satisfied = false;
 				}
 				if (session.getPassword() == null){
-					System.out.println("User Credentials cannot be created: User password not yet set.");
+					System.out.println("User Credentials cannot be created: User password not yet set.\n");
 					satisfied = false;
 				}
 				if (session.getPin() == null){
-					System.out.println("User Credentials cannot be created: User PIN not yet set.");
+					System.out.println("User Credentials cannot be created: User PIN not yet set.\n");
 					satisfied = false;
 				}
 				return satisfied;

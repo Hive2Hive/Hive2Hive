@@ -1,4 +1,4 @@
-package org.hive2hive.core.client.menu;
+package org.hive2hive.core.client.menuitem;
 
 
 /**

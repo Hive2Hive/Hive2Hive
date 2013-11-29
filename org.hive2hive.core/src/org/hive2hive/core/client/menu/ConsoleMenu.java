@@ -5,6 +5,8 @@ import java.util.Scanner;
 
 import org.hive2hive.core.client.H2HConsole;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.menuitem.ConsoleMenuItem;
+import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 
 public abstract class ConsoleMenu {
 
@@ -37,6 +39,7 @@ public abstract class ConsoleMenu {
 
 	public void open() {
 		while (!exited) {
+			console.clear();
 			show();
 		}
 	}

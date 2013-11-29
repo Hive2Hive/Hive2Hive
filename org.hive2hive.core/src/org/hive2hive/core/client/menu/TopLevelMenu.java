@@ -2,6 +2,7 @@ package org.hive2hive.core.client.menu;
 
 import org.hive2hive.core.client.H2HConsole;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.process.IProcess;
 
 public class TopLevelMenu extends ConsoleMenu {
@@ -15,12 +16,12 @@ public class TopLevelMenu extends ConsoleMenu {
 					
 		add(new H2HConsoleMenuItem("Network Configuration") {
 			protected void execute() {
-				networkConfigurationHandler();
+				new NetworkMenu(console, session).open();
 			}
 		});
 		add(new H2HConsoleMenuItem("User Configuration") {
 			protected void execute() {
-				userConfigurationHandler();
+				new UserMenu(console, session).open();
 			}
 		});
 		add(new H2HConsoleMenuItem("Register") {
@@ -33,18 +34,6 @@ public class TopLevelMenu extends ConsoleMenu {
 				loginHandler();
 			}
 		});
-	}
-	
-	private void networkConfigurationHandler() {
-		
-		NetworkMenu menu = new NetworkMenu(console, session);
-		menu.open();
-	}
-	
-	private void userConfigurationHandler() {
-	
-		UserMenu menu = new UserMenu(console, session);
-		menu.open();
 	}
 
 	private void registerHandler() {
