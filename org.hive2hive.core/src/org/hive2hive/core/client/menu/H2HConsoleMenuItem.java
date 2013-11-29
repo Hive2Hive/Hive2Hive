@@ -2,30 +2,46 @@ package org.hive2hive.core.client.menu;
 
 public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 
+	boolean hasException = false;
+	Exception catchedException = null;
+	
 	public H2HConsoleMenuItem(String displayText) {
 		super(displayText);
 	}
 
 	@Override
-	protected final void initialize() {
+	public void invoke() {
+		
+		hasException = false;
+		catchedException = null;
+		
+		initialize();
+		try {
+			execute();
+		} catch (Exception e){
+			hasException = true;
+			catchedException = e;
+		} finally {
+			end();
+		}
+	}
+	
+	@Override
+	protected void initialize() {
 		printSelection();
-//		printInstruction();
 	}
 
 	@Override
 	protected abstract void execute();
 
 	@Override
-	protected final void end() {
-		// TODO Auto-generated method stub
-
+	protected void end() {
+		if (hasException){
+			System.err.println(String.format("An exception has been thrown:\n %s\n", catchedException.getMessage()));
+		}
 	}
 
 	private void printSelection() {
-		System.out.println(String.format("Selected Option: %s", displayText));
-	}
-	
-	private void printInstruction() {
 		System.out.println(String.format("Selected Option: %s", displayText));
 	}
 }

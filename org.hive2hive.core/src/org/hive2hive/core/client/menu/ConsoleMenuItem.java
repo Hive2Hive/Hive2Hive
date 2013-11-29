@@ -20,7 +20,7 @@ public abstract class ConsoleMenuItem {
 //		this.callback = callback;
 	}
 	
-	public final void invoke() {
+	public void invoke() {
 		initialize();
 		execute();
 		end();
