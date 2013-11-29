@@ -5,12 +5,20 @@ import java.util.ArrayList;
 import org.hive2hive.core.H2HNode;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.UserCredentials;
 
 public class SessionInstance {
 
+	// network configuration parameters
 	private ArrayList<NetworkManager> network;
 	private final H2HNodeBuilder nodeBuilder = new H2HNodeBuilder();
 	private H2HNode node;
+	
+	// user configuration parameters
+	private String userId;
+	private String password;
+	private String pin;
+	private UserCredentials credentials;
 	
 	public void setH2HNode(H2HNode node){
 		this.node = node;
@@ -30,6 +38,38 @@ public class SessionInstance {
 
 	public H2HNodeBuilder getNodeBuilder() {
 		return nodeBuilder;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
+	}
+
+	public UserCredentials getCredentials() {
+		return credentials;
+	}
+
+	public void setCredentials(UserCredentials credentials) {
+		this.credentials = credentials;
 	}
 	
 }

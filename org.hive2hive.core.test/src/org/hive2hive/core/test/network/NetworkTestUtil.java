@@ -125,14 +125,14 @@ public class NetworkTestUtil {
 		// create a master
 		File tempDirectory = FileUtils.getTempDirectory();
 		File root = new File(tempDirectory, randomString());
-		IH2HNode master = H2HNodeBuilder.buildDefault().setMaster(true).setRootPath(root.getAbsolutePath());
+		IH2HNode master = new H2HNodeBuilder().setIsMaster(true).setRootPath(root.getAbsolutePath()).build();
 		nodes.add(master);
 
 		try {
 			InetAddress bootstrapAddress = InetAddress.getByName("127.0.0.1");
 			for (int i = 1; i < numberOfNodes; i++) {
 				root = new File(tempDirectory, randomString());
-				IH2HNode node = H2HNodeBuilder.buildDefault().setBootstrapAddress(bootstrapAddress).setRootPath(root.getAbsolutePath());
+				IH2HNode node = new H2HNodeBuilder().setBootstrapAddress(bootstrapAddress).setRootPath(root.getAbsolutePath()).build();
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {

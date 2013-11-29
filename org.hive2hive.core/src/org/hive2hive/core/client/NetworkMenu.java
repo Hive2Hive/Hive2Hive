@@ -15,20 +15,6 @@ public class NetworkMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuHandlers() {
 
-		add("Create Network", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Create Network");
-				createNetworkHandler();
-			}
-		});
-		
-		add("Create H2H Node", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Create H2H Node");
-				session.setH2HNode(session.getNodeBuilder().build());
-			}
-		});
-		
 		add("Set MaxFileSize", new IConsoleMenuCallback() {
 			public void invoke() {
 				printMenuSelection("Set MaxFileSize");
@@ -95,6 +81,20 @@ public class NetworkMenu extends ConsoleMenu {
 				printMenuSelection("Set RootPath");
 				System.out.println("Specify RootPath:\n");
 				session.getNodeBuilder().setRootPath(awaitStringParameter());
+			}
+		});
+		
+		add("Create Network", new IConsoleMenuCallback() {
+			public void invoke() {
+				printMenuSelection("Create Network");
+				createNetworkHandler();
+			}
+		});
+		
+		add("Create H2H Node", new IConsoleMenuCallback() {
+			public void invoke() {
+				printMenuSelection("Create H2H Node");
+				session.setH2HNode(session.getNodeBuilder().build());
 			}
 		});
 	}

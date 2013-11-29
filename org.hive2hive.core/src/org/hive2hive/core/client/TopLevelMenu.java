@@ -1,5 +1,7 @@
 package org.hive2hive.core.client;
 
+import org.hive2hive.core.process.IProcess;
+
 public class TopLevelMenu extends ConsoleMenu {
 
 	public TopLevelMenu(H2HConsole console, SessionInstance session) {
@@ -36,20 +38,21 @@ public class TopLevelMenu extends ConsoleMenu {
 
 	}
 	
-	private void userConfigurationHandler() {
-		
-	}
-	
 	private void networkConfigurationHandler() {
 		
 		NetworkMenu menu = new NetworkMenu(console, session);
 		menu.open();
 	}
+	
+	private void userConfigurationHandler() {
+	
+		UserMenu menu = new UserMenu(console, session);
+		menu.open();
+	}
 
 	private void registerHandler() {
 
-		RegisterMenu menu = new RegisterMenu(console, session);
-		menu.open();
+		IProcess registerProcess = session.getH2HNode().register(session.getCredentials());
 	}
 
 	private void loginHandler() {
