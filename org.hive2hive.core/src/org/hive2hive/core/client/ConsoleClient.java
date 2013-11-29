@@ -2,6 +2,7 @@ package org.hive2hive.core.client;
 
 import java.io.IOException;
 
+import org.hive2hive.core.client.menu.TopLevelMenu;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
 /**

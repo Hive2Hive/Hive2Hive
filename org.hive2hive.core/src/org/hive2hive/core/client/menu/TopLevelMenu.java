@@ -1,5 +1,7 @@
-package org.hive2hive.core.client;
+package org.hive2hive.core.client.menu;
 
+import org.hive2hive.core.client.H2HConsole;
+import org.hive2hive.core.client.SessionInstance;
 import org.hive2hive.core.process.IProcess;
 
 public class TopLevelMenu extends ConsoleMenu {

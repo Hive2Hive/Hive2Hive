@@ -1,7 +1,10 @@
-package org.hive2hive.core.client;
+package org.hive2hive.core.client.menu;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import org.hive2hive.core.client.H2HConsole;
+import org.hive2hive.core.client.SessionInstance;
 
 public abstract class ConsoleMenu {
 

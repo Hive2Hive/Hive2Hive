@@ -1,9 +1,11 @@
-package org.hive2hive.core.client;
+package org.hive2hive.core.client.menu;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import org.hive2hive.core.client.H2HConsole;
+import org.hive2hive.core.client.SessionInstance;
 import org.hive2hive.core.network.NetworkManager;
 
 public class NetworkMenu extends ConsoleMenu {
