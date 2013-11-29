@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.network;
+package org.hive2hive.core.test.network.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +10,13 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
@@ -190,15 +192,14 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		@Override
 		public void start() {
 			try {
-				UserProfile userProfile = profileManager.getUserProfile(getProcess());
+				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), put);
 
 				if (modify) {
-					profileManager.startModification(getProcess());
 					new FileTreeNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
 				}
 
 				if (put) {
-					profileManager.putUserProfile(getProcess());
+					profileManager.readyToPut(userProfile, getProcess().getID());
 				}
 
 				getProcess().setNextStep(null);

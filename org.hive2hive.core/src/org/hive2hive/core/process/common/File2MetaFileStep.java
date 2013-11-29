@@ -51,7 +51,7 @@ public class File2MetaFileStep extends ProcessStep {
 	@Override
 	public void start() {
 		try {
-			UserProfile profile = profileManager.getUserProfile(getProcess());
+			UserProfile profile = profileManager.getUserProfile(getProcess().getID(), false);
 
 			if (fileNode == null) {
 				fileNode = profile.getFileByPath(file, fileManager);

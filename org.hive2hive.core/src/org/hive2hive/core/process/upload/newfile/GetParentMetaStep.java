@@ -50,7 +50,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			UserProfileManager profileManager = context.getProfileManager();
 			UserProfile userProfile = null;
 			try {
-				userProfile = profileManager.getUserProfile(getProcess());
+				userProfile = profileManager.getUserProfile(getProcess().getID(), false);
 			} catch (GetFailedException e) {
 				getProcess().stop(e.getMessage());
 				return;

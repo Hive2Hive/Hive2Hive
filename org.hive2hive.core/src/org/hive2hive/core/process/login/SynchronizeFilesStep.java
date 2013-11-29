@@ -55,7 +55,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		FileSynchronizer synchronizer = null;
 		try {
-			UserProfile userProfile = profileManager.getUserProfile(getProcess());
+			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), false);
 			synchronizer = new FileSynchronizer(fileManager, userProfile);
 		} catch (GetFailedException e1) {
 			getProcess().stop(e1.getMessage());
@@ -109,13 +109,13 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		if (context.getIsDefinedAsMaster()) {
 			String userId = profileManager.getUserCredentials().getUserId();
-			
-			
+
 			// TODO set when step is implemented
-//			HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
-//			GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId, handleUmQueueStep);
-//			context.setUserMessageQueueStep(getUMQueueStep);
-//			 getProcess().setNextStep(getUMQueueStep);
+			// HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
+			// GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
+			// handleUmQueueStep);
+			// context.setUserMessageQueueStep(getUMQueueStep);
+			// getProcess().setNextStep(getUMQueueStep);
 			getProcess().setNextStep(null);
 		} else {
 			// done with the post login process
