@@ -18,7 +18,6 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.ProcessTreeNode;
-import org.hive2hive.core.process.common.get.GetUserMessageStep;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.manager.ProcessManager;
