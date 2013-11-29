@@ -15,90 +15,90 @@ public class NetworkMenu extends ConsoleMenu {
 	}
 
 	@Override
-	protected void addMenuHandlers() {
+	protected void addMenuItems() {
 
-		add("Set MaxFileSize", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set MaxFileSize");
-				System.out.println("Specify MaxFileSize:\n");
-				session.getNodeBuilder().setMaxFileSize(awaitIntParameter());
-			}
-		});
-
-		add("Set MaxNumOfVersions", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set MaxNumOfVersions");
-				System.out.println("Specify MaxNumOfVersions:\n");
-				session.getNodeBuilder().setMaxNumOfVersions(awaitIntParameter());
-			}
-		});
-
-		add("Set MaxSizeAllVersions", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set MaxSizeAllVersions");
-				System.out.println("Specify MaxSizeAllVersions:\n");
-				session.getNodeBuilder().setMaxSizeAllVersions(awaitIntParameter());
-			}
-		});
-
-		add("Set ChunkSize", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set ChunkSize");
-				System.out.println("Specify ChunkSize:\n");
-				session.getNodeBuilder().setChunkSize(awaitIntParameter());
-			}
-		});
-
-		add("Set AutostartProcesses", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set AutostartProcesses");
-				System.out.println("Specify AutostartProcesses:\n");
-				session.getNodeBuilder().setAutostartProcesses(Boolean.parseBoolean(awaitStringParameter()));
-			}
-		});
-
-		add("Set IsMasterPeer", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set IsMasterPeer");
-				System.out.println("Specify IsMasterPeer:\n");
-				session.getNodeBuilder().setIsMaster(Boolean.parseBoolean(awaitStringParameter()));
-			}
-		});
-		
-		add("Set BootstrapAddress", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set BootstrapAddress");
-				System.out.println("Specify BootstrapAddress:\n");
-				try {
-					session.getNodeBuilder().setBootstrapAddress(InetAddress.getByName(awaitStringParameter()));
-				} catch (UnknownHostException e){
-					System.out.println("UnknownHostException occured.");
-					this.invoke();
-				}
-			}
-		});
-
-		add("Set RootPath", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Set RootPath");
-				System.out.println("Specify RootPath:\n");
-				session.getNodeBuilder().setRootPath(awaitStringParameter());
-			}
-		});
-		
-		add("Create Network", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Create Network");
-				createNetworkHandler();
-			}
-		});
-		
-		add("Create H2H Node", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Create H2H Node");
-				session.setH2HNode(session.getNodeBuilder().build());
-			}
-		});
+//		add("Set MaxFileSize", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set MaxFileSize");
+//				System.out.println("Specify MaxFileSize:\n");
+//				session.getNodeBuilder().setMaxFileSize(awaitIntParameter());
+//			}
+//		});
+//
+//		add("Set MaxNumOfVersions", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set MaxNumOfVersions");
+//				System.out.println("Specify MaxNumOfVersions:\n");
+//				session.getNodeBuilder().setMaxNumOfVersions(awaitIntParameter());
+//			}
+//		});
+//
+//		add("Set MaxSizeAllVersions", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set MaxSizeAllVersions");
+//				System.out.println("Specify MaxSizeAllVersions:\n");
+//				session.getNodeBuilder().setMaxSizeAllVersions(awaitIntParameter());
+//			}
+//		});
+//
+//		add("Set ChunkSize", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set ChunkSize");
+//				System.out.println("Specify ChunkSize:\n");
+//				session.getNodeBuilder().setChunkSize(awaitIntParameter());
+//			}
+//		});
+//
+//		add("Set AutostartProcesses", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set AutostartProcesses");
+//				System.out.println("Specify AutostartProcesses:\n");
+//				session.getNodeBuilder().setAutostartProcesses(Boolean.parseBoolean(awaitStringParameter()));
+//			}
+//		});
+//
+//		add("Set IsMasterPeer", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set IsMasterPeer");
+//				System.out.println("Specify IsMasterPeer:\n");
+//				session.getNodeBuilder().setIsMaster(Boolean.parseBoolean(awaitStringParameter()));
+//			}
+//		});
+//		
+//		add("Set BootstrapAddress", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set BootstrapAddress");
+//				System.out.println("Specify BootstrapAddress:\n");
+//				try {
+//					session.getNodeBuilder().setBootstrapAddress(InetAddress.getByName(awaitStringParameter()));
+//				} catch (UnknownHostException e){
+//					System.out.println("UnknownHostException occured.");
+//					this.invoke();
+//				}
+//			}
+//		});
+//
+//		add("Set RootPath", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Set RootPath");
+//				System.out.println("Specify RootPath:\n");
+//				session.getNodeBuilder().setRootPath(awaitStringParameter());
+//			}
+//		});
+//		
+//		add("Create Network", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Create Network");
+//				createNetworkHandler();
+//			}
+//		});
+//		
+//		add("Create H2H Node", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Create H2H Node");
+//				session.setH2HNode(session.getNodeBuilder().build());
+//			}
+//		});
 	}
 
 	private void createNetworkHandler() {

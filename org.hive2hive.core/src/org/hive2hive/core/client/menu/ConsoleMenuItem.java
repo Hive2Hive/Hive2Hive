@@ -6,21 +6,31 @@ package org.hive2hive.core.client.menu;
  * @author Christian
  * 
  */
-public class ConsoleMenuItem {
+public abstract class ConsoleMenuItem {
 
-	private String displayText;
-	private IConsoleMenuCallback callback;
+	protected String displayText;
+//	private IConsoleMenuCallback callback;
 
-	public ConsoleMenuItem(String displayText, IConsoleMenuCallback callback) {
+	protected abstract void initialize();
+	protected abstract void execute();
+	protected abstract void end();
+	
+	public ConsoleMenuItem(String displayText) {
 		this.displayText = displayText;
-		this.callback = callback;
+//		this.callback = callback;
+	}
+	
+	public final void invoke() {
+		initialize();
+		execute();
+		end();
 	}
 
 	public String getDisplayText() {
 		return displayText;
 	}
 
-	public IConsoleMenuCallback getCallback() {
-		return callback;
-	}
+//	public IConsoleMenuCallback getCallback() {
+//		return callback;
+//	}
 }

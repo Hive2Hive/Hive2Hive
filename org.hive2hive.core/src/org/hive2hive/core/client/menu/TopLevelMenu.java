@@ -11,32 +11,38 @@ public class TopLevelMenu extends ConsoleMenu {
 	}
 
 	@Override
-	protected void addMenuHandlers() {
-		
-		add("Network Configuration", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Network Configuration");
+	protected void addMenuItems() {
+					
+		add(new H2HConsoleMenuItem("Network Configuration") {
+			protected void execute() {
 				networkConfigurationHandler();
 			}
 		});
-		add("User Configuration", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("User Configuration");
-				userConfigurationHandler();
-			}
-		});
-		add("Register", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Register");
-				registerHandler();
-			}
-		});
-		add("Login", new IConsoleMenuCallback() {
-			public void invoke() {
-				printMenuSelection("Login");
-				loginHandler();
-			}
-		});
+		
+//		add("Network Configuration", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Network Configuration");
+//				networkConfigurationHandler();
+//			}
+//		});
+//		add("User Configuration", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("User Configuration");
+//				userConfigurationHandler();
+//			}
+//		});
+//		add("Register", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Register");
+//				registerHandler();
+//			}
+//		});
+//		add("Login", new IConsoleMenuCallback() {
+//			public void invoke() {
+//				printMenuSelection("Login");
+//				loginHandler();
+//			}
+//		});
 
 	}
 	
