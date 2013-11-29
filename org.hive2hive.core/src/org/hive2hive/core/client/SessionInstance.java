@@ -10,7 +10,7 @@ import org.hive2hive.core.security.UserCredentials;
 public class SessionInstance {
 
 	// network configuration parameters
-	private ArrayList<NetworkManager> network;
+	private ArrayList<NetworkManager> network = null;
 	private final H2HNodeBuilder nodeBuilder = new H2HNodeBuilder();
 	private H2HNode node;
 	

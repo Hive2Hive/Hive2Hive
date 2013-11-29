@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -15,6 +16,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -47,9 +50,14 @@ public final class H2HConsole extends WindowAdapter implements WindowListener, R
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 		textArea.setEditable(true);
+		textArea.setMargin(new Insets(10, 10, 10, 10));
 
 		frame = new JFrame("Hive2Hive Console");
-		// frame.setIconImage(image);
+//		try {
+//			frame.setIconImage(ImageIO.read(H2HConsole.class.getResource("/resources/h2h_logo.png")));
+//		} catch (IOException e) {
+//		}
+		frame.setIconImage(new ImageIcon(getClass().getResource("/res/logo.png")).getImage());
 		frame.setBounds(frameSize.width / 2, frameSize.height / 2, frameSize.width, frameSize.height);
 		frame.getContentPane().setLayout(new BorderLayout());
 		frame.getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);

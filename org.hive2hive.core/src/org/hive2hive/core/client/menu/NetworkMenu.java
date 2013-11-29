@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.hive2hive.core.client.H2HConsole;
 import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.network.NetworkManager;
 
 public class NetworkMenu extends ConsoleMenu {
@@ -80,6 +81,15 @@ public class NetworkMenu extends ConsoleMenu {
 			}
 		});
 		add(new H2HConsoleMenuItem("Create H2H Node") {
+			@Override
+			protected boolean preconditionsSatisfied() {
+				boolean satisfied = true;
+				if (session.getNetwork() == null){
+					System.out.println("Cannot create H2H Node: No network created yet.\n");
+					satisfied = false;
+				}
+				return satisfied;
+			}
 			protected void execute() {
 				session.setH2HNode(session.getNodeBuilder().build());
 				printSuccess();
