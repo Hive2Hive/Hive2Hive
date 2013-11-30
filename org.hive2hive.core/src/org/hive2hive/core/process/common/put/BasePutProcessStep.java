@@ -16,7 +16,7 @@ import org.hive2hive.core.process.ProcessStep;
  * @author Seppi
  */
 public abstract class BasePutProcessStep extends ProcessStep implements IPutListener, IRemoveListener {
-	
+
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
 
 	protected String locationKey;
@@ -32,7 +32,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
-		
+
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
@@ -50,32 +50,41 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 	public void onPutFailure() {
 		getProcess().stop("Put failed.");
 	}
-	
+
 	@Override
 	public void rollBack() {
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
-			logger.warn(String.format(
-					"Roll back of put failed. No connection. location key = '%s' content key = '%s' version key = '%s'",
-					locationKey, contentKey, content.getVersionKey()));
+		if (content == null) {
+			logger.warn("Nothing to remove at rollback because nothing has been put");
 			getProcess().nextRollBackStep();
 			return;
 		}
+
+		DataManager dataManager = getNetworkManager().getDataManager();
+		if (dataManager == null) {
+			logger.warn(String
+					.format("Roll back of put failed. No connection. location key = '%s' content key = '%s' version key = '%s'",
+							locationKey, contentKey, content.getVersionKey()));
+			getProcess().nextRollBackStep();
+			return;
+		}
+
 		dataManager.remove(locationKey, contentKey, content.getVersionKey(), this);
+		getProcess().nextRollBackStep();
 	}
-	
+
 	@Override
 	public void onRemoveSuccess() {
-		logger.debug(String.format("Roll back of put succeeded. location key = '%s' content key = '%s' version key = '%s'",
+		logger.debug(String.format(
+				"Roll back of put succeeded. location key = '%s' content key = '%s' version key = '%s'",
 				locationKey, contentKey, content.getVersionKey()));
 		getProcess().nextRollBackStep();
 	}
 
 	@Override
 	public void onRemoveFailure() {
-		logger.warn(String.format(
-				"Roll back of put failed. Remove failed. location key = '%s' content key = '%s' version key = '%s'",
-				locationKey, contentKey, content.getVersionKey()));
+		logger.warn(String
+				.format("Roll back of put failed. Remove failed. location key = '%s' content key = '%s' version key = '%s'",
+						locationKey, contentKey, content.getVersionKey()));
 		getProcess().nextRollBackStep();
 	}
 }
