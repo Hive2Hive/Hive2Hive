@@ -112,6 +112,26 @@ public class NewVersionTest extends H2HJUnitTest {
 		}
 	}
 
+	@Test
+	public void testNewFolderVersion() throws IllegalFileLocation {
+		// new folder version is illegal
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+
+		File folder = new File(fileManager.getRoot(), "test-folder");
+		folder.mkdir();
+
+		// upload the file
+		ProcessTestUtil.uploadNewFile(client, folder, profileManager, fileManager, config);
+
+		try {
+			ProcessTestUtil.uploadNewFileVersion(client, folder, profileManager, fileManager, config);
+			Assert.fail();
+		} catch (IllegalArgumentException e) {
+			// intended exception
+		}
+	}
+
 	@After
 	public void deleteAndShutdown() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
