@@ -180,7 +180,9 @@ public class UserProfileManager {
 						logger.debug("Notifying process " + modifying.getPid() + " that putting is finished");
 					} else if (!modifying.isAborted()) {
 						// request is not ready to put and has not been aborted
-						logger.error("Process " + modifying.getPid() + " never finished doing modifications");
+						logger.error("Process " + modifying.getPid()
+								+ " never finished doing modifications. Abort the put request.");
+						modifying.abort();
 						modifying.setPutError(new PutFailedException("Too long modification. Only "
 								+ MAX_MODIFICATION_TIME + "ms are allowed."));
 					}
@@ -280,6 +282,10 @@ public class UserProfileManager {
 		}
 
 		public void waitForGet() throws GetFailedException {
+			if (getFailedException != null) {
+				throw getFailedException;
+			}
+
 			synchronized (getWaiter) {
 				try {
 					getWaiter.wait();
@@ -347,6 +353,10 @@ public class UserProfileManager {
 		}
 
 		public void waitForPut() throws PutFailedException {
+			if (putFailedException != null) {
+				throw putFailedException;
+			}
+
 			synchronized (putWaiter) {
 				try {
 					putWaiter.wait();
