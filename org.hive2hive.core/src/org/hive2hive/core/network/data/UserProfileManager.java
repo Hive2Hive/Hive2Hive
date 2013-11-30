@@ -207,11 +207,11 @@ public class UserProfileManager {
 					H2HConstants.USER_PROFILE);
 			futureGet.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
-			if (futureGet.isFailed() || futureGet.getData() == null) {
-				logger.warn("Did not find user profile.");
-				entry.setGetError(new GetFailedException("User profile not found"));
-			} else {
-				try {
+			try {
+				if (futureGet.isFailed() || futureGet.getData() == null) {
+					logger.warn("Did not find user profile.");
+					entry.setGetError(new GetFailedException("User profile not found"));
+				} else {
 					// decrypt it
 					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) futureGet.getData()
 							.object();
@@ -223,11 +223,14 @@ public class UserProfileManager {
 
 					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 					entry.setUserProfile((UserProfile) decrypted);
-				} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
-						| ClassNotFoundException | IOException e) {
-					logger.error("Cannot decrypt the user profile.", e);
-					entry.setGetError(new GetFailedException("Cannot decrypt the user profile"));
 				}
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
+					| ClassNotFoundException | IOException e) {
+				logger.error("Cannot decrypt the user profile.", e);
+				entry.setGetError(new GetFailedException("Cannot decrypt the user profile"));
+			} catch (Exception e) {
+				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
+				entry.setGetError(new GetFailedException(e.getMessage()));
 			}
 		}
 

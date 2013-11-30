@@ -16,6 +16,7 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public class UpdateMetaDocumentStep extends ProcessStep {
 
@@ -56,6 +57,10 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 				// store for backup
 				originalMD5 = fileNode.getMD5();
 				byte[] newMD5 = EncryptionUtil.generateMD5Hash(file);
+				if (H2HEncryptionUtil.compareMD5(originalMD5, newMD5)) {
+					getProcess().stop("Try to create new version with same content.");
+					return;
+				}
 
 				// make and put modifications
 				fileNode.setMD5(newMD5);
