@@ -45,7 +45,7 @@ public final class UserMenu extends ConsoleMenu {
 		};
 		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
 			@Override
-			protected boolean preconditionsSatisfied() {
+			protected void checkPreconditions() {
 				if (session.getUserId() == null) {
 					printPreconditionError("User Credentials cannot be created: Please set User ID first.");
 					SetUserID.invoke();
@@ -58,7 +58,6 @@ public final class UserMenu extends ConsoleMenu {
 					printPreconditionError("User Credentials cannot be created: Please set User PIN first.");
 					SetUserPin.invoke();
 				}
-				return true;
 			}
 
 			protected void execute() throws Exception {

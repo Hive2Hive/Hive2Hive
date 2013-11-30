@@ -1,6 +1,5 @@
 package org.hive2hive.core.client;
 
-import java.awt.Color;
 import java.io.IOException;
 
 import org.hive2hive.core.client.console.Console;

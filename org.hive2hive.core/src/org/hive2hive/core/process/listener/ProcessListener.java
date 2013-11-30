@@ -1,6 +1,5 @@
-package org.hive2hive.core.client;
+package org.hive2hive.core.process.listener;
 
-import org.hive2hive.core.process.listener.IProcessListener;
 
 public class ProcessListener implements IProcessListener {
 
@@ -26,5 +25,9 @@ public class ProcessListener implements IProcessListener {
 
 	public boolean hasFailed() {
 		return hasFailed;
+	}
+	
+	public boolean hasFinished() {
+		return hasSucceeded() || hasFailed();
 	}
 }

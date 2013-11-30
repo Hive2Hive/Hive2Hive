@@ -15,9 +15,8 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	@Override
 	public void invoke() {
 		// check preconditions before invoking
-		if (preconditionsSatisfied()) {
-			super.invoke();
-		}
+		checkPreconditions();
+		super.invoke();
 	}
 
 	@Override
@@ -33,20 +32,19 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 		printExecuted();
 	}
 
-	protected boolean preconditionsSatisfied() {
-		// accept by default
-		return true;
+	protected void checkPreconditions() {
+		// nothing by default
 	}
 
 	private void printSelection() {
 		System.out.println(String.format("Selected Option: %s\n", displayText));
 	}
-	
+
 	protected void printPreconditionError(String message) {
 		System.out.println(String.format("Unsatisfied Precondition: %s\n", message));
 	}
 
 	private void printExecuted() {
-		System.out.println(String.format("%s executed.\n", displayText));
+		System.out.println(String.format("\n%s executed.\n", displayText));
 	}
 }
