@@ -47,19 +47,19 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 			// notify all other clients of all users
 			logger.debug("Sending notifications to " + allLocations.size() + " users");
 			NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
-			Map<String, BaseDirectMessage> messages = context.getNotificationMessages();
 			Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
+			INotificationMessageFactory messageFactory = context.getMessageFactory();
 
 			for (String user : allLocations.keySet()) {
 				List<PeerAddress> peerList = allLocations.get(user);
 				logger.debug("Notifying " + peerList.size() + " clients of user '" + user + "'.");
 				for (PeerAddress peerAddress : peerList) {
-					// TODO: where to get the messages from?
-					getNetworkManager().sendDirect(messages.get(user), userPublicKeys.get(user), null);
+					BaseDirectMessage msg = messageFactory.createNotificationMessage(peerAddress, user);
+					getNetworkManager().sendDirect(msg, userPublicKeys.get(user), null);
 				}
 			}
 
-			// done
+			// done with all notifications
 			getProcess().setNextStep(null);
 		} else {
 			// get next in the list

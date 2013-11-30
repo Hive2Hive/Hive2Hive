@@ -25,7 +25,7 @@ public abstract class BaseGetProcessStep extends ProcessStep implements IGetList
 
 	@Override
 	public final void rollBack() {
-		// ignore because just a get
+		// ignore because sending a message cannot be absorbed
 		getProcess().nextRollBackStep();
 	}
 

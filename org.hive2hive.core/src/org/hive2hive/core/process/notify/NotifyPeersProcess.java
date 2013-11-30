@@ -1,9 +1,8 @@
 package org.hive2hive.core.process.notify;
 
-import java.util.Map;
+import java.util.Set;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.ProcessContext;
 
@@ -17,11 +16,12 @@ public class NotifyPeersProcess extends Process {
 
 	private final NotifyPeersProcessContext context;
 
-	public NotifyPeersProcess(NetworkManager networkManager, Map<String, BaseDirectMessage> users) {
+	public NotifyPeersProcess(NetworkManager networkManager, Set<String> users,
+			INotificationMessageFactory messageFactory) {
 		super(networkManager);
-		context = new NotifyPeersProcessContext(this, users);
+		context = new NotifyPeersProcessContext(this, users, messageFactory);
 
-		setNextStep(new GetPublicKeysStep(users.keySet()));
+		setNextStep(new GetPublicKeysStep(users));
 	}
 
 	@Override

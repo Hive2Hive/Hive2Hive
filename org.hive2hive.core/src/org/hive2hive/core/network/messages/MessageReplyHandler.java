@@ -5,6 +5,7 @@ import java.security.KeyPair;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -38,7 +39,11 @@ public class MessageReplyHandler implements ObjectDataReply {
 			return null;
 		}
 
-		if (networkManager.getSession() == null) {
+		try {
+			if (networkManager.getSession() == null) {
+				throw new NoSessionException();
+			}
+		} catch (NoSessionException e) {
 			logger.warn("Currently no user logged in! Keys for decryption needed.");
 			return AcceptanceReply.FAILURE;
 		}

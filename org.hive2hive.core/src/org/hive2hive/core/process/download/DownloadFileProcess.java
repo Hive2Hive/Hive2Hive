@@ -2,16 +2,24 @@ package org.hive2hive.core.process.download;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
+/**
+ * Download a file that is already in the user profile but not on disk yet
+ */
 public class DownloadFileProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(DownloadFileProcess.class);
@@ -19,10 +27,38 @@ public class DownloadFileProcess extends Process {
 	private DownloadFileProcessContext context;
 
 	/**
-	 * Download a file that is already in the user profile but not on disk yet
+	 * Preferably use this constructor if the {@link FileTreeNode} is already existent.
+	 * 
+	 * @param file
+	 * @param networkManager
+	 * @param fileManager
 	 */
 	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager, FileManager fileManager) {
 		super(networkManager);
+		initialize(file, fileManager);
+	}
+
+	/**
+	 * Use this constructor if the {@link FileTreeNode} is not here. The user profile will first be fetched
+	 * and then the normal steps are executed. Note that a valid session must already be in place.
+	 * 
+	 * @param fileKey the public key of the file
+	 * @param networkManager the network manager
+	 * @throws GetFailedException
+	 * @throws NoSessionException
+	 */
+	public DownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) throws GetFailedException,
+			NoSessionException {
+		super(networkManager);
+
+		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
+		UserProfile userProfile = profileManager.getUserProfile(super.getID(), false);
+		FileTreeNode fileNode = userProfile.getFileById(fileKey);
+
+		initialize(fileNode, networkManager.getSession().getFileManager());
+	}
+
+	private void initialize(FileTreeNode file, FileManager fileManager) {
 		context = new DownloadFileProcessContext(this, file, fileManager);
 
 		// check if already exists
