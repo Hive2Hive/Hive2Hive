@@ -13,6 +13,9 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -106,6 +109,84 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		String content = FileUtils.readFileToString(downloadedFile);
 		Assert.assertEquals(testContent, content);
+	}
+
+	@Test
+	public void testDownloadWrongKeys() throws IOException {
+		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager downloaderFileManager = new FileManager(newRoot);
+
+		DownloadFileProcess process = new DownloadFileProcess(new FileTreeNode(file.getParent(),
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024), "bla", "bla".getBytes()), client,
+				downloaderFileManager);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
+
+	@Test
+	public void testDownloadFileAlreadyExisting() throws IOException {
+		// should overwrite the existing file
+		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager downloaderFileManager = new FileManager(newRoot);
+
+		// create the existing file
+		File existing = new File(downloaderFileManager.getRoot(), uploadedFile.getName());
+		FileUtils.write(existing, "existing content");
+		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
+
+		DownloadFileProcess process = new DownloadFileProcess(file, client, downloaderFileManager);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// the downloaded file should still be on the disk
+		File downloadedFile = new File(newRoot, file.getName());
+		Assert.assertTrue(downloadedFile.exists());
+
+		String content = FileUtils.readFileToString(downloadedFile);
+		Assert.assertEquals(testContent, content);
+
+		// the content of the existing file is modified
+		Assert.assertFalse(H2HEncryptionUtil.compareMD5(downloadedFile, md5Before));
+	}
+
+	@Test
+	public void testDownloadFileAlreadyExistingSameContent() throws IOException {
+		// should overwrite the existing file
+		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager downloaderFileManager = new FileManager(newRoot);
+
+		// create the existing file
+		File existing = new File(downloaderFileManager.getRoot(), uploadedFile.getName());
+		FileUtils.write(existing, testContent);
+		long lastModifiedBefore = existing.lastModified();
+
+		DownloadFileProcess process = new DownloadFileProcess(file, client, downloaderFileManager);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// the existing file has already same content, should not have been downloaded
+		Assert.assertEquals(lastModifiedBefore, existing.lastModified());
 	}
 
 	@After
