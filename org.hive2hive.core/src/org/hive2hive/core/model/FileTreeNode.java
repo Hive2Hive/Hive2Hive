@@ -19,7 +19,7 @@ public class FileTreeNode extends NetworkContent {
 	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;
 	private final boolean isFolder;
-	private final FileTreeNode parent;
+	private FileTreeNode parent;
 	private String name;
 	private byte[] md5LatestVersion;
 	private KeyPair domainKeys;
@@ -90,6 +90,11 @@ public class FileTreeNode extends NetworkContent {
 
 	public FileTreeNode getParent() {
 		return parent;
+	}
+
+	public void setParent(FileTreeNode parent) {
+		if (!isRoot())
+			this.parent = parent;
 	}
 
 	public Set<FileTreeNode> getChildren() {

@@ -32,7 +32,7 @@ public class DeleteFileProcess extends Process {
 	private final DeleteFileProcessContext context;
 
 	/**
-	 * Default constructor that also deletes the file on disc.
+	 * Default constructor that also deletes the file on disk.
 	 * 
 	 * @param file the file to delete
 	 * @param fileManager the file manager

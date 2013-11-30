@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.delete;
 
+import java.security.PublicKey;
+
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -26,6 +28,10 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 	private final MetaDocument metaDocumentToDelete;
 
+	// in case of rollback
+	private FileTreeNode deletedFileNode;
+	private PublicKey parentKey;
+
 	public GetParentMetaStep(MetaDocument metaDocumentToDelete) {
 		// TODO this keypair ist just for omitting a NullPointerException at the superclass.
 		// There should be a super-constructor not taking any arguments
@@ -47,14 +53,14 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 		// update the profile here because it does not matter whether the parent meta data needs to be updated
 		// or not.
-		FileTreeNode fileNode = userProfile.getFileById(metaDocumentToDelete.getId());
-		if (!fileNode.getChildren().isEmpty()) {
+		deletedFileNode = userProfile.getFileById(metaDocumentToDelete.getId());
+		if (!deletedFileNode.getChildren().isEmpty()) {
 			getProcess().stop("Can only delete empty directory");
 			return;
 		}
 
-		FileTreeNode parent = fileNode.getParent();
-		parent.removeChild(fileNode);
+		FileTreeNode parent = deletedFileNode.getParent();
+		parent.removeChild(deletedFileNode);
 		try {
 			profileManager.readyToPut(userProfile, getProcess().getID());
 		} catch (PutFailedException e) {
@@ -62,6 +68,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			return;
 		}
 
+		parentKey = parent.getKeyPair().getPublic();
 		if (parent.equals(userProfile.getRoot())) {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the parent meta folder and update the profile directly");
@@ -79,4 +86,25 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		}
 	}
 
+	@Override
+	public void rollBack() {
+		if (deletedFileNode != null && parentKey != null) {
+			try {
+				DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
+				UserProfileManager profileManager = context.getProfileManager();
+				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
+
+				// add the child again to the user profile
+				FileTreeNode parent = userProfile.getFileById(parentKey);
+				parent.addChild(deletedFileNode);
+				deletedFileNode.setParent(parent);
+
+				profileManager.readyToPut(userProfile, getProcess().getID());
+			} catch (GetFailedException | PutFailedException e) {
+				// ignore during rollback
+			}
+		}
+
+		getProcess().nextRollBackStep();
+	}
 }
