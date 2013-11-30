@@ -29,8 +29,8 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	protected abstract void execute() throws Exception;
 
 	@Override
-	protected void end() {
-		// do nothing by default
+	protected final void end() {
+		printExecuted();
 	}
 
 	protected boolean preconditionsSatisfied() {
@@ -46,7 +46,7 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 		System.out.println(String.format("Unsatisfied Precondition: %s\n", message));
 	}
 
-	protected void printSuccess() {
+	private void printExecuted() {
 		System.out.println(String.format("%s executed.\n", displayText));
 	}
 }
