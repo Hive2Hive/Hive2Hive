@@ -34,7 +34,6 @@ public final class NetworkMenu extends ConsoleMenu {
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
 				session.getNodeBuilder().setBootstrapAddress(bootstrapAddress);
 				session.setBootstrapAddress(bootstrapAddress);
-				printSuccess();
 			}
 		};
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create Network") {
@@ -48,7 +47,6 @@ public final class NetworkMenu extends ConsoleMenu {
 			};
 			protected void execute() {
 				createNetworkHandler();
-				printSuccess();
 			}
 		};
 		CreateH2HNodeMenutItem = new H2HConsoleMenuItem("Create H2H Node") {
@@ -62,7 +60,6 @@ public final class NetworkMenu extends ConsoleMenu {
 
 			protected void execute() {
 				session.setH2HNode(session.getNodeBuilder().build());
-				printSuccess();
 			}
 		};
 	}
@@ -74,42 +71,36 @@ public final class NetworkMenu extends ConsoleMenu {
 			protected void execute() {
 				System.out.println("Specify MaxFileSize:\n");
 				session.getNodeBuilder().setMaxFileSize(awaitIntParameter());
-				printSuccess();
 			}
 		});
 		add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxNumOfVersions:\n");
 				session.getNodeBuilder().setMaxNumOfVersions(awaitIntParameter());
-				printSuccess();
 			}
 		});
 		add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxSizeAllVersions:\n");
 				session.getNodeBuilder().setMaxSizeAllVersions(awaitIntParameter());
-				printSuccess();
 			}
 		});
 		add(new H2HConsoleMenuItem("Set ChunkSize") {
 			protected void execute() {
 				System.out.println("Specify ChunkSize:\n");
 				session.getNodeBuilder().setChunkSize(awaitIntParameter());
-				printSuccess();
 			}
 		});
 		add(new H2HConsoleMenuItem("Set AutostartProcesses") {
 			protected void execute() {
 				System.out.println("Specify AutostartProcesses:\n");
 				session.getNodeBuilder().setAutostartProcesses(awaitBooleanParameter());
-				printSuccess();
 			}
 		});
 		add(new H2HConsoleMenuItem("Set IsMasterPeer") {
 			protected void execute() {
 				System.out.println("Specify IsMasterPeer:\n");
 				session.getNodeBuilder().setIsMaster(awaitBooleanParameter());
-				printSuccess();
 			}
 		});
 		add(SetBootStrapMenuItem);
@@ -117,7 +108,6 @@ public final class NetworkMenu extends ConsoleMenu {
 			protected void execute() {
 				System.out.println("Specify RootPath:\n");
 				session.getNodeBuilder().setRootPath(awaitStringParameter());
-				printSuccess();
 			}
 		});
 		add(CreateNetworkMenuItem);

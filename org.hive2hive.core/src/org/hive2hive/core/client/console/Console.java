@@ -18,7 +18,6 @@ import java.io.PrintStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -216,20 +215,4 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 		frame.dispose();
 	}
 
-	public Font getFont() {
-		return textArea.getFont();
-	}
-
-	public void setFont(Font font) {
-		textArea.setFont(font);
-	}
-
-	// public void setBoldness(boolean isBold) {
-	// Font current = textArea.getFont();
-	// if (isBold) {
-	// setFont(new Font(current.getFamily(), Font.BOLD, current.getSize()));
-	// } else {
-	// setFont(new Font(current.getFamily(), Font.PLAIN, current.getSize()));
-	// }
-	// }
 }

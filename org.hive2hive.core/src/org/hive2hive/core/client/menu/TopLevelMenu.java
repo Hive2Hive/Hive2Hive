@@ -1,11 +1,11 @@
 package org.hive2hive.core.client.menu;
 
 import org.hive2hive.core.client.ConsoleClient;
+import org.hive2hive.core.client.ProcessListener;
 import org.hive2hive.core.client.SessionInstance;
 import org.hive2hive.core.client.console.Console;
 import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
  * The top-level menu of the {@link ConsoleClient}.
@@ -32,7 +32,6 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 		});
 		add(new H2HConsoleMenuItem("Register") {
-			@Override
 			protected boolean preconditionsSatisfied() {
 				if (session.getH2HNode() == null){
 					printPreconditionError("Cannot register: Please create a H2HNode first.");
@@ -46,19 +45,47 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 			protected void execute() {
 				IProcess registerProcess = session.getH2HNode().register(session.getCredentials());
-				// TODO notify client when process is finished
+				ProcessListener processListener = new ProcessListener();
+				registerProcess.addListener(processListener);
+				while (!processListener.hasFailed() || !processListener.hasSucceeded()){
+					
+				}
 			}
 		});
 		add(new H2HConsoleMenuItem("Login") {
 			protected void execute() {
-				loginHandler();
+				notImplemented();
+			}
+		});
+		add(new H2HConsoleMenuItem("Add File") {
+			protected void execute() {
+				notImplemented();
+			}
+		});
+		add(new H2HConsoleMenuItem("Update File") {
+			protected void execute() {
+				notImplemented();
+			}
+		});
+		add(new H2HConsoleMenuItem("Delete File") {
+			protected void execute() {
+				notImplemented();
+			}
+		});
+		add(new H2HConsoleMenuItem("Logout") {
+			protected void execute() {
+				notImplemented();
+			}
+		});
+		add(new H2HConsoleMenuItem("Unregister") {
+			protected void execute() {
+				notImplemented();
 			}
 		});
 	}
-
-	private void loginHandler() {
-		
-		
+	
+	private void notImplemented() {
+		System.out.println("This option has not yet been implemented.\n");
 	}
 	
 	@Override

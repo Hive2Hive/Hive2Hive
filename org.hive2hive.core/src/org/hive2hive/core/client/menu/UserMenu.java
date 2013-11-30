@@ -29,21 +29,18 @@ public final class UserMenu extends ConsoleMenu {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user ID:");
 				session.setUserId(awaitStringParameter());
-				printSuccess();
 			}
 		};
 		SetUserPassword = new H2HConsoleMenuItem("Set User Password") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user password:");
 				session.setPassword(awaitStringParameter());
-				printSuccess();
 			}
 		};
 		SetUserPin = new H2HConsoleMenuItem("Set User PIN") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user PIN:");
 				session.setPin(awaitStringParameter());
-				printSuccess();
 			}
 		};
 		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
@@ -67,7 +64,6 @@ public final class UserMenu extends ConsoleMenu {
 			protected void execute() throws Exception {
 				session.setCredentials(new UserCredentials(session.getUserId(), session.getPassword(),
 						session.getPin()));
-				printSuccess();
 			}
 		};
 	}
