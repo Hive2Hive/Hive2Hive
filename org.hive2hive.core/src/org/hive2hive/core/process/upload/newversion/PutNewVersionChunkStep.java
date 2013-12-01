@@ -22,7 +22,7 @@ public class PutNewVersionChunkStep extends PutChunkStep {
 
 	private void configureStepAfterUpload(UploadFileProcessContext context) {
 		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getProfileManager(),
-				context.getFileManager(), context, new UpdateMetaDocumentStep());
+				context.getFileManager(), context, new UpdateMetaFileStep());
 		setStepAfterPutting(file2MetaStep);
 	}
 }

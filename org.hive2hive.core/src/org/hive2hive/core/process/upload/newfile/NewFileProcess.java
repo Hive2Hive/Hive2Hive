@@ -41,6 +41,7 @@ public class NewFileProcess extends Process {
 		// 3. put the new meta file
 		// 4. update the parent meta document
 		// 5. update the user profile
+		// 6. notify other clients
 		logger.debug("Adding a new file/folder to the DHT");
 		setNextStep(new PutNewFileChunkStep(file, context));
 	}

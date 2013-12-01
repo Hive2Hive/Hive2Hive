@@ -23,6 +23,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 	protected String contentKey;
 	protected NetworkContent content;
 	protected ProcessStep nextStep;
+	private boolean putPerformed = false;
 
 	public BasePutProcessStep(ProcessStep nextStep) {
 		this.nextStep = nextStep;
@@ -39,6 +40,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 			return;
 		}
 		dataManager.putGlobal(locationKey, contentKey, content, this);
+		putPerformed = true;
 	}
 
 	@Override
@@ -53,7 +55,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 
 	@Override
 	public void rollBack() {
-		if (content == null) {
+		if (!putPerformed) {
 			logger.warn("Nothing to remove at rollback because nothing has been put");
 			getProcess().nextRollBackStep();
 			return;

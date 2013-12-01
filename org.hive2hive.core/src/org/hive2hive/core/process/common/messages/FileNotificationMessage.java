@@ -43,6 +43,7 @@ public class FileNotificationMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
+		logger.debug("File notification message received. Operation: " + operation);
 		switch (operation) {
 			case ADDED:
 			case MODIFIED:

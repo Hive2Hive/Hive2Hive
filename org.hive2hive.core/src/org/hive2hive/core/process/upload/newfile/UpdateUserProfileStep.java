@@ -4,13 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Set;
 
+import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.notify.NotifyPeersProcess;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 
@@ -24,6 +30,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(UpdateUserProfileStep.class);
 
+	// used for rollback
 	private PublicKey parentKey;
 
 	@Override
@@ -31,24 +38,41 @@ public class UpdateUserProfileStep extends ProcessStep {
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 		logger.debug("Start updating the user profile where adding the file: " + context.getFile().getName());
 
-		// set the user profile from the previous step
+		// update the user profile by adding the new file
 		UserProfileManager profileManager = context.getProfileManager();
-
+		UserProfile userProfile = null;
 		try {
-			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
+			userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 
 			// create a file tree node in the user profile
 			addFileToUserProfile(userProfile, context.getFile(), context.getNewMetaKeyPair());
 
 			profileManager.readyToPut(userProfile, getProcess().getID());
-
-			// TODO next steps:
-			// 1. notify other clients as the next step
-			// 2. check if too many versions of that file exist --> remove old versions if necessary
-			getProcess().setNextStep(null);
-		} catch (Exception e) {
+		} catch (PutFailedException | GetFailedException | IOException e) {
 			getProcess().stop(e.getMessage());
+			return;
 		}
+
+		// start with notification
+		if (userProfile != null && userProfile.getRoot().getKeyPair().getPublic().equals(parentKey)) {
+			// file is in root; notify only own client
+			try {
+				NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(),
+						new AddNotifyMessageFactory(context.getNewMetaKeyPair().getPublic()));
+				notifyProcess.start();
+			} catch (NoSessionException e) {
+				logger.error("No session. Cannot notify other clients about new file");
+			}
+		} else {
+			MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
+			Set<String> userList = metaFolder.getUserList();
+			NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userList,
+					new AddNotifyMessageFactory(context.getNewMetaKeyPair().getPublic()));
+			notifyProcess.start();
+		}
+
+		// TODO check if too many versions of that file exist --> remove old versions if necessary
+		getProcess().setNextStep(null);
 	}
 
 	/**

@@ -15,6 +15,12 @@ import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
+/**
+ * Gets the parent meta folder (if file is not in root)
+ * 
+ * @author Nico
+ * 
+ */
 public class GetParentMetaStep extends GetMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetParentMetaStep.class);

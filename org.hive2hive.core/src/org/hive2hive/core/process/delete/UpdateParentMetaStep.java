@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
+import org.hive2hive.core.process.notify.NotifyPeersProcess;
 
 /**
  * Updates the parent meta data such that the child is removed from the list
@@ -37,8 +38,12 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 		logger.debug("Removed child from meta folder. Total children = "
 				+ parentMeta.getChildDocuments().size());
 
-		// TODO notify other clients
-		// nextStep = ...
+		// notify other clients (can be multiple users)
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(),
+				parentMeta.getUserList(), new DeleteNotifyMessageFactory(childKey));
+		notifyProcess.start();
+
+		// next step is null, process is done
 		super.metaDocument = parentMeta;
 		super.start();
 	}

@@ -67,6 +67,8 @@ public class NetworkManager {
 	 * Returns the session of the currently logged in user
 	 */
 	public H2HSession getSession() throws NoSessionException {
+		if (session == null)
+			throw new NoSessionException();
 		return session;
 	}
 

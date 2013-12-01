@@ -29,12 +29,20 @@ public class GetPublicKeysStep extends BaseGetProcessStep {
 	private final Map<String, PublicKey> keys;
 	private String current;
 
+	/**
+	 * Use this constructor for getting all the public keys
+	 * 
+	 * @param users
+	 */
 	public GetPublicKeysStep(Set<String> users) {
 		this(new ArrayList<String>(users), new HashMap<String, PublicKey>());
 		logger.debug("Start getting public keys from " + users.size() + " user(s)");
 	}
 
-	private GetPublicKeysStep(List<String> moreToGet, Map<String, PublicKey> keys) {
+	/**
+	 * Use this constructor when some keys are already existent (e.g. own key)
+	 */
+	public GetPublicKeysStep(List<String> moreToGet, Map<String, PublicKey> keys) {
 		this.users = moreToGet;
 		this.keys = keys;
 	}

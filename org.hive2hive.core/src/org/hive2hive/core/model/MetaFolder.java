@@ -3,7 +3,9 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Holds the permissions for the folder (only one if private, but can have multiple users) and the keys for
@@ -45,6 +47,19 @@ public class MetaFolder extends MetaDocument {
 		}
 
 		userPermissions.remove(toDelete);
+	}
+
+	/**
+	 * Returns a list of users that can at least read the file
+	 * 
+	 * @return
+	 */
+	public Set<String> getUserList() {
+		Set<String> users = new HashSet<String>(userPermissions.size());
+		for (UserPermission permission : userPermissions) {
+			users.add(permission.getUserId());
+		}
+		return users;
 	}
 
 	public List<KeyPair> getChildDocuments() {
