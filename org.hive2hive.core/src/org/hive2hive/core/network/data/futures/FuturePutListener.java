@@ -17,8 +17,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.IPutListener;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 
 /**

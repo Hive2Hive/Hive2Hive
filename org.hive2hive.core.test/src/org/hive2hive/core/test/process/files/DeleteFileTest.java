@@ -11,6 +11,7 @@ import net.tomp2p.futures.FutureGet;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileVersion;
@@ -59,7 +60,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFile() throws IOException, IllegalFileLocation {
+	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
 		NetworkManager client = network.get(1);
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
@@ -71,7 +73,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
 
 		// store the keys of the meta file to verify them later
-		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfileBeforeDeletion = profileManager.getUserProfile(-1, false);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, fileManager).getKeyPair();
 		MetaDocument metaDocumentBeforeDeletion = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
@@ -80,7 +82,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		ProcessTestUtil.deleteFile(client, file, profileManager, fileManager);
 
 		// check if the file is still in the DHT
-		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = profileManager.getUserProfile(-2, false);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
 
 		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
@@ -101,7 +103,39 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation {
+	public void testDeleteFolder() throws FileNotFoundException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
+		NetworkManager client = network.get(1);
+		UserProfileManager manager = new UserProfileManager(client, userCredentials);
+
+		// add a folder to the network
+		String randomName = NetworkTestUtil.randomString();
+		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
+		FileManager fileManager = new FileManager(root);
+		File folder = new File(root, "test-folder");
+		folder.mkdir();
+		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);
+
+		// store some keys before deletion
+		UserProfile userProfileBeforeDeletion = manager.getUserProfile(-1, false);
+		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
+		MetaDocument metaDocumentBeforeDeletion = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
+		Assert.assertNotNull(metaDocumentBeforeDeletion);
+
+		// delete the folder
+		ProcessTestUtil.deleteFile(client, folder, manager, fileManager);
+
+		// check if the folder is still in the DHT
+		UserProfile userProfile = manager.getUserProfile(-2, false);
+		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
+
+		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
+		Assert.assertNull(metaDocument);
+	}
+
+	@Test
+	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
 		NetworkManager client = network.get(1);
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
@@ -119,7 +153,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		ProcessTestUtil.uploadNewFile(client, file, manager, fileManager, config);
 
 		// store some things to be able to test later
-		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfileBeforeDeletion = manager.getUserProfile(-1, false);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, fileManager).getKeyPair();
 		MetaFolder metaFolderBeforeDeletion = (MetaFolder) ProcessTestUtil.getMetaDocument(client,
@@ -133,7 +167,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		ProcessTestUtil.deleteFile(client, file, manager, fileManager);
 
 		// check if the file is still in the DHT
-		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
+		UserProfile userProfile = manager.getUserProfile(-2, false);
 		Assert.assertNull(userProfile.getFileById(metaKeyPairFile.getPublic()));
 
 		// check if the folder is still in the DHT
@@ -150,7 +184,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFolder() throws FileNotFoundException, IllegalFileLocation {
+	public void testDeleteFolderInFolder() throws IOException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
 		NetworkManager client = network.get(1);
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
@@ -162,21 +197,43 @@ public class DeleteFileTest extends H2HJUnitTest {
 		folder.mkdir();
 		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);
 
-		// store some keys before deletion
-		UserProfile userProfileBeforeDeletion = ProcessTestUtil.getUserProfile(client, userCredentials);
-		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
-		MetaDocument metaDocumentBeforeDeletion = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
-		Assert.assertNotNull(metaDocumentBeforeDeletion);
+		// add a 2nd folder to the network
+		File innerFolder = new File(folder, "inner-folder");
+		innerFolder.mkdir();
+		ProcessTestUtil.uploadNewFile(client, innerFolder, manager, fileManager, config);
 
-		// delete the folder
-		ProcessTestUtil.deleteFile(client, folder, manager, fileManager);
+		// store some things to be able to test later
+		UserProfile userProfileBeforeDeletion = manager.getUserProfile(-1, false);
+		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, fileManager).getKeyPair();
+		KeyPair metaKeyPairInnerFolder = userProfileBeforeDeletion.getFileByPath(innerFolder, fileManager)
+				.getKeyPair();
+		MetaFolder metaFolderBeforeDeletion = (MetaFolder) ProcessTestUtil.getMetaDocument(client,
+				metaKeyPairFolder);
+		MetaFolder metaInnerFolderBeforeDeletion = (MetaFolder) ProcessTestUtil.getMetaDocument(client,
+				metaKeyPairInnerFolder);
+		Assert.assertNotNull(metaFolderBeforeDeletion);
+		Assert.assertNotNull(metaInnerFolderBeforeDeletion);
+		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
+		Assert.assertEquals(0, metaInnerFolderBeforeDeletion.getChildDocuments().size());
 
-		// check if the folder is still in the DHT
-		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
-		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
+		// delete the inner folder
+		ProcessTestUtil.deleteFile(client, innerFolder, manager, fileManager);
 
-		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
-		Assert.assertNull(metaDocument);
+		// check if the inner folder is still in the DHT
+		UserProfile userProfile = manager.getUserProfile(-2, false);
+		Assert.assertNull(userProfile.getFileById(metaKeyPairInnerFolder.getPublic()));
+
+		// check if the outer folder is still in the DHT
+		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
+
+		// check the inner meta folder is still in the DHT
+		MetaDocument metaInnerFolder = ProcessTestUtil.getMetaDocument(client, metaKeyPairInnerFolder);
+		Assert.assertNull(metaInnerFolder);
+
+		// check if the child folder is also gone
+		MetaFolder metaFolder = (MetaFolder) ProcessTestUtil.getMetaDocument(client, metaKeyPairFolder);
+		Assert.assertNotNull(metaFolder);
+		Assert.assertEquals(0, metaFolder.getChildDocuments().size());
 	}
 
 	@AfterClass

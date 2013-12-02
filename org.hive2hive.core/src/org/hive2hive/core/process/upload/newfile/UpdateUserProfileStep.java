@@ -35,13 +35,12 @@ public class UpdateUserProfileStep extends ProcessStep {
 		UserProfileManager profileManager = context.getProfileManager();
 
 		try {
-			UserProfile userProfile = profileManager.getUserProfile(getProcess());
-			profileManager.startModification(getProcess());
+			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 
 			// create a file tree node in the user profile
 			addFileToUserProfile(userProfile, context.getFile(), context.getNewMetaKeyPair());
 
-			profileManager.putUserProfile(getProcess());
+			profileManager.readyToPut(userProfile, getProcess().getID());
 
 			// TODO next steps:
 			// 1. notify other clients as the next step
@@ -92,13 +91,12 @@ public class UpdateUserProfileStep extends ProcessStep {
 		UserProfileManager profileManager = context.getProfileManager();
 
 		try {
-			UserProfile userProfile = profileManager.getUserProfile(getProcess());
-			profileManager.startModification(getProcess());
+			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 
 			FileTreeNode parentNode = userProfile.getFileById(parentKey);
 			FileTreeNode childNode = parentNode.getChildByName(context.getFile().getName());
 			parentNode.removeChild(childNode);
-			profileManager.putUserProfile(getProcess());
+			profileManager.readyToPut(userProfile, getProcess().getID());
 		} catch (Exception e) {
 			// ignore
 		}

@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.upload.newversion;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
@@ -31,10 +30,10 @@ public class NewVersionProcess extends Process {
 	 * @param userProfile
 	 * @param networkManager
 	 * @param fileManager
-	 * @throws FileNotFoundException
+	 * @throws IllegalArgumentException
 	 */
 	public NewVersionProcess(File file, UserProfileManager profileManager, NetworkManager networkManager,
-			FileManager fileManager, IH2HFileConfiguration config) {
+			FileManager fileManager, IH2HFileConfiguration config) throws IllegalArgumentException {
 		super(networkManager);
 		context = new UploadFileProcessContext(this, file, profileManager, fileManager, config, true);
 

@@ -4,7 +4,6 @@ import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.common.get.GetUserMessageStep;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -13,7 +12,6 @@ public class PostLoginProcessContext extends ProcessContext {
 	private final UserProfileManager profileManager;
 	private Locations locations;
 	private boolean isElectedMaster = false;
-	private GetUserMessageStep umQueueStep;
 	private final FileManager fileManager;
 	private final IH2HFileConfiguration fileConfig;
 
@@ -47,11 +45,6 @@ public class PostLoginProcessContext extends ProcessContext {
 	public boolean getIsDefinedAsMaster() {
 		return isElectedMaster;
 	}
-
-	public void setUserMessageQueueStep(GetUserMessageStep umQueueStep) {
-		this.umQueueStep = umQueueStep;
-	}
-
 
 	public UserProfileManager getProfileManager() {
 		return profileManager;

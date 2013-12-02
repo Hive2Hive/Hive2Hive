@@ -4,8 +4,12 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.util.Date;
+
+import net.tomp2p.peers.Number160;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -75,5 +79,20 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 
 	public final byte[] getSignature() {
 		return signature;
+	}
+
+	/**
+	 * Creates a key which has a prefix (see {@link H2HConstants#USER_PROFILE_TASK_CONTENT_KEY_PREFIX} and a time stamp
+	 * (taking current time).
+	 * 
+	 * @return a key
+	 */
+	public Number160 generateContentKey() {
+		String prefix = H2HConstants.USER_PROFILE_TASK_CONTENT_KEY_PREFIX;
+		// get the current time
+		long timestamp = new Date().getTime();
+		StringBuilder build = new StringBuilder();
+		String contentKey = build.append(prefix).append(timestamp).toString();
+		return Number160.createHash(contentKey);
 	}
 }

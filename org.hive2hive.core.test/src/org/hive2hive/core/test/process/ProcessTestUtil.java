@@ -164,7 +164,8 @@ public class ProcessTestUtil {
 	}
 
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
+			throws IllegalArgumentException {
 		NewVersionProcess process = new NewVersionProcess(file, profileManager, networkManager, fileManager,
 				config);
 		executeProcess(process);

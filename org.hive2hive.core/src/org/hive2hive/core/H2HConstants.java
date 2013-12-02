@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
 
+import net.tomp2p.peers.Number160;
+
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.security.EncryptionUtil;
 
@@ -58,6 +60,8 @@ public interface H2HConstants {
 	public static final int PUT_RETRIES = 3;
 	// number of allowed tries to get for verification a put
 	public static final int GET_RETRIES = 3;
+	// number of allowed tries to retry a remove
+	public static final int REMOVE_RETRIES = 3;
 
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final long CONTACT_PEERS_AWAIT_MS = 10000;
@@ -66,6 +70,9 @@ public interface H2HConstants {
 	public static final EncryptionUtil.RSA_KEYLENGTH H2H_RSA_KEYLENGTH = EncryptionUtil.RSA_KEYLENGTH.BIT_512;
 	public static final EncryptionUtil.AES_KEYLENGTH H2H_AES_KEYLENGTH = EncryptionUtil.AES_KEYLENGTH.BIT_128;
 
-	public static final String UM_DOMAIN = "USER-MESSAGE";
-	public static final String UM_CONTENT_KEY_PREFIX = "USER-MESSAGE";
+	public static final String USER_PROFILE_TASK_DOMAIN = "USER-PROFILE-TASK";
+	public static final String USER_PROFILE_TASK_CONTENT_KEY_PREFIX = "USER-PROFILE_TASK";
+	
+	// default key used in the TomP2P framework
+	public static final Number160 TOMP2P_DEFAULT_KEY = Number160.ZERO;
 }

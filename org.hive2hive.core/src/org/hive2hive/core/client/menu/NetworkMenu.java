@@ -37,25 +37,23 @@ public final class NetworkMenu extends ConsoleMenu {
 			}
 		};
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create Network") {
-			protected boolean preconditionsSatisfied() {
+			protected void checkPreconditions() {
 				// check if bootstrap address is set
 				if (session.getBootstrapAddress() == null){
 					printPreconditionError("Cannot create network: Please specify a bootstrap address first.");
 					SetBootStrapMenuItem.invoke();
 				}
-				return true;
 			};
 			protected void execute() {
 				createNetworkHandler();
 			}
 		};
 		CreateH2HNodeMenutItem = new H2HConsoleMenuItem("Create H2H Node") {
-			protected boolean preconditionsSatisfied() {
+			protected void checkPreconditions() {
 				if (session.getNetwork() == null) {
 					printPreconditionError("Cannot create H2H Node: Please create a network first.");
 					new NetworkMenu(console, session).CreateNetworkMenuItem.invoke();
 				}
-				return true;
 			}
 
 			protected void execute() {

@@ -1,5 +1,6 @@
-package org.hive2hive.core.network.data;
+package org.hive2hive.core.network.data.listener;
 
+import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 
@@ -12,6 +13,12 @@ import org.hive2hive.core.process.common.get.BaseGetProcessStep;
  */
 public interface IGetListener {
 
+	/**
+	 * Gets called when get finishes. Can be <code>null</code> if something went wrong or required object
+	 * doesn't exist in the network.
+	 * 
+	 * @param content
+	 */
 	public void handleGetResult(NetworkContent content);
 
 }

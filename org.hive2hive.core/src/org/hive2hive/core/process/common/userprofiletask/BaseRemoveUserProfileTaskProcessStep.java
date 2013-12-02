@@ -1,59 +1,57 @@
-package org.hive2hive.core.process.common.remove;
+package org.hive2hive.core.process.common.userprofiletask;
+
+import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
+import org.hive2hive.core.network.data.listener.IPutUserProfileTaskListener;
+import org.hive2hive.core.network.data.listener.IRemoveUserProfileTaskListener;
+import org.hive2hive.core.network.usermessages.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 
-/**
- * A process step which removes a {@link NetworkContent} object under the given keys from the network.</br>
- * <b>Important:</b> Use only this process step to remove data from the network so that in case of failure a
- * appropriate handling is triggered.
- * 
- * @author Seppi
- */
-public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemoveListener, IPutListener {
+public abstract class BaseRemoveUserProfileTaskProcessStep extends ProcessStep implements
+		IRemoveUserProfileTaskListener, IPutUserProfileTaskListener {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
+	private static final H2HLogger logger = H2HLoggerFactory
+			.getLogger(BaseRemoveUserProfileTaskProcessStep.class);
 
 	protected String locationKey;
-	protected String contentKey;
-	protected NetworkContent contentToRemove;
+	protected Number160 contentKey;
+	protected UserProfileTask userProfileTaskToRemove;
 	protected ProcessStep nextStep;
 
-	public BaseRemoveProcessStep(ProcessStep nexStep) {
+	public BaseRemoveUserProfileTaskProcessStep(ProcessStep nexStep) {
 		this.nextStep = nexStep;
 	}
 
-	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove) {
+	protected void remove(String locationKey, Number160 contentKey, UserProfileTask userProfileTaskToRemove) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
-		this.contentToRemove = contentToRemove;
+		// needed for roll back
+		this.userProfileTaskToRemove = userProfileTaskToRemove;
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), this);
+		dataManager.removeUserProfileTask(locationKey, contentKey, this);
 	}
 
 	@Override
-	public void onRemoveSuccess() {
+	public void onRemoveUserProfileTaskSuccess() {
 		getProcess().setNextStep(nextStep);
 	}
 
 	@Override
-	public void onRemoveFailure() {
+	public void onRemoveUserProfileTaskFailure() {
 		getProcess().stop("Remove failed.");
 	}
 
 	@Override
 	public void rollBack() {
 		// TODO ugly bug fix
-		if (contentToRemove == null) {
+		if (userProfileTaskToRemove == null) {
 			logger.warn(String
 					.format("Roll back of remove failed. No content to re-put. location key = '%s' content key = '%s'",
 							locationKey, contentKey));
@@ -69,20 +67,18 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			getProcess().nextRollBackStep();
 			return;
 		}
-
-		dataManager.putGlobal(locationKey, contentKey, contentToRemove, this);
-		getProcess().nextRollBackStep();
+		dataManager.putUserProfileTask(locationKey, contentKey, userProfileTaskToRemove, this);
 	}
 
 	@Override
-	public void onPutSuccess() {
+	public void onPutUserProfileTaskSuccess() {
 		logger.debug(String.format("Roll back of remove succeeded. location key = '%s' content key = '%s'",
 				locationKey, contentKey));
 		getProcess().nextRollBackStep();
 	}
 
 	@Override
-	public void onPutFailure() {
+	public void onPutUserProfileTaskFailure() {
 		logger.warn(String.format(
 				"Roll back of remove failed. Re-put failed. location key = '%s' content key = '%s'",
 				locationKey, contentKey));
