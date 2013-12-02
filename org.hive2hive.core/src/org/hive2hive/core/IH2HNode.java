@@ -30,9 +30,10 @@ public interface IH2HNode {
 	 * Initiates and returns a login process.
 	 * 
 	 * @param credentials The user's credentials with which it shall be logged in.
+	 * @param rootPath The user's root path to his files
 	 * @return Returns an observable login process.
 	 */
-	IProcess login(UserCredentials credentials);
+	IProcess login(UserCredentials credentials, File rootPath);
 
 	/**
 	 * Initiates and returns a logout process.

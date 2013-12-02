@@ -17,11 +17,10 @@ public class H2HNodeBuilder {
 	private boolean autostartProcesses = H2HConstants.DEFAULT_AUTOSTART_PROCESSES;
 	private boolean isMasterPeer = H2HConstants.DEFAULT_IS_MASTER_PEER;
 	private InetAddress bootstrapAddress = H2HConstants.DEFAULT_BOOTSTRAP_ADDRESS;
-	private String rootPath = H2HConstants.DEFAULT_ROOT_PATH;
 
-	public H2HNode build() {
+	public IH2HNode build() {
 		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeOfAllVersions, chunkSize,
-				autostartProcesses, isMasterPeer, bootstrapAddress, rootPath);
+				autostartProcesses, isMasterPeer, bootstrapAddress);
 	}
 
 	public H2HNodeBuilder setMaxFileSize(int maxFileSize) {
@@ -56,11 +55,6 @@ public class H2HNodeBuilder {
 
 	public H2HNodeBuilder setBootstrapAddress(InetAddress bootstrapAddress) {
 		this.bootstrapAddress = bootstrapAddress;
-		return this;
-	}
-
-	public H2HNodeBuilder setRootPath(String rootPath) {
-		this.rootPath = rootPath;
 		return this;
 	}
 }

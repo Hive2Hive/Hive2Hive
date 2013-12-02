@@ -2,12 +2,10 @@ package org.hive2hive.core.test.integration;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HNode;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -38,6 +36,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	private final Random random = new Random();
 
 	private IH2HNode loggedInNode;
+	private File rootDirectory;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -67,8 +66,9 @@ public class H2HNodeTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
+		rootDirectory = FileUtils.getTempDirectory();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcess loginProcess = loggedInNode.login(credentials);
+		IProcess loginProcess = loggedInNode.login(credentials, rootDirectory);
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
 
@@ -88,12 +88,6 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test
 	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException,
 			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		// use reflections to get the private field 'rootPath'
-		Field privateRootDir = H2HNode.class.getDeclaredField("rootPath");
-		privateRootDir.setAccessible(true);
-		String fieldValue = (String) privateRootDir.get((H2HNode) loggedInNode);
-
-		File rootDirectory = new File(fieldValue);
 		File testFile = new File(rootDirectory, "test-file");
 		FileUtils.write(testFile, "Hello World");
 
