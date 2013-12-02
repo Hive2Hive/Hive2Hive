@@ -21,7 +21,7 @@ public final class NetworkMenu extends ConsoleMenu {
 	public H2HConsoleMenuItem SetBootStrapMenuItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
 	public H2HConsoleMenuItem CreateH2HNodeMenutItem;
-	
+
 	public NetworkMenu(Console console, SessionInstance session) {
 		super(console, session);
 	}
@@ -39,11 +39,12 @@ public final class NetworkMenu extends ConsoleMenu {
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create Network") {
 			protected void checkPreconditions() {
 				// check if bootstrap address is set
-				if (session.getBootstrapAddress() == null){
+				if (session.getBootstrapAddress() == null) {
 					printPreconditionError("Cannot create network: Please specify a bootstrap address first.");
 					SetBootStrapMenuItem.invoke();
 				}
 			};
+
 			protected void execute() {
 				createNetworkHandler();
 			}
@@ -61,7 +62,7 @@ public final class NetworkMenu extends ConsoleMenu {
 			}
 		};
 	}
-	
+
 	@Override
 	protected void addMenuItems() {
 
@@ -102,16 +103,10 @@ public final class NetworkMenu extends ConsoleMenu {
 			}
 		});
 		add(SetBootStrapMenuItem);
-		add(new H2HConsoleMenuItem("Set RootPath") {
-			protected void execute() {
-				System.out.println("Specify RootPath:\n");
-				session.getNodeBuilder().setRootPath(awaitStringParameter());
-			}
-		});
 		add(CreateNetworkMenuItem);
 		add(CreateH2HNodeMenutItem);
 	}
-	
+
 	private void createNetworkHandler() {
 
 		// TODO this whole procedure should exist as separate process

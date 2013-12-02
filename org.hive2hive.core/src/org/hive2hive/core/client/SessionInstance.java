@@ -3,8 +3,8 @@ package org.hive2hive.core.client;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-import org.hive2hive.core.H2HNode;
 import org.hive2hive.core.H2HNodeBuilder;
+import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -19,7 +19,7 @@ public final class SessionInstance {
 	// network configuration parameters
 	private ArrayList<NetworkManager> network = null;
 	private final H2HNodeBuilder nodeBuilder = new H2HNodeBuilder();
-	private H2HNode node;
+	private IH2HNode node;
 	private InetAddress bootstrapAddress = null;
 
 	// user configuration parameters
@@ -28,11 +28,11 @@ public final class SessionInstance {
 	private String pin = null;
 	private UserCredentials credentials;
 
-	public void setH2HNode(H2HNode node) {
+	public void setH2HNode(IH2HNode node) {
 		this.node = node;
 	}
 
-	public H2HNode getH2HNode() {
+	public IH2HNode getH2HNode() {
 		return node;
 	}
 

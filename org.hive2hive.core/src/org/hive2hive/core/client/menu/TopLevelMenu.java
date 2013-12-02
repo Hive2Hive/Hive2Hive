@@ -1,5 +1,7 @@
 package org.hive2hive.core.client.menu;
 
+import java.io.File;
+
 import org.hive2hive.core.client.ConsoleClient;
 import org.hive2hive.core.client.SessionInstance;
 import org.hive2hive.core.client.console.Console;
@@ -9,8 +11,9 @@ import org.hive2hive.core.process.listener.ProcessListener;
 
 /**
  * The top-level menu of the {@link ConsoleClient}.
+ * 
  * @author Christian
- *
+ * 
  */
 public final class TopLevelMenu extends ConsoleMenu {
 
@@ -20,7 +23,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-			
+
 		add(new H2HConsoleMenuItem("Network Configuration") {
 			protected void execute() {
 				new NetworkMenu(console, session).open();
@@ -33,7 +36,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Register") {
 			protected void checkPreconditions() {
-				if (session.getH2HNode() == null){
+				if (session.getH2HNode() == null) {
 					printPreconditionError("Cannot register: Please create a H2HNode first.");
 					new NetworkMenu(console, session).CreateH2HNodeMenutItem.invoke();
 				}
@@ -42,11 +45,12 @@ public final class TopLevelMenu extends ConsoleMenu {
 					new UserMenu(console, session).CreateUserCredentials.invoke();
 				}
 			}
+
 			protected void execute() {
 				IProcess registerProcess = session.getH2HNode().register(session.getCredentials());
 				ProcessListener processListener = new ProcessListener();
 				registerProcess.addListener(processListener);
-				while (!processListener.hasFinished()){
+				while (!processListener.hasFinished()) {
 					// busy waiting
 					try {
 						Thread.sleep(100);
@@ -58,7 +62,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
-				if (session.getH2HNode() == null){
+				if (session.getH2HNode() == null) {
 					printPreconditionError("Cannot register: Please create a H2HNode first.");
 					new NetworkMenu(console, session).CreateH2HNodeMenutItem.invoke();
 				}
@@ -67,11 +71,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 					new UserMenu(console, session).CreateUserCredentials.invoke();
 				}
 			}
+
 			protected void execute() {
-				IProcess loginProcess = session.getH2HNode().login(session.getCredentials());
+				System.out.println("Specify root path: ");
+				String input = awaitStringParameter();
+				File root = new File(input);
+				IProcess loginProcess = session.getH2HNode().login(session.getCredentials(), root);
 				ProcessListener processListener = new ProcessListener();
 				loginProcess.addListener(processListener);
-				while(!processListener.hasFinished()){
+				while (!processListener.hasFinished()) {
 					// busy waiting
 					try {
 						Thread.sleep(100);
@@ -106,11 +114,11 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 		});
 	}
-	
+
 	private void notImplemented() {
 		System.out.println("This option has not yet been implemented.\n");
 	}
-	
+
 	@Override
 	public String getInstruction() {
 		return "Please select an option:\n";
