@@ -28,8 +28,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	private int maxSizeOfAllVersions;
 	private int chunkSize;
 	private boolean autostartProcesses;
-	private boolean isMasterPeer;
-	private InetAddress bootstrapAddress;
 	private String rootPath;
 
 	private final NetworkManager networkManager;
@@ -53,9 +51,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeOfAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
-		this.isMasterPeer = isMasterPeer;
 		this.autostartProcesses = autostartProcesses;
-		this.bootstrapAddress = bootstrapAddress;
 		this.rootPath = rootPath;
 
 		// TODO set appropriate node ID

@@ -19,8 +19,8 @@ public class ConsoleClient {
 
 	public static void main(String[] args) {
 
-		console = new Console("Hive2Hive Console");
 		session = new SessionInstance();
+		console = new Console("Hive2Hive Console", session);
 
 		try {
 			H2HLoggerFactory.initFactory();

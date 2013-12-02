@@ -21,6 +21,9 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.core.network.NetworkManager;
+
 /**
  * A Java swing console that reassigns the standard channels STDIN, STDOUT and STDERR to itself.
  * 
@@ -41,9 +44,13 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	private Thread readerThread2;
 
 	private boolean quit;
+	
+	private final SessionInstance session;
 
-	public Console(String title) {
+	public Console(String title, SessionInstance session) {
 
+		this.session = session;
+		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = new Dimension(screenSize.width / 2, screenSize.height / 2);
 
@@ -213,6 +220,12 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	public void windowClosing(WindowEvent e) {
 		frame.setVisible(false);
 		frame.dispose();
+		
+		// shut down network
+		if (session.getNetwork() != null) {
+			for (NetworkManager node : session.getNetwork()) {
+				node.disconnect();
+			}
+		}
 	}
-
 }

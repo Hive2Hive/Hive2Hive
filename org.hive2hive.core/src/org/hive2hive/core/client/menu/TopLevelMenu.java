@@ -48,6 +48,10 @@ public final class TopLevelMenu extends ConsoleMenu {
 				registerProcess.addListener(processListener);
 				while (!processListener.hasFinished()){
 					// busy waiting
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
 				}
 			}
 		});
@@ -69,12 +73,17 @@ public final class TopLevelMenu extends ConsoleMenu {
 				loginProcess.addListener(processListener);
 				while(!processListener.hasFinished()){
 					// busy waiting
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
 				}
 			}
 		});
 		add(new H2HConsoleMenuItem("Add File") {
 			protected void execute() {
-				notImplemented();
+				new File(session.getNodeBuilder().)
+				IProcess addFileProcess = session.getH2HNode().add(file)
 			}
 		});
 		add(new H2HConsoleMenuItem("Update File") {
