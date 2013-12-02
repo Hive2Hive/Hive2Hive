@@ -82,8 +82,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Add File") {
 			protected void execute() {
-				new File(session.getNodeBuilder().)
-				IProcess addFileProcess = session.getH2HNode().add(file)
+				notImplemented();
 			}
 		});
 		add(new H2HConsoleMenuItem("Update File") {
