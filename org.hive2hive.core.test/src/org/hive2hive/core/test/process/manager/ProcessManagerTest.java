@@ -3,10 +3,10 @@ package org.hive2hive.core.test.process.manager;
 import java.util.Random;
 
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessState;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.manager.ProcessManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;

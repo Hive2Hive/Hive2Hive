@@ -32,12 +32,12 @@ public class PutNewFileChunkStep extends PutChunkStep {
 			metaDocument = new MetaFolder(metaKeyPair.getPublic(), context.getCredentials().getUserId());
 		} else {
 			// create new meta file with new version
-			MetaFile metaFile = new MetaFile(metaKeyPair.getPublic());
 			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis());
 			version.setChunkIds(chunkKeys);
 			List<FileVersion> versions = new ArrayList<FileVersion>(1);
 			versions.add(version);
-			metaFile.setVersions(versions);
+
+			MetaFile metaFile = new MetaFile(metaKeyPair.getPublic(), versions);
 			metaDocument = metaFile;
 		}
 

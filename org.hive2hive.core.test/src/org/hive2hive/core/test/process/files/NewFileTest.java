@@ -178,7 +178,7 @@ public class NewFileTest extends H2HJUnitTest {
 			// get meta folder
 			MetaFolder metaFolder = (MetaFolder) metaDocument;
 			Assert.assertNotNull(metaFolder);
-			Assert.assertEquals(originalFile.list().length, metaFolder.getChildDocuments().size());
+			Assert.assertEquals(originalFile.list().length, metaFolder.getChildKeys().size());
 		}
 
 		// create new filemanager

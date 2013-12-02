@@ -23,25 +23,36 @@ import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
+	private boolean autostartProcesses;
+	private final int maxSizeOfAllVersions;
 	private final int maxFileSize;
 	private final int maxNumOfVersions;
-	private final int maxSizeAllVersions;
 	private final int chunkSize;
-	private final String rootPath;
 
 	private final NetworkManager networkManager;
-	private final boolean autostartProcesses;
 
 	private H2HSession session;
 
+	/**
+	 * Configures an instance of {@link H2HNode}. Use {@link H2HNodeBuilder} to create specific types of
+	 * instances with specific values.
+	 * 
+	 * @param maxFileSize
+	 * @param maxNumOfVersions
+	 * @param maxSizeAllVersions
+	 * @param chunkSize
+	 * @param autostartProcesses
+	 * @param isMasterPeer
+	 * @param bootstrapAddress
+	 * @param rootPath
+	 */
 	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
-			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress, String rootPath) {
+			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress) {
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
-		this.maxSizeAllVersions = maxSizeAllVersions;
+		this.maxSizeOfAllVersions = maxSizeAllVersions;
 		this.chunkSize = chunkSize;
 		this.autostartProcesses = autostartProcesses;
-		this.rootPath = rootPath;
 
 		// TODO set appropriate node ID
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
@@ -50,26 +61,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		} else {
 			networkManager.connect(bootstrapAddress);
 		}
-	}
-
-	@Override
-	public int getMaxFileSize() {
-		return maxFileSize;
-	}
-
-	@Override
-	public int getMaxNumOfVersions() {
-		return maxNumOfVersions;
-	}
-
-	@Override
-	public int getMaxSizeAllVersions() {
-		return maxSizeAllVersions;
-	}
-
-	@Override
-	public int getChunkSize() {
-		return chunkSize;
 	}
 
 	@Override
@@ -94,8 +85,10 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
-	public IProcess login(final UserCredentials credentials) {
+	public IProcess login(final UserCredentials credentials, final File rootPath) {
 		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
+
+		// TODO this makes no sense actually, since the IProcess is returned...
 		loginProcess.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {
@@ -184,5 +177,25 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		}
 
 		return process;
+	}
+
+	@Override
+	public int getMaxFileSize() {
+		return maxFileSize;
+	}
+
+	@Override
+	public int getMaxNumOfVersions() {
+		return maxNumOfVersions;
+	}
+
+	@Override
+	public int getMaxSizeAllVersions() {
+		return maxSizeOfAllVersions;
+	}
+
+	@Override
+	public int getChunkSize() {
+		return chunkSize;
 	}
 }

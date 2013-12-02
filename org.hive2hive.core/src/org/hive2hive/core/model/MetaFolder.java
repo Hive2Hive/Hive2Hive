@@ -18,12 +18,12 @@ public class MetaFolder extends MetaDocument {
 
 	private static final long serialVersionUID = 1L;
 	private final List<UserPermission> userPermissions;
-	private final List<KeyPair> childDocuments;
+	private final List<KeyPair> childKeys;
 
 	public MetaFolder(PublicKey id, String creatorName) {
 		super(id);
 		userPermissions = new ArrayList<UserPermission>();
-		childDocuments = new ArrayList<KeyPair>();
+		childKeys = new ArrayList<KeyPair>();
 
 		// creator receives write permissions by default
 		userPermissions.add(new UserPermission(creatorName, PermissionType.WRITE));
@@ -62,23 +62,23 @@ public class MetaFolder extends MetaDocument {
 		return users;
 	}
 
-	public List<KeyPair> getChildDocuments() {
-		return childDocuments;
+	public List<KeyPair> getChildKeys() {
+		return childKeys;
 	}
 
-	public void addChildDocument(KeyPair child) {
-		childDocuments.add(child);
+	public void addChildKeyPair(KeyPair keyPair) {
+		childKeys.add(keyPair);
 	}
 
-	public void removeChildDocument(PublicKey childKey) {
+	public void removeChildKey(PublicKey childKey) {
 		KeyPair toRemove = null;
-		for (KeyPair child : childDocuments) {
+		for (KeyPair child : childKeys) {
 			if (child.getPublic().equals(childKey)) {
 				toRemove = child;
 				break;
 			}
 		}
 
-		childDocuments.remove(toRemove);
+		childKeys.remove(toRemove);
 	}
 }

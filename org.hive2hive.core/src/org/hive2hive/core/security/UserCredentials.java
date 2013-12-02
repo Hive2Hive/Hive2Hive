@@ -24,19 +24,6 @@ public final class UserCredentials {
 		this.locationCache = calculateLocationCache();
 	}
 
-	private String generateProfileLocationKey() {
-		// concatenate PIN + PW + UserId
-		String location = new StringBuilder().append(pin).append(password).append(userId).toString();
-
-		// create fixed salt based on location
-		byte[] fixedSalt = PasswordUtil.generateFixedSalt(location.getBytes());
-
-		// hash the location
-		byte[] locationKey = PasswordUtil.generateHash(location.toCharArray(), fixedSalt);
-
-		return new String(locationKey, H2HConstants.ENCODING_CHARSET);
-	}
-
 	public String getUserId() {
 		return userId;
 	}

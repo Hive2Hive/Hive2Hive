@@ -1,31 +1,28 @@
 package org.hive2hive.core;
 
-import java.io.File;
 import java.net.InetAddress;
 
+/**
+ * A builder class for building specific types of {@link IH2HNode}s.
+ * 
+ * @author Christian
+ * 
+ */
 public class H2HNodeBuilder {
 
-	// File size configuration
-	private int maxFileSize = 25 * 1024 * 1024; // 25Mb
-	private int maxNumOfVersions = 100;
-	private int maxSizeAllVersions = maxFileSize * maxNumOfVersions;
-	private int chunkSize = 1024 * 1024; // 1Mb
-	private boolean autostartProcesses = true;
-	private boolean isMaster = false;
-	private InetAddress bootstrapAddress = null;
-	private String rootPath = new File(System.getProperty("user.home"), "H2H").getAbsolutePath();
+	private int maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
+	private int maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
+	private int maxSizeOfAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
+	private int chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
+	private boolean autostartProcesses = H2HConstants.DEFAULT_AUTOSTART_PROCESSES;
+	private boolean isMasterPeer = H2HConstants.DEFAULT_IS_MASTER_PEER;
+	private InetAddress bootstrapAddress = H2HConstants.DEFAULT_BOOTSTRAP_ADDRESS;
 
 	public IH2HNode build() {
-		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize, autostartProcesses,
-				isMaster, bootstrapAddress, rootPath);
+		return new H2HNode(maxFileSize, maxNumOfVersions, maxSizeOfAllVersions, chunkSize,
+				autostartProcesses, isMasterPeer, bootstrapAddress);
 	}
 
-	/**
-	 * Set the max size in bytes
-	 * 
-	 * @param fileSize in bytes
-	 * @return the builder according to the builder pattern
-	 */
 	public H2HNodeBuilder setMaxFileSize(int maxFileSize) {
 		this.maxFileSize = maxFileSize;
 		return this;
@@ -36,8 +33,8 @@ public class H2HNodeBuilder {
 		return this;
 	}
 
-	public H2HNodeBuilder setMaxSizeAllVersions(int maxSizeAllVersions) {
-		this.maxSizeAllVersions = maxSizeAllVersions;
+	public H2HNodeBuilder setMaxSizeAllVersions(int maxSizeOfAllVersions) {
+		this.maxSizeOfAllVersions = maxSizeOfAllVersions;
 		return this;
 	}
 
@@ -46,13 +43,13 @@ public class H2HNodeBuilder {
 		return this;
 	}
 
-	public H2HNodeBuilder setAutostartProcesses(boolean autostart) {
-		this.autostartProcesses = autostart;
+	public H2HNodeBuilder setAutostartProcesses(boolean autostartProcesses) {
+		this.autostartProcesses = autostartProcesses;
 		return this;
 	}
 
-	public H2HNodeBuilder setMaster(boolean isMaster) {
-		this.isMaster = isMaster;
+	public H2HNodeBuilder setIsMaster(boolean isMasterPeer) {
+		this.isMasterPeer = isMasterPeer;
 		return this;
 	}
 
@@ -60,10 +57,4 @@ public class H2HNodeBuilder {
 		this.bootstrapAddress = bootstrapAddress;
 		return this;
 	}
-
-	public H2HNodeBuilder setRootPath(String rootPath) {
-		this.rootPath = rootPath;
-		return this;
-	}
-
 }
