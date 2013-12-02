@@ -18,6 +18,7 @@ import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
+// TODO rename to 'File'
 public class UpdateMetaDocumentStep extends ProcessStep {
 
 	private byte[] originalMD5;
@@ -34,6 +35,8 @@ public class UpdateMetaDocumentStep extends ProcessStep {
 		}
 
 		File file = context.getFile();
+
+		// TODO necessary here? Already checked before
 		if (file.isDirectory()) {
 			// no need to put because meta folder remains the same
 			getProcess().setNextStep(getInformClientsStep());

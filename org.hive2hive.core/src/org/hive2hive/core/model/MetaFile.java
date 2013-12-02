@@ -1,7 +1,6 @@
 package org.hive2hive.core.model;
 
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -15,19 +14,15 @@ import java.util.List;
 public class MetaFile extends MetaDocument {
 
 	private static final long serialVersionUID = 1L;
-	private List<FileVersion> versions;
+	private final List<FileVersion> versions;
 
-	public MetaFile(PublicKey id) {
+	public MetaFile(PublicKey id, List<FileVersion> versions) {
 		super(id);
-		setVersions(new ArrayList<FileVersion>());
+		this.versions = versions;
 	}
 
 	public List<FileVersion> getVersions() {
 		return versions;
-	}
-
-	public void setVersions(List<FileVersion> versions) {
-		this.versions = versions;
 	}
 
 	public int getTotalSize() {

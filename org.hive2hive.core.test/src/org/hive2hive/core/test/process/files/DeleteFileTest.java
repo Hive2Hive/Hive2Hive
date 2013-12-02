@@ -161,7 +161,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		MetaFile metaFileBeforeDeletion = (MetaFile) ProcessTestUtil.getMetaDocument(client, metaKeyPairFile);
 		Assert.assertNotNull(metaFolderBeforeDeletion);
 		Assert.assertNotNull(metaFileBeforeDeletion);
-		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
+		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildKeys().size());
 
 		// delete the file
 		ProcessTestUtil.deleteFile(client, file, manager, fileManager);
@@ -180,7 +180,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// check if the child is also gone
 		MetaFolder metaFolder = (MetaFolder) ProcessTestUtil.getMetaDocument(client, metaKeyPairFolder);
 		Assert.assertNotNull(metaFolder);
-		Assert.assertEquals(0, metaFolder.getChildDocuments().size());
+		Assert.assertEquals(0, metaFolder.getChildKeys().size());
 	}
 
 	@Test
@@ -213,8 +213,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 				metaKeyPairInnerFolder);
 		Assert.assertNotNull(metaFolderBeforeDeletion);
 		Assert.assertNotNull(metaInnerFolderBeforeDeletion);
-		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildDocuments().size());
-		Assert.assertEquals(0, metaInnerFolderBeforeDeletion.getChildDocuments().size());
+		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildKeys().size());
+		Assert.assertEquals(0, metaInnerFolderBeforeDeletion.getChildKeys().size());
 
 		// delete the inner folder
 		ProcessTestUtil.deleteFile(client, innerFolder, manager, fileManager);
@@ -233,7 +233,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// check if the child folder is also gone
 		MetaFolder metaFolder = (MetaFolder) ProcessTestUtil.getMetaDocument(client, metaKeyPairFolder);
 		Assert.assertNotNull(metaFolder);
-		Assert.assertEquals(0, metaFolder.getChildDocuments().size());
+		Assert.assertEquals(0, metaFolder.getChildKeys().size());
 	}
 
 	@AfterClass

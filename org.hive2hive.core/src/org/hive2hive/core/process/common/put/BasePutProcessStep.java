@@ -69,7 +69,6 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 		}
 
 		dataManager.remove(locationKey, contentKey, content.getVersionKey(), this);
-		getProcess().nextRollBackStep();
 	}
 
 	@Override

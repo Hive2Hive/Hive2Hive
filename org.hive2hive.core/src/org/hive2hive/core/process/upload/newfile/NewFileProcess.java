@@ -32,6 +32,8 @@ public class NewFileProcess extends Process {
 			throw new IllegalFileLocation("File must be in root of the H2H directory.");
 		}
 
+		// TODO check if file is root
+
 		context = new NewFileProcessContext(this, file, profileManager, fileManager, config);
 
 		// TODO shared files not considered yet

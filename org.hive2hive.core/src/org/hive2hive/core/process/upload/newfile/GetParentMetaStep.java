@@ -44,7 +44,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateUserProfileStep());
 			getProcess().setNextStep(nextStep);
 		} else {
-			// normal case when file is not in root
+			// when file is not in root
 			logger.debug("Get the meta folder of the parent (lookup in user profile)");
 
 			UserProfileManager profileManager = context.getProfileManager();
