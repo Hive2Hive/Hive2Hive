@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -58,8 +60,25 @@ public class GetPublicKeysStep extends BaseGetProcessStep {
 			getProcess().setNextStep(new GetAllLocationsStep(keys.keySet()));
 		} else {
 			current = users.remove(0);
+			boolean gotKey = false;
 
-			get(current, H2HConstants.USER_PUBLIC_KEY);
+			try {
+				H2HSession session = getNetworkManager().getSession();
+				if (session.getCredentials().getUserId().equalsIgnoreCase(current)) {
+					// current user is myself, the key is already present
+					keys.put(current, session.getKeyPair().getPublic());
+					gotKey = true;
+				}
+			} catch (NoSessionException e) {
+				gotKey = false;
+			}
+
+			if (gotKey) {
+				getProcess().setNextStep(new GetPublicKeysStep(users, keys));
+			} else {
+				// needs to perform a get call
+				get(current, H2HConstants.USER_PUBLIC_KEY);
+			}
 		}
 	}
 
