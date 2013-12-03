@@ -55,7 +55,7 @@ public class NotificationTest extends H2HJUnitTest {
 
 		network = NetworkTestUtil.createNetwork(networkSize);
 
-		// create 10 nodes:
+		// create 10 nodes and login 5 of them:
 		// node 0-2: user A
 		// node 3-4: user B
 		// node 5: user C
@@ -103,11 +103,31 @@ public class NotificationTest extends H2HJUnitTest {
 		networkManager.setSession(session);
 	}
 
+	/**
+	 * Scenario: Call the notification process with an empty list
+	 */
+	@Test
+	public void testNotifyNobody() throws ClassNotFoundException, IOException {
+		NetworkManager notifier = network.get(0);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, new HashSet<String>(1), msgFactory);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		// wait until all messages are sent
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+	}
+
+	/**
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2)
+	 */
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException {
-		/**
-		 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2)
-		 */
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
@@ -125,12 +145,12 @@ public class NotificationTest extends H2HJUnitTest {
 		Assert.assertEquals(ProcessState.FINISHED, process.getState());
 	}
 
+	/**
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2). Use the session of the current
+	 * user here for performance improvements
+	 */
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException {
-		/**
-		 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2). Use the session of the current
-		 * user here for performance improvements
-		 */
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
@@ -148,12 +168,12 @@ public class NotificationTest extends H2HJUnitTest {
 		Assert.assertEquals(ProcessState.FINISHED, process.getState());
 	}
 
+	/**
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
+	 * (peer 3 and 4) and user C (peer 5)
+	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException {
-		/**
-		 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
-		 * (peer 3 and 4)
-		 */
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
@@ -161,6 +181,7 @@ public class NotificationTest extends H2HJUnitTest {
 		Set<String> users = new HashSet<String>(2);
 		users.add(userAProfile.getUserId());
 		users.add(userBProfile.getUserId());
+		users.add(userCProfile.getUserId());
 		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
 		process.start();
 
@@ -172,12 +193,12 @@ public class NotificationTest extends H2HJUnitTest {
 		Assert.assertEquals(ProcessState.FINISHED, process.getState());
 	}
 
+	/**
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
+	 * (peer 3 and 4). Peer 4 of user B has done an unfriendly leave, never responding.
+	 */
 	@Test
 	public void testNotifyUnfriendlyLogout() throws ClassNotFoundException, IOException, InterruptedException {
-		/**
-		 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
-		 * (peer 3 and 4). Peer 4 of user B has done an unfriendly leave, never responding.
-		 */
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
