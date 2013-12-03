@@ -18,7 +18,8 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 
 /**
- * Gets all locations of a given list of users (iterative)
+ * Gets all locations of a given list of users (iterative). If all locations are fetched, this step sends
+ * them.
  * 
  * @author Nico
  * 
@@ -44,20 +45,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 	@Override
 	public void start() {
 		if (moreToGet.isEmpty()) {
-			// notify all other clients of all users
-			logger.debug("Sending notifications to " + allLocations.size() + " users");
-			NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
-			Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
-			INotificationMessageFactory messageFactory = context.getMessageFactory();
-
-			for (String user : allLocations.keySet()) {
-				List<PeerAddress> peerList = allLocations.get(user);
-				logger.debug("Notifying " + peerList.size() + " clients of user '" + user + "'.");
-				for (PeerAddress peerAddress : peerList) {
-					BaseDirectMessage msg = messageFactory.createNotificationMessage(peerAddress, user);
-					getNetworkManager().sendDirect(msg, userPublicKeys.get(user), null);
-				}
-			}
+			sendAllMessages();
 
 			// done with all notifications
 			getProcess().setNextStep(null);
@@ -65,6 +53,28 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 			// get next in the list
 			currentUser = moreToGet.remove(0);
 			get(currentUser, H2HConstants.USER_LOCATIONS);
+		}
+	}
+
+	private void sendAllMessages() {
+		// notify all other clients of all users
+		logger.debug("Sending notifications to " + allLocations.size() + " users");
+		NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
+		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
+		INotificationMessageFactory messageFactory = context.getMessageFactory();
+
+		for (String user : allLocations.keySet()) {
+			List<PeerAddress> peerList = allLocations.get(user);
+			logger.debug("Notifying " + peerList.size() + " clients of user '" + user + "'.");
+			for (PeerAddress peerAddress : peerList) {
+				if (peerAddress.equals(getNetworkManager().getConnection().getPeer().getPeerAddress())) {
+					// don't send to own peer
+					continue;
+				}
+
+				BaseDirectMessage msg = messageFactory.createNotificationMessage(peerAddress, user);
+				getNetworkManager().sendDirect(msg, userPublicKeys.get(user), null);
+			}
 		}
 	}
 

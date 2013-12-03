@@ -22,7 +22,7 @@ import org.hive2hive.core.process.common.get.BaseGetProcessStep;
  * @author Nico
  * 
  */
-// TODO get the key in parallel
+// TODO get the keys in parallel
 // TODO cache the keys to speedup future messages
 public class GetPublicKeysStep extends BaseGetProcessStep {
 
@@ -60,24 +60,26 @@ public class GetPublicKeysStep extends BaseGetProcessStep {
 			getProcess().setNextStep(new GetAllLocationsStep(keys.keySet()));
 		} else {
 			current = users.remove(0);
-			boolean gotKey = false;
+			boolean getRequired = true;
 
 			try {
+				// check if own user --> key is already in session
 				H2HSession session = getNetworkManager().getSession();
 				if (session.getCredentials().getUserId().equalsIgnoreCase(current)) {
 					// current user is myself, the key is already present
 					keys.put(current, session.getKeyPair().getPublic());
-					gotKey = true;
+					getRequired = false;
 				}
 			} catch (NoSessionException e) {
-				gotKey = false;
+				getRequired = true;
 			}
 
-			if (gotKey) {
-				getProcess().setNextStep(new GetPublicKeysStep(users, keys));
-			} else {
+			if (getRequired) {
 				// needs to perform a get call
 				get(current, H2HConstants.USER_PUBLIC_KEY);
+			} else {
+				// no get required --> go to next user
+				getProcess().setNextStep(new GetPublicKeysStep(users, keys));
 			}
 		}
 	}
