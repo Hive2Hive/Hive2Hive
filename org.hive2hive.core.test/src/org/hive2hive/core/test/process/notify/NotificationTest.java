@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -114,6 +115,29 @@ public class NotificationTest extends H2HJUnitTest {
 		Set<String> users = new HashSet<String>(1);
 		users.add(userAProfile.getUserId());
 		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		process.start();
+
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!msgFactory.allMsgsArrived());
+
+		Assert.assertEquals(ProcessState.FINISHED, process.getState());
+	}
+
+	@Test
+	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException {
+		/**
+		 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2). Use the session of the current
+		 * user here for performance improvements
+		 */
+		NetworkManager notifier = network.get(0);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+
+		// send notification to own peers
+		Set<String> users = new HashSet<String>(1);
+		users.add(userAProfile.getUserId());
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
