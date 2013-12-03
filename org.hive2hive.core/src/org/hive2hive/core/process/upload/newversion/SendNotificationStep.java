@@ -25,6 +25,8 @@ public class SendNotificationStep extends ProcessStep {
 		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userList,
 				new ModifyNotifyMessageFactory(modifiedFileKey));
 		notifyProcess.start();
+
+		getProcess().setNextStep(null);
 	}
 
 	@Override

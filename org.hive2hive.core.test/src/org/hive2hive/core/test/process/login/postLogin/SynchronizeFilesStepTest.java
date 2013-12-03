@@ -8,11 +8,14 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.login.SynchronizeFilesStep;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -82,7 +85,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		folder1.mkdir();
 		ProcessTestUtil.uploadNewFile(network.get(0), folder1, profileManager, fileManager0, config);
 
-		File file3 = new File(folder1, "file 2");
+		File file3 = new File(folder1, "file 3");
 		FileUtils.writeStringToFile(file3, NetworkTestUtil.randomString());
 		ProcessTestUtil.uploadNewFile(network.get(0), file3, profileManager, fileManager0, config);
 
@@ -120,10 +123,10 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		NetworkManager remoteClient = network.get(0);
 		UserProfileManager profileManager = new UserProfileManager(remoteClient, userCredentials);
 
-		// add a file 3 within folder 1
-		File file3 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 4");
-		FileUtils.write(file3, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(remoteClient, file3, profileManager, fileManager0, config);
+		// add a file 4 within folder 1
+		File file4 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 4");
+		FileUtils.write(file4, NetworkTestUtil.randomString());
+		ProcessTestUtil.uploadNewFile(remoteClient, file4, profileManager, fileManager0, config);
 
 		// delete file 2
 		File file2 = new File(fileManager0.getRoot(), "file 2");
@@ -136,8 +139,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		startSync(client, fileManager1, 60);
 
 		/** verify if the remote changes are applied **/
-		file3 = new File(new File(fileManager1.getRoot(), "folder 1"), "file 4");
-		Assert.assertTrue(file3.exists()); // added file is now here
+		file4 = new File(new File(fileManager1.getRoot(), "folder 1"), "file 4");
+		Assert.assertTrue(file4.exists()); // added file is now here
 		file2 = new File(fileManager1.getRoot(), "file 2");
 		Assert.assertFalse(file2.exists()); // deleted file is not here
 
@@ -145,6 +148,57 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertTrue(userProfile.getFileByPath("added-file") != null); // added file is here
 		Assert.assertTrue(userProfile.getFileByPath("file 1") == null); // deleted file is not in UP
+	}
+
+	@Test
+	public void testModifications() throws IOException, IllegalFileLocation {
+		/** do some modifications on client **/
+		// modify file 1
+		File file1 = new File(fileManager1.getRoot(), "file 1");
+		FileUtils.write(file1, NetworkTestUtil.randomString());
+		byte[] newMD5File1 = EncryptionUtil.generateMD5Hash(file1);
+
+		// modify file 3
+		File folder = new File(fileManager1.getRoot(), "folder 1");
+		File file3 = new File(folder, "file 3");
+		FileUtils.write(file3, NetworkTestUtil.randomString());
+
+		/** do some modifications on the remote **/
+		NetworkManager remoteClient = network.get(0);
+		UserProfileManager profileManager = new UserProfileManager(remoteClient, userCredentials);
+
+		// modify file 2
+		File file2 = new File(fileManager0.getRoot(), "file 2");
+		String file2Content = NetworkTestUtil.randomString();
+		FileUtils.write(file2, file2Content);
+		ProcessTestUtil.uploadNewFileVersion(remoteClient, file2, profileManager, fileManager0, config);
+
+		// also modify file 3
+		folder = new File(fileManager0.getRoot(), "folder 1");
+		file3 = new File(folder, "file 3");
+		FileUtils.write(file3, NetworkTestUtil.randomString());
+		byte[] newMD5File3 = EncryptionUtil.generateMD5Hash(file3);
+		ProcessTestUtil.uploadNewFileVersion(remoteClient, file3, profileManager, fileManager0, config);
+
+		/** start sync **/
+		// the client that logs in
+		NetworkManager client = network.get(1);
+		startSync(client, fileManager1, 60);
+
+		/** verify if the remote changes are applied **/
+		// modification of file 2 has been downloaded
+		file2 = new File(fileManager1.getRoot(), "file 2");
+		Assert.assertEquals(file2Content, FileUtils.readFileToString(file2));
+
+		/** verify if the local changes have been uploaded **/
+		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
+		FileTreeNode file1Node = userProfile.getFileByPath("file 1");
+		// modifications have been uploaded
+		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File1, file1Node.getMD5()));
+
+		/** verify the file that has been modified remotely and locally **/
+		FileTreeNode file3Node = userProfile.getFileByPath("folder 1" + FileManager.FILE_SEP + "file 3");
+		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File3, file3Node.getMD5()));
 	}
 
 	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS) {
