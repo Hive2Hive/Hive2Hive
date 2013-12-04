@@ -3,8 +3,10 @@ package org.hive2hive.core.test.process;
 import java.io.File;
 import java.security.KeyPair;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.Locations;
@@ -26,6 +28,8 @@ import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 
@@ -159,8 +163,14 @@ public class ProcessTestUtil {
 	public static void uploadNewFile(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
 			throws IllegalFileLocation {
-		NewFileProcess process = new NewFileProcess(file, profileManager, networkManager, fileManager, config);
-		executeProcess(process);
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+		try {
+			NewFileProcess process = new NewFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
 	}
 
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,

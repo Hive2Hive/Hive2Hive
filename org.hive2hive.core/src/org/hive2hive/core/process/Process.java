@@ -140,7 +140,8 @@ public abstract class Process implements IProcess {
 		if (currentStep != null) {
 			currentStep.start();
 		} else {
-			logger.error("No process step to start with specified.");
+			logger.warn("No process step to start with specified.");
+			finish();
 		}
 	}
 

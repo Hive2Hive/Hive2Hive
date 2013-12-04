@@ -132,7 +132,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		validateSession();
 
 		// TODO start a logout process
-		// TODO stop all other processes of this user
+		// TODO stop all other processes of this user as soon as the logout process is done
 
 		// write the current state to a meta file
 		session.getFileManager().writePersistentMetaData();
@@ -150,7 +150,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
 		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
-		NewFileProcess uploadProcess = new NewFileProcess(file, session, networkManager);
+		NewFileProcess uploadProcess = new NewFileProcess(file, networkManager);
 		if (autostartProcesses) {
 			uploadProcess.start();
 		}

@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
@@ -154,11 +155,12 @@ public class SynchronizeFilesStep extends ProcessStep {
 			ProcessTreeNode parent = getParent(rootProcess, file);
 			try {
 				// initialize the process
-				NewFileProcess uploadProcess = new NewFileProcess(file, profileManager, getNetworkManager(),
-						fileManager, config);
+				NewFileProcess uploadProcess = new NewFileProcess(file, getNetworkManager());
 				new FileProcessTreeNode(uploadProcess, parent, file);
 			} catch (IllegalFileLocation e) {
 				logger.error("File cannot be uploaded", e);
+			} catch (NoSessionException e) {
+				logger.error("File cannot be uploaded because there is no session", e);
 			}
 		}
 

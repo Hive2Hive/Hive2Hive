@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -40,6 +41,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 5;
 	private final static String testContent = "DownloadFileTest";
+	private final TestH2HFileConfiguration config = new TestH2HFileConfiguration();
 	private static List<NetworkManager> network;
 	private FileManager uploaderFileManager;
 	private File uploadedFile;
@@ -71,8 +73,9 @@ public class DownloadFileTest extends H2HJUnitTest {
 		String fileName = NetworkTestUtil.randomString();
 		uploadedFile = new File(root, fileName);
 		FileUtils.write(uploadedFile, testContent);
-		NewFileProcess ulProcess = new NewFileProcess(uploadedFile, profileManager, client,
-				uploaderFileManager, new TestH2HFileConfiguration());
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, uploaderFileManager));
+		NewFileProcess ulProcess = new NewFileProcess(uploadedFile, client);
 
 		TestProcessListener listener = new TestProcessListener();
 		ulProcess.addListener(listener);

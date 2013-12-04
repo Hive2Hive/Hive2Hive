@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -18,6 +20,8 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -68,7 +72,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSingleChunk() throws IOException, IllegalFileLocation {
+	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException {
 		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 
 		startUploadProcess(file);
@@ -76,7 +80,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation {
+	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException {
 		// creates a file with length of at least 5 chunks
 		File file = FileTestUtil.createFileRandomContent(5, fileManager, config);
 
@@ -85,7 +89,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolder() throws IOException, IllegalFileLocation {
+	public void testUploadFolder() throws IOException, IllegalFileLocation, NoSessionException {
 		File folder = new File(fileManager.getRoot(), "folder1");
 		folder.mkdirs();
 
@@ -94,7 +98,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation {
+	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation, NoSessionException {
 		// create a container
 		File folder = new File(fileManager.getRoot(), "folder-with-file");
 		folder.mkdirs();
@@ -107,7 +111,7 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation {
+	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation, NoSessionException {
 		File folder = new File(fileManager.getRoot(), "folder-with-folder");
 		folder.mkdirs();
 		startUploadProcess(folder);
@@ -120,14 +124,16 @@ public class NewFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadWrongCredentials() throws IOException, IllegalFileLocation {
+	public void testUploadWrongCredentials() throws IOException, IllegalFileLocation, NoSessionException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
-		NewFileProcess process = new NewFileProcess(file, profileManager, client, fileManager, config);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+		NewFileProcess process = new NewFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -138,10 +144,12 @@ public class NewFileTest extends H2HJUnitTest {
 		} while (!listener.hasFailed());
 	}
 
-	private void startUploadProcess(File toUpload) throws IllegalFileLocation {
+	private void startUploadProcess(File toUpload) throws IllegalFileLocation, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		NewFileProcess process = new NewFileProcess(toUpload, profileManager, client, fileManager, config);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+		NewFileProcess process = new NewFileProcess(toUpload, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
