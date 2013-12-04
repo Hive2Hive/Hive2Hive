@@ -118,9 +118,13 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	private void startPostLoginProcess(Locations locations) {
-		// start the post login process
-		PostLoginProcess postLogin = new PostLoginProcess(session, locations, networkManager);
-		postLogin.start();
+		try {
+			// start the post login process
+			PostLoginProcess postLogin = new PostLoginProcess(locations, networkManager);
+			postLogin.start();
+		} catch (NoSessionException e) {
+			// TODO handle the exception
+		}
 	}
 
 	@Override

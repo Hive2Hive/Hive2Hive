@@ -1,7 +1,6 @@
 package org.hive2hive.core;
 
 import java.io.File;
-import java.net.InetAddress;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -17,7 +16,7 @@ import org.hive2hive.core.security.UserCredentials;
  * 
  */
 public interface IH2HNode {
-	
+
 	/**
 	 * Initiates and returns a register process.
 	 * 

@@ -108,9 +108,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		if (context.getIsDefinedAsMaster()) {
-			String userId = profileManager.getUserCredentials().getUserId();
-
 			// TODO set when step is implemented
+			// String userId = profileManager.getUserCredentials().getUserId();
 			// HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
 			// GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
 			// handleUmQueueStep);

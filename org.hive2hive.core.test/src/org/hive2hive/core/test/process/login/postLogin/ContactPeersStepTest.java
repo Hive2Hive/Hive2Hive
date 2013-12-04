@@ -12,6 +12,7 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
@@ -70,9 +71,11 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 
 	/**
 	 * All client nodes are alive.
+	 * 
+	 * @throws NoSessionException
 	 */
 	@Test
-	public void allClientsAreAlive() {
+	public void allClientsAreAlive() throws NoSessionException {
 		Locations fakedLocations = new Locations(userId);
 		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
 		// responding nodes
@@ -95,9 +98,11 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 
 	/**
 	 * Some client nodes are offline.
+	 * 
+	 * @throws NoSessionException
 	 */
 	@Test
-	public void notAllClientsAreAlive() {
+	public void notAllClientsAreAlive() throws NoSessionException {
 		Locations fakedLocations = new Locations(userId);
 		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
 		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
@@ -120,9 +125,11 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 
 	/**
 	 * No other clients are or have been online.
+	 * 
+	 * @throws NoSessionException
 	 */
 	@Test
-	public void noOtherClientsOrDeadClients() {
+	public void noOtherClientsOrDeadClients() throws NoSessionException {
 		Locations fakedLocations = new Locations(userId);
 		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
 
@@ -134,9 +141,11 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 
 	/**
 	 * No client is responding.
+	 * 
+	 * @throws NoSessionException
 	 */
 	@Test
-	public void allOtherClientsAreDead() {
+	public void allOtherClientsAreDead() throws NoSessionException {
 		Locations fakedLocations = new Locations(userId);
 		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
 		// not responding nodes
@@ -151,9 +160,11 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 
 	/**
 	 * Received an empty location map.
+	 * 
+	 * @throws NoSessionException
 	 */
 	@Test
-	public void emptyLocations() {
+	public void emptyLocations() throws NoSessionException {
 		Locations fakedLocations = new Locations(userId);
 
 		runProcessStep(fakedLocations, true);
@@ -164,9 +175,11 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 
 	/**
 	 * Received a location map without own location entry.
+	 * 
+	 * @throws NoSessionException
 	 */
 	@Test
-	public void notCompleteLocations() {
+	public void notCompleteLocations() throws NoSessionException {
 		Locations fakedLocations = new Locations(userId);
 		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
 
@@ -189,8 +202,9 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 	 * 
 	 * @param fakedLocations
 	 *            locations which the {@link ContactPeersStep} step has to handle
+	 * @throws NoSessionException
 	 */
-	private void runProcessStep(Locations fakedLocations, final boolean isMaster) {
+	private void runProcessStep(Locations fakedLocations, final boolean isMaster) throws NoSessionException {
 		// initialize the process and the one and only step to test
 		TestProcessContatctPeers process = new TestProcessContatctPeers(fakedLocations, network.get(0));
 		process.setNextStep(new ContactPeersStep() {
@@ -233,8 +247,9 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 	 * @author Seppi
 	 */
 	private class TestProcessContatctPeers extends PostLoginProcess {
-		public TestProcessContatctPeers(Locations locations, NetworkManager networkManager) {
-			super(null, locations, networkManager, null, null);
+		public TestProcessContatctPeers(Locations locations, NetworkManager networkManager)
+				throws NoSessionException {
+			super(locations, networkManager);
 		}
 	}
 

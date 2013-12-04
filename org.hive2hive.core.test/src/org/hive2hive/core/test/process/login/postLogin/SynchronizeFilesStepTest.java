@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -15,6 +17,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.login.SynchronizeFilesStep;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -98,7 +101,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testNothingChanged() {
+	public void testNothingChanged() throws NoSessionException {
 		// the client that logs in
 		NetworkManager client = network.get(1);
 
@@ -110,7 +113,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testAdditionsDeletions() throws IOException, IllegalFileLocation {
+	public void testAdditionsDeletions() throws IOException, IllegalFileLocation, NoSessionException {
 		/** do some modifications on client **/
 		// add a file
 		FileUtils.write(new File(fileManager1.getRoot(), "added-file"), NetworkTestUtil.randomString());
@@ -151,7 +154,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testModifications() throws IOException, IllegalFileLocation {
+	public void testModifications() throws IOException, IllegalFileLocation, NoSessionException {
 		/** do some modifications on client **/
 		// modify file 1
 		File file1 = new File(fileManager1.getRoot(), "file 1");
@@ -201,8 +204,11 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File3, file3Node.getMD5()));
 	}
 
-	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS) {
+	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS)
+			throws NoSessionException {
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), manager,
+				config, fileManager));
 		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, manager, fileManager);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -236,8 +242,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	private class SynchronizePostLoginProcess extends PostLoginProcess {
 
 		public SynchronizePostLoginProcess(NetworkManager networkManager, UserProfileManager profileManager,
-				FileManager fileManager) {
-			super(profileManager, null, networkManager, fileManager, config);
+				FileManager fileManager) throws NoSessionException {
+			super(null, networkManager);
 			super.getContext().setIsElectedMaster(false);
 			setNextStep(new SynchronizeFilesStep());
 		}
