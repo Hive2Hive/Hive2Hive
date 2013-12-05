@@ -31,8 +31,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	private final NetworkManager networkManager;
 
-	private H2HSession session;
-
 	/**
 	 * Configures an instance of {@link H2HNode}. Use {@link H2HNodeBuilder} to create specific types of
 	 * instances with specific values.
@@ -68,12 +66,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		networkManager.disconnect();
 	}
 
-	private void validateSession() throws NoSessionException {
-		if (session == null) {
-			throw new NoSessionException();
-		}
-	}
-
 	@Override
 	public IProcess register(UserCredentials credentials) {
 		final RegisterProcess process = new RegisterProcess(credentials, networkManager);
@@ -97,8 +89,8 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 				FileManager fileManager = new FileManager(rootPath);
 
 				LoginProcessContext loginContext = loginProcess.getContext();
-				session = new H2HSession(loginContext.getUserProfile().getEncryptionKeys(), profileManager,
-						H2HNode.this, fileManager);
+				H2HSession session = new H2HSession(loginContext.getUserProfile().getEncryptionKeys(),
+						profileManager, H2HNode.this, fileManager);
 				networkManager.setSession(session);
 
 				startPostLoginProcess(loginContext.getLocations());
@@ -129,16 +121,13 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess logout() throws NoSessionException {
-		validateSession();
-
 		// TODO start a logout process
 		// TODO stop all other processes of this user as soon as the logout process is done
 
 		// write the current state to a meta file
-		session.getFileManager().writePersistentMetaData();
+		networkManager.getSession().getFileManager().writePersistentMetaData();
 
 		// quit the session
-		session = null;
 		networkManager.setSession(null);
 
 		return null;
@@ -146,8 +135,6 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess add(File file) throws IllegalFileLocation, NoSessionException {
-		validateSession();
-
 		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
 		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
 		NewFileProcess uploadProcess = new NewFileProcess(file, networkManager);
@@ -160,9 +147,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess update(File file) throws NoSessionException {
-		validateSession();
-
-		NewVersionProcess process = new NewVersionProcess(file, session, networkManager);
+		NewVersionProcess process = new NewVersionProcess(file, networkManager);
 		if (autostartProcesses) {
 			process.start();
 		}
@@ -172,9 +157,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
-		validateSession();
-
-		DeleteFileProcess process = new DeleteFileProcess(file, session, networkManager);
+		DeleteFileProcess process = new DeleteFileProcess(file, networkManager);
 
 		if (autostartProcesses) {
 			process.start();

@@ -78,7 +78,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the file
-		ProcessTestUtil.deleteFile(client, file, profileManager, fileManager);
+		ProcessTestUtil.deleteFile(client, file, profileManager, fileManager, config);
 
 		// check if the file is still in the DHT
 		UserProfile userProfile = profileManager.getUserProfile(-2, false);
@@ -122,7 +122,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the folder
-		ProcessTestUtil.deleteFile(client, folder, manager, fileManager);
+		ProcessTestUtil.deleteFile(client, folder, manager, fileManager, config);
 
 		// check if the folder is still in the DHT
 		UserProfile userProfile = manager.getUserProfile(-2, false);
@@ -163,7 +163,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertEquals(1, metaFolderBeforeDeletion.getChildKeys().size());
 
 		// delete the file
-		ProcessTestUtil.deleteFile(client, file, manager, fileManager);
+		ProcessTestUtil.deleteFile(client, file, manager, fileManager, config);
 
 		// check if the file is still in the DHT
 		UserProfile userProfile = manager.getUserProfile(-2, false);
@@ -216,7 +216,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertEquals(0, metaInnerFolderBeforeDeletion.getChildKeys().size());
 
 		// delete the inner folder
-		ProcessTestUtil.deleteFile(client, innerFolder, manager, fileManager);
+		ProcessTestUtil.deleteFile(client, innerFolder, manager, fileManager, config);
 
 		// check if the inner folder is still in the DHT
 		UserProfile userProfile = manager.getUserProfile(-2, false);

@@ -177,10 +177,13 @@ public class SynchronizeFilesStep extends ProcessStep {
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
 		for (File file : toUpload) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
-			// initialize the process
-			NewVersionProcess uploadProcess = new NewVersionProcess(file, profileManager,
-					getNetworkManager(), fileManager, config);
-			new FileProcessTreeNode(uploadProcess, parent, file);
+			try {
+				// initialize the process
+				NewVersionProcess uploadProcess = new NewVersionProcess(file, getNetworkManager());
+				new FileProcessTreeNode(uploadProcess, parent, file);
+			} catch (NoSessionException e) {
+				logger.error("Cannot initialize the process for uploading a new version, because no session");
+			}
 		}
 
 		if (toUpload.size() > 0)

@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -35,27 +36,25 @@ public class DeleteFileProcess extends Process {
 	 * Default constructor that also deletes the file on disk.
 	 * 
 	 * @param file the file to delete
-	 * @param fileManager the file manager
 	 * @param networkManager the network manager, connected to the H2H network
 	 * @param credentials the credentials of the user
 	 * @throws IllegalArgumentException if the file cannot be deleted
+	 * @throws NoSessionException
 	 */
-	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
-			UserProfileManager profileManager) throws IllegalArgumentException {
+	public DeleteFileProcess(File file, NetworkManager networkManager) throws IllegalArgumentException,
+			NoSessionException {
 		super(networkManager);
 		logger.info("Deleting file/folder from the DHT");
 
 		// verify if the file can be deleted
 		verify(file);
 
-		context = new DeleteFileProcessContext(this, fileManager, file.isDirectory(), profileManager);
+		H2HSession session = networkManager.getSession();
+		context = new DeleteFileProcessContext(this, session.getFileManager(), file.isDirectory(),
+				session.getProfileManager());
 
 		// start by deleting the file
 		setNextStep(new DeleteFileOnDiskStep(file));
-	}
-
-	public DeleteFileProcess(File file, H2HSession session, NetworkManager networkManager) {
-		this(file, session.getFileManager(), networkManager, session.getProfileManager());
 	}
 
 	/**

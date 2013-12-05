@@ -4,11 +4,9 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HFileConfiguration;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 
@@ -23,19 +21,12 @@ public class NewVersionProcess extends Process {
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewVersionProcess.class);
 	private final UploadFileProcessContext context;
 
-	/**
-	 * Use this constructor if the most recent user profile is already present
-	 * 
-	 * @param file
-	 * @param userProfile
-	 * @param networkManager
-	 * @param fileManager
-	 * @throws IllegalArgumentException
-	 */
-	public NewVersionProcess(File file, UserProfileManager profileManager, NetworkManager networkManager,
-			FileManager fileManager, IH2HFileConfiguration config) throws IllegalArgumentException {
+	public NewVersionProcess(File file, NetworkManager networkManager) throws NoSessionException {
 		super(networkManager);
-		context = new UploadFileProcessContext(this, file, profileManager, fileManager, config, true);
+
+		H2HSession session = networkManager.getSession();
+		context = new UploadFileProcessContext(this, file, session.getProfileManager(),
+				session.getFileManager(), session.getFileConfiguration(), true);
 
 		// TODO shared files not considered yet
 
@@ -52,11 +43,6 @@ public class NewVersionProcess extends Process {
 		} else {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
-	}
-
-	public NewVersionProcess(File file, H2HSession session, NetworkManager networkManager) {
-		this(file, session.getProfileManager(), networkManager, session.getFileManager(), session
-				.getFileConfiguration());
 	}
 
 	@Override

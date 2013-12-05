@@ -134,7 +134,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// delete file 2
 		File file2 = new File(fileManager0.getRoot(), "file 2");
 		file2.delete();
-		ProcessTestUtil.deleteFile(remoteClient, file2, profileManager, fileManager0);
+		ProcessTestUtil.deleteFile(remoteClient, file2, profileManager, fileManager0, config);
 
 		/** start sync **/
 		// the client that logs in

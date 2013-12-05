@@ -176,15 +176,28 @@ public class ProcessTestUtil {
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
 			throws IllegalArgumentException {
-		NewVersionProcess process = new NewVersionProcess(file, profileManager, networkManager, fileManager,
-				config);
-		executeProcess(process);
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+
+		try {
+			NewVersionProcess process = new NewVersionProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager) {
-		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, profileManager);
-		executeProcess(process);
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+
+		try {
+			DeleteFileProcess process = new DeleteFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
 	}
 
 }
