@@ -11,7 +11,7 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 
 /**
- * Process to upload a file into the DHT
+ * Process to upload a new version of a file into the DHT
  * 
  * @author Nico
  * 

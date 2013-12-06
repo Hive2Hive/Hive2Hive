@@ -27,7 +27,7 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 		parentMeta.addChildKeyPair(context.getNewMetaKeyPair());
 		logger.debug("MetaFolder has new child. Total children = " + parentMeta.getChildKeys().size());
 
-		metaDocument = parentMeta;
+		super.metaDocument = parentMeta;
 		super.start();
 	}
 }

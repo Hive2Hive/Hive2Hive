@@ -14,8 +14,6 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.notify.NotifyPeersProcess;
-import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
 /**
  * Gets the meta folder of the parent. If the parent is root, there is no need to update it. Else, the deleted
@@ -35,9 +33,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 	private PublicKey parentKey;
 
 	public GetParentMetaStep(MetaDocument metaDocumentToDelete) {
-		// TODO this keypair ist just for omitting a NullPointerException at the superclass.
-		// There should be a super-constructor not taking any arguments
-		super(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), null, null);
+		super(null, null, null);
 		this.metaDocumentToDelete = metaDocumentToDelete;
 	}
 
