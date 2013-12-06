@@ -5,7 +5,6 @@ import java.security.PublicKey;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -13,7 +12,6 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
-import org.hive2hive.core.process.notify.NotifyPeersProcess;
 
 /**
  * Gets the meta folder of the parent. If the parent is root, there is no need to update it. Else, the deleted
@@ -71,15 +69,9 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the parent meta folder and notify my other clients directly");
 
-			try {
-				// notify other clients of this user
-				NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(),
-						new DeleteNotifyMessageFactory(metaDocumentToDelete.getId()));
-				notifyProcess.start();
-			} catch (NoSessionException e) {
-				logger.error("Cannot notify other clients about deletion because I don't have a session");
-			}
-
+			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(
+					metaDocumentToDelete.getId());
+			getProcess().notifyOtherClients(messageFactory);
 			getProcess().setNextStep(null);
 		} else {
 			// normal case when file is not in root

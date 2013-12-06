@@ -7,7 +7,6 @@ import java.security.PublicKey;
 import java.util.Set;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -16,7 +15,6 @@ import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.notify.NotifyPeersProcess;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 
@@ -54,21 +52,15 @@ public class UpdateUserProfileStep extends ProcessStep {
 		}
 
 		// start with notification
+		KeyPair keyPair = context.getNewMetaKeyPair();
+		AddNotifyMessageFactory messageFactory = new AddNotifyMessageFactory(keyPair.getPublic());
 		if (userProfile != null && userProfile.getRoot().getKeyPair().getPublic().equals(parentKey)) {
 			// file is in root; notify only own client
-			try {
-				NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(),
-						new AddNotifyMessageFactory(context.getNewMetaKeyPair().getPublic()));
-				notifyProcess.start();
-			} catch (NoSessionException e) {
-				logger.error("No session. Cannot notify other clients about new file");
-			}
+			getProcess().notifyOtherClients(messageFactory);
 		} else {
 			MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
 			Set<String> userList = metaFolder.getUserList();
-			NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userList,
-					new AddNotifyMessageFactory(context.getNewMetaKeyPair().getPublic()));
-			notifyProcess.start();
+			getProcess().notfyOtherUsers(userList, messageFactory);
 		}
 
 		// TODO check if too many versions of that file exist --> remove old versions if necessary

@@ -6,7 +6,6 @@ import java.security.KeyPair;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -17,7 +16,6 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
-import org.hive2hive.core.process.notify.NotifyPeersProcess;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -92,15 +90,8 @@ public class UpdateMetaFileStep extends ProcessStep {
 		FileTreeNode parent = userProfile.getFileById(metaFile.getId()).getParent();
 
 		if (parent.equals(userProfile.getRoot())) {
-			try {
-				logger.debug("Inform only current user since file is in root");
-				NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(),
-						new ModifyNotifyMessageFactory(metaFile.getId()));
-				notifyProcess.start();
-			} catch (NoSessionException e) {
-				logger.error("Could not notify all my clients since I don't have a session");
-			}
-
+			logger.debug("Inform only current user since file is in root");
+			getProcess().notifyOtherClients(new ModifyNotifyMessageFactory(metaFile.getId()));
 			return null;
 		} else {
 			// 1. get the parent meta
