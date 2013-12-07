@@ -1,8 +1,7 @@
-package org.hive2hive.core.process.upload.util;
+package org.hive2hive.core.process.util;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessTreeNode;
 
 /**
  * Additionally holds a {@link FileTreeNode}

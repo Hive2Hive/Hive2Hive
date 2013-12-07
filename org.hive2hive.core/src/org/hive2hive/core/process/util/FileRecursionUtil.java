@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.upload.util;
+package org.hive2hive.core.process.util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,7 +11,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessTreeNode;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;

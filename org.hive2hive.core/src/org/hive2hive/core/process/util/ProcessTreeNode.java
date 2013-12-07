@@ -1,9 +1,10 @@
-package org.hive2hive.core.process;
+package org.hive2hive.core.process.util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.listener.IProcessListener;
 
 /**

@@ -1,9 +1,8 @@
-package org.hive2hive.core.process.upload.util;
+package org.hive2hive.core.process.util;
 
 import java.io.File;
 
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessTreeNode;
 
 /**
  * Additionally holds a {@link File}
