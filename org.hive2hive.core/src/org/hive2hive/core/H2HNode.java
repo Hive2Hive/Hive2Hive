@@ -2,6 +2,7 @@ package org.hive2hive.core;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -19,6 +20,8 @@ import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
+import org.hive2hive.core.process.util.FileRecursionUtil;
+import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HNode implements IH2HNode, IH2HFileConfiguration {
@@ -135,14 +138,22 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess add(File file) throws IllegalFileLocation, NoSessionException {
-		// TODO if file is non-empty folder, add all files within the folder (and subfolder)?
-		// TODO if file is in folder that does not exist in the network yet --> add parent folder(s) as well?
-		NewFileProcess uploadProcess = new NewFileProcess(file, networkManager);
-		if (autostartProcesses) {
-			uploadProcess.start();
+		IProcess process;
+		if (file.isDirectory() && file.listFiles().length > 0) {
+			// add the files recursively
+			List<File> preorderList = FileRecursionUtil.getPreorderList(file);
+			process = FileRecursionUtil.buildProcessTreeUpload(preorderList, networkManager,
+					FileProcessAction.NEW_FILE);
+		} else {
+			// add single file
+			process = new NewFileProcess(file, networkManager);
 		}
 
-		return uploadProcess;
+		if (autostartProcesses) {
+			process.start();
+		}
+
+		return process;
 	}
 
 	@Override
@@ -157,7 +168,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
-		DeleteFileProcess process = new DeleteFileProcess(file, networkManager);
+		IProcess process = new DeleteFileProcess(file, networkManager);
 
 		if (autostartProcesses) {
 			process.start();

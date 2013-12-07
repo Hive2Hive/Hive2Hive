@@ -89,6 +89,20 @@ public class FileRecursionUtil {
 		return current;
 	}
 
+	public static List<File> getPreorderList(File root) {
+		List<File> allFiles = new ArrayList<File>();
+		listFiles(root, allFiles);
+		return allFiles;
+	}
+
+	private static void listFiles(File file, List<File> preorderList) {
+		preorderList.add(file);
+		File[] children = file.listFiles();
+		for (File child : children) {
+			listFiles(child, preorderList);
+		}
+	}
+
 	/**
 	 * Creates a process tree based on a list of files to download from the DHT. Note that the list must be in
 	 * preorder.
@@ -128,14 +142,13 @@ public class FileRecursionUtil {
 			NetworkManager networkManager) {
 		// delete the files in the DHT that are deleted while offline. First create a normal tree, but the
 		// order must be reverse. With the created tree, reverse it in a 2nd step.
-		List<ProcessTreeNode> allNodes = new ArrayList<ProcessTreeNode>();
 		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
 		for (FileTreeNode node : toDelete) {
 			ProcessTreeNode parent = getParent(rootProcess, node);
 			try {
 				// initialize the process
 				DeleteFileProcess deleteProcess = new DeleteFileProcess(node, networkManager);
-				allNodes.add(new NodeProcessTreeNode(deleteProcess, parent, node));
+				new NodeProcessTreeNode(deleteProcess, parent, node);
 			} catch (IllegalArgumentException e) {
 				logger.error("File cannot be deleted", e);
 			} catch (NoSessionException e) {
@@ -143,13 +156,17 @@ public class FileRecursionUtil {
 			}
 		}
 
-		// remove the rootProcess from the process manager because it will never be started
-		// TODO not used anymore
-		// ProcessManager.getInstance().detachProcess(rootProcess);
-
 		// files are deleted in reverse order (not pre-order)
 		// get parent means get the child files --> start deletion at children,
 		// thus the tree must be reversed (by using the depth)
+		return reverseTree(rootProcess);
+	}
+
+	/**
+	 * Reverses a tree (conserving the levels, but rearranging parent-child relations).
+	 */
+	private static ProcessTreeNode reverseTree(ProcessTreeNode root) {
+		List<ProcessTreeNode> allNodes = root.getAllChildren();
 		NodeProcessTreeNode reverseRootProcess = new NodeProcessTreeNode();
 		ProcessTreeNode currentParent = reverseRootProcess;
 		int currentDepth = allNodes.size();

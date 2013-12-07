@@ -43,7 +43,7 @@ public interface IH2HNode {
 
 	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
-	 * the node configuration
+	 * the node configuration. If a full tree needs to be uploaded, the parameter must be the root.
 	 */
 	IProcess add(File file) throws IllegalFileLocation, NoSessionException;
 

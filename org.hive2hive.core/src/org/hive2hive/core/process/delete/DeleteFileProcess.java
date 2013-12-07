@@ -66,7 +66,8 @@ public class DeleteFileProcess extends Process {
 	}
 
 	/**
-	 * Use this constructor to apply a file deletion during the absence of a user.
+	 * Use this constructor to apply a file deletion during the absence of a user. File does not exist on disk
+	 * anymore.
 	 * 
 	 * @param fileNode the file node in the user profile that needs to be deleted
 	 * @param profileManager

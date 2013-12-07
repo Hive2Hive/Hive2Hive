@@ -13,6 +13,7 @@ import org.hive2hive.core.process.listener.IProcessListener;
  * @author Nico
  * 
  */
+// TODO the listeners in the root process and the progress does not work here
 public abstract class ProcessTreeNode extends Process {
 
 	private final Process process;
@@ -57,6 +58,16 @@ public abstract class ProcessTreeNode extends Process {
 
 	public List<ProcessTreeNode> getChildren() {
 		return childProcesses;
+	}
+
+	public List<ProcessTreeNode> getAllChildren() {
+		List<ProcessTreeNode> allChildren = new ArrayList<ProcessTreeNode>();
+
+		for (ProcessTreeNode child : getChildren()) {
+			allChildren.add(child);
+			allChildren.addAll(child.getAllChildren());
+		}
+		return allChildren;
 	}
 
 	public ProcessTreeNode getParent() {
