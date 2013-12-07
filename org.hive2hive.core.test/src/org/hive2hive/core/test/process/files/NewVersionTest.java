@@ -77,7 +77,7 @@ public class NewVersionTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadNewVersion() throws IOException {
+	public void testUploadNewVersion() throws IOException, GetFailedException {
 		NetworkManager uploader = network.get(1);
 		NetworkManager downloader = network.get(2);
 
@@ -89,7 +89,9 @@ public class NewVersionTest extends H2HJUnitTest {
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
 
 			// verify the original content
-			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, downloaderFileManager);
+			UserProfileManager profileManager = new UserProfileManager(downloader, userCredentials);
+			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, profileManager,
+					downloaderFileManager, config);
 			Assert.assertEquals(originalContent, FileUtils.readFileToString(downloaded));
 		}
 
@@ -108,9 +110,11 @@ public class NewVersionTest extends H2HJUnitTest {
 			FileManager downloaderFileManager = new FileManager(root);
 
 			// download the file and check if version is newer
-			UserProfile userProfile = ProcessTestUtil.getUserProfile(downloader, userCredentials);
+			UserProfileManager profileManager = new UserProfileManager(downloader, userCredentials);
+			UserProfile userProfile = profileManager.getUserProfile(-1, false);
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
-			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, downloaderFileManager);
+			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, profileManager,
+					downloaderFileManager, config);
 
 			// new content should be latest one
 			Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));

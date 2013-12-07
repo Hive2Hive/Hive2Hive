@@ -154,9 +154,17 @@ public class ProcessTestUtil {
 		return context.getLocations();
 	}
 
-	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {
-		DownloadFileProcess process = new DownloadFileProcess(file, networkManager, fileManager);
-		executeProcess(process);
+	public static File downloadFile(NetworkManager networkManager, FileTreeNode file,
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+		try {
+			DownloadFileProcess process = new DownloadFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
+
 		return fileManager.getFile(file);
 	}
 

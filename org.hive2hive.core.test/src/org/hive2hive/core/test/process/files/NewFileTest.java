@@ -194,7 +194,8 @@ public class NewFileTest extends H2HJUnitTest {
 		FileManager fileManager2 = new FileManager(root);
 
 		// verify the file after downloadig it
-		File file = ProcessTestUtil.downloadFile(client, node, fileManager2);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		File file = ProcessTestUtil.downloadFile(client, node, profileManager, fileManager2, config);
 		Assert.assertTrue(file.exists());
 		if (originalFile.isFile()) {
 			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));

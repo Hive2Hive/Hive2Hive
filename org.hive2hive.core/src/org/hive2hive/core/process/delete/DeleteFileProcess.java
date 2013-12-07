@@ -5,11 +5,9 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.File2MetaFileStep;
 
@@ -57,6 +55,16 @@ public class DeleteFileProcess extends Process {
 		setNextStep(new DeleteFileOnDiskStep(file));
 	}
 
+	private void verify(File file) throws IllegalArgumentException {
+		if (file == null) {
+			throw new IllegalArgumentException("File may not be null");
+		}
+
+		if (file.isDirectory() && file.listFiles().length > 0) {
+			throw new IllegalArgumentException("Folder is not empty");
+		}
+	}
+
 	/**
 	 * Use this constructor to apply a file deletion during the absence of a user.
 	 * 
@@ -66,26 +74,20 @@ public class DeleteFileProcess extends Process {
 	 * @param networkManager the network manager, connected to the H2H network
 	 * @param credentials the credentials of the user
 	 * @throws IllegalArgumentException if the file cannot be deleted
+	 * @throws NoSessionException
 	 */
-	public DeleteFileProcess(FileTreeNode fileNode, UserProfileManager profileManager,
-			FileManager fileManager, NetworkManager networkManager) throws IllegalArgumentException {
+	public DeleteFileProcess(FileTreeNode fileNode, NetworkManager networkManager)
+			throws IllegalArgumentException, NoSessionException {
 		super(networkManager);
 		logger.info("Deleting file/folder from the DHT");
-		context = new DeleteFileProcessContext(this, fileManager, fileNode.isFolder(), profileManager);
 
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, profileManager, fileManager,
-				context, new DeleteChunkStep());
+		H2HSession session = networkManager.getSession();
+		context = new DeleteFileProcessContext(this, session.getFileManager(), fileNode.isFolder(),
+				session.getProfileManager());
+
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, session.getProfileManager(),
+				session.getFileManager(), context, new DeleteChunkStep());
 		setNextStep(file2MetaStep);
-	}
-
-	private void verify(File file) throws IllegalArgumentException {
-		if (file == null) {
-			throw new IllegalArgumentException("File may not be null");
-		}
-
-		if (file.isDirectory() && file.listFiles().length > 0) {
-			throw new IllegalArgumentException("Folder is not empty");
-		}
 	}
 
 	@Override

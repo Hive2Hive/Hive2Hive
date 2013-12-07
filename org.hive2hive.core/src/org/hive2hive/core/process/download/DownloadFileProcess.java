@@ -32,10 +32,11 @@ public class DownloadFileProcess extends Process {
 	 * @param file
 	 * @param networkManager
 	 * @param fileManager
+	 * @throws NoSessionException
 	 */
-	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager, FileManager fileManager) {
+	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager) throws NoSessionException {
 		super(networkManager);
-		initialize(file, fileManager);
+		initialize(file, networkManager.getSession().getFileManager());
 	}
 
 	/**

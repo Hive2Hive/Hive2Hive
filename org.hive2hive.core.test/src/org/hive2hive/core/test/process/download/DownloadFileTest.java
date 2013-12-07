@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -46,6 +47,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	private FileManager uploaderFileManager;
 	private File uploadedFile;
 	private FileTreeNode file;
+	private UserCredentials userCredentials;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -58,7 +60,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 	@Before
 	public void uploadFile() throws Exception {
-		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
 		ProcessTestUtil.register(network.get(0), userCredentials);
@@ -91,12 +93,15 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDownload() throws IOException {
+	public void testDownload() throws IOException, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		FileManager downloaderFileManager = new FileManager(newRoot);
 
-		DownloadFileProcess process = new DownloadFileProcess(file, client, downloaderFileManager);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, downloaderFileManager));
+		DownloadFileProcess process = new DownloadFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -115,14 +120,17 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDownloadWrongKeys() throws IOException {
+	public void testDownloadWrongKeys() throws IOException, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		FileManager downloaderFileManager = new FileManager(newRoot);
 
-		DownloadFileProcess process = new DownloadFileProcess(new FileTreeNode(file.getParent(),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024), "bla", "bla".getBytes()), client,
-				downloaderFileManager);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, downloaderFileManager));
+		FileTreeNode wrongKeys = new FileTreeNode(file.getParent(),
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024), "bla", "bla".getBytes());
+		DownloadFileProcess process = new DownloadFileProcess(wrongKeys, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -134,7 +142,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDownloadFileAlreadyExisting() throws IOException {
+	public void testDownloadFileAlreadyExisting() throws IOException, NoSessionException {
 		// should overwrite the existing file
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
@@ -145,7 +153,11 @@ public class DownloadFileTest extends H2HJUnitTest {
 		FileUtils.write(existing, "existing content");
 		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
 
-		DownloadFileProcess process = new DownloadFileProcess(file, client, downloaderFileManager);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, downloaderFileManager));
+
+		DownloadFileProcess process = new DownloadFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -167,7 +179,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDownloadFileAlreadyExistingSameContent() throws IOException {
+	public void testDownloadFileAlreadyExistingSameContent() throws IOException, NoSessionException {
 		// should overwrite the existing file
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
@@ -178,7 +190,10 @@ public class DownloadFileTest extends H2HJUnitTest {
 		FileUtils.write(existing, testContent);
 		long lastModifiedBefore = existing.lastModified();
 
-		DownloadFileProcess process = new DownloadFileProcess(file, client, downloaderFileManager);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, downloaderFileManager));
+		DownloadFileProcess process = new DownloadFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
