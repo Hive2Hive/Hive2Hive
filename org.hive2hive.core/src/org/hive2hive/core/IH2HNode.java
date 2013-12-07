@@ -53,10 +53,11 @@ public interface IH2HNode {
 	 * @param file the file to be updated
 	 * @return
 	 */
-	IProcess update(File file) throws NoSessionException;
+	IProcess update(File file) throws NoSessionException, IllegalArgumentException;
 
 	/**
-	 * Delete the file or the folder in the network. Note that the folder must be empty to delete
+	 * Delete the file or the folder in the network. Note that when a whole file tree should be deleted, the
+	 * parameter must be the root.
 	 * 
 	 * @throws IllegalArgumentException
 	 * @throws NoSessionException

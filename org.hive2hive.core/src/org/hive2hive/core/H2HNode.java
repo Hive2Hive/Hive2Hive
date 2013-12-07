@@ -142,7 +142,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<File> preorderList = FileRecursionUtil.getPreorderList(file);
-			process = FileRecursionUtil.buildProcessTreeUpload(preorderList, networkManager,
+			process = FileRecursionUtil.buildProcessTree(preorderList, networkManager,
 					FileProcessAction.NEW_FILE);
 		} else {
 			// add single file
@@ -157,7 +157,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
-	public IProcess update(File file) throws NoSessionException {
+	public IProcess update(File file) throws NoSessionException, IllegalArgumentException {
 		NewVersionProcess process = new NewVersionProcess(file, networkManager);
 		if (autostartProcesses) {
 			process.start();
@@ -168,7 +168,16 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
-		IProcess process = new DeleteFileProcess(file, networkManager);
+		IProcess process;
+		if (file.isDirectory() && file.listFiles().length > 0) {
+			// delete the files recursively
+			List<File> preorderList = FileRecursionUtil.getPreorderList(file);
+			process = FileRecursionUtil.buildProcessTree(preorderList, networkManager,
+					FileProcessAction.DELETE);
+		} else {
+			// delete a single file
+			process = new DeleteFileProcess(file, networkManager);
+		}
 
 		if (autostartProcesses) {
 			process.start();

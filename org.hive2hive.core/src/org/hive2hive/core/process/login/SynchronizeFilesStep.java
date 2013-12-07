@@ -128,7 +128,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	private ProcessTreeNode startUpload(List<File> toUpload, FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
-		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessTreeUpload(toUpload, getNetworkManager(),
+		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessTree(toUpload, getNetworkManager(),
 				action);
 
 		if (toUpload.size() > 0)

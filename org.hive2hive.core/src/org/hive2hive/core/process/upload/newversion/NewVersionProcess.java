@@ -21,7 +21,8 @@ public class NewVersionProcess extends Process {
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewVersionProcess.class);
 	private final UploadFileProcessContext context;
 
-	public NewVersionProcess(File file, NetworkManager networkManager) throws NoSessionException {
+	public NewVersionProcess(File file, NetworkManager networkManager) throws NoSessionException,
+			IllegalArgumentException {
 		super(networkManager);
 
 		H2HSession session = networkManager.getSession();

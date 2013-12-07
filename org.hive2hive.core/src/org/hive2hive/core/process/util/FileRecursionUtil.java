@@ -26,24 +26,25 @@ public class FileRecursionUtil {
 
 	public enum FileProcessAction {
 		NEW_FILE,
-		MODIFY_FILE;
+		MODIFY_FILE,
+		DELETE;
 	}
 
 	/**
-	 * Creates a process tree based on a list of files to upload to the DHT. Note that the list must be in
-	 * preorder.
+	 * Creates a process tree based on a list of files. Note that the list must be in
+	 * preorder (root first, even if the action is DELETE)
 	 * 
-	 * @param toUpload preorder list of files
+	 * @param files preorder list of files
 	 * @param networkManager the network manager
 	 * @param action which action to perform (decides over kind of process)
 	 * @return the root process which can be started and holds all necessary information of its child
 	 *         processes
 	 */
-	public static ProcessTreeNode buildProcessTreeUpload(List<File> toUpload, NetworkManager networkManager,
+	public static ProcessTreeNode buildProcessTree(List<File> files, NetworkManager networkManager,
 			FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
-		for (File file : toUpload) {
+		for (File file : files) {
 			ProcessTreeNode parent = getParent(rootProcess, file);
 			try {
 				// initialize the process
@@ -54,6 +55,9 @@ public class FileRecursionUtil {
 						break;
 					case MODIFY_FILE:
 						process = new NewVersionProcess(file, networkManager);
+						break;
+					case DELETE:
+						process = new DeleteFileProcess(file, networkManager);
 						break;
 					default:
 						logger.error("Type mismatch");
@@ -68,7 +72,12 @@ public class FileRecursionUtil {
 			}
 		}
 
-		return rootProcess;
+		if (action == FileProcessAction.DELETE) {
+			// deletion happens in reverse order
+			return reverseTree(rootProcess);
+		} else {
+			return rootProcess;
+		}
 	}
 
 	/**
