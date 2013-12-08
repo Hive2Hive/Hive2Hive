@@ -5,21 +5,29 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
+import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -69,7 +77,7 @@ public class NewVersionTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadNewVersion() throws IOException {
+	public void testUploadNewVersion() throws IOException, GetFailedException {
 		NetworkManager uploader = network.get(1);
 		NetworkManager downloader = network.get(2);
 
@@ -81,7 +89,9 @@ public class NewVersionTest extends H2HJUnitTest {
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
 
 			// verify the original content
-			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, downloaderFileManager);
+			UserProfileManager profileManager = new UserProfileManager(downloader, userCredentials);
+			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, profileManager,
+					downloaderFileManager, config);
 			Assert.assertEquals(originalContent, FileUtils.readFileToString(downloaded));
 		}
 
@@ -100,15 +110,66 @@ public class NewVersionTest extends H2HJUnitTest {
 			FileManager downloaderFileManager = new FileManager(root);
 
 			// download the file and check if version is newer
-			UserProfile userProfile = ProcessTestUtil.getUserProfile(downloader, userCredentials);
+			UserProfileManager profileManager = new UserProfileManager(downloader, userCredentials);
+			UserProfile userProfile = profileManager.getUserProfile(-1, false);
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
-			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, downloaderFileManager);
+			File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, profileManager,
+					downloaderFileManager, config);
 
 			// new content should be latest one
 			Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
 
 			// check the md5 hash
 			Assert.assertTrue(H2HEncryptionUtil.compareMD5(downloaded, md5UpdatedFile));
+		}
+	}
+
+	@Test
+	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException,
+			NoSessionException {
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+
+		// upload the same content again
+		NewVersionProcess process = new NewVersionProcess(file, client);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+		process.start();
+
+		H2HWaiter waiter = new H2HWaiter(6000);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+
+		// verify if the md5 hash did not change
+		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
+		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
+
+		// verify that only one version was created
+		MetaFile metaDocument = (MetaFile) ProcessTestUtil.getMetaDocument(client, fileNode.getKeyPair());
+		Assert.assertEquals(1, metaDocument.getVersions().size());
+	}
+
+	@Test
+	public void testNewFolderVersion() throws IllegalFileLocation {
+		// new folder version is illegal
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+
+		File folder = new File(fileManager.getRoot(), "test-folder");
+		folder.mkdir();
+
+		// upload the file
+		ProcessTestUtil.uploadNewFile(client, folder, profileManager, fileManager, config);
+
+		try {
+			ProcessTestUtil.uploadNewFileVersion(client, folder, profileManager, fileManager, config);
+			Assert.fail();
+		} catch (IllegalArgumentException e) {
+			// intended exception
 		}
 	}
 

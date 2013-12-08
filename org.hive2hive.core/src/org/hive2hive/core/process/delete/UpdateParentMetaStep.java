@@ -33,12 +33,14 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 			getProcess().stop("Could not find the parent meta data");
 		}
 
-		parentMeta.removeChildDocument(childKey);
-		logger.debug("Removed child from meta folder. Total children = "
-				+ parentMeta.getChildDocuments().size());
+		parentMeta.removeChildKey(childKey);
+		logger.debug("Removed child from meta folder. Total children = " + parentMeta.getChildKeys().size());
 
-		// TODO notify other clients
-		// nextStep = ...
+		// notify other clients (can be multiple users)
+		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(childKey);
+		getProcess().notfyOtherUsers(parentMeta.getUserList(), messageFactory);
+
+		// next step is null, process is done
 		super.metaDocument = parentMeta;
 		super.start();
 	}

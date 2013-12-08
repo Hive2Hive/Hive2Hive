@@ -29,9 +29,10 @@ public interface IH2HNode {
 	 * Initiates and returns a login process.
 	 * 
 	 * @param credentials The user's credentials with which it shall be logged in.
+	 * @param rootPath The user's root path to his files
 	 * @return Returns an observable login process.
 	 */
-	IProcess login(UserCredentials credentials);
+	IProcess login(UserCredentials credentials, File rootPath);
 
 	/**
 	 * Initiates and returns a logout process.
@@ -42,7 +43,7 @@ public interface IH2HNode {
 
 	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
-	 * the node configuration
+	 * the node configuration. If a full tree needs to be uploaded, the parameter must be the root.
 	 */
 	IProcess add(File file) throws IllegalFileLocation, NoSessionException;
 
@@ -52,10 +53,11 @@ public interface IH2HNode {
 	 * @param file the file to be updated
 	 * @return
 	 */
-	IProcess update(File file) throws NoSessionException;
+	IProcess update(File file) throws NoSessionException, IllegalArgumentException;
 
 	/**
-	 * Delete the file or the folder in the network. Note that the folder must be empty to delete
+	 * Delete the file or the folder in the network. Note that when a whole file tree should be deleted, the
+	 * parameter must be the root.
 	 * 
 	 * @throws IllegalArgumentException
 	 * @throws NoSessionException

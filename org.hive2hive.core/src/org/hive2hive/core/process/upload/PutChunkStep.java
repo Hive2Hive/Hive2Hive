@@ -52,9 +52,10 @@ public class PutChunkStep extends BasePutProcessStep {
 	 * Constructor only usable with subclass. Remember to configure the steps after uploading before starting
 	 * this step. This ensures that the step knows what to do when all parts are uploaded.
 	 * 
-	 * @param file
-	 * @param offset
-	 * @param chunkKeys
+	 * @param file the file to upload
+	 * @param offset how many bytes of the file are already on the network
+	 * @param chunkKeys the collected chunk keys during upload. This also indicates the progress of the
+	 *            chunking
 	 */
 	protected PutChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
 		// the details are set later
@@ -63,6 +64,8 @@ public class PutChunkStep extends BasePutProcessStep {
 		this.offset = offset;
 		this.chunkKeys = chunkKeys;
 	}
+
+	// TODO create 2nd constructor (private) for better readability and safety
 
 	@Override
 	public void start() {

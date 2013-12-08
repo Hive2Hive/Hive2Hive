@@ -1,8 +1,10 @@
-package org.hive2hive.core.process;
+package org.hive2hive.core.process.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
@@ -11,22 +13,24 @@ import org.hive2hive.core.process.listener.IProcessListener;
  * @author Nico
  * 
  */
+// TODO the listeners in the root process and the progress does not work here
 public abstract class ProcessTreeNode extends Process {
 
 	private final Process process;
 	private final List<ProcessTreeNode> childProcesses;
 	private boolean done;
 	private final ProcessTreeNode parent;
+	private final List<String> problemList;
 
 	/**
-	 * For the root node (does not do anything except holding children and starting them simultanously
+	 * For the root node (does not do anything except holding children and starting them simultaneously
 	 */
 	public ProcessTreeNode() {
 		this(null, null);
 	}
 
 	/**
-	 * For process nodes that hold process. The process is not started unil the parent has finished
+	 * For process nodes that hold process. The process is not started until the parent has finished
 	 * 
 	 * @param process
 	 * @param parent
@@ -38,7 +42,12 @@ public abstract class ProcessTreeNode extends Process {
 		this.parent = parent;
 		this.childProcesses = new ArrayList<ProcessTreeNode>();
 		this.done = false;
-		if (parent != null) {
+		if (parent == null) {
+			// root node
+			problemList = new CopyOnWriteArrayList<String>();
+		} else {
+			// child node
+			problemList = null;
 			parent.addChild(this);
 		}
 	}
@@ -49,6 +58,16 @@ public abstract class ProcessTreeNode extends Process {
 
 	public List<ProcessTreeNode> getChildren() {
 		return childProcesses;
+	}
+
+	public List<ProcessTreeNode> getAllChildren() {
+		List<ProcessTreeNode> allChildren = new ArrayList<ProcessTreeNode>();
+
+		for (ProcessTreeNode child : getChildren()) {
+			allChildren.add(child);
+			allChildren.addAll(child.getAllChildren());
+		}
+		return allChildren;
 	}
 
 	public ProcessTreeNode getParent() {
@@ -77,6 +96,14 @@ public abstract class ProcessTreeNode extends Process {
 		}
 	}
 
+	protected void addProblem(String reason) {
+		if (parent == null) {
+			problemList.add(reason);
+		} else {
+			parent.addProblem(reason);
+		}
+	}
+
 	@Override
 	public void run() {
 		if (process == null) {
@@ -102,7 +129,7 @@ public abstract class ProcessTreeNode extends Process {
 				@Override
 				public void onFail(String reason) {
 					done = true;
-					onFail(reason);
+					addProblem(reason);
 				}
 			});
 
@@ -110,5 +137,11 @@ public abstract class ProcessTreeNode extends Process {
 		}
 	}
 
-	public abstract void onFail(String reason);
+	public List<String> getProblemList() {
+		if (parent == null) {
+			return problemList;
+		} else {
+			return parent.getProblemList();
+		}
+	}
 }

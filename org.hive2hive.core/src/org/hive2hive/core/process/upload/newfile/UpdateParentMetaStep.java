@@ -24,8 +24,8 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 			getProcess().stop("Could not find the parent meta data");
 		}
 
-		parentMeta.addChildDocument(context.getNewMetaKeyPair());
-		logger.debug("MetaFolder has new child. Total children = " + parentMeta.getChildDocuments().size());
+		parentMeta.addChildKeyPair(context.getNewMetaKeyPair());
+		logger.debug("MetaFolder has new child. Total children = " + parentMeta.getChildKeys().size());
 
 		super.metaDocument = parentMeta;
 		super.start();

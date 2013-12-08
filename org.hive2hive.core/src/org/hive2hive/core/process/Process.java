@@ -2,13 +2,16 @@ package org.hive2hive.core.process;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.manager.ProcessManager;
+import org.hive2hive.core.process.notify.INotificationMessageFactory;
+import org.hive2hive.core.process.notify.NotifyPeersProcess;
 
 /**
  * This abstract process is used for executing workflows. It keeps the order of the process steps.
@@ -141,7 +144,8 @@ public abstract class Process implements IProcess {
 		if (currentStep != null) {
 			currentStep.start();
 		} else {
-			logger.error("No process step to start with specified.");
+			logger.warn("No process step to start with specified.");
+			finish();
 		}
 	}
 
@@ -184,6 +188,29 @@ public abstract class Process implements IProcess {
 				step.rollBack();
 			}
 		}
+	}
+
+	/**
+	 * Notify the clients of the same user
+	 */
+	public void notifyOtherClients(INotificationMessageFactory messageFactory) {
+		try {
+			logger.debug("Start notifying other clients of same user");
+			NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory);
+			notifyProcess.start();
+		} catch (NoSessionException e) {
+			logger.error("Could not notify all my clients since I don't have a session");
+		}
+	}
+
+	/**
+	 * Notify all clients of multiple users
+	 */
+	public void notfyOtherUsers(Set<String> userIds, INotificationMessageFactory messageFactory) {
+		logger.debug("Start notifying " + userIds.size() + " users");
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userIds,
+				messageFactory);
+		notifyProcess.start();
 	}
 
 	/**

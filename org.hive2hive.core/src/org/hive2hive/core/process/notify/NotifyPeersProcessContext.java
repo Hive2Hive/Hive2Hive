@@ -2,23 +2,30 @@ package org.hive2hive.core.process.notify;
 
 import java.security.PublicKey;
 import java.util.Map;
+import java.util.Set;
 
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.ProcessContext;
 
 public class NotifyPeersProcessContext extends ProcessContext {
 
-	private final Map<String, BaseDirectMessage> notificationMessages;
+	private final Set<String> users;
+	private final INotificationMessageFactory messageFactory;
 	private Map<String, PublicKey> keys;
 
-	public NotifyPeersProcessContext(Process process, Map<String, BaseDirectMessage> notificationMessages) {
+	public NotifyPeersProcessContext(Process process, Set<String> users,
+			INotificationMessageFactory messageFactory) {
 		super(process);
-		this.notificationMessages = notificationMessages;
+		this.users = users;
+		this.messageFactory = messageFactory;
 	}
 
-	public Map<String, BaseDirectMessage> getNotificationMessages() {
-		return notificationMessages;
+	public Set<String> getUsers() {
+		return users;
+	}
+
+	public INotificationMessageFactory getMessageFactory() {
+		return messageFactory;
 	}
 
 	public void setUserPublicKeys(Map<String, PublicKey> keys) {

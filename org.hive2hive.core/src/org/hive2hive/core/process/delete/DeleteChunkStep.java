@@ -57,12 +57,11 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 			// 3. put the updated user profile
 
 			getProcess().setNextStep(new DeleteMetaDocumentStep());
-			return;
+		} else {
+			KeyPair toDelete = chunksToDelete.remove(0);
+			nextStep = new DeleteChunkStep(chunksToDelete);
+			// TODO: original chunk is not here in case a rollback happens.
+			remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0));
 		}
-
-		KeyPair toDelete = chunksToDelete.remove(0);
-		nextStep = new DeleteChunkStep(chunksToDelete);
-		// TODO: original chunk is not here in case a rollback happens.
-		remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0));
 	}
 }

@@ -3,8 +3,10 @@ package org.hive2hive.core.test.process;
 import java.io.File;
 import java.security.KeyPair;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.Locations;
@@ -26,6 +28,8 @@ import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 
@@ -150,30 +154,58 @@ public class ProcessTestUtil {
 		return context.getLocations();
 	}
 
-	public static File downloadFile(NetworkManager networkManager, FileTreeNode file, FileManager fileManager) {
-		DownloadFileProcess process = new DownloadFileProcess(file, networkManager, fileManager);
-		executeProcess(process);
+	public static File downloadFile(NetworkManager networkManager, FileTreeNode file,
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+		try {
+			DownloadFileProcess process = new DownloadFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
+
 		return fileManager.getFile(file);
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
 			throws IllegalFileLocation {
-		NewFileProcess process = new NewFileProcess(file, profileManager, networkManager, fileManager, config);
-		executeProcess(process);
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+		try {
+			NewFileProcess process = new NewFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
 	}
 
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
-		NewVersionProcess process = new NewVersionProcess(file, profileManager, networkManager, fileManager,
-				config);
-		executeProcess(process);
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
+			throws IllegalArgumentException {
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+
+		try {
+			NewVersionProcess process = new NewVersionProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager) {
-		DeleteFileProcess process = new DeleteFileProcess(file, fileManager, networkManager, profileManager);
-		executeProcess(process);
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+		networkManager.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				profileManager, config, fileManager));
+
+		try {
+			DeleteFileProcess process = new DeleteFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
 	}
 
 }

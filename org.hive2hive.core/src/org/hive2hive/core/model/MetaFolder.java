@@ -3,7 +3,9 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Holds the permissions for the folder (only one if private, but can have multiple users) and the keys for
@@ -16,12 +18,12 @@ public class MetaFolder extends MetaDocument {
 
 	private static final long serialVersionUID = 1L;
 	private final List<UserPermission> userPermissions;
-	private final List<KeyPair> childDocuments;
+	private final List<KeyPair> childKeys;
 
 	public MetaFolder(PublicKey id, String creatorName) {
 		super(id);
 		userPermissions = new ArrayList<UserPermission>();
-		childDocuments = new ArrayList<KeyPair>();
+		childKeys = new ArrayList<KeyPair>();
 
 		// creator receives write permissions by default
 		userPermissions.add(new UserPermission(creatorName, PermissionType.WRITE));
@@ -47,23 +49,36 @@ public class MetaFolder extends MetaDocument {
 		userPermissions.remove(toDelete);
 	}
 
-	public List<KeyPair> getChildDocuments() {
-		return childDocuments;
+	/**
+	 * Returns a list of users that can at least read the file
+	 * 
+	 * @return
+	 */
+	public Set<String> getUserList() {
+		Set<String> users = new HashSet<String>(userPermissions.size());
+		for (UserPermission permission : userPermissions) {
+			users.add(permission.getUserId());
+		}
+		return users;
 	}
 
-	public void addChildDocument(KeyPair child) {
-		childDocuments.add(child);
+	public List<KeyPair> getChildKeys() {
+		return childKeys;
 	}
 
-	public void removeChildDocument(PublicKey childKey) {
+	public void addChildKeyPair(KeyPair keyPair) {
+		childKeys.add(keyPair);
+	}
+
+	public void removeChildKey(PublicKey childKey) {
 		KeyPair toRemove = null;
-		for (KeyPair child : childDocuments) {
+		for (KeyPair child : childKeys) {
 			if (child.getPublic().equals(childKey)) {
 				toRemove = child;
 				break;
 			}
 		}
 
-		childDocuments.remove(toRemove);
+		childKeys.remove(toRemove);
 	}
 }

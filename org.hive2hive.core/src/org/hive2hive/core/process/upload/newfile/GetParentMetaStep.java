@@ -12,9 +12,13 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
-import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
+/**
+ * Gets the parent meta folder (if file is not in root)
+ * 
+ * @author Nico
+ * 
+ */
 public class GetParentMetaStep extends GetMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetParentMetaStep.class);
@@ -22,9 +26,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 	private final MetaDocument childMetaDocument;
 
 	public GetParentMetaStep(MetaDocument childMetaDocument) {
-		// TODO this keypair ist just for omitting a NullPointerException at the superclass.
-		// There should be a super-constructor not taking any arguments
-		super(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), null, null);
+		super(null, null, null);
 		this.childMetaDocument = childMetaDocument;
 	}
 
@@ -44,7 +46,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateUserProfileStep());
 			getProcess().setNextStep(nextStep);
 		} else {
-			// normal case when file is not in root
+			// when file is not in root, the parent meta folder must be found
 			logger.debug("Get the meta folder of the parent (lookup in user profile)");
 
 			UserProfileManager profileManager = context.getProfileManager();
@@ -57,7 +59,6 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			}
 
 			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
-
 			if (parentNode == null) {
 				getProcess().stop("Parent file is not in user profile");
 				return;
@@ -67,8 +68,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			// 1. put the new meta document
 			// 2. update the parent meta document
 			// 3. update the user profile
-			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
-
+			super.nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
 			super.keyPair = parentNode.getKeyPair();
 			super.context = context;
 			super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);

@@ -180,7 +180,9 @@ public class UserProfileManager {
 						logger.debug("Notifying process " + modifying.getPid() + " that putting is finished");
 					} else if (!modifying.isAborted()) {
 						// request is not ready to put and has not been aborted
-						logger.error("Process " + modifying.getPid() + " never finished doing modifications");
+						logger.error("Process " + modifying.getPid()
+								+ " never finished doing modifications. Abort the put request.");
+						modifying.abort();
 						modifying.setPutError(new PutFailedException("Too long modification. Only "
 								+ MAX_MODIFICATION_TIME + "ms are allowed."));
 					}
@@ -205,11 +207,11 @@ public class UserProfileManager {
 					H2HConstants.USER_PROFILE);
 			futureGet.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
-			if (futureGet.isFailed() || futureGet.getData() == null) {
-				logger.warn("Did not find user profile.");
-				entry.setGetError(new GetFailedException("User profile not found"));
-			} else {
-				try {
+			try {
+				if (futureGet.isFailed() || futureGet.getData() == null) {
+					logger.warn("Did not find user profile.");
+					entry.setGetError(new GetFailedException("User profile not found"));
+				} else {
 					// decrypt it
 					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) futureGet.getData()
 							.object();
@@ -221,11 +223,14 @@ public class UserProfileManager {
 
 					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 					entry.setUserProfile((UserProfile) decrypted);
-				} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
-						| ClassNotFoundException | IOException e) {
-					logger.error("Cannot decrypt the user profile.", e);
-					entry.setGetError(new GetFailedException("Cannot decrypt the user profile"));
 				}
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
+					| ClassNotFoundException | IOException e) {
+				logger.error("Cannot decrypt the user profile.", e);
+				entry.setGetError(new GetFailedException("Cannot decrypt the user profile"));
+			} catch (Exception e) {
+				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
+				entry.setGetError(new GetFailedException(e.getMessage()));
 			}
 		}
 
@@ -280,6 +285,10 @@ public class UserProfileManager {
 		}
 
 		public void waitForGet() throws GetFailedException {
+			if (getFailedException != null) {
+				throw getFailedException;
+			}
+
 			synchronized (getWaiter) {
 				try {
 					getWaiter.wait();
@@ -347,6 +356,10 @@ public class UserProfileManager {
 		}
 
 		public void waitForPut() throws PutFailedException {
+			if (putFailedException != null) {
+				throw putFailedException;
+			}
+
 			synchronized (putWaiter) {
 				try {
 					putWaiter.wait();

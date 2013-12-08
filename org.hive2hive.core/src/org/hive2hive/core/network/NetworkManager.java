@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -65,7 +66,9 @@ public class NetworkManager {
 	/**
 	 * Returns the session of the currently logged in user
 	 */
-	public H2HSession getSession() {
+	public H2HSession getSession() throws NoSessionException {
+		if (session == null)
+			throw new NoSessionException();
 		return session;
 	}
 

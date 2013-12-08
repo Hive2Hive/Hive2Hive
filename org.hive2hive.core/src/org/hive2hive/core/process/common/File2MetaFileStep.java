@@ -51,10 +51,12 @@ public class File2MetaFileStep extends ProcessStep {
 	@Override
 	public void start() {
 		try {
-			UserProfile profile = profileManager.getUserProfile(getProcess().getID(), false);
-
+			// file node can be null or already present
 			if (fileNode == null) {
+				// file node is null, first look it up in the user profile
+				UserProfile profile = profileManager.getUserProfile(getProcess().getID(), false);
 				fileNode = profile.getFileByPath(file, fileManager);
+
 				if (fileNode == null) {
 					getProcess().stop(
 							"File does not exist in user profile. You might consider uploading a new file");

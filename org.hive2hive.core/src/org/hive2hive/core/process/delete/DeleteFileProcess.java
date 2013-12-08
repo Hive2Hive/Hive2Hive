@@ -4,11 +4,10 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.File2MetaFileStep;
 
@@ -32,51 +31,28 @@ public class DeleteFileProcess extends Process {
 	private final DeleteFileProcessContext context;
 
 	/**
-	 * Default constructor that also deletes the file on disc.
+	 * Default constructor that also deletes the file on disk.
 	 * 
 	 * @param file the file to delete
-	 * @param fileManager the file manager
 	 * @param networkManager the network manager, connected to the H2H network
 	 * @param credentials the credentials of the user
 	 * @throws IllegalArgumentException if the file cannot be deleted
+	 * @throws NoSessionException
 	 */
-	public DeleteFileProcess(File file, FileManager fileManager, NetworkManager networkManager,
-			UserProfileManager profileManager) throws IllegalArgumentException {
+	public DeleteFileProcess(File file, NetworkManager networkManager) throws IllegalArgumentException,
+			NoSessionException {
 		super(networkManager);
 		logger.info("Deleting file/folder from the DHT");
 
 		// verify if the file can be deleted
 		verify(file);
 
-		context = new DeleteFileProcessContext(this, fileManager, file.isDirectory(), profileManager);
+		H2HSession session = networkManager.getSession();
+		context = new DeleteFileProcessContext(this, session.getFileManager(), file.isDirectory(),
+				session.getProfileManager());
 
 		// start by deleting the file
 		setNextStep(new DeleteFileOnDiskStep(file));
-	}
-
-	public DeleteFileProcess(File file, H2HSession session, NetworkManager networkManager) {
-		this(file, session.getFileManager(), networkManager, session.getProfileManager());
-	}
-
-	/**
-	 * Use this constructor to apply a file deletion during the absence of a user.
-	 * 
-	 * @param fileNode the file node in the user profile that needs to be deleted
-	 * @param profileManager
-	 * @param fileManager the file manager
-	 * @param networkManager the network manager, connected to the H2H network
-	 * @param credentials the credentials of the user
-	 * @throws IllegalArgumentException if the file cannot be deleted
-	 */
-	public DeleteFileProcess(FileTreeNode fileNode, UserProfileManager profileManager,
-			FileManager fileManager, NetworkManager networkManager) throws IllegalArgumentException {
-		super(networkManager);
-		logger.info("Deleting file/folder from the DHT");
-		context = new DeleteFileProcessContext(this, fileManager, fileNode.isFolder(), profileManager);
-
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, profileManager, fileManager,
-				context, new DeleteChunkStep());
-		setNextStep(file2MetaStep);
 	}
 
 	private void verify(File file) throws IllegalArgumentException {
@@ -87,6 +63,32 @@ public class DeleteFileProcess extends Process {
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			throw new IllegalArgumentException("Folder is not empty");
 		}
+	}
+
+	/**
+	 * Use this constructor to apply a file deletion during the absence of a user. File does not exist on disk
+	 * anymore.
+	 * 
+	 * @param fileNode the file node in the user profile that needs to be deleted
+	 * @param profileManager
+	 * @param fileManager the file manager
+	 * @param networkManager the network manager, connected to the H2H network
+	 * @param credentials the credentials of the user
+	 * @throws IllegalArgumentException if the file cannot be deleted
+	 * @throws NoSessionException
+	 */
+	public DeleteFileProcess(FileTreeNode fileNode, NetworkManager networkManager)
+			throws IllegalArgumentException, NoSessionException {
+		super(networkManager);
+		logger.info("Deleting file/folder from the DHT");
+
+		H2HSession session = networkManager.getSession();
+		context = new DeleteFileProcessContext(this, session.getFileManager(), fileNode.isFolder(),
+				session.getProfileManager());
+
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, session.getProfileManager(),
+				session.getFileManager(), context, new DeleteChunkStep());
+		setNextStep(file2MetaStep);
 	}
 
 	@Override

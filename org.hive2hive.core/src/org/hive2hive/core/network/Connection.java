@@ -100,8 +100,7 @@ public class Connection {
 		if (!createPeer())
 			return false;
 
-		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapInetAddress).ports(port)
-				.start();
+		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapInetAddress).ports(port).start();
 		futureDiscover.awaitUninterruptibly();
 
 		if (futureDiscover.isSuccess()) {
@@ -133,7 +132,7 @@ public class Connection {
 
 	public void disconnect() {
 		if (isConnected) {
-			peer.shutdown();
+			peer.shutdown().awaitUninterruptibly(10000);
 			isConnected = false;
 		} else {
 			logger.warn("Peer is not connected. No disconnect.");

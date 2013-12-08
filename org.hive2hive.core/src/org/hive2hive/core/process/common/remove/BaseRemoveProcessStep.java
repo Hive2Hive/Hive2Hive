@@ -23,6 +23,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 	protected String contentKey;
 	protected NetworkContent contentToRemove;
 	protected ProcessStep nextStep;
+	private boolean removePerformed = false;
 
 	public BaseRemoveProcessStep(ProcessStep nexStep) {
 		this.nextStep = nexStep;
@@ -38,6 +39,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			return;
 		}
 		dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), this);
+		removePerformed = true;
 	}
 
 	@Override
@@ -52,6 +54,12 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 
 	@Override
 	public void rollBack() {
+		if (!removePerformed) {
+			logger.info("Noting has been removed. Skip re-adding it to the network");
+			getProcess().nextRollBackStep();
+			return;
+		}
+
 		// TODO ugly bug fix
 		if (contentToRemove == null) {
 			logger.warn(String
@@ -69,7 +77,9 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			getProcess().nextRollBackStep();
 			return;
 		}
+
 		dataManager.putGlobal(locationKey, contentKey, contentToRemove, this);
+		getProcess().nextRollBackStep();
 	}
 
 	@Override

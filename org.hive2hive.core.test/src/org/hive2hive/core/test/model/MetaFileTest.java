@@ -25,15 +25,13 @@ public class MetaFileTest extends H2HJUnitTest {
 	@Test
 	public void testGetNewestVersion() {
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
-		MetaFile metaFile = new MetaFile(keys.getPublic());
-
 		List<FileVersion> versions = new ArrayList<FileVersion>();
 		versions.add(new FileVersion(0, 123, System.currentTimeMillis()));
 		versions.add(new FileVersion(1, 123, System.currentTimeMillis()));
 		// timestamp is older
 		versions.add(new FileVersion(2, 123, System.currentTimeMillis() - 1000 * 60));
 
-		metaFile.setVersions(versions);
+		MetaFile metaFile = new MetaFile(keys.getPublic(), versions);
 
 		FileVersion newestVersion = metaFile.getNewestVersion();
 		Assert.assertEquals(2, newestVersion.getCounter());
