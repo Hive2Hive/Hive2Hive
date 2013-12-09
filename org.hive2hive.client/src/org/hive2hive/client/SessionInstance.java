@@ -1,4 +1,4 @@
-package org.hive2hive.core.client;
+package org.hive2hive.client;
 
 import java.net.InetAddress;
 import java.util.ArrayList;

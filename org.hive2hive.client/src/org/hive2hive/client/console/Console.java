@@ -1,4 +1,4 @@
-package org.hive2hive.core.client.console;
+package org.hive2hive.client.console;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.hive2hive.core.client.SessionInstance;
+import org.hive2hive.client.SessionInstance;
 import org.hive2hive.core.network.NetworkManager;
 
 /**

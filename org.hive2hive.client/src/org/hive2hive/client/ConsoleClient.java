@@ -1,9 +1,9 @@
-package org.hive2hive.core.client;
+package org.hive2hive.client;
 
 import java.io.IOException;
 
-import org.hive2hive.core.client.console.Console;
-import org.hive2hive.core.client.menu.TopLevelMenu;
+import org.hive2hive.client.console.Console;
+import org.hive2hive.client.menu.TopLevelMenu;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
 /**
