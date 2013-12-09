@@ -6,6 +6,8 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.Console;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
 
@@ -19,6 +21,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 	private final UserMenu userMenu;
 	private final NodeCreationMenu nodeMenu;
+	protected File root;
 
 	public TopLevelMenu(Console console) {
 		super(console);
@@ -28,17 +31,18 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-
 		add(new H2HConsoleMenuItem("Network Configuration") {
 			protected void execute() {
 				nodeMenu.open();
 			}
 		});
+
 		add(new H2HConsoleMenuItem("User Configuration") {
 			protected void execute() {
 				userMenu.open();
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Register") {
 			protected void checkPreconditions() {
 				if (nodeMenu.getH2HNode() == null) {
@@ -78,7 +82,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 
 			protected void execute() {
-				File root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
+				root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
 				System.out.println("Specify root path or enter 'ok' if you're ok with: ");
 				System.out.println(root.getAbsolutePath());
 				String input = awaitStringParameter();
@@ -96,11 +100,32 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Add File") {
+			@Override
 			protected void execute() {
-				notImplemented();
+				System.out.println("Specify the relative file path to " + root.getAbsolutePath());
+				String path = awaitStringParameter();
+				File toAdd = new File(root, path);
+
+				try {
+					IProcess process = nodeMenu.getH2HNode().add(toAdd);
+					ProcessListener processListener = new ProcessListener();
+					process.addListener(processListener);
+
+					while (!processListener.hasFinished()) {
+						// busy waiting
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+						}
+					}
+				} catch (IllegalFileLocation | NoSessionException e) {
+					System.out.println("Could not add the file. Reason: " + e.getMessage());
+				}
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Update File") {
 			protected void execute() {
 				notImplemented();

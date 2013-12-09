@@ -26,6 +26,9 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	public NodeCreationMenu(Console console) {
 		super(console);
 		nodeBuilder = new H2HNodeBuilder();
+
+		// config that cannot be changed
+		nodeBuilder.setAutostartProcesses(true);
 	}
 
 	@Override
@@ -39,6 +42,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 				createNode();
 			}
 		};
+
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create new network") {
 			protected void execute() {
 				nodeBuilder.setIsMaster(true);
@@ -55,35 +59,31 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-
 		add(new H2HConsoleMenuItem("Set MaxFileSize") {
 			protected void execute() {
 				System.out.println("Specify MaxFileSize:\n");
 				nodeBuilder.setMaxFileSize(awaitIntParameter());
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxNumOfVersions:\n");
 				nodeBuilder.setMaxNumOfVersions(awaitIntParameter());
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxSizeAllVersions:\n");
 				nodeBuilder.setMaxSizeAllVersions(awaitIntParameter());
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Set ChunkSize") {
 			protected void execute() {
 				System.out.println("Specify ChunkSize:\n");
 				nodeBuilder.setChunkSize(awaitIntParameter());
-			}
-		});
-		add(new H2HConsoleMenuItem("Set AutostartProcesses") {
-			protected void execute() {
-				System.out.println("Specify AutostartProcesses:\n");
-				nodeBuilder.setAutostartProcesses(awaitBooleanParameter());
 			}
 		});
 

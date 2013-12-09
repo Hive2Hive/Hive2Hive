@@ -62,7 +62,6 @@ public abstract class ConsoleMenu {
 	}
 
 	private final void show() {
-
 		int chosen = 0;
 		Scanner input = new Scanner(System.in);
 
@@ -96,7 +95,7 @@ public abstract class ConsoleMenu {
 		Scanner input = new Scanner(System.in);
 		String parameter;
 		try {
-			parameter = input.next();
+			parameter = input.nextLine();
 		} catch (Exception e) {
 			System.out.println("Exception while parsing the parameter.");
 			input.nextLine();
