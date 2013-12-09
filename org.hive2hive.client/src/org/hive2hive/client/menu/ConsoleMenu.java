@@ -3,7 +3,6 @@ package org.hive2hive.client.menu;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.hive2hive.client.SessionInstance;
 import org.hive2hive.client.console.Console;
 import org.hive2hive.client.menuitem.ConsoleMenuItem;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
@@ -17,14 +16,12 @@ import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 public abstract class ConsoleMenu {
 
 	protected final Console console;
-	protected final SessionInstance session;
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
 
-	public ConsoleMenu(Console console, SessionInstance session) {
+	public ConsoleMenu(Console console) {
 		this.console = console;
-		this.session = session;
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 
