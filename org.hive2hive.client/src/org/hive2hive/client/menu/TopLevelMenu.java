@@ -2,6 +2,7 @@ package org.hive2hive.client.menu;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.Console;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
@@ -17,12 +18,12 @@ import org.hive2hive.core.process.listener.ProcessListener;
 public final class TopLevelMenu extends ConsoleMenu {
 
 	private final UserMenu userMenu;
-	private final NodeCreationMenu networkMenu;
+	private final NodeCreationMenu nodeMenu;
 
 	public TopLevelMenu(Console console) {
 		super(console);
 		userMenu = new UserMenu(console);
-		networkMenu = new NodeCreationMenu(console);
+		nodeMenu = new NodeCreationMenu(console);
 	}
 
 	@Override
@@ -30,7 +31,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Network Configuration") {
 			protected void execute() {
-				networkMenu.open();
+				nodeMenu.open();
 			}
 		});
 		add(new H2HConsoleMenuItem("User Configuration") {
@@ -40,9 +41,9 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Register") {
 			protected void checkPreconditions() {
-				if (networkMenu.getH2HNode() == null) {
+				if (nodeMenu.getH2HNode() == null) {
 					printPreconditionError("Cannot register: Please create a H2HNode first.");
-					networkMenu.open();
+					nodeMenu.open();
 				}
 				if (userMenu.getUserCredentials() == null) {
 					printPreconditionError("Cannot register: Please create UserCredentials first.");
@@ -51,7 +52,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 
 			protected void execute() {
-				IProcess registerProcess = networkMenu.getH2HNode().register(userMenu.getUserCredentials());
+				IProcess registerProcess = nodeMenu.getH2HNode().register(userMenu.getUserCredentials());
 				ProcessListener processListener = new ProcessListener();
 				registerProcess.addListener(processListener);
 				while (!processListener.hasFinished()) {
@@ -66,21 +67,24 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
-				if (networkMenu.getH2HNode() == null) {
-					printPreconditionError("Cannot register: Please create a H2HNode first.");
-					new NodeCreationMenu(console).open();
+				if (nodeMenu.getH2HNode() == null) {
+					printPreconditionError("Cannot login: Please create a H2HNode first.");
+					nodeMenu.open();
 				}
 				if (userMenu.getUserCredentials() == null) {
-					printPreconditionError("Cannot register: Please create UserCredentials first.");
-					new UserMenu(console).CreateUserCredentials.invoke();
+					printPreconditionError("Cannot login: Please create UserCredentials first.");
+					userMenu.CreateUserCredentials.invoke();
 				}
 			}
 
 			protected void execute() {
-				System.out.println("Specify root path: ");
+				File root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
+				System.out.println("Specify root path or enter 'ok' if you're ok with: ");
+				System.out.println(root.getAbsolutePath());
 				String input = awaitStringParameter();
-				File root = new File(input);
-				IProcess loginProcess = networkMenu.getH2HNode().login(userMenu.getUserCredentials(), root);
+				if (!input.equalsIgnoreCase("ok"))
+					root = new File(input);
+				IProcess loginProcess = nodeMenu.getH2HNode().login(userMenu.getUserCredentials(), root);
 				ProcessListener processListener = new ProcessListener();
 				loginProcess.addListener(processListener);
 				while (!processListener.hasFinished()) {

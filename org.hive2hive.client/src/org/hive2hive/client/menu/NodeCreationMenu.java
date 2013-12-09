@@ -87,7 +87,6 @@ public final class NodeCreationMenu extends ConsoleMenu {
 			}
 		});
 
-		System.out.println("After configuration, choose one of these two:");
 		add(ConnectToExistingNetworkItem);
 		add(CreateNetworkMenuItem);
 	}

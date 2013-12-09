@@ -108,7 +108,17 @@ public abstract class ConsoleMenu {
 	}
 
 	protected int awaitIntParameter() {
-		return Integer.parseInt(awaitStringParameter());
+		boolean success = false;
+		int number = 0;
+		while (!success) {
+			try {
+				number = Integer.parseInt(awaitStringParameter());
+				success = true;
+			} catch (NumberFormatException e) {
+				System.out.println("This was not a number... Try again.");
+			}
+		}
+		return number;
 	}
 
 	protected boolean awaitBooleanParameter() {
