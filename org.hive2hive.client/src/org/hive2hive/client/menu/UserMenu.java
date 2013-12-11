@@ -8,7 +8,7 @@ import org.hive2hive.core.security.UserCredentials;
 /**
  * The user configuration menu of the {@link ConsoleClient}.
  * 
- * @author Christian
+ * @author Christian, Nico
  * 
  */
 public final class UserMenu extends ConsoleMenu {

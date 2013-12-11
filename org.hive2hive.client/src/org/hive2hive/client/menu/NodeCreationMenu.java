@@ -12,7 +12,7 @@ import org.hive2hive.core.IH2HNode;
 /**
  * The network configuration menu of the {@link ConsoleClient}.
  * 
- * @author Christian
+ * @author Christian, Nico
  * 
  */
 public final class NodeCreationMenu extends ConsoleMenu {

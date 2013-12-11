@@ -17,6 +17,7 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
+import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
@@ -91,7 +92,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 
 		if (parent.equals(userProfile.getRoot())) {
 			logger.debug("Inform only current user since file is in root");
-			getProcess().notifyOtherClients(new ModifyNotifyMessageFactory(metaFile.getId()));
+			getProcess().notifyOtherClients(new UploadNotificationMessageFactory(metaFile.getId()));
 			return null;
 		} else {
 			// 1. get the parent meta

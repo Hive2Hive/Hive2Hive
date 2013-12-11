@@ -69,15 +69,15 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			// no parent to update since the file is in root
 			logger.debug("File is in root; skip getting the parent meta folder and notify my other clients directly");
 
-			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(
-					metaDocumentToDelete.getId());
+			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentKey,
+					deletedFileNode.getName());
 			getProcess().notifyOtherClients(messageFactory);
 			getProcess().setNextStep(null);
 		} else {
 			// normal case when file is not in root
 			logger.debug("Get the meta folder of the parent");
 
-			super.nextStep = new UpdateParentMetaStep(metaDocumentToDelete.getId());
+			super.nextStep = new UpdateParentMetaStep(metaDocumentToDelete.getId(), deletedFileNode.getName());
 			super.keyPair = parent.getKeyPair();
 			super.context = context;
 			super.get(key2String(parent.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);

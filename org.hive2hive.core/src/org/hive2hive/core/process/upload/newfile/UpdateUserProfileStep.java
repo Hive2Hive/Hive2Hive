@@ -16,6 +16,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
+import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
@@ -53,7 +54,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 		// start with notification
 		KeyPair keyPair = context.getNewMetaKeyPair();
-		AddNotifyMessageFactory messageFactory = new AddNotifyMessageFactory(keyPair.getPublic());
+		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(
+				keyPair.getPublic());
 		if (userProfile != null && userProfile.getRoot().getKeyPair().getPublic().equals(parentKey)) {
 			// file is in root; notify only own client
 			getProcess().notifyOtherClients(messageFactory);

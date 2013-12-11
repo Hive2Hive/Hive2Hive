@@ -14,7 +14,7 @@ import org.hive2hive.core.process.listener.ProcessListener;
 /**
  * The top-level menu of the {@link ConsoleClient}.
  * 
- * @author Christian
+ * @author Christian, Nico
  * 
  */
 public final class TopLevelMenu extends ConsoleMenu {
@@ -62,7 +62,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				while (!processListener.hasFinished()) {
 					// busy waiting
 					try {
-						Thread.sleep(100);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 					}
 				}
@@ -94,7 +94,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				while (!processListener.hasFinished()) {
 					// busy waiting
 					try {
-						Thread.sleep(100);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 					}
 				}
@@ -104,19 +104,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Add File") {
 			@Override
 			protected void execute() {
-				System.out.println("Specify the relative file path to " + root.getAbsolutePath());
-				String path = awaitStringParameter();
-				File toAdd = new File(root, path);
-
 				try {
-					IProcess process = nodeMenu.getH2HNode().add(toAdd);
+					IProcess process = nodeMenu.getH2HNode().add(askForFile());
 					ProcessListener processListener = new ProcessListener();
 					process.addListener(processListener);
 
 					while (!processListener.hasFinished()) {
 						// busy waiting
 						try {
-							Thread.sleep(100);
+							Thread.sleep(500);
 						} catch (InterruptedException e) {
 						}
 					}
@@ -128,12 +124,40 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Update File") {
 			protected void execute() {
-				notImplemented();
+				try {
+					IProcess process = nodeMenu.getH2HNode().update(askForFile());
+					ProcessListener processListener = new ProcessListener();
+					process.addListener(processListener);
+
+					while (!processListener.hasFinished()) {
+						// busy waiting
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+						}
+					}
+				} catch (IllegalArgumentException | NoSessionException e) {
+					System.out.println("Could not update the file. Reason: " + e.getMessage());
+				}
 			}
 		});
 		add(new H2HConsoleMenuItem("Delete File") {
 			protected void execute() {
-				notImplemented();
+				try {
+					IProcess process = nodeMenu.getH2HNode().delete(askForFile());
+					ProcessListener processListener = new ProcessListener();
+					process.addListener(processListener);
+
+					while (!processListener.hasFinished()) {
+						// busy waiting
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+						}
+					}
+				} catch (IllegalArgumentException | NoSessionException e) {
+					System.out.println("Could not delete the file. Reason: " + e.getMessage());
+				}
 			}
 		});
 		add(new H2HConsoleMenuItem("Logout") {
@@ -146,6 +170,18 @@ public final class TopLevelMenu extends ConsoleMenu {
 				notImplemented();
 			}
 		});
+	}
+
+	private File askForFile() {
+		File file = null;
+		while (file == null || !file.exists()) {
+			System.out.println("Specify the relative file path to " + root.getAbsolutePath());
+			String path = awaitStringParameter();
+			file = new File(root, path);
+			if (!file.exists())
+				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again");
+		}
+		return file;
 	}
 
 	private void notImplemented() {
