@@ -9,7 +9,6 @@ import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
-import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -33,17 +32,17 @@ public class DataManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGlobalPutGlobalGet() throws Exception {
+	public void testGlobalputGet() throws Exception {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = node.getDataManager().putGlobal(locationKey, contentKey, new H2HTestData(data));
+		FuturePut future = node.getDataManager().put(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		FutureGet futureGet = node.getDataManager().getGlobal(locationKey, contentKey);
+		FutureGet futureGet = node.getDataManager().get(locationKey, contentKey);
 		futureGet.awaitUninterruptibly();
 
 		String result = (String) ((H2HTestData) futureGet.getData().object()).getTestString();
@@ -51,7 +50,7 @@ public class DataManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGlobalPutGlobalGetFromOtherNode() throws Exception {
+	public void testGlobalputGetFromOtherNode() throws Exception {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -59,10 +58,10 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = nodeA.getDataManager().putGlobal(locationKey, contentKey, new H2HTestData(data));
+		FuturePut future = nodeA.getDataManager().put(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		FutureGet futureGet = nodeB.getDataManager().getGlobal(locationKey, contentKey);
+		FutureGet futureGet = nodeB.getDataManager().get(locationKey, contentKey);
 		futureGet.awaitUninterruptibly();
 
 		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
@@ -92,7 +91,7 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = nodeA.getDataManager().putGlobal(locationKey, contentKey, new H2HTestData(data));
+		FuturePut future = nodeA.getDataManager().put(locationKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
 		String result = (String) ((H2HTestData) nodeB.getDataManager().getLocal(locationKey, contentKey)).getTestString();
@@ -109,28 +108,28 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = node.getDataManager().putGlobal(locationKey, contentKey1, new H2HTestData(data1));
+		FuturePut future1 = node.getDataManager().put(locationKey, contentKey1, new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = node.getDataManager().putGlobal(locationKey, contentKey2, new H2HTestData(data2));
+		FuturePut future2 = node.getDataManager().put(locationKey, contentKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = node.getDataManager().putGlobal(locationKey, contentKey3, new H2HTestData(data3));
+		FuturePut future3 = node.getDataManager().put(locationKey, contentKey3, new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		FutureGet get1 = node.getDataManager().getGlobal(locationKey, contentKey1);
+		FutureGet get1 = node.getDataManager().get(locationKey, contentKey1);
 		get1.awaitUninterruptibly();
 		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
 		assertEquals(data1, result1);
 
-		FutureGet get2 = node.getDataManager().getGlobal(locationKey, contentKey2);
+		FutureGet get2 = node.getDataManager().get(locationKey, contentKey2);
 		get2.awaitUninterruptibly();
 		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
 		assertEquals(data2, result2);
 
-		FutureGet get3 = node.getDataManager().getGlobal(locationKey, contentKey3);
+		FutureGet get3 = node.getDataManager().get(locationKey, contentKey3);
 		get3.awaitUninterruptibly();
 		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
 		assertEquals(data3, result3);
@@ -144,31 +143,31 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey3 = NetworkTestUtil.randomString();
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager().putGlobal(locationKey, contentKey1,
+		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, contentKey1,
 				new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager().putGlobal(locationKey, contentKey2,
+		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, contentKey2,
 				new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager().putGlobal(locationKey, contentKey3,
+		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, contentKey3,
 				new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().getGlobal(locationKey, contentKey1);
+		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, contentKey1);
 		get1.awaitUninterruptibly();
 		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
 		assertEquals(data1, result1);
 
-		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().getGlobal(locationKey, contentKey2);
+		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, contentKey2);
 		get2.awaitUninterruptibly();
 		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
 		assertEquals(data2, result2);
 
-		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().getGlobal(locationKey, contentKey3);
+		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, contentKey3);
 		get3.awaitUninterruptibly();
 		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
 		assertEquals(data3, result3);
@@ -211,15 +210,15 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey3 = NetworkTestUtil.randomString();
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = nodeA.getDataManager().putGlobal(locationKey, contentKey1, new H2HTestData(data1));
+		FuturePut future1 = nodeA.getDataManager().put(locationKey, contentKey1, new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = nodeA.getDataManager().putGlobal(locationKey, contentKey2, new H2HTestData(data2));
+		FuturePut future2 = nodeA.getDataManager().put(locationKey, contentKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 		
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = nodeA.getDataManager().putGlobal(locationKey, contentKey3, new H2HTestData(data3));
+		FuturePut future3 = nodeA.getDataManager().put(locationKey, contentKey3, new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 		
 		String result1 = (String) ((H2HTestData) nodeB.getDataManager().getLocal(locationKey, contentKey1)).getTestString();
@@ -238,14 +237,14 @@ public class DataManagerTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		// put a content
-		nodeA.getDataManager().putGlobal(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()))
+		nodeA.getDataManager().put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()))
 				.awaitUninterruptibly();
 
 		// test that it is there
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey));
 
 		// delete it
-		nodeA.getDataManager().remove(locationKey, contentKey, Number160.ZERO).awaitUninterruptibly();
+		nodeA.getDataManager().remove(locationKey, contentKey).awaitUninterruptibly();
 
 		// check that it is gone
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey));
@@ -266,13 +265,13 @@ public class DataManagerTest extends H2HJUnitTest {
 		String testString3 = NetworkTestUtil.randomString();
 
 		// insert them
-		FuturePut put1 = nodeA.getDataManager().putGlobal(locationKey, contentKey1, new H2HTestData(testString1));
+		FuturePut put1 = nodeA.getDataManager().put(locationKey, contentKey1, new H2HTestData(testString1));
 		put1.awaitUninterruptibly();
 
-		FuturePut put2 = nodeA.getDataManager().putGlobal(locationKey, contentKey2, new H2HTestData(testString2));
+		FuturePut put2 = nodeA.getDataManager().put(locationKey, contentKey2, new H2HTestData(testString2));
 		put2.awaitUninterruptibly();
 
-		FuturePut put3 = nodeA.getDataManager().putGlobal(locationKey, contentKey3, new H2HTestData(testString3));
+		FuturePut put3 = nodeA.getDataManager().put(locationKey, contentKey3, new H2HTestData(testString3));
 		put3.awaitUninterruptibly();
 
 		// check that they are all stored
@@ -281,14 +280,14 @@ public class DataManagerTest extends H2HJUnitTest {
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey3));
 
 		// remove 2nd one and check that 1st and 3rd are still there
-		nodeA.getDataManager().remove(locationKey, contentKey2, Number160.ZERO).awaitUninterruptibly();
+		nodeA.getDataManager().remove(locationKey, contentKey2).awaitUninterruptibly();
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey2));
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey1));
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey3));
 
 		// remove 3rd one as well and check that they are gone as well
-		nodeA.getDataManager().remove(locationKey, contentKey1, Number160.ZERO).awaitUninterruptibly();
-		nodeA.getDataManager().remove(locationKey, contentKey3, Number160.ZERO).awaitUninterruptibly();
+		nodeA.getDataManager().remove(locationKey, contentKey1).awaitUninterruptibly();
+		nodeA.getDataManager().remove(locationKey, contentKey3).awaitUninterruptibly();
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey1));
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey3));
 	}

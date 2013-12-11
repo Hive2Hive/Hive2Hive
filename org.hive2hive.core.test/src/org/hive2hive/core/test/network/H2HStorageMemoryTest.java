@@ -42,7 +42,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		data.setVersionKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut = node.getDataManager().putGlobal(locationKey, contentKey, data);
+		FuturePut futurePut = node.getDataManager().put(locationKey, contentKey, data);
 		futurePut.awaitUninterruptibly();
 
 		assertFalse(futurePut.getRawResult().isEmpty());
@@ -63,13 +63,13 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		H2HTestData data1 = new H2HTestData(NetworkTestUtil.randomString());
 		data1.setVersionKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut1 = node.getDataManager().putGlobal(locationKey, contentKey, data1);
+		FuturePut futurePut1 = node.getDataManager().put(locationKey, contentKey, data1);
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
 		data2.setVersionKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut2 = node.getDataManager().putGlobal(locationKey, contentKey, data2);
+		FuturePut futurePut2 = node.getDataManager().put(locationKey, contentKey, data2);
 		futurePut2.awaitUninterruptibly();
 
 		assertFalse(futurePut2.getRawResult().isEmpty());
@@ -90,13 +90,13 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		H2HTestData data1 = new H2HTestData(NetworkTestUtil.randomString());
 		data1.generateVersionKey();
 
-		FuturePut futurePut1 = node.getDataManager().putGlobal(locationKey, contentKey, data1);
+		FuturePut futurePut1 = node.getDataManager().put(locationKey, contentKey, data1);
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
 		data2.setVersionKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut2 = node.getDataManager().putGlobal(locationKey, contentKey, data2);
+		FuturePut futurePut2 = node.getDataManager().put(locationKey, contentKey, data2);
 		futurePut2.awaitUninterruptibly();
 
 		assertFalse(futurePut2.getRawResult().isEmpty());
@@ -119,7 +119,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 		assertNotEquals(Number160.ZERO, data.getVersionKey());
 
-		FuturePut futurePut = node.getDataManager().putGlobal(locationKey, contentKey, data);
+		FuturePut futurePut = node.getDataManager().put(locationKey, contentKey, data);
 		futurePut.awaitUninterruptibly();
 		futurePut.getFutureRequests().awaitUninterruptibly();
 
@@ -142,14 +142,14 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		data1.generateVersionKey();
 		data1.setBasedOnKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut1 = node.getDataManager().putGlobal(locationKey, contentKey, data1);
+		FuturePut futurePut1 = node.getDataManager().put(locationKey, contentKey, data1);
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
 		data2.generateVersionKey();
 		data1.setBasedOnKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut2 = node.getDataManager().putGlobal(locationKey, contentKey, data2);
+		FuturePut futurePut2 = node.getDataManager().put(locationKey, contentKey, data2);
 		futurePut2.awaitUninterruptibly();
 
 		assertFalse(futurePut2.getRawResult().isEmpty());
@@ -171,7 +171,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		data1.generateVersionKey();
 		data1.setBasedOnKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut1 = node.getDataManager().putGlobal(locationKey, contentKey, data1);
+		FuturePut futurePut1 = node.getDataManager().put(locationKey, contentKey, data1);
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
@@ -181,7 +181,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		data3.generateVersionKey();
 		data3.setBasedOnKey(data2.getVersionKey());
 
-		FuturePut futurePut3 = node.getDataManager().putGlobal(locationKey, contentKey, data3);
+		FuturePut futurePut3 = node.getDataManager().put(locationKey, contentKey, data3);
 		futurePut3.awaitUninterruptibly();
 
 		assertFalse(futurePut3.getRawResult().isEmpty());
@@ -203,14 +203,14 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		data1.generateVersionKey();
 		data1.setBasedOnKey(Number160.ZERO); // not really necessary, is already default value
 
-		FuturePut futurePut1 = node.getDataManager().putGlobal(locationKey, contentKey, data1);
+		FuturePut futurePut1 = node.getDataManager().put(locationKey, contentKey, data1);
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
 		data2.generateVersionKey();
 		data2.setBasedOnKey(data1.getVersionKey());
 
-		FuturePut futurePut2 = node.getDataManager().putGlobal(locationKey, contentKey, data2);
+		FuturePut futurePut2 = node.getDataManager().put(locationKey, contentKey, data2);
 		futurePut2.awaitUninterruptibly();
 
 		assertFalse(futurePut2.getRawResult().isEmpty());
@@ -242,10 +242,10 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		data1.setBasedOnKey(Number160.ZERO); // not really necessary, is already default value
 		data2.setBasedOnKey(data1.getVersionKey());
 
-		FuturePut futurePut1 = node.getDataManager().putGlobal(locationKey, contentKey, data1);
+		FuturePut futurePut1 = node.getDataManager().put(locationKey, contentKey, data1);
 		futurePut1.awaitUninterruptibly();
 
-		FuturePut futurePut2 = node.getDataManager().putGlobal(locationKey, contentKey, data2);
+		FuturePut futurePut2 = node.getDataManager().put(locationKey, contentKey, data2);
 		futurePut2.awaitUninterruptibly();
 
 		assertFalse(futurePut2.getRawResult().isEmpty());

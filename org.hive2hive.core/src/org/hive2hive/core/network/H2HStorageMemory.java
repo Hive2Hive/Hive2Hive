@@ -1,7 +1,7 @@
 package org.hive2hive.core.network;
 
 import java.security.PublicKey;
-import java.util.SortedMap;
+import java.util.NavigableMap;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
@@ -81,7 +81,7 @@ public class H2HStorageMemory extends StorageLayer {
 	 */
 	private PutStatusH2H validateVersion(Number640 key, Data newData) {
 		/** 0. get all versions for this locationKey, domainKey and contentKey combination **/
-		SortedMap<Number640, Data> history = getHistoryOnStorage(key);
+		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
 
 		/** 1. if version key is zero **/
 		if (key.getVersionKey().equals(Number160.ZERO)) {
@@ -106,6 +106,9 @@ public class H2HStorageMemory extends StorageLayer {
 				logger.warn("History is not empty and no based on key given.");
 				return PutStatusH2H.VERSION_CONFLICT_NO_BASED_ON;
 			}
+		} else if (history.isEmpty()) {
+			logger.debug("First version of a content is added, but a based on key is given.");
+			return PutStatusH2H.OK;
 		}
 
 		/** 2. check if previous exists **/
@@ -129,7 +132,7 @@ public class H2HStorageMemory extends StorageLayer {
 	}
 
 	private void cleanupVersions(Number640 key) {
-		SortedMap<Number640, Data> history = getHistoryOnStorage(key);
+		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
 
 		long now = System.currentTimeMillis();
 		while (history.size() >= H2HConstants.MAX_VERSIONS_HISTORY) {
@@ -144,9 +147,10 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 	}
 
-	private SortedMap<Number640, Data> getHistoryOnStorage(Number640 key) {
-		return super.get(new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(),
-				Number160.ZERO), new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(),
-				Number160.MAX_VALUE));
+	private NavigableMap<Number640, Number160> getHistoryOnStorage(Number640 key) {
+		return super.digest(
+				new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(), Number160.ZERO),
+				new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(),
+						Number160.MAX_VALUE), -1, true).getDigests();
 	}
 }

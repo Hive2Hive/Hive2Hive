@@ -30,7 +30,7 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 	@Override
 	public void run() {
 		// put for verification
-		networkManager.getDataManager().putGlobal(verificationLoc, verificationContentKey, verificationData);
+		networkManager.getDataManager().put(verificationLoc, verificationContentKey, verificationData);
 	}
 
 	@Override

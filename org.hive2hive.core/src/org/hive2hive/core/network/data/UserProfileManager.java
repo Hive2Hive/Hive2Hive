@@ -203,7 +203,7 @@ public class UserProfileManager {
 				return;
 			}
 
-			FutureGet futureGet = dataManager.getGlobal(credentials.getProfileLocationKey(),
+			FutureGet futureGet = dataManager.get(credentials.getProfileLocationKey(),
 					H2HConstants.USER_PROFILE);
 			futureGet.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
@@ -252,7 +252,7 @@ public class UserProfileManager {
 					return;
 				}
 
-				FuturePut futurePut = dataManager.putGlobal(credentials.getProfileLocationKey(),
+				FuturePut futurePut = dataManager.put(credentials.getProfileLocationKey(),
 						H2HConstants.USER_PROFILE, encryptedUserProfile);
 				futurePut.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {

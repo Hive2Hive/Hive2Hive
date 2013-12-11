@@ -58,8 +58,6 @@ public interface H2HConstants {
 
 	// number of allowed tries to retry a put
 	public static final int PUT_RETRIES = 3;
-	// number of allowed tries to get for verification a put
-	public static final int GET_RETRIES = 3;
 	// number of allowed tries to retry a remove
 	public static final int REMOVE_RETRIES = 3;
 

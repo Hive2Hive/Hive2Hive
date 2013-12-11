@@ -20,7 +20,7 @@ public abstract class BaseGetProcessStep extends ProcessStep implements IGetList
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.getGlobal(locationKey, contentKey, this);
+		dataManager.get(locationKey, contentKey, this);
 	}
 
 	@Override

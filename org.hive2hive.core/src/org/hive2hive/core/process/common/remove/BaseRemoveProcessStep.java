@@ -38,7 +38,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), this);
+		dataManager.remove(locationKey, contentKey, this);
 		removePerformed = true;
 	}
 
@@ -78,7 +78,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			return;
 		}
 
-		dataManager.putGlobal(locationKey, contentKey, contentToRemove, this);
+		dataManager.put(locationKey, contentKey, contentToRemove, this);
 		getProcess().nextRollBackStep();
 	}
 

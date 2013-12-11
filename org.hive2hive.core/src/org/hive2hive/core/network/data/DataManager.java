@@ -6,6 +6,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.p2p.Peer;
+import net.tomp2p.p2p.builder.DigestBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -49,8 +50,8 @@ public class DataManager {
 		return networkManager.getConnection().getPeer();
 	}
 
-	public void putGlobal(String locationKey, String contentKey, NetworkContent content, IPutListener listener) {
-		FuturePut putFuture = putGlobal(locationKey, contentKey, content);
+	public void put(String locationKey, String contentKey, NetworkContent content, IPutListener listener) {
+		FuturePut putFuture = put(locationKey, contentKey, content);
 		if (putFuture == null && listener != null) {
 			listener.onPutFailure();
 			return;
@@ -58,8 +59,8 @@ public class DataManager {
 		putFuture.addListener(new FuturePutListener(locationKey, contentKey, content, listener, this));
 	}
 
-	public FuturePut putGlobal(String locationKey, String contentKey, NetworkContent content) {
-		logger.debug(String.format("global put key = '%s' content key = '%s' version key = '%s'",
+	public FuturePut put(String locationKey, String contentKey, NetworkContent content) {
+		logger.debug(String.format("put location key = '%s' content key = '%s' version key = '%s'",
 				locationKey, contentKey, content.getVersionKey()));
 		try {
 			Data data = new Data(content);
@@ -68,13 +69,14 @@ public class DataManager {
 					.setData(Number160.createHash(contentKey), data).setVersionKey(content.getVersionKey())
 					.start();
 		} catch (IOException e) {
-			logger.error(String
-					.format("Global put failed. content = '%s' in the location = '%s' under the contentKey = '%s' exception = '%s'",
-							content.toString(), locationKey, contentKey, e.getMessage()));
+			logger.error(String.format(
+					"Put failed. location key = '%s' content key = '%s' version key = '%s' exception = '%s'",
+					locationKey, contentKey, content.getVersionKey(), e.getMessage()));
 			return null;
 		}
 	}
 
+	@Deprecated
 	public void putLocal(String locationKey, String contentKey, NetworkContent content) {
 		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
 		try {
@@ -91,30 +93,40 @@ public class DataManager {
 		}
 	}
 
-	public void getGlobal(String locationKey, String contentKey, IGetListener listener) {
-		getGlobal(locationKey, contentKey, H2HConstants.TOMP2P_DEFAULT_KEY, listener);
-	}
-
-	public void getGlobal(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
-		FutureGet futureGet = getGlobal(locationKey, contentKey, versionKey);
+	public void get(String locationKey, String contentKey, IGetListener listener) {
+		FutureGet futureGet = get(locationKey, contentKey);
 		futureGet.addListener(new FutureGetListener(listener));
 	}
 
-	public FutureGet getGlobal(String locationKey, String contentKey) {
-		return getGlobal(locationKey, contentKey, H2HConstants.TOMP2P_DEFAULT_KEY);
+	public FutureGet get(String locationKey, String contentKey) {
+		logger.debug(String.format("get key = '%s' content key = '%s'", locationKey, contentKey));
+		return getPeer()
+				.get(Number160.createHash(locationKey))
+				.from(new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), Number160.ZERO))
+				.to(new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), Number160.MAX_VALUE)).descending().returnNr(1)
+				.start();
 	}
 
-	public FutureGet getGlobal(String locationKey, String contentKey, Number160 versionKey) {
-		logger.debug(String.format("global get key = '%s' content key = '%s' version key = '%s'",
-				locationKey, contentKey, versionKey));
-		return getPeer().get(Number160.createHash(locationKey))
+	public void get(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
+		FutureGet futureGet = get(locationKey, contentKey, versionKey);
+		futureGet.addListener(new FutureGetListener(listener));
+	}
+
+	public FutureGet get(String locationKey, String contentKey, Number160 versionKey) {
+		logger.debug(String.format("get key = '%s' content key = '%s' version key = '%s'", locationKey,
+				contentKey, versionKey));
+		return getPeer().get(Number160.createHash(locationKey)).setDomainKey(H2HConstants.TOMP2P_DEFAULT_KEY)
 				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
 	}
 
+	@Deprecated
 	public NetworkContent getLocal(String locationKey, String contentKey) {
 		return getLocal(locationKey, contentKey, H2HConstants.TOMP2P_DEFAULT_KEY);
 	}
 
+	@Deprecated
 	public NetworkContent getLocal(String locationKey, String contentKey, Number160 versionKey) {
 		logger.debug(String.format("local get key = '%s' content key = '%s' version key = '%s'", locationKey,
 				contentKey, versionKey));
@@ -133,17 +145,34 @@ public class DataManager {
 		return null;
 	}
 
-	public void remove(String locationKey, String contentKey, Number160 versionKey, IRemoveListener listener) {
-		FutureRemove futureRemove = remove(locationKey, contentKey, versionKey);
+	public void remove(String locationKey, String contentKey, IRemoveListener listener) {
+		FutureRemove futureRemove = remove(locationKey, contentKey);
+		futureRemove.addListener(new FutureRemoveListener(locationKey, contentKey, listener, this));
+	}
+
+	public FutureRemove remove(String locationKey, String contentKey) {
+		logger.debug(String.format("remove key = '%s' content key = '%s'", locationKey, contentKey));
+		return getPeer()
+				.remove(Number160.createHash(locationKey))
+				.from(new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY, Number160
+						.createHash(contentKey), Number160.ZERO))
+				.to(new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY, Number160
+						.createHash(contentKey), Number160.MAX_VALUE)).start();
+	}
+
+	public void removeVersion(String locationKey, String contentKey, Number160 versionKey,
+			IRemoveListener listener) {
+		FutureRemove futureRemove = removeVersion(locationKey, contentKey, versionKey);
 		futureRemove
 				.addListener(new FutureRemoveListener(locationKey, contentKey, versionKey, listener, this));
 	}
 
-	public FutureRemove remove(String locationKey, String contentKey, Number160 versionKey) {
-		logger.debug(String.format("remove key = '%s' content key = '%s' version key = '%s", locationKey,
+	public FutureRemove removeVersion(String locationKey, String contentKey, Number160 versionKey) {
+		logger.debug(String.format("remove key = '%s' content key = '%s' version key = '%s'", locationKey,
 				contentKey, versionKey));
 		return getPeer().remove(Number160.createHash(locationKey))
-				.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey).start();
+				.setDomainKey(H2HConstants.TOMP2P_DEFAULT_KEY).contentKey(Number160.createHash(contentKey))
+				.setVersionKey(versionKey).start();
 	}
 
 	/**
@@ -253,7 +282,7 @@ public class DataManager {
 				locationKey, contentKey));
 		// start removing in the specific user profile task domain
 		FutureRemove futureRemove = getPeer().remove(Number160.createHash(locationKey))
-				.setContentKey(contentKey)
+				.contentKey(contentKey)
 				.setDomainKey(Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN)).start();
 		// attach a listener to handle future remove results
 		futureRemove.addListener(new FutureRemoveUserProfileTaskListener(locationKey, contentKey, listener,
@@ -271,8 +300,12 @@ public class DataManager {
 	 * @return a future
 	 */
 	public FutureRemove removeUserProfileTask(String locationKey, Number160 contentKey) {
-		return getPeer().remove(Number160.createHash(locationKey)).setContentKey(contentKey)
+		return getPeer().remove(Number160.createHash(locationKey)).contentKey(contentKey)
 				.setDomainKey(Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN)).start();
+	}
+
+	public DigestBuilder getDigest(String locationKey) {
+		return getPeer().digest(Number160.createHash(locationKey));
 	}
 
 }

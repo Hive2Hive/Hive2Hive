@@ -39,7 +39,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.putGlobal(locationKey, contentKey, content, this);
+		dataManager.put(locationKey, contentKey, content, this);
 		putPerformed = true;
 	}
 
@@ -70,7 +70,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 			return;
 		}
 
-		dataManager.remove(locationKey, contentKey, content.getVersionKey(), this);
+		dataManager.removeVersion(locationKey, contentKey, content.getVersionKey(), this);
 	}
 
 	@Override

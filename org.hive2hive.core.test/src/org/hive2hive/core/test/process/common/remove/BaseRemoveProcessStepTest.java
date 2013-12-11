@@ -51,7 +51,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		network.get(0).getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		network.get(1).getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		// put some data to remove
-		network.get(0).getDataManager().putGlobal(locationKey, locationKey, testData).awaitUninterruptibly();
+		network.get(0).getDataManager().put(locationKey, locationKey, testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
@@ -82,7 +82,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(testData));
 		network.get(1).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(testData));
 		// put some data to remove
-		network.get(0).getDataManager().putGlobal(locationKey, locationKey, testData).awaitUninterruptibly();
+		network.get(0).getDataManager().put(locationKey, locationKey, testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {

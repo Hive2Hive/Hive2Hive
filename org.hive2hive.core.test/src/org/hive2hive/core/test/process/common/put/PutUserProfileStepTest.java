@@ -82,7 +82,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		FutureGet global = client.getDataManager().getGlobal(credentials.getProfileLocationKey(),
+		FutureGet global = client.getDataManager().get(credentials.getProfileLocationKey(),
 				H2HConstants.USER_PROFILE);
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();

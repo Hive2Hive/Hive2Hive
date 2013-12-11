@@ -1,16 +1,19 @@
 package org.hive2hive.core.network.data.futures;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
 
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
+import net.tomp2p.p2p.builder.DigestBuilder;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.storage.Data;
+import net.tomp2p.rpc.DigestResult;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
@@ -49,8 +52,6 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	// used to count put retries
 	private int putTries = 0;
-	// used to count get tries
-	private int getTries = 0;
 
 	/**
 	 * Constructor for the put future adapter.
@@ -94,52 +95,66 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 
 		// analyze returned put status
-		List<PeerAddress> versionConflict = new ArrayList<PeerAddress>();
+		final List<PeerAddress> versionConflict = new ArrayList<PeerAddress>();
 		List<PeerAddress> fail = new ArrayList<PeerAddress>();
 		for (PeerAddress peeradress : future.getRawResult().keySet()) {
-			for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
-				byte status = future.getRawResult().get(peeradress).get(key);
-				switch (PutStatusH2H.values()[status]) {
-					case OK:
-						break;
-					case FAILED:
-					case FAILED_NOT_ABSENT:
-					case FAILED_SECURITY:
-						logger.warn(String
-								.format("A node denied putting data. reason = '%s' location key = '%s' content key = '%s' version key = '%s'",
-										PutStatusH2H.values()[status], locationKey, contentKey,
-										content.getVersionKey()));
-						fail.add(peeradress);
-						break;
-					case VERSION_CONFLICT:
-					case VERSION_CONFLICT_NO_BASED_ON:
-					case VERSION_CONFLICT_NO_VERSION_KEY:
-					case VERSION_CONFLICT_OLD_TIMESTAMP:
-						logger.warn(String
-								.format("A version conflict detected. reason = '%s' location key = '%s' content key = '%s' version key = '%s'",
-										PutStatusH2H.values()[status], locationKey, contentKey,
-										content.getVersionKey()));
-						versionConflict.add(peeradress);
-						break;
+			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
+			if (map == null) {
+				logger.warn(String
+						.format("A node gave no status (null) back."
+								+ " location key = '%s' content key = '%s' version key = '%s'",
+								locationKey, contentKey, content.getVersionKey()));
+				fail.add(peeradress);
+			} else {
+				for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
+					byte status = future.getRawResult().get(peeradress).get(key);
+					switch (PutStatusH2H.values()[status]) {
+						case OK:
+							break;
+						case FAILED:
+						case FAILED_NOT_ABSENT:
+						case FAILED_SECURITY:
+							logger.warn(String
+									.format("A node denied putting data. reason = '%s'"
+											+ " location key = '%s' content key = '%s' version key = '%s'",
+											PutStatusH2H.values()[status], locationKey, contentKey,
+											content.getVersionKey()));
+							fail.add(peeradress);
+							break;
+						case VERSION_CONFLICT:
+						case VERSION_CONFLICT_NO_BASED_ON:
+						case VERSION_CONFLICT_NO_VERSION_KEY:
+						case VERSION_CONFLICT_OLD_TIMESTAMP:
+							logger.warn(String
+									.format("A version conflict detected. reason = '%s' location key = '%s' "
+											+ "content key = '%s' version key = '%s'",
+											PutStatusH2H.values()[status], locationKey, contentKey,
+											content.getVersionKey()));
+							versionConflict.add(peeradress);
+							break;
+					}
 				}
 			}
 		}
 
 		if (!versionConflict.isEmpty()) {
-			/*
-			 * TODO check what is on other peers and which version is valid
-			 * 1. contact this peers which indicate version conflict
-			 * 2. get the version keys
-			 * 3. compare it to own version key
-			 * 4. determine who has newer one, this one wins the version conflict
-			 * 4a. if necessary remove succeeded peers
-			 * 5. verify with a delayed get
-			 * 6. inform listener
-			 */
+			FutureDigest digestFuture = getDigest();
+			digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
+				@Override
+				public void operationComplete(FutureDigest future) throws Exception {
+					if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
+						logger.warn(String
+								.format("Put verification failed. Couldn't get digest data. location key = '%s' content key = '%s' version key = '%s'",
+										locationKey, contentKey, content.getVersionKey()));
+						notifyFailure();
+					} else {
+						analyseVersionKey(versionConflict, future.getRawDigest());
+					}
+				}
+			});
 		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
 			// majority of the contacted nodes responded with ok
-			waitAMoment();
-			verifyWithADelayedGet();
+			verifyPut();
 		} else {
 			logger.warn(String.format("%s of %s contacted nodes failed.", fail.size(), future.getRawResult()
 					.size()));
@@ -157,104 +172,147 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					"Put retry #%s. location key = '%s' content key = '%s' version key = '%s'", putTries,
 					locationKey, contentKey, content.getVersionKey()));
 			// remove succeeded puts
-			dataManager.remove(locationKey, contentKey, content.getVersionKey()).addListener(
-					new RetryPutListener());
+			FutureRemove futureRemove = dataManager.removeVersion(locationKey, contentKey,
+					content.getVersionKey());
+			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
+				@Override
+				public void operationComplete(FutureRemove future) {
+					if (future.isFailed())
+						logger.warn(String
+								.format("Put Retry: Could not delete the newly put content. location key = '%s' content key = '%s' version key = '%s'",
+										locationKey, contentKey, content.getVersionKey()));
+
+					dataManager.put(locationKey, contentKey, content).addListener(FuturePutListener.this);
+				}
+			});
 		} else {
 			logger.error(String
 					.format("Put verification failed. Couldn't put data after %s tries. location key = '%s' content key = '%s' version key = '%s'",
-							putTries - 1, locationKey, contentKey, content.getVersionKey()));
-			if (listener != null)
-				listener.onPutFailure();
+							putTries, locationKey, contentKey, content.getVersionKey()));
+			notifyFailure();
 		}
 	}
 
-	/**
-	 * Puts given content under given keys into the network.
-	 * 
-	 * @author Seppi
-	 */
-	private class RetryPutListener extends BaseFutureAdapter<FutureRemove> {
-		@Override
-		public void operationComplete(FutureRemove future) throws Exception {
-			if (future.isFailed())
-				logger.warn(String
-						.format("Put Retry: Could not delete the newly put content. location key = '%s' content key = '%s' version key = '%s'",
-								locationKey, contentKey, content.getVersionKey()));
-			try {
-				Data data = new Data(content);
-				data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
-				dataManager.putGlobal(locationKey, contentKey, content).addListener(FuturePutListener.this);
-			} catch (IOException e) {
-				logger.error(String.format("Exception while creating data object! exception = '%s'",
-						e.getMessage()));
-				if (listener != null)
-					listener.onPutFailure();
-			}
-		}
+	private FutureDigest getDigest() {
+		DigestBuilder digestBuilder = dataManager.getDigest(locationKey);
+		digestBuilder.from(
+				new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160
+						.createHash(contentKey), Number160.ZERO)).to(
+				new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160
+						.createHash(contentKey), Number160.MAX_VALUE));
+		return digestBuilder.start();
 	}
 
-	/**
-	 * Sleeps a moment.
-	 */
-	private void waitAMoment() {
-		try {
-			// wait a moment to give time to replicate the data
-			Thread.sleep(H2HConstants.PUT_VERIFICATION_WAITING_TIME_MS);
-		} catch (InterruptedException e) {
-			logger.warn("Put verification woken up involuntarily.");
-		}
-	}
-
-	private void verifyWithADelayedGet() {
-		if (getTries++ < H2HConstants.GET_RETRIES) {
-			// get data to verify if everything went correct
-			dataManager.getGlobal(locationKey, contentKey).addListener(new DelayedGetListener());
-		} else {
-			logger.error(String
-					.format("Put verification failed. Couldn't get data after %s tries. location key = '%s' content key = '%s'",
-							getTries - 1, locationKey, contentKey));
-			if (listener != null)
-				listener.onPutFailure();
-		}
-	}
-
-	private class DelayedGetListener extends BaseFutureAdapter<FutureGet> {
-		@Override
-		public void operationComplete(FutureGet future) throws Exception {
-			if (future.isFailed() || future.getData() == null) {
-				logger.warn(String
-						.format("Put verification failed. Couldn't get data. Try #%s. location key = '%s' content key = '%s' version key = '%s'",
-								getTries, locationKey, contentKey, content.getVersionKey()));
-				verifyWithADelayedGet();
-			} else {
-				checkVersionKey();
-			}
-		}
-	}
-
-	private void checkVersionKey() {
-		/*
-		 * TODO check if version key is newest or contained in the history
-		 * if newest in history --> my object is most recent one
-		 * if not newest in history --> already newer version, but that's based on my version
-		 * if not in list --> fork happened and I'm not part of the "right" branch. --> Rollback to base on
-		 * newest version --> possibly throw an exception or repeat the put based on the most recent version
-		 */
-		boolean check = true;
-		if (check) {
-			logger.debug(String
-					.format("Verification for put completed. location key = '%s' content key = '%s' version key = '%s'",
+	private void analyseVersionKey(List<PeerAddress> peersWithVersionConflicts, Map<PeerAddress, DigestResult> map) {
+		for (PeerAddress peerAddress : map.keySet()) {
+			if (map.get(peerAddress).getKeyDigest().isEmpty())
+				continue;
+			
+			if (!peersWithVersionConflicts.contains(peerAddress))
+				continue;
+			
+			if (content.getVersionKey().timestamp() < map.get(peerAddress).getKeyDigest().firstKey()
+					.getVersionKey().timestamp()) {
+				// own time stamp is older
+				logger.warn(String.format("Put verification failed. Version conflict!"
+						+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
+						contentKey, content.getVersionKey()));
+				notifyFailure();
+				return;
+			} else if (content.getVersionKey().timestamp() == map.get(peerAddress).getKeyDigest().firstKey()
+					.getVersionKey().timestamp()) {
+				logger.warn(String.format("Version conflict with same timestamps!"
+						+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
+						contentKey, content.getVersionKey()));
+				int compare = content.getVersionKey().compareTo(
+						map.get(peerAddress).getKeyDigest().firstKey().getVersionKey());
+				if (compare == 1) {
+					// version key is smaller
+					logger.warn(String.format(
+							"Put verification failed. Version conflict (with same timestamps)!"
+									+ " location key = '%s' content key = '%s' version key = '%s'",
 							locationKey, contentKey, content.getVersionKey()));
-			// everything is ok
-			if (listener != null)
-				listener.onPutSuccess();
+					notifyFailure();
+					return;
+				} else if (compare == 0) {
+					logger.error(String.format("Put verification failed. Version conflict with same version?"
+							+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
+							contentKey, content.getVersionKey()));
+					notifyFailure();
+					return;
+				}
+			}
+		}
+		logger.warn(String.format("Put verification: version conflict detected but timestamp is newer."
+				+ " location key = '%s' content key = '%s' version key = '%s'", locationKey, contentKey,
+				content.getVersionKey()));
+		notifySuccess();
+	}
+
+	private void verifyPut() {
+		// get data to verify if everything went correct
+		FutureDigest digestFuture = getDigest();
+		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
+			@Override
+			public void operationComplete(FutureDigest future) throws Exception {
+				if (future.isFailed() || future.getDigest() == null
+						|| future.getDigest().getKeyDigest() == null
+						|| future.getDigest().getKeyDigest().isEmpty()) {
+					logger.error(String
+							.format("Put verification failed. Couldn't get digest. location key = '%s' content key = '%s' version key = '%s'",
+									locationKey, contentKey, content.getVersionKey()));
+					notifyFailure();
+				} else {
+					checkVersionKey(future.getDigest().getKeyDigest());
+				}
+			}
+		});
+	}
+
+	private void checkVersionKey(NavigableMap<Number640, Number160> navigableMap) {
+		if (navigableMap.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
+			logger.debug(String
+					.format("Put verification: entry is newest. location key = '%s' content key = '%s' version key = '%s'",
+							locationKey, contentKey, content.getVersionKey()));
+			notifySuccess();
+		} else if (navigableMap.containsKey(new Number640(Number160.createHash(locationKey), Number160.ZERO,
+				Number160.createHash(contentKey), content.getVersionKey()))) {
+			logger.debug(String
+					.format("Put verification: entry exists in history. location key = '%s' content key = '%s' version key = '%s'",
+							locationKey, contentKey, content.getVersionKey()));
+			notifySuccess();
 		} else {
 			logger.warn(String
 					.format("Put verification failed. Concurrent modification happened. location key = '%s' content key = '%s' version key = '%s'",
 							locationKey, contentKey, content.getVersionKey()));
-			if (listener != null)
-				listener.onPutFailure();
+			notifyFailure();
 		}
 	}
 
+	private void notifySuccess() {
+		logger.debug(String.format(
+				"Verification for put completed. location key = '%s' content key = '%s' version key = '%s'",
+				locationKey, contentKey, content.getVersionKey()));
+		// everything is ok
+		if (listener != null)
+			listener.onPutSuccess();
+	}
+
+	private void notifyFailure() {
+		// remove succeeded puts
+		FutureRemove futureRemove = dataManager.removeVersion(locationKey, contentKey,
+				content.getVersionKey());
+		futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
+			@Override
+			public void operationComplete(FutureRemove future) {
+				if (future.isFailed())
+					logger.warn(String
+							.format("Put Retry: Could not delete the newly put content. location key = '%s' content key = '%s' version key = '%s'",
+									locationKey, contentKey, content.getVersionKey()));
+
+				if (listener != null)
+					listener.onPutFailure();
+			}
+		});
+	}
 }
