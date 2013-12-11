@@ -59,10 +59,6 @@ public class DeleteFileProcess extends Process {
 		if (file == null) {
 			throw new IllegalArgumentException("File may not be null");
 		}
-
-		if (file.isDirectory() && file.listFiles().length > 0) {
-			throw new IllegalArgumentException("Folder is not empty");
-		}
 	}
 
 	/**

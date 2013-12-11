@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.delete;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.PublicKey;
@@ -54,8 +55,7 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 			if (parentNode == null) {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent");
 			} else {
-				FileTreeNode toDelete = parentNode.getChildByName(fileName);
-				boolean deleted = fileManager.getFile(toDelete).delete();
+				boolean deleted = new File(fileManager.getFile(parentNode), fileName).delete();
 				if (!deleted) {
 					throw new IOException("Could not delete the file");
 				}

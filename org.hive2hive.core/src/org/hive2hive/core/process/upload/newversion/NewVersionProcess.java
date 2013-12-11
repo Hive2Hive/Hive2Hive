@@ -39,7 +39,7 @@ public class NewVersionProcess extends Process {
 			// 5. update the parent meta folder
 			// 6. update the user profile
 
-			logger.debug("Adding a file to the DHT");
+			logger.debug("Adding a new file version to the DHT");
 			setNextStep(new PutNewVersionChunkStep(file, context));
 		} else {
 			throw new IllegalArgumentException("A folder can have one version only");
