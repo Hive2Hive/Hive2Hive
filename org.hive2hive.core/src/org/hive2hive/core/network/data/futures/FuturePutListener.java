@@ -100,10 +100,9 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		for (PeerAddress peeradress : future.getRawResult().keySet()) {
 			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
 			if (map == null) {
-				logger.warn(String
-						.format("A node gave no status (null) back."
-								+ " location key = '%s' content key = '%s' version key = '%s'",
-								locationKey, contentKey, content.getVersionKey()));
+				logger.warn(String.format("A node gave no status (null) back."
+						+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
+						contentKey, content.getVersionKey()));
 				fail.add(peeradress);
 			} else {
 				for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
@@ -114,22 +113,21 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 						case FAILED:
 						case FAILED_NOT_ABSENT:
 						case FAILED_SECURITY:
-							logger.warn(String
-									.format("A node denied putting data. reason = '%s'"
-											+ " location key = '%s' content key = '%s' version key = '%s'",
-											PutStatusH2H.values()[status], locationKey, contentKey,
-											content.getVersionKey()));
+							logger.warn(String.format("A node denied putting data. reason = '%s'"
+									+ " location key = '%s' content key = '%s' version key = '%s'",
+									PutStatusH2H.values()[status], locationKey, contentKey,
+									content.getVersionKey()));
 							fail.add(peeradress);
 							break;
 						case VERSION_CONFLICT:
 						case VERSION_CONFLICT_NO_BASED_ON:
 						case VERSION_CONFLICT_NO_VERSION_KEY:
 						case VERSION_CONFLICT_OLD_TIMESTAMP:
-							logger.warn(String
-									.format("A version conflict detected. reason = '%s' location key = '%s' "
+							logger.warn(String.format(
+									"A version conflict detected. reason = '%s' location key = '%s' "
 											+ "content key = '%s' version key = '%s'",
-											PutStatusH2H.values()[status], locationKey, contentKey,
-											content.getVersionKey()));
+									PutStatusH2H.values()[status], locationKey, contentKey,
+									content.getVersionKey()));
 							versionConflict.add(peeradress);
 							break;
 					}
@@ -138,20 +136,10 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 
 		if (!versionConflict.isEmpty()) {
-			FutureDigest digestFuture = getDigest();
-			digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
-				@Override
-				public void operationComplete(FutureDigest future) throws Exception {
-					if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
-						logger.warn(String
-								.format("Put verification failed. Couldn't get digest data. location key = '%s' content key = '%s' version key = '%s'",
-										locationKey, contentKey, content.getVersionKey()));
-						notifyFailure();
-					} else {
-						analyseVersionKey(versionConflict, future.getRawDigest());
-					}
-				}
-			});
+			logger.warn(String.format("Put verification failed. Version conflict!"
+					+ " location key = '%s' content key = '%s' version key = '%s'", locationKey, contentKey,
+					content.getVersionKey()));
+			notifyFailure();
 		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
 			// majority of the contacted nodes responded with ok
 			verifyPut();
@@ -203,90 +191,119 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		return digestBuilder.start();
 	}
 
-	private void analyseVersionKey(List<PeerAddress> peersWithVersionConflicts, Map<PeerAddress, DigestResult> map) {
-		for (PeerAddress peerAddress : map.keySet()) {
-			if (map.get(peerAddress).getKeyDigest().isEmpty())
-				continue;
-			
-			if (!peersWithVersionConflicts.contains(peerAddress))
-				continue;
-			
-			if (content.getVersionKey().timestamp() < map.get(peerAddress).getKeyDigest().firstKey()
-					.getVersionKey().timestamp()) {
-				// own time stamp is older
-				logger.warn(String.format("Put verification failed. Version conflict!"
-						+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
-						contentKey, content.getVersionKey()));
-				notifyFailure();
-				return;
-			} else if (content.getVersionKey().timestamp() == map.get(peerAddress).getKeyDigest().firstKey()
-					.getVersionKey().timestamp()) {
-				logger.warn(String.format("Version conflict with same timestamps!"
-						+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
-						contentKey, content.getVersionKey()));
-				int compare = content.getVersionKey().compareTo(
-						map.get(peerAddress).getKeyDigest().firstKey().getVersionKey());
-				if (compare == 1) {
-					// version key is smaller
-					logger.warn(String.format(
-							"Put verification failed. Version conflict (with same timestamps)!"
-									+ " location key = '%s' content key = '%s' version key = '%s'",
-							locationKey, contentKey, content.getVersionKey()));
-					notifyFailure();
-					return;
-				} else if (compare == 0) {
-					logger.error(String.format("Put verification failed. Version conflict with same version?"
-							+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
-							contentKey, content.getVersionKey()));
-					notifyFailure();
-					return;
-				}
-			}
-		}
-		logger.warn(String.format("Put verification: version conflict detected but timestamp is newer."
-				+ " location key = '%s' content key = '%s' version key = '%s'", locationKey, contentKey,
-				content.getVersionKey()));
-		notifySuccess();
-	}
-
 	private void verifyPut() {
 		// get data to verify if everything went correct
 		FutureDigest digestFuture = getDigest();
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
-				if (future.isFailed() || future.getDigest() == null
-						|| future.getDigest().getKeyDigest() == null
-						|| future.getDigest().getKeyDigest().isEmpty()) {
+				if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
 					logger.error(String
 							.format("Put verification failed. Couldn't get digest. location key = '%s' content key = '%s' version key = '%s'",
 									locationKey, contentKey, content.getVersionKey()));
 					notifyFailure();
 				} else {
-					checkVersionKey(future.getDigest().getKeyDigest());
+					checkVersionKey(future.getRawDigest());
 				}
 			}
 		});
 	}
 
-	private void checkVersionKey(NavigableMap<Number640, Number160> navigableMap) {
-		if (navigableMap.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
-			logger.debug(String
-					.format("Put verification: entry is newest. location key = '%s' content key = '%s' version key = '%s'",
+	private void checkVersionKey(Map<PeerAddress, DigestResult> rawDigest) {
+		for (PeerAddress peerAddress : rawDigest.keySet()) {
+			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).getKeyDigest() == null
+					|| rawDigest.get(peerAddress).getKeyDigest().isEmpty()) {
+				logger.warn(String.format("Put verification: Received from peer '%s' no digest."
+						+ " location key = '%s' content key = '%s' version key = '%s'", peerAddress,
+						locationKey, contentKey, content.getVersionKey()));
+			} else {
+				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).getKeyDigest();
+				if (keyDigest.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
+					logger.debug(String.format("Put verification: On peer '%s' entry is newest."
+							+ " location key = '%s' content key = '%s' version key = '%s'", peerAddress,
 							locationKey, contentKey, content.getVersionKey()));
-			notifySuccess();
-		} else if (navigableMap.containsKey(new Number640(Number160.createHash(locationKey), Number160.ZERO,
-				Number160.createHash(contentKey), content.getVersionKey()))) {
-			logger.debug(String
-					.format("Put verification: entry exists in history. location key = '%s' content key = '%s' version key = '%s'",
+				} else if (keyDigest.containsKey(new Number640(Number160.createHash(locationKey),
+						Number160.ZERO, Number160.createHash(contentKey), content.getVersionKey()))) {
+					logger.debug(String.format("Put verification: entry on peer '%s' exists in history."
+							+ " location key = '%s' content key = '%s' version key = '%s'", peerAddress,
 							locationKey, contentKey, content.getVersionKey()));
-			notifySuccess();
-		} else {
-			logger.warn(String
-					.format("Put verification failed. Concurrent modification happened. location key = '%s' content key = '%s' version key = '%s'",
-							locationKey, contentKey, content.getVersionKey()));
-			notifyFailure();
+				} else {
+					logger.warn(String.format("Put verification: Concurrent modification happened."
+							+ " location key = '%s' content key = '%s' version key = '%s'", locationKey,
+							contentKey, content.getVersionKey()));
+					// if version key is older than the other, the version wins
+					if (!checkIfMyVerisonWins(keyDigest, peerAddress)) {
+						notifyFailure();
+						return;
+					}
+				}
+			}
 		}
+		notifySuccess();
+	}
+	
+	protected boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest, PeerAddress peerAddress) {
+		/* Check if based on entry exists */
+		if (!keyDigest.containsKey(new Number640(Number160.createHash(locationKey),
+				Number160.ZERO, Number160.createHash(contentKey), content.getBasedOnKey()))) {
+			logger.warn(String.format(
+					"Put verification: Peer '%s' doesn't contain based on version."
+							+ " location key = '%s' content key = '%s' version key = '%s'",
+					locationKey, peerAddress, contentKey, content.getVersionKey()));
+			// something is definitely wrong with this peer
+			return true;
+		} else {
+			// figure out the next version based on same version
+			Number640 entryBasingOnSameParent = getSuccessor(keyDigest);
+			if (entryBasingOnSameParent == null) {
+				if (keyDigest.firstKey().getVersionKey().equals(content.getBasedOnKey())) {
+					logger.error(String
+							.format("Put verification: Peer '%s' has no successor version."
+									+ " location key = '%s' content key = '%s' version key = '%s'",
+									peerAddress, locationKey, contentKey, content.getVersionKey()));
+					// this peer doesn't contain any successor version, with this peer is something wrong
+					return true;
+				} else {
+					logger.error(String
+							.format("Put verification: Peer '%s' has a corrupt version history."
+									+ " location key = '%s' content key = '%s' version key = '%s'",
+									peerAddress, locationKey, contentKey, content.getVersionKey()));
+					return true;				
+				}
+			} else {
+				int compare = entryBasingOnSameParent.getVersionKey().compareTo(content.getVersionKey());
+				if (compare == 0){
+					logger.error(String
+							.format("Put verification: Peer '%s' has same version."
+									+ " location key = '%s' content key = '%s' version key = '%s'",
+									peerAddress, locationKey, contentKey, content.getVersionKey()));
+					return true;
+				} else if (compare < 0) {
+					logger.warn(String
+							.format("Put verification: Peer '%s' has older version."
+									+ " location key = '%s' content key = '%s' version key = '%s'",
+									peerAddress, locationKey, contentKey, content.getVersionKey()));
+					return false;					
+				} else {
+					logger.warn(String
+							.format("Put verification: Peer '%s' has newer version."
+									+ " location key = '%s' content key = '%s' version key = '%s'",
+									peerAddress, locationKey, contentKey, content.getVersionKey()));
+					return true;				
+				}
+			}
+		}
+	}
+
+	private Number640 getSuccessor(NavigableMap<Number640, Number160> keyDigest){
+		Number640 entryBasingOnSameParent = null;
+		for (Number640 key : keyDigest.keySet()) {
+			if (keyDigest.get(key).equals(content.getBasedOnKey())) {
+				entryBasingOnSameParent = key;
+				break;
+			}
+		}
+		return entryBasingOnSameParent;
 	}
 
 	private void notifySuccess() {
