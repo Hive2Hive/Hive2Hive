@@ -1,12 +1,11 @@
-package org.hive2hive.core.client.menu;
+package org.hive2hive.client.menu;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.hive2hive.core.client.SessionInstance;
-import org.hive2hive.core.client.console.Console;
-import org.hive2hive.core.client.menuitem.ConsoleMenuItem;
-import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.console.Console;
+import org.hive2hive.client.menuitem.ConsoleMenuItem;
+import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 
 /**
  * An abstract console menu to be used with a {@link Console}.
@@ -17,14 +16,12 @@ import org.hive2hive.core.client.menuitem.H2HConsoleMenuItem;
 public abstract class ConsoleMenu {
 
 	protected final Console console;
-	protected final SessionInstance session;
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
 
-	public ConsoleMenu(Console console, SessionInstance session) {
+	public ConsoleMenu(Console console) {
 		this.console = console;
-		this.session = session;
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 
@@ -65,7 +62,6 @@ public abstract class ConsoleMenu {
 	}
 
 	private final void show() {
-
 		int chosen = 0;
 		Scanner input = new Scanner(System.in);
 
@@ -99,7 +95,7 @@ public abstract class ConsoleMenu {
 		Scanner input = new Scanner(System.in);
 		String parameter;
 		try {
-			parameter = input.next();
+			parameter = input.nextLine();
 		} catch (Exception e) {
 			System.out.println("Exception while parsing the parameter.");
 			input.nextLine();
@@ -111,7 +107,17 @@ public abstract class ConsoleMenu {
 	}
 
 	protected int awaitIntParameter() {
-		return Integer.parseInt(awaitStringParameter());
+		boolean success = false;
+		int number = 0;
+		while (!success) {
+			try {
+				number = Integer.parseInt(awaitStringParameter());
+				success = true;
+			} catch (NumberFormatException e) {
+				System.out.println("This was not a number... Try again.");
+			}
+		}
+		return number;
 	}
 
 	protected boolean awaitBooleanParameter() {

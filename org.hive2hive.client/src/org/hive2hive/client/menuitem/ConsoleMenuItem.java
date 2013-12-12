@@ -1,4 +1,4 @@
-package org.hive2hive.core.client.menuitem;
+package org.hive2hive.client.menuitem;
 
 /**
  * An abstract console menu item representing an option. It predefines the execution of an operation by means

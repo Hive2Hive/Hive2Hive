@@ -33,13 +33,12 @@ public class NewVersionProcess extends Process {
 
 		if (file.isFile()) {
 			// 1. validate and split the file content, encrypt it and upload it to the DHT
-			// 2. get the user profile
+			// 2. get the user profile, find keys of meta file
 			// 3. get the meta file
-			// 4. update the meta file
-			// 5. update the parent meta folder
-			// 6. update the user profile
-
-			logger.debug("Adding a file to the DHT");
+			// 4. update the meta file, add new version
+			// 5. update the user profile (md5 hash)
+			// 6. notify other clients
+			logger.debug("Adding a new file version to the DHT");
 			setNextStep(new PutNewVersionChunkStep(file, context));
 		} else {
 			throw new IllegalArgumentException("A folder can have one version only");

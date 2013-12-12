@@ -6,6 +6,7 @@ import java.util.Set;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
+import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
 
 public class SendNotificationStep extends ProcessStep {
 
@@ -21,7 +22,7 @@ public class SendNotificationStep extends ProcessStep {
 		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
 
 		Set<String> userList = metaFolder.getUserList();
-		getProcess().notfyOtherUsers(userList, new ModifyNotifyMessageFactory(modifiedFileKey));
+		getProcess().notfyOtherUsers(userList, new UploadNotificationMessageFactory(modifiedFileKey));
 		getProcess().setNextStep(null);
 	}
 

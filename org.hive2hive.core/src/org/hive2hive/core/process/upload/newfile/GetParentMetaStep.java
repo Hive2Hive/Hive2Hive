@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -49,30 +48,28 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			// when file is not in root, the parent meta folder must be found
 			logger.debug("Get the meta folder of the parent (lookup in user profile)");
 
-			UserProfileManager profileManager = context.getProfileManager();
-			UserProfile userProfile = null;
 			try {
-				userProfile = profileManager.getUserProfile(getProcess().getID(), false);
-			} catch (GetFailedException e) {
+				UserProfileManager profileManager = context.getProfileManager();
+				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), false);
+				FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
+				if (parentNode == null) {
+					getProcess().stop("Parent file is not in user profile");
+					return;
+				}
+
+				// initialize the next steps
+				// 1. put the new meta document
+				// 2. update the parent meta document
+				// 3. update the user profile
+				super.nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
+				super.keyPair = parentNode.getKeyPair();
+				super.context = context;
+				super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
+			} catch (Exception e) {
 				getProcess().stop(e.getMessage());
 				return;
 			}
 
-			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
-			if (parentNode == null) {
-				getProcess().stop("Parent file is not in user profile");
-				return;
-			}
-
-			// initialize the next steps
-			// 1. put the new meta document
-			// 2. update the parent meta document
-			// 3. update the user profile
-			super.nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateParentMetaStep());
-			super.keyPair = parentNode.getKeyPair();
-			super.context = context;
-			super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
 		}
 	}
-
 }

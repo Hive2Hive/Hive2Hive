@@ -1,8 +1,9 @@
 package org.hive2hive.core.file;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 public class FileUtil {
 
@@ -18,13 +19,20 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static long getFileSize(File file) {
+		InputStream stream = null;
 		try {
-			FileInputStream stream = new FileInputStream(file);
-			long size = stream.getChannel().size();
-			stream.close();
-			return size;
+			URL url = file.toURI().toURL();
+			stream = url.openStream();
+			return stream.available();
 		} catch (IOException e) {
 			return file.length();
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch (IOException e) {
+				// ignore
+			}
 		}
 	}
 }

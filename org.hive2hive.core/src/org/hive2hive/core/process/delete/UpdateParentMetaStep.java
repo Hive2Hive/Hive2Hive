@@ -17,10 +17,12 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
 	private final PublicKey childKey;
+	private final String childName;
 
-	public UpdateParentMetaStep(PublicKey childKey) {
+	public UpdateParentMetaStep(PublicKey childKey, String childName) {
 		super(null);
 		this.childKey = childKey;
+		this.childName = childName;
 	}
 
 	@Override
@@ -37,7 +39,8 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 		logger.debug("Removed child from meta folder. Total children = " + parentMeta.getChildKeys().size());
 
 		// notify other clients (can be multiple users)
-		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(childKey);
+		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentMeta.getId(),
+				childName);
 		getProcess().notfyOtherUsers(parentMeta.getUserList(), messageFactory);
 
 		// next step is null, process is done

@@ -106,10 +106,11 @@ public class FileRecursionUtil {
 
 	private static void listFiles(File file, List<File> preorderList) {
 		preorderList.add(file);
-		File[] children = file.listFiles();
-		for (File child : children) {
-			listFiles(child, preorderList);
-		}
+		File[] listFiles = file.listFiles();
+		if (listFiles != null)
+			for (File child : listFiles) {
+				listFiles(child, preorderList);
+			}
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package org.hive2hive.core.client.menuitem;
+package org.hive2hive.client.menuitem;
 
 /**
  * A specified console menu item. Allows to check preconditions before execution the operation.

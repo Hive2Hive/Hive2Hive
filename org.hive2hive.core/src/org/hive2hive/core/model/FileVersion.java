@@ -1,11 +1,9 @@
 package org.hive2hive.core.model;
 
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * A version of a file in the DHT. A version contains several chunks (depending on the file size and the
@@ -14,7 +12,7 @@ import org.hive2hive.core.network.data.NetworkContent;
  * @author Nico
  * 
  */
-public class FileVersion extends NetworkContent {
+public class FileVersion implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private final int counter; // version count
@@ -47,10 +45,5 @@ public class FileVersion extends NetworkContent {
 
 	public long getDate() {
 		return date;
-	}
-
-	@Override
-	public int getTimeToLive() {
-		return TimeToLiveStore.getInstance().getMetaDocument();
 	}
 }

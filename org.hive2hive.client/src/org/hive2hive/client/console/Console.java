@@ -1,4 +1,4 @@
-package org.hive2hive.core.client.console;
+package org.hive2hive.client.console;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,14 +15,14 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.hive2hive.core.client.SessionInstance;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.IH2HNode;
 
 /**
  * A Java swing console that reassigns the standard channels STDIN, STDOUT and STDERR to itself.
@@ -43,14 +43,10 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	private Thread readerThread1;
 	private Thread readerThread2;
 
-	private boolean quit;
-	
-	private final SessionInstance session;
+	private final AtomicBoolean quit;
+	private IH2HNode h2hNode;
 
-	public Console(String title, SessionInstance session) {
-
-		this.session = session;
-		
+	public Console(String title) {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = new Dimension(screenSize.width / 2, screenSize.height / 2);
 
@@ -92,7 +88,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 		readerThread2.setDaemon(true);
 		readerThread2.start();
 
-		quit = false;
+		quit = new AtomicBoolean(false);
 	}
 
 	private void redirectSystemStreams() {
@@ -138,7 +134,6 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 
 	@Override
 	public synchronized void run() {
-
 		while (Thread.currentThread() == readerThread1) {
 			handleInputStream(pis1);
 		}
@@ -148,8 +143,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 		}
 	}
 
-	private synchronized void handleInputStream(PipedInputStream pis) {
-
+	private void handleInputStream(PipedInputStream pis) {
 		try {
 			this.wait(100);
 		} catch (InterruptedException e) {
@@ -160,15 +154,14 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 				String input = readLine(pis);
 				print(input);
 			}
-			if (quit)
+			if (quit.get())
 				return;
 		} catch (IOException e) {
 			print("Console reports an internal error:\n" + e);
 		}
 	}
 
-	private synchronized String readLine(PipedInputStream pis) throws IOException {
-
+	private String readLine(PipedInputStream pis) throws IOException {
 		String input = "";
 		do {
 			int available = pis.available();
@@ -177,7 +170,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 			byte buffer[] = new byte[available];
 			pis.read(buffer);
 			input = input + new String(buffer, 0, buffer.length);
-		} while (!input.endsWith("\n") && !input.endsWith("\r\n") && !quit);
+		} while (!input.endsWith("\n") && !input.endsWith("\r\n") && !quit.get());
 		return input;
 	}
 
@@ -193,7 +186,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	@Override
 	public void windowClosed(WindowEvent e) {
 
-		quit = true;
+		quit.set(true);
 		this.notifyAll(); // stop all threads
 
 		try {
@@ -220,12 +213,14 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	public void windowClosing(WindowEvent e) {
 		frame.setVisible(false);
 		frame.dispose();
-		
+
 		// shut down network
-		if (session.getNetwork() != null) {
-			for (NetworkManager node : session.getNetwork()) {
-				node.disconnect();
-			}
+		if (h2hNode != null) {
+			h2hNode.disconnect();
 		}
+	}
+
+	public void setH2HNode(IH2HNode h2hNode) {
+		this.h2hNode = h2hNode;
 	}
 }
