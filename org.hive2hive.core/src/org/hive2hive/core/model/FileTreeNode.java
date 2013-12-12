@@ -1,12 +1,11 @@
 package org.hive2hive.core.model;
 
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Tree implementation for the file tree. It stores the keys for the files and it's logic location.
@@ -14,7 +13,7 @@ import org.hive2hive.core.network.data.NetworkContent;
  * @author Nico
  * 
  */
-public class FileTreeNode extends NetworkContent {
+public class FileTreeNode implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;
@@ -192,11 +191,6 @@ public class FileTreeNode extends NetworkContent {
 		} else {
 			return parent.getFullPath() + getName();
 		}
-	}
-
-	@Override
-	public int getTimeToLive() {
-		return TimeToLiveStore.getInstance().getMetaDocument();
 	}
 
 	@Override

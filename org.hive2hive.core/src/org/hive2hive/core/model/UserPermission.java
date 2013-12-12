@@ -1,7 +1,6 @@
 package org.hive2hive.core.model;
 
-import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkContent;
+import java.io.Serializable;
 
 /**
  * Mapping between the userId and the permission type. This is applied for {@link MetaFolder} objects in order
@@ -10,7 +9,7 @@ import org.hive2hive.core.network.data.NetworkContent;
  * @author Nico
  * 
  */
-public class UserPermission extends NetworkContent {
+public class UserPermission implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private PermissionType permission;
@@ -31,10 +30,5 @@ public class UserPermission extends NetworkContent {
 
 	public String getUserId() {
 		return userId;
-	}
-
-	@Override
-	public int getTimeToLive() {
-		return TimeToLiveStore.getInstance().getMetaDocument();
 	}
 }
