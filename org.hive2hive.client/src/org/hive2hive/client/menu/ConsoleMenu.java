@@ -92,6 +92,7 @@ public abstract class ConsoleMenu {
 	// TODO correct parameter input methods
 	protected String awaitStringParameter() {
 
+		System.out.print("> ");
 		Scanner input = new Scanner(System.in);
 		String parameter;
 		try {
