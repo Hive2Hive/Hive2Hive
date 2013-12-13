@@ -13,11 +13,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public class ConsoleClient {
 
-	// private static Console console;
-
 	public static void main(String[] args) {
 
-		// console = new Console("Hive2Hive Console");
 		printHeader();
 
 		try {

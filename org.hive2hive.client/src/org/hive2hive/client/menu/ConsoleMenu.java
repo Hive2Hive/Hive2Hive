@@ -3,25 +3,23 @@ package org.hive2hive.client.menu;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.hive2hive.client.console.Console;
+import org.hive2hive.client.console.UIConsole;
 import org.hive2hive.client.menuitem.ConsoleMenuItem;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 
 /**
- * An abstract console menu to be used with a {@link Console}.
+ * An abstract console menu to be used with a {@link UIConsole}.
  * 
  * @author Christian
  * 
  */
 public abstract class ConsoleMenu {
 
-//	protected final Console console;
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
 
 	public ConsoleMenu() {
-//		this.console = console;
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 
@@ -56,7 +54,6 @@ public abstract class ConsoleMenu {
 
 	public final void open() {
 		while (!exited) {
-//			console.clear();
 			show();
 		}
 		onMenuExit();
@@ -68,7 +65,6 @@ public abstract class ConsoleMenu {
 
 	private final void show() {
 		int chosen = 0;
-//		Scanner input = new Scanner(System.in);
 
 		System.out.println(getInstruction());
 
@@ -80,12 +76,8 @@ public abstract class ConsoleMenu {
 
 		chosen = awaitIntParameter();
 
-//		console.clear();
-
 		if (chosen > items.size() || chosen < 1) {
-			System.out.println(String.format("Invalid option. Select an option from 1 to %s.", items.size()));
-//			System.out.println("Press enter to continue...");
-//			input.nextLine();
+			System.out.println(String.format("Invalid option. Select an option from 1 to %s.\n", items.size()));
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
 			item.invoke();
@@ -94,7 +86,6 @@ public abstract class ConsoleMenu {
 		// do not close input
 	}
 
-	// TODO correct parameter input methods
 	protected String awaitStringParameter() {
 
 		System.out.print("> ");
