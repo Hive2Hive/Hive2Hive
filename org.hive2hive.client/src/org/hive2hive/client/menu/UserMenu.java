@@ -1,7 +1,6 @@
 package org.hive2hive.client.menu;
 
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.console.Console;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -23,8 +22,8 @@ public final class UserMenu extends ConsoleMenu {
 	private String pin;
 	private UserCredentials userCredentials;
 
-	public UserMenu(Console console) {
-		super(console);
+	public UserMenu() {
+//		super(console);
 	}
 
 	@Override

@@ -22,15 +22,13 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.hive2hive.core.IH2HNode;
-
 /**
- * A Java swing console that reassigns the standard channels STDIN, STDOUT and STDERR to itself.
+ * A Java swing (GUI) console that reassigns the standard channels STDIN, STDOUT and STDERR to itself.
  * 
  * @author Christian
  * 
  */
-public final class Console extends WindowAdapter implements WindowListener, Runnable {
+public final class UIConsole extends WindowAdapter implements WindowListener, Runnable {
 
 	private JFrame frame;
 	private JTextArea textArea;
@@ -44,9 +42,8 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	private Thread readerThread2;
 
 	private final AtomicBoolean quit;
-	private IH2HNode h2hNode;
 
-	public Console(String title) {
+	public UIConsole(String title) {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = new Dimension(screenSize.width / 2, screenSize.height / 2);
 
@@ -213,14 +210,5 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	public void windowClosing(WindowEvent e) {
 		frame.setVisible(false);
 		frame.dispose();
-
-		// shut down network
-		if (h2hNode != null) {
-			h2hNode.disconnect();
-		}
-	}
-
-	public void setH2HNode(IH2HNode h2hNode) {
-		this.h2hNode = h2hNode;
 	}
 }
