@@ -18,6 +18,7 @@ public class ConsoleClient {
 	public static void main(String[] args) {
 
 		// console = new Console("Hive2Hive Console");
+		printHeader();
 
 		try {
 			H2HLoggerFactory.initFactory();
@@ -25,15 +26,15 @@ public class ConsoleClient {
 			System.out.println("H2HLoggerFactory could not be initialized.");
 		}
 
-		printHeader();
-
 		new TopLevelMenu().open();
+		
+		printFooter();
 
 		System.exit(0);
 	}
 
 	private static void printHeader() {
-		System.out.println("**************************************************************************************************");
+		System.out.println("\n**************************************************************************************************");
 		System.out.println("*                                                                           .´'`.                *");
 		System.out.println("*                                                                           |   |                *");
 		System.out.println("*                           Welcome to the Hive2Hive console client!      .´ `-´ `.              *");
@@ -41,5 +42,15 @@ public class ConsoleClient {
 		System.out.println("*                                                                          `-´ `-´               *");
 		System.out.println("**************************************************************************************************");
 		System.out.println("\nConfigure your H2H network and nodes by browsing through the menus and follow the guides.\n");
+	}
+	
+	private static void printFooter() {
+		System.out.println("**************************************************************************************************");
+		System.out.println("*                                                                           .´'`.                *");
+		System.out.println("*                                                                           |   |                *");
+		System.out.println("*                                          Goodbye!                       .´ `-´ `.              *");
+		System.out.println("*                                    (www.hive2hive.com)                  |   |   |              *");
+		System.out.println("*                                                                          `-´ `-´               *");
+		System.out.println("**************************************************************************************************\n");
 	}
 }
