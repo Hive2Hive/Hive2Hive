@@ -13,11 +13,11 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public class ConsoleClient {
 
-//	private static Console console;
+	// private static Console console;
 
 	public static void main(String[] args) {
 
-//		console = new Console("Hive2Hive Console");
+		// console = new Console("Hive2Hive Console");
 
 		try {
 			H2HLoggerFactory.initFactory();
@@ -25,12 +25,21 @@ public class ConsoleClient {
 			System.out.println("H2HLoggerFactory could not be initialized.");
 		}
 
-		System.out.println("Welcome to the Hive2Hive console client!\n");
-		System.out
-				.println("Configure your H2H network and nodes by browsing through the menus and follow the guides.\n");
+		printHeader();
 
 		new TopLevelMenu().open();
 
 		System.exit(0);
+	}
+
+	private static void printHeader() {
+		System.out.println("**************************************************************************************************");
+		System.out.println("*                                                                           .´'`.                *");
+		System.out.println("*                                                                           |   |                *");
+		System.out.println("*                           Welcome to the Hive2Hive console client!      .´ `-´ `.              *");
+		System.out.println("*                                                                         |   |   |              *");
+		System.out.println("*                                                                          `-´ `-´               *");
+		System.out.println("**************************************************************************************************");
+		System.out.println("\nConfigure your H2H network and nodes by browsing through the menus and follow the guides.\n");
 	}
 }

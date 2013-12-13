@@ -44,7 +44,7 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 	private Thread readerThread2;
 
 	private final AtomicBoolean quit;
-	private IH2HNode h2hNode;
+//	private IH2HNode h2hNode;
 
 	public Console(String title) {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -215,12 +215,12 @@ public final class Console extends WindowAdapter implements WindowListener, Runn
 		frame.dispose();
 
 		// shut down network
-		if (h2hNode != null) {
-			h2hNode.disconnect();
-		}
+//		if (h2hNode != null) {
+//			h2hNode.disconnect();
+//		}
 	}
 
-	public void setH2HNode(IH2HNode h2hNode) {
-		this.h2hNode = h2hNode;
-	}
+//	public void setH2HNode(IH2HNode h2hNode) {
+//		this.h2hNode = h2hNode;
+//	}
 }

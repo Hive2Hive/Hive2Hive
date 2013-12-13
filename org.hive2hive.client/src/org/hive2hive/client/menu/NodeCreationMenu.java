@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.console.Console;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.IH2HNode;
@@ -24,7 +23,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	private final H2HNodeBuilder nodeBuilder;
 
 	public NodeCreationMenu() {
-//		super(console);
+		// super(console);
 		nodeBuilder = new H2HNodeBuilder();
 
 		// config that cannot be changed
@@ -54,7 +53,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	private void createNode() {
 		// creates the node
 		h2hNode = nodeBuilder.build();
-//		console.setH2HNode(h2hNode);
+		// console.setH2HNode(h2hNode);
 	}
 
 	@Override

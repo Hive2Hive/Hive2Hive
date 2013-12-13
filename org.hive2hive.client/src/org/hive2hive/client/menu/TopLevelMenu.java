@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.console.Console;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -29,6 +28,14 @@ public final class TopLevelMenu extends ConsoleMenu {
 		nodeMenu = new NodeCreationMenu();
 	}
 
+	@Override
+	protected void onMenuExit() {
+		// shutdown network
+		if (nodeMenu.getH2HNode() != null) {
+			nodeMenu.getH2HNode().disconnect();
+		}
+	}
+	
 	@Override
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Network Configuration") {

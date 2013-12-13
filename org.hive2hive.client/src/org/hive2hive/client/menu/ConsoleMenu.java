@@ -54,11 +54,16 @@ public abstract class ConsoleMenu {
 		items.add(menuItem);
 	}
 
-	public void open() {
+	public final void open() {
 		while (!exited) {
 //			console.clear();
 			show();
 		}
+		onMenuExit();
+	}
+	
+	protected void onMenuExit(){
+		// do nothing by default
 	}
 
 	private final void show() {
