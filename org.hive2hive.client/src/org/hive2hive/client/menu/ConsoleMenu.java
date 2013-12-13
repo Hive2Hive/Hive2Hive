@@ -15,13 +15,13 @@ import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
  */
 public abstract class ConsoleMenu {
 
-	protected final Console console;
+//	protected final Console console;
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
 
-	public ConsoleMenu(Console console) {
-		this.console = console;
+	public ConsoleMenu() {
+//		this.console = console;
 		this.items = new ArrayList<ConsoleMenuItem>();
 		this.exited = false;
 
@@ -56,14 +56,14 @@ public abstract class ConsoleMenu {
 
 	public void open() {
 		while (!exited) {
-			console.clear();
+//			console.clear();
 			show();
 		}
 	}
 
 	private final void show() {
 		int chosen = 0;
-		Scanner input = new Scanner(System.in);
+//		Scanner input = new Scanner(System.in);
 
 		System.out.println(getInstruction());
 
@@ -75,12 +75,12 @@ public abstract class ConsoleMenu {
 
 		chosen = awaitIntParameter();
 
-		console.clear();
+//		console.clear();
 
 		if (chosen > items.size() || chosen < 1) {
 			System.out.println(String.format("Invalid option. Select an option from 1 to %s.", items.size()));
-			System.out.println("Press enter to continue...");
-			input.nextLine();
+//			System.out.println("Press enter to continue...");
+//			input.nextLine();
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
 			item.invoke();

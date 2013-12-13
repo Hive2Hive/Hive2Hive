@@ -23,8 +23,8 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	private IH2HNode h2hNode;
 	private final H2HNodeBuilder nodeBuilder;
 
-	public NodeCreationMenu(Console console) {
-		super(console);
+	public NodeCreationMenu() {
+//		super(console);
 		nodeBuilder = new H2HNodeBuilder();
 
 		// config that cannot be changed
@@ -54,7 +54,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	private void createNode() {
 		// creates the node
 		h2hNode = nodeBuilder.build();
-		console.setH2HNode(h2hNode);
+//		console.setH2HNode(h2hNode);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 	@Override
 	public String getInstruction() {
-		return "Configure the H2H node and connect to (or create) the network.";
+		return "Configure the H2H node and connect to (or create) the network.\n";
 	}
 
 	public IH2HNode getH2HNode() {

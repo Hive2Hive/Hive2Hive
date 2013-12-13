@@ -23,10 +23,10 @@ public final class TopLevelMenu extends ConsoleMenu {
 	private final NodeCreationMenu nodeMenu;
 	protected File root;
 
-	public TopLevelMenu(Console console) {
-		super(console);
-		userMenu = new UserMenu(console);
-		nodeMenu = new NodeCreationMenu(console);
+	public TopLevelMenu() {
+//		super(console);
+		userMenu = new UserMenu();
+		nodeMenu = new NodeCreationMenu();
 	}
 
 	@Override

@@ -23,8 +23,8 @@ public final class UserMenu extends ConsoleMenu {
 	private String pin;
 	private UserCredentials userCredentials;
 
-	public UserMenu(Console console) {
-		super(console);
+	public UserMenu() {
+//		super(console);
 	}
 
 	@Override
