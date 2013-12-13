@@ -6,9 +6,12 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.List;
 
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -47,11 +50,11 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
-		// to prevent conflicts with other tests
-		network.get(0).getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
-		network.get(1).getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		// put some data to remove
-		network.get(0).getDataManager().put(locationKey, locationKey, testData).awaitUninterruptibly();
+		network.get(0)
+				.getDataManager()
+				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
@@ -69,9 +72,16 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		assertNull(network.get(0).getDataManager().getLocal(locationKey, contentKey));
+		FutureGet futureGet = network
+				.get(0)
+				.getDataManager()
+				.get(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 	}
 
+	// TODO fix fail: problem is verification is based on digest not get
 	@Test
 	public void testRemoveProcessStepRollBack() {
 		String locationKey = network.get(0).getNodeId();
@@ -82,7 +92,10 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(testData));
 		network.get(1).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(testData));
 		// put some data to remove
-		network.get(0).getDataManager().put(locationKey, locationKey, testData).awaitUninterruptibly();
+		network.get(0)
+				.getDataManager()
+				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), testData).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {

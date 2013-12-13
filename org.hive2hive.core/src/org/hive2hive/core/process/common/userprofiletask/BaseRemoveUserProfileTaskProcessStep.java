@@ -5,13 +5,13 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IPutUserProfileTaskListener;
-import org.hive2hive.core.network.data.listener.IRemoveUserProfileTaskListener;
+import org.hive2hive.core.network.data.listener.IPutListener;
+import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 
-public abstract class BaseRemoveUserProfileTaskProcessStep extends ProcessStep implements
-		IRemoveUserProfileTaskListener, IPutUserProfileTaskListener {
+public abstract class BaseRemoveUserProfileTaskProcessStep extends ProcessStep implements IRemoveListener,
+		IPutListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory
 			.getLogger(BaseRemoveUserProfileTaskProcessStep.class);
@@ -39,12 +39,12 @@ public abstract class BaseRemoveUserProfileTaskProcessStep extends ProcessStep i
 	}
 
 	@Override
-	public void onRemoveUserProfileTaskSuccess() {
+	public void onRemoveSuccess() {
 		getProcess().setNextStep(nextStep);
 	}
 
 	@Override
-	public void onRemoveUserProfileTaskFailure() {
+	public void onRemoveFailure() {
 		getProcess().stop("Remove failed.");
 	}
 
@@ -71,14 +71,14 @@ public abstract class BaseRemoveUserProfileTaskProcessStep extends ProcessStep i
 	}
 
 	@Override
-	public void onPutUserProfileTaskSuccess() {
+	public void onPutSuccess() {
 		logger.debug(String.format("Roll back of remove succeeded. location key = '%s' content key = '%s'",
 				locationKey, contentKey));
 		getProcess().nextRollBackStep();
 	}
 
 	@Override
-	public void onPutUserProfileTaskFailure() {
+	public void onPutFailure() {
 		logger.warn(String.format(
 				"Roll back of remove failed. Re-put failed. location key = '%s' content key = '%s'",
 				locationKey, contentKey));

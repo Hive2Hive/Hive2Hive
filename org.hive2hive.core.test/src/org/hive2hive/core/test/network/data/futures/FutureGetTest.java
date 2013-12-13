@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.listener.IGetListener;
@@ -22,6 +24,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * 
+ * @author Seppi
+ */
 public class FutureGetTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
@@ -43,7 +49,9 @@ public class FutureGetTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		H2HTestData content = new H2HTestData(NetworkTestUtil.randomString());
 
-		nodeA.getDataManager().put(nodeA.getNodeId(), contentKey, content).awaitUninterruptibly();
+		nodeA.getDataManager()
+				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), content).awaitUninterruptibly();
 
 		TestGetListener listener = new TestGetListener();
 
@@ -65,7 +73,10 @@ public class FutureGetTest extends H2HJUnitTest {
 		String locationKey = nodeA.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
-		assertNull(nodeA.getDataManager().getLocal(locationKey, contentKey));
+		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 
 		TestGetListener listener = new TestGetListener();
 
@@ -97,9 +108,10 @@ public class FutureGetTest extends H2HJUnitTest {
 			}
 			content.add(data);
 
-			nodeA.getDataManager().put(locationKey, contentKey, data).awaitUninterruptibly();
+			nodeA.getDataManager()
+					.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+							Number160.createHash(contentKey), data).awaitUninterruptibly();
 		}
-		
 
 		TestGetListener listener = new TestGetListener();
 
@@ -123,7 +135,9 @@ public class FutureGetTest extends H2HJUnitTest {
 		H2HTestData content = new H2HTestData(NetworkTestUtil.randomString());
 		content.generateVersionKey();
 
-		nodeA.getDataManager().put(nodeA.getNodeId(), contentKey, content).awaitUninterruptibly();
+		nodeA.getDataManager()
+				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), content).awaitUninterruptibly();
 
 		TestGetListener listener = new TestGetListener();
 
@@ -146,7 +160,10 @@ public class FutureGetTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		Number160 versionKey = Number160.createHash(NetworkTestUtil.randomString());
 
-		assertNull(nodeA.getDataManager().getLocal(locationKey, contentKey, versionKey));
+		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 
 		TestGetListener listener = new TestGetListener();
 
@@ -159,7 +176,7 @@ public class FutureGetTest extends H2HJUnitTest {
 
 		assertNull(listener.getData());
 	}
-	
+
 	@AfterClass
 	public static void cleanAfterClass() {
 		NetworkTestUtil.shutdownNetwork(network);

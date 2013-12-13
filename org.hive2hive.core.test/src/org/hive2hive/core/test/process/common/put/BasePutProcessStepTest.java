@@ -4,8 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.List;
 
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
+
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -38,7 +43,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutProcessSuccess() {
+	public void testPutProcessSuccess() throws ClassNotFoundException, IOException {
 		NetworkManager putter = network.get(0);
 		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1);
@@ -64,8 +69,11 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
+		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
 		assertEquals(data,
-				((H2HTestData) proxy.getDataManager().getLocal(locationKey, contentKey)).getTestString());
+				((H2HTestData) futureGet.getData().object()).getTestString());
 	}
 
 	@Test
@@ -95,7 +103,10 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		assertNull(proxy.getDataManager().getLocal(locationKey, contentKey));
+		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 	}
 
 	@AfterClass

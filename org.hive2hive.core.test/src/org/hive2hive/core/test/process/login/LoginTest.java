@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
@@ -65,7 +66,8 @@ public class LoginTest extends H2HJUnitTest {
 		Assert.assertEquals(userProfile.getUserId(), process.getContext().getUserProfile().getUserId());
 
 		// verify the locations map
-		FutureGet futureGet = client.getDataManager().get(userProfile.getUserId(), H2HConstants.USER_LOCATIONS);
+		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userProfile.getUserId()),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 		futureGet.getFutureRequests().awaitUninterruptibly();
 

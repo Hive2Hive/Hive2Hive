@@ -7,6 +7,7 @@ import java.security.KeyPair;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -90,8 +91,9 @@ public class DeleteFileTest extends H2HJUnitTest {
 		MetaFile metaFileBeforeDeletion = (MetaFile) metaDocumentBeforeDeletion;
 		for (FileVersion version : metaFileBeforeDeletion.getVersions()) {
 			for (KeyPair key : version.getChunkIds()) {
-				FutureGet get = client.getDataManager().get(ProcessStep.key2String(key.getPublic()),
-						H2HConstants.FILE_CHUNK);
+				FutureGet get = client.getDataManager().get(
+						Number160.createHash(ProcessStep.key2String(key.getPublic())),
+						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.FILE_CHUNK));
 				get.awaitUninterruptibly();
 				get.getFutureRequests().awaitUninterruptibly();
 

@@ -9,6 +9,7 @@ import java.util.List;
 import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FuturePut;
+import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -69,8 +70,9 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 				credentials.getPin(), AES_KEYLENGTH.BIT_256);
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
-		FuturePut putGlobal = putter.getDataManager().put(credentials.getProfileLocationKey(),
-				H2HConstants.USER_PROFILE, encrypted);
+		FuturePut putGlobal = putter.getDataManager().put(
+				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
+				Number160.createHash(H2HConstants.USER_PROFILE), encrypted);
 		putGlobal.awaitUninterruptibly();
 
 		UserProfile profile = ProcessTestUtil.getUserProfile(putter, credentials);

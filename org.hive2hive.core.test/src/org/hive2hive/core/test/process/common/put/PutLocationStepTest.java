@@ -1,10 +1,13 @@
 package org.hive2hive.core.test.process.common.put;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -116,7 +119,10 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		} while (!listener.hasFailed());
 
 		// get the locations which should be stored at the proxy --> they should be null
-		Assert.assertNull(proxy.getDataManager().getLocal(userId, H2HConstants.USER_LOCATIONS));
+		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(userId),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 	}
 
 	@Override

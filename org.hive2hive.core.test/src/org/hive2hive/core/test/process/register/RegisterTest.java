@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
+import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -64,7 +65,8 @@ public class RegisterTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// verify the new public key
-		FutureGet getKey = otherClient.getDataManager().get(credentials.getUserId(), H2HConstants.USER_PUBLIC_KEY);
+		FutureGet getKey = otherClient.getDataManager().get(Number160.createHash(credentials.getUserId()),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_PUBLIC_KEY));
 		getKey.awaitUninterruptibly();
 		getKey.getFutureRequests().awaitUninterruptibly();
 		UserPublicKey publicKey = (UserPublicKey) getKey.getData().object();
@@ -80,7 +82,9 @@ public class RegisterTest extends H2HJUnitTest {
 		Assert.assertEquals(credentials.getUserId(), gotUserProfile.getUserId());
 
 		// verify the new locations map
-		FutureGet getLocations = otherClient.getDataManager().get(credentials.getUserId(), H2HConstants.USER_LOCATIONS);
+		FutureGet getLocations = otherClient.getDataManager().get(
+				Number160.createHash(credentials.getUserId()), H2HConstants.TOMP2P_DEFAULT_KEY,
+				Number160.createHash(H2HConstants.USER_LOCATIONS));
 		getLocations.awaitUninterruptibly();
 		getLocations.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) getLocations.getData().object();
@@ -90,18 +94,18 @@ public class RegisterTest extends H2HJUnitTest {
 		// fresh location maps should be empty
 		Assert.assertTrue(locations.getPeerAddresses().isEmpty());
 
-//		// verify the new user message queue
-//		FutureGet getQueue = otherClient.getDataManager().getGlobal(credentials.getUserId(),
-//				H2HConstants.USER_MESSAGE_QUEUE_KEY);
-//		getQueue.awaitUninterruptibly();
-//		getQueue.getFutureRequests().awaitUninterruptibly();
-//		UserMessageQueue queue = (UserMessageQueue) getQueue.getData().object();
-//		Assert.assertNotNull(queue);
-//		// userId should match
-//		Assert.assertEquals(credentials.getUserId(), queue.getUserId());
+		// // verify the new user message queue
+		// FutureGet getQueue = otherClient.getDataManager().getGlobal(credentials.getUserId(),
+		// H2HConstants.USER_MESSAGE_QUEUE_KEY);
+		// getQueue.awaitUninterruptibly();
+		// getQueue.getFutureRequests().awaitUninterruptibly();
+		// UserMessageQueue queue = (UserMessageQueue) getQueue.getData().object();
+		// Assert.assertNotNull(queue);
+		// // userId should match
+		// Assert.assertEquals(credentials.getUserId(), queue.getUserId());
 		// fresh queue should be empty
 		// TODO uncomment
-//		Assert.assertTrue(queue.getMessageQueue().isEmpty());
+		// Assert.assertTrue(queue.getMessageQueue().isEmpty());
 	}
 
 	@Test
@@ -111,7 +115,8 @@ public class RegisterTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// already put a locations map
-		FuturePut putProfile = client.getDataManager().put(credentials.getUserId(), H2HConstants.USER_LOCATIONS,
+		FuturePut putProfile = client.getDataManager().put(Number160.createHash(credentials.getUserId()),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS),
 				new Locations(credentials.getUserId()));
 		putProfile.awaitUninterruptibly();
 		putProfile.getFutureRequests().awaitUninterruptibly();

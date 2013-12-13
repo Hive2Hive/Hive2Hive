@@ -18,6 +18,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
@@ -34,6 +35,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * 
+ * @author Seppi
+ */
 public class FuturePutTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
@@ -80,7 +85,8 @@ public class FuturePutTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		FutureGet futureGet = nodeB.getDataManager().get(locationKey, contentKey);
+		FutureGet futureGet = nodeB.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 		futureGet.awaitUninterruptibly();
 
 		assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
@@ -114,7 +120,8 @@ public class FuturePutTest extends H2HJUnitTest {
 				waiter.tickASecond();
 			} while (!listener.hasSucceeded());
 
-			FutureGet futureGet = nodeB.getDataManager().get(locationKey, contentKey);
+			FutureGet futureGet = nodeB.getDataManager().get(Number160.createHash(locationKey),
+					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 			futureGet.awaitUninterruptibly();
 
 			assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
@@ -144,7 +151,8 @@ public class FuturePutTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		FutureGet futureGet = nodeA.getDataManager().get(locationKey, contentKey);
+		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 		futureGet.awaitUninterruptibly();
 
 		assertNull(futureGet.getData());
@@ -171,7 +179,8 @@ public class FuturePutTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		FutureGet futureGet = nodeB.getDataManager().get(locationKey, contentKey);
+		FutureGet futureGet = nodeB.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 		futureGet.awaitUninterruptibly();
 
 		assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
@@ -195,8 +204,12 @@ public class FuturePutTest extends H2HJUnitTest {
 		data2B.generateVersionKey();
 		data2B.setBasedOnKey(data1.getVersionKey());
 
-		nodeB.getDataManager().put(locationKey, contentKey, data1).awaitUninterruptibly();
-		nodeB.getDataManager().put(locationKey, contentKey, data2A).awaitUninterruptibly();
+		nodeB.getDataManager()
+				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), data1).awaitUninterruptibly();
+		nodeB.getDataManager()
+				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(contentKey), data2A).awaitUninterruptibly();
 
 		TestPutListener listener = new TestPutListener();
 		nodeB.getDataManager().put(locationKey, contentKey, data2B, listener);
@@ -207,12 +220,14 @@ public class FuturePutTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 
-		FutureGet futureGet2A = nodeB.getDataManager().get(locationKey, contentKey);
+		FutureGet futureGet2A = nodeB.getDataManager().get(Number160.createHash(locationKey),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 		futureGet2A.awaitUninterruptibly();
 
 		assertEquals(data2A.getTestString(), ((H2HTestData) futureGet2A.getData().object()).getTestString());
 
-		FutureGet futureGet2B = nodeA.getDataManager().get(locationKey, contentKey, data2B.getVersionKey());
+		FutureGet futureGet2B = nodeA.getDataManager().get(Number160.createHash(locationKey),
+				Number160.createHash(contentKey), data2B.getVersionKey());
 		futureGet2B.awaitUninterruptibly();
 
 		assertNull(futureGet2B.getData());
@@ -227,7 +242,7 @@ public class FuturePutTest extends H2HJUnitTest {
 		dataOther.generateVersionKey();
 		Number640 dataOtherKey = new Number640(Number160.createHash(locationKey), Number160.ZERO,
 				Number160.createHash(contentKey), dataOther.getVersionKey());
-		
+
 		H2HTestData data1 = new H2HTestData("data1");
 		data1.generateVersionKey();
 		Number640 data1Key = new Number640(Number160.createHash(locationKey), Number160.ZERO,
@@ -239,14 +254,14 @@ public class FuturePutTest extends H2HJUnitTest {
 		data2AOlder.setBasedOnKey(data1.getVersionKey());
 		Number640 data2AOlderKey = new Number640(Number160.createHash(locationKey), Number160.ZERO,
 				Number160.createHash(contentKey), data2AOlder.getVersionKey());
-		
+
 		waitATick();
 		H2HTestData data2B = new H2HTestData("data2B");
 		data2B.generateVersionKey();
 		data2B.setBasedOnKey(data1.getVersionKey());
 		Number640 data2BKey = new Number640(Number160.createHash(locationKey), Number160.ZERO,
 				Number160.createHash(contentKey), data2B.getVersionKey());
-		
+
 		waitATick();
 		H2HTestData data2ANewer = new H2HTestData("data2ANewer");
 		data2ANewer.generateVersionKey();
@@ -254,46 +269,47 @@ public class FuturePutTest extends H2HJUnitTest {
 		Number640 data2ANewerKey = new Number640(Number160.createHash(locationKey), Number160.ZERO,
 				Number160.createHash(contentKey), data2ANewer.getVersionKey());
 
-		TestFuturePutListener futurePutListener = new TestFuturePutListener(locationKey, contentKey, data2B, null, null);
+		TestFuturePutListener futurePutListener = new TestFuturePutListener(locationKey, contentKey, data2B,
+				null, null);
 		NavigableMap<Number640, Number160> dataMap = new ConcurrentSkipListMap<Number640, Number160>();
-		
+
 		// empty map
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
-		
+
 		// no based on entry
 		dataMap.put(dataOtherKey, dataOther.getBasedOnKey());
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
-		
+
 		// contains only parent entry
 		dataMap.clear();
 		dataMap.put(data1Key, data1.getBasedOnKey());
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
-		
+
 		// first entry is parent, second is corrupt
 		dataMap.clear();
 		dataMap.put(data1Key, data1.getBasedOnKey());
 		dataMap.put(dataOtherKey, dataOther.getBasedOnKey());
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
-		
+
 		// first entry is parent, second entry is older
 		dataMap.clear();
 		dataMap.put(data1Key, data1.getBasedOnKey());
 		dataMap.put(data2AOlderKey, data2AOlder.getBasedOnKey());
 		assertFalse(futurePutListener.checkIfMyVerisonWins(dataMap));
-		
+
 		// first entry is parent, second entry is newer
 		dataMap.clear();
 		dataMap.put(data1Key, data1.getBasedOnKey());
 		dataMap.put(data2ANewerKey, data2ANewer.getBasedOnKey());
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
-		
+
 		// first entry is parent, second entry is same
 		dataMap.clear();
 		dataMap.put(data1Key, data1.getBasedOnKey());
 		dataMap.put(data2BKey, data2B.getBasedOnKey());
-		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));	
+		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 	}
-	
+
 	@AfterClass
 	public static void cleanAfterClass() {
 		afterClass();
@@ -332,18 +348,18 @@ public class FuturePutTest extends H2HJUnitTest {
 			return H2HStorageMemory.PutStatusH2H.FAILED;
 		}
 	}
-	
-	private class TestFuturePutListener extends FuturePutListener{
+
+	private class TestFuturePutListener extends FuturePutListener {
 		public TestFuturePutListener(String locationKey, String contentKey, NetworkContent content,
 				IPutListener listener, DataManager dataManager) {
-			super(locationKey, contentKey, content, listener, dataManager);
+			super(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY, Number160
+					.createHash(contentKey), content, listener, dataManager);
 		}
-		
+
 		public boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest) {
 			return checkIfMyVerisonWins(keyDigest, null);
 		}
 	};
-
 
 	private void waitATick() {
 		synchronized (this) {

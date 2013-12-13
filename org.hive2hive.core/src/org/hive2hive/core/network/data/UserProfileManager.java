@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
+import net.tomp2p.peers.Number160;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
@@ -203,8 +204,9 @@ public class UserProfileManager {
 				return;
 			}
 
-			FutureGet futureGet = dataManager.get(credentials.getProfileLocationKey(),
-					H2HConstants.USER_PROFILE);
+			// TODO change this to non-blocking
+			FutureGet futureGet = dataManager.get(Number160.createHash(credentials.getProfileLocationKey()),
+					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_PROFILE));
 			futureGet.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 
 			try {
@@ -252,8 +254,11 @@ public class UserProfileManager {
 					return;
 				}
 
-				FuturePut futurePut = dataManager.put(credentials.getProfileLocationKey(),
-						H2HConstants.USER_PROFILE, encryptedUserProfile);
+				// TODO change this to non-blocking
+				FuturePut futurePut = dataManager.put(
+						Number160.createHash(credentials.getProfileLocationKey()),
+						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_PROFILE),
+						encryptedUserProfile);
 				futurePut.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);

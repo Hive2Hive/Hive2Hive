@@ -70,7 +70,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 			return;
 		}
 
-		dataManager.removeVersion(locationKey, contentKey, content.getVersionKey(), this);
+		dataManager.remove(locationKey, contentKey, content.getVersionKey(), this);
 	}
 
 	@Override

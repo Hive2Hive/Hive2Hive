@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.process.common.put;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
@@ -9,6 +10,7 @@ import java.util.List;
 import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -82,8 +84,9 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// get the user profile which should be stored at the proxy
-		FutureGet global = client.getDataManager().get(credentials.getProfileLocationKey(),
-				H2HConstants.USER_PROFILE);
+		FutureGet global = client.getDataManager().get(
+				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
+				Number160.createHash(H2HConstants.USER_PROFILE));
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
@@ -128,7 +131,11 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		} while (!listener.hasFailed());
 
 		// get the locations which should be stored at the proxy --> they should be null
-		Assert.assertNull(proxy.getDataManager().getLocal(credentials.getProfileLocationKey(), H2HConstants.USER_LOCATIONS));
+		FutureGet futureGet = proxy.getDataManager().get(
+				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
+				Number160.createHash(H2HConstants.USER_LOCATIONS));
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 	}
 
 	@AfterClass

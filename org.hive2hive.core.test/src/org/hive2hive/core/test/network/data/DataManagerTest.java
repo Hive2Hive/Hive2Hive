@@ -9,7 +9,9 @@ import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
+import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -18,6 +20,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * 
+ * @author Seppi
+ */
 public class DataManagerTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
@@ -33,16 +39,17 @@ public class DataManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testGlobalputGet() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
 
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = node.getDataManager().put(locationKey, contentKey, new H2HTestData(data));
+		FuturePut future = node.getDataManager().put(locationKey, domainKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		FutureGet futureGet = node.getDataManager().get(locationKey, contentKey);
+		FutureGet futureGet = node.getDataManager().get(locationKey, domainKey, contentKey);
 		futureGet.awaitUninterruptibly();
 
 		String result = (String) ((H2HTestData) futureGet.getData().object()).getTestString();
@@ -51,17 +58,18 @@ public class DataManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testGlobalputGetFromOtherNode() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
 
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = nodeA.getDataManager().put(locationKey, contentKey, new H2HTestData(data));
+		FuturePut future = nodeA.getDataManager().put(locationKey, domainKey, contentKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
-		FutureGet futureGet = nodeB.getDataManager().get(locationKey, contentKey);
+		FutureGet futureGet = nodeB.getDataManager().get(locationKey, domainKey, contentKey);
 		futureGet.awaitUninterruptibly();
 
 		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
@@ -87,11 +95,14 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
-		String locationKey = nodeB.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = NetworkTestUtil.randomString();
+		String contentKey =NetworkTestUtil.randomString();
+		Number160 lKey = Number160.createHash(locationKey);
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 cKey = Number160.createHash(contentKey);
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = nodeA.getDataManager().put(locationKey, contentKey, new H2HTestData(data));
+		FuturePut future = nodeA.getDataManager().put(lKey, domainKey, cKey, new H2HTestData(data));
 		future.awaitUninterruptibly();
 
 		String result = (String) ((H2HTestData) nodeB.getDataManager().getLocal(locationKey, contentKey)).getTestString();
@@ -100,36 +111,37 @@ public class DataManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testGlobalPutOneLocationKeyMultipleContentKeys() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey1 = NetworkTestUtil.randomString();
-		String contentKey2 = NetworkTestUtil.randomString();
-		String contentKey3 = NetworkTestUtil.randomString();
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 contentKey1 = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 contentKey2 = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 contentKey3 = Number160.createHash(NetworkTestUtil.randomString());
 
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = node.getDataManager().put(locationKey, contentKey1, new H2HTestData(data1));
+		FuturePut future1 = node.getDataManager().put(locationKey, domainKey, contentKey1, new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = node.getDataManager().put(locationKey, contentKey2, new H2HTestData(data2));
+		FuturePut future2 = node.getDataManager().put(locationKey, domainKey, contentKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = node.getDataManager().put(locationKey, contentKey3, new H2HTestData(data3));
+		FuturePut future3 = node.getDataManager().put(locationKey, domainKey, contentKey3, new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		FutureGet get1 = node.getDataManager().get(locationKey, contentKey1);
+		FutureGet get1 = node.getDataManager().get(locationKey, domainKey, contentKey1);
 		get1.awaitUninterruptibly();
 		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
 		assertEquals(data1, result1);
 
-		FutureGet get2 = node.getDataManager().get(locationKey, contentKey2);
+		FutureGet get2 = node.getDataManager().get(locationKey, domainKey, contentKey2);
 		get2.awaitUninterruptibly();
 		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
 		assertEquals(data2, result2);
 
-		FutureGet get3 = node.getDataManager().get(locationKey, contentKey3);
+		FutureGet get3 = node.getDataManager().get(locationKey, domainKey, contentKey3);
 		get3.awaitUninterruptibly();
 		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
 		assertEquals(data3, result3);
@@ -137,37 +149,38 @@ public class DataManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testGlobalPutOneLocationKeyMultipleContentKeysGlobalGetFromOtherNodes() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey1 = NetworkTestUtil.randomString();
-		String contentKey2 = NetworkTestUtil.randomString();
-		String contentKey3 = NetworkTestUtil.randomString();
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 contentKey1 = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 contentKey2 = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 contentKey3 = Number160.createHash(NetworkTestUtil.randomString());
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, contentKey1,
+		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, domainKey, contentKey1,
 				new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, contentKey2,
+		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, domainKey, contentKey2,
 				new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, contentKey3,
+		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, domainKey, contentKey3,
 				new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 
-		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, contentKey1);
+		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, domainKey, contentKey1);
 		get1.awaitUninterruptibly();
 		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
 		assertEquals(data1, result1);
 
-		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, contentKey2);
+		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, domainKey, contentKey2);
 		get2.awaitUninterruptibly();
 		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
 		assertEquals(data2, result2);
 
-		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, contentKey3);
+		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, domainKey, contentKey3);
 		get3.awaitUninterruptibly();
 		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
 		assertEquals(data3, result3);
@@ -178,9 +191,14 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String locationKey = node.getNodeId();
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 lKey = Number160.createHash(locationKey);
 		String contentKey1 = NetworkTestUtil.randomString();
+		Number160 cKey1 = Number160.createHash(contentKey1);
 		String contentKey2 = NetworkTestUtil.randomString();
+		Number160 cKey2 = Number160.createHash(contentKey2);
 		String contentKey3 = NetworkTestUtil.randomString();
+		Number160 cKey3 = Number160.createHash(contentKey3);
 
 		String data1 = NetworkTestUtil.randomString();
 		node.getDataManager().putLocal(locationKey, contentKey1, new H2HTestData(data1));
@@ -205,20 +223,25 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		String locationKey = nodeB.getNodeId();
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 lKey = Number160.createHash(locationKey);
 		String contentKey1 = NetworkTestUtil.randomString();
+		Number160 cKey1 = Number160.createHash(contentKey1);
 		String contentKey2 = NetworkTestUtil.randomString();
+		Number160 cKey2 = Number160.createHash(contentKey2);
 		String contentKey3 = NetworkTestUtil.randomString();
+		Number160 cKey3 = Number160.createHash(contentKey3);
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = nodeA.getDataManager().put(locationKey, contentKey1, new H2HTestData(data1));
+		FuturePut future1 = nodeA.getDataManager().put(lKey, domainKey, cKey1, new H2HTestData(data1));
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = nodeA.getDataManager().put(locationKey, contentKey2, new H2HTestData(data2));
+		FuturePut future2 = nodeA.getDataManager().put(lKey, domainKey, cKey2, new H2HTestData(data2));
 		future2.awaitUninterruptibly();
 		
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = nodeA.getDataManager().put(locationKey, contentKey3, new H2HTestData(data3));
+		FuturePut future3 = nodeA.getDataManager().put(lKey, domainKey, cKey3, new H2HTestData(data3));
 		future3.awaitUninterruptibly();
 		
 		String result1 = (String) ((H2HTestData) nodeB.getDataManager().getLocal(locationKey, contentKey1)).getTestString();
@@ -234,17 +257,20 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		String locationKey = nodeB.getNodeId();
+		Number160 lKey = Number160.createHash(locationKey);
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		String contentKey = NetworkTestUtil.randomString();
+		Number160 cKey = Number160.createHash(contentKey);
 
 		// put a content
-		nodeA.getDataManager().put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()))
+		nodeA.getDataManager().put(lKey, domainKey, cKey, new H2HTestData(NetworkTestUtil.randomString()))
 				.awaitUninterruptibly();
 
 		// test that it is there
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey));
 
 		// delete it
-		nodeA.getDataManager().remove(locationKey, contentKey).awaitUninterruptibly();
+		nodeA.getDataManager().remove(lKey, domainKey, cKey).awaitUninterruptibly();
 
 		// check that it is gone
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey));
@@ -254,24 +280,29 @@ public class DataManagerTest extends H2HJUnitTest {
 	public void testRemovalMultipleContentKey() {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-		String locationKey = nodeB.getNodeId();
 
+		String locationKey = nodeB.getNodeId();
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 lKey = Number160.createHash(locationKey);
 		String contentKey1 = NetworkTestUtil.randomString();
+		Number160 cKey1 = Number160.createHash(contentKey1);
 		String contentKey2 = NetworkTestUtil.randomString();
+		Number160 cKey2 = Number160.createHash(contentKey2);
 		String contentKey3 = NetworkTestUtil.randomString();
+		Number160 cKey3 = Number160.createHash(contentKey3);
 
 		String testString1 = NetworkTestUtil.randomString();
 		String testString2 = NetworkTestUtil.randomString();
 		String testString3 = NetworkTestUtil.randomString();
 
 		// insert them
-		FuturePut put1 = nodeA.getDataManager().put(locationKey, contentKey1, new H2HTestData(testString1));
+		FuturePut put1 = nodeA.getDataManager().put(lKey, domainKey, cKey1, new H2HTestData(testString1));
 		put1.awaitUninterruptibly();
 
-		FuturePut put2 = nodeA.getDataManager().put(locationKey, contentKey2, new H2HTestData(testString2));
+		FuturePut put2 = nodeA.getDataManager().put(lKey, domainKey, cKey2, new H2HTestData(testString2));
 		put2.awaitUninterruptibly();
 
-		FuturePut put3 = nodeA.getDataManager().put(locationKey, contentKey3, new H2HTestData(testString3));
+		FuturePut put3 = nodeA.getDataManager().put(lKey, domainKey, cKey3, new H2HTestData(testString3));
 		put3.awaitUninterruptibly();
 
 		// check that they are all stored
@@ -280,14 +311,14 @@ public class DataManagerTest extends H2HJUnitTest {
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey3));
 
 		// remove 2nd one and check that 1st and 3rd are still there
-		nodeA.getDataManager().remove(locationKey, contentKey2).awaitUninterruptibly();
+		nodeA.getDataManager().remove(lKey, domainKey, cKey2).awaitUninterruptibly();
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey2));
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey1));
 		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey3));
 
 		// remove 3rd one as well and check that they are gone as well
-		nodeA.getDataManager().remove(locationKey, contentKey1).awaitUninterruptibly();
-		nodeA.getDataManager().remove(locationKey, contentKey3).awaitUninterruptibly();
+		nodeA.getDataManager().remove(lKey, domainKey, cKey1).awaitUninterruptibly();
+		nodeA.getDataManager().remove(lKey, domainKey, cKey3).awaitUninterruptibly();
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey1));
 		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey3));
 	}

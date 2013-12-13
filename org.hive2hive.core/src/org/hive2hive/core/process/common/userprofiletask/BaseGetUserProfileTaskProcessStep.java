@@ -1,10 +1,10 @@
 package org.hive2hive.core.process.common.userprofiletask;
 
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IGetUserProfileTaskListener;
+import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.process.ProcessStep;
 
-public abstract class BaseGetUserProfileTaskProcessStep extends ProcessStep implements IGetUserProfileTaskListener {
+public abstract class BaseGetUserProfileTaskProcessStep extends ProcessStep implements IGetListener {
 
 	protected void getUserProfileTask(String locationKey) {
 		DataManager dataManager = getNetworkManager().getDataManager();
@@ -12,7 +12,7 @@ public abstract class BaseGetUserProfileTaskProcessStep extends ProcessStep impl
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.getNextUserProfileTask(locationKey, this);
+		dataManager.getUserProfileTask(locationKey, this);
 	}
 
 	@Override

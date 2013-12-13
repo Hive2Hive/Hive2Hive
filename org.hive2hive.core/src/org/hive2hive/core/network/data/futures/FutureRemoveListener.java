@@ -28,46 +28,45 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	// used to count remove retries
 	private int removeTries = 0;
 
-	protected final String locationKey;
-	protected final String contentKey;
+	protected final Number160 locationKey;
+	protected final Number160 domainKey;
+	protected final Number160 contentKey;
 	protected final Number160 versionKey;
 	protected final IRemoveListener listener;
 	protected final DataManager dataManager;
 
-	public FutureRemoveListener(String locationKey, String contentKey, Number160 versionKey,
+	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			IRemoveListener listener, DataManager dataManager) {
 		this.locationKey = locationKey;
-		this.contentKey = contentKey;
-		this.versionKey = versionKey;
-		this.listener = listener;
-		this.dataManager = dataManager;
-	}
-
-	public FutureRemoveListener(String locationKey, String contentKey, IRemoveListener listener,
-			DataManager dataManager) {
-		this.locationKey = locationKey;
+		this.domainKey = domainKey;
 		this.contentKey = contentKey;
 		this.versionKey = null;
 		this.listener = listener;
 		this.dataManager = dataManager;
 	}
 
+	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
+			Number160 versionKey, IRemoveListener listener, DataManager dataManager) {
+		this.locationKey = locationKey;
+		this.domainKey = domainKey;
+		this.contentKey = contentKey;
+		this.versionKey = versionKey;
+		this.listener = listener;
+		this.dataManager = dataManager;
+	}
+
 	@Override
 	public void operationComplete(FutureRemove future) throws Exception {
-		logger.debug(String.format(
-				"Start verification of remove. locationKey = '%s' contentKey = '%s' versionKey = '%s'",
-				locationKey, contentKey, versionKey));
+		logger.debug(String.format("Start verification of remove."
+				+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+				locationKey, domainKey, contentKey, versionKey));
 		// get data to verify if everything went correct
 		DigestBuilder digestBuilder = dataManager.getDigest(locationKey);
 		if (versionKey != null) {
-			digestBuilder.setDomainKey(H2HConstants.TOMP2P_DEFAULT_KEY)
-					.setContentKey(Number160.createHash(contentKey)).setVersionKey(versionKey);
+			digestBuilder.setDomainKey(domainKey).setContentKey(contentKey).setVersionKey(versionKey);
 		} else {
-			digestBuilder.from(
-					new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), Number160.ZERO)).to(
-					new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), Number160.MAX_VALUE));
+			digestBuilder.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO)).to(
+					new Number640(locationKey, domainKey, contentKey, Number160.MAX_VALUE));
 		}
 		FutureDigest digestFuture = digestBuilder.start();
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
@@ -78,9 +77,9 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 				} else if (!future.getDigest().getKeyDigest().isEmpty()) {
 					retryRemove();
 				} else {
-					logger.debug(String
-							.format("Verification for remove completed. location key = '%s' content key = '%s' versionKey = '%s'",
-									locationKey, contentKey, versionKey));
+					logger.debug(String.format("Verification for remove completed."
+							+ " location key = '%s' domain key = '%s' content key = '%s' versionKey = '%s'",
+							locationKey, domainKey, contentKey, versionKey));
 					if (listener != null)
 						listener.onRemoveSuccess();
 				}
@@ -90,18 +89,18 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
 	private void retryRemove() {
 		if (removeTries++ < H2HConstants.REMOVE_RETRIES) {
-			logger.warn(String
-					.format("Remove verification failed. Data is not null. Try #%s. location key = '%s' content key = '%s' versionKey = '%s'",
-							removeTries, locationKey, contentKey, versionKey));
+			logger.warn(String.format("Remove verification failed. Data is not null. Try #%s."
+					+ " location key = '%s' domain key = '%s' content key = '%s' versionKey = '%s'",
+					removeTries, locationKey, domainKey, contentKey, versionKey));
 			if (versionKey == null) {
-				dataManager.remove(locationKey, contentKey).addListener(this);
+				dataManager.remove(locationKey, domainKey, contentKey).addListener(this);
 			} else {
-				dataManager.removeVersion(locationKey, contentKey, versionKey).addListener(this);
+				dataManager.remove(locationKey, domainKey, contentKey, versionKey).addListener(this);
 			}
 		} else {
-			logger.error(String
-					.format("Remove verification failed. Data is not null after %s tries. location key = '%s' content key = '%s'",
-							removeTries - 1, locationKey, contentKey, versionKey));
+			logger.error(String.format("Remove verification failed. Data is not null after %s tries."
+					+ " location key = '%s' domain key = '%s' content key = '%s'", removeTries - 1,
+					locationKey, domainKey, contentKey, versionKey));
 			if (listener != null)
 				listener.onRemoveFailure();
 		}
