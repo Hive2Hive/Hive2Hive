@@ -1,0 +1,1 @@
+java -jar %~p0H2HConsoleClient.jar%*
