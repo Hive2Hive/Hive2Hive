@@ -12,6 +12,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.listener.IProcessListener;
+import org.hive2hive.core.process.notify.cleanup.CleanupLocationsProcess;
 
 /**
  * Notifies all peers with a given message
@@ -59,10 +60,7 @@ public class NotifyPeersProcess extends Process {
 
 			@Override
 			public void onSuccess() {
-				// check if cleanup is required
-				if (getContext().isLocationCleanupRequired()) {
-					// TODO
-				}
+				cleanupOwnLocations();
 			}
 
 			@Override
@@ -79,4 +77,18 @@ public class NotifyPeersProcess extends Process {
 		return context;
 	}
 
+	private void cleanupOwnLocations() {
+		// check if cleanup is required
+		if (getContext().getUnreachableOwnPeers().isEmpty()) {
+			return;
+		}
+
+		try {
+			CleanupLocationsProcess process = new CleanupLocationsProcess(getNetworkManager(), getContext()
+					.getUnreachableOwnPeers());
+			process.start();
+		} catch (NoSessionException e) {
+			// ignore
+		}
+	}
 }

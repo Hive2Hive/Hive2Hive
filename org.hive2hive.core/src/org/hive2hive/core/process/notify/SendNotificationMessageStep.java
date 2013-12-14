@@ -27,7 +27,8 @@ public class SendNotificationMessageStep extends BaseDirectMessageProcessStep {
 		if (toOwnUser) {
 			// flag that cleanup is required (done at the end of all notifications)
 			NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
-			context.setLocationCleanupRequred(true);
+			BaseDirectMessage directMessage = (BaseDirectMessage) message;
+			context.addUnreachableLocation(directMessage.getTargetAddress());
 		}
 
 		getProcess().setNextStep(nextStep);

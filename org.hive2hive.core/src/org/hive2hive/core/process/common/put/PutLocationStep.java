@@ -11,7 +11,7 @@ import org.hive2hive.core.process.ProcessStep;
  */
 public class PutLocationStep extends BasePutProcessStep {
 
-	private final Locations locations;
+	protected Locations locations;
 
 	public PutLocationStep(Locations locations, ProcessStep nextStep) {
 		super(nextStep);
