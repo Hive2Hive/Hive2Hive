@@ -9,9 +9,11 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessState;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.notify.NotifyPeersProcess;
@@ -226,6 +228,44 @@ public class NotificationTest extends H2HJUnitTest {
 			waiter.tickASecond();
 			// wait until all messages are here except 1
 		} while (msgFactory.getArrivedMessageCount() != sentMessages - 1);
+	}
+
+	/**
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2), but peer 1 has done an unfriendly
+	 * leave. The locations map should be cleaned up
+	 */
+	@Test
+	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
+			InterruptedException {
+		NetworkManager notifier = network.get(0);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+
+		// send notification to own peers
+		Set<String> users = new HashSet<String>(2);
+		users.add(userAProfile.getUserId());
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+
+		// kick out Peer 1
+		network.get(1).disconnect();
+		process.start();
+
+		// wait until all messages are sent
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+			// wait until all processes (inclusive cleanup) are done
+		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+
+		// check the locations map; should have 2 entries only
+		Locations locations = ProcessTestUtil.getLocations(network.get(0), userAProfile.getUserId());
+		Assert.assertEquals(2, locations.getPeerAddresses().size());
 	}
 
 	@AfterClass
