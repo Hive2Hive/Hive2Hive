@@ -12,6 +12,7 @@ public class NotifyPeersProcessContext extends ProcessContext {
 	private final Set<String> users;
 	private final INotificationMessageFactory messageFactory;
 	private Map<String, PublicKey> keys;
+	private boolean cleanupRequired;
 
 	public NotifyPeersProcessContext(Process process, Set<String> users,
 			INotificationMessageFactory messageFactory) {
@@ -34,5 +35,13 @@ public class NotifyPeersProcessContext extends ProcessContext {
 
 	public Map<String, PublicKey> getUserPublicKeys() {
 		return keys;
+	}
+
+	public void setLocationCleanupRequred(boolean cleanupRequired) {
+		this.cleanupRequired = cleanupRequired;
+	}
+
+	public boolean isLocationCleanupRequired() {
+		return cleanupRequired;
 	}
 }

@@ -221,7 +221,7 @@ public class NotificationTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 		int sentMessages = msgFactory.getSentMessageCount();
 
-		waiter = new H2HWaiter(5);
+		waiter = new H2HWaiter(10);
 		do {
 			waiter.tickASecond();
 			// wait until all messages are here except 1

@@ -11,7 +11,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
  * Notifies all peers with a given message
@@ -29,8 +29,9 @@ public class NotifyPeersProcess extends Process {
 	public NotifyPeersProcess(NetworkManager networkManager, Set<String> users,
 			INotificationMessageFactory messageFactory) {
 		super(networkManager);
-		context = new NotifyPeersProcessContext(this, users, messageFactory);
+		addCleanupListener();
 
+		context = new NotifyPeersProcessContext(this, users, messageFactory);
 		setNextStep(new GetPublicKeysStep(users));
 	}
 
@@ -40,6 +41,7 @@ public class NotifyPeersProcess extends Process {
 	public NotifyPeersProcess(NetworkManager networkManager, INotificationMessageFactory messageFactory)
 			throws NoSessionException {
 		super(networkManager);
+		addCleanupListener();
 
 		H2HSession session = networkManager.getSession();
 		Set<String> onlyMe = new HashSet<String>(1);
@@ -52,8 +54,28 @@ public class NotifyPeersProcess extends Process {
 		setNextStep(new GetPublicKeysStep(new ArrayList<String>(), myKey));
 	}
 
+	private void addCleanupListener() {
+		IProcessListener listener = new IProcessListener() {
+
+			@Override
+			public void onSuccess() {
+				// check if cleanup is required
+				if (getContext().isLocationCleanupRequired()) {
+					// TODO
+				}
+			}
+
+			@Override
+			public void onFail(String reason) {
+				// do not cleanup
+			}
+		};
+
+		addListener(listener);
+	}
+
 	@Override
-	public ProcessContext getContext() {
+	public NotifyPeersProcessContext getContext() {
 		return context;
 	}
 

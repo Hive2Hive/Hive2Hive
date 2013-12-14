@@ -11,10 +11,12 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 
 /**
@@ -45,10 +47,9 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 	@Override
 	public void start() {
 		if (moreToGet.isEmpty()) {
-			sendAllMessages();
-
 			// done with all notifications
-			getProcess().setNextStep(null);
+			logger.debug("Sending notifications to " + allLocations.size() + " users");
+			getProcess().setNextStep(getSendingProcessSteps());
 		} else {
 			// get next in the list
 			currentUser = moreToGet.remove(0);
@@ -56,14 +57,20 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 		}
 	}
 
-	private void sendAllMessages() {
-		// notify all other clients of all users
-		logger.debug("Sending notifications to " + allLocations.size() + " users");
+	private ProcessStep getSendingProcessSteps() {
 		NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
 		INotificationMessageFactory messageFactory = context.getMessageFactory();
 
+		ProcessStep tail = null;
 		for (String user : allLocations.keySet()) {
+			boolean toOwnUser = false;
+			try {
+				toOwnUser = user.equals(getNetworkManager().getSession().getCredentials().getUserId());
+			} catch (NoSessionException e) {
+				// ignore
+			}
+
 			List<PeerAddress> peerList = allLocations.get(user);
 			logger.debug("Notifying " + peerList.size() + " clients of user '" + user + "'.");
 			for (PeerAddress peerAddress : peerList) {
@@ -73,9 +80,11 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 				}
 
 				BaseDirectMessage msg = messageFactory.createNotificationMessage(peerAddress, user);
-				getNetworkManager().sendDirect(msg, userPublicKeys.get(user), null);
+				tail = new SendNotificationMessageStep(msg, userPublicKeys.get(user), tail, toOwnUser);
 			}
 		}
+
+		return tail;
 	}
 
 	@Override
