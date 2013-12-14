@@ -63,7 +63,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		ProcessTestUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(userCredentials, network.get(0));
 
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		uploaderFileManager = new FileManager(root);

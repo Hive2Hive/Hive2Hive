@@ -64,7 +64,7 @@ public class NewFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		ProcessTestUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(userCredentials, network.get(0));
 
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);

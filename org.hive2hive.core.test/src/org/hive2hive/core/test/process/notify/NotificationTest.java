@@ -62,13 +62,13 @@ public class NotificationTest extends H2HJUnitTest {
 		// node 3-4: user B
 		// node 5: user C
 		userACredentials = NetworkTestUtil.generateRandomCredentials();
-		userAProfile = ProcessTestUtil.register(network.get(0), userACredentials);
+		userAProfile = ProcessTestUtil.register(userACredentials, network.get(0));
 
 		userBCredentials = NetworkTestUtil.generateRandomCredentials();
-		userBProfile = ProcessTestUtil.register(network.get(3), userBCredentials);
+		userBProfile = ProcessTestUtil.register(userBCredentials, network.get(3));
 
 		userCCredentials = NetworkTestUtil.generateRandomCredentials();
-		userCProfile = ProcessTestUtil.register(network.get(5), userCCredentials);
+		userCProfile = ProcessTestUtil.register(userCCredentials, network.get(5));
 
 		// login all nodes
 		login(network.get(0), userACredentials, userAProfile);

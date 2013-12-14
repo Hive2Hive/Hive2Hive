@@ -25,6 +25,7 @@ import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
+import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -79,10 +80,15 @@ public class ProcessTestUtil {
 		} while (!listener.hasSucceeded());
 	}
 
-	public static UserProfile register(NetworkManager networkManager, UserCredentials credentials) {
+	public static UserProfile register(UserCredentials credentials, NetworkManager networkManager) {
 		RegisterProcess register = new RegisterProcess(credentials, networkManager);
 		executeProcess(register);
 		return register.getContext().getUserProfile();
+	}
+	
+	public static void login(UserCredentials credentials, NetworkManager networkManager){
+		LoginProcess login = new LoginProcess(credentials, networkManager);
+		executeProcess(login);
 	}
 
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials) {
