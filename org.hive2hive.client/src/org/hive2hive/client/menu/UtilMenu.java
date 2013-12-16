@@ -31,6 +31,18 @@ public class UtilMenu extends ConsoleMenu {
 				
 			}
 		});
+//		add(new H2HConsoleMenuItem("Show External IP") {
+//			
+//			@Override
+//			protected void execute() throws Exception {
+//				
+//				URL ipService = new URL("http://automation.whatismyip.com/n09230945.asp");
+//				BufferedReader in = new BufferedReader(new InputStreamReader(ipService.openStream()));
+//
+//				String ip = in.readLine();
+//				System.out.printf("External IP: %s", ip);
+//			}
+//		});
 	}
 
 	@Override
