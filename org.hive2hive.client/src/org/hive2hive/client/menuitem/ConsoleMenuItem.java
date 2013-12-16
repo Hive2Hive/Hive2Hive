@@ -1,5 +1,7 @@
 package org.hive2hive.client.menuitem;
 
+import org.hive2hive.client.Formatter;
+
 /**
  * An abstract console menu item representing an option. It predefines the execution of an operation by means
  * of a template method.
@@ -21,9 +23,11 @@ public abstract class ConsoleMenuItem {
 		try {
 			execute();
 		} catch (Exception e) {
+			Formatter.setErrorForeground();
 			System.err.println("An exception has been thrown:");
 			e.printStackTrace();
 			System.out.println();
+			Formatter.setDefaultForeground();
 		} finally {
 			end();
 		}

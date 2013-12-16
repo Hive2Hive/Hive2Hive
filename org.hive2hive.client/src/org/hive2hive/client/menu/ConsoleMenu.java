@@ -3,6 +3,7 @@ package org.hive2hive.client.menu;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.hive2hive.client.Formatter;
 import org.hive2hive.client.console.UIConsole;
 import org.hive2hive.client.menuitem.ConsoleMenuItem;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
@@ -77,7 +78,7 @@ public abstract class ConsoleMenu {
 		chosen = awaitIntParameter();
 
 		if (chosen > items.size() || chosen < 1) {
-			System.out.println(String.format("Invalid option. Select an option from 1 to %s.\n", items.size()));
+			printError(String.format("Invalid option. Select an option from 1 to %s.\n", items.size()));
 		} else {
 			ConsoleMenuItem item = items.get(chosen - 1);
 			item.invoke();
@@ -88,18 +89,21 @@ public abstract class ConsoleMenu {
 
 	protected String awaitStringParameter() {
 
-		System.out.print("> ");
+		Formatter.setInputForeground();
+
 		Scanner input = new Scanner(System.in);
 		String parameter;
 		try {
 			parameter = input.nextLine();
 		} catch (Exception e) {
-			System.out.println("Exception while parsing the parameter.");
+			printError("Exception while parsing the parameter.");
 			input.nextLine();
 			return null;
 		}
+		
+		Formatter.setDefaultForeground();
 		// do not close input
-
+		
 		return parameter;
 	}
 
@@ -111,7 +115,7 @@ public abstract class ConsoleMenu {
 				number = Integer.parseInt(awaitStringParameter());
 				success = true;
 			} catch (NumberFormatException e) {
-				System.out.println("This was not a number... Try again.");
+				printError("This was not a number... Try again.");
 			}
 		}
 		return number;
@@ -126,4 +130,10 @@ public abstract class ConsoleMenu {
 	}
 
 	protected abstract String getInstruction();
+	
+	protected void printError(String errorMsg) {
+		Formatter.setErrorForeground();
+		System.err.println(errorMsg);
+		Formatter.setDefaultForeground();
+	}
 }
