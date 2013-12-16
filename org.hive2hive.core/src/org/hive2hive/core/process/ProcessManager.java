@@ -34,7 +34,7 @@ public class ProcessManager {
 	 * @param reason The reason why all processes get stopped.
 	 */
 	public void stopAll(String reason) {
-		for (IProcess process : attachedProcesses.values()) {
+		for (IProcess process : getAllProcesses()) {
 			process.stop(reason);
 		}
 	}
