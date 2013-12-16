@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.logout;
 
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.GetLocationsStep;
@@ -14,7 +15,7 @@ public class LogoutProcess extends Process {
 
 	private final LogoutProcessContext context;
 	
-	public LogoutProcess(String userId, NetworkManager networkManager) {
+	public LogoutProcess(NetworkManager networkManager) throws NoSessionException {
 		super(networkManager);
 		context = new LogoutProcessContext(this);
 		
@@ -22,8 +23,8 @@ public class LogoutProcess extends Process {
 		// 1. GetLocationsStep
 		// 2. RemoveOwnLocationStep
 		
-		RemoveOwnLocationStep removeLocationStep = new RemoveOwnLocationStep(userId);
-		GetLocationsStep locationsStep = new GetLocationsStep(userId, removeLocationStep, context);
+		RemoveOwnLocationStep removeLocationStep = new RemoveOwnLocationStep(networkManager.getSession().getCredentials().getUserId());
+		GetLocationsStep locationsStep = new GetLocationsStep(networkManager.getSession().getCredentials().getUserId(), removeLocationStep, context);
 		
 		setNextStep(locationsStep);
 	}

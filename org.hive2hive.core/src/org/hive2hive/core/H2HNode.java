@@ -127,20 +127,16 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	@Override
 	public IProcess logout() throws NoSessionException {
 
-		// check for the NoSessionException
-		final H2HSession session = networkManager.getSession();
-
-		LogoutProcess logoutProcess = new LogoutProcess(networkManager.getSession().getCredentials()
-				.getUserId(), networkManager);
+		LogoutProcess logoutProcess = new LogoutProcess(networkManager);
 		logoutProcess.addListener(new IProcessListener() {
 			@Override
 			public void onSuccess() {
-				postLogoutWork(session);
+				postLogoutWork();
 			}
 
 			@Override
 			public void onFail(String reason) {
-				postLogoutWork(session);
+				postLogoutWork();
 			}
 		});
 
@@ -150,16 +146,20 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		return logoutProcess;
 	}
 
-	private void postLogoutWork(H2HSession session) {
+	private void postLogoutWork() {
 
 		// stop all running processes
 		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
 		// write the current state to a meta file
-		session.getFileManager().writePersistentMetaData();
-
-		// quit the session
-		networkManager.setSession(null);
+		try {
+			networkManager.getSession().getFileManager().writePersistentMetaData();
+			
+			// quit the session
+			networkManager.setSession(null);
+		} catch (NoSessionException e) {
+			// ignore
+		}
 	}
 
 	@Override
