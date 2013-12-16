@@ -33,6 +33,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
 
 /**
  * Helper class for JUnit tests to get some documents from the DHT.
@@ -85,10 +86,15 @@ public class ProcessTestUtil {
 		executeProcess(register);
 		return register.getContext().getUserProfile();
 	}
-	
-	public static void login(UserCredentials credentials, NetworkManager networkManager){
+
+	public static void login(UserCredentials credentials, NetworkManager networkManager, File rootDirectory) {
 		LoginProcess login = new LoginProcess(credentials, networkManager);
 		executeProcess(login);
+
+		UserProfile userProfile = login.getContext().getUserProfile();
+
+		networkManager.setSession(new H2HSession(userProfile.getEncryptionKeys(), new UserProfileManager(
+				networkManager, credentials), new TestH2HFileConfiguration(), new FileManager(rootDirectory)));
 	}
 
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials) {

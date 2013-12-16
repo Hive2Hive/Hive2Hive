@@ -9,7 +9,9 @@ import java.util.Random;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -47,13 +49,13 @@ public class LogoutTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		userProfile = ProcessTestUtil.register(userCredentials, network.get(0));
+		ProcessTestUtil.login(userCredentials, network.get(0), FileUtils.getTempDirectory());
 	}
 
 	@Test
-	public void testLogout() throws ClassNotFoundException, IOException {
+	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException {
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		ProcessTestUtil.login(userCredentials, client);
 
 		// verify the locations map before logout
 		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userProfile.getUserId()),
@@ -66,10 +68,9 @@ public class LogoutTest extends H2HJUnitTest {
 		System.out.println("Client PeerAddress: " + client.getPeerAddress() +"\n");
 		
 		Assert.assertTrue(locations.getPeerAddresses().contains(client.getPeerAddress()));
-		
 
 		// logout
-		LogoutProcess process = new LogoutProcess(userCredentials.getUserId(), client);
+		LogoutProcess process = new LogoutProcess(client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
