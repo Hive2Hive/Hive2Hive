@@ -93,7 +93,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 				}
 			} else {
 				// more chunks to get. Continue with downloadint the next chunk
-				GetFileChunkStep nextStep = new GetFileChunkStep(getFile(), currentChunkOrder, chunksToGet,
+				GetFileChunkStep nextStep = new GetFileChunkStep(file, currentChunkOrder, chunksToGet,
 						chunkBuffer);
 				getProcess().setNextStep(nextStep);
 			}
@@ -127,9 +127,5 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 
 			chunkBuffer.removeAll(wroteToDisk);
 		} while (!wroteToDisk.isEmpty());
-	}
-
-	public File getFile() {
-		return file;
 	}
 }

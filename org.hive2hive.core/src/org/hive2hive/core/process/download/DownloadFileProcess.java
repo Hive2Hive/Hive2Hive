@@ -90,7 +90,6 @@ public class DownloadFileProcess extends Process {
 			GetMetaDocumentStep metaDocumentStep = new GetMetaDocumentStep(file.getKeyPair(),
 					new EvaluateMetaDocumentStep(), context);
 			setNextStep(metaDocumentStep);
-
 		}
 	}
 

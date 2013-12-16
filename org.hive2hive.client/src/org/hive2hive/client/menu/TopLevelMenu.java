@@ -23,7 +23,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 	protected File root;
 
 	public TopLevelMenu() {
-//		super(console);
+		// super(console);
 		userMenu = new UserMenu();
 		nodeMenu = new NodeCreationMenu();
 	}
@@ -35,7 +35,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			nodeMenu.getH2HNode().disconnect();
 		}
 	}
-	
+
 	@Override
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Network Configuration") {
@@ -63,16 +63,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 
 			protected void execute() {
-				IProcess registerProcess = nodeMenu.getH2HNode().register(userMenu.getUserCredentials());
-				ProcessListener processListener = new ProcessListener();
-				registerProcess.addListener(processListener);
-				while (!processListener.hasFinished()) {
-					// busy waiting
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-					}
-				}
+				IProcess process = nodeMenu.getH2HNode().register(userMenu.getUserCredentials());
+				executeBlocking(process);
 			}
 		});
 		add(new H2HConsoleMenuItem("Login") {
@@ -95,16 +87,9 @@ public final class TopLevelMenu extends ConsoleMenu {
 				String input = awaitStringParameter();
 				if (!input.equalsIgnoreCase("ok"))
 					root = new File(input);
-				IProcess loginProcess = nodeMenu.getH2HNode().login(userMenu.getUserCredentials(), root);
-				ProcessListener processListener = new ProcessListener();
-				loginProcess.addListener(processListener);
-				while (!processListener.hasFinished()) {
-					// busy waiting
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-					}
-				}
+
+				IProcess process = nodeMenu.getH2HNode().login(userMenu.getUserCredentials(), root);
+				executeBlocking(process);
 			}
 		});
 
@@ -113,16 +98,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			protected void execute() {
 				try {
 					IProcess process = nodeMenu.getH2HNode().add(askForFile());
-					ProcessListener processListener = new ProcessListener();
-					process.addListener(processListener);
-
-					while (!processListener.hasFinished()) {
-						// busy waiting
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-						}
-					}
+					executeBlocking(process);
 				} catch (IllegalFileLocation | NoSessionException e) {
 					System.out.println("Could not add the file. Reason: " + e.getMessage());
 				}
@@ -133,16 +109,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			protected void execute() {
 				try {
 					IProcess process = nodeMenu.getH2HNode().update(askForFile());
-					ProcessListener processListener = new ProcessListener();
-					process.addListener(processListener);
-
-					while (!processListener.hasFinished()) {
-						// busy waiting
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-						}
-					}
+					executeBlocking(process);
 				} catch (IllegalArgumentException | NoSessionException e) {
 					System.out.println("Could not update the file. Reason: " + e.getMessage());
 				}
@@ -152,16 +119,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			protected void execute() {
 				try {
 					IProcess process = nodeMenu.getH2HNode().delete(askForFile());
-					ProcessListener processListener = new ProcessListener();
-					process.addListener(processListener);
-
-					while (!processListener.hasFinished()) {
-						// busy waiting
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-						}
-					}
+					executeBlocking(process);
 				} catch (IllegalArgumentException | NoSessionException e) {
 					System.out.println("Could not delete the file. Reason: " + e.getMessage());
 				}
@@ -179,6 +137,25 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 	}
 
+	/**
+	 * Executes the given process (autostart anyhow) and blocks until it is done
+	 */
+	private void executeBlocking(IProcess process) {
+		ProcessListener processListener = new ProcessListener();
+		process.addListener(processListener);
+
+		while (!processListener.hasFinished()) {
+			// busy waiting
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	/**
+	 * Asks for a (valid) file
+	 */
 	private File askForFile() {
 		File file = null;
 		while (file == null || !file.exists()) {
