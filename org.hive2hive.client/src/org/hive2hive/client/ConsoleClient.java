@@ -31,7 +31,7 @@ public class ConsoleClient {
 	}
 
 	private static void printHeader() {
-		System.out.println("\n******************************************************************************************");
+		System.out.println("\n********************************************************************************************");
 		System.out.println("*                                                                        .´'`.             *");
 		System.out.println("*                                                                        |   |             *");
 		System.out.println("*                        Welcome to the Hive2Hive console client!      .´ `-´ `.           *");
