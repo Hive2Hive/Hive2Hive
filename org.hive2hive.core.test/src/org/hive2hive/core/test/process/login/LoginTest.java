@@ -44,7 +44,7 @@ public class LoginTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
-		userProfile = ProcessTestUtil.register(network.get(0), userCredentials);
+		userProfile = ProcessTestUtil.register(userCredentials, network.get(0));
 	}
 
 	@Test

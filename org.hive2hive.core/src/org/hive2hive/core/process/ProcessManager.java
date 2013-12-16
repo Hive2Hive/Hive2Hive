@@ -29,6 +29,17 @@ public class ProcessManager {
 	}
 
 	/**
+	 * Stop all currently attached processes.
+	 * 
+	 * @param reason The reason why all processes get stopped.
+	 */
+	public void stopAll(String reason) {
+		for (IProcess process : getAllProcesses()) {
+			process.stop(reason);
+		}
+	}
+
+	/**
 	 * Returns a unique PID (process ID) for this {@link ProcessManager}.
 	 * 
 	 * @return A unique PID.

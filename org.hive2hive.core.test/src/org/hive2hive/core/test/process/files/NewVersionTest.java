@@ -64,7 +64,7 @@ public class NewVersionTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		ProcessTestUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(userCredentials, network.get(0));
 
 		// create a file
 		String randomName = NetworkTestUtil.randomString();

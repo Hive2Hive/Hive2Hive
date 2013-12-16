@@ -12,11 +12,13 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
+import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -124,16 +126,40 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 
 	@Override
 	public IProcess logout() throws NoSessionException {
-		// TODO start a logout process
-		// TODO stop all other processes of this user as soon as the logout process is done
+
+		// check for the NoSessionException
+		final H2HSession session = networkManager.getSession();
+
+		LogoutProcess logoutProcess = new LogoutProcess(networkManager.getSession().getCredentials()
+				.getUserId(), networkManager);
+		logoutProcess.addListener(new IProcessListener() {
+			@Override
+			public void onSuccess() {
+				postLogoutWork(session);
+			}
+
+			@Override
+			public void onFail(String reason) {
+				postLogoutWork(session);
+			}
+		});
+
+		if (autostartProcesses)
+			logoutProcess.start();
+
+		return logoutProcess;
+	}
+
+	private void postLogoutWork(H2HSession session) {
+
+		// stop all running processes
+		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
 		// write the current state to a meta file
-		networkManager.getSession().getFileManager().writePersistentMetaData();
+		session.getFileManager().writePersistentMetaData();
 
 		// quit the session
 		networkManager.setSession(null);
-
-		return null;
 	}
 
 	@Override

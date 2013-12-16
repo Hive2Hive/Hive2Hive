@@ -62,7 +62,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		// first, register a new user
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		ProcessTestUtil.register(network.get(0), userCredentials);
+		ProcessTestUtil.register(userCredentials, network.get(0));
 		UserProfileManager profileManager = new UserProfileManager(network.get(0), userCredentials);
 
 		// create two filemanagers
