@@ -58,6 +58,12 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
+		
+		add(new H2HConsoleMenuItem("Open Utils") {
+			protected void execute() {
+				new UtilMenu().open();
+			}
+		});
 		add(new H2HConsoleMenuItem("Set MaxFileSize") {
 			protected void execute() {
 				System.out.println("Specify MaxFileSize:\n");
