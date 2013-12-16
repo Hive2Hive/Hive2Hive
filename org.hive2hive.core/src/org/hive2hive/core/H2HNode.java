@@ -191,6 +191,12 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
+	public IProcess move(File source, File destination) throws NoSessionException, IllegalArgumentException {
+		// TODO
+		return null;
+	}
+
+	@Override
 	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
 		IProcess process;
 		if (file.isDirectory() && file.listFiles().length > 0) {

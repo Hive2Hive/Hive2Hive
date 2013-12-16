@@ -44,6 +44,9 @@ public interface IH2HNode {
 	/**
 	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
 	 * the node configuration. If a full tree needs to be uploaded, the parameter must be the root.
+	 * 
+	 * @param file the file to be added
+	 * @return an observable add file process
 	 */
 	IProcess add(File file) throws IllegalFileLocation, NoSessionException;
 
@@ -51,16 +54,25 @@ public interface IH2HNode {
 	 * Update a file or a folder in the network.
 	 * 
 	 * @param file the file to be updated
-	 * @return
+	 * @return an observable update process
 	 */
 	IProcess update(File file) throws NoSessionException, IllegalArgumentException;
+
+	/**
+	 * Moves a file from source to destination
+	 * 
+	 * @param source the file to move
+	 * @param destination the destination of the file
+	 * @return an observable move process
+	 */
+	IProcess move(File source, File destination) throws NoSessionException, IllegalArgumentException;
 
 	/**
 	 * Delete the file or the folder in the network. Note that when a whole file tree should be deleted, the
 	 * parameter must be the root.
 	 * 
-	 * @throws IllegalArgumentException
-	 * @throws NoSessionException
+	 * @param the file to delete
+	 * @return an observable deletion process
 	 */
 	IProcess delete(File file) throws IllegalArgumentException, NoSessionException;
 
