@@ -1,6 +1,5 @@
 package org.hive2hive.core.process;
 
-import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
@@ -66,14 +65,18 @@ public interface IProcess extends Runnable {
 	int getProgress();
 
 	/**
-	 * Returns the context of this process.
+	 * Add a listener to listen on process events (finishing, crashed, ...)
 	 * 
-	 * @return
+	 * @param listener the listener to add
 	 */
-	ProcessContext getContext();
-
 	void addListener(IProcessListener listener);
 
+	/**
+	 * Remove a listener from the process
+	 * 
+	 * @param listener the listener to remove
+	 * @return if the removal was successful
+	 */
 	boolean removeListener(IProcessListener listener);
 
 }

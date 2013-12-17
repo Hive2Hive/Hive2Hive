@@ -5,7 +5,6 @@ import java.util.Random;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessState;
-import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
@@ -112,11 +111,6 @@ public class ProcessManagerTest extends H2HJUnitTest {
 			@Override
 			public boolean removeListener(IProcessListener listener) {
 				return false;
-			}
-
-			@Override
-			public ProcessContext getContext() {
-				return null;
 			}
 
 			@Override

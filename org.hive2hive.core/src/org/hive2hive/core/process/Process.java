@@ -134,7 +134,6 @@ public abstract class Process implements IProcess {
 	 * Returns the process context. This methods should override this method and covariantly narrow down the
 	 * return type.
 	 */
-	@Override
 	public ProcessContext getContext() {
 		return null;
 	}
