@@ -84,17 +84,6 @@ public final class PasswordUtil {
 		return null;
 	}
 
-	// /**
-	// * Generates a user password based on the user defined password. This function randomly generates a salt
-	// * that is attached to this password.
-	// *
-	// * @param password
-	// * @return Returns a UserPassword that holds the password and its associated salt.
-	// */
-	// public static UserPassword generatePassword(char[] password) {
-	// return new UserPassword(password, generateSalt());
-	// }
-
 	/**
 	 * Returns a salted PBKDF2 hash of the password.
 	 * 
@@ -123,8 +112,7 @@ public final class PasswordUtil {
 		byte[] enlargedPin = getPBKDF2Hash(pin.toCharArray(), pinEnlargementSalt, SALT_BIT_SIZE);
 
 		// use the enlarged PIN as salt to generate the symmetric AES key
-		byte[] secretKeyEncoded = getPBKDF2Hash(password.toCharArray(), enlargedPin,
-				keyLength.value());
+		byte[] secretKeyEncoded = getPBKDF2Hash(password.toCharArray(), enlargedPin, keyLength.value());
 
 		return new SecretKeySpec(secretKeyEncoded, "AES");
 	}

@@ -25,10 +25,15 @@ public class UserCredentialsTest extends H2HJUnitTest {
 	@Test
 	public void generateLocations() {
 		// random credentials
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		String userName = NetworkTestUtil.randomString();
+		String password = NetworkTestUtil.randomString();
+		String pin = NetworkTestUtil.randomString();
+
+		UserCredentials credentials1 = new UserCredentials(userName, password, pin);
+		UserCredentials credentials2 = new UserCredentials(userName, password, pin);
 
 		// test if same result twice
-		Assert.assertEquals(credentials.getProfileLocationKey(), credentials.getProfileLocationKey());
+		Assert.assertEquals(credentials1.getProfileLocationKey(), credentials2.getProfileLocationKey());
 	}
 
 	@AfterClass

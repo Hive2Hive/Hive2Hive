@@ -47,7 +47,6 @@ public final class UserCredentials {
 	 * @return The location key associated with this credentials.
 	 */
 	private String calculateLocationCache() {
-
 		// concatenate PIN + PW + UserId
 		String appendage = new StringBuilder().append(pin).append(password).append(userId).toString();
 
