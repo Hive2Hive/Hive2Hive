@@ -78,7 +78,7 @@ public class DownloadFileProcess extends Process {
 		}
 
 		if (file.isFolder()) {
-			logger.info("No download of the file needed since it's a folder");
+			logger.info("No download of the file needed since '" + file.getFullPath() + "' is a folder");
 			setNextStep(new CreateFolderStep(file, fileManager));
 		} else {
 			// download the file

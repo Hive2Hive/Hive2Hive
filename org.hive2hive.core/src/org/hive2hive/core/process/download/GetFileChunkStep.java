@@ -45,6 +45,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	 */
 	public GetFileChunkStep(FileTreeNode file, MetaFile metaFile, FileManager fileManager) {
 		this(fileManager.getFile(file), 0, metaFile.getNewestVersion().getChunkIds(), new ArrayList<Chunk>());
+		logger.debug("Start downloading '" + file.getName() + "'");
 	}
 
 	/**
@@ -68,7 +69,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 		// download next chunk
 		KeyPair firstInList = chunksToGet.remove(0);
 		decryptionKey = firstInList.getPrivate(); // store current private key
-		logger.info("Downloading next chunk... " + chunksToGet.size() + " chunk(s) more to go.");
+		logger.info("File " + file.getName() + ": " + chunksToGet.size() + " chunk(s) more to download.");
 		get(key2String(firstInList.getPublic()), H2HConstants.FILE_CHUNK);
 	}
 
@@ -84,6 +85,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 				// all chunks downloaded
 				if (chunkBuffer.isEmpty()) {
 					// normal case: done with the process.
+					logger.debug("Finished downloading file '" + file.getName() + "'.");
 					getProcess().setNextStep(null);
 				} else {
 					// should be empty

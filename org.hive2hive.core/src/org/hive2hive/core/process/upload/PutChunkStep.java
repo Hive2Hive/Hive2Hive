@@ -71,7 +71,7 @@ public class PutChunkStep extends BasePutProcessStep {
 	public void start() {
 		// only put sth. if the file has content
 		if (file.isDirectory()) {
-			logger.debug("No data to put because the file is a folder");
+			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
 			getProcess().setNextStep(stepAfterPutting);
 			return;
 		}
@@ -98,7 +98,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			read = rndAccessFile.read(data);
 			rndAccessFile.close();
 		} catch (IOException e) {
-			logger.error("Could not read the file", e);
+			logger.error("File " + file.getAbsolutePath() + ": Could not read the file", e);
 			getProcess().stop(e.getMessage());
 			return;
 		}
@@ -124,7 +124,7 @@ public class PutChunkStep extends BasePutProcessStep {
 						chunkKey.getPublic(), AES_KEYLENGTH.BIT_256);
 
 				// start the put and continue with next chunk
-				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getAbsolutePath());
+				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getName());
 				put(key2String(chunk.getId()), H2HConstants.FILE_CHUNK, encryptedContent);
 			} catch (DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
@@ -132,7 +132,7 @@ public class PutChunkStep extends BasePutProcessStep {
 				getProcess().stop(e.getMessage());
 			}
 		} else {
-			logger.debug("All chunks uploaded. Continue with meta data.");
+			logger.debug("File " + file.getName() + ": All chunks uploaded. Continue with meta data.");
 			// nothing read, stop putting chunks and start next step
 			context.setChunkKeys(chunkKeys);
 

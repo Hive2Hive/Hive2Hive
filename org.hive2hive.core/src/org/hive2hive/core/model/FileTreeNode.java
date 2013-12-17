@@ -101,11 +101,16 @@ public class FileTreeNode implements Serializable {
 	}
 
 	public void addChild(FileTreeNode child) {
-		children.add(child);
+		// only add once
+		if (getChildByName(child.getName()) == null)
+			children.add(child);
 	}
 
 	public void removeChild(FileTreeNode child) {
-		children.remove(child);
+		if (!children.remove(child)) {
+			// remove by name
+			children.remove(getChildByName(child.getName()));
+		}
 	}
 
 	/**

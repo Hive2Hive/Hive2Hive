@@ -33,6 +33,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	protected KeyPair keyPair;
 	protected ProcessStep nextStep;
 	protected IGetMetaContext context;
+	private String key = null;
 
 	public GetMetaDocumentStep(KeyPair keyPair, ProcessStep nextStep, IGetMetaContext context) {
 		this.keyPair = keyPair;
@@ -42,7 +43,9 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	@Override
 	public void start() {
-		get(key2String(keyPair.getPublic()), H2HConstants.META_DOCUMENT);
+		key = key2String(keyPair.getPublic());
+		logger.debug("Get meta document for key " + key);
+		get(key, H2HConstants.META_DOCUMENT);
 	}
 
 	@Override
@@ -54,6 +57,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
 				context.setMetaDocument((MetaDocument) decrypted);
+				logger.debug("Successfully fetched and decrypted meta document " + key);
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the meta document.", e);

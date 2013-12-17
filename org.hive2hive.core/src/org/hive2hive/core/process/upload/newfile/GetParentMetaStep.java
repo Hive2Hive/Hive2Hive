@@ -41,12 +41,14 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 
 		if (parent.equals(context.getFileManager().getRoot())) {
 			// no parent to update since the file is in root
-			logger.debug("File is in root; skip getting the meta folder and update the profile directly");
+			logger.debug("File '" + file.getName()
+					+ "' is in root; skip getting the parent meta folder and update the profile directly");
 			nextStep = new PutMetaDocumentStep(childMetaDocument, new UpdateUserProfileStep());
 			getProcess().setNextStep(nextStep);
 		} else {
 			// when file is not in root, the parent meta folder must be found
-			logger.debug("Get the meta folder of the parent (lookup in user profile)");
+			logger.debug("File '" + file.getName()
+					+ "' is not in root; get the meta folder of the parent (lookup in user profile)");
 
 			try {
 				UserProfileManager profileManager = context.getProfileManager();
