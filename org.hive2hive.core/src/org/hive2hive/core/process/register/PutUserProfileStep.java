@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common.put;
+package org.hive2hive.core.process.register;
 
 import javax.crypto.SecretKey;
 
@@ -9,6 +9,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;

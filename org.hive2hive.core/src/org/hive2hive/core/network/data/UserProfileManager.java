@@ -324,7 +324,7 @@ public class UserProfileManager {
 					UserProfile userProfile = (UserProfile) decrypted;
 					userProfile.setVersionKey(content.getVersionKey());
 					userProfile.setBasedOnKey(content.getBasedOnKey());
-					setUserProfile((UserProfile) decrypted);
+					setUserProfile(userProfile);
 				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
