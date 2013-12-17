@@ -231,7 +231,7 @@ public class UserProfileManager {
 					return;
 				}
 
-				encryptedUserProfile.setBasedOnKey(encryptedUserProfile.getVersionKey());
+				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
 				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
 						encryptedUserProfile, entry);
@@ -321,6 +321,9 @@ public class UserProfileManager {
 							credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
 
 					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
+					UserProfile userProfile = (UserProfile) decrypted;
+					userProfile.setVersionKey(content.getVersionKey());
+					userProfile.setBasedOnKey(content.getBasedOnKey());
 					setUserProfile((UserProfile) decrypted);
 				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
