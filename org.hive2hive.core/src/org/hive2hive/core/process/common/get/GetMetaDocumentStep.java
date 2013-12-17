@@ -52,12 +52,14 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	public void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			logger.error("Meta document not found");
+			context.setMetaDocument(null);
 		} else {
+			logger.debug("Got encrypted meta document " + key);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
 				context.setMetaDocument((MetaDocument) decrypted);
-				logger.debug("Successfully fetched and decrypted meta document " + key);
+				logger.debug("Successfully decrypted meta document " + key);
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the meta document.", e);

@@ -20,7 +20,7 @@ public class EvaluateMetaDocumentStep extends ProcessStep {
 			getProcess().stop("Meta document not found");
 		} else {
 			MetaFile metaFile = (MetaFile) metaDocument;
-			logger.debug("The meta document has been found. Downloading all chunks is the next step.");
+			logger.debug("The meta document is valid. Downloading all chunks is the next step.");
 			GetFileChunkStep nextStep = new GetFileChunkStep(context.getFile(), metaFile,
 					context.getFileManager());
 			getProcess().setNextStep(nextStep);

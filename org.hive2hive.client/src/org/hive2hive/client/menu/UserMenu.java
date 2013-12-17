@@ -23,7 +23,7 @@ public final class UserMenu extends ConsoleMenu {
 	private UserCredentials userCredentials;
 
 	public UserMenu() {
-//		super(console);
+		// super(console);
 	}
 
 	@Override
@@ -31,19 +31,19 @@ public final class UserMenu extends ConsoleMenu {
 		SetUserID = new H2HConsoleMenuItem("Set User ID") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user ID:");
-				userId = awaitStringParameter();
+				userId = awaitStringParameter().trim();
 			}
 		};
 		SetUserPassword = new H2HConsoleMenuItem("Set User Password") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user password:");
-				password = awaitStringParameter();
+				password = awaitStringParameter().trim();
 			}
 		};
 		SetUserPin = new H2HConsoleMenuItem("Set User PIN") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user PIN:");
-				pin = awaitStringParameter();
+				pin = awaitStringParameter().trim();
 			}
 		};
 		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {

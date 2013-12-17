@@ -452,7 +452,6 @@ public final class EncryptionUtil {
 	}
 
 	public static Object deserializeObject(byte[] bytes) {
-
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = null;
 		Object result = null;
