@@ -61,8 +61,10 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 				context.setMetaDocument((MetaDocument) decrypted);
 				logger.debug("Successfully decrypted meta document " + key);
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
-					| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
+					| BadPaddingException | IllegalStateException | InvalidCipherTextException
+					| IllegalArgumentException e) {
 				logger.error("Cannot decrypt the meta document.", e);
+				context.setMetaDocument(null);
 			}
 		}
 		// continue with next step

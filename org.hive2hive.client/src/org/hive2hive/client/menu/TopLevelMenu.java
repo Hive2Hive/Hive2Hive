@@ -127,7 +127,12 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void execute() {
-				notImplemented();
+				try {
+					IProcess process = nodeMenu.getH2HNode().logout();
+					executeBlocking(process);
+				} catch (NoSessionException e) {
+					System.out.println("Could not logout. Reason: " + e.getMessage());
+				}
 			}
 		});
 		add(new H2HConsoleMenuItem("Unregister") {
