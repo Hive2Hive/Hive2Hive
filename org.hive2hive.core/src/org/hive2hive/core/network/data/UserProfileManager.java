@@ -1,15 +1,10 @@
 package org.hive2hive.core.network.data;
 
-import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
-
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.peers.Number160;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
@@ -20,6 +15,8 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.listener.IGetListener;
+import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -42,6 +39,7 @@ public class UserProfileManager {
 
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
+	private final Object queueWaiter = new Object();
 
 	private final Queue<QueueEntry> readOnlyQueue;
 	private final Queue<PutQueueEntry> modifyQueue;
@@ -131,7 +129,7 @@ public class UserProfileManager {
 				// modifying processes have advantage here because the read-only processes can profit
 				if (modifyQueue.isEmpty() && readOnlyQueue.isEmpty()) {
 					try {
-						Thread.sleep(500);
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						// ignore
 					}
@@ -139,6 +137,7 @@ public class UserProfileManager {
 					logger.debug(readOnlyQueue.size() + " process(es) are waiting for read-only access");
 					// a process wants to read
 					QueueEntry entry = readOnlyQueue.peek();
+
 					get(entry);
 
 					logger.debug("Notifying " + readOnlyQueue.size()
@@ -186,9 +185,8 @@ public class UserProfileManager {
 						modifying.abort();
 						modifying.setPutError(new PutFailedException("Too long modification. Only "
 								+ MAX_MODIFICATION_TIME + "ms are allowed."));
+						modifying.notifyPut();
 					}
-
-					modifying.notifyPut();
 				}
 			}
 		}
@@ -204,35 +202,14 @@ public class UserProfileManager {
 				return;
 			}
 
-			// TODO change this to non-blocking
-			FutureGet futureGet = dataManager.get(Number160.createHash(credentials.getProfileLocationKey()),
-					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_PROFILE));
-			futureGet.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
+			dataManager.get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, entry);
 
-			try {
-				if (futureGet.isFailed() || futureGet.getData() == null) {
-					logger.warn("Did not find user profile.");
-					entry.setGetError(new GetFailedException("User profile not found"));
-				} else {
-					// decrypt it
-					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) futureGet.getData()
-							.object();
-
-					logger.debug("Decrypting user profile with 256-bit AES key from password.");
-
-					SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(
-							credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
-
-					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
-					entry.setUserProfile((UserProfile) decrypted);
+			synchronized (queueWaiter) {
+				try {
+					queueWaiter.wait();
+				} catch (InterruptedException e) {
+					// ignore
 				}
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
-					| ClassNotFoundException | IOException e) {
-				logger.error("Cannot decrypt the user profile.", e);
-				entry.setGetError(new GetFailedException("Cannot decrypt the user profile"));
-			} catch (Exception e) {
-				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
-				entry.setGetError(new GetFailedException(e.getMessage()));
 			}
 		}
 
@@ -254,21 +231,26 @@ public class UserProfileManager {
 					return;
 				}
 
-				// TODO change this to non-blocking
-				FuturePut futurePut = dataManager.put(
-						Number160.createHash(credentials.getProfileLocationKey()),
-						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_PROFILE),
-						encryptedUserProfile);
-				futurePut.awaitUninterruptibly(PUT_GET_AWAIT_TIMEOUT);
+				encryptedUserProfile.setBasedOnKey(encryptedUserProfile.getVersionKey());
+				encryptedUserProfile.generateVersionKey();
+				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
+						encryptedUserProfile, entry);
+
+				synchronized (queueWaiter) {
+					try {
+						queueWaiter.wait();
+					} catch (InterruptedException e) {
+						// ignore
+					}
+				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
 			}
 		}
-
 	}
 
-	private class QueueEntry {
+	private class QueueEntry implements IGetListener {
 		private final int pid;
 		private final Object getWaiter;
 		private UserProfile userProfile; // got from DHT
@@ -322,9 +304,40 @@ public class UserProfileManager {
 		public boolean equals(int pid) {
 			return this.pid == pid;
 		}
+
+		@Override
+		public void handleGetResult(NetworkContent content) {
+			try {
+				if (content == null) {
+					logger.warn("Did not find user profile.");
+					setGetError(new GetFailedException("User profile not found"));
+				} else {
+					// decrypt it
+					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
+
+					logger.debug("Decrypting user profile with 256-bit AES key from password.");
+
+					SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(
+							credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
+
+					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
+					setUserProfile((UserProfile) decrypted);
+				}
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+				logger.error("Cannot decrypt the user profile.", e);
+				setGetError(new GetFailedException("Cannot decrypt the user profile"));
+			} catch (Exception e) {
+				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
+				setGetError(new GetFailedException(e.getMessage()));
+			}
+
+			synchronized (queueWaiter) {
+				queueWaiter.notify();
+			}
+		}
 	}
 
-	private class PutQueueEntry extends QueueEntry {
+	private class PutQueueEntry extends QueueEntry implements IPutListener {
 
 		private final AtomicBoolean readyToPut;
 		private final AtomicBoolean abort;
@@ -380,6 +393,23 @@ public class UserProfileManager {
 
 		public void setPutError(PutFailedException error) {
 			this.putFailedException = error;
+		}
+
+		@Override
+		public void onPutSuccess() {
+			notifyPut();
+			synchronized (queueWaiter) {
+				queueWaiter.notify();
+			}
+		}
+
+		@Override
+		public void onPutFailure() {
+			setPutError(new PutFailedException());
+			notifyPut();
+			synchronized (queueWaiter) {
+				queueWaiter.notify();
+			}
 		}
 	}
 }

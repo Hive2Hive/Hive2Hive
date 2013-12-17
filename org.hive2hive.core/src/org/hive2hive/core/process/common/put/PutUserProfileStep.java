@@ -43,6 +43,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(userProfile,
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
+			encryptedUserProfile.generateVersionKey();
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
