@@ -138,8 +138,7 @@ public class UserProfileManager {
 				// modifying processes have advantage here because the read-only processes can profit
 				if (modifyQueue.isEmpty() && readOnlyQueue.isEmpty()) {
 					try {
-						logger.debug("waiting");
-						Thread.sleep(500);
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						// ignore
 					}

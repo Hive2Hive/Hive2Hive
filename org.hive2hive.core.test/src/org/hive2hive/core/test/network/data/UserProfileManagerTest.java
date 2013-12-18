@@ -51,11 +51,8 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	@Before
 	public void setup() {
-		logger.debug("create random credentials");
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		logger.debug("create network");
 		client = NetworkTestUtil.createNetwork(1).get(0);
-		logger.debug("register");
 		ProcessTestUtil.register(userCredentials, client);
 	}
 
