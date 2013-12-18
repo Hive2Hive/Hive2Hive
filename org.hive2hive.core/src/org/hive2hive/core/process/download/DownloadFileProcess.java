@@ -82,7 +82,7 @@ public class DownloadFileProcess extends Process {
 			setNextStep(new CreateFolderStep(file, fileManager));
 		} else {
 			// download the file
-			logger.info("Start downloading file " + file.getFullPath());
+			logger.info("Initalized process for downloading file " + file.getFullPath());
 
 			// 1. get the meta file
 			// 2. evaluate the meta file
