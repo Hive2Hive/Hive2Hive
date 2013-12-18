@@ -40,4 +40,9 @@ public class TestDirectMessage extends BaseDirectMessage {
 		return AcceptanceReply.OK;
 	}
 
+	@Override
+	public boolean checkSignature() {
+		return true;
+	}
+	
 }

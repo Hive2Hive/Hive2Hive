@@ -2,6 +2,7 @@ package org.hive2hive.core.network.messages;
 
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.HashMap;
 
 import javax.crypto.BadPaddingException;
@@ -72,7 +73,7 @@ public final class MessageManager {
 		message.increaseRoutedSendingCounter();
 
 		// encrypt the message with the given public key
-		HybridEncryptedContent encryptedMessage = encryptMessage(message, targetPublicKey);
+		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null)
 			return;
 
@@ -81,8 +82,7 @@ public final class MessageManager {
 				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
 				.setRequestP2PConfiguration(createSendingConfiguration()).start();
 		// attach a future listener to log, handle and notify events
-		futureSend
-				.addListener(new FutureRoutedListener(listener, message, targetPublicKey, networkManager));
+		futureSend.addListener(new FutureRoutedListener(listener, message, targetPublicKey, networkManager));
 
 		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
 				message.getTargetKey(), message.getMessageID()));
@@ -115,7 +115,7 @@ public final class MessageManager {
 		message.increaseDirectSendingCounter();
 
 		// encrypt the message with the given public key
-		HybridEncryptedContent encryptedMessage = encryptMessage(message, targetPublicKey);
+		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null)
 			return;
 
@@ -123,8 +123,8 @@ public final class MessageManager {
 		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
-		futureDirect.addListener(new FutureDirectListener(listener, message, targetPublicKey,
-				networkManager));
+		futureDirect
+				.addListener(new FutureDirectListener(listener, message, targetPublicKey, networkManager));
 
 		logger.debug(String.format(
 				"Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
@@ -184,10 +184,17 @@ public final class MessageManager {
 		}
 	}
 
-	private HybridEncryptedContent encryptMessage(BaseMessage message, PublicKey targetPublicKey) {
-
+	private HybridEncryptedContent signAndEncryptMessage(BaseMessage message, PublicKey targetPublicKey) {
+		try {
+			message.sign(networkManager.getPrivateKey());
+		} catch (InvalidKeyException | SignatureException e1) {
+			logger.error("An exception occured while signing the message. The message will not be sent.");
+			return null;
+		}
+		
 		// asymmetrically encrypt message
 		byte[] messageBytes = EncryptionUtil.serializeObject(message);
+
 		try {
 			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes,
 					targetPublicKey, H2HConstants.H2H_AES_KEYLENGTH);
@@ -196,8 +203,8 @@ public final class MessageManager {
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.error("An exception occured while encrypting the message. The message will not be sent.");
+			return null;
 		}
-		return null;
 	}
 
 }

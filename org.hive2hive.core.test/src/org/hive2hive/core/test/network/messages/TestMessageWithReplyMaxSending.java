@@ -57,4 +57,9 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 
 	}
 
+	@Override
+	public boolean checkSignature() {
+		return true;
+	}
+	
 }

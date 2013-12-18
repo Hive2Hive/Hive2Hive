@@ -36,4 +36,9 @@ public class TestMessage extends BaseMessage {
 		return AcceptanceReply.OK;
 	}
 
+	@Override
+	public boolean checkSignature() {
+		return true;
+	}
+	
 }

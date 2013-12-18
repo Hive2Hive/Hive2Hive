@@ -43,7 +43,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		testClass = BaseDirectMessageProcessStepTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
-		NetworkTestUtil.createKeyPairs(network);
+		NetworkTestUtil.createSameKeyPair(network);
 	}
 
 	/**

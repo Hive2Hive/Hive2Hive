@@ -31,5 +31,11 @@ public class ContactPeerMessage extends DirectRequestMessage {
 		// send a response with the evidentContent -> proves this peer could decrypt and read the message
 		sendDirectResponse(createResponse(evidenceContent));
 	}
+	
+	@Override
+	public boolean checkSignature() {
+		// contacted nodes are other client nodes and should have same keys
+		return verify(networkManager.getPublicKey());
+	}
 
 }

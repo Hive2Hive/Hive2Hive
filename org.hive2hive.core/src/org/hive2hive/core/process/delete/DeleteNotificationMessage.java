@@ -64,4 +64,10 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 			logger.error("Got notified but cannot delete the file", e);
 		}
 	}
+	
+	@Override
+	public boolean checkSignature() {
+		// message should come from another client node
+		return verify(networkManager.getPublicKey());
+	}
 }

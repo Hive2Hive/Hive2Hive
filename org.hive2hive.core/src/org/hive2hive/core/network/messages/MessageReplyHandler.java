@@ -44,7 +44,9 @@ public class MessageReplyHandler implements ObjectDataReply {
 				throw new NoSessionException();
 			}
 		} catch (NoSessionException e) {
-			logger.warn("Currently no user logged in! Keys for decryption needed.");
+			logger.warn(String.format(
+					"Currently no user logged in! Keys for decryption needed. node id = '%s'",
+					networkManager.getNodeId()));
 			return AcceptanceReply.FAILURE;
 		}
 
@@ -64,6 +66,15 @@ public class MessageReplyHandler implements ObjectDataReply {
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
 			receivedMessage.setNetworkManager(networkManager);
+			// check if signature is correct
+			if (!receivedMessage.checkSignature()) {
+				logger.error(String.format("Message has wrong signature. node id = '%s'",
+						networkManager.getNodeId()));
+				return AcceptanceReply.FAILURE_SIGNATURE;
+			} else {
+				logger.debug(String.format("Message's signature verified. node id = '%s'",
+						networkManager.getNodeId()));
+			}
 			AcceptanceReply reply = receivedMessage.accept();
 			if (AcceptanceReply.OK == reply) {
 				// handle message in own thread
@@ -81,5 +92,4 @@ public class MessageReplyHandler implements ObjectDataReply {
 			return null;
 		}
 	}
-
 }

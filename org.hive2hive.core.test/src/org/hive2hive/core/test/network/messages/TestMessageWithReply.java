@@ -55,4 +55,9 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 
 	}
 
+	@Override
+	public boolean checkSignature() {
+		return true;
+	}
+	
 }

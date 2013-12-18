@@ -1,6 +1,7 @@
 package org.hive2hive.core.network;
 
 import java.net.InetAddress;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
@@ -79,6 +80,15 @@ public class NetworkManager {
 		if (session == null)
 			return null;
 		return session.getKeyPair().getPublic();
+	}
+	
+	/**
+	 * Helper method that returns the private key of the currently logged in user
+	 */
+	public PrivateKey getPrivateKey() {
+		if (session == null)
+			return null;
+		return session.getKeyPair().getPrivate();
 	}
 
 	/**

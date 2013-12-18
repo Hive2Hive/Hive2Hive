@@ -41,4 +41,10 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 	public AcceptanceReply accept() {
 		return AcceptanceReply.OK;
 	}
+	
+	@Override
+	public boolean checkSignature() {
+		// sender should be another client node
+		return verify(networkManager.getPublicKey());
+	}
 }
