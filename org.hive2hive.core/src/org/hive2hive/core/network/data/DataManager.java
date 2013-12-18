@@ -107,13 +107,13 @@ public class DataManager {
 	public void get(String locationKey, String contentKey, IGetListener listener) {
 		FutureGet futureGet = get(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
 				Number160.createHash(contentKey));
-		futureGet.addListener(new FutureGetListener(listener));
+		futureGet.addListener(new FutureGetListener(listener, locationKey));
 	}
 
 	public void get(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
 		FutureGet futureGet = get(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
 				Number160.createHash(contentKey), versionKey);
-		futureGet.addListener(new FutureGetListener(listener));
+		futureGet.addListener(new FutureGetListener(listener, locationKey));
 	}
 
 	public void getUserProfileTask(String locationKey, IGetListener listener) {
@@ -124,7 +124,7 @@ public class DataManager {
 				.to(new Number640(Number160.createHash(locationKey), Number160
 						.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN), Number160.ZERO,
 						Number160.MAX_VALUE)).ascending().returnNr(1).start();
-		futureGet.addListener(new FutureGetListener(listener));
+		futureGet.addListener(new FutureGetListener(listener, locationKey));
 	}
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {

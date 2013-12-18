@@ -17,26 +17,32 @@ import org.hive2hive.core.network.data.listener.IGetListener;
 public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(FutureGetListener.class);
-	protected final IGetListener listener;
+	private final IGetListener listener;
+	private final String locationKey;
 
-	public FutureGetListener(IGetListener listener) {
+	public FutureGetListener(IGetListener listener, String locationKey) {
 		this.listener = listener;
+		this.locationKey = locationKey;
 	}
 
 	@Override
 	public void operationComplete(FutureGet future) throws Exception {
 		if (future == null || future.isFailed() || future.getData() == null) {
+			logger.debug(String.format("got key = '%s' result= 'null'", locationKey));
 			if (listener != null)
 				listener.handleGetResult(null);
 		} else {
+			NetworkContent content = (NetworkContent) future.getData().object();
+			logger.debug(String.format("got key = '%s' result= '%s'", locationKey, content.getClass()
+					.getSimpleName()));
 			if (listener != null)
-				listener.handleGetResult((NetworkContent) future.getData().object());
+				listener.handleGetResult(content);
 		}
 	}
 
 	@Override
 	public void exceptionCaught(Throwable t) throws Exception {
-		logger.error("Exception caught during get", t);
+		logger.error("Exception caught during get for key '" + locationKey + "'", t);
 		operationComplete(null);
 	}
 
