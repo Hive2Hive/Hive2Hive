@@ -6,7 +6,6 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutLocationStep;
-import org.hive2hive.core.process.common.put.PutUserProfileStep;
 
 /**
  * This step is called as soon as the @link{GetLocationsStep} is done.

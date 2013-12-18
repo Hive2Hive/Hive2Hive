@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common.put;
+package org.hive2hive.core.process.register;
 
 import javax.crypto.SecretKey;
 
@@ -9,6 +9,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -43,6 +44,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(userProfile,
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
+			encryptedUserProfile.generateVersionKey();
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);

@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.common.get;
+package org.hive2hive.core.process.login;
 
 import javax.crypto.SecretKey;
 
@@ -11,6 +11,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
@@ -58,7 +59,10 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 					credentials.getPin(), AES_KEYLENGTH.BIT_256);
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
-				context.setUserProfile((UserProfile) decrypted);
+				UserProfile userProfile = (UserProfile) decrypted;
+				userProfile.setVersionKey(content.getVersionKey());
+				userProfile.setBasedOnKey(content.getBasedOnKey());
+				context.setUserProfile(userProfile);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
 			}
