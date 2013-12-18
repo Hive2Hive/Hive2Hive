@@ -51,8 +51,11 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	@Before
 	public void setup() {
+		logger.debug("create random credentials");
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		logger.debug("create network");
 		client = NetworkTestUtil.createNetwork(1).get(0);
+		logger.debug("register");
 		ProcessTestUtil.register(userCredentials, client);
 	}
 
@@ -111,7 +114,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		for (TestUserProfileProcess process : processes) {
 			process.start();
 			// sleep for random time
-			Thread.sleep(Math.abs(new Random().nextLong() % 1000));
+			Thread.sleep(Math.abs(new Random().nextLong() % 100));
 		}
 
 		H2HWaiter waiter = new H2HWaiter(20);

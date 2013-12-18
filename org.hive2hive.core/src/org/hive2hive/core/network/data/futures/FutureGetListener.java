@@ -8,8 +8,7 @@ import org.hive2hive.core.network.data.listener.IGetListener;
 
 /**
  * A future listener for a get. Returns the given {@link IGetListener} listener the desired content or
- * <code>null</code> if the
- * get fails or the content doesn't exist.
+ * <code>null</code> if the get fails or the content doesn't exist.
  * 
  * @author Seppi
  */

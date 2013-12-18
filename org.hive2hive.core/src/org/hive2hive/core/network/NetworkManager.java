@@ -132,6 +132,8 @@ public class NetworkManager {
 		if (!connection.isConnected())
 			return;
 		connection.disconnect();
+		if (session != null)
+			session.getProfileManager().stopQueueWorker();
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 

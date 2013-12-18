@@ -39,8 +39,12 @@ public class UserProfileManager {
 
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
+
 	private final Object queueWaiter = new Object();
 
+	private final QueueWorker worker;
+	private boolean running = true;
+	
 	private final Queue<QueueEntry> readOnlyQueue;
 	private final Queue<PutQueueEntry> modifyQueue;
 	private volatile PutQueueEntry modifying;
@@ -51,7 +55,12 @@ public class UserProfileManager {
 		readOnlyQueue = new ConcurrentLinkedQueue<QueueEntry>();
 		modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
 
-		new Thread(new QueueWorker()).start();
+		worker = new QueueWorker();
+		new Thread(worker).start();		
+	}
+	
+	public void stopQueueWorker(){
+		running = false;
 	}
 
 	public UserCredentials getUserCredentials() {
@@ -125,11 +134,12 @@ public class UserProfileManager {
 
 		@Override
 		public void run() {
-			while (true) { // run forever
+			while (running) { // run forever
 				// modifying processes have advantage here because the read-only processes can profit
 				if (modifyQueue.isEmpty() && readOnlyQueue.isEmpty()) {
 					try {
-						Thread.sleep(100);
+						logger.debug("waiting");
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						// ignore
 					}
@@ -189,6 +199,7 @@ public class UserProfileManager {
 					}
 				}
 			}
+			logger.debug("Queue worker stoped.");
 		}
 
 		/**
