@@ -40,6 +40,7 @@ public class UserProfileManager {
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
 
+	private final Object entryWaiter = new Object();
 	private final Object queueWaiter = new Object();
 
 	private final QueueWorker worker;
@@ -61,6 +62,9 @@ public class UserProfileManager {
 	
 	public void stopQueueWorker(){
 		running = false;
+		synchronized (queueWaiter) {
+			queueWaiter.notify();
+		}
 	}
 
 	public UserCredentials getUserCredentials() {
@@ -86,6 +90,10 @@ public class UserProfileManager {
 		} else {
 			entry = new QueueEntry(pid);
 			readOnlyQueue.add(entry);
+		}
+		
+		synchronized (queueWaiter) {
+			queueWaiter.notify();
 		}
 
 		try {
@@ -137,10 +145,12 @@ public class UserProfileManager {
 			while (running) { // run forever
 				// modifying processes have advantage here because the read-only processes can profit
 				if (modifyQueue.isEmpty() && readOnlyQueue.isEmpty()) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						// ignore
+					synchronized (queueWaiter) {
+						try {
+							queueWaiter.wait();
+						} catch (InterruptedException e) {
+							// ignore
+						}
 					}
 				} else if (modifyQueue.isEmpty()) {
 					logger.debug(readOnlyQueue.size() + " process(es) are waiting for read-only access");
@@ -214,9 +224,9 @@ public class UserProfileManager {
 
 			dataManager.get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, entry);
 
-			synchronized (queueWaiter) {
+			synchronized (entryWaiter) {
 				try {
-					queueWaiter.wait();
+					entryWaiter.wait();
 				} catch (InterruptedException e) {
 					// ignore
 				}
@@ -246,9 +256,9 @@ public class UserProfileManager {
 				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
 						encryptedUserProfile, entry);
 
-				synchronized (queueWaiter) {
+				synchronized (entryWaiter) {
 					try {
-						queueWaiter.wait();
+						entryWaiter.wait();
 					} catch (InterruptedException e) {
 						// ignore
 					}
@@ -344,8 +354,8 @@ public class UserProfileManager {
 				setGetError(new GetFailedException(e.getMessage()));
 			}
 
-			synchronized (queueWaiter) {
-				queueWaiter.notify();
+			synchronized (entryWaiter) {
+				entryWaiter.notify();
 			}
 		}
 	}
@@ -411,8 +421,8 @@ public class UserProfileManager {
 		@Override
 		public void onPutSuccess() {
 			notifyPut();
-			synchronized (queueWaiter) {
-				queueWaiter.notify();
+			synchronized (entryWaiter) {
+				entryWaiter.notify();
 			}
 		}
 
@@ -420,8 +430,8 @@ public class UserProfileManager {
 		public void onPutFailure() {
 			setPutError(new PutFailedException());
 			notifyPut();
-			synchronized (queueWaiter) {
-				queueWaiter.notify();
+			synchronized (entryWaiter) {
+				entryWaiter.notify();
 			}
 		}
 	}
