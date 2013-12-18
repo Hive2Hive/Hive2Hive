@@ -3,6 +3,7 @@ package org.hive2hive.core.test.network;
 import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.network.messages.BaseMessageTest;
 import org.hive2hive.core.test.network.messages.BaseRequestMessageTest;
+import org.hive2hive.core.test.network.messages.MessageSignatureTest;
 import org.hive2hive.core.test.network.messages.direct.BaseDirectRequestMessageTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -20,7 +21,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		// Network, Data
 		DataManagerTest.class,
 		// Network, Message
-		BaseMessageTest.class, BaseRequestMessageTest.class,
+		MessageSignatureTest.class, BaseMessageTest.class, BaseRequestMessageTest.class,
 		// Network, Message, Direct
 		BaseDirectRequestMessageTest.class,
 })

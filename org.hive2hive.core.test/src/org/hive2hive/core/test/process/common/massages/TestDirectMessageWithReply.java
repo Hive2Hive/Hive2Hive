@@ -57,5 +57,10 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 		}
 
 	}
+	
+	@Override
+	public boolean checkSignature() {
+		return true;
+	}
 
 }

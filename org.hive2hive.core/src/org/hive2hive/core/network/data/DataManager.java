@@ -24,9 +24,7 @@ import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
- * This class offers an interface for putting, getting and removing data from the network. Data can be stored
- * or loaded globally or locally. The class offers also some special methods for the {@link UserProfileTask}
- * objects.
+ * This class offers an interface for putting, getting and removing data from the network.
  * 
  * @author Seppi
  */
@@ -40,6 +38,11 @@ public class DataManager {
 		this.networkManager = networkManager;
 	}
 
+	/**
+	 * Helper to get the <code>TomP2P</code> peer.
+	 * 
+	 * @return the current peer
+	 */
 	private Peer getPeer() {
 		return networkManager.getConnection().getPeer();
 	}

@@ -16,8 +16,7 @@ import org.hive2hive.core.network.data.listener.IRemoveListener;
 /**
  * A future listener for a remove. After the operation completed the listener verifies with a get digest if
  * all data has been deleted. If not, the listener retries the remove (see {@link H2HConstants#REMOVE_RETRIES}
- * ). In both cases the given {@link IRemoveListener} listener gets notified. </br></br>
- * For further details see {@link DataManager#remove(String, String, Number160, IRemoveListener)}
+ * ). In both cases the given {@link IRemoveListener} listener gets notified.
  * 
  * @author Seppi
  */
@@ -87,6 +86,9 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 		});
 	}
 
+	/**
+	 * Retry a remove till a certain threshold (see {@link H2HConstants#REMOVE_RETRIES})
+	 */
 	private void retryRemove() {
 		if (removeTries++ < H2HConstants.REMOVE_RETRIES) {
 			logger.warn(String.format("Remove verification failed. Data is not null. Try #%s."

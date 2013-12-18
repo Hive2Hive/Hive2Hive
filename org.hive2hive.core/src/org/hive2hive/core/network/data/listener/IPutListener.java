@@ -5,7 +5,7 @@ import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
 /**
  * An interface used in {@link FuturePutListener} to inform entities about a success or fail of a put. </br>
- * <b>Example:</b> {@link BasePutProcessStep#onSuccess()} or {@link BasePutProcessStep#onFailure()}
+ * <b>Example:</b> {@link BasePutProcessStep#onPutSuccess()} or {@link BasePutProcessStep#onPutFailure()}
  * 
  * @author Seppi
  */

@@ -6,7 +6,8 @@ import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 /**
  * An interface used in {@link FutureRemoveListener} to inform entities about a success or fail of a remove.
  * </br>
- * <b>Example:</b> {@link BaseRemoveProcessStep#onSuccess()} or {@link BaseRemoveProcessStep#onFailure()}
+ * <b>Example:</b> {@link BaseRemoveProcessStep#onRemoveSuccess()} or
+ * {@link BaseRemoveProcessStep#onRemoveFailure()}
  * 
  * @author Seppi
  */

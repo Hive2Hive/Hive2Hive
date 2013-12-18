@@ -88,4 +88,10 @@ public class ResponseMessage extends BaseDirectMessage {
 		}
 	}
 
+	@Override
+	public boolean checkSignature() {
+		// a response message doesn't require special signature verification
+		return true;
+	}
+
 }

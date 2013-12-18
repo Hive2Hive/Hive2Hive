@@ -41,4 +41,10 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 			logger.error("Got notified but cannot download the file", e);
 		}
 	}
+	
+	@Override
+	public boolean checkSignature() {
+		// message should come from another client nodes
+		return verify(networkManager.getPublicKey());
+	}
 }

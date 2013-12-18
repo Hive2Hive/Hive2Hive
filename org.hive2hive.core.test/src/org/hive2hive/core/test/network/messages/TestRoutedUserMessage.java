@@ -21,5 +21,10 @@ public class TestRoutedUserMessage extends RoutedRequestMessage {
 	public AcceptanceReply accept() {
 		return AcceptanceReply.OK;
 	}
+	
+	@Override
+	public boolean checkSignature() {
+		return true;
+	}
 
 }

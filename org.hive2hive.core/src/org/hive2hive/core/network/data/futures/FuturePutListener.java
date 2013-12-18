@@ -22,7 +22,6 @@ import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.listener.IPutListener;
-import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 
 /**
  * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
@@ -31,12 +30,10 @@ import org.hive2hive.core.network.messages.futures.FutureDirectListener;
  * <b>Failure Handling</b></br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link PutStatusH2H} for possible failures. If putting fails the
- * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). For that another adapter
- * (see {@link FutureDirectListener}) is attached. After a successful put the adapter waits a moment and
- * verifies with a get if no concurrent modification happened. All puts are asynchronous. That's why the
- * future listener attaches himself to the new future objects so that the adapter can finally notify his/her
- * listener
- * about a success or failure.
+ * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). After a successful put
+ * the adapter verifies with a digest if no concurrent modification happened. All puts are asynchronous.
+ * That's why the future listener attaches himself to the new future objects so that the adapter can finally
+ * notify his/her listener about a success or failure.
  * 
  * @author Seppi
  */
@@ -172,6 +169,11 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 	}
 
+	/**
+	 * Get the digest under the given location, domain and content key. Digest contains all version keys.
+	 * 
+	 * @return future with the digest request
+	 */
 	private FutureDigest getDigest() {
 		DigestBuilder digestBuilder = dataManager.getDigest(locationKey);
 		digestBuilder.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO)).to(
@@ -179,6 +181,9 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		return digestBuilder.start();
 	}
 
+	/**
+	 * Loads digest and triggers a check.
+	 */
 	private void verifyPut() {
 		// get data to verify if everything went correct
 		FutureDigest digestFuture = getDigest();
@@ -197,6 +202,14 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		});
 	}
 
+	/**
+	 * Checks if newly put version is listened in the digest. If yes everything is fine. If one peer doesn't
+	 * contain the new version key it is a sign for a concurrent modification. In this case we have to figure
+	 * out which newly put version wins.
+	 * 
+	 * @param rawDigest
+	 *            raw digest data set
+	 */
 	private void checkVersionKey(Map<PeerAddress, DigestResult> rawDigest) {
 		for (PeerAddress peerAddress : rawDigest.keySet()) {
 			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).getKeyDigest() == null
@@ -235,6 +248,17 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		notifySuccess();
 	}
 
+	/**
+	 * Checks if the new version key is older than the one listened in the digest.
+	 * 
+	 * @param keyDigest
+	 *            digest of a peer
+	 * @param peerAddress
+	 *            the owner of the digest
+	 * @return
+	 *         <code>true</code> if the new version key has precedence to the one listened in the digest,
+	 *         otherwise <code>false</code>
+	 */
 	protected boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest,
 			PeerAddress peerAddress) {
 		/* Check if based on entry exists */
@@ -257,21 +281,21 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					return true;
 				} else {
 					logger.error(String.format("Put verification: Peer '%s' has a corrupt version history."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'", peerAddress,
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 					return true;
 				}
 			} else {
 				int compare = entryBasingOnSameParent.getVersionKey().compareTo(content.getVersionKey());
 				if (compare == 0) {
 					logger.error(String.format("Put verification: Peer '%s' has same version."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'", peerAddress,
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 					return true;
 				} else if (compare < 0) {
 					logger.warn(String.format("Put verification: Peer '%s' has older version."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'", peerAddress,
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 					return false;
 				} else {
 					logger.warn(String.format("Put verification: Peer '%s' has newer version."
@@ -283,6 +307,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 	}
 
+	/**
+	 * Get the entry which is the parent of the new version.
+	 * 
+	 * @param keyDigest
+	 *            a digest containing the parent version (based on)
+	 * @return the parent of the new version
+	 */
 	private Number640 getSuccessor(NavigableMap<Number640, Number160> keyDigest) {
 		Number640 entryBasingOnSameParent = null;
 		for (Number640 key : keyDigest.keySet()) {
@@ -295,14 +326,17 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	}
 
 	private void notifySuccess() {
-		logger.debug(String.format(
-				"Verification for put completed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-				locationKey, domainKey, contentKey, content.getVersionKey()));
+		logger.debug(String
+				.format("Verification for put completed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+						locationKey, domainKey, contentKey, content.getVersionKey()));
 		// everything is ok
 		if (listener != null)
 			listener.onPutSuccess();
 	}
 
+	/**
+	 * Remove first potentially successful puts. Then notify the listener about the fail.
+	 */
 	private void notifyFailure() {
 		// remove succeeded puts
 		FutureRemove futureRemove = dataManager.remove(locationKey, domainKey, contentKey,
@@ -311,10 +345,9 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			@Override
 			public void operationComplete(FutureRemove future) {
 				if (future.isFailed())
-					logger.warn(String
-							.format("Put Retry: Could not delete the newly put content."
-									+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-									locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.warn(String.format("Put Retry: Could not delete the newly put content."
+							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+							locationKey, domainKey, contentKey, content.getVersionKey()));
 
 				if (listener != null)
 					listener.onPutFailure();

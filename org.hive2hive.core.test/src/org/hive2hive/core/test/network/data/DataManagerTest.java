@@ -95,7 +95,7 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
-		String locationKey = NetworkTestUtil.randomString();
+		String locationKey = nodeB.getNodeId();
 		String contentKey =NetworkTestUtil.randomString();
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;

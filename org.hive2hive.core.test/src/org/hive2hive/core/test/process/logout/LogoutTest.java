@@ -49,7 +49,7 @@ public class LogoutTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		userProfile = ProcessTestUtil.register(userCredentials, network.get(0));
-		ProcessTestUtil.login(userCredentials, network.get(0), FileUtils.getTempDirectory());
+		ProcessTestUtil.login(userCredentials, network.get(0));
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package org.hive2hive.core.network;
 
 import java.net.InetAddress;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
@@ -80,6 +81,15 @@ public class NetworkManager {
 			return null;
 		return session.getKeyPair().getPublic();
 	}
+	
+	/**
+	 * Helper method that returns the private key of the currently logged in user
+	 */
+	public PrivateKey getPrivateKey() {
+		if (session == null)
+			return null;
+		return session.getKeyPair().getPrivate();
+	}
 
 	/**
 	 * Create a peer which will be the first node in the network (master).
@@ -122,6 +132,8 @@ public class NetworkManager {
 		if (!connection.isConnected())
 			return;
 		connection.disconnect();
+		if (session != null)
+			session.getProfileManager().stopQueueWorker();
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 
