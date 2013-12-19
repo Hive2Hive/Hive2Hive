@@ -98,6 +98,7 @@ public abstract class Process implements IProcess {
 	}
 
 	@Override
+	// TODO stop with exception as parameter
 	public void stop(String reason) {
 		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
 			// first roll back

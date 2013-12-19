@@ -84,18 +84,15 @@ public class FileRecursionUtil {
 	 * Finds the parent process node
 	 */
 	private static ProcessTreeNode getParent(FileProcessTreeNode root, File file) {
-		ProcessTreeNode current = root;
-		for (ProcessTreeNode child : root.getChildren()) {
-			FileProcessTreeNode childProcess = (FileProcessTreeNode) child;
-			File childNode = childProcess.getFile();
-			if (childNode.isDirectory()) {
-				// skip non-directories
-				if (file.getAbsolutePath().startsWith(childNode.getAbsolutePath())) {
-					current = child;
-				}
+		File parent = file.getParentFile();
+		for (ProcessTreeNode node : root.getAllChildren()) {
+			FileProcessTreeNode fileNode = (FileProcessTreeNode) node;
+			if (fileNode.getFile().equals(parent)) {
+				return fileNode;
 			}
 		}
-		return current;
+
+		return root;
 	}
 
 	public static List<File> getPreorderList(File root) {
@@ -203,17 +200,15 @@ public class FileRecursionUtil {
 	 * Finds the parent process node
 	 */
 	private static ProcessTreeNode getParent(NodeProcessTreeNode root, FileTreeNode node) {
-		ProcessTreeNode current = root;
-		for (ProcessTreeNode child : root.getChildren()) {
-			NodeProcessTreeNode childProcess = (NodeProcessTreeNode) child;
-			FileTreeNode childNode = childProcess.getNode();
-			if (childNode.isFolder()) {
-				// skip non-directories
-				if (node.getFullPath().startsWith(childNode.getFullPath())) {
-					current = child;
-				}
+		FileTreeNode parent = node.getParent();
+		for (ProcessTreeNode child : root.getAllChildren()) {
+			NodeProcessTreeNode treeNode = (NodeProcessTreeNode) child;
+			// skip non-directories
+			if (treeNode.getNode().getFullPath().equals(parent.getFullPath())) {
+				return treeNode;
 			}
 		}
-		return current;
+
+		return root;
 	}
 }

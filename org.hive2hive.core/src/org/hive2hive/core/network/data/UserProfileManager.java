@@ -45,7 +45,7 @@ public class UserProfileManager {
 
 	private final QueueWorker worker;
 	private boolean running = true;
-	
+
 	private final Queue<QueueEntry> readOnlyQueue;
 	private final Queue<PutQueueEntry> modifyQueue;
 	private volatile PutQueueEntry modifying;
@@ -57,10 +57,10 @@ public class UserProfileManager {
 		modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
 
 		worker = new QueueWorker();
-		new Thread(worker).start();		
+		new Thread(worker).start();
 	}
-	
-	public void stopQueueWorker(){
+
+	public void stopQueueWorker() {
 		running = false;
 		synchronized (queueWaiter) {
 			queueWaiter.notify();
@@ -91,7 +91,7 @@ public class UserProfileManager {
 			entry = new QueueEntry(pid);
 			readOnlyQueue.add(entry);
 		}
-		
+
 		synchronized (queueWaiter) {
 			queueWaiter.notify();
 		}
@@ -105,7 +105,10 @@ public class UserProfileManager {
 			throw e;
 		}
 
-		return entry.getUserProfile();
+		UserProfile profile = entry.getUserProfile();
+		if (profile == null)
+			throw new GetFailedException("User Profile not found");
+		return profile;
 	}
 
 	/**
@@ -163,7 +166,11 @@ public class UserProfileManager {
 							+ " processes that newest profile is ready");
 					// notify all read only processes
 					while (!readOnlyQueue.isEmpty()) {
-						readOnlyQueue.poll().notifyGet();
+						// copy userprofile and errors to other entries
+						QueueEntry readOnly = readOnlyQueue.poll();
+						readOnly.setUserProfile(entry.getUserProfile());
+						readOnly.setGetError(entry.getGetError());
+						readOnly.notifyGet();
 					}
 				} else {
 					// a process wants to modify
@@ -177,7 +184,11 @@ public class UserProfileManager {
 					modifying.notifyGet();
 					// notify all read only processes
 					while (!readOnlyQueue.isEmpty()) {
-						readOnlyQueue.poll().notifyGet();
+						// copy userprofile and errors to other entries
+						QueueEntry readOnly = readOnlyQueue.poll();
+						readOnly.setUserProfile(modifying.getUserProfile());
+						readOnly.setGetError(modifying.getGetError());
+						readOnly.notifyGet();
 					}
 
 					int counter = 0;
@@ -311,6 +322,10 @@ public class UserProfileManager {
 
 		public void setGetError(GetFailedException error) {
 			this.getFailedException = error;
+		}
+
+		public GetFailedException getGetError() {
+			return getFailedException;
 		}
 
 		public UserProfile getUserProfile() {

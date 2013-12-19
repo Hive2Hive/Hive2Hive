@@ -12,10 +12,12 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.util.FileRecursionUtil;
-import org.hive2hive.core.process.util.ProcessTreeNode;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
+import org.hive2hive.core.process.util.ProcessTreeNode;
 
 /**
  * Synchronizes the local files with the entries in the user profile:
@@ -88,6 +90,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone()
 				&& uploadProcessNewVersions.isDone() && deleteProcess.isDone())) {
 			try {
+				List<IProcess> allProcesses = ProcessManager.getInstance().getAllProcesses();
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
