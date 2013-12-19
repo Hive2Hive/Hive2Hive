@@ -19,6 +19,7 @@ public abstract class ProcessTreeNode extends Process {
 	private final Process process;
 	private final List<ProcessTreeNode> childProcesses;
 	private boolean done;
+	private boolean failed;
 	private final ProcessTreeNode parent;
 	private final List<String> problemList;
 
@@ -42,6 +43,7 @@ public abstract class ProcessTreeNode extends Process {
 		this.parent = parent;
 		this.childProcesses = new ArrayList<ProcessTreeNode>();
 		this.done = false;
+		this.failed = false;
 		if (parent == null) {
 			// root node
 			problemList = new CopyOnWriteArrayList<String>();
@@ -80,6 +82,11 @@ public abstract class ProcessTreeNode extends Process {
 	 * @return
 	 */
 	public boolean isDone() {
+		// when failed, the children must not be checked since they never started
+		if (failed)
+			return true;
+
+		// children may have started and are already finished (note the recursion)
 		boolean allChildrenDone = true;
 		for (ProcessTreeNode child : childProcesses) {
 			allChildrenDone &= child.isDone();
@@ -106,7 +113,7 @@ public abstract class ProcessTreeNode extends Process {
 
 	@Override
 	public void run() {
-		if (process == null) {
+		if (parent == null) {
 			setNextStep(null);
 
 			// is root node --> start all children
@@ -129,6 +136,7 @@ public abstract class ProcessTreeNode extends Process {
 				@Override
 				public void onFail(String reason) {
 					done = true;
+					failed = true;
 					addProblem(reason);
 				}
 			});

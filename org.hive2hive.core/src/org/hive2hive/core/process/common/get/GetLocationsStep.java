@@ -9,7 +9,8 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 
 /**
- * Generic process step to get the {@link: UserProfile} and decrypt it. It is then accessible in
+ * Generic process step to get the {@link: Locations}. It is then accessible in the context
+ * object
  * 
  * @author Nico, Christian, Seppi
  * 
@@ -27,16 +28,18 @@ public class GetLocationsStep extends BaseGetProcessStep {
 		this.nextStep = nextStep;
 		this.context = context;
 	}
-	
+
 	@Override
 	public void start() {
+		logger.debug("Get the locations for user '" + userId + "'.");
 		get(userId, H2HConstants.USER_LOCATIONS);
 	}
 
 	@Override
 	public void handleGetResult(NetworkContent content) {
 		if (content == null) {
-			logger.debug("Did not find the locations.");
+			logger.warn("Did not find the locations.");
+			context.setLocation(null);
 		} else {
 			context.setLocation((Locations) content);
 		}

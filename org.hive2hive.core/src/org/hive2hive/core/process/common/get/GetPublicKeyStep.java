@@ -34,6 +34,7 @@ public class GetPublicKeyStep extends BaseGetProcessStep {
 	public void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			context.setPublicKey(null);
+			context.setPublicKey(null);
 		} else {
 			UserPublicKey key = (UserPublicKey) content;
 			context.setPublicKey(key.getPublicKey());
