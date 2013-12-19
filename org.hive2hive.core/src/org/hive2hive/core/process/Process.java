@@ -101,6 +101,7 @@ public abstract class Process implements IProcess {
 	// TODO stop with exception as parameter
 	public void stop(String reason) {
 		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
+			logger.error(this.getClass().getSimpleName() + " stopped. Reason: " + reason);
 			// first roll back
 			rollBack(reason);
 

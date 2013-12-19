@@ -20,7 +20,7 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 	private final String childName;
 
 	public UpdateParentMetaStep(PublicKey childKey, String childName) {
-		super(null);
+		super(null, null);
 		this.childKey = childKey;
 		this.childName = childName;
 	}

@@ -9,8 +9,8 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
 
-	protected UpdateParentMetaStep() {
-		super(new UpdateUserProfileStep());
+	public UpdateParentMetaStep() {
+		super(null, new UpdateUserProfileStep());
 	}
 
 	@Override

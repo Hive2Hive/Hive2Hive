@@ -34,14 +34,6 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 		this.metaDocument = metaDocument;
 	}
 
-	/**
-	 * Note, if this constructor is used, the meta document to put needs to be set in an overwritten start
-	 * method
-	 */
-	protected PutMetaDocumentStep(ProcessStep nextStep) {
-		super(nextStep);
-	}
-
 	@Override
 	public void start() {
 		try {
