@@ -236,9 +236,9 @@ public class UserProfileManager {
 
 			synchronized (entryWaiter) {
 				try {
-					entryWaiter.wait();
+					entryWaiter.wait(PUT_GET_AWAIT_TIMEOUT);
 				} catch (InterruptedException e) {
-					// ignore
+					entry.setGetError(new GetFailedException("Could not wait to get the user profile"));
 				}
 			}
 		}
@@ -268,14 +268,16 @@ public class UserProfileManager {
 
 				synchronized (entryWaiter) {
 					try {
-						entryWaiter.wait();
+						entryWaiter.wait(PUT_GET_AWAIT_TIMEOUT);
 					} catch (InterruptedException e) {
-						// ignore
+						entry.setPutError(new PutFailedException("Could not wait for put"));
 					}
 				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
+			} finally {
+				entry.notifyPut();
 			}
 		}
 	}
@@ -435,7 +437,7 @@ public class UserProfileManager {
 
 		@Override
 		public void onPutSuccess() {
-			notifyPut();
+			logger.debug("Put was successful. Notifying process " + getPid());
 			synchronized (entryWaiter) {
 				entryWaiter.notify();
 			}
@@ -443,8 +445,8 @@ public class UserProfileManager {
 
 		@Override
 		public void onPutFailure() {
-			setPutError(new PutFailedException());
-			notifyPut();
+			logger.error("Put failed. Notifying process " + getPid());
+			setPutError(new PutFailedException("Could not put the user profile into the DHT"));
 			synchronized (entryWaiter) {
 				entryWaiter.notify();
 			}
