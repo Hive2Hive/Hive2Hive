@@ -53,11 +53,6 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 			try {
 				UserProfileManager profileManager = context.getProfileManager();
 				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), false);
-				if (userProfile == null) {
-					getProcess().stop("User profile not found");
-					return;
-				}
-
 				FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getFileManager());
 				if (parentNode == null) {
 					getProcess().stop("Parent file is not in user profile");

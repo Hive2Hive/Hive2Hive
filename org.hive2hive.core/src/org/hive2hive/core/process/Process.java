@@ -107,6 +107,7 @@ public abstract class Process implements IProcess {
 
 			// then mark process as stopped
 			state = ProcessState.STOPPED;
+			ProcessManager.getInstance().detachProcess(this);
 		} else {
 			logger.warn("Process is already stopped or still rollbacking");
 		}

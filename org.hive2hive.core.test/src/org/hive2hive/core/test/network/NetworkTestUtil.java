@@ -125,7 +125,7 @@ public class NetworkTestUtil {
 		nodes.add(master);
 
 		try {
-			InetAddress bootstrapAddress = InetAddress.getByName("127.0.0.1");
+			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
 				IH2HNode node = new H2HNodeBuilder().setBootstrapAddress(bootstrapAddress).build();
 				nodes.add(node);

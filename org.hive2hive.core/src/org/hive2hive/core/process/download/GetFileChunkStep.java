@@ -100,7 +100,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 				getProcess().setNextStep(nextStep);
 			}
 		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-				| IllegalStateException | InvalidCipherTextException e) {
+				| IllegalStateException | InvalidCipherTextException | IllegalArgumentException e) {
 			getProcess().stop("Could not decrypt file chunk. Reason: " + e.getMessage());
 		} catch (IOException e) {
 			getProcess().stop("Could not write file chunk. Reason: " + e.getMessage());

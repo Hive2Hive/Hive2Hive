@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
@@ -132,6 +133,7 @@ public abstract class ProcessTreeNode extends Process {
 						child.start();
 					}
 					done = true;
+					ProcessManager.getInstance().detachProcess(ProcessTreeNode.this);
 				}
 
 				@Override
@@ -139,6 +141,7 @@ public abstract class ProcessTreeNode extends Process {
 					addProblem(reason);
 					done = true;
 					failed = true;
+					ProcessManager.getInstance().detachProcess(ProcessTreeNode.this);
 				}
 			});
 

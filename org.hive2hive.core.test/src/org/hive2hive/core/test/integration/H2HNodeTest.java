@@ -37,6 +37,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	private IH2HNode loggedInNode;
 	private File rootDirectory;
+	private UserCredentials credentials;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -53,7 +54,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@Before
 	public void testRegisterLogin() throws IOException {
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		credentials = NetworkTestUtil.generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
 		IProcess registerProcess = registerNode.register(credentials);
@@ -66,8 +67,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		rootDirectory = FileUtils.getTempDirectory();
-		loggedInNode = network.get(random.nextInt(NETWORK_SIZE));
+		rootDirectory = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
 		IProcess loginProcess = loggedInNode.login(credentials, rootDirectory);
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
@@ -124,6 +125,70 @@ public class H2HNodeTest extends H2HJUnitTest {
 		} catch (IllegalFileLocation e) {
 			// intended exception
 		}
+	}
+
+	@Test
+	public void testAddFileTree() throws IOException, IllegalFileLocation, NoSessionException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		// /folder1/test1.txt
+		// /folder1/folder2/test2.txt
+		File folder1 = new File(rootDirectory, "folder1");
+		folder1.mkdir();
+		File test1File = new File(folder1, "test1.txt");
+		FileUtils.write(test1File, "Hello World 1");
+
+		File folder2 = new File(folder1, "folder2");
+		folder2.mkdir();
+		File test2File = new File(folder2, "test2.txt");
+		FileUtils.write(test2File, "Hello World 2");
+
+		IProcess process = loggedInNode.add(folder1);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+
+		// wait for the process to finish the upload
+		H2HWaiter waiter = new H2HWaiter(30);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// wait for all uploading processes to finish
+		waiter = new H2HWaiter(60);
+		do {
+			waiter.tickASecond();
+		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+
+		// then start 2nd client and login
+		File rootUser2 = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
+		IProcess loginProcess = newNode.login(credentials, rootUser2);
+		listener = new TestProcessListener();
+		loginProcess.addListener(listener);
+
+		// wait for the process to finish
+		waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+
+		// wait for the post-loginprocess to finish
+		waiter = new H2HWaiter(60);
+		do {
+			waiter.tickASecond();
+		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+
+		// verfiy that all files are here
+		folder1 = new File(rootUser2, "folder1");
+		Assert.assertTrue(folder1.exists());
+
+		test1File = new File(folder1, "test1.txt");
+		Assert.assertEquals("Hello World 1", FileUtils.readFileToString(test1File));
+
+		folder2 = new File(folder1, "folder2");
+		Assert.assertTrue(folder2.exists());
+
+		test2File = new File(folder2, "test2.txt");
+		Assert.assertEquals("Hello World 2", FileUtils.readFileToString(test2File));
 	}
 
 	@After

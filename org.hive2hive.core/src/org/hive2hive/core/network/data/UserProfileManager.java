@@ -194,10 +194,11 @@ public class UserProfileManager {
 					long sleepTime = MAX_MODIFICATION_TIME / 10;
 					while (counter < 10 && !modifying.isReadyToPut() && !modifying.isAborted()) {
 						try {
-							counter++;
 							Thread.sleep(sleepTime);
 						} catch (InterruptedException e) {
 							// ignore
+						} finally {
+							counter++;
 						}
 					}
 
@@ -218,7 +219,8 @@ public class UserProfileManager {
 					}
 				}
 			}
-			logger.debug("Queue worker stoped.");
+
+			logger.debug("Queue worker stopped.");
 		}
 
 		/**
@@ -312,7 +314,7 @@ public class UserProfileManager {
 				try {
 					getWaiter.wait();
 				} catch (InterruptedException e) {
-					// ignore
+					getFailedException = new GetFailedException("Could not wait for getting the user profile");
 				}
 			}
 
@@ -422,7 +424,7 @@ public class UserProfileManager {
 				try {
 					putWaiter.wait();
 				} catch (InterruptedException e) {
-					// ignore
+					putFailedException = new PutFailedException("Could not wait to put the user profile");
 				}
 			}
 
