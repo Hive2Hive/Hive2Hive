@@ -191,13 +191,13 @@ public final class MessageManager {
 			logger.error("An exception occured while signing the message. The message will not be sent.");
 			return null;
 		}
-		
+
 		// asymmetrically encrypt message
 		byte[] messageBytes = EncryptionUtil.serializeObject(message);
 
 		try {
 			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes,
-					targetPublicKey, H2HConstants.H2H_AES_KEYLENGTH);
+					targetPublicKey, H2HConstants.HYBRID_AES_KEYLENGTH);
 
 			return encryptedMessage;
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException

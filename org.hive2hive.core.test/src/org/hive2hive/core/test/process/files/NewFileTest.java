@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -21,7 +22,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -131,7 +131,7 @@ public class NewFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, fileManager));
 		NewFileProcess process = new NewFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();
@@ -147,7 +147,7 @@ public class NewFileTest extends H2HJUnitTest {
 	private void startUploadProcess(File toUpload) throws IllegalFileLocation, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, fileManager));
 		NewFileProcess process = new NewFileProcess(toUpload, client);
 		TestProcessListener listener = new TestProcessListener();

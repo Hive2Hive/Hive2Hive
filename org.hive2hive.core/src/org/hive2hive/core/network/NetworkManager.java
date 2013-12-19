@@ -81,7 +81,7 @@ public class NetworkManager {
 			return null;
 		return session.getKeyPair().getPublic();
 	}
-	
+
 	/**
 	 * Helper method that returns the private key of the currently logged in user
 	 */
@@ -132,7 +132,7 @@ public class NetworkManager {
 		if (!connection.isConnected())
 			return;
 		connection.disconnect();
-		if (session != null)
+		if (session != null && session.getProfileManager() != null)
 			session.getProfileManager().stopQueueWorker();
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}

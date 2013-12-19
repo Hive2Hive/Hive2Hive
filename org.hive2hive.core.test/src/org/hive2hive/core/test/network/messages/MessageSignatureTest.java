@@ -48,9 +48,9 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		NetworkManager receiver = network.get(1);
 
 		// assign same key pairs to simulate logged in users
-		KeyPair keyPair1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		KeyPair keyPair1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		sender.setSession(new H2HSession(keyPair1, null, null, null));
-		KeyPair keyPair2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		KeyPair keyPair2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		receiver.setSession(new H2HSession(keyPair2, null, null, null));
 
 		// location key is target node id
@@ -77,9 +77,9 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		NetworkManager receiver = network.get(1);
 
 		// assign same key pairs to simulate logged in users
-		KeyPair keyPair1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		KeyPair keyPair1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		sender.setSession(new H2HSession(keyPair1, null, null, null));
-		KeyPair keyPair2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		KeyPair keyPair2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		receiver.setSession(new H2HSession(keyPair2, null, null, null));
 
 		// location key is target node id
@@ -87,7 +87,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 		// create a message with target node B, assign random public key
 		TestSignedMessage message = new TestSignedMessage(locationKey, EncryptionUtil.generateRSAKeyPair(
-				H2HConstants.H2H_RSA_KEYLENGTH).getPublic());
+				H2HConstants.KEYLENGTH_USER_KEYS).getPublic());
 
 		// send message
 		TestMessageVerifyListener listener = new TestMessageVerifyListener();

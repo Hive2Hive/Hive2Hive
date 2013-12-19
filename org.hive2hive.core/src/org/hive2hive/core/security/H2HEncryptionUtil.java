@@ -14,7 +14,6 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 
 public final class H2HEncryptionUtil {
 
@@ -64,7 +63,8 @@ public final class H2HEncryptionUtil {
 	}
 
 	/**
-	 * Asymmetrically encrypts content inheriting from {@link NetworkContent}.
+	 * Asymmetrically encrypts content inheriting from {@link NetworkContent}. A default key length will be
+	 * used.
 	 * 
 	 * @param content the content to be encrypted.
 	 * @param publicKey The asymmetric public key with which the content will be encrypted
@@ -77,12 +77,13 @@ public final class H2HEncryptionUtil {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey,
-			AES_KEYLENGTH keyLength) throws DataLengthException, InvalidKeyException, IllegalStateException,
+	public static HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey)
+			throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
 		byte[] serialized = EncryptionUtil.serializeObject(content);
 
-		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey, keyLength);
+		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey,
+				H2HConstants.HYBRID_AES_KEYLENGTH);
 		encryptHybrid.setTimeToLive(content.getTimeToLive());
 		return encryptHybrid;
 	}

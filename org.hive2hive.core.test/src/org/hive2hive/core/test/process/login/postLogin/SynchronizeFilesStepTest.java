@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -17,7 +18,6 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.login.SynchronizeFilesStep;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -207,8 +207,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	private void startSync(NetworkManager client, FileManager fileManager, int waitTimeS)
 			throws NoSessionException {
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), manager,
-				config, fileManager));
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
+				manager, config, fileManager));
 		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, manager, fileManager);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);

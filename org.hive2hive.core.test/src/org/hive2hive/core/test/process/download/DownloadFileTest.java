@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
@@ -16,7 +17,6 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -75,7 +75,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		String fileName = NetworkTestUtil.randomString();
 		uploadedFile = new File(root, fileName);
 		FileUtils.write(uploadedFile, testContent);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, uploaderFileManager));
 		NewFileProcess ulProcess = new NewFileProcess(uploadedFile, client);
 
@@ -99,7 +99,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		FileManager downloaderFileManager = new FileManager(newRoot);
 
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, downloaderFileManager));
 		DownloadFileProcess process = new DownloadFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();
@@ -126,10 +126,11 @@ public class DownloadFileTest extends H2HJUnitTest {
 		FileManager downloaderFileManager = new FileManager(newRoot);
 
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, downloaderFileManager));
 		FileTreeNode wrongKeys = new FileTreeNode(file.getParent(),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024), "bla", "bla".getBytes());
+				EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA), "bla",
+				"bla".getBytes());
 		DownloadFileProcess process = new DownloadFileProcess(wrongKeys, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -154,7 +155,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
 
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, downloaderFileManager));
 
 		DownloadFileProcess process = new DownloadFileProcess(file, client);
@@ -191,7 +192,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		long lastModifiedBefore = existing.lastModified();
 
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, downloaderFileManager));
 		DownloadFileProcess process = new DownloadFileProcess(file, client);
 		TestProcessListener listener = new TestProcessListener();

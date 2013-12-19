@@ -4,9 +4,11 @@ import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * File which contains all keys and meta information about the files of the owner.
@@ -22,6 +24,11 @@ public class UserProfile extends NetworkContent {
 	private final KeyPair encryptionKeys;
 	private final KeyPair domainKeys;
 	private final FileTreeNode root;
+
+	public UserProfile(String userId) {
+		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
+				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS));
+	}
 
 	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair domainKeys) {
 		this.userId = userId;

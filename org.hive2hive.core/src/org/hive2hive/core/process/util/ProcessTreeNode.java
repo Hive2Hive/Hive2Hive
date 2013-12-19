@@ -120,6 +120,7 @@ public abstract class ProcessTreeNode extends Process {
 			for (ProcessTreeNode child : childProcesses) {
 				child.start();
 			}
+
 			// no further tasks for the root node
 			done = true;
 		} else {
@@ -127,17 +128,17 @@ public abstract class ProcessTreeNode extends Process {
 			process.addListener(new IProcessListener() {
 				@Override
 				public void onSuccess() {
-					done = true;
 					for (ProcessTreeNode child : childProcesses) {
 						child.start();
 					}
+					done = true;
 				}
 
 				@Override
 				public void onFail(String reason) {
+					addProblem(reason);
 					done = true;
 					failed = true;
-					addProblem(reason);
 				}
 			});
 

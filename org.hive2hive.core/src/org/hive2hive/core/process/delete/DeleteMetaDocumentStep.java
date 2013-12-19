@@ -12,7 +12,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
@@ -41,7 +40,7 @@ public class DeleteMetaDocumentStep extends BaseRemoveProcessStep {
 		try {
 			// fist encrypt the content, in case of a rollback, we need to re-put this thing again
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaDocument,
-					metaDocument.getId(), AES_KEYLENGTH.BIT_256);
+					metaDocument.getId());
 
 			// start the deletion
 			remove(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted);

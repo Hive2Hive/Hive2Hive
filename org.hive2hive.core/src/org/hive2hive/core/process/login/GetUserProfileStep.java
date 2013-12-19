@@ -14,7 +14,6 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -56,7 +55,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 			logger.debug("Decrypting user profile with 256-bit AES key from password.");
 
 			SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-					credentials.getPin(), AES_KEYLENGTH.BIT_256);
+					credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 				UserProfile userProfile = (UserProfile) decrypted;

@@ -75,7 +75,7 @@ public class NetworkTestUtil {
 	 */
 	public static void createKeyPairs(List<NetworkManager> network) {
 		for (NetworkManager node : network) {
-			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			node.setSession(new H2HSession(keyPair, null, null, null));
 		}
 	}
@@ -87,7 +87,7 @@ public class NetworkTestUtil {
 	 *            list containing all nodes which need to have the same key pair
 	 */
 	public static void createSameKeyPair(List<NetworkManager> network) {
-		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.H2H_RSA_KEYLENGTH);
+		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		H2HSession session = new H2HSession(keyPair, null, null, null);
 		for (NetworkManager node : network) {
 			node.setSession(session);

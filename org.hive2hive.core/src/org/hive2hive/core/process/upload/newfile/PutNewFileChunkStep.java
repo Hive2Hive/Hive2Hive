@@ -5,6 +5,7 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -12,7 +13,6 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.upload.PutChunkStep;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
 public class PutNewFileChunkStep extends PutChunkStep {
 
@@ -23,7 +23,7 @@ public class PutNewFileChunkStep extends PutChunkStep {
 
 	private void configureStepAfterUpload(NewFileProcessContext context) {
 		// generate the new key pair for the meta file (which are later stored in the user profile)
-		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		context.setNewMetaKeyPair(metaKeyPair);
 
 		MetaDocument metaDocument = null;

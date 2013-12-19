@@ -21,8 +21,6 @@ import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
@@ -109,7 +107,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			// the byte-Array may contain many empty slots if last chunk. Truncate it
 			data = truncateData(data, read);
 
-			KeyPair chunkKey = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+			KeyPair chunkKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK_RSA);
 			Chunk chunk = new Chunk(chunkKey.getPublic(), data, chunkKeys.size(), read);
 			chunkKeys.add(chunkKey);
 
@@ -121,7 +119,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
 				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptHybrid(chunk,
-						chunkKey.getPublic(), AES_KEYLENGTH.BIT_256);
+						chunkKey.getPublic());
 
 				// start the put and continue with next chunk
 				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getName());

@@ -31,9 +31,7 @@ public class UserProfileTest extends H2HJUnitTest {
 
 	@Before
 	public void createUserProfile() {
-		userProfile = new UserProfile(NetworkTestUtil.randomString(),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512));
+		userProfile = new UserProfile(NetworkTestUtil.randomString());
 	}
 
 	@Test

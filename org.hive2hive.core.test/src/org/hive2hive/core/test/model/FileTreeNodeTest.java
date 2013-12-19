@@ -2,10 +2,10 @@ package org.hive2hive.core.test.model;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	@Before
 	public void createTreeNode() {
 		// create a tree
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		root = new FileTreeNode(keys);
 
 		// naming convention:
@@ -77,7 +77,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	@Test
 	public void testShared() {
 		// set 1d to be shared
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		dir1.setDomainKeys(keys);
 
 		// 1d, 2f and 2d should return to be shared, others not

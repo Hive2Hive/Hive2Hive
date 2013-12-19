@@ -21,8 +21,6 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.register.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -63,9 +61,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
-		UserProfile testProfile = new UserProfile(credentials.getUserId(),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
+		UserProfile testProfile = new UserProfile(credentials.getUserId());
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
@@ -94,7 +90,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 		// decrypt it using the same password as set above
 		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-				credentials.getPin(), AES_KEYLENGTH.BIT_256);
+				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 		UserProfile decrypted = (UserProfile) H2HEncryptionUtil.decryptAES(found, decryptionKeys);
 
 		// verify if both objects are the same
@@ -110,9 +106,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
-		UserProfile testProfile = new UserProfile(credentials.getUserId(),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
+		UserProfile testProfile = new UserProfile(credentials.getUserId());
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {

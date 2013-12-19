@@ -11,7 +11,6 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -40,7 +39,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 		logger.debug("Encrypting UserProfile with 256bit AES key from password");
 		try {
 			SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-					credentials.getPin(), AES_KEYLENGTH.BIT_256);
+					credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(userProfile,
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");

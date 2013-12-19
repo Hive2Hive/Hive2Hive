@@ -7,12 +7,12 @@ import java.security.KeyPair;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
@@ -78,9 +78,9 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		file2d = new File(file1d, "2d");
 		file2d.mkdir();
 
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
-		userProfile = new UserProfile("test-user", keys, keys);
+		userProfile = new UserProfile("test-user");
 		root = userProfile.getRoot();
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		node1f1 = new FileTreeNode(root, keys, "1f1", EncryptionUtil.generateMD5Hash(file1f1));
 		node1f2 = new FileTreeNode(root, keys, "1f2", EncryptionUtil.generateMD5Hash(file1f2));
 		node1d = new FileTreeNode(root, keys, "1d");
@@ -141,7 +141,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddedRemotely() throws IOException {
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		FileTreeNode node1f3 = new FileTreeNode(root, keys, "1f3", null);
 		FileTreeNode node2d2 = new FileTreeNode(node1d, keys, "2d2");
 

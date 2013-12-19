@@ -18,7 +18,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -251,7 +250,7 @@ public class UserProfileManager {
 			logger.debug("Encrypting UserProfile with 256bit AES key from password");
 			try {
 				SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-						credentials.getPin(), AES_KEYLENGTH.BIT_256);
+						credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 				EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(
 						entry.getUserProfile(), encryptionKey);
 				logger.debug("Putting UserProfile into the DHT");
@@ -353,7 +352,8 @@ public class UserProfileManager {
 					logger.debug("Decrypting user profile with 256-bit AES key from password.");
 
 					SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(
-							credentials.getPassword(), credentials.getPin(), AES_KEYLENGTH.BIT_256);
+							credentials.getPassword(), credentials.getPin(),
+							H2HConstants.KEYLENGTH_USER_PROFILE);
 
 					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
 					UserProfile userProfile = (UserProfile) decrypted;

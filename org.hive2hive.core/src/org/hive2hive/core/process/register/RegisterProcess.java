@@ -1,14 +1,10 @@
 package org.hive2hive.core.process.register;
 
-import java.security.KeyPair;
-
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.GetLocationsStep;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
 public class RegisterProcess extends Process {
 
@@ -18,10 +14,7 @@ public class RegisterProcess extends Process {
 		super(networkManager);
 
 		// create and set context
-		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		KeyPair domainKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-
-		UserProfile userProfile = new UserProfile(credentials.getUserId(), encryptionKeys, domainKeys);
+		UserProfile userProfile = new UserProfile(credentials.getUserId());
 		context = new RegisterProcessContext(this, credentials, userProfile);
 
 		// get the locations map to check if a user with the same name is already existent

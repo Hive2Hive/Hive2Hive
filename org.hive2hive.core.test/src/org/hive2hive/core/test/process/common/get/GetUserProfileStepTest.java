@@ -20,9 +20,6 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -62,13 +59,11 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
-		UserProfile testProfile = new UserProfile(credentials.getUserId(),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024),
-				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024));
+		UserProfile testProfile = new UserProfile(credentials.getUserId());
 
 		// add them already to the DHT
 		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-				credentials.getPin(), AES_KEYLENGTH.BIT_256);
+				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
 		FuturePut putGlobal = putter.getDataManager().put(
 				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,

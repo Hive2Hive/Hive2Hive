@@ -4,10 +4,10 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -24,7 +24,7 @@ public class MetaFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetNewestVersion() {
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		List<FileVersion> versions = new ArrayList<FileVersion>();
 		versions.add(new FileVersion(0, 123, System.currentTimeMillis()));
 		versions.add(new FileVersion(1, 123, System.currentTimeMillis()));

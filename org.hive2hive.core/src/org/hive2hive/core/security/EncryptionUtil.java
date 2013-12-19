@@ -60,7 +60,6 @@ public final class EncryptionUtil {
 
 	public static final String SINGATURE_ALGORITHM = "SHA1withRSA";
 	public static final int IV_LENGTH = 16;
-	public static final RSA_KEYLENGTH HYBRID_RSA_KEYLENGTH = RSA_KEYLENGTH.BIT_2048;
 
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
