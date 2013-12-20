@@ -2,6 +2,7 @@ package org.hive2hive.core.process.login;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.context.IGetLocationsContext;
@@ -15,7 +16,9 @@ public final class LoginProcessContext extends ProcessContext implements IGetLoc
 	private Locations locations;
 	private UserProfile userProfile;
 	private PublicKey publicKey;
-
+	
+	private H2HSession session;
+	
 	public LoginProcessContext(LoginProcess loginProcess) {
 		super(loginProcess);
 	}
@@ -48,5 +51,13 @@ public final class LoginProcessContext extends ProcessContext implements IGetLoc
 	@Override
 	public PublicKey getPublicKey() {
 		return publicKey;
+	}
+
+	public H2HSession getSession() {
+		return session;
+	}
+
+	public void setSession(H2HSession session) {
+		this.session = session;
 	}
 }

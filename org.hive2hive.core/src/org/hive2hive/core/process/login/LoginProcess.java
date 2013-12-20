@@ -16,26 +16,41 @@ public class LoginProcess extends Process {
 
 	private final LoginProcessContext context;
 
-	public LoginProcess(UserCredentials credentials, NetworkManager networkManager) {
+	public LoginProcess(UserCredentials credentials, SessionParameters sessionParameters,
+			NetworkManager networkManager) {
 		super(networkManager);
 		context = new LoginProcessContext(this);
 
 		// execution order:
 		// 1. GetUserProfileStep
 		// 2. VerifyUserProfileStep
-		// 3. GetPublicKeyStep
-		// 4. GetLocationsStep: get the other client's locations
-		// 5. AddMyselfToLocationsStep: add this client to the locations map
+		// SessionCreationStep
+		// 3. GetLocationsStep: get the other client's locations
+		// 4. AddMyselfToLocationsStep: add this client to the locations map
+
+		// 5. ContactPeersStep (-> PutLocationsStep)
+		// 6. SynchronizeFilesStep
+		// if elected master:
+		// 7. HandleUserMessageQueueStep
 
 		// TODO add myself to locations here or in PostLoginProcess?
-		AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(credentials.getUserId());
+
+		AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(credentials.getUserId(),
+				new ContactPeersStep());
+
 		GetLocationsStep locationsStep = new GetLocationsStep(credentials.getUserId(), addToLocsStep, context);
-		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId(),
+
+		SessionCreationStep sessionStep = new SessionCreationStep(sessionParameters, networkManager,
 				locationsStep);
+
+		VerifyUserProfileStep verifyProfileStep = new VerifyUserProfileStep(credentials.getUserId(),
+				sessionStep);
+
 		GetUserProfileStep profileStep = new GetUserProfileStep(credentials, context, verifyProfileStep);
 
 		// define first step
 		setNextStep(profileStep);
+
 	}
 
 	@Override

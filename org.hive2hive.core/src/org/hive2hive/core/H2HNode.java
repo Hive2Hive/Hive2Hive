@@ -10,7 +10,6 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.IllegalProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
@@ -18,8 +17,7 @@ import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
-import org.hive2hive.core.process.login.LoginProcessContext;
-import org.hive2hive.core.process.login.PostLoginProcess;
+import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
@@ -116,43 +114,16 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess login(final UserCredentials credentials, final Path rootPath) {
-		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
+	public IProcess login(UserCredentials credentials, Path rootPath) {
+		SessionParameters sessionParameters = new SessionParameters();
+		sessionParameters.setProfileManager(new UserProfileManager(networkManager, credentials));
+		sessionParameters.setFileManager(new FileManager(rootPath));
+		sessionParameters.setFileConfig(H2HNode.this);
 
-		// TODO this makes no sense actually, since the IProcess is returned...
-		loginProcess.addListener(new IProcessListener() {
-			@Override
-			public void onSuccess() {
-				// create a session
-				UserProfileManager profileManager = new UserProfileManager(networkManager, credentials);
-				FileManager fileManager = new FileManager(rootPath);
-
-				LoginProcessContext loginContext = loginProcess.getContext();
-				H2HSession session = new H2HSession(loginContext.getUserProfile().getEncryptionKeys(),
-						profileManager, H2HNode.this, fileManager);
-				networkManager.setSession(session);
-
-				startPostLoginProcess(loginContext.getLocations());
-			}
-
-			@Override
-			public void onFail(Exception error) {
-				// ignore here
-			}
-		});
+		LoginProcess loginProcess = new LoginProcess(credentials, sessionParameters, networkManager);
 
 		autoStartProcess(loginProcess);
 		return loginProcess;
-	}
-
-	private void startPostLoginProcess(Locations locations) {
-		try {
-			// start the post login process
-			PostLoginProcess postLogin = new PostLoginProcess(locations, networkManager);
-			postLogin.start();
-		} catch (Exception e) {
-			// TODO handle the exception
-		}
 	}
 
 	@Override

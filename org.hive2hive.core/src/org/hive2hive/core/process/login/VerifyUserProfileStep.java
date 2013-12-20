@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.login;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 

@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
 /**
@@ -19,8 +20,8 @@ public class AddMyselfToLocationsStep extends BasePutProcessStep {
 
 	private final String userId;
 
-	public AddMyselfToLocationsStep(String userId) {
-		super(null);
+	public AddMyselfToLocationsStep(String userId, ProcessStep nextStep) {
+		super(nextStep);
 
 		this.userId = userId;
 	}
@@ -32,7 +33,7 @@ public class AddMyselfToLocationsStep extends BasePutProcessStep {
 		Locations loadedLocations = ((LoginProcess) getProcess()).getContext().getLocations();
 
 		if (loadedLocations == null) {
-			logger.error("Something went wrong at the registration: No locations found.");
+			logger.error("Locations not found.");
 			getProcess().stop("Locations not found.");
 		} else {
 
