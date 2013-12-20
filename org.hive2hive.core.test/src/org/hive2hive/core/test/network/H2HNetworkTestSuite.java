@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.network;
 
 import org.hive2hive.core.test.network.data.DataManagerTest;
+import org.hive2hive.core.test.network.data.UserProfileManagerTest;
 import org.hive2hive.core.test.network.messages.BaseMessageTest;
 import org.hive2hive.core.test.network.messages.BaseRequestMessageTest;
 import org.hive2hive.core.test.network.messages.MessageSignatureTest;
@@ -19,7 +20,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		// Network
 		H2HStorageMemoryTest.class, ConnectionTest.class,
 		// Network, Data
-		DataManagerTest.class,
+		DataManagerTest.class, UserProfileManagerTest.class,
 		// Network, Message
 		MessageSignatureTest.class, BaseMessageTest.class, BaseRequestMessageTest.class,
 		// Network, Message, Direct

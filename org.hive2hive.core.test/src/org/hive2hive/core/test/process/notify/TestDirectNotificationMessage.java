@@ -43,8 +43,11 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 	}
 	
 	@Override
-	public boolean checkSignature() {
-		// sender should be another client node
-		return verify(networkManager.getPublicKey());
+	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
+		if (!networkManager.getUserId().equals(userId)) {
+			return false;
+		} else {
+			return verify(data, signature, networkManager.getPublicKey());
+		}
 	}
 }

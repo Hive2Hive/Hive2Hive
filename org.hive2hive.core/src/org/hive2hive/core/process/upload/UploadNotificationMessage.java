@@ -43,8 +43,12 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 	}
 	
 	@Override
-	public boolean checkSignature() {
-		// message should come from another client nodes
-		return verify(networkManager.getPublicKey());
+	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
+		if (!networkManager.getUserId().equals(userId)) {
+			logger.error("Signature is not from the same user.");
+			return false;
+		} else {
+			return verify(data, signature, networkManager.getPublicKey());
+		}
 	}
 }

@@ -33,9 +33,13 @@ public class ContactPeerMessage extends DirectRequestMessage {
 	}
 	
 	@Override
-	public boolean checkSignature() {
-		// contacted nodes are other client nodes and should have same keys
-		return verify(networkManager.getPublicKey());
+	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
+		if (!networkManager.getUserId().equals(userId)) {
+			logger.error("Signature is not from the same user.");
+			return false;
+		} else {
+			return verify(data, signature, networkManager.getPublicKey());
+		}
 	}
 
 }

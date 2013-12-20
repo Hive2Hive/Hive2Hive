@@ -1,7 +1,5 @@
 package org.hive2hive.core.test.network.messages;
 
-import java.security.PublicKey;
-
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 
@@ -9,11 +7,8 @@ public class TestSignedMessage extends BaseMessage {
 
 	private static final long serialVersionUID = -7416023464387691292L;
 
-	private final PublicKey publicKey;
-	
-	public TestSignedMessage(String targetKey, PublicKey publicKey) {
+	public TestSignedMessage(String targetKey) {
 		super(createMessageID(), targetKey);
-		this.publicKey = publicKey;
 	}
 
 	@Override
@@ -26,8 +21,12 @@ public class TestSignedMessage extends BaseMessage {
 	}
 
 	@Override
-	public boolean checkSignature() {
-		return verify(publicKey);
+	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
+		if (!networkManager.getUserId().equals(userId)) {
+			return false;
+		} else {
+			return verify(data, signature, networkManager.getPublicKey());
+		}
 	}
 
 }

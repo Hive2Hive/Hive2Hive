@@ -2,14 +2,10 @@ package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertFalse;
 
-import java.security.KeyPair;
 import java.util.List;
 
-import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -44,20 +40,16 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 	@Test
 	public void testMessageWithSignature() {
+		NetworkTestUtil.createSameKeyPair(network);
+
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
-
-		// assign same key pairs to simulate logged in users
-		KeyPair keyPair1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		sender.setSession(new H2HSession(keyPair1, null, null, null));
-		KeyPair keyPair2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		receiver.setSession(new H2HSession(keyPair2, null, null, null));
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
 
 		// create a message with target node B
-		TestSignedMessage message = new TestSignedMessage(locationKey, keyPair1.getPublic());
+		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
 		TestMessageVerifyListener listener = new TestMessageVerifyListener();
@@ -73,21 +65,16 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 	@Test
 	public void testMessageWithWrongSignature() {
+		NetworkTestUtil.createKeyPairs(network);
+
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
-
-		// assign same key pairs to simulate logged in users
-		KeyPair keyPair1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		sender.setSession(new H2HSession(keyPair1, null, null, null));
-		KeyPair keyPair2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		receiver.setSession(new H2HSession(keyPair2, null, null, null));
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
 
 		// create a message with target node B, assign random public key
-		TestSignedMessage message = new TestSignedMessage(locationKey, EncryptionUtil.generateRSAKeyPair(
-				H2HConstants.KEYLENGTH_USER_KEYS).getPublic());
+		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
 		TestMessageVerifyListener listener = new TestMessageVerifyListener();

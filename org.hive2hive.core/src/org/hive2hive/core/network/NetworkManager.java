@@ -90,6 +90,15 @@ public class NetworkManager {
 			return null;
 		return session.getKeyPair().getPrivate();
 	}
+	
+	/**
+	 * Helper method that returns the user id of the currently logged in user
+	 */
+	public String getUserId() {
+		if (session == null)
+			return null;
+		return session.getCredentials().getUserId();
+	}
 
 	/**
 	 * Create a peer which will be the first node in the network (master).

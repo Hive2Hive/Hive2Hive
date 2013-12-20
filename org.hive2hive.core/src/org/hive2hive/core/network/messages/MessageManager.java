@@ -185,19 +185,26 @@ public final class MessageManager {
 	}
 
 	private HybridEncryptedContent signAndEncryptMessage(BaseMessage message, PublicKey targetPublicKey) {
-		try {
-			message.sign(networkManager.getPrivateKey());
-		} catch (InvalidKeyException | SignatureException e1) {
-			logger.error("An exception occured while signing the message. The message will not be sent.");
+		String userId = networkManager.getUserId();
+		if (userId == null) {
+			logger.error("No user id given (no logged in user). The message will not be sent.");
 			return null;
 		}
 
-		// asymmetrically encrypt message
-		byte[] messageBytes = EncryptionUtil.serializeObject(message);
-
 		try {
+			// asymmetrically encrypt message
+			byte[] messageBytes = EncryptionUtil.serializeObject(message);
 			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes,
 					targetPublicKey, H2HConstants.HYBRID_AES_KEYLENGTH);
+
+			// create signature
+			try {
+				byte[] signature = EncryptionUtil.sign(messageBytes, networkManager.getPrivateKey());
+				encryptedMessage.setSignature(userId, signature);
+			} catch (InvalidKeyException | SignatureException e1) {
+				logger.error("An exception occured while signing the message. The message will not be sent.");
+				return null;
+			}
 
 			return encryptedMessage;
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException

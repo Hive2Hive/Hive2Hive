@@ -12,6 +12,7 @@ import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -76,7 +77,10 @@ public class NetworkTestUtil {
 	public static void createKeyPairs(List<NetworkManager> network) {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-			node.setSession(new H2HSession(keyPair, null, null, null));
+			UserCredentials userCredentials = generateRandomCredentials();
+			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
+			H2HSession session = new H2HSession(keyPair, profileManager, null, null);
+			node.setSession(session);
 		}
 	}
 
@@ -88,8 +92,10 @@ public class NetworkTestUtil {
 	 */
 	public static void createSameKeyPair(List<NetworkManager> network) {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		H2HSession session = new H2HSession(keyPair, null, null, null);
+		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
+			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
+			H2HSession session = new H2HSession(keyPair, profileManager, null, null);
 			node.setSession(session);
 		}
 	}

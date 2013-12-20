@@ -50,8 +50,17 @@ public class MessageReplyHandler implements ObjectDataReply {
 			return AcceptanceReply.FAILURE;
 		}
 
-		// asymmetrically decrypt message
 		HybridEncryptedContent encryptedMessage = (HybridEncryptedContent) request;
+
+		// get signature
+		String senderId = encryptedMessage.getUserId();
+		byte[] signature = encryptedMessage.getSignature();
+		if (senderId == null || signature == null) {
+			logger.warn("No signature for message.");
+			return AcceptanceReply.FAILURE_SIGNATURE;
+		}
+
+		// asymmetrically decrypt message
 		byte[] decryptedMessage = null;
 		try {
 			KeyPair keys = networkManager.getSession().getKeyPair();
@@ -60,14 +69,20 @@ public class MessageReplyHandler implements ObjectDataReply {
 			logger.warn("Decryption of message failed.");
 			return AcceptanceReply.FAILURE_DECRYPTION;
 		}
+		
 		// deserialize decrypted message
 		Object message = EncryptionUtil.deserializeObject(decryptedMessage);
 
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
+			byte[] data = EncryptionUtil.serializeObject(receivedMessage);
+			
+			// give a network manager reference to work (verify, handle)
 			receivedMessage.setNetworkManager(networkManager);
-			// check if signature is correct
-			if (!receivedMessage.checkSignature()) {
+			
+			// verify the signature
+			if (!receivedMessage.checkSignature(data, signature,
+					senderId)) {
 				logger.error(String.format("Message has wrong signature. node id = '%s'",
 						networkManager.getNodeId()));
 				return AcceptanceReply.FAILURE_SIGNATURE;
@@ -75,6 +90,8 @@ public class MessageReplyHandler implements ObjectDataReply {
 				logger.debug(String.format("Message's signature verified. node id = '%s'",
 						networkManager.getNodeId()));
 			}
+
+			// check if message gets accepted
 			AcceptanceReply reply = receivedMessage.accept();
 			if (AcceptanceReply.OK == reply) {
 				// handle message in own thread
@@ -86,6 +103,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 						"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
 						networkManager.getNodeId()));
 			}
+			
 			return reply;
 		} else {
 			logger.error("Received unknown object.");

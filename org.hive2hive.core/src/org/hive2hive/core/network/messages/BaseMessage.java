@@ -3,7 +3,6 @@ package org.hive2hive.core.network.messages;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
@@ -53,7 +52,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	private final SendingBehavior sendingBehavior;
 
 	private int routedSendingCounter = 0;
-	private byte[] signature;
 
 	/**
 	 * Constructor for an asynchronous message.
@@ -152,15 +150,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	}
 
 	/**
-	 * Getter
-	 * 
-	 * @return the signature of this message
-	 */
-	public byte[] getSignature() {
-		return signature;
-	}
-
-	/**
 	 * Setter
 	 * 
 	 * @param senderAddress
@@ -188,16 +177,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	public void setNetworkManager(NetworkManager aNetworkManager) {
 		networkManager = aNetworkManager;
-	}
-
-	/**
-	 * Setter
-	 * 
-	 * @param signature
-	 *            the signature for this message
-	 */
-	public void setSignature(byte[] signature) {
-		this.signature = signature;
 	}
 
 	/**
@@ -239,9 +218,15 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 * {@link BaseMessage#verify(PublicKey)} with the according public key of the sender. Sometimes no
 	 * verification is required or possible. Then return just <code>true</code>.
 	 * 
+	 * @param data
+	 *            the message itself as byte to compare with signature
+	 * @param signature
+	 *            the signature of the message
+	 * @param userId
+	 *            the user id of the sender
 	 * @return <code>true</code> if given signature is correct, otherwise <code>false</code>
 	 */
-	public abstract boolean checkSignature();
+	public abstract boolean checkSignature(byte[] data, byte[] signature, String userId);
 
 	/**
 	 * This method is called if a failure is detected while sending this message. The idea is that sending
@@ -310,27 +295,19 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	}
 
 	/**
-	 * Signs the message with the given private key.
-	 * 
-	 * @param privateKey
-	 *            the private key to sign the message
-	 * @throws SignatureException
-	 * @throws InvalidKeyException
-	 */
-	public void sign(PrivateKey privateKey) throws InvalidKeyException, SignatureException {
-		signature = EncryptionUtil.sign(EncryptionUtil.serializeObject(messageID), privateKey);
-	}
-
-	/**
 	 * Verifies the message according the sender's public key.
 	 * 
+	 * @param data
+	 *            the data to compare
+	 * @param signature
+	 *            the signature of the data
 	 * @param publicKey
 	 *            the public key of the sender to verify the message
 	 * @return <code>true</code> if signature is valid, otherwise <code>false</code>
 	 */
-	protected boolean verify(PublicKey publicKey) {
+	protected boolean verify(byte[] data, byte[] signature, PublicKey publicKey) {
 		try {
-			return EncryptionUtil.verify(EncryptionUtil.serializeObject(messageID), signature, publicKey);
+			return EncryptionUtil.verify(data, signature, publicKey);
 		} catch (InvalidKeyException | SignatureException e) {
 			logger.error("Exception while verifying message: ", e);
 		}

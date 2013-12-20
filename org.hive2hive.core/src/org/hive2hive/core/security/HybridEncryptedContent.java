@@ -17,6 +17,9 @@ public final class HybridEncryptedContent extends NetworkContent {
 	private final byte[] encryptedData;
 	private int timeToLive = TimeToLiveStore.convertDaysToSeconds(365);
 
+	private String userId = null;
+	private byte[] signature = null;
+
 	public HybridEncryptedContent(byte[] encryptedParams, byte[] encryptedData) {
 		this.encryptedParameters = encryptedParams;
 		this.encryptedData = encryptedData;
@@ -38,6 +41,37 @@ public final class HybridEncryptedContent extends NetworkContent {
 	 */
 	public byte[] getEncryptedData() {
 		return encryptedData;
+	}
+
+	/**
+	 * Set signature.
+	 * 
+	 * @param userId
+	 *            the creator of the signature
+	 * @param signature
+	 *            the signature
+	 */
+	public void setSignature(String userId, byte[] signature) {
+		this.userId = userId;
+		this.signature = signature;
+	}
+
+	/**
+	 * Getter
+	 * 
+	 * @return the creator of the signature
+	 */
+	public String getUserId() {
+		return userId;
+	}
+
+	/**
+	 * Getter
+	 * 
+	 * @return the signature of this message
+	 */
+	public byte[] getSignature() {
+		return signature;
 	}
 
 	@Override
