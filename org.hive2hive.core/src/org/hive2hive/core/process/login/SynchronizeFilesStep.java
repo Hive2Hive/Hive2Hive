@@ -43,9 +43,10 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		PostLoginProcessContext context = (PostLoginProcessContext) getProcess().getContext();
-		FileManager fileManager = context.getFileManager();
-		UserProfileManager profileManager = context.getProfileManager();
+		
+		LoginProcessContext context = (LoginProcessContext) getProcess().getContext();
+		FileManager fileManager = context.getSession().getFileManager();
+		UserProfileManager profileManager = context.getSession().getProfileManager();
 
 		FileSynchronizer synchronizer = null;
 		try {
@@ -100,19 +101,20 @@ public class SynchronizeFilesStep extends ProcessStep {
 			logger.error("Problem occurred: " + problem);
 		}
 
-		if (context.getIsDefinedAsMaster()) {
-			// TODO set when step is implemented
-			// String userId = profileManager.getUserCredentials().getUserId();
-			// HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
-			// GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
-			// handleUmQueueStep);
-			// context.setUserMessageQueueStep(getUMQueueStep);
-			// getProcess().setNextStep(getUMQueueStep);
-			getProcess().setNextStep(null);
-		} else {
-			// done with the post login process
-			getProcess().setNextStep(null);
-		}
+//		if (context.getIsDefinedAsMaster()) {
+//			// TODO set when step is implemented
+//			// String userId = profileManager.getUserCredentials().getUserId();
+//			// HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
+//			// GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
+//			// handleUmQueueStep);
+//			// context.setUserMessageQueueStep(getUMQueueStep);
+//			// getProcess().setNextStep(getUMQueueStep);
+//			getProcess().setNextStep(null);
+//		} else {
+//			// done with the post login process
+//			getProcess().setNextStep(null);
+//		}
+		getProcess().setNextStep(null);
 	}
 
 	private ProcessTreeNode startDownload(List<FileTreeNode> toDownload) {

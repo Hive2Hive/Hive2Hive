@@ -29,7 +29,7 @@ public final class RegisterProcessContext extends ProcessContext implements IGet
 	}
 
 	@Override
-	public void setLocation(Locations locations) {
+	public void setLocations(Locations locations) {
 		this.locations = locations;
 	}
 

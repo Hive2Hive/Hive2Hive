@@ -39,9 +39,9 @@ public class GetLocationsStep extends BaseGetProcessStep {
 	public void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			logger.warn("Did not find the locations.");
-			context.setLocation(null);
+			context.setLocations(null);
 		} else {
-			context.setLocation((Locations) content);
+			context.setLocations((Locations) content);
 		}
 		getProcess().setNextStep(nextStep);
 	}

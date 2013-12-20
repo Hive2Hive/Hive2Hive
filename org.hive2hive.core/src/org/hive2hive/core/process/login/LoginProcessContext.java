@@ -24,7 +24,7 @@ public final class LoginProcessContext extends ProcessContext implements IGetLoc
 	}
 
 	@Override
-	public void setLocation(Locations locations) {
+	public void setLocations(Locations locations) {
 		this.locations = locations;
 	}
 

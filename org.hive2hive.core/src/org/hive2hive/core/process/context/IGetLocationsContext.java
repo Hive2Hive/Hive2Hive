@@ -4,7 +4,7 @@ import org.hive2hive.core.model.Locations;
 
 public interface IGetLocationsContext {
 
-	void setLocation(Locations locations);
+	void setLocations(Locations locations);
 
 	Locations getLocations();
 }

@@ -14,7 +14,7 @@ public class CleanupLocationsProcessContext extends ProcessContext implements IG
 	}
 
 	@Override
-	public void setLocation(Locations locations) {
+	public void setLocations(Locations locations) {
 		this.locations = locations;
 	}
 

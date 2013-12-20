@@ -32,7 +32,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ContactPeersStep.class);
 
-	private PostLoginProcessContext context;
+	private LoginProcessContext context;
 
 	private ConcurrentHashMap<PeerAddress, Boolean> responses = new ConcurrentHashMap<PeerAddress, Boolean>();
 	protected ConcurrentHashMap<PeerAddress, String> evidenceMap = new ConcurrentHashMap<PeerAddress, String>();
@@ -45,7 +45,8 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 
 	@Override
 	public void start() {
-		context = (PostLoginProcessContext) getProcess().getContext();
+		
+		context = (LoginProcessContext) getProcess().getContext();
 
 		PeerAddress myself = null;
 		for (PeerAddress location : context.getLocations().getPeerAddresses()) {
@@ -135,8 +136,8 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 			// add myself
 			newLocations.addPeerAddress(getNetworkManager().getPeerAddress());
 			// put all into context
-			context.setIsElectedMaster(isDefinedAsMaster);
-			context.setNewLocations(newLocations);
+//			context.setIsElectedMaster(isDefinedAsMaster);
+			context.setLocations(newLocations);
 
 			// continue the process
 			nextStep(newLocations);

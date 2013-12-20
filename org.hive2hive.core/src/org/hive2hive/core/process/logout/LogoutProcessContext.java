@@ -13,7 +13,7 @@ public class LogoutProcessContext extends ProcessContext implements IGetLocation
 	private Locations locations;
 	
 	@Override
-	public void setLocation(Locations locations) {
+	public void setLocations(Locations locations) {
 		this.locations = locations;
 	}
 
