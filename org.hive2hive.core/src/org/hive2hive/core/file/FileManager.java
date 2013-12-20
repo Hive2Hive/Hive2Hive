@@ -14,8 +14,14 @@ import org.hive2hive.core.security.EncryptionUtil;
 public class FileManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileManager.class);
-	public static final String FILE_SEP = System.getProperty("file.separator");
 	private final File root;
+	
+	public static String getFileSep(){
+		String fileSep = System.getProperty("file.separator");
+		if (fileSep.equals("\\"))
+			fileSep = "\\\\";
+		return fileSep;
+	}
 
 	// holds persistent meta data
 	private final File h2hMetaFile;

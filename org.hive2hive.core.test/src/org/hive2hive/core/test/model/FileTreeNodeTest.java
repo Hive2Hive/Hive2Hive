@@ -65,12 +65,12 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 
 	@Test
 	public void testFullPath() {
-		Assert.assertEquals(FileManager.FILE_SEP, root.getFullPath());
-		Assert.assertEquals(FileManager.FILE_SEP + "1f1", child1.getFullPath());
-		Assert.assertEquals(FileManager.FILE_SEP + "1f2", child2.getFullPath());
-		Assert.assertEquals(FileManager.FILE_SEP + "1d" + FileManager.FILE_SEP, dir1.getFullPath());
-		Assert.assertEquals(FileManager.FILE_SEP + "1d" + FileManager.FILE_SEP + "2f", child3.getFullPath());
-		Assert.assertEquals(FileManager.FILE_SEP + "1d" + FileManager.FILE_SEP + "2d" + FileManager.FILE_SEP,
+		Assert.assertEquals(FileManager.getFileSep(), root.getFullPath());
+		Assert.assertEquals(FileManager.getFileSep() + "1f1", child1.getFullPath());
+		Assert.assertEquals(FileManager.getFileSep() + "1f2", child2.getFullPath());
+		Assert.assertEquals(FileManager.getFileSep() + "1d" + FileManager.getFileSep(), dir1.getFullPath());
+		Assert.assertEquals(FileManager.getFileSep() + "1d" + FileManager.getFileSep() + "2f", child3.getFullPath());
+		Assert.assertEquals(FileManager.getFileSep() + "1d" + FileManager.getFileSep() + "2d" + FileManager.getFileSep(),
 				dir2.getFullPath());
 	}
 

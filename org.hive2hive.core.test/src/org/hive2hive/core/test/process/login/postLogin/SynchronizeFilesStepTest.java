@@ -200,7 +200,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File1, file1Node.getMD5()));
 
 		/** verify the file that has been modified remotely and locally **/
-		FileTreeNode file3Node = userProfile.getFileByPath("folder 1" + FileManager.FILE_SEP + "file 3");
+		FileTreeNode file3Node = userProfile.getFileByPath("folder 1" + FileManager.getFileSep() + "file 3");
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File3, file3Node.getMD5()));
 	}
 

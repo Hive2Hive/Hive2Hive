@@ -121,10 +121,7 @@ public class FileTreeNode implements Serializable {
 	 */
 	public FileTreeNode getChildByName(String name) {
 		if (name != null) {
-			String file_sep = FileManager.FILE_SEP;
-			if (file_sep.equals("\\"))
-				file_sep = "\\\\";
-			String withoutSeparator = name.replaceAll(file_sep, "");
+			String withoutSeparator = name.replaceAll(FileManager.getFileSep(), "");
 			for (FileTreeNode child : children) {
 				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
 					return child;
@@ -193,9 +190,9 @@ public class FileTreeNode implements Serializable {
 	 */
 	public String getFullPath() {
 		if (parent == null) {
-			return FileManager.FILE_SEP;
+			return FileManager.getFileSep();
 		} else if (isFolder) {
-			return parent.getFullPath() + getName() + FileManager.FILE_SEP;
+			return parent.getFullPath() + getName() + FileManager.getFileSep();
 		} else {
 			return parent.getFullPath() + getName();
 		}

@@ -89,7 +89,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 		File parent = file.getParentFile();
 
 		// find the parent node using the relative path to navigate there
-		String relativeParentPath = parent.getAbsolutePath().replaceFirst(fileRoot.getAbsolutePath(), "");
+		String fileRootAbsolutePath = fileRoot.getAbsolutePath().replace("\\", "\\\\");
+		String relativeParentPath = parent.getAbsolutePath().replaceFirst(fileRootAbsolutePath, "");
 		FileTreeNode parentNode = userProfile.getFileByPath(relativeParentPath);
 		parentKey = parentNode.getKeyPair().getPublic();
 

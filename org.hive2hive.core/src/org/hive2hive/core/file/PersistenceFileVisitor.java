@@ -27,7 +27,7 @@ public class PersistenceFileVisitor extends SimpleFileVisitor<Path> {
 		this.root = root;
 		fileTree = new HashMap<String, byte[]>();
 
-		configFilePath = root.getAbsolutePath() + FileManager.FILE_SEP + H2HConstants.META_FILE_NAME;
+		configFilePath = root.getAbsolutePath() + FileManager.getFileSep() + H2HConstants.META_FILE_NAME;
 	}
 
 	@Override
@@ -57,9 +57,9 @@ public class PersistenceFileVisitor extends SimpleFileVisitor<Path> {
 	private void addToMap(File file) throws IOException {
 		// add to fileTree
 		String relativePath = file.getAbsolutePath().replaceFirst(root.getAbsolutePath(), "");
-		if (file.isDirectory() && !relativePath.endsWith(FileManager.FILE_SEP)) {
+		if (file.isDirectory() && !relativePath.endsWith(FileManager.getFileSep())) {
 			// add a file separator to the end of folders if not existent
-			relativePath += FileManager.FILE_SEP;
+			relativePath += FileManager.getFileSep();
 		}
 
 		byte[] md5 = EncryptionUtil.generateMD5Hash(file);
