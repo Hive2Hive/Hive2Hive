@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.common.remove;
 
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -38,7 +40,10 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.remove(locationKey, contentKey, this);
+		if (contentToRemove.getVersionKey() == Number160.ZERO)
+			dataManager.remove(locationKey, contentKey, this);
+		else
+			dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), this);
 		removePerformed = true;
 	}
 

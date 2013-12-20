@@ -3,13 +3,12 @@ package org.hive2hive.core.test.process.common.remove;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
-import java.io.IOException;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
-import net.tomp2p.storage.Data;
+import net.tomp2p.rpc.DigestInfo;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.H2HStorageMemory;
@@ -22,7 +21,6 @@ import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -81,16 +79,16 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 	}
 
-	// TODO fix fail: problem is verification is based on digest not get
 	@Test
 	public void testRemoveProcessStepRollBack() {
 		String locationKey = network.get(0).getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
+		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey), Number160.ZERO);
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// manipulate the nodes, remove will not work
-		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(testData));
-		network.get(1).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(testData));
+		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(key));
+		network.get(1).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(key));
 		// put some data to remove
 		network.get(0)
 				.getDataManager()
@@ -122,23 +120,20 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 	private class FakeGetTestStorage extends H2HStorageMemory {
 
-		private final H2HTestData data;
+		private final Number640 key;
 
-		public FakeGetTestStorage(H2HTestData data) {
+		public FakeGetTestStorage(Number640 key) {
 			super();
-			this.data = data;
+			this.key = key;
 		}
 
 		@Override
-		public Data get(Number640 key) {
-			Data fakeData = null;
-			try {
-				fakeData = new Data(data);
-			} catch (IOException e) {
-				Assert.fail("Should not happen!");
-			}
-			return fakeData;
+		public DigestInfo digest(Number640 from, Number640 to, int limit, boolean ascending) {
+			DigestInfo digestInfo = new DigestInfo();
+			digestInfo.put(key, Number160.ZERO);
+			return digestInfo;
 		}
+		
 	}
 
 	/**
