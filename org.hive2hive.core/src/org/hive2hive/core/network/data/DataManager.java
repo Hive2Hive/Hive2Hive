@@ -105,27 +105,30 @@ public class DataManager {
 	}
 
 	public void get(String locationKey, String contentKey, IGetListener listener) {
-		FutureGet futureGet = get(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(contentKey));
-		futureGet.addListener(new FutureGetListener(listener, locationKey));
+		Number160 lKey = Number160.createHash(locationKey);
+		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 cKey = Number160.createHash(contentKey);
+		FutureGet futureGet = get(lKey, dKey, cKey);
+		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, this, listener));
 	}
 
 	public void get(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
-		FutureGet futureGet = get(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(contentKey), versionKey);
-		futureGet.addListener(new FutureGetListener(listener, locationKey));
+		Number160 lKey = Number160.createHash(locationKey);
+		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 cKey = Number160.createHash(contentKey);
+		FutureGet futureGet = get(lKey, dKey, cKey, versionKey);
+		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, versionKey, this, listener));
 	}
 
-	public void getUserProfileTask(String locationKey, IGetListener listener) {
-		FutureGet futureGet = getPeer()
-				.get(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160
-						.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN), Number160.ZERO, Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160
-						.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN), Number160.ZERO,
-						Number160.MAX_VALUE)).ascending().returnNr(1).start();
-		futureGet.addListener(new FutureGetListener(listener, locationKey));
-	}
+//	public void getUserProfileTask(String locationKey, IGetListener listener) {
+//		Number160 lKey = Number160.createHash(locationKey);
+//		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+//		FutureGet futureGet = getPeer().get(Number160.createHash(locationKey))
+//				.from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
+//				.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
+//				.returnNr(1).start();
+//		futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
+//	}
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
 		logger.debug(String.format("get key = '%s' domain key = '%s' content key = '%s'", locationKey,

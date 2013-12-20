@@ -64,6 +64,8 @@ public interface H2HConstants {
 	public static final int PUT_RETRIES = 3;
 	// number of allowed tries to retry a remove
 	public static final int REMOVE_RETRIES = 3;
+	// number of allowed tries to retry a get
+	public static final int GET_RETRIES = 3;
 
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final long CONTACT_PEERS_AWAIT_MS = 10000;
