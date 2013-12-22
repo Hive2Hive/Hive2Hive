@@ -2,6 +2,10 @@ package org.hive2hive.core.test.network.data;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hive2hive.core.network.NetworkManager;
@@ -10,7 +14,6 @@ import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -27,33 +30,53 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 	private static Random random = new Random();
+	private static final int NUM_OF_THREADS = 100;
+	private static final String locationKey = NetworkTestUtil.randomString();
+	private static final String contentKey = NetworkTestUtil.randomString();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = DataManagerConcurrencyTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
+
+		// put some content first
+		final CountDownLatch latch = new CountDownLatch(1);
+		IPutListener listener = new IPutListener() {
+
+			@Override
+			public void onPutSuccess() {
+				latch.countDown();
+			}
+
+			@Override
+			public void onPutFailure() {
+				Assert.fail();
+			}
+		};
+
+		network.get(random.nextInt(networkSize)).getDataManager()
+				.put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()), listener);
+		latch.await();
 	}
 
 	@Test
-	public void testConcurrentPutGet() {
+	public void testConcurrentPutGet() throws InterruptedException {
 		// counting listener for multiple threads
 		final AtomicInteger counter = new AtomicInteger();
 
 		// start multiple threads to perform a get
-		final int NUM_OF_THREADS = 100;
+		ExecutorService taskExecutor = Executors.newFixedThreadPool(NUM_OF_THREADS);
 		for (int i = 0; i < NUM_OF_THREADS; i++) {
-			// take putter and getter randomly (can be same)
-			NetworkManager putter = network.get(random.nextInt(networkSize));
+			// take getter randomly
 			NetworkManager getter = network.get(random.nextInt(networkSize));
-			new Thread(new PutGetRandomRunnable(counter, putter, getter)).start();
+			taskExecutor.execute(new SleepyGetRunnable(counter, getter));
 		}
 
-		// wait some time (20s is enough since everything happens locally)
-		H2HWaiter waiter = new H2HWaiter(20);
-		while (counter.get() < NUM_OF_THREADS) {
-			waiter.tickASecond();
-		}
+		taskExecutor.shutdown();
+		taskExecutor.awaitTermination(60, TimeUnit.SECONDS);
+
+		Assert.assertEquals(NUM_OF_THREADS, counter.get());
 	}
 
 	@AfterClass
@@ -68,56 +91,54 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 	 * @author Nico
 	 * 
 	 */
-	private class PutGetRandomRunnable implements Runnable {
+	private class SleepyGetRunnable implements Runnable {
 
+		private final Object waiter = new Object();
 		private final AtomicInteger counter;
-		private final NetworkManager putter;
 		private final NetworkManager getter;
-		private final H2HTestData data;
 
-		public PutGetRandomRunnable(AtomicInteger counter, NetworkManager putter, NetworkManager getter) {
+		public SleepyGetRunnable(AtomicInteger counter, NetworkManager getter) {
 			this.counter = counter;
-			this.putter = putter;
 			this.getter = getter;
-			data = new H2HTestData(NetworkTestUtil.randomString());
 		}
 
 		@Override
 		public void run() {
-			final String locationKey = NetworkTestUtil.randomString();
-			final String contentKey = NetworkTestUtil.randomString();
-
-			final IPutListener putListener = new IPutListener() {
+			IGetListener listener = new IGetListener() {
 
 				@Override
-				public void onPutSuccess() {
-					// then get
-					IGetListener listener = new IGetListener() {
-						@Override
-						public void handleGetResult(NetworkContent content) {
-							if (content == null)
-								Assert.fail("Content is null");
-							else
-								counter.incrementAndGet();
-						}
-					};
+				public void handleGetResult(NetworkContent content) {
+					if (content == null) {
+						Assert.fail("Got null result but not expected");
+					} else {
+						// content is ok
+						counter.incrementAndGet();
+					}
 
 					try {
-						Thread.sleep(new Random().nextInt(100));
+						synchronized (waiter) {
+							// provocate netty by sleeping here
+							waiter.wait(1000 + random.nextInt(5000));
+						}
 					} catch (InterruptedException e) {
-						// ignore and continue
+						// ignore
+						e.printStackTrace();
 					}
-					getter.getDataManager().get(locationKey, contentKey, listener);
-				}
-
-				@Override
-				public void onPutFailure() {
-					Assert.fail("Put failed");
 				}
 			};
 
-			// put first
-			putter.getDataManager().put(locationKey, contentKey, data, putListener);
+			// sleep that I start at random time
+			try {
+				synchronized (waiter) {
+					waiter.wait(new Random().nextInt(300));
+				}
+			} catch (InterruptedException e) {
+				// ignore and start the get
+				e.printStackTrace();
+			}
+
+			// get the test data
+			getter.getDataManager().get(locationKey, contentKey, listener);
 		}
 	}
 }
