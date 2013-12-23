@@ -69,7 +69,7 @@ public class File2MetaFileStep extends ProcessStep {
 					metaContext);
 			getProcess().setNextStep(getMetaStep);
 		} catch (GetFailedException e) {
-			getProcess().stop("Could not get the user profile");
+			getProcess().stop(e);
 		}
 	}
 

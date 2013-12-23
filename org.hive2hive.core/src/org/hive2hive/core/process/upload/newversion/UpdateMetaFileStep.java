@@ -82,7 +82,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 		} catch (IOException e) {
 			getProcess().stop("The new MD5 hash for the user profile could not be generated");
 		} catch (Exception e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 		}
 	}
 

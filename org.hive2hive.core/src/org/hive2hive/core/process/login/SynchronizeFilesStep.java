@@ -51,7 +51,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), false);
 			synchronizer = new FileSynchronizer(fileManager, userProfile);
 		} catch (GetFailedException e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 			return;
 		}
 

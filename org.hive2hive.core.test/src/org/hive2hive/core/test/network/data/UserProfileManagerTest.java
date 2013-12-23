@@ -203,7 +203,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 				getProcess().setNextStep(null);
 			} catch (GetFailedException | PutFailedException e) {
-				getProcess().stop(e.getMessage());
+				getProcess().stop(e);
 				Assert.fail();
 			}
 		}

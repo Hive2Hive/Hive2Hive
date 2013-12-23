@@ -48,7 +48,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 			profileManager.readyToPut(userProfile, getProcess().getID());
 		} catch (PutFailedException | GetFailedException | IOException e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 			return;
 		}
 

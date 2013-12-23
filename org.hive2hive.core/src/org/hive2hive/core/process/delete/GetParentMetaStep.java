@@ -43,7 +43,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		try {
 			userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 		} catch (GetFailedException e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 			return;
 		}
 
@@ -60,7 +60,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 		try {
 			profileManager.readyToPut(userProfile, getProcess().getID());
 		} catch (PutFailedException e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 			return;
 		}
 

@@ -68,7 +68,7 @@ public class GetParentMetaStep extends GetMetaDocumentStep {
 				super.context = context;
 				super.get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
 			} catch (Exception e) {
-				getProcess().stop(e.getMessage());
+				getProcess().stop(e);
 			}
 
 		}

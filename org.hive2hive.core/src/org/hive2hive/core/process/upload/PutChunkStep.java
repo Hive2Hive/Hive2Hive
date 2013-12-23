@@ -127,7 +127,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			} catch (DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Could not encrypt the chunk", e);
-				getProcess().stop(e.getMessage());
+				getProcess().stop(e);
 			}
 		} else {
 			logger.debug("File " + file.getName() + ": All chunks uploaded. Continue with meta data.");

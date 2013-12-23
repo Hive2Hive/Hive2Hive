@@ -36,7 +36,7 @@ public class CreateFolderStep extends ProcessStep {
 				throw new IOException("Folder could not be created");
 			}
 		} catch (IOException e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 			return;
 		}
 
