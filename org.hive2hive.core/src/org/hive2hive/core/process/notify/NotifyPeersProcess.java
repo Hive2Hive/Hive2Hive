@@ -64,7 +64,7 @@ public class NotifyPeersProcess extends Process {
 			}
 
 			@Override
-			public void onFail(String reason) {
+			public void onFail(Exception exception) {
 				// do not cleanup
 			}
 		};

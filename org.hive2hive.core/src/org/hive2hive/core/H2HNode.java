@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.IllegalProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
@@ -66,6 +67,15 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		}
 	}
 
+	private void autoStartProcess(IProcess process) {
+		try {
+			if (autostartProcesses)
+				process.start();
+		} catch (IllegalProcessStateException e) {
+			// ignore
+		}
+	}
+
 	@Override
 	public void disconnect() {
 		networkManager.disconnect();
@@ -75,9 +85,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	public IProcess register(UserCredentials credentials) {
 		final RegisterProcess process = new RegisterProcess(credentials, networkManager);
 
-		if (autostartProcesses) {
-			process.start();
-		}
+		autoStartProcess(process);
 		return process;
 	}
 
@@ -102,15 +110,12 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			}
 
 			@Override
-			public void onFail(String reason) {
+			public void onFail(Exception error) {
 				// ignore here
 			}
 		});
 
-		if (autostartProcesses) {
-			loginProcess.start();
-		}
-
+		autoStartProcess(loginProcess);
 		return loginProcess;
 	}
 
@@ -119,14 +124,13 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			// start the post login process
 			PostLoginProcess postLogin = new PostLoginProcess(locations, networkManager);
 			postLogin.start();
-		} catch (NoSessionException e) {
+		} catch (Exception e) {
 			// TODO handle the exception
 		}
 	}
 
 	@Override
 	public IProcess logout() throws NoSessionException {
-
 		LogoutProcess logoutProcess = new LogoutProcess(networkManager);
 		logoutProcess.addListener(new IProcessListener() {
 			@Override
@@ -135,26 +139,23 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			}
 
 			@Override
-			public void onFail(String reason) {
+			public void onFail(Exception error) {
 				postLogoutWork();
 			}
 		});
 
-		if (autostartProcesses)
-			logoutProcess.start();
-
+		autoStartProcess(logoutProcess);
 		return logoutProcess;
 	}
 
 	private void postLogoutWork() {
-
 		// stop all running processes
 		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
 		// write the current state to a meta file
 		try {
 			networkManager.getSession().getFileManager().writePersistentMetaData();
-			
+
 			// quit the session
 			networkManager.setSession(null);
 		} catch (NoSessionException e) {
@@ -175,10 +176,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			process = new NewFileProcess(file, networkManager);
 		}
 
-		if (autostartProcesses) {
-			process.start();
-		}
-
+		autoStartProcess(process);
 		return process;
 	}
 
@@ -205,10 +203,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 			process = new DeleteFileProcess(file, networkManager);
 		}
 
-		if (autostartProcesses) {
-			process.start();
-		}
-
+		autoStartProcess(process);
 		return process;
 	}
 

@@ -21,7 +21,7 @@ public class TestProcessListener implements IProcessListener {
 	}
 
 	@Override
-	public void onFail(String reason) {
+	public void onFail(Exception error) {
 		onFailure = true;
 	}
 

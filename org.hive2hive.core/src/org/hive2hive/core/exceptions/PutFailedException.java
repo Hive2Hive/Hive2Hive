@@ -1,6 +1,6 @@
 package org.hive2hive.core.exceptions;
 
-public class PutFailedException extends Exception {
+public class PutFailedException extends Hive2HiveException {
 
 	private static final long serialVersionUID = -676084733761214493L;
 

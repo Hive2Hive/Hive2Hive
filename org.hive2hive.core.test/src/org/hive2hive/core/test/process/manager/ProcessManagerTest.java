@@ -72,6 +72,10 @@ public class ProcessManagerTest extends H2HJUnitTest {
 			}
 
 			@Override
+			public void stop(Exception exception) {
+			}
+
+			@Override
 			public void start() {
 			}
 

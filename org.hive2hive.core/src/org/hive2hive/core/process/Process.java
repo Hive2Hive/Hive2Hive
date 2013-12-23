@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.IllegalProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -34,6 +36,7 @@ public abstract class Process implements IProcess {
 
 	private final List<ProcessStep> executedSteps = new ArrayList<ProcessStep>();
 	private final List<IProcessListener> listeners = new ArrayList<IProcessListener>();
+	private Thread thread;
 
 	public Process(NetworkManager networkManager) {
 		this.networkManager = networkManager;
@@ -68,7 +71,8 @@ public abstract class Process implements IProcess {
 		if (state == ProcessState.INITIALIZING) {
 			state = ProcessState.RUNNING;
 			ProcessManager.getInstance().attachProcess(this);
-			new Thread(this).start();
+			thread = new Thread(this);
+			thread.start();
 		} else {
 			logger.error("Process state is " + state.toString() + ". Cannot start.");
 		}
@@ -100,16 +104,33 @@ public abstract class Process implements IProcess {
 	@Override
 	// TODO stop with exception as parameter
 	public void stop(String reason) {
+		stop(new Hive2HiveException(reason));
+	}
+
+	@Override
+	// TODO stop with exception as parameter
+	public void stop(Exception exception) {
 		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
-			logger.error(this.getClass().getSimpleName() + " stopped. Reason: " + reason);
+			logger.error(this.getClass().getSimpleName() + " stopped. Reason: " + exception.getMessage());
 			// first roll back
-			rollBack(reason);
+			rollBack(exception);
 
 			// then mark process as stopped
 			state = ProcessState.STOPPED;
 			ProcessManager.getInstance().detachProcess(this);
 		} else {
 			logger.warn("Process is already stopped or still rollbacking");
+		}
+	}
+
+	public void join() throws InterruptedException, IllegalProcessStateException {
+		if (state == ProcessState.RUNNING) {
+			if (thread != null) {
+				thread.join();
+			}
+		} else {
+			logger.warn("Cannot join the process since it's not running");
+			throw new IllegalProcessStateException("The process is not running.", state);
 		}
 	}
 
@@ -162,9 +183,9 @@ public abstract class Process implements IProcess {
 		}
 	}
 
-	private void rollBack(String reason) {
+	private void rollBack(Exception exception) {
 		state = ProcessState.ROLLBACKING;
-		logger.warn(String.format("Rollback triggered. Reason = '%s'", reason));
+		logger.warn(String.format("Rollback triggered. Reason = '%s'", exception));
 
 		// start roll back from current step
 		if (currentStep != null)
@@ -177,7 +198,7 @@ public abstract class Process implements IProcess {
 		// }
 
 		for (IProcessListener listener : listeners) {
-			listener.onFail(reason);
+			listener.onFail(exception);
 		}
 	}
 

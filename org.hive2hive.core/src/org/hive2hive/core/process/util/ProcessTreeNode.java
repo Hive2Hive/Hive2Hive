@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
@@ -22,7 +21,7 @@ public abstract class ProcessTreeNode extends Process {
 	private boolean done;
 	private boolean failed;
 	private final ProcessTreeNode parent;
-	private final List<String> problemList;
+	private final List<Exception> exceptionList;
 
 	/**
 	 * For the root node (does not do anything except holding children and starting them simultaneously
@@ -47,10 +46,10 @@ public abstract class ProcessTreeNode extends Process {
 		this.failed = false;
 		if (parent == null) {
 			// root node
-			problemList = new CopyOnWriteArrayList<String>();
+			exceptionList = new CopyOnWriteArrayList<Exception>();
 		} else {
 			// child node
-			problemList = null;
+			exceptionList = null;
 			parent.addChild(this);
 		}
 	}
@@ -104,9 +103,9 @@ public abstract class ProcessTreeNode extends Process {
 		}
 	}
 
-	protected void addProblem(String reason) {
+	protected void addProblem(Exception reason) {
 		if (parent == null) {
-			problemList.add(reason);
+			exceptionList.add(reason);
 		} else {
 			parent.addProblem(reason);
 		}
@@ -133,15 +132,13 @@ public abstract class ProcessTreeNode extends Process {
 						child.start();
 					}
 					done = true;
-					ProcessManager.getInstance().detachProcess(ProcessTreeNode.this);
 				}
 
 				@Override
-				public void onFail(String reason) {
-					addProblem(reason);
+				public void onFail(Exception exception) {
+					addProblem(exception);
 					done = true;
 					failed = true;
-					ProcessManager.getInstance().detachProcess(ProcessTreeNode.this);
 				}
 			});
 
@@ -149,11 +146,11 @@ public abstract class ProcessTreeNode extends Process {
 		}
 	}
 
-	public List<String> getProblemList() {
+	public List<Exception> getExceptionList() {
 		if (parent == null) {
-			return problemList;
+			return exceptionList;
 		} else {
-			return parent.getProblemList();
+			return parent.getExceptionList();
 		}
 	}
 }
