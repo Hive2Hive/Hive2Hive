@@ -11,7 +11,7 @@ public class UpdateDestinationParentStep extends PutMetaDocumentStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateDestinationParentStep.class);
 
 	public UpdateDestinationParentStep() {
-		super(null, null);
+		super(null, new RelinkUserProfileStep());
 	}
 
 	@Override
@@ -31,10 +31,6 @@ public class UpdateDestinationParentStep extends PutMetaDocumentStep {
 		// keep the list of users to notify them about the movement
 		context.addUsersToNotifyDestination(parent.getUserList());
 
-		// initialize next steps:
-		// 3. update the user profile
-		// 4. notify
-		super.nextStep = new RelinkUserProfileStep();
 		super.start();
 	}
 }

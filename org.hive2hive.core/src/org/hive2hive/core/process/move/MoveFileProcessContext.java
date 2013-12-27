@@ -54,6 +54,9 @@ public class MoveFileProcessContext extends ProcessContext implements IGetMetaCo
 		return nodeKeyPair;
 	}
 
+	/**
+	 * The keys of the destination's parent. However, if the destination is the root, the keys are null
+	 */
 	public void setDestinationParentKeys(KeyPair destinationParentKeys) {
 		this.destinationParentKeys = destinationParentKeys;
 	}

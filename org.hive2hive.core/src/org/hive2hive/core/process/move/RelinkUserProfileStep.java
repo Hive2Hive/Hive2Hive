@@ -28,18 +28,33 @@ public class RelinkUserProfileStep extends ProcessStep {
 		logger.debug("Start relinking the moved file in the user profile");
 		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
 
+		// different possibilities of movement:
+		// - file moved from root to other destination
+		// - file moved from other source to root
+		// - file moved from other source to other destination
 		try {
 			UserProfileManager profileManager = getNetworkManager().getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 
-			// relink them
+			logger.debug("Start relinking the moved file in the user profile");
 			FileTreeNode movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
 			FileTreeNode oldParent = movedNode.getParent();
 			oldParentKey = oldParent.getKeyPair().getPublic();
 
+			// source's parent needs to be updated, no matter if it's root or not
 			oldParent.removeChild(movedNode);
-			movedNode.setParent(userProfile.getRoot());
-			userProfile.getRoot().addChild(movedNode);
+
+			if (context.getDestinationParentKeys() == null) {
+				// moved to root
+				movedNode.setParent(userProfile.getRoot());
+				userProfile.getRoot().addChild(movedNode);
+			} else {
+				// moved to non-root
+				FileTreeNode newParent = userProfile.getFileById(context.getDestinationParentKeys()
+						.getPublic());
+				movedNode.setParent(newParent);
+				newParent.addChild(movedNode);
+			}
 
 			// update in DHT
 			profileManager.readyToPut(userProfile, getProcess().getID());
@@ -47,15 +62,20 @@ public class RelinkUserProfileStep extends ProcessStep {
 			logger.debug("Successfully relinked the moved file in the user profile");
 
 			// notify other users
-			notifyUsers(context.getUsersToNotifySource(), context.getUsersToNotifyDestination(),
-					movedNode.getName(), movedNode.getKeyPair().getPublic());
+			notifyUsers(context.getUsersToNotifySource(), context.getUsersToNotifyDestination(), movedNode);
 		} catch (NoSessionException | GetFailedException | PutFailedException e) {
 			getProcess().stop(e);
 			return;
 		}
 	}
 
-	private void notifyUsers(Set<String> source, Set<String> destination, String fileName, PublicKey fileKey) {
+	/**
+	 * Sends three notification types:
+	 * 1. users that have access to the file prior and after file movement
+	 * 2. users that don't have access to the file anymore
+	 * 3. users that now have access to the file but didn't have prior movement
+	 */
+	private void notifyUsers(Set<String> source, Set<String> destination, FileTreeNode movedNode) {
 		// add all common users to a list
 		Set<String> common = new HashSet<String>();
 		for (String user : source) {
@@ -69,17 +89,22 @@ public class RelinkUserProfileStep extends ProcessStep {
 		}
 
 		// inform common users
-		getProcess().notfyOtherUsers(common, new MoveNotificationMessageFactory(fileKey));
+		getProcess().notfyOtherUsers(
+				common,
+				new MoveNotificationMessageFactory(movedNode.getName(), oldParentKey, movedNode.getParent()
+						.getKeyPair().getPublic()));
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
 
 		// inform users that don't have access to the new destination anymore
 		source.removeAll(common);
-		getProcess().notfyOtherUsers(source, new DeleteNotifyMessageFactory(oldParentKey, fileName));
+		getProcess().notfyOtherUsers(source,
+				new DeleteNotifyMessageFactory(oldParentKey, movedNode.getName()));
 		logger.debug("Inform " + source.size() + " users that a file has been removed (after movement)");
 
 		// inform users that have now access to the moved file
 		destination.removeAll(common);
-		getProcess().notfyOtherUsers(destination, new UploadNotificationMessageFactory(fileKey));
+		getProcess().notfyOtherUsers(destination,
+				new UploadNotificationMessageFactory(movedNode.getKeyPair().getPublic()));
 		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
 	}
 
