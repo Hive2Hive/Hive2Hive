@@ -2,28 +2,24 @@ package org.hive2hive.core.process.move;
 
 import java.security.PublicKey;
 
-import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.model.FileTreeNode;
+import org.apache.log4j.Logger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 
 public class UpdateSourceParentStep extends PutMetaDocumentStep {
 
-	private boolean profileUpdated;
+	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateSourceParentStep.class);
 
 	public UpdateSourceParentStep() {
 		super(null, null);
-		profileUpdated = false;
 	}
 
 	@Override
 	public void start() {
+		logger.debug("Start removing the file from the former parent meta folder");
 		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
 		MetaDocument sourceParent = context.getMetaDocument();
 		if (sourceParent == null) {
@@ -36,30 +32,15 @@ public class UpdateSourceParentStep extends PutMetaDocumentStep {
 		parent.removeChildKey(fileKey);
 		super.metaDocument = parent;
 
+		// keep the list of users to notify them about the movement
+		context.addUsersToNotifySource(parent.getUserList());
+
 		if (context.getDestinationParentKeys() == null) {
+			logger.debug("No need to update the new parent meta folder since it's moved to root");
 			// file is going to be in root. Next steps:
 			// 1. update the user profile
 			// 2. notify
-			try {
-				UserProfileManager profileManager = getNetworkManager().getSession().getProfileManager();
-				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
-
-				// relink them
-				FileTreeNode movedNode = userProfile.getFileById(fileKey);
-				FileTreeNode oldParent = movedNode.getParent();
-				oldParent.removeChild(movedNode);
-				movedNode.setParent(userProfile.getRoot());
-				userProfile.getRoot().addChild(movedNode);
-
-				// update in DHT
-				profileManager.readyToPut(userProfile, getProcess().getID());
-				profileUpdated = true;
-
-				// TODO notify
-			} catch (NoSessionException | GetFailedException | PutFailedException e) {
-				getProcess().stop(e.getMessage());
-				return;
-			}
+			super.nextStep = new RelinkUserProfileStep();
 		} else {
 			// initialize next steps:
 			// 1. get parent of destination
@@ -71,31 +52,5 @@ public class UpdateSourceParentStep extends PutMetaDocumentStep {
 		}
 
 		super.start();
-	}
-
-	@Override
-	public void rollBack() {
-		// only when user profile has been updated
-		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
-		if (profileUpdated) {
-			try {
-				UserProfileManager profileManager = getNetworkManager().getSession().getProfileManager();
-				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
-
-				// relink them
-				FileTreeNode movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
-				userProfile.getRoot().removeChild(movedNode);
-				FileTreeNode oldParent = userProfile.getFileById(metaDocument.getId());
-				movedNode.setParent(oldParent);
-				oldParent.addChild(movedNode);
-
-				// update in DHT
-				profileManager.readyToPut(userProfile, getProcess().getID());
-			} catch (NoSessionException | GetFailedException | PutFailedException e) {
-				// ignore
-			}
-		}
-
-		super.rollBack();
 	}
 }

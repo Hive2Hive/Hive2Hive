@@ -7,6 +7,20 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 
+/**
+ * Moves the file to a new destination. The following steps are required: <br>
+ * <ol>
+ * <li>Move the file on disk</li>
+ * <li>Get the source and the destinations parent meta folder</li>
+ * <li>Remove the file from the former parent</li>
+ * <li>Add the file from the new parent</li>
+ * <li>Update the user profile</li>
+ * <li>Notify other clients</li>
+ * </ol>
+ * 
+ * @author Nico
+ * 
+ */
 public class MoveFileProcess extends Process {
 
 	private final MoveFileProcessContext context;
@@ -19,6 +33,7 @@ public class MoveFileProcess extends Process {
 		// verify the file
 		verifyFiles(source, destination);
 
+		setNextStep(new MoveOnDiskStep());
 	}
 
 	private void verifyFiles(File source, File destination) throws IllegalArgumentException,

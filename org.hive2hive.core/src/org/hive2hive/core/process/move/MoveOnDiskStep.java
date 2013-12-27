@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -21,6 +23,8 @@ import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
  */
 public class MoveOnDiskStep extends ProcessStep {
 
+	private final static Logger logger = H2HLoggerFactory.getLogger(MoveOnDiskStep.class);
+
 	@Override
 	public void start() {
 		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
@@ -28,6 +32,8 @@ public class MoveOnDiskStep extends ProcessStep {
 			// move the file
 			Files.move(context.getSource().toPath(), context.getDestination().toPath(),
 					StandardCopyOption.ATOMIC_MOVE);
+			logger.debug("Moved the file from " + context.getSource().getAbsolutePath() + " to "
+					+ context.getDestination().getAbsolutePath());
 
 			// now get the key of the meta file
 			H2HSession session = getNetworkManager().getSession();
@@ -53,12 +59,12 @@ public class MoveOnDiskStep extends ProcessStep {
 
 			// need to update the former parent (if it was not located in root
 			if (fileNode.getParent() == null) {
+				logger.debug("File is in root; No need to update the source parent");
 				// file was in root. Next steps:
 				// 1. update the destinations parent
 				// 2. update the user profile
 				// 3. notify
-				// TODO
-				getProcess().setNextStep(null);
+				getProcess().setNextStep(new UpdateDestinationParentStep());
 			} else {
 				// parent meta needs to be updated. Next steps:
 				// 1. update the source parent
@@ -72,7 +78,7 @@ public class MoveOnDiskStep extends ProcessStep {
 		} catch (IOException e) {
 			getProcess().stop("File could not be moved to destination. Reason: " + e.getMessage());
 		} catch (NoSessionException | GetFailedException | IllegalArgumentException e) {
-			getProcess().stop(e.getMessage());
+			getProcess().stop(e);
 		}
 
 	}

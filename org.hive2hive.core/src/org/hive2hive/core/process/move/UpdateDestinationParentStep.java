@@ -1,10 +1,14 @@
 package org.hive2hive.core.process.move;
 
+import org.apache.log4j.Logger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 
 public class UpdateDestinationParentStep extends PutMetaDocumentStep {
+
+	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateDestinationParentStep.class);
 
 	public UpdateDestinationParentStep() {
 		super(null, null);
@@ -12,6 +16,7 @@ public class UpdateDestinationParentStep extends PutMetaDocumentStep {
 
 	@Override
 	public void start() {
+		logger.debug("Start adding the file to the new parent meta folder");
 		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
 		MetaDocument destinationParent = context.getMetaDocument();
 		if (destinationParent == null) {
@@ -23,11 +28,13 @@ public class UpdateDestinationParentStep extends PutMetaDocumentStep {
 		parent.addChildKeyPair(context.getFileNodeKeys());
 		super.metaDocument = parent;
 
+		// keep the list of users to notify them about the movement
+		context.addUsersToNotifyDestination(parent.getUserList());
+
 		// initialize next steps:
 		// 3. update the user profile
 		// 4. notify
-		// TODO
-
+		super.nextStep = new RelinkUserProfileStep();
 		super.start();
 	}
 }

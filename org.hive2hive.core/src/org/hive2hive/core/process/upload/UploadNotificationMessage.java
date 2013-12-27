@@ -10,7 +10,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 
 /**
- * This message is sent after an upload has finished. It downloads the newest version at the receiver side *
+ * This message is sent after an upload has finished. It downloads the newest version at the receiver side
  * 
  * @author Nico
  * 
@@ -41,7 +41,7 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 			logger.error("Got notified but cannot download the file", e);
 		}
 	}
-	
+
 	@Override
 	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
 		if (!networkManager.getUserId().equals(userId)) {
