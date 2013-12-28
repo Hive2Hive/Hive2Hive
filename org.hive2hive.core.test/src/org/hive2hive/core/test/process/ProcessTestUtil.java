@@ -26,6 +26,7 @@ import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.PutUserProfileStep;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
@@ -221,4 +222,16 @@ public class ProcessTestUtil {
 		}
 	}
 
+	public static void moveFile(NetworkManager networkManager, File source, File destination,
+			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+		networkManager.setSession(new H2HSession(EncryptionUtil
+				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
+
+		try {
+			MoveFileProcess process = new MoveFileProcess(networkManager, source, destination);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
+	}
 }

@@ -35,7 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests uploading a new version of a file.
+ * Tests deleting a file.
  * 
  * @author Nico
  * 

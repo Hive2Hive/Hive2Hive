@@ -58,19 +58,24 @@ public class MoveOnDiskStep extends ProcessStep {
 			}
 
 			// need to update the former parent (if it was not located in root
-			if (fileNode.getParent() == null) {
+			if (fileNode.getParent().isRoot()) {
 				logger.debug("File is in root; No need to update the source parent");
 				// file was in root. Next steps:
-				// 1. update the destinations parent
-				// 2. update the user profile
-				// 3. notify
-				getProcess().setNextStep(new UpdateDestinationParentStep());
-			} else {
-				// parent meta needs to be updated. Next steps:
-				// 1. update the source parent
-				// 2. update the destination parent
+				// 1. get the parent meta data
+				// 2. update the destinations parent
 				// 3. update the user profile
 				// 4. notify
+				GetMetaDocumentStep nextStep = new GetMetaDocumentStep(context.getDestinationParentKeys(),
+						new UpdateDestinationParentStep(), context);
+				getProcess().setNextStep(nextStep);
+			} else {
+				// parent meta needs to be updated. Next steps:
+				// 1. get the source parent
+				// 2. update the source parent
+				// 3. get the destination parent
+				// 4. update the destination parent
+				// 5. update the user profile
+				// 6. notify
 				GetMetaDocumentStep getSourceParent = new GetMetaDocumentStep(fileNode.getParent()
 						.getKeyPair(), new UpdateSourceParentStep(), context);
 				getProcess().setNextStep(getSourceParent);

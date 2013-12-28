@@ -63,6 +63,9 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 			// notify other users
 			notifyUsers(context.getUsersToNotifySource(), context.getUsersToNotifyDestination(), movedNode);
+
+			// done with all steps
+			getProcess().setNextStep(null);
 		} catch (NoSessionException | GetFailedException | PutFailedException e) {
 			getProcess().stop(e);
 			return;
@@ -89,23 +92,22 @@ public class RelinkUserProfileStep extends ProcessStep {
 		}
 
 		// inform common users
-		getProcess().notfyOtherUsers(
-				common,
-				new MoveNotificationMessageFactory(movedNode.getName(), oldParentKey, movedNode.getParent()
-						.getKeyPair().getPublic()));
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
+		PublicKey newParentKey = movedNode.getParent().getKeyPair().getPublic();
+		getProcess().notfyOtherUsers(common,
+				new MoveNotificationMessageFactory(movedNode.getName(), oldParentKey, newParentKey));
 
 		// inform users that don't have access to the new destination anymore
+		logger.debug("Inform " + source.size() + " users that a file has been removed (after movement)");
 		source.removeAll(common);
 		getProcess().notfyOtherUsers(source,
 				new DeleteNotifyMessageFactory(oldParentKey, movedNode.getName()));
-		logger.debug("Inform " + source.size() + " users that a file has been removed (after movement)");
 
 		// inform users that have now access to the moved file
+		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
 		destination.removeAll(common);
 		getProcess().notfyOtherUsers(destination,
 				new UploadNotificationMessageFactory(movedNode.getKeyPair().getPublic()));
-		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
 	}
 
 	@Override
