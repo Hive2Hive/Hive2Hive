@@ -82,7 +82,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
 
-			logger.debug("Putting the modified meta file (containing the new version");
+			logger.debug("Putting the modified meta file (containing the new version)");
 			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile,
 					getStepsForNotification(userProfile));
 			getProcess().setNextStep(putMetaStep);
