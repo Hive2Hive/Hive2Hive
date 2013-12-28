@@ -25,7 +25,9 @@ public class MoveFileProcessContext extends ProcessContext implements IGetMetaCo
 		this.source = source;
 		this.destination = destination;
 		this.usersToNotifySource = new HashSet<String>();
+		usersToNotifySource.add(process.getNetworkManager().getUserId());
 		this.usersToNotifyDestination = new HashSet<String>();
+		usersToNotifyDestination.add(process.getNetworkManager().getUserId());
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.logout.LogoutProcess;
+import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -183,17 +184,15 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	@Override
 	public IProcess update(File file) throws NoSessionException, IllegalArgumentException {
 		NewVersionProcess process = new NewVersionProcess(file, networkManager);
-		if (autostartProcesses) {
-			process.start();
-		}
-
+		autoStartProcess(process);
 		return process;
 	}
 
 	@Override
 	public IProcess move(File source, File destination) throws NoSessionException, IllegalArgumentException {
-		// TODO
-		return null;
+		MoveFileProcess process = new MoveFileProcess(networkManager, source, destination);
+		autoStartProcess(process);
+		return process;
 	}
 
 	@Override
