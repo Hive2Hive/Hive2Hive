@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -22,6 +23,7 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,8 +37,8 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	private static final int networkSize = 5;
 	private static List<NetworkManager> network;
-	private static UserCredentials userCredentials;
 	private static IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private UserCredentials userCredentials;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -44,6 +46,10 @@ public class MoveFileTest extends H2HJUnitTest {
 		beforeClass();
 
 		network = NetworkTestUtil.createNetwork(networkSize);
+	}
+
+	@Before
+	public void register() {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
@@ -86,6 +92,92 @@ public class MoveFileTest extends H2HJUnitTest {
 				.getKeyPair());
 		MetaFolder parentFolder = (MetaFolder) parentMetaDocument;
 		Assert.assertEquals(1, parentFolder.getChildKeys().size());
+	}
+
+	@Test
+	public void testDirectoryToRoot() throws IOException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager fileManager = new FileManager(root);
+
+		// add the source folder
+		File folder = new File(root, "folder");
+		folder.mkdir();
+		ProcessTestUtil.uploadNewFile(client, folder, profileManager, fileManager, config);
+
+		// add a file to the folder
+		File file = new File(folder, "test-file");
+		FileUtils.write(file, NetworkTestUtil.randomString());
+		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+
+		File destination = new File(root, file.getName());
+
+		// move the file
+		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+
+		// assert that the file is moved
+		Assert.assertTrue(destination.exists());
+
+		// check that the user profile has a correct entry
+		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		Assert.assertNotNull(fileNode);
+		Assert.assertEquals(userProfile.getRoot(), fileNode.getParent());
+
+		// root contains moved file and empty folder as file
+		Assert.assertEquals(2, userProfile.getRoot().getChildren().size());
+	}
+
+	@Test
+	public void testDirectoryToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager fileManager = new FileManager(root);
+
+		// add the source folder
+		File sourceFolder = new File(root, "source-folder");
+		sourceFolder.mkdir();
+		ProcessTestUtil.uploadNewFile(client, sourceFolder, profileManager, fileManager, config);
+
+		// add a file to the folder
+		File file = new File(sourceFolder, "test-file");
+		FileUtils.write(file, NetworkTestUtil.randomString());
+		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+
+		// add the destination folder
+		File destFolder = new File(root, "dest-folder");
+		destFolder.mkdir();
+		ProcessTestUtil.uploadNewFile(client, destFolder, profileManager, fileManager, config);
+
+		File destination = new File(destFolder, file.getName());
+
+		// move the file
+		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+
+		// assert that the file is moved
+		Assert.assertTrue(destination.exists());
+
+		// check that the user profile has a correct entry
+		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		Assert.assertNotNull(fileNode);
+		Assert.assertEquals(destFolder.getName(), fileNode.getParent().getName());
+
+		// check that the new meta document has the file
+		MetaDocument destParentMetaDocument = ProcessTestUtil.getMetaDocument(client, fileNode.getParent()
+				.getKeyPair());
+		MetaFolder parentFolder = (MetaFolder) destParentMetaDocument;
+		Assert.assertEquals(1, parentFolder.getChildKeys().size());
+
+		// check that the old meta document does not contain the file anymore
+		MetaDocument sourceParentMetaDocument = ProcessTestUtil.getMetaDocument(client, userProfile
+				.getFileByPath(sourceFolder, fileManager).getKeyPair());
+		parentFolder = (MetaFolder) sourceParentMetaDocument;
+		Assert.assertEquals(0, parentFolder.getChildKeys().size());
 	}
 
 	@AfterClass

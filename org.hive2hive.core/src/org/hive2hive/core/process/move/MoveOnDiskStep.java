@@ -46,7 +46,7 @@ public class MoveOnDiskStep extends ProcessStep {
 			context.setFileNodeKeys(fileNode.getKeyPair());
 
 			// since we already have the user profile, get the destination parent as well
-			if (context.getDestination().getAbsolutePath()
+			if (context.getDestination().getParentFile().getAbsolutePath()
 					.equalsIgnoreCase(session.getFileManager().getRoot().getAbsolutePath())) {
 				// file is moved to root
 				context.setDestinationParentKeys(null);
