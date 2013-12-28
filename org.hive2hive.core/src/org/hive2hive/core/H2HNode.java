@@ -28,7 +28,17 @@ import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.security.UserCredentials;
 
-public class H2HNode implements IH2HNode, IH2HFileConfiguration {
+/**
+ * This is the central class for a developer using the Hive2Hive library. A node represents a peer in the
+ * network, forming a distributed hash table (DHT). Each node needs to create a new network or connect to an
+ * existing network (bootstrapping).<br>
+ * To create a new peer, use the {@link H2HNodeBuilder} to configure the node and set it up (it helps to fill
+ * this awful constructor). A instance of this class opens the world for user and file management.
+ * 
+ * @author Nico, Chris, Seppi
+ * 
+ */
+public class H2HNode implements IH2HNode, IH2HFileConfiguration, IFileManagement, IUserManagement {
 
 	private boolean autostartProcesses;
 	private final int maxSizeOfAllVersions;
@@ -75,6 +85,21 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		} catch (IllegalProcessStateException e) {
 			// ignore
 		}
+	}
+
+	@Override
+	public IH2HFileConfiguration getFileConfiguration() {
+		return this;
+	}
+
+	@Override
+	public IUserManagement getUserManagement() {
+		return this;
+	}
+
+	@Override
+	public IFileManagement getFileManagement() {
+		return this;
 	}
 
 	@Override
