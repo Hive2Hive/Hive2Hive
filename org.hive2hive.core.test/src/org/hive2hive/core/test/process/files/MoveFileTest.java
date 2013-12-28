@@ -180,6 +180,35 @@ public class MoveFileTest extends H2HJUnitTest {
 		Assert.assertEquals(0, parentFolder.getChildKeys().size());
 	}
 
+	@Test
+	public void testRename() throws IOException, IllegalFileLocation, GetFailedException,
+			InterruptedException {
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileManager fileManager = new FileManager(root);
+
+		// add a file to the network
+		File file = new File(root, "test-file");
+		FileUtils.write(file, NetworkTestUtil.randomString());
+		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+
+		// don't move, only rename
+		File destination = new File(root, "test-file-moved");
+
+		// move the file
+		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+
+		// assert that the file is moved
+		Assert.assertTrue(destination.exists());
+
+		// check that the user profile has a correct entry
+		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		Assert.assertNotNull(fileNode);
+		Assert.assertEquals(fileNode.getName(), destination.getName());
+	}
+
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);

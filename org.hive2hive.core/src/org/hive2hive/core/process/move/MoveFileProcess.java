@@ -38,6 +38,10 @@ public class MoveFileProcess extends Process {
 
 	private void verifyFiles(File source, File destination) throws IllegalArgumentException,
 			NoSessionException {
+		if (source.equals(destination)) {
+			throw new IllegalArgumentException("Source and destination are the same");
+		}
+
 		if (!source.exists()) {
 			throw new IllegalArgumentException("File to move does not exist");
 		} else if (destination.exists()) {

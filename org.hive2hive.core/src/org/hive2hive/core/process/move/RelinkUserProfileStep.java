@@ -38,6 +38,10 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 			logger.debug("Start relinking the moved file in the user profile");
 			FileTreeNode movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
+
+			// consider renaming
+			movedNode.setName(context.getDestination().getName());
+
 			FileTreeNode oldParent = movedNode.getParent();
 			oldParentKey = oldParent.getKeyPair().getPublic();
 
