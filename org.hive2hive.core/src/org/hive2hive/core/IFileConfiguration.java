@@ -1,6 +1,6 @@
 package org.hive2hive.core;
 
-public interface IH2HFileConfiguration {
+public interface IFileConfiguration {
 
 	int getMaxFileSize();
 

@@ -117,7 +117,7 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 
 					try {
 						synchronized (waiter) {
-							// provocate netty by sleeping here
+							// provocate netty by sleeping here (between 1s and 6s)
 							waiter.wait(1000 + random.nextInt(5000));
 						}
 					} catch (InterruptedException e) {

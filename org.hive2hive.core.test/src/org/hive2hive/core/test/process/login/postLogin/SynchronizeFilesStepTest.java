@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
@@ -43,7 +43,7 @@ import org.junit.Test;
 public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 	private static final int networkSize = 2;
-	private static IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private static IFileConfiguration config = new TestH2HFileConfiguration();
 
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;

@@ -38,7 +38,7 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Nico, Chris, Seppi
  * 
  */
-public class H2HNode implements IH2HNode, IH2HFileConfiguration, IFileManagement, IUserManagement {
+public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, IUserManagement {
 
 	private boolean autostartProcesses;
 	private final int maxSizeOfAllVersions;
@@ -88,7 +88,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration, IFileManagement
 	}
 
 	@Override
-	public IH2HFileConfiguration getFileConfiguration() {
+	public IFileConfiguration getFileConfiguration() {
 		return this;
 	}
 

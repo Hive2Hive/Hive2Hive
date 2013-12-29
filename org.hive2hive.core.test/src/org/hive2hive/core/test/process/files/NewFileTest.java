@@ -9,7 +9,7 @@ import java.util.Random;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
@@ -48,7 +48,7 @@ public class NewFileTest extends H2HJUnitTest {
 	private final int networkSize = 3;
 	private List<NetworkManager> network;
 	private FileManager fileManager;
-	private IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private IFileConfiguration config = new TestH2HFileConfiguration();
 	private UserCredentials userCredentials;
 
 	@BeforeClass

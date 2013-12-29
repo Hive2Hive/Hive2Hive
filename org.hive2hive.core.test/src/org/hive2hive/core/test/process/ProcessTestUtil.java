@@ -5,7 +5,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
@@ -169,7 +169,7 @@ public class ProcessTestUtil {
 	}
 
 	public static File downloadFile(NetworkManager networkManager, FileTreeNode file,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
 		try {
@@ -183,7 +183,7 @@ public class ProcessTestUtil {
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
+			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config)
 			throws IllegalFileLocation {
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
@@ -196,7 +196,7 @@ public class ProcessTestUtil {
 	}
 
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config)
+			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config)
 			throws IllegalArgumentException {
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
@@ -210,7 +210,7 @@ public class ProcessTestUtil {
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
 
@@ -223,7 +223,7 @@ public class ProcessTestUtil {
 	}
 
 	public static void moveFile(NetworkManager networkManager, File source, File destination,
-			UserProfileManager profileManager, FileManager fileManager, IH2HFileConfiguration config) {
+			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
 

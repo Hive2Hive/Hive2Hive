@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -45,7 +45,7 @@ import org.junit.Test;
 public class NewVersionTest extends H2HJUnitTest {
 
 	private final int networkSize = 5;
-	private final IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private final IFileConfiguration config = new TestH2HFileConfiguration();
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;
 	private FileManager fileManager;
@@ -177,7 +177,7 @@ public class NewVersionTest extends H2HJUnitTest {
 	@Test
 	public void testCleanupMaxNumVersions() throws IOException, GetFailedException {
 		// overwrite config
-		IH2HFileConfiguration limitingConfig = new IH2HFileConfiguration() {
+		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
 			@Override
 			public int getMaxSizeAllVersions() {
@@ -223,7 +223,7 @@ public class NewVersionTest extends H2HJUnitTest {
 	public void testCleanupMaxSize() throws IOException, GetFailedException {
 		// overwrite config and set the currently max limit
 		final long fileSize = file.length();
-		IH2HFileConfiguration limitingConfig = new IH2HFileConfiguration() {
+		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
 			@Override
 			public int getMaxSizeAllVersions() {

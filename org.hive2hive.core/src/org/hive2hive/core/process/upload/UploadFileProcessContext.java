@@ -4,7 +4,7 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.List;
 
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -16,7 +16,7 @@ import org.hive2hive.core.security.UserCredentials;
 public class UploadFileProcessContext extends ProcessContext implements IGetMetaContext {
 
 	private final FileManager fileManager;
-	private final IH2HFileConfiguration config;
+	private final IFileConfiguration config;
 	private final File file;
 	private final boolean fileAlreadyExists;
 	private final UserProfileManager profileManager;
@@ -24,7 +24,7 @@ public class UploadFileProcessContext extends ProcessContext implements IGetMeta
 	private MetaDocument metaDocument;
 
 	public UploadFileProcessContext(Process process, File file, UserProfileManager profileManager,
-			FileManager fileManager, IH2HFileConfiguration config, boolean fileAlreadyExists) {
+			FileManager fileManager, IFileConfiguration config, boolean fileAlreadyExists) {
 		super(process);
 		this.file = file;
 		this.profileManager = profileManager;
@@ -37,7 +37,7 @@ public class UploadFileProcessContext extends ProcessContext implements IGetMeta
 		return fileManager;
 	}
 
-	public IH2HFileConfiguration getConfig() {
+	public IFileConfiguration getConfig() {
 		return config;
 	}
 

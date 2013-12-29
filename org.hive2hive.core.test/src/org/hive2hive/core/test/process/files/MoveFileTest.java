@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
@@ -37,7 +37,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	private static final int networkSize = 5;
 	private static List<NetworkManager> network;
-	private static IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private static IFileConfiguration config = new TestH2HFileConfiguration();
 	private UserCredentials userCredentials;
 
 	@BeforeClass

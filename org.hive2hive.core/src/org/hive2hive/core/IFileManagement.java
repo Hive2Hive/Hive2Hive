@@ -55,5 +55,5 @@ public interface IFileManagement {
 	 * 
 	 * @return the file configuration of this node
 	 */
-	IH2HFileConfiguration getFileConfiguration();
+	IFileConfiguration getFileConfiguration();
 }
