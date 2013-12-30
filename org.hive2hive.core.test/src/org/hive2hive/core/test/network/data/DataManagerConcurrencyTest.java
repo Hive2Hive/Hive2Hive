@@ -18,6 +18,7 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -55,15 +56,16 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 			}
 		};
 
-		network.get(random.nextInt(networkSize)).getDataManager()
+		network.get(0).getDataManager()
 				.put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()), listener);
 		latch.await();
 	}
 
 	@Test
-	public void testConcurrentPutGet() throws InterruptedException {
+	@Ignore
+	public void testConcurrentGet() throws InterruptedException {
 		// counting listener for multiple threads
-		final AtomicInteger counter = new AtomicInteger();
+		final AtomicInteger counter = new AtomicInteger(0);
 
 		// start multiple threads to perform a get
 		ExecutorService taskExecutor = Executors.newFixedThreadPool(NUM_OF_THREADS);
@@ -104,6 +106,7 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 
 		@Override
 		public void run() {
+			final CountDownLatch latch = new CountDownLatch(1);
 			IGetListener listener = new IGetListener() {
 
 				@Override
@@ -124,6 +127,8 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 						// ignore
 						e.printStackTrace();
 					}
+
+					latch.countDown();
 				}
 			};
 
@@ -139,6 +144,11 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 
 			// get the test data
 			getter.getDataManager().get(locationKey, contentKey, listener);
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				// ignore
+			}
 		}
 	}
 }

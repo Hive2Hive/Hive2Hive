@@ -58,7 +58,7 @@ public class NetworkTestUtil {
 		for (int i = 1; i < numberOfNodes; i++) {
 			NetworkManager node = new NetworkManager(String.format("Node %s", ++letter));
 			try {
-				node.connect(InetAddress.getByName("127.0.0.1"));
+				node.connect(InetAddress.getLocalHost());
 			} catch (UnknownHostException e) {
 				// should not happen
 			}
