@@ -55,7 +55,7 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 			if (parentNode == null) {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent");
 			} else {
-				boolean deleted = new File(fileManager.getFile(parentNode), fileName).delete();
+				boolean deleted = new File(fileManager.getPath(parentNode).toFile(), fileName).delete();
 				if (!deleted) {
 					throw new IOException("Could not delete the file");
 				}

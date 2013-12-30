@@ -178,7 +178,7 @@ public class ProcessTestUtil {
 			// never happens because session is set before
 		}
 
-		return fileManager.getFile(file);
+		return fileManager.getPath(file).toFile();
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file,

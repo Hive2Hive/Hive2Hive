@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.util;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,31 +41,31 @@ public class FileRecursionUtil {
 	 * @return the root process which can be started and holds all necessary information of its child
 	 *         processes
 	 */
-	public static ProcessTreeNode buildProcessTree(List<File> files, NetworkManager networkManager,
+	public static ProcessTreeNode buildProcessTree(List<Path> files, NetworkManager networkManager,
 			FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
-		for (File file : files) {
-			ProcessTreeNode parent = getParent(rootProcess, file);
+		for (Path path : files) {
+			ProcessTreeNode parent = getParent(rootProcess, path);
 			try {
 				// initialize the process
 				Process process = null;
 				switch (action) {
 					case NEW_FILE:
-						process = new NewFileProcess(file, networkManager);
+						process = new NewFileProcess(path.toFile(), networkManager);
 						break;
 					case MODIFY_FILE:
-						process = new NewVersionProcess(file, networkManager);
+						process = new NewVersionProcess(path.toFile(), networkManager);
 						break;
 					case DELETE:
-						process = new DeleteFileProcess(file, networkManager);
+						process = new DeleteFileProcess(path.toFile(), networkManager);
 						break;
 					default:
 						logger.error("Type mismatch");
 						continue;
 				}
 
-				new FileProcessTreeNode(process, parent, file);
+				new FileProcessTreeNode(process, parent, path);
 			} catch (IllegalFileLocation e) {
 				logger.error("File cannot be uploaded", e);
 			} catch (NoSessionException e) {
@@ -83,11 +84,11 @@ public class FileRecursionUtil {
 	/**
 	 * Finds the parent process node
 	 */
-	private static ProcessTreeNode getParent(FileProcessTreeNode root, File file) {
-		File parent = file.getParentFile();
+	private static ProcessTreeNode getParent(FileProcessTreeNode root, Path path) {
+		Path parent = path.getParent();
 		for (ProcessTreeNode node : root.getAllChildren()) {
 			FileProcessTreeNode fileNode = (FileProcessTreeNode) node;
-			if (fileNode.getFile().equals(parent)) {
+			if (fileNode.getPath().equals(parent)) {
 				return fileNode;
 			}
 		}
@@ -95,18 +96,18 @@ public class FileRecursionUtil {
 		return root;
 	}
 
-	public static List<File> getPreorderList(File root) {
-		List<File> allFiles = new ArrayList<File>();
+	public static List<Path> getPreorderList(Path root) {
+		List<Path> allFiles = new ArrayList<Path>();
 		listFiles(root, allFiles);
 		return allFiles;
 	}
 
-	private static void listFiles(File file, List<File> preorderList) {
-		preorderList.add(file);
-		File[] listFiles = file.listFiles();
+	private static void listFiles(Path path, List<Path> preorderList) {
+		preorderList.add(path);
+		File[] listFiles = path.toFile().listFiles();
 		if (listFiles != null)
 			for (File child : listFiles) {
-				listFiles(child, preorderList);
+				listFiles(child.toPath(), preorderList);
 			}
 	}
 

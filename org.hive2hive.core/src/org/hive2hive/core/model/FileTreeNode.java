@@ -1,6 +1,8 @@
 package org.hive2hive.core.model;
 
 import java.io.Serializable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.util.HashSet;
 import java.util.Set;
@@ -188,13 +190,11 @@ public class FileTreeNode implements Serializable {
 	 * 
 	 * @return
 	 */
-	public String getFullPath() {
+	public Path getFullPath() {
 		if (parent == null) {
-			return FileManager.getFileSep();
-		} else if (isFolder) {
-			return parent.getFullPath() + getName() + FileManager.getFileSep();
+			return Paths.get("");
 		} else {
-			return parent.getFullPath() + getName();
+			return Paths.get(parent.getFullPath().toString(), getName());
 		}
 	}
 

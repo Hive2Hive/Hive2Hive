@@ -20,7 +20,7 @@ public class FileTestUtil {
 		}
 
 		String fileName = NetworkTestUtil.randomString();
-		File file = new File(fileManager.getRoot(), fileName);
+		File file = new File(fileManager.getRoot().toFile(), fileName);
 		FileUtils.write(file, random);
 
 		return file;

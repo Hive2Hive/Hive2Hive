@@ -1,6 +1,7 @@
 package org.hive2hive.core;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -32,7 +33,7 @@ public interface IH2HNode {
 	 * @param rootPath The user's root path to his files
 	 * @return Returns an observable login process.
 	 */
-	IProcess login(UserCredentials credentials, File rootPath);
+	IProcess login(UserCredentials credentials, Path rootPath);
 
 	/**
 	 * Initiates and returns a logout process.

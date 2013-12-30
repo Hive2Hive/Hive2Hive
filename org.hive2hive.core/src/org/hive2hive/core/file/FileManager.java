@@ -1,8 +1,9 @@
 package org.hive2hive.core.file;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -14,7 +15,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 public class FileManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileManager.class);
-	private final File root;
+	private final Path root;
 	
 	public static String getFileSep(){
 		String fileSep = System.getProperty("file.separator");
@@ -24,19 +25,19 @@ public class FileManager {
 	}
 
 	// holds persistent meta data
-	private final File h2hMetaFile;
+	private final Path h2hMetaFile;
 
 	public FileManager(String rootDirectory) {
-		this(new File(rootDirectory));
+		this(Paths.get(rootDirectory));
 	}
 
-	public FileManager(File rootDirectory) {
+	public FileManager(Path rootDirectory) {
 		root = rootDirectory;
-		if (!root.exists()) {
-			root.mkdirs();
+		if (!root.toFile().exists()) {
+			root.toFile().mkdirs();
 		}
 
-		h2hMetaFile = new File(root, H2HConstants.META_FILE_NAME);
+		h2hMetaFile = Paths.get(root.toString(), H2HConstants.META_FILE_NAME);
 	}
 
 	/**
@@ -44,7 +45,7 @@ public class FileManager {
 	 * 
 	 * @return
 	 */
-	public File getRoot() {
+	public Path getRoot() {
 		return root;
 	}
 
@@ -56,11 +57,11 @@ public class FileManager {
 		PersistentMetaData metaData = new PersistentMetaData();
 		try {
 			PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
-			Files.walkFileTree(root.toPath(), visitor);
+			Files.walkFileTree(root, visitor);
 			metaData.setFileTree(visitor.getFileTree());
 
 			byte[] encoded = EncryptionUtil.serializeObject(metaData);
-			FileUtils.writeByteArrayToFile(h2hMetaFile, encoded);
+			FileUtils.writeByteArrayToFile(h2hMetaFile.toFile(), encoded);
 		} catch (IOException e) {
 			logger.error("Cannot write the meta data", e);
 		}
@@ -73,7 +74,7 @@ public class FileManager {
 	 */
 	public PersistentMetaData getPersistentMetaData() {
 		try {
-			byte[] content = FileUtils.readFileToByteArray(h2hMetaFile);
+			byte[] content = FileUtils.readFileToByteArray(h2hMetaFile.toFile());
 			PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
 			return metaData;
 		} catch (IOException e) {
@@ -88,8 +89,7 @@ public class FileManager {
 	 * @param fileToFind
 	 * @return
 	 */
-	public File getFile(FileTreeNode fileToFind) {
-		String fullPath = root.getAbsolutePath() + fileToFind.getFullPath();
-		return new File(fullPath);
+	public Path getPath(FileTreeNode fileToFind) {
+		return Paths.get(root.toString(), fileToFind.getFullPath().toString());
 	}
 }

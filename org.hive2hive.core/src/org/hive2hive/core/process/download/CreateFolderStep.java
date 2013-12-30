@@ -28,7 +28,7 @@ public class CreateFolderStep extends ProcessStep {
 		logger.debug("Try creating a new folder on disk: " + file.getName());
 		try {
 			// create the folder on disk
-			File folder = fileManager.getFile(file);
+			File folder = fileManager.getPath(file).toFile();
 			if (folder.exists()) {
 				throw new FileAlreadyExistsException("Folder already exists");
 			} else if (!folder.mkdir()) {
@@ -48,7 +48,7 @@ public class CreateFolderStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		if (!existedBefore) {
-			File folder = fileManager.getFile(file);
+			File folder = fileManager.getPath(file).toFile();
 			folder.delete();
 		}
 		getProcess().nextRollBackStep();

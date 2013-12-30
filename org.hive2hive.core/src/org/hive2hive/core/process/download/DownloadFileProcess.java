@@ -63,7 +63,7 @@ public class DownloadFileProcess extends Process {
 		context = new DownloadFileProcessContext(this, file, fileManager);
 
 		// check if already exists
-		File existing = fileManager.getFile(file);
+		File existing = fileManager.getPath(file).toFile();
 		if (existing != null && existing.exists()) {
 			try {
 				if (H2HEncryptionUtil.compareMD5(existing, file.getMD5())) {

@@ -41,22 +41,23 @@ public class FileManagerTest extends H2HJUnitTest {
 	public void createFileManager() {
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		fileManager = new FileManager(root);
+		fileManager = new FileManager(root.toPath());
 	}
 
 	@After
 	public void cleanup() throws IOException {
-		FileUtils.deleteDirectory(fileManager.getRoot());
+		FileUtils.deleteDirectory(fileManager.getRoot().toFile());
 	}
 
 	@Test
 	public void testReadWriteMetaData() throws IOException {
-		File file = new File(fileManager.getRoot(), "test-file");
+		String fileName = "test-file";
+		File file = new File(fileManager.getRoot().toFile(), fileName);
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
 
 		fileManager.writePersistentMetaData();
 		PersistentMetaData persistentMetaData = fileManager.getPersistentMetaData();
 		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
-		Assert.assertTrue(fileTree.containsKey("/test-file"));
+		Assert.assertTrue(fileTree.containsKey(fileName));
 	}
 }

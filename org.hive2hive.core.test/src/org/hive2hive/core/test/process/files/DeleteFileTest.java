@@ -68,7 +68,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// add a file to the network
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		FileManager fileManager = new FileManager(root);
+		FileManager fileManager = new FileManager(root.toPath());
 		File file = FileTestUtil.createFileRandomContent(3, fileManager, config);
 		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
 
@@ -112,7 +112,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// add a folder to the network
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		FileManager fileManager = new FileManager(root);
+		FileManager fileManager = new FileManager(root.toPath());
 		File folder = new File(root, NetworkTestUtil.randomString());
 		folder.mkdir();
 		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);
@@ -143,7 +143,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// add a folder to the network
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		FileManager fileManager = new FileManager(root);
+		FileManager fileManager = new FileManager(root.toPath());
 		File folder = new File(root, NetworkTestUtil.randomString());
 		folder.mkdir();
 		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);
@@ -193,7 +193,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// add a folder to the network
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		FileManager fileManager = new FileManager(root);
+		FileManager fileManager = new FileManager(root.toPath());
 		File folder = new File(root, NetworkTestUtil.randomString());
 		folder.mkdir();
 		ProcessTestUtil.uploadNewFile(client, folder, manager, fileManager, config);

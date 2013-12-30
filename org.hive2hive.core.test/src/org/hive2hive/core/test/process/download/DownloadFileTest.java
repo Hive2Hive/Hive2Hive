@@ -66,7 +66,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		ProcessTestUtil.register(userCredentials, network.get(0));
 
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		uploaderFileManager = new FileManager(root);
+		uploaderFileManager = new FileManager(root.toPath());
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
@@ -85,6 +85,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		H2HWaiter waiter = new H2HWaiter(30);
 		do {
+			Assert.assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
@@ -96,7 +97,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	public void testDownload() throws IOException, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager downloaderFileManager = new FileManager(newRoot);
+		FileManager downloaderFileManager = new FileManager(newRoot.toPath());
 
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
@@ -108,6 +109,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
+			Assert.assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
@@ -123,7 +125,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	public void testDownloadWrongKeys() throws IOException, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager downloaderFileManager = new FileManager(newRoot);
+		FileManager downloaderFileManager = new FileManager(newRoot.toPath());
 
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
@@ -138,6 +140,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
+			Assert.assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 	}
@@ -147,10 +150,10 @@ public class DownloadFileTest extends H2HJUnitTest {
 		// should overwrite the existing file
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager downloaderFileManager = new FileManager(newRoot);
+		FileManager downloaderFileManager = new FileManager(newRoot.toPath());
 
 		// create the existing file
-		File existing = new File(downloaderFileManager.getRoot(), uploadedFile.getName());
+		File existing = new File(downloaderFileManager.getRoot().toFile(), uploadedFile.getName());
 		FileUtils.write(existing, "existing content");
 		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
 
@@ -165,6 +168,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
+			Assert.assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
@@ -184,10 +188,10 @@ public class DownloadFileTest extends H2HJUnitTest {
 		// should overwrite the existing file
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager downloaderFileManager = new FileManager(newRoot);
+		FileManager downloaderFileManager = new FileManager(newRoot.toPath());
 
 		// create the existing file
-		File existing = new File(downloaderFileManager.getRoot(), uploadedFile.getName());
+		File existing = new File(downloaderFileManager.getRoot().toFile(), uploadedFile.getName());
 		FileUtils.write(existing, testContent);
 		long lastModifiedBefore = existing.lastModified();
 
@@ -201,6 +205,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
+			Assert.assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
@@ -210,7 +215,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 	@After
 	public void delete() throws IOException {
-		FileUtils.deleteDirectory(uploaderFileManager.getRoot());
+		FileUtils.deleteDirectory(uploaderFileManager.getRoot().toFile());
 	}
 
 	@AfterClass

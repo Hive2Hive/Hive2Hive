@@ -88,7 +88,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				if (!input.equalsIgnoreCase("ok"))
 					root = new File(input);
 
-				IProcess process = nodeMenu.getH2HNode().login(userMenu.getUserCredentials(), root);
+				IProcess process = nodeMenu.getH2HNode().login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
 			}
 		});

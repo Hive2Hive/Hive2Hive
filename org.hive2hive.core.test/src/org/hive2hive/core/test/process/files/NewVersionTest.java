@@ -69,7 +69,7 @@ public class NewVersionTest extends H2HJUnitTest {
 		// create a file
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		fileManager = new FileManager(root);
+		fileManager = new FileManager(root.toPath());
 		file = FileTestUtil.createFileRandomContent(3, fileManager, config);
 		originalContent = FileUtils.readFileToString(file);
 		ProcessTestUtil.uploadNewFile(network.get(0), file, new UserProfileManager(network.get(0),
@@ -83,7 +83,7 @@ public class NewVersionTest extends H2HJUnitTest {
 
 		{
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-			FileManager downloaderFileManager = new FileManager(root);
+			FileManager downloaderFileManager = new FileManager(root.toPath());
 
 			UserProfile userProfile = ProcessTestUtil.getUserProfile(downloader, userCredentials);
 			FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
@@ -107,7 +107,7 @@ public class NewVersionTest extends H2HJUnitTest {
 
 			// use different file manager for not overriding the original file
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-			FileManager downloaderFileManager = new FileManager(root);
+			FileManager downloaderFileManager = new FileManager(root.toPath());
 
 			// download the file and check if version is newer
 			UserProfileManager profileManager = new UserProfileManager(downloader, userCredentials);
@@ -159,7 +159,7 @@ public class NewVersionTest extends H2HJUnitTest {
 		NetworkManager client = network.get(1);
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
-		File folder = new File(fileManager.getRoot(), "test-folder");
+		File folder = new File(fileManager.getRoot().toFile(), "test-folder");
 		folder.mkdir();
 
 		// upload the file
@@ -176,7 +176,7 @@ public class NewVersionTest extends H2HJUnitTest {
 	@After
 	public void deleteAndShutdown() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(fileManager.getRoot());
+		FileUtils.deleteDirectory(fileManager.getRoot().toFile());
 	}
 
 	@AfterClass

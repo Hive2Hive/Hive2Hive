@@ -1,13 +1,13 @@
 package org.hive2hive.core.model;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
 
@@ -79,15 +79,12 @@ public class UserProfile extends NetworkContent {
 	}
 
 	public FileTreeNode getFileByPath(File file, FileManager fileManager) {
-		String rootAbsolutePath = fileManager.getRoot().getAbsolutePath();
-		rootAbsolutePath = rootAbsolutePath.replace("\\", "\\\\");
-		String relativePath = file.getAbsolutePath()
-				.replaceFirst(rootAbsolutePath, "");
+		Path relativePath = fileManager.getRoot().relativize(file.toPath());
 		return getFileByPath(relativePath);
 	}
 
-	public FileTreeNode getFileByPath(String relativePath) {
-		String[] split = relativePath.split(FileManager.getFileSep());
+	public FileTreeNode getFileByPath(Path relativePath) {
+		String[] split = relativePath.toString().split(FileManager.getFileSep());
 		FileTreeNode current = root;
 		for (int i = 0; i < split.length; i++) {
 			if (split[i].isEmpty()) {

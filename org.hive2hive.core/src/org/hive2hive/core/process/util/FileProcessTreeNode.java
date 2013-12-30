@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.util;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.hive2hive.core.process.Process;
 
@@ -11,19 +12,19 @@ import org.hive2hive.core.process.Process;
  * 
  */
 public class FileProcessTreeNode extends ProcessTreeNode {
-	private final File file;
+	private final Path path;
 
-	public FileProcessTreeNode(Process process, ProcessTreeNode parent, File file) {
+	public FileProcessTreeNode(Process process, ProcessTreeNode parent, Path path) {
 		super(process, parent);
-		this.file = file;
+		this.path = path;
 	}
 
 	public FileProcessTreeNode() {
 		super();
-		this.file = null;
+		this.path = null;
 	}
 
-	public File getFile() {
-		return file;
+	public Path getPath() {
+		return path;
 	}
 }

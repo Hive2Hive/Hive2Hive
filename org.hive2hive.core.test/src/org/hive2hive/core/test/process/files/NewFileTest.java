@@ -68,7 +68,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		fileManager = new FileManager(root);
+		fileManager = new FileManager(root.toPath());
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolder() throws IOException, IllegalFileLocation, NoSessionException {
-		File folder = new File(fileManager.getRoot(), "folder1");
+		File folder = new File(fileManager.getRoot().toFile(), "folder1");
 		folder.mkdirs();
 
 		startUploadProcess(folder);
@@ -100,7 +100,7 @@ public class NewFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation, NoSessionException {
 		// create a container
-		File folder = new File(fileManager.getRoot(), "folder-with-file");
+		File folder = new File(fileManager.getRoot().toFile(), "folder-with-file");
 		folder.mkdirs();
 		startUploadProcess(folder);
 
@@ -112,11 +112,11 @@ public class NewFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation, NoSessionException {
-		File folder = new File(fileManager.getRoot(), "folder-with-folder");
+		File folder = new File(fileManager.getRoot().toFile(), "folder-with-folder");
 		folder.mkdirs();
 		startUploadProcess(folder);
 
-		File innerFolder = new File(fileManager.getRoot(), "inner-folder");
+		File innerFolder = new File(fileManager.getRoot().toFile(), "inner-folder");
 		innerFolder.mkdir();
 		startUploadProcess(innerFolder);
 
@@ -140,6 +140,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 		H2HWaiter waiter = new H2HWaiter(40);
 		do {
+			Assert.assertFalse(listener.hasSucceeded());
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
 	}
@@ -155,8 +156,9 @@ public class NewFileTest extends H2HJUnitTest {
 		process.start();
 
 		// wait maximally 1m because files could be large
-		H2HWaiter waiter = new H2HWaiter(6000);
+		H2HWaiter waiter = new H2HWaiter(60);
 		do {
+			Assert.assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
@@ -191,7 +193,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 		// create new filemanager
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager fileManager2 = new FileManager(root);
+		FileManager fileManager2 = new FileManager(root.toPath());
 
 		// verify the file after downloadig it
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
@@ -205,7 +207,7 @@ public class NewFileTest extends H2HJUnitTest {
 	@After
 	public void deleteAndShutdown() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(fileManager.getRoot());
+		FileUtils.deleteDirectory(fileManager.getRoot().toFile());
 	}
 
 	@AfterClass

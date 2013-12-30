@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.login;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -65,9 +66,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 		/*
 		 * Upload the locally added and updated files
 		 */
-		List<File> toUploadNewFiles = synchronizer.getAddedLocally();
+		List<Path> toUploadNewFiles = synchronizer.getAddedLocally();
 		ProcessTreeNode uploadProcessNewFiles = startUpload(toUploadNewFiles, FileProcessAction.NEW_FILE);
-		List<File> toUploadNewVersions = synchronizer.getUpdatedLocally();
+		List<Path> toUploadNewVersions = synchronizer.getUpdatedLocally();
 		ProcessTreeNode uploadProcessNewVersions = startUpload(toUploadNewVersions,
 				FileProcessAction.MODIFY_FILE);
 
@@ -80,9 +81,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 		/*
 		 * Delete the remotely deleted files
 		 */
-		List<File> toDeleteOnDisk = synchronizer.getDeletedRemotely();
-		for (File file : toDeleteOnDisk) {
-			file.delete();
+		List<Path> toDeleteOnDisk = synchronizer.getDeletedRemotely();
+		for (Path path : toDeleteOnDisk) {
+			path.toFile().delete();
 		}
 
 		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone()
@@ -126,7 +127,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		return rootProcess;
 	}
 
-	private ProcessTreeNode startUpload(List<File> toUpload, FileProcessAction action) {
+	private ProcessTreeNode startUpload(List<Path> toUpload, FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
 		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessTree(toUpload, getNetworkManager(),
 				action);

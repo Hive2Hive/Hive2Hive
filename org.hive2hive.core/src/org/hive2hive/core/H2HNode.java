@@ -2,6 +2,7 @@ package org.hive2hive.core;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -90,7 +91,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	}
 
 	@Override
-	public IProcess login(final UserCredentials credentials, final File rootPath) {
+	public IProcess login(final UserCredentials credentials, final Path rootPath) {
 		final LoginProcess loginProcess = new LoginProcess(credentials, networkManager);
 
 		// TODO this makes no sense actually, since the IProcess is returned...
@@ -168,7 +169,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		IProcess process;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
-			List<File> preorderList = FileRecursionUtil.getPreorderList(file);
+			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
 			process = FileRecursionUtil.buildProcessTree(preorderList, networkManager,
 					FileProcessAction.NEW_FILE);
 		} else {
@@ -195,7 +196,7 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		IProcess process;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
-			List<File> preorderList = FileRecursionUtil.getPreorderList(file);
+			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
 			process = FileRecursionUtil.buildProcessTree(preorderList, networkManager,
 					FileProcessAction.DELETE);
 		} else {

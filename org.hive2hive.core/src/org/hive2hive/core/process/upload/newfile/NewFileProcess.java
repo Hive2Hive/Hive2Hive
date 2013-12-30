@@ -27,7 +27,7 @@ public class NewFileProcess extends Process {
 
 		H2HSession session = networkManager.getSession();
 		// file must be in the given root directory
-		if (!file.getAbsolutePath().startsWith(session.getFileManager().getRoot().getAbsolutePath())) {
+		if (!file.toPath().toString().startsWith(session.getFileManager().getRoot().toString())) {
 			throw new IllegalFileLocation("File must be in root of the H2H directory.");
 		}
 

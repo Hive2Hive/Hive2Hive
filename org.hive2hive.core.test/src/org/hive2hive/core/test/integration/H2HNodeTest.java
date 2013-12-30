@@ -69,7 +69,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		rootDirectory = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcess loginProcess = loggedInNode.login(credentials, rootDirectory);
+		IProcess loginProcess = loggedInNode.login(credentials, rootDirectory.toPath());
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
 
@@ -161,7 +161,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// then start 2nd client and login
 		File rootUser2 = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
-		IProcess loginProcess = newNode.login(credentials, rootUser2);
+		IProcess loginProcess = newNode.login(credentials, rootUser2.toPath());
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
 

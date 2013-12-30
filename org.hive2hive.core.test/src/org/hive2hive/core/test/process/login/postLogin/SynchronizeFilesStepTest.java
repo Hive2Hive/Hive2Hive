@@ -2,6 +2,7 @@ package org.hive2hive.core.test.process.login.postLogin;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -67,24 +68,24 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		// create two filemanagers
 		File root1 = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		fileManager0 = new FileManager(root1);
+		fileManager0 = new FileManager(root1.toPath());
 		File root2 = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		fileManager1 = new FileManager(root2);
+		fileManager1 = new FileManager(root2.toPath());
 
 		// create default tree that can be used later. Upload it to the DHT
 		// - file 1
 		// - file 2
 		// - folder 1
 		// - - file 3
-		File file1 = new File(fileManager0.getRoot(), "file 1");
+		File file1 = new File(fileManager0.getRoot().toFile(), "file 1");
 		FileUtils.writeStringToFile(file1, NetworkTestUtil.randomString());
 		ProcessTestUtil.uploadNewFile(network.get(0), file1, profileManager, fileManager0, config);
 
-		File file2 = new File(fileManager0.getRoot(), "file 2");
+		File file2 = new File(fileManager0.getRoot().toFile(), "file 2");
 		FileUtils.writeStringToFile(file2, NetworkTestUtil.randomString());
 		ProcessTestUtil.uploadNewFile(network.get(0), file2, profileManager, fileManager0, config);
 
-		File folder1 = new File(fileManager0.getRoot(), "folder 1");
+		File folder1 = new File(fileManager0.getRoot().toFile(), "folder 1");
 		folder1.mkdir();
 		ProcessTestUtil.uploadNewFile(network.get(0), folder1, profileManager, fileManager0, config);
 
@@ -93,7 +94,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		ProcessTestUtil.uploadNewFile(network.get(0), file3, profileManager, fileManager0, config);
 
 		// copy the content to the other client such that they are in sync
-		FileUtils.copyDirectory(fileManager0.getRoot(), fileManager1.getRoot());
+		FileUtils.copyDirectory(fileManager0.getRoot().toFile(), fileManager1.getRoot().toFile());
 
 		// write both versions to disc
 		fileManager0.writePersistentMetaData();
@@ -108,18 +109,19 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		startSync(client, fileManager1, 20);
 
 		// check if the size is still the same
-		Assert.assertEquals(FileUtils.sizeOfAsBigInteger(fileManager0.getRoot()),
-				FileUtils.sizeOfAsBigInteger(fileManager1.getRoot()));
+		Assert.assertEquals(FileUtils.sizeOfAsBigInteger(fileManager0.getRoot().toFile()),
+				FileUtils.sizeOfAsBigInteger(fileManager1.getRoot().toFile()));
 	}
 
 	@Test
 	public void testAdditionsDeletions() throws IOException, IllegalFileLocation, NoSessionException {
 		/** do some modifications on client **/
 		// add a file
-		FileUtils.write(new File(fileManager1.getRoot(), "added-file"), NetworkTestUtil.randomString());
+		FileUtils.write(new File(fileManager1.getRoot().toFile(), "added-file"),
+				NetworkTestUtil.randomString());
 
 		// delete file 1
-		File file1 = new File(fileManager1.getRoot(), "file 1");
+		File file1 = new File(fileManager1.getRoot().toFile(), "file 1");
 		file1.delete();
 
 		/** do some modifications on the remote **/
@@ -127,12 +129,12 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		UserProfileManager profileManager = new UserProfileManager(remoteClient, userCredentials);
 
 		// add a file 4 within folder 1
-		File file4 = new File(new File(fileManager0.getRoot(), "folder 1"), "file 4");
+		File file4 = new File(new File(fileManager0.getRoot().toFile(), "folder 1"), "file 4");
 		FileUtils.write(file4, NetworkTestUtil.randomString());
 		ProcessTestUtil.uploadNewFile(remoteClient, file4, profileManager, fileManager0, config);
 
 		// delete file 2
-		File file2 = new File(fileManager0.getRoot(), "file 2");
+		File file2 = new File(fileManager0.getRoot().toFile(), "file 2");
 		file2.delete();
 		ProcessTestUtil.deleteFile(remoteClient, file2, profileManager, fileManager0, config);
 
@@ -142,27 +144,28 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		startSync(client, fileManager1, 60);
 
 		/** verify if the remote changes are applied **/
-		file4 = new File(new File(fileManager1.getRoot(), "folder 1"), "file 4");
+		file4 = new File(new File(fileManager1.getRoot().toFile(), "folder 1"), "file 4");
 		Assert.assertTrue(file4.exists()); // added file is now here
-		file2 = new File(fileManager1.getRoot(), "file 2");
+		file2 = new File(fileManager1.getRoot().toFile(), "file 2");
 		Assert.assertFalse(file2.exists()); // deleted file is not here
 
 		/** verify if the local changes have been uploaded **/
 		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
-		Assert.assertTrue(userProfile.getFileByPath("added-file") != null); // added file is here
-		Assert.assertTrue(userProfile.getFileByPath("file 1") == null); // deleted file is not in UP
+		Assert.assertTrue(userProfile.getFileByPath(Paths.get("added-file")) != null); // added file is here
+		Assert.assertTrue(userProfile.getFileByPath(Paths.get("file 1")) == null); // deleted file is not in
+																					// UP
 	}
 
 	@Test
 	public void testModifications() throws IOException, IllegalFileLocation, NoSessionException {
 		/** do some modifications on client **/
 		// modify file 1
-		File file1 = new File(fileManager1.getRoot(), "file 1");
+		File file1 = new File(fileManager1.getRoot().toFile(), "file 1");
 		FileUtils.write(file1, NetworkTestUtil.randomString());
 		byte[] newMD5File1 = EncryptionUtil.generateMD5Hash(file1);
 
 		// modify file 3
-		File folder = new File(fileManager1.getRoot(), "folder 1");
+		File folder = new File(fileManager1.getRoot().toFile(), "folder 1");
 		File file3 = new File(folder, "file 3");
 		FileUtils.write(file3, NetworkTestUtil.randomString());
 
@@ -171,13 +174,13 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		UserProfileManager profileManager = new UserProfileManager(remoteClient, userCredentials);
 
 		// modify file 2
-		File file2 = new File(fileManager0.getRoot(), "file 2");
+		File file2 = new File(fileManager0.getRoot().toFile(), "file 2");
 		String file2Content = NetworkTestUtil.randomString();
 		FileUtils.write(file2, file2Content);
 		ProcessTestUtil.uploadNewFileVersion(remoteClient, file2, profileManager, fileManager0, config);
 
 		// also modify file 3
-		folder = new File(fileManager0.getRoot(), "folder 1");
+		folder = new File(fileManager0.getRoot().toFile(), "folder 1");
 		file3 = new File(folder, "file 3");
 		FileUtils.write(file3, NetworkTestUtil.randomString());
 		byte[] newMD5File3 = EncryptionUtil.generateMD5Hash(file3);
@@ -190,17 +193,17 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		/** verify if the remote changes are applied **/
 		// modification of file 2 has been downloaded
-		file2 = new File(fileManager1.getRoot(), "file 2");
+		file2 = new File(fileManager1.getRoot().toFile(), "file 2");
 		Assert.assertEquals(file2Content, FileUtils.readFileToString(file2));
 
 		/** verify if the local changes have been uploaded **/
 		UserProfile userProfile = ProcessTestUtil.getUserProfile(client, userCredentials);
-		FileTreeNode file1Node = userProfile.getFileByPath("file 1");
+		FileTreeNode file1Node = userProfile.getFileByPath(Paths.get("file 1"));
 		// modifications have been uploaded
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File1, file1Node.getMD5()));
 
 		/** verify the file that has been modified remotely and locally **/
-		FileTreeNode file3Node = userProfile.getFileByPath("folder 1" + FileManager.getFileSep() + "file 3");
+		FileTreeNode file3Node = userProfile.getFileByPath(Paths.get("folder 1", "file 3"));
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(newMD5File3, file3Node.getMD5()));
 	}
 
@@ -224,8 +227,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	@After
 	public void tearDown() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(fileManager0.getRoot());
-		FileUtils.deleteDirectory(fileManager1.getRoot());
+		FileUtils.deleteDirectory(fileManager0.getRoot().toFile());
+		FileUtils.deleteDirectory(fileManager1.getRoot().toFile());
 	}
 
 	@AfterClass

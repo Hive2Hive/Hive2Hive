@@ -99,7 +99,7 @@ public class NotificationTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		FileManager fileManager = new FileManager(FileUtils.getTempDirectory());
+		FileManager fileManager = new FileManager(FileUtils.getTempDirectory().toPath());
 		H2HSession session = new H2HSession(userProfile.getEncryptionKeys(), new UserProfileManager(
 				networkManager, credentials), config, fileManager);
 		networkManager.setSession(session);

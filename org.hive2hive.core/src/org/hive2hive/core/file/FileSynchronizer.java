@@ -1,8 +1,9 @@
 package org.hive2hive.core.file;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +46,7 @@ public class FileSynchronizer {
 
 		PersistenceFileVisitor visitor = new PersistenceFileVisitor(fileManager.getRoot());
 		try {
-			Files.walkFileTree(fileManager.getRoot().toPath(), visitor);
+			Files.walkFileTree(fileManager.getRoot(), visitor);
 			now = visitor.getFileTree();
 		} catch (IOException e) {
 			logger.error("Cannot walk the current tree");
@@ -67,7 +68,7 @@ public class FileSynchronizer {
 				continue;
 			} else {
 				// test whether it is in the user profile
-				FileTreeNode node = userProfile.getFileByPath(path);
+				FileTreeNode node = userProfile.getFileByPath(Paths.get(path));
 				if (node != null) {
 					// file is still in user profile
 					if (H2HEncryptionUtil.compareMD5(node.getMD5(), before.get(path))) {
@@ -93,15 +94,16 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<File> getDeletedRemotely() {
-		List<File> deletedRemotely = new ArrayList<File>();
+	public List<Path> getDeletedRemotely() {
+		List<Path> deletedRemotely = new ArrayList<Path>();
 
-		for (String path : now.keySet()) {
-			if (before.containsKey(path) && userProfile.getFileByPath(path) == null) {
+		for (String p : now.keySet()) {
+			Path path = Paths.get(p);
+			if (before.containsKey(p) && userProfile.getFileByPath(path) == null) {
 				// is on disk but deleted in the user profile
-				if (H2HEncryptionUtil.compareMD5(before.get(path), now.get(path))) {
+				if (H2HEncryptionUtil.compareMD5(before.get(p), now.get(p))) {
 					// only delete the file, if it was not modified locally
-					deletedRemotely.add(new File(fileManager.getRoot(), path));
+					deletedRemotely.add(Paths.get(fileManager.getRoot().toString(), path.toString()));
 				}
 			}
 		}
@@ -117,16 +119,17 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<File> getAddedLocally() {
-		List<File> addedLocally = new ArrayList<File>();
+	public List<Path> getAddedLocally() {
+		List<Path> addedLocally = new ArrayList<Path>();
 
-		for (String path : now.keySet()) {
+		for (String p : now.keySet()) {
+			Path path = Paths.get(p);
 			// test whether it is in the user profile
 			FileTreeNode node = userProfile.getFileByPath(path);
 			if (node == null) {
 				// not in profile --> it has been added locally
-				logger.debug("File " + path + " has been added locally during absence");
-				addedLocally.add(new File(fileManager.getRoot(), path));
+				logger.debug("File " + p + " has been added locally during absence");
+				addedLocally.add(Paths.get(fileManager.getRoot().toString(), path.toString()));
 			}
 		}
 
@@ -149,7 +152,7 @@ public class FileSynchronizer {
 		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
 			FileTreeNode top = fileStack.pop();
-			if (now.containsKey(top.getFullPath())) {
+			if (now.containsKey(top.getFullPath().toString())) {
 				// was here before and is still here --> nothing to add
 				logger.trace("File " + top.getFullPath() + " was already here");
 			} else {
@@ -174,8 +177,8 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<File> getUpdatedLocally() {
-		List<File> updatedLocally = new ArrayList<File>();
+	public List<Path> getUpdatedLocally() {
+		List<Path> updatedLocally = new ArrayList<Path>();
 
 		for (String path : now.keySet()) {
 			if (!before.containsKey(path)) {
@@ -188,7 +191,7 @@ public class FileSynchronizer {
 				continue;
 			}
 
-			FileTreeNode fileNode = userProfile.getFileByPath(path);
+			FileTreeNode fileNode = userProfile.getFileByPath(Paths.get(path));
 			if (fileNode == null) {
 				// file not found --> skip, this is not the task of this method
 				continue;
@@ -199,7 +202,7 @@ public class FileSynchronizer {
 			if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))
 					&& !H2HEncryptionUtil.compareMD5(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File " + path + " has been updated locally during absence");
-				updatedLocally.add(fileManager.getFile(fileNode));
+				updatedLocally.add(fileManager.getPath(fileNode));
 			}
 		}
 
@@ -222,10 +225,10 @@ public class FileSynchronizer {
 		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
 			FileTreeNode top = fileStack.pop();
-			if (before.containsKey(top.getFullPath()) && now.containsKey(top.getFullPath())) {
+			if (before.containsKey(top.getFullPath().toString()) && now.containsKey(top.getFullPath().toString())) {
 				// was here before and is still here
-				if (!H2HEncryptionUtil.compareMD5(top.getMD5(), now.get(top.getFullPath()))
-						&& !H2HEncryptionUtil.compareMD5(top.getMD5(), before.get(top.getFullPath()))) {
+				if (!H2HEncryptionUtil.compareMD5(top.getMD5(), now.get(top.getFullPath().toString()))
+						&& !H2HEncryptionUtil.compareMD5(top.getMD5(), before.get(top.getFullPath().toString()))) {
 					// different md5 hashes than 'before' and 'now'
 					logger.debug("File " + top.getFullPath() + " has been updated remotely during absence");
 					updatedRemotely.add(top);
@@ -253,7 +256,7 @@ public class FileSynchronizer {
 
 			@Override
 			public int compare(FileTreeNode node1, FileTreeNode node2) {
-				return new String(node1.getFullPath()).compareTo(node2.getFullPath());
+				return node1.getFullPath().toString().compareTo(node2.getFullPath().toString());
 			}
 		});
 	}
@@ -263,12 +266,12 @@ public class FileSynchronizer {
 	 * 
 	 * @param deletedLocally
 	 */
-	private void sortFilesPreorder(List<File> fileList) {
-		Collections.sort(fileList, new Comparator<File>() {
+	private void sortFilesPreorder(List<Path> fileList) {
+		Collections.sort(fileList, new Comparator<Path>() {
 
 			@Override
-			public int compare(File file1, File file2) {
-				return new String(file1.getAbsolutePath()).compareTo(file2.getAbsolutePath());
+			public int compare(Path path1, Path path2) {
+				return path1.compareTo(path2);
 			}
 		});
 	}

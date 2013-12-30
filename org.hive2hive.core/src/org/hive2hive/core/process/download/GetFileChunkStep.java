@@ -1,7 +1,7 @@
 package org.hive2hive.core.process.download;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -30,7 +30,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetFileChunkStep.class);
 
-	private final File file;
+	private final Path path;
 	private final List<KeyPair> chunksToGet;
 	private final List<Chunk> chunkBuffer;
 	private int currentChunkOrder;
@@ -44,7 +44,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	 * @param fileManager
 	 */
 	public GetFileChunkStep(FileTreeNode file, MetaFile metaFile, FileManager fileManager) {
-		this(fileManager.getFile(file), 0, metaFile.getNewestVersion().getChunkIds(), new ArrayList<Chunk>());
+		this(fileManager.getPath(file), 0, metaFile.getNewestVersion().getChunkIds(), new ArrayList<Chunk>());
 		logger.debug("Start downloading '" + file.getName() + "'");
 	}
 
@@ -56,9 +56,9 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	 * @param chunksToGet
 	 * @param chunkBuffer
 	 */
-	private GetFileChunkStep(File file, int currentChunkOrder, List<KeyPair> chunksToGet,
+	private GetFileChunkStep(Path path, int currentChunkOrder, List<KeyPair> chunksToGet,
 			List<Chunk> chunkBuffer) {
-		this.file = file;
+		this.path = path;
 		this.currentChunkOrder = currentChunkOrder;
 		this.chunksToGet = chunksToGet;
 		this.chunkBuffer = chunkBuffer;
@@ -69,7 +69,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 		// download next chunk
 		KeyPair firstInList = chunksToGet.remove(0);
 		decryptionKey = firstInList.getPrivate(); // store current private key
-		logger.info("File " + file.getName() + ": " + chunksToGet.size() + " chunk(s) more to download.");
+		logger.info("File " + path + ": " + chunksToGet.size() + " chunk(s) more to download.");
 		get(key2String(firstInList.getPublic()), H2HConstants.FILE_CHUNK);
 	}
 
@@ -85,7 +85,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 				// all chunks downloaded
 				if (chunkBuffer.isEmpty()) {
 					// normal case: done with the process.
-					logger.debug("Finished downloading file '" + file.getName() + "'.");
+					logger.debug("Finished downloading file '" + path + "'.");
 					getProcess().setNextStep(null);
 				} else {
 					// should be empty
@@ -95,7 +95,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 				}
 			} else {
 				// more chunks to get. Continue with downloadint the next chunk
-				GetFileChunkStep nextStep = new GetFileChunkStep(file, currentChunkOrder, chunksToGet,
+				GetFileChunkStep nextStep = new GetFileChunkStep(path, currentChunkOrder, chunksToGet,
 						chunkBuffer);
 				getProcess().setNextStep(nextStep);
 			}
@@ -121,7 +121,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 					// append only if already written a chunk, else overwrite the possibly existent file
 					boolean append = currentChunkOrder != 0;
 
-					FileUtils.writeByteArrayToFile(file, chunk.getData(), append);
+					FileUtils.writeByteArrayToFile(path.toFile(), chunk.getData(), append);
 					wroteToDisk.add(chunk);
 					currentChunkOrder++;
 				}

@@ -2,6 +2,7 @@ package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Set;
@@ -82,16 +83,15 @@ public class UpdateUserProfileStep extends ProcessStep {
 	private void addFileToUserProfile(UserProfile userProfile, File file, KeyPair fileKeys)
 			throws IOException {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
-		File fileRoot = context.getFileManager().getRoot();
+		Path fileRoot = context.getFileManager().getRoot();
 
 		// new file
 		// the parent of the new file should already exist in the tree
-		File parent = file.getParentFile();
+		Path parent = file.getParentFile().toPath();
 
 		// find the parent node using the relative path to navigate there
-		String fileRootAbsolutePath = fileRoot.getAbsolutePath().replace("\\", "\\\\");
-		String relativeParentPath = parent.getAbsolutePath().replaceFirst(fileRootAbsolutePath, "");
-		FileTreeNode parentNode = userProfile.getFileByPath(relativeParentPath);
+		Path relativePath = fileRoot.relativize(parent);
+		FileTreeNode parentNode = userProfile.getFileByPath(relativePath);
 		parentKey = parentNode.getKeyPair().getPublic();
 
 		// use the file keys generated in a previous step where the meta document is stored
