@@ -1,8 +1,12 @@
 package org.hive2hive.core.network;
 
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+
 import java.io.IOException;
 import java.net.InetAddress;
 
+import net.tomp2p.connection.ChannelClientConfiguration;
+import net.tomp2p.connection.ChannelServerConficuration;
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
@@ -147,8 +151,19 @@ public class Connection {
 			while (NetworkUtils.isPortAvailable(port) == false)
 				port++;
 
+			// configure the thread handling internally. Callback can be blocking.
+			// TODO how many threads?
+			DefaultEventExecutorGroup eventExecutorGroup = new DefaultEventExecutorGroup(250);
+			ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
+			clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
+			ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
+			serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
 			peer = new PeerMaker(Number160.createHash(nodeId)).ports(port).setEnableIndirectReplication(true)
+					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
 					.makeAndListen();
+
 			// override the put method for validation tasks
 			peer.getPeerBean().storage(new H2HStorageMemory());
 			// attach a reply handler for messages
