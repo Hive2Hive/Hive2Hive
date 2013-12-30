@@ -3,9 +3,12 @@ package org.hive2hive.core.process.upload.newversion;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.IFileConfiguration;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -18,6 +21,7 @@ import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
+import org.hive2hive.core.process.upload.newversion.cleanup.DeleteFileVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
@@ -44,6 +48,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 			return;
 		}
 
+		logger.debug("Adding a new version to the meta file");
 		metaFile = (MetaFile) context.getMetaDocument();
 		File file = context.getFile();
 		List<KeyPair> chunkKeys = context.getChunkKeys();
@@ -51,7 +56,9 @@ public class UpdateMetaFileStep extends ProcessStep {
 				System.currentTimeMillis());
 		version.setChunkIds(chunkKeys);
 		metaFile.getVersions().add(version);
-		logger.debug("Adding a new version to the meta file");
+
+		// cleanup old versions when too many versions
+		initiateCleanup();
 
 		// 1. update the md5 hash in the user profile
 		// 2. put the meta document
@@ -75,7 +82,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
 
-			logger.debug("Putting the modified meta file (containing the new version");
+			logger.debug("Putting the modified meta file (containing the new version)");
 			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile,
 					getStepsForNotification(userProfile));
 			getProcess().setNextStep(putMetaStep);
@@ -83,6 +90,34 @@ public class UpdateMetaFileStep extends ProcessStep {
 			getProcess().stop("The new MD5 hash for the user profile could not be generated");
 		} catch (Exception e) {
 			getProcess().stop(e);
+		}
+	}
+
+	private void initiateCleanup() {
+		try {
+			IFileConfiguration fileConfiguration = getNetworkManager().getSession().getFileConfiguration();
+			List<FileVersion> toRemove = new ArrayList<FileVersion>();
+
+			// remove files when the number of allowed versions is exceeded or when the total file size (sum
+			// of all versions) exceeds the allowed file size
+			while (metaFile.getVersions().size() > fileConfiguration.getMaxNumOfVersions()
+					|| metaFile.getTotalSize() > fileConfiguration.getMaxSizeAllVersions()) {
+				// keep at least one version
+				if (metaFile.getVersions().size() == 1)
+					break;
+
+				toRemove.add(metaFile.getVersions().remove(0));
+			}
+
+			logger.debug("Need to remove " + toRemove.size() + " old versions");
+			for (FileVersion fileVersion : toRemove) {
+				DeleteFileVersionProcess deleteProcess = new DeleteFileVersionProcess(getNetworkManager(),
+						fileVersion);
+				deleteProcess.start();
+			}
+		} catch (NoSessionException e) {
+			// should never happen since the session is used before, however, just skip the cleanup
+			logger.error("Cannot cleanup old versions because we don't have a session");
 		}
 	}
 

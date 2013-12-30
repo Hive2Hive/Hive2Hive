@@ -3,6 +3,7 @@ package org.hive2hive.core.process;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -26,6 +27,17 @@ public class ProcessManager {
 			instance = new ProcessManager();
 		}
 		return instance;
+	}
+
+	/**
+	 * Creates a random PID which is not really valid (it's negative). This is used because some code parts
+	 * rely on a PID
+	 * 
+	 * @return
+	 */
+	public static int createRandomPseudoPID() {
+		// create simulated PID
+		return new Random().nextInt(Integer.MAX_VALUE) * -1;
 	}
 
 	/**

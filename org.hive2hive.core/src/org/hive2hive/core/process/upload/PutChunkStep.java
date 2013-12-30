@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
@@ -25,7 +25,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * First validates the file size according to the limits set in the {@link IH2HFileConfiguration} object.
+ * First validates the file size according to the limits set in the {@link IFileConfiguration} object.
  * Then, puts a chunk and recursively calls itself until all chunks are stored in the DHT.
  * This class is intended to be subclassed because there are two scenarios:
  * <ul>
@@ -78,7 +78,7 @@ public class PutChunkStep extends BasePutProcessStep {
 
 		// first, validate the file size (only first time)
 		if (chunkKeys.isEmpty()) {
-			IH2HFileConfiguration config = context.getConfig();
+			IFileConfiguration config = context.getConfig();
 			long fileSize = FileUtil.getFileSize(file);
 
 			if (fileSize > config.getMaxFileSize()) {

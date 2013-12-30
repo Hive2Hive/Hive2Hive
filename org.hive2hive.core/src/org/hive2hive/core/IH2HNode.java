@@ -1,12 +1,5 @@
 package org.hive2hive.core;
 
-import java.io.File;
-import java.nio.file.Path;
-
-import org.hive2hive.core.exceptions.IllegalFileLocation;
-import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.security.UserCredentials;
 
 /**
  * Interface for all operations on a Hive2Hive peer. Note that all calls are returned immediately although the
@@ -19,51 +12,18 @@ import org.hive2hive.core.security.UserCredentials;
 public interface IH2HNode {
 
 	/**
-	 * Initiates and returns a register process.
+	 * Returns the management interface for all user operations
 	 * 
-	 * @param credentials The user's credentials with which it shall be registered.
-	 * @return Returns an observable register process.
+	 * @return the user management interface
 	 */
-	IProcess register(UserCredentials credentials);
+	IUserManagement getUserManagement();
 
 	/**
-	 * Initiates and returns a login process.
+	 * Returns the management interface for all file operations
 	 * 
-	 * @param credentials The user's credentials with which it shall be logged in.
-	 * @param rootPath The user's root path to his files
-	 * @return Returns an observable login process.
+	 * @return the file management interface
 	 */
-	IProcess login(UserCredentials credentials, Path rootPath);
-
-	/**
-	 * Initiates and returns a logout process.
-	 * 
-	 * @return the observable logout process.
-	 */
-	IProcess logout() throws NoSessionException;
-
-	/**
-	 * Add a file or a folder to the network. Note that the file must be within the root directory given in
-	 * the node configuration. If a full tree needs to be uploaded, the parameter must be the root.
-	 */
-	IProcess add(File file) throws IllegalFileLocation, NoSessionException;
-
-	/**
-	 * Update a file or a folder in the network.
-	 * 
-	 * @param file the file to be updated
-	 * @return
-	 */
-	IProcess update(File file) throws NoSessionException, IllegalArgumentException;
-
-	/**
-	 * Delete the file or the folder in the network. Note that when a whole file tree should be deleted, the
-	 * parameter must be the root.
-	 * 
-	 * @throws IllegalArgumentException
-	 * @throws NoSessionException
-	 */
-	IProcess delete(File file) throws IllegalArgumentException, NoSessionException;
+	IFileManagement getFileManagement();
 
 	// TODO this must not be part of the H2H interface
 	void disconnect();

@@ -25,8 +25,6 @@ import org.hive2hive.core.process.notify.NotifyPeersProcess;
  */
 public abstract class Process implements IProcess {
 
-	// TODO throw exceptions on invalid process states
-
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Process.class);
 
 	private final NetworkManager networkManager;
@@ -102,13 +100,11 @@ public abstract class Process implements IProcess {
 	}
 
 	@Override
-	// TODO stop with exception as parameter
 	public void stop(String reason) {
 		stop(new Hive2HiveException(reason));
 	}
 
 	@Override
-	// TODO stop with exception as parameter
 	public void stop(Exception exception) {
 		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
 			logger.error(this.getClass().getSimpleName() + " stopped. Reason: " + exception.getMessage());

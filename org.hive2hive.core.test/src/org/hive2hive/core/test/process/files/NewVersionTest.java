@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -17,6 +17,7 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -44,10 +45,10 @@ import org.junit.Test;
 public class NewVersionTest extends H2HJUnitTest {
 
 	private final int networkSize = 5;
+	private final IFileConfiguration config = new TestH2HFileConfiguration();
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;
 	private FileManager fileManager;
-	private IH2HFileConfiguration config = new TestH2HFileConfiguration();
 	private String originalContent;
 	private File file;
 
@@ -171,6 +172,98 @@ public class NewVersionTest extends H2HJUnitTest {
 		} catch (IllegalArgumentException e) {
 			// intended exception
 		}
+	}
+
+	@Test
+	public void testCleanupMaxNumVersions() throws IOException, GetFailedException {
+		// overwrite config
+		IFileConfiguration limitingConfig = new IFileConfiguration() {
+
+			@Override
+			public int getMaxSizeAllVersions() {
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public int getMaxNumOfVersions() {
+				return 1;
+			}
+
+			@Override
+			public int getMaxFileSize() {
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public int getChunkSize() {
+				return H2HConstants.DEFAULT_CHUNK_SIZE;
+			}
+		};
+
+		// update the file
+		FileUtils.write(file, "bla", false);
+
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		ProcessTestUtil.uploadNewFileVersion(client, file, profileManager, fileManager, limitingConfig);
+
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+
+		// verify that only one version is online
+		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
+		MetaFile metaDocument = (MetaFile) ProcessTestUtil.getMetaDocument(client, fileNode.getKeyPair());
+		Assert.assertEquals(1, metaDocument.getVersions().size());
+	}
+
+	@Test
+	public void testCleanupMaxSize() throws IOException, GetFailedException {
+		// overwrite config and set the currently max limit
+		final long fileSize = file.length();
+		IFileConfiguration limitingConfig = new IFileConfiguration() {
+
+			@Override
+			public int getMaxSizeAllVersions() {
+				return (int) fileSize;
+			}
+
+			@Override
+			public int getMaxNumOfVersions() {
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public int getMaxFileSize() {
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public int getChunkSize() {
+				return H2HConstants.DEFAULT_CHUNK_SIZE;
+			}
+		};
+
+		// update the file (append some data)
+		FileUtils.write(file, NetworkTestUtil.randomString(), true);
+		FileUtils.write(file, NetworkTestUtil.randomString(), true);
+
+		NetworkManager client = network.get(1);
+		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		ProcessTestUtil.uploadNewFileVersion(client, file, profileManager, fileManager, limitingConfig);
+
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+
+		// verify that only one version is online
+		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManager);
+		MetaFile metaDocument = (MetaFile) ProcessTestUtil.getMetaDocument(client, fileNode.getKeyPair());
+		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
 	@After

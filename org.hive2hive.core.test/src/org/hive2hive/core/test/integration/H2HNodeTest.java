@@ -57,7 +57,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		credentials = NetworkTestUtil.generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcess registerProcess = registerNode.register(credentials);
+		IProcess registerProcess = registerNode.getUserManagement().register(credentials);
 		TestProcessListener listener = new TestProcessListener();
 		registerProcess.addListener(listener);
 
@@ -69,7 +69,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		rootDirectory = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcess loginProcess = loggedInNode.login(credentials, rootDirectory.toPath());
+		IProcess loginProcess = loggedInNode.getUserManagement().login(credentials, rootDirectory.toPath());
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
 
@@ -92,7 +92,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		File testFile = new File(rootDirectory, "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		IProcess process = loggedInNode.add(testFile);
+		IProcess process = loggedInNode.getFileManagement().add(testFile);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 
@@ -103,7 +103,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		} while (!listener.hasSucceeded());
 
 		// is now added; delete it
-		process = loggedInNode.delete(testFile);
+		process = loggedInNode.getFileManagement().delete(testFile);
 		listener = new TestProcessListener();
 		process.addListener(listener);
 
@@ -120,7 +120,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		FileUtils.write(testFile, "Hello World");
 
 		try {
-			loggedInNode.add(testFile);
+			loggedInNode.getFileManagement().add(testFile);
 			Assert.fail("Should not be able to add a file that is not in the root");
 		} catch (IllegalFileLocation e) {
 			// intended exception
@@ -142,7 +142,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		File test2File = new File(folder2, "test2.txt");
 		FileUtils.write(test2File, "Hello World 2");
 
-		IProcess process = loggedInNode.add(folder1);
+		IProcess process = loggedInNode.getFileManagement().add(folder1);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 
@@ -161,7 +161,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// then start 2nd client and login
 		File rootUser2 = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
-		IProcess loginProcess = newNode.login(credentials, rootUser2.toPath());
+		IProcess loginProcess = newNode.getUserManagement().login(credentials, rootUser2.toPath());
 		listener = new TestProcessListener();
 		loginProcess.addListener(listener);
 
@@ -192,17 +192,17 @@ public class H2HNodeTest extends H2HJUnitTest {
 	}
 
 	@After
-	public void logoutAndUnregister() {
+	public void logoutAndUnregister() throws NoSessionException {
 		// TODO logout and unregister
 
-		// IProcess process = loggedInNode.logout();
-		// TestProcessListener listener = new TestProcessListener();
-		// process.addListener(listener);
-		//
-		// // wait for the process to finish
-		// H2HWaiter waiter = new H2HWaiter(20);
-		// do {
-		// waiter.tickASecond();
-		// } while (!listener.hasSucceeded());
+		IProcess process = loggedInNode.getUserManagement().logout();
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+
+		// wait for the process to finish
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
 	}
 }

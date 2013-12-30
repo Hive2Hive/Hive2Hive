@@ -1,6 +1,6 @@
 package org.hive2hive.core.process.login;
 
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -13,10 +13,10 @@ public class PostLoginProcessContext extends ProcessContext {
 	private Locations locations;
 	private boolean isElectedMaster = false;
 	private final FileManager fileManager;
-	private final IH2HFileConfiguration fileConfig;
+	private final IFileConfiguration fileConfig;
 
 	public PostLoginProcessContext(PostLoginProcess postLoginProcess, UserProfileManager profileManager,
-			Locations currentLocations, FileManager fileManager, IH2HFileConfiguration fileConfig) {
+			Locations currentLocations, FileManager fileManager, IFileConfiguration fileConfig) {
 		super(postLoginProcess);
 		this.profileManager = profileManager;
 		this.locations = currentLocations;
@@ -62,7 +62,7 @@ public class PostLoginProcessContext extends ProcessContext {
 		return fileManager;
 	}
 
-	public IH2HFileConfiguration getFileConfig() {
+	public IFileConfiguration getFileConfig() {
 		return fileConfig;
 	}
 }

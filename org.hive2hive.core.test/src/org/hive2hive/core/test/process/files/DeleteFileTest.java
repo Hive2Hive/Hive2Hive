@@ -11,7 +11,7 @@ import net.tomp2p.peers.Number160;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.IH2HFileConfiguration;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.file.FileManager;
@@ -35,7 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests uploading a new version of a file.
+ * Tests deleting a file.
  * 
  * @author Nico
  * 
@@ -45,7 +45,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	private static final int networkSize = 2;
 	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
-	private static IH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private static IFileConfiguration config = new TestH2HFileConfiguration();
 
 	@BeforeClass
 	public static void initTest() throws Exception {

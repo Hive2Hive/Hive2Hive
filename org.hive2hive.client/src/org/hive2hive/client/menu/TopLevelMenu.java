@@ -63,7 +63,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 
 			protected void execute() {
-				IProcess process = nodeMenu.getH2HNode().register(userMenu.getUserCredentials());
+				IProcess process = nodeMenu.getH2HNode().getUserManagement()
+						.register(userMenu.getUserCredentials());
 				executeBlocking(process);
 			}
 		});
@@ -88,7 +89,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				if (!input.equalsIgnoreCase("ok"))
 					root = new File(input);
 
-				IProcess process = nodeMenu.getH2HNode().login(userMenu.getUserCredentials(), root.toPath());
+				IProcess process = nodeMenu.getH2HNode().getUserManagement().login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
 			}
 		});
@@ -97,7 +98,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			@Override
 			protected void execute() {
 				try {
-					IProcess process = nodeMenu.getH2HNode().add(askForFile());
+					IProcess process = nodeMenu.getH2HNode().getFileManagement().add(askForFile(true));
 					executeBlocking(process);
 				} catch (IllegalFileLocation | NoSessionException e) {
 					System.out.println("Could not add the file. Reason: " + e.getMessage());
@@ -108,7 +109,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Update File") {
 			protected void execute() {
 				try {
-					IProcess process = nodeMenu.getH2HNode().update(askForFile());
+					IProcess process = nodeMenu.getH2HNode().getFileManagement().update(askForFile(true));
 					executeBlocking(process);
 				} catch (IllegalArgumentException | NoSessionException e) {
 					System.out.println("Could not update the file. Reason: " + e.getMessage());
@@ -118,7 +119,24 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Delete File") {
 			protected void execute() {
 				try {
-					IProcess process = nodeMenu.getH2HNode().delete(askForFile());
+					IProcess process = nodeMenu.getH2HNode().getFileManagement().delete(askForFile(true));
+					executeBlocking(process);
+				} catch (IllegalArgumentException | NoSessionException e) {
+					System.out.println("Could not delete the file. Reason: " + e.getMessage());
+				}
+			}
+		});
+
+		add(new H2HConsoleMenuItem("Move File") {
+			protected void execute() {
+				try {
+					System.out.println("Source path needed: ");
+					File source = askForFile(true);
+
+					System.out.println("Destination path needed: ");
+					File destination = askForFile(false);
+
+					IProcess process = nodeMenu.getH2HNode().getFileManagement().move(source, destination);
 					executeBlocking(process);
 				} catch (IllegalArgumentException | NoSessionException e) {
 					System.out.println("Could not delete the file. Reason: " + e.getMessage());
@@ -128,7 +146,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void execute() {
 				try {
-					IProcess process = nodeMenu.getH2HNode().logout();
+					IProcess process = nodeMenu.getH2HNode().getUserManagement().logout();
 					executeBlocking(process);
 				} catch (NoSessionException e) {
 					System.out.println("Could not logout. Reason: " + e.getMessage());
@@ -161,15 +179,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 	/**
 	 * Asks for a (valid) file
 	 */
-	private File askForFile() {
+	private File askForFile(boolean expectExistence) {
 		File file = null;
-		while (file == null || !file.exists()) {
+		do {
 			System.out.println("Specify the relative file path to " + root.getAbsolutePath());
 			String path = awaitStringParameter();
 			file = new File(root, path);
-			if (!file.exists())
+			if (expectExistence && !file.exists())
 				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again");
-		}
+		} while (expectExistence && (file == null || !file.exists()));
 		return file;
 	}
 

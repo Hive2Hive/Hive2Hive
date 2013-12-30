@@ -21,6 +21,7 @@ import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.LoginProcessContext;
 import org.hive2hive.core.process.login.PostLoginProcess;
 import org.hive2hive.core.process.logout.LogoutProcess;
+import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -28,7 +29,17 @@ import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.security.UserCredentials;
 
-public class H2HNode implements IH2HNode, IH2HFileConfiguration {
+/**
+ * This is the central class for a developer using the Hive2Hive library. A node represents a peer in the
+ * network, forming a distributed hash table (DHT). Each node needs to create a new network or connect to an
+ * existing network (bootstrapping).<br>
+ * To create a new peer, use the {@link H2HNodeBuilder} to configure the node and set it up (it helps to fill
+ * this awful constructor). A instance of this class opens the world for user and file management.
+ * 
+ * @author Nico, Chris, Seppi
+ * 
+ */
+public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, IUserManagement {
 
 	private boolean autostartProcesses;
 	private final int maxSizeOfAllVersions;
@@ -75,6 +86,21 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 		} catch (IllegalProcessStateException e) {
 			// ignore
 		}
+	}
+
+	@Override
+	public IFileConfiguration getFileConfiguration() {
+		return this;
+	}
+
+	@Override
+	public IUserManagement getUserManagement() {
+		return this;
+	}
+
+	@Override
+	public IFileManagement getFileManagement() {
+		return this;
 	}
 
 	@Override
@@ -184,10 +210,14 @@ public class H2HNode implements IH2HNode, IH2HFileConfiguration {
 	@Override
 	public IProcess update(File file) throws NoSessionException, IllegalArgumentException {
 		NewVersionProcess process = new NewVersionProcess(file, networkManager);
-		if (autostartProcesses) {
-			process.start();
-		}
+		autoStartProcess(process);
+		return process;
+	}
 
+	@Override
+	public IProcess move(File source, File destination) throws NoSessionException, IllegalArgumentException {
+		MoveFileProcess process = new MoveFileProcess(networkManager, source, destination);
+		autoStartProcess(process);
 		return process;
 	}
 
