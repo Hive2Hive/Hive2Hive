@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.upload.newversion;
 
 import java.security.PublicKey;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.MetaFolder;
@@ -21,7 +22,11 @@ public class SendNotificationStep extends ProcessStep {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
 
-		Set<String> userList = metaFolder.getUserList();
+		Set<String> userList = new HashSet<String>();
+		if (metaFolder != null) {
+			userList.addAll(metaFolder.getUserList());
+		}
+
 		getProcess().notfyOtherUsers(userList, new UploadNotificationMessageFactory(modifiedFileKey));
 		getProcess().setNextStep(null);
 	}

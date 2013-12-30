@@ -33,6 +33,7 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 		MetaFolder parentMeta = (MetaFolder) context.getMetaDocument();
 		if (parentMeta == null) {
 			getProcess().stop("Could not find the parent meta data");
+			return;
 		}
 
 		parentMeta.removeChildKey(childKey);

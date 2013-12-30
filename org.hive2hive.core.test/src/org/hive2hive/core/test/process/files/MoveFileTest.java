@@ -18,7 +18,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.junit.AfterClass;
@@ -37,7 +37,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	private static final int networkSize = 5;
 	private static List<NetworkManager> network;
-	private static IFileConfiguration config = new TestH2HFileConfiguration();
+	private static IFileConfiguration config = new TestFileConfiguration();
 	private UserCredentials userCredentials;
 
 	@BeforeClass

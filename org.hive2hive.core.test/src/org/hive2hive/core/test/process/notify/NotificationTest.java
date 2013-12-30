@@ -20,7 +20,7 @@ import org.hive2hive.core.process.notify.NotifyPeersProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -39,7 +39,7 @@ public class NotificationTest extends H2HJUnitTest {
 
 	private static final int networkSize = 10;
 	private static List<NetworkManager> network;
-	private static final TestH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private static final TestFileConfiguration config = new TestFileConfiguration();
 
 	private static UserProfile userAProfile;
 	private static UserCredentials userACredentials;

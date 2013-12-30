@@ -26,7 +26,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -48,7 +48,7 @@ public class NewFileTest extends H2HJUnitTest {
 	private final int networkSize = 3;
 	private List<NetworkManager> network;
 	private FileManager fileManager;
-	private IFileConfiguration config = new TestH2HFileConfiguration();
+	private IFileConfiguration config = new TestFileConfiguration();
 	private UserCredentials userCredentials;
 
 	@BeforeClass

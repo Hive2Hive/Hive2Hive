@@ -2,7 +2,7 @@ package org.hive2hive.core.test.integration;
 
 import org.hive2hive.core.IFileConfiguration;
 
-public class TestH2HFileConfiguration implements IFileConfiguration {
+public class TestFileConfiguration implements IFileConfiguration {
 
 	@Override
 	public int getMaxFileSize() {

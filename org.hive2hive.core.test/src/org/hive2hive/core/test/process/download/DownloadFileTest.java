@@ -21,7 +21,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.integration.TestH2HFileConfiguration;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -42,7 +42,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 5;
 	private final static String testContent = "DownloadFileTest";
-	private final TestH2HFileConfiguration config = new TestH2HFileConfiguration();
+	private final TestFileConfiguration config = new TestFileConfiguration();
 	private static List<NetworkManager> network;
 	private FileManager uploaderFileManager;
 	private File uploadedFile;
