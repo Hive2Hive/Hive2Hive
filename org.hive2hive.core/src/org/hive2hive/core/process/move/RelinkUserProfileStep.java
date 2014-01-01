@@ -66,7 +66,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 			logger.debug("Successfully relinked the moved file in the user profile");
 
 			// notify other users
-			notifyUsers(context.getUsersToNotifySource(), context.getUsersToNotifyDestination(), movedNode);
+			notifyUsers(context.getUsersToNotifySource(), context.getUsersToNotifyDestination(), movedNode,
+					context.getSource().getName(), context.getDestination().getName());
 
 			// done with all steps
 			getProcess().setNextStep(null);
@@ -82,7 +83,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 	 * 2. users that don't have access to the file anymore
 	 * 3. users that now have access to the file but didn't have prior movement
 	 */
-	private void notifyUsers(Set<String> source, Set<String> destination, FileTreeNode movedNode) {
+	private void notifyUsers(Set<String> source, Set<String> destination, FileTreeNode movedNode,
+			String sourceName, String destName) {
 		// add all common users to a list
 		Set<String> common = new HashSet<String>();
 		for (String user : source) {
@@ -99,13 +101,12 @@ public class RelinkUserProfileStep extends ProcessStep {
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
 		PublicKey newParentKey = movedNode.getParent().getKeyPair().getPublic();
 		getProcess().notfyOtherUsers(common,
-				new MoveNotificationMessageFactory(movedNode.getName(), oldParentKey, newParentKey));
+				new MoveNotificationMessageFactory(sourceName, destName, oldParentKey, newParentKey));
 
 		// inform users that don't have access to the new destination anymore
 		logger.debug("Inform " + source.size() + " users that a file has been removed (after movement)");
 		source.removeAll(common);
-		getProcess().notfyOtherUsers(source,
-				new DeleteNotifyMessageFactory(oldParentKey, movedNode.getName()));
+		getProcess().notfyOtherUsers(source, new DeleteNotifyMessageFactory(oldParentKey, sourceName));
 
 		// inform users that have now access to the moved file
 		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");

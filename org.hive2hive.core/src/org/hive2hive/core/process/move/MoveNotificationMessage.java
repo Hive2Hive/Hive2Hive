@@ -31,14 +31,16 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 2855700202146422905L;
 	private final static Logger logger = H2HLoggerFactory.getLogger(MoveNotificationMessage.class);
-	private final String fileName;
+	private final String sourceFileName;
+	private final String destFileName;
 	private final PublicKey oldParentKey;
 	private final PublicKey newParentKey;
 
-	public MoveNotificationMessage(PeerAddress targetAddress, String fileName, PublicKey oldParentKey,
-			PublicKey newParentKey) {
+	public MoveNotificationMessage(PeerAddress targetAddress, String sourceFileName, String destFileName,
+			PublicKey oldParentKey, PublicKey newParentKey) {
 		super(targetAddress);
-		this.fileName = fileName;
+		this.sourceFileName = sourceFileName;
+		this.destFileName = destFileName;
 		this.oldParentKey = oldParentKey;
 		this.newParentKey = newParentKey;
 	}
@@ -59,7 +61,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 			// find the file of this user on the disc
 			FileTreeNode oldParent = userProfile.getFileById(oldParentKey);
 			File oldParentFile = session.getFileManager().getPath(oldParent).toFile();
-			File toMoveSource = new File(oldParentFile, fileName);
+			File toMoveSource = new File(oldParentFile, sourceFileName);
 
 			if (!toMoveSource.exists()) {
 				throw new FileNotFoundException("Cannot move file '" + toMoveSource.getAbsolutePath()
@@ -68,7 +70,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 
 			FileTreeNode newParent = userProfile.getFileById(newParentKey);
 			File newParentFile = session.getFileManager().getPath(newParent).toFile();
-			File toMoveDest = new File(newParentFile, fileName);
+			File toMoveDest = new File(newParentFile, destFileName);
 
 			if (toMoveDest.exists()) {
 				logger.warn("Overwriting '" + toMoveDest.getAbsolutePath()

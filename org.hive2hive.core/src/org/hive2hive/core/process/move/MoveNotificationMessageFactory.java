@@ -9,21 +9,29 @@ import org.hive2hive.core.process.notify.INotificationMessageFactory;
 
 public class MoveNotificationMessageFactory implements INotificationMessageFactory {
 
-	private final String fileName;
+	private final String sourceFileName;
+	private final String destFileName;
 	private final PublicKey oldParent;
 	private final PublicKey newParent;
 
 	/**
-	 * @param fileKey of the file that has been moved
+	 * Message factory for notification messages when a file has been moved
+	 * 
+	 * @param sourceFileName the original file name
+	 * @param destFileName the new file name (considers renaming of the files)
+	 * @param oldParent the former parent key
+	 * @param newParent the key of the new parent
 	 */
-	public MoveNotificationMessageFactory(String fileName, PublicKey oldParent, PublicKey newParent) {
-		this.fileName = fileName;
+	public MoveNotificationMessageFactory(String sourceFileName, String destFileName, PublicKey oldParent,
+			PublicKey newParent) {
+		this.sourceFileName = sourceFileName;
+		this.destFileName = destFileName;
 		this.oldParent = oldParent;
 		this.newParent = newParent;
 	}
 
 	@Override
 	public BaseDirectMessage createNotificationMessage(PeerAddress receiver, String userId) {
-		return new MoveNotificationMessage(receiver, fileName, oldParent, newParent);
+		return new MoveNotificationMessage(receiver, sourceFileName, destFileName, oldParent, newParent);
 	}
 }
