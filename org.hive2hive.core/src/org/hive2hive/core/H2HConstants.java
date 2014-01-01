@@ -93,4 +93,8 @@ public interface H2HConstants {
 
 	// default key used in the TomP2P framework
 	public static final Number160 TOMP2P_DEFAULT_KEY = Number160.ZERO;
+
+	// number of threads that netty / tomp2p are allowed to have. Too few threads can lead to slow response
+	// times, too many threads can exceed the available memory
+	public static final int NUM_OF_NETWORK_THREADS = 250; // Runtime.getRuntime().availableProcessors();
 }

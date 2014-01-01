@@ -1,6 +1,7 @@
 package org.hive2hive.core.network;
 
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.Future;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -26,6 +27,7 @@ import org.hive2hive.core.network.messages.MessageReplyHandler;
 public class Connection {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Connection.class);
+	private DefaultEventExecutorGroup eventExecutorGroup;
 
 	private Peer peer = null;
 	private boolean isConnected = false;
@@ -141,6 +143,12 @@ public class Connection {
 		} else {
 			logger.warn("Peer is not connected. No disconnect.");
 		}
+
+		if (eventExecutorGroup != null) {
+			Future<?> shutdownGracefully = eventExecutorGroup.shutdownGracefully();
+			shutdownGracefully.awaitUninterruptibly(10000);
+			eventExecutorGroup = null;
+		}
 	}
 
 	private boolean createPeer() {
@@ -151,9 +159,9 @@ public class Connection {
 			while (NetworkUtils.isPortAvailable(port) == false)
 				port++;
 
-			// configure the thread handling internally. Callback can be blocking.
 			// TODO how many threads?
-			DefaultEventExecutorGroup eventExecutorGroup = new DefaultEventExecutorGroup(250);
+			eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
+			// configure the thread handling internally. Callback can be blocking.
 			ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
 			clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
 
