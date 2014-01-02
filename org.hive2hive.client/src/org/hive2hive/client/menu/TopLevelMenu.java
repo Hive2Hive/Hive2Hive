@@ -82,14 +82,16 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 
 			protected void execute() {
-				root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
+				if (root == null)
+					root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
 				System.out.println("Specify root path or enter 'ok' if you're ok with: ");
 				System.out.println(root.getAbsolutePath());
 				String input = awaitStringParameter();
 				if (!input.equalsIgnoreCase("ok"))
 					root = new File(input);
 
-				IProcess process = nodeMenu.getH2HNode().getUserManagement().login(userMenu.getUserCredentials(), root.toPath());
+				IProcess process = nodeMenu.getH2HNode().getUserManagement()
+						.login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
 			}
 		});
