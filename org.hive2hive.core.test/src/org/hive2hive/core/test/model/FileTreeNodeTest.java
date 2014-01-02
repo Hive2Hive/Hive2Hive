@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.model;
 
+import java.nio.file.Paths;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
@@ -65,13 +66,12 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 
 	@Test
 	public void testFullPath() {
-		Assert.assertEquals(FileManager.getFileSep(), root.getFullPath());
-		Assert.assertEquals(FileManager.getFileSep() + "1f1", child1.getFullPath());
-		Assert.assertEquals(FileManager.getFileSep() + "1f2", child2.getFullPath());
-		Assert.assertEquals(FileManager.getFileSep() + "1d" + FileManager.getFileSep(), dir1.getFullPath());
-		Assert.assertEquals(FileManager.getFileSep() + "1d" + FileManager.getFileSep() + "2f", child3.getFullPath());
-		Assert.assertEquals(FileManager.getFileSep() + "1d" + FileManager.getFileSep() + "2d" + FileManager.getFileSep(),
-				dir2.getFullPath());
+		Assert.assertEquals("", root.getFullPath().toString());
+		Assert.assertEquals("1f1", child1.getFullPath().toString());
+		Assert.assertEquals("1f2", child2.getFullPath().toString());
+		Assert.assertEquals("1d", dir1.getFullPath().toString());
+		Assert.assertEquals(Paths.get("1d","2f").toString(), child3.getFullPath().toString());
+		Assert.assertEquals(Paths.get("1d","2d").toString(), dir2.getFullPath().toString());
 	}
 
 	@Test
