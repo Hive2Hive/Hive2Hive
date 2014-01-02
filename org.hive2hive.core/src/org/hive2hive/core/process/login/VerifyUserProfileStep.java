@@ -1,6 +1,5 @@
 package org.hive2hive.core.process.login;
 
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -17,14 +16,12 @@ public class VerifyUserProfileStep extends ProcessStep {
 	private final ProcessStep nextStep;
 
 	public VerifyUserProfileStep(String userId, ProcessStep nextStep) {
-
 		this.userId = userId;
 		this.nextStep = nextStep;
 	}
 
 	@Override
 	public void start() {
-
 		// get the loaded profile from the process context
 		UserProfile loadedProfile = ((LoginProcess) getProcess()).getContext().getUserProfile();
 

@@ -45,7 +45,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 
 	@Override
 	public void start() {
-		
+
 		context = (LoginProcessContext) getProcess().getContext();
 
 		PeerAddress myself = null;
@@ -136,7 +136,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 			// add myself
 			newLocations.addPeerAddress(getNetworkManager().getPeerAddress());
 			// put all into context
-//			context.setIsElectedMaster(isDefinedAsMaster);
+			context.setIsElectedMaster(isDefinedAsMaster);
 			context.setLocations(newLocations);
 
 			// continue the process

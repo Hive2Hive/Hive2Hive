@@ -17,8 +17,9 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.process.login.ContactPeersStep;
-import org.hive2hive.core.process.login.PostLoginProcess;
-import org.hive2hive.core.process.login.PostLoginProcessContext;
+import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.login.LoginProcessContext;
+import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -38,7 +39,7 @@ import org.junit.Test;
  * ranking from smallest to greatest node id:
  * C, B, A, F, E, G, A, D
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class ContactPeersStepTest extends H2HJUnitTest {
 
@@ -206,7 +207,10 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 	 */
 	private void runProcessStep(Locations fakedLocations, final boolean isMaster) throws NoSessionException {
 		// initialize the process and the one and only step to test
-		TestProcessContatctPeers process = new TestProcessContatctPeers(fakedLocations, network.get(0));
+		TestProcessContatctPeers process = new TestProcessContatctPeers(network.get(0));
+		LoginProcessContext context = (LoginProcessContext) process.getContext();
+		context.setLocations(fakedLocations);
+
 		process.setNextStep(new ContactPeersStep() {
 			// override this to disable the triggering of the further process steps
 			@Override
@@ -215,14 +219,15 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 				result = newLocations;
 
 				if (isMaster)
-					assertTrue(((PostLoginProcessContext) getProcess().getContext()).getIsDefinedAsMaster());
+					assertTrue(((LoginProcessContext) getProcess().getContext()).isDefinedAsMaster());
 				else
-					assertFalse(((PostLoginProcessContext) getProcess().getContext()).getIsDefinedAsMaster());
+					assertFalse(((LoginProcessContext) getProcess().getContext()).isDefinedAsMaster());
 
 				// stop the process
 				getProcess().setNextStep(null);
 			}
 		});
+
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -242,14 +247,13 @@ public class ContactPeersStepTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * A sub-class of {@link PostLoginProcess} to simplify the context initialization.
+	 * A sub-class of {@link LoginProcess} to simplify the context initialization.
 	 * 
-	 * @author Seppi
+	 * @author Seppi, Nico
 	 */
-	private class TestProcessContatctPeers extends PostLoginProcess {
-		public TestProcessContatctPeers(Locations locations, NetworkManager networkManager)
-				throws NoSessionException {
-			super(locations, networkManager);
+	private class TestProcessContatctPeers extends LoginProcess {
+		public TestProcessContatctPeers(NetworkManager networkManager) throws NoSessionException {
+			super(NetworkTestUtil.generateRandomCredentials(), new SessionParameters(), networkManager);
 		}
 	}
 

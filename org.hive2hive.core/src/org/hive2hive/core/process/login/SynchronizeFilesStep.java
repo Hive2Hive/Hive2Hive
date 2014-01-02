@@ -1,6 +1,5 @@
 package org.hive2hive.core.process.login;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,10 +42,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		
 		LoginProcessContext context = (LoginProcessContext) getProcess().getContext();
-		FileManager fileManager = context.getSession().getFileManager();
 		UserProfileManager profileManager = context.getSession().getProfileManager();
+		FileManager fileManager = context.getSession().getFileManager();
 
 		FileSynchronizer synchronizer = null;
 		try {
@@ -87,6 +85,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 			path.toFile().delete();
 		}
 
+		// TODO check process state and if it does not change for a while, don't wait anymore (else, it may
+		// cause an endless loop)
 		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone()
 				&& uploadProcessNewVersions.isDone() && deleteProcess.isDone())) {
 			try {
@@ -101,19 +101,19 @@ public class SynchronizeFilesStep extends ProcessStep {
 			logger.error("Problem occurred: " + problem);
 		}
 
-//		if (context.getIsDefinedAsMaster()) {
-//			// TODO set when step is implemented
-//			// String userId = profileManager.getUserCredentials().getUserId();
-//			// HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
-//			// GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
-//			// handleUmQueueStep);
-//			// context.setUserMessageQueueStep(getUMQueueStep);
-//			// getProcess().setNextStep(getUMQueueStep);
-//			getProcess().setNextStep(null);
-//		} else {
-//			// done with the post login process
-//			getProcess().setNextStep(null);
-//		}
+		// if (context.getIsDefinedAsMaster()) {
+		// // TODO set when step is implemented
+		// // String userId = profileManager.getUserCredentials().getUserId();
+		// // HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
+		// // GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
+		// // handleUmQueueStep);
+		// // context.setUserMessageQueueStep(getUMQueueStep);
+		// // getProcess().setNextStep(getUMQueueStep);
+		// getProcess().setNextStep(null);
+		// } else {
+		// // done with the post login process
+		// getProcess().setNextStep(null);
+		// }
 		getProcess().setNextStep(null);
 	}
 

@@ -76,8 +76,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// verify if both objects are the same
 		Assert.assertEquals(userId, context.getLocations().getUserId());
 
-		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(context.getLocations()
-				.getPeerAddresses());
+		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(context.getLocations().getPeerAddresses());
 		Assert.assertEquals(getter.getPeerAddress(), onlinePeers.get(0));
 	}
 
@@ -113,7 +112,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		private Locations locations;
 
 		@Override
-		public void setLocation(Locations locations) {
+		public void setLocations(Locations locations) {
 			this.locations = locations;
 		}
 

@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.process.notify;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +16,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessState;
-import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.notify.NotifyPeersProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -88,18 +88,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	private static void login(NetworkManager networkManager, UserCredentials credentials,
 			UserProfile userProfile) {
+		File root = FileUtils.getTempDirectory();
+
 		// login with valid credentials
-		LoginProcess process = new LoginProcess(credentials, networkManager);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
+		ProcessTestUtil.login(credentials, networkManager, root);
 
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		FileManager fileManager = new FileManager(FileUtils.getTempDirectory().toPath());
+		FileManager fileManager = new FileManager(root.toPath());
 		H2HSession session = new H2HSession(userProfile.getEncryptionKeys(), new UserProfileManager(
 				networkManager, credentials), config, fileManager);
 		networkManager.setSession(session);

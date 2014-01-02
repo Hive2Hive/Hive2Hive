@@ -108,7 +108,8 @@ public class NetworkTestUtil {
 	 */
 	public static void shutdownNetwork(List<NetworkManager> network) {
 		for (NetworkManager node : network) {
-			node.disconnect();
+			if (node.getConnection().isConnected())
+				node.disconnect();
 		}
 	}
 

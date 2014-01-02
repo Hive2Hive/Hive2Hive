@@ -16,9 +16,10 @@ public final class LoginProcessContext extends ProcessContext implements IGetLoc
 	private Locations locations;
 	private UserProfile userProfile;
 	private PublicKey publicKey;
-	
+
 	private H2HSession session;
-	
+	private boolean isDefinedAsMaster = false;
+
 	public LoginProcessContext(LoginProcess loginProcess) {
 		super(loginProcess);
 	}
@@ -59,5 +60,13 @@ public final class LoginProcessContext extends ProcessContext implements IGetLoc
 
 	public void setSession(H2HSession session) {
 		this.session = session;
+	}
+
+	public void setIsElectedMaster(boolean isDefinedAsMaster) {
+		this.isDefinedAsMaster = isDefinedAsMaster;
+	}
+
+	public boolean isDefinedAsMaster() {
+		return isDefinedAsMaster;
 	}
 }

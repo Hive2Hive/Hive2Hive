@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.process.login;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
@@ -7,11 +8,14 @@ import java.util.Random;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
@@ -35,6 +39,7 @@ public class LoginTest extends H2HJUnitTest {
 	private static List<NetworkManager> network;
 	private static UserProfile userProfile;
 	private static UserCredentials userCredentials;
+	private static File root;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -45,6 +50,7 @@ public class LoginTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		userProfile = ProcessTestUtil.register(userCredentials, network.get(0));
+		root = FileUtils.getTempDirectory();
 	}
 
 	@Test
@@ -52,18 +58,10 @@ public class LoginTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
 		// login with valid credentials
-		LoginProcess process = new LoginProcess(userCredentials, client);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
+		UserProfile profile = ProcessTestUtil.login(userCredentials, client, root);
 
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		Assert.assertNotNull(process.getContext().getUserProfile());
-		Assert.assertEquals(userProfile.getUserId(), process.getContext().getUserProfile().getUserId());
+		Assert.assertNotNull(profile);
+		Assert.assertEquals(userProfile.getUserId(), profile.getUserId());
 
 		// verify the locations map
 		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userProfile.getUserId()),
@@ -104,7 +102,10 @@ public class LoginTest extends H2HJUnitTest {
 
 	public LoginProcess loginAndWaitToFail(UserCredentials wrongCredentials) {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		LoginProcess process = new LoginProcess(wrongCredentials, client);
+		SessionParameters sessionParameters = new SessionParameters();
+		sessionParameters.setProfileManager(new UserProfileManager(client, wrongCredentials));
+
+		LoginProcess process = new LoginProcess(wrongCredentials, sessionParameters, client);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();

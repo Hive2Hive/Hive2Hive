@@ -16,7 +16,8 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.login.PostLoginProcess;
+import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.login.SynchronizeFilesStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -212,7 +213,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				manager, config, fileManager));
-		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, manager, fileManager);
+		SynchronizePostLoginProcess process = new SynchronizePostLoginProcess(client, manager);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -242,12 +243,13 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	 * @author Nico
 	 * 
 	 */
-	private class SynchronizePostLoginProcess extends PostLoginProcess {
+	private class SynchronizePostLoginProcess extends LoginProcess {
 
-		public SynchronizePostLoginProcess(NetworkManager networkManager, UserProfileManager profileManager,
-				FileManager fileManager) throws NoSessionException {
-			super(null, networkManager);
+		public SynchronizePostLoginProcess(NetworkManager networkManager, UserProfileManager profileManager)
+				throws NoSessionException {
+			super(userCredentials, new SessionParameters(), networkManager);
 			super.getContext().setIsElectedMaster(false);
+			super.getContext().setSession(networkManager.getSession());
 			setNextStep(new SynchronizeFilesStep());
 		}
 

@@ -21,6 +21,14 @@ public class H2HSession {
 		this.fileManager = sessionParameters.getFileManager();
 	}
 
+	public H2HSession(KeyPair keyPair, UserProfileManager profileManager,
+			IFileConfiguration fileConfiguration, FileManager fileManager) {
+		this.keyPair = keyPair;
+		this.profileManager = profileManager;
+		this.fileConfiguration = fileConfiguration;
+		this.fileManager = fileManager;
+	}
+
 	public UserProfileManager getProfileManager() {
 		return profileManager;
 	}

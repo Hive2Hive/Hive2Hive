@@ -6,8 +6,8 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
- * Process to log in. This process only logs in. When the credentials match, the locations get updated.
- * This process does <strong>not</strong> synchronize the local files or handle the user message queue.
+ * Process to log in. When the credentials match, the locations get updated.
+ * This process does then synchronize the local files and handle the user message queue.
  * 
  * @author Nico, Christian
  * 
@@ -24,21 +24,18 @@ public class LoginProcess extends Process {
 		// execution order:
 		// 1. GetUserProfileStep
 		// 2. VerifyUserProfileStep
-		// SessionCreationStep
-		// 3. GetLocationsStep: get the other client's locations
-		// 4. AddMyselfToLocationsStep: add this client to the locations map
-
-		// 5. ContactPeersStep (-> PutLocationsStep)
-		// 6. SynchronizeFilesStep
+		// 3. SessionCreationStep
+		// 4. GetLocationsStep: get the other client's locations
+		// 5. AddMyselfToLocationsStep: add this client to the locations map
+		// 6. ContactPeersStep (-> PutLocationsStep)
+		// 7. SynchronizeFilesStep
 		// if elected master:
-		// 7. HandleUserMessageQueueStep
+		// 8. HandleUserMessageQueueStep
 
-		// TODO add myself to locations here or in PostLoginProcess?
+		ContactPeersStep contactPeersStep = new ContactPeersStep();
 
-		AddMyselfToLocationsStep addToLocsStep = new AddMyselfToLocationsStep(credentials.getUserId(),
-				new ContactPeersStep());
-
-		GetLocationsStep locationsStep = new GetLocationsStep(credentials.getUserId(), addToLocsStep, context);
+		GetLocationsStep locationsStep = new GetLocationsStep(credentials.getUserId(), contactPeersStep,
+				context);
 
 		SessionCreationStep sessionStep = new SessionCreationStep(sessionParameters, networkManager,
 				locationsStep);

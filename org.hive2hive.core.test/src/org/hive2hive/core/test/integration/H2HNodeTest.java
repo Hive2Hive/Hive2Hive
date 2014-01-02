@@ -78,12 +78,6 @@ public class H2HNodeTest extends H2HJUnitTest {
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
-
-		// wait for the post-loginprocess to finish
-		waiter = new H2HWaiter(40);
-		do {
-			waiter.tickASecond();
-		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
 	}
 
 	@Test

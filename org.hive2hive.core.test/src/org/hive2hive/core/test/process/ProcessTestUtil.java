@@ -26,6 +26,7 @@ import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.process.login.LoginProcess;
+import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.PutUserProfileStep;
 import org.hive2hive.core.process.register.RegisterProcess;
@@ -34,6 +35,7 @@ import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.junit.Assert;
 
 /**
@@ -92,11 +94,15 @@ public class ProcessTestUtil {
 		return register.getContext().getUserProfile();
 	}
 
-	public static void login(UserCredentials credentials, NetworkManager networkManager) {
-		LoginProcess login = new LoginProcess(credentials, networkManager);
+	public static UserProfile login(UserCredentials credentials, NetworkManager networkManager, File root) {
+		SessionParameters sessionParameters = new SessionParameters();
+		sessionParameters.setFileConfig(new TestFileConfiguration());
+		sessionParameters.setFileManager(new FileManager(root.toPath()));
+		sessionParameters.setProfileManager(new UserProfileManager(networkManager, credentials));
+		LoginProcess login = new LoginProcess(credentials, sessionParameters, networkManager);
 		executeProcess(login);
 
-		UserProfile userProfile = login.getContext().getUserProfile();
+		return login.getContext().getUserProfile();
 	}
 
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials) {
@@ -153,7 +159,7 @@ public class ProcessTestUtil {
 			private Locations locations;
 
 			@Override
-			public void setLocation(Locations locations) {
+			public void setLocations(Locations locations) {
 				this.locations = locations;
 			}
 

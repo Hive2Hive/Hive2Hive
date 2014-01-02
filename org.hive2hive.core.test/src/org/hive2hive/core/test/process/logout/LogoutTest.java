@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
@@ -49,13 +48,12 @@ public class LogoutTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		userProfile = ProcessTestUtil.register(userCredentials, network.get(0));
-		ProcessTestUtil.login(userCredentials, network.get(0));
+		ProcessTestUtil.login(userCredentials, network.get(0), FileUtils.getTempDirectory());
 	}
 
 	@Test
 	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException {
-
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		NetworkManager client = network.get(0);
 
 		// verify the locations map before logout
 		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userProfile.getUserId()),
@@ -63,11 +61,8 @@ public class LogoutTest extends H2HJUnitTest {
 		futureGet.awaitUninterruptibly();
 		futureGet.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) futureGet.getData().object();
-		
-		System.out.println("\nLOCATIONS: " + locations.getPeerAddresses());
-		System.out.println("Client PeerAddress: " + client.getPeerAddress() +"\n");
-		
-		Assert.assertTrue(locations.getPeerAddresses().contains(client.getPeerAddress()));
+
+		Assert.assertEquals(1, locations.getPeerAddresses().size());
 
 		// logout
 		LogoutProcess process = new LogoutProcess(client);
@@ -89,9 +84,7 @@ public class LogoutTest extends H2HJUnitTest {
 		futureGet2.getFutureRequests().awaitUninterruptibly();
 		Locations locations2 = (Locations) futureGet2.getData().object();
 
-		System.out.println("\nLOCATIONS: " + locations2.getPeerAddresses() +"\n");
-		
-		Assert.assertFalse(locations2.getPeerAddresses().contains(client.getPeerAddress()));
+		Assert.assertEquals(0, locations2.getPeerAddresses().size());
 	}
 
 	@AfterClass
