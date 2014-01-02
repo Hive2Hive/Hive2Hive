@@ -13,9 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  */
 public class ProcessManager {
-	private static ProcessManager instance;
 	private int pidCounter;
 	private Map<Integer, IProcess> attachedProcesses;
+
+	private static class SingletonHolder {
+		private static final ProcessManager INSTANCE = new ProcessManager();
+	}
 
 	private ProcessManager() {
 		attachedProcesses = new ConcurrentHashMap<Integer, IProcess>();
@@ -23,10 +26,7 @@ public class ProcessManager {
 	}
 
 	public static ProcessManager getInstance() {
-		if (instance == null) {
-			instance = new ProcessManager();
-		}
-		return instance;
+		return SingletonHolder.INSTANCE;
 	}
 
 	/**

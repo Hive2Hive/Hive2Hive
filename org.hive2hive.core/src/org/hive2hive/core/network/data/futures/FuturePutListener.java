@@ -299,8 +299,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					return false;
 				} else {
 					logger.warn(String.format("Put verification: Peer '%s' has newer version."
-							+ " location key = '%s' content key = '%s' version key = '%s'", peerAddress,
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 					return true;
 				}
 			}

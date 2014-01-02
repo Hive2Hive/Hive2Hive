@@ -8,27 +8,26 @@ package org.hive2hive.core;
  */
 public class TimeToLiveStore {
 
-	private static TimeToLiveStore instance;
-
 	private int chunk;
 	private int metaDocument;
 	private int userProfile;
 	private int locations;
 	private int userMessageQueue;
 
-	private TimeToLiveStore() {
+	private static class SingletonHolder {
+		private static final TimeToLiveStore INSTANCE = new TimeToLiveStore();
+
+		private SingletonHolder() {
+			INSTANCE.setChunk(convertDaysToSeconds(180));
+			INSTANCE.setMetaDocument(convertDaysToSeconds(365));
+			INSTANCE.setUserProfile(convertDaysToSeconds(2 * 365));
+			INSTANCE.setLocations(convertDaysToSeconds(2 * 365));
+			INSTANCE.setUserMessageQueue(convertDaysToSeconds(2 * 365));
+		}
 	}
 
 	public static TimeToLiveStore getInstance() {
-		if (instance == null) {
-			instance = new TimeToLiveStore();
-			instance.setChunk(convertDaysToSeconds(180));
-			instance.setMetaDocument(convertDaysToSeconds(365));
-			instance.setUserProfile(convertDaysToSeconds(2 * 365));
-			instance.setLocations(convertDaysToSeconds(2 * 365));
-			instance.setUserMessageQueue(convertDaysToSeconds(2 * 365));
-		}
-		return instance;
+		return SingletonHolder.INSTANCE;
 	}
 
 	public int getChunk() {

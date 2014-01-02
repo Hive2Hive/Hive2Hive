@@ -80,7 +80,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
 					logger.warn(String
-							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '&s' target address = '%s'",
+							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '%s' target address = '%s'",
 									message.getTargetKey(), message.getTargetAddress()));
 					// re-send the message (routed)
 					networkManager.send(message, receiverPublicKey, listener);

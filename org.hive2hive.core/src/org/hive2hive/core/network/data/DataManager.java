@@ -52,10 +52,12 @@ public class DataManager {
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
 		FuturePut putFuture = put(lKey, dKey, cKey, content);
-		if (putFuture == null && listener != null) {
-			listener.onPutFailure();
+		if (putFuture == null) {
+			if (listener != null)
+				listener.onPutFailure();
 			return;
 		}
+
 		putFuture.addListener(new FuturePutListener(lKey, dKey, cKey, content, listener, this));
 	}
 
@@ -81,7 +83,7 @@ public class DataManager {
 					.setVersionKey(content.getVersionKey()).start();
 		} catch (IOException e) {
 			logger.error(String
-					.format("Put failed. location key = '%s' domain key content key = '%s' version key = '%s' exception = '%s'",
+					.format("Put failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s' exception = '%s'",
 							locationKey, domainKey, contentKey, content.getVersionKey(), e.getMessage()));
 			return null;
 		}
@@ -120,15 +122,15 @@ public class DataManager {
 		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, versionKey, this, listener));
 	}
 
-//	public void getUserProfileTask(String locationKey, IGetListener listener) {
-//		Number160 lKey = Number160.createHash(locationKey);
-//		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-//		FutureGet futureGet = getPeer().get(Number160.createHash(locationKey))
-//				.from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
-//				.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
-//				.returnNr(1).start();
-//		futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
-//	}
+	// public void getUserProfileTask(String locationKey, IGetListener listener) {
+	// Number160 lKey = Number160.createHash(locationKey);
+	// Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+	// FutureGet futureGet = getPeer().get(Number160.createHash(locationKey))
+	// .from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
+	// .to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
+	// .returnNr(1).start();
+	// futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
+	// }
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
 		logger.debug(String.format("get key = '%s' domain key = '%s' content key = '%s'", locationKey,

@@ -101,8 +101,8 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 			}
 		} else {
 			logger.error(String.format("Remove verification failed. Data is not null after %s tries."
-					+ " location key = '%s' domain key = '%s' content key = '%s'", removeTries - 1,
-					locationKey, domainKey, contentKey, versionKey));
+					+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+					removeTries - 1, locationKey, domainKey, contentKey, versionKey));
 			if (listener != null)
 				listener.onRemoveFailure();
 		}

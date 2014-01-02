@@ -34,7 +34,8 @@ public class MetaFolder extends MetaDocument {
 	}
 
 	public void addUserPermissions(UserPermission userPermission) {
-		userPermissions.add(userPermission);
+		if (userPermission != null)
+			userPermissions.add(userPermission);
 	}
 
 	public void removeUserPermissions(String userId) {
@@ -67,7 +68,8 @@ public class MetaFolder extends MetaDocument {
 	}
 
 	public void addChildKeyPair(KeyPair keyPair) {
-		childKeys.add(keyPair);
+		if (keyPair != null)
+			childKeys.add(keyPair);
 	}
 
 	public void removeChildKey(PublicKey childKey) {

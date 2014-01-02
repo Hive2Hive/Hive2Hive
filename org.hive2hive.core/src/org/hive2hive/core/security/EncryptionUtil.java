@@ -441,8 +441,10 @@ public final class EncryptionUtil {
 			logger.error("Exception while serializing object:", e);
 		} finally {
 			try {
-				oos.close();
-				baos.close();
+				if (oos != null)
+					oos.close();
+				if (baos != null)
+					baos.close();
 			} catch (IOException e) {
 				logger.error("Exception while closing serialization process.");
 			}
@@ -462,8 +464,10 @@ public final class EncryptionUtil {
 			logger.error("Exception while deserializing object.");
 		} finally {
 			try {
-				ois.close();
-				bais.close();
+				if (ois != null)
+					ois.close();
+				if (bais != null)
+					bais.close();
 			} catch (IOException e) {
 				logger.error("Exception while closing deserialization process.");
 			}
