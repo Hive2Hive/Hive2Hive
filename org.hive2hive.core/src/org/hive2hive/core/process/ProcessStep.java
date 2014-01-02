@@ -2,9 +2,8 @@ package org.hive2hive.core.process;
 
 import java.security.PublicKey;
 
-import org.bouncycastle.util.encoders.Base64;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * This class represents a single step of a {@link Process}. This step calls the next step after being
@@ -42,6 +41,6 @@ public abstract class ProcessStep {
 	}
 
 	public static String key2String(PublicKey key) {
-		return new String(Base64.encode(key.getEncoded()), H2HConstants.ENCODING_CHARSET);
+		return EncryptionUtil.byteToHex(key.getEncoded());
 	}
 }

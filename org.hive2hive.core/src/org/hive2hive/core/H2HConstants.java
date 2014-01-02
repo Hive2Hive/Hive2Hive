@@ -2,7 +2,6 @@ package org.hive2hive.core;
 
 import java.io.File;
 import java.net.InetAddress;
-import java.nio.charset.Charset;
 
 import net.tomp2p.peers.Number160;
 
@@ -27,9 +26,6 @@ public interface H2HConstants {
 
 	// standard port for the hive2hive network
 	public static final int H2H_PORT = 4622;
-
-	// define the default encoding char set (use explicitly)
-	public static final Charset ENCODING_CHARSET = Charset.forName("UTF-8");
 
 	// the configuration file name (lying in the root directory of the node)
 	public static final String META_FILE_NAME = "h2h.conf";
