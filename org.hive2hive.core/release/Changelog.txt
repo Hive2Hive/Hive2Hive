@@ -1,0 +1,6 @@
+=================================================================
+1.0.0 - initial release
+* support for private files only (no sharing)
+* register, login, logout of a user
+* add, remove, move (rename), update files
+* signed and encrypted messages

@@ -14,19 +14,36 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+
 	<packaging>pom</packaging>
 	<version>1.0.0</version>
 	<dependencies>
-		<!-- 
-		<dependency>
-			<groupId>net.tomp2p</groupId>
-			<artifactId>TomP2P</artifactId>
-			<version>4.4</version>
-		</dependency>
-		 -->
-		 
+		<!-- <dependency> <groupId>net.tomp2p</groupId> <artifactId>TomP2P</artifactId> 
+			<version>4.4</version> </dependency> -->
+
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -55,11 +72,7 @@
 		</dependency>
 	</dependencies>
 	<repositories>
-		<!-- 
-		<repository>
-			<id>tomp2p.net</id>
-			<url>http://tomp2p.net/dev/mvn/</url>
-		</repository>
-		 -->
+		<!-- <repository> <id>tomp2p.net</id> <url>http://tomp2p.net/dev/mvn/</url> 
+			</repository> -->
 	</repositories>
 </project>

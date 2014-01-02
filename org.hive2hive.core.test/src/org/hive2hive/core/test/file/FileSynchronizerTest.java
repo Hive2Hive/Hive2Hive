@@ -88,7 +88,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node2f = new FileTreeNode(node1d, keys, "2f", EncryptionUtil.generateMD5Hash(file2f));
 		node2d = new FileTreeNode(node1d, keys, "2d");
 
-		// write the meta data now. Before creating the synchronizer, first modify the file system as desired.
+		// write the meta data now. Before creating the synchronizer, modify the file system as desired first.
 		fileManager.writePersistentMetaData();
 	}
 
