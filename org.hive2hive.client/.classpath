@@ -16,16 +16,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/dependencies/bcprov-jdk16-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/logback-classic-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/logback-core-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/netty-buffer-4.0.13.Final.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/netty-common-4.0.13.Final.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/netty-transport-4.0.13.Final.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/slf4j-api-1.6.4.jar"/>
-	<classpathentry kind="lib" path="lib/dependencies/tomp2p.core-2014_01_01.jar"/>
-	<classpathentry kind="lib" path="lib/org.hive2hive.core-1.0.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.hive2hive.core"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
