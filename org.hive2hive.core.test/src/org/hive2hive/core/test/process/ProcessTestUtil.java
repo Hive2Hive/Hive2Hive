@@ -23,6 +23,7 @@ import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
+import org.hive2hive.core.process.digest.GetDigestProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.process.login.LoginProcess;
@@ -239,5 +240,15 @@ public class ProcessTestUtil {
 		} catch (NoSessionException e) {
 			// never happens because session is set before
 		}
+	}
+
+	public static GetDigestProcess getDigest(NetworkManager networkManager, UserProfileManager profileManager,
+			FileManager fileManager, IFileConfiguration config) {
+		
+		networkManager.setSession(new H2HSession(EncryptionUtil
+				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
+		GetDigestProcess process = new GetDigestProcess(networkManager);
+		executeProcess(process);
+		return process;
 	}
 }

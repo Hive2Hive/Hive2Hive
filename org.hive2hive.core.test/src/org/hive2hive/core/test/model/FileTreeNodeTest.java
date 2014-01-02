@@ -4,7 +4,6 @@ import java.nio.file.Paths;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;

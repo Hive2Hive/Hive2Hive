@@ -15,6 +15,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
+import org.hive2hive.core.process.digest.GetDigestProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -207,6 +208,14 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		autoStartProcess(process);
 		return process;
 	}
+	
+	@Override
+	public GetDigestProcess getDigest() {
+		GetDigestProcess process = new GetDigestProcess(networkManager);
+		
+		autoStartProcess(process);
+		return process;
+	}
 
 	@Override
 	public int getMaxFileSize() {
@@ -227,4 +236,5 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	public int getChunkSize() {
 		return chunkSize;
 	}
+
 }

@@ -5,11 +5,12 @@ import java.io.File;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.digest.GetDigestProcess;
 
 /**
  * Interface on all file operations that Hive2Hive currently supports.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public interface IFileManagement {
@@ -56,4 +57,10 @@ public interface IFileManagement {
 	 * @return the file configuration of this node
 	 */
 	IFileConfiguration getFileConfiguration();
+	
+	/**
+	 * Returns a list of the files currently stored in the network.
+	 * @return
+	 */
+	GetDigestProcess getDigest();
 }
