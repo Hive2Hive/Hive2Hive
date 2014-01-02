@@ -522,6 +522,14 @@ public final class EncryptionUtil {
 		return result;
 	}
 
+	public static String byteToHex(byte[] data) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : data) {
+			sb.append(String.format("%02X", b));
+		}
+		return sb.toString();
+	}
+
 	// private static byte[] processRSACiphering(boolean isEncrypting, byte[] data, CipherParameters key)
 	// throws InvalidCipherTextException {
 	//

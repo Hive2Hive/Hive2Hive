@@ -69,20 +69,19 @@ public class MessageReplyHandler implements ObjectDataReply {
 			logger.warn("Decryption of message failed.");
 			return AcceptanceReply.FAILURE_DECRYPTION;
 		}
-		
+
 		// deserialize decrypted message
 		Object message = EncryptionUtil.deserializeObject(decryptedMessage);
 
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
 			byte[] data = EncryptionUtil.serializeObject(receivedMessage);
-			
+
 			// give a network manager reference to work (verify, handle)
 			receivedMessage.setNetworkManager(networkManager);
-			
+
 			// verify the signature
-			if (!receivedMessage.checkSignature(data, signature,
-					senderId)) {
+			if (!receivedMessage.checkSignature(data, signature, senderId)) {
 				logger.error(String.format("Message has wrong signature. node id = '%s'",
 						networkManager.getNodeId()));
 				return AcceptanceReply.FAILURE_SIGNATURE;
@@ -103,7 +102,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 						"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
 						networkManager.getNodeId()));
 			}
-			
+
 			return reply;
 		} else {
 			logger.error("Received unknown object.");

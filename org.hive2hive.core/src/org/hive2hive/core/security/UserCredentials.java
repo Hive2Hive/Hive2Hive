@@ -55,11 +55,7 @@ public final class UserCredentials {
 		byte[] locationKey = PasswordUtil.generateHash(appendage.toCharArray(), fixedSalt);
 
 		// Note: Do this as hex to support all platforms
-		StringBuilder sb = new StringBuilder();
-		for (byte b : locationKey) {
-			sb.append(String.format("%02X", b));
-		}
-		return sb.toString();
+		return EncryptionUtil.byteToHex(locationKey);
 
 		// String location = new String(locationKey, H2HConstants.ENCODING_CHARSET);
 		// return location;
