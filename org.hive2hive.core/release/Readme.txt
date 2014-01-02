@@ -3,6 +3,6 @@ Hive2Hive is an additional layer on top of the DHT specialized in file synchroni
 
 How to use it?
 Bind the Hive2Hive library and all necessary dependencies into your project. The dependent libraries are not part of Hive2Hive and can also be imported using maven or other tools.
-On the project website (http://hive2hive.com/) you can see a usage guide.
+On the project website you can see a usage guide.
 
 For more information, see http://hive2hive.com/

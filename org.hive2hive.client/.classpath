@@ -26,6 +26,6 @@
 	<classpathentry kind="lib" path="lib/dependencies/netty-transport-4.0.13.Final.jar"/>
 	<classpathentry kind="lib" path="lib/dependencies/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/dependencies/tomp2p.core-2014_01_01.jar"/>
-	<classpathentry kind="lib" path="lib/org.hive2hive.core.jar"/>
+	<classpathentry kind="lib" path="lib/org.hive2hive.core-1.0.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

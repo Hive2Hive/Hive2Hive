@@ -58,7 +58,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		
+
 		add(new H2HConsoleMenuItem("Open Utils") {
 			protected void execute() {
 				new UtilMenu().open();
