@@ -40,8 +40,6 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 			chunksToDelete = new ArrayList<KeyPair>();
 			if (!context.isDirectory()) {
 				// no chunks to delete when directory
-				// TODO sort the deletion by version --> if there is an error, the newest version may not be
-				// gone
 				MetaFile metaFile = (MetaFile) context.getMetaDocument();
 				for (FileVersion version : metaFile.getVersions()) {
 					chunksToDelete.addAll(version.getChunkIds());

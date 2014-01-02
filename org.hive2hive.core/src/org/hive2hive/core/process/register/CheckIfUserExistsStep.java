@@ -39,8 +39,7 @@ public class CheckIfUserExistsStep extends ProcessStep {
 		// first, put the new user profile
 		// second, put the empty locations map
 		// third, put the public key of the user
-		
-		// TODO check whether null is OK to be passed
+
 		PutPublicKeyStep third = new PutPublicKeyStep(userProfile.getUserId(), userProfile
 				.getEncryptionKeys().getPublic(), null);
 		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), third);

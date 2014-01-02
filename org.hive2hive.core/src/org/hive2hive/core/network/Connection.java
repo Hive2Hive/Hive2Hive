@@ -159,7 +159,6 @@ public class Connection {
 			while (NetworkUtils.isPortAvailable(port) == false)
 				port++;
 
-			// TODO how many threads?
 			eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
 			// configure the thread handling internally. Callback can be blocking.
 			ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();

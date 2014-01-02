@@ -43,7 +43,6 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 
 	private void delete() {
 		try {
-			// TODO file key does not exist anymore
 			H2HSession session = networkManager.getSession();
 
 			FileManager fileManager = session.getFileManager();

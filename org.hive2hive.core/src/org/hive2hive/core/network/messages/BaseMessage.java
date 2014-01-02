@@ -310,8 +310,8 @@ public abstract class BaseMessage implements Runnable, Serializable {
 			return EncryptionUtil.verify(data, signature, publicKey);
 		} catch (InvalidKeyException | SignatureException e) {
 			logger.error("Exception while verifying message: ", e);
+			return false;
 		}
-		return false;
 	}
 
 }

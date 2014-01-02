@@ -66,7 +66,6 @@ public class UpdateUserProfileStep extends ProcessStep {
 			getProcess().notfyOtherUsers(userList, messageFactory);
 		}
 
-		// TODO check if too many versions of that file exist --> remove old versions if necessary
 		getProcess().setNextStep(null);
 	}
 

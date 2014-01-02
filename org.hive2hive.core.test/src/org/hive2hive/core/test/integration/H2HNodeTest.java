@@ -193,8 +193,6 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@After
 	public void logoutAndUnregister() throws NoSessionException {
-		// TODO logout and unregister
-
 		IProcess process = loggedInNode.getUserManagement().logout();
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
@@ -204,5 +202,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
+
+		// TODO unregister
 	}
 }

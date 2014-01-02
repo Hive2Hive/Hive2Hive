@@ -70,7 +70,6 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		this.chunkSize = chunkSize;
 		this.autostartProcesses = autostartProcesses;
 
-		// TODO set appropriate node ID
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
 		if (isMasterPeer) {
 			networkManager.connect();
