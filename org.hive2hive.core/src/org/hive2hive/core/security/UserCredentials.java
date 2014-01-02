@@ -1,7 +1,5 @@
 package org.hive2hive.core.security;
 
-import org.hive2hive.core.H2HConstants;
-
 /**
  * This stores a user's credentials. Do not change the password or the PIN manually by using
  * setters but rather define both parameters from scratch. The PIN needs to be unique per-user per-password.
@@ -56,7 +54,14 @@ public final class UserCredentials {
 		// hash the location
 		byte[] locationKey = PasswordUtil.generateHash(appendage.toCharArray(), fixedSalt);
 
-		String location = new String(locationKey, H2HConstants.ENCODING_CHARSET);
-		return location;
+		// Note: Do this as hex to support all platforms
+		StringBuilder sb = new StringBuilder();
+		for (byte b : locationKey) {
+			sb.append(String.format("%02X", b));
+		}
+		return sb.toString();
+
+		// String location = new String(locationKey, H2HConstants.ENCODING_CHARSET);
+		// return location;
 	}
 }

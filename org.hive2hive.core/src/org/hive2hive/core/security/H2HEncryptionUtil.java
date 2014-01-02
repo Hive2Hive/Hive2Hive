@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -146,7 +147,6 @@ public final class H2HEncryptionUtil {
 		}
 
 		// calculate the MD5 hash and compare it
-		return new String(md5, H2HConstants.ENCODING_CHARSET).equalsIgnoreCase(new String(expectedMD5,
-				H2HConstants.ENCODING_CHARSET));
+		return Arrays.equals(md5, expectedMD5);
 	}
 }
