@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.download;
 
+import java.nio.file.Path;
+
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -10,12 +12,15 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 
 	private final FileTreeNode file;
 	private final FileManager fileManager;
+	private final Path destination;
 	private MetaDocument metaDocument;
 
-	public DownloadFileProcessContext(DownloadFileProcess process, FileTreeNode file, FileManager fileManager) {
+	public DownloadFileProcessContext(DownloadFileProcess process, FileTreeNode file,
+			FileManager fileManager, Path destination) {
 		super(process);
 		this.file = file;
 		this.fileManager = fileManager;
+		this.destination = destination;
 	}
 
 	public FileTreeNode getFile() {
@@ -34,5 +39,9 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+
+	public Path getDestination() {
+		return destination;
 	}
 }

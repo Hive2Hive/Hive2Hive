@@ -2,6 +2,7 @@ package org.hive2hive.core.process.download;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.PublicKey;
 
 import org.apache.log4j.Logger;
@@ -36,7 +37,29 @@ public class DownloadFileProcess extends Process {
 	 */
 	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager) throws NoSessionException {
 		super(networkManager);
-		initialize(file, networkManager.getSession().getFileManager());
+
+		FileManager fileManager = networkManager.getSession().getFileManager();
+		Path destination = fileManager.getPath(file);
+		initialize(file, networkManager.getSession().getFileManager(), destination);
+	}
+
+	/**
+	 * Download a specific file version to a given path (used for restoring).
+	 * 
+	 * @param file the file to download
+	 * @param networkManager
+	 * @param indexToDownload the version to download
+	 * @param desiredFileName the filename to download the file to
+	 * @throws NoSessionException
+	 */
+	public DownloadFileProcess(FileTreeNode file, NetworkManager networkManager, int indexToDownload,
+			String desiredFileName) throws NoSessionException {
+		super(networkManager);
+
+		FileManager fileManager = networkManager.getSession().getFileManager();
+		Path originalFilePath = fileManager.getPath(file);
+		File destination = new File(originalFilePath.getParent().toFile(), desiredFileName);
+		initialize(file, networkManager.getSession().getFileManager(), destination.toPath());
 	}
 
 	/**
@@ -56,14 +79,16 @@ public class DownloadFileProcess extends Process {
 		UserProfile userProfile = profileManager.getUserProfile(super.getID(), false);
 		FileTreeNode fileNode = userProfile.getFileById(fileKey);
 
-		initialize(fileNode, networkManager.getSession().getFileManager());
+		FileManager fileManager = networkManager.getSession().getFileManager();
+		Path destination = fileManager.getPath(fileNode);
+		initialize(fileNode, networkManager.getSession().getFileManager(), destination);
 	}
 
-	private void initialize(FileTreeNode file, FileManager fileManager) {
-		context = new DownloadFileProcessContext(this, file, fileManager);
+	private void initialize(FileTreeNode file, FileManager fileManager, Path destination) {
+		context = new DownloadFileProcessContext(this, file, fileManager, destination);
 
 		// check if already exists
-		File existing = fileManager.getPath(file).toFile();
+		File existing = destination.toFile();
 		if (existing != null && existing.exists()) {
 			try {
 				if (H2HEncryptionUtil.compareMD5(existing, file.getMD5())) {

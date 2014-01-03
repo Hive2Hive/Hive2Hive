@@ -21,8 +21,9 @@ public class EvaluateMetaDocumentStep extends ProcessStep {
 		} else {
 			MetaFile metaFile = (MetaFile) metaDocument;
 			logger.debug("The meta document is valid. Downloading all chunks is the next step.");
-			GetFileChunkStep nextStep = new GetFileChunkStep(context.getFile(), metaFile,
-					context.getFileManager());
+
+			// start downloading
+			GetFileChunkStep nextStep = new GetFileChunkStep(context.getDestination(), metaFile);
 			getProcess().setNextStep(nextStep);
 		}
 	}
