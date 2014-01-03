@@ -45,10 +45,23 @@ public class MetaFile extends MetaDocument {
 		Collections.sort(versions, new Comparator<FileVersion>() {
 			@Override
 			public int compare(FileVersion o1, FileVersion o2) {
-				return new Integer(o1.getCounter()).compareTo(o2.getCounter());
+				return new Integer(o1.getIndex()).compareTo(o2.getIndex());
 			}
 		});
 
 		return versions.get(versions.size() - 1);
+	}
+
+	public FileVersion getVersionByIndex(int index) {
+		if (versions == null || versions.isEmpty()) {
+			return null;
+		}
+
+		for (FileVersion version : versions) {
+			if (version.getIndex() == index)
+				return version;
+		}
+
+		return null;
 	}
 }

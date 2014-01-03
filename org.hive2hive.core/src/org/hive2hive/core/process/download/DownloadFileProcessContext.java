@@ -13,14 +13,16 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	private final FileTreeNode file;
 	private final FileManager fileManager;
 	private final Path destination;
+	private final int indexToDownload;
 	private MetaDocument metaDocument;
 
 	public DownloadFileProcessContext(DownloadFileProcess process, FileTreeNode file,
-			FileManager fileManager, Path destination) {
+			FileManager fileManager, Path destination, int indexToDownload) {
 		super(process);
 		this.file = file;
 		this.fileManager = fileManager;
 		this.destination = destination;
+		this.indexToDownload = indexToDownload;
 	}
 
 	public FileTreeNode getFile() {
@@ -43,5 +45,9 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 
 	public Path getDestination() {
 		return destination;
+	}
+
+	public int getIndexToDownload() {
+		return indexToDownload;
 	}
 }

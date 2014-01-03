@@ -40,7 +40,7 @@ public class DownloadFileProcess extends Process {
 
 		FileManager fileManager = networkManager.getSession().getFileManager();
 		Path destination = fileManager.getPath(file);
-		initialize(file, networkManager.getSession().getFileManager(), destination);
+		initialize(file, networkManager.getSession().getFileManager(), destination, -1);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class DownloadFileProcess extends Process {
 		FileManager fileManager = networkManager.getSession().getFileManager();
 		Path originalFilePath = fileManager.getPath(file);
 		File destination = new File(originalFilePath.getParent().toFile(), desiredFileName);
-		initialize(file, networkManager.getSession().getFileManager(), destination.toPath());
+		initialize(file, networkManager.getSession().getFileManager(), destination.toPath(), indexToDownload);
 	}
 
 	/**
@@ -81,11 +81,19 @@ public class DownloadFileProcess extends Process {
 
 		FileManager fileManager = networkManager.getSession().getFileManager();
 		Path destination = fileManager.getPath(fileNode);
-		initialize(fileNode, networkManager.getSession().getFileManager(), destination);
+		initialize(fileNode, networkManager.getSession().getFileManager(), destination, -1);
 	}
 
-	private void initialize(FileTreeNode file, FileManager fileManager, Path destination) {
-		context = new DownloadFileProcessContext(this, file, fileManager, destination);
+	/**
+	 * Initializes the context and the next steps
+	 * 
+	 * @param file
+	 * @param fileManager
+	 * @param destination the destination to store the file to download
+	 * @param indexToDownload -1 to get the newest version, else a specific version
+	 */
+	private void initialize(FileTreeNode file, FileManager fileManager, Path destination, int indexToDownload) {
+		context = new DownloadFileProcessContext(this, file, fileManager, destination, indexToDownload);
 
 		// check if already exists
 		File existing = destination.toFile();
