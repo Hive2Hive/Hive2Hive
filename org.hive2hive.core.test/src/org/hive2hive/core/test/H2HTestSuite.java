@@ -21,8 +21,12 @@ import org.hive2hive.core.test.process.common.put.BasePutProcessStepTest;
 import org.hive2hive.core.test.process.common.put.PutLocationStepTest;
 import org.hive2hive.core.test.process.common.put.PutUserProfileStepTest;
 import org.hive2hive.core.test.process.common.remove.BaseRemoveProcessStepTest;
-import org.hive2hive.core.test.process.download.DownloadFileTest;
+import org.hive2hive.core.test.process.files.DeleteFileTest;
+import org.hive2hive.core.test.process.files.DownloadFileTest;
+import org.hive2hive.core.test.process.files.MoveFileTest;
 import org.hive2hive.core.test.process.files.NewFileTest;
+import org.hive2hive.core.test.process.files.NewVersionTest;
+import org.hive2hive.core.test.process.files.RecoverFileTest;
 import org.hive2hive.core.test.process.manager.ProcessManagerTest;
 import org.hive2hive.core.test.process.register.RegisterTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
@@ -37,7 +41,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		// TomP2P
+// TomP2P
 		ReplicationTest.class,
 
 		// Network
@@ -64,11 +68,17 @@ import org.junit.runners.Suite.SuiteClasses;
 		// Process: Register
 		RegisterTest.class,
 
-		// Process: Upload
-		NewFileTest.class,
+		// Process: Upload and download
+		NewFileTest.class, NewVersionTest.class, DownloadFileTest.class,
 
-		// Process: Download
-		DownloadFileTest.class,
+		// Process: Delete
+		DeleteFileTest.class,
+
+		// Process: Move
+		MoveFileTest.class,
+
+		// Process: Recover
+		RecoverFileTest.class,
 
 		// Files
 		FileManagerTest.class, FileSynchronizerTest.class,

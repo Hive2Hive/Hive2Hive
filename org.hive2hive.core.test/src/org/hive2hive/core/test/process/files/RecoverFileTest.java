@@ -45,7 +45,6 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 	private UserCredentials userCredentials;
 	private File file;
-	private int currentFileNumber = 0;
 	private NetworkManager client;
 	private FileManager fileManager;
 	private UserProfileManager profileManager;
@@ -74,11 +73,6 @@ public class RecoverFileTest extends H2HJUnitTest {
 		file = new File(root, "test-file");
 		FileUtils.write(file, "0");
 		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
-
-		// add 3 new versions (total 4)
-		uploadVersion("1");
-		uploadVersion("2");
-		uploadVersion("3");
 	}
 
 	private void uploadVersion(String content) throws IOException {
@@ -88,6 +82,11 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testRestoreVersion() throws IOException, NoSessionException {
+		// add 3 new versions (total 4)
+		uploadVersion("1");
+		uploadVersion("2");
+		uploadVersion("3");
+
 		final int versionToRestore = 2;
 
 		RecoverFileProcess process = new RecoverFileProcess(client, file, new IVersionSelector() {

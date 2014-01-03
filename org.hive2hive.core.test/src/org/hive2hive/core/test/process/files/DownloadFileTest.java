@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.download;
+package org.hive2hive.core.test.process.files;
 
 import java.io.File;
 import java.io.IOException;
