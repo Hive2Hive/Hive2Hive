@@ -3,6 +3,7 @@ package org.hive2hive.core.test.process.common.put;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccessful() throws InterruptedException {
+	public void testStepSuccessful() throws InterruptedException, ClassNotFoundException, IOException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
@@ -79,10 +80,12 @@ public class PutLocationStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		// get the locations which should be stored at the proxy
-		Locations found = (Locations) proxy.getDataManager().getLocal(userId, H2HConstants.USER_LOCATIONS);
-		Assert.assertNotNull(found);
-
+		// get the locations
+		FutureGet future = proxy.getDataManager().get(Number160.createHash(userId), H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
+		future.awaitUninterruptibly();
+		Assert.assertNotNull(future.getData());
+		Locations found = (Locations) future.getData().object();
+		
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());
 

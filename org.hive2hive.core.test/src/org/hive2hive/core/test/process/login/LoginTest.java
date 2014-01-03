@@ -67,7 +67,6 @@ public class LoginTest extends H2HJUnitTest {
 		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userProfile.getUserId()),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
-		futureGet.getFutureRequests().awaitUninterruptibly();
 
 		Locations locations = (Locations) futureGet.getData().object();
 		Assert.assertEquals(1, locations.getPeerAddresses().size());

@@ -20,6 +20,8 @@ public class PutLocationStep extends BasePutProcessStep {
 
 	@Override
 	public void start() {
+		locations.setBasedOnKey(locations.getVersionKey());
+		locations.generateVersionKey();
 		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations);
 	}
 

@@ -108,6 +108,8 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 
 			// replace the locations map
 			Locations newLocations = new Locations(context.getLocations().getUserId());
+			newLocations.setBasedOnKey(context.getLocations().getBasedOnKey());
+			newLocations.setVersionKey(context.getLocations().getVersionKey());
 			List<PeerAddress> listToDetectMaster = new ArrayList<PeerAddress>();
 
 			// add contacts that responded
