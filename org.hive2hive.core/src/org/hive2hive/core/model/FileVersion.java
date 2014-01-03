@@ -12,16 +12,16 @@ import java.util.List;
  * @author Nico
  * 
  */
-public class FileVersion implements Serializable {
+public class FileVersion implements Serializable, IFileVersion {
 
 	private static final long serialVersionUID = 1L;
-	private final int counter; // version count
+	private final int index; // version count
 	private final long size; // size of the version
 	private final long date; // date when it's created
 	private List<KeyPair> chunkIds;
 
-	public FileVersion(int counter, long size, long date) {
-		this.counter = counter;
+	public FileVersion(int index, long size, long date) {
+		this.index = index;
 		this.size = size;
 		this.date = date;
 		chunkIds = new ArrayList<KeyPair>();
@@ -35,14 +35,17 @@ public class FileVersion implements Serializable {
 		this.chunkIds = chunkIds;
 	}
 
-	public int getCounter() {
-		return counter;
+	@Override
+	public int getIndex() {
+		return index;
 	}
 
+	@Override
 	public long getSize() {
 		return size;
 	}
 
+	@Override
 	public long getDate() {
 		return date;
 	}

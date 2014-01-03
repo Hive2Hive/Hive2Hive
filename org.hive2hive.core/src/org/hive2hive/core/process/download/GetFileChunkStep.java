@@ -16,11 +16,9 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -39,13 +37,12 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 	/**
 	 * Constructor for first step
 	 * 
-	 * @param file
-	 * @param metaFile
-	 * @param fileManager
+	 * @param destination
+	 * @param version
 	 */
-	public GetFileChunkStep(FileTreeNode file, MetaFile metaFile, FileManager fileManager) {
-		this(fileManager.getPath(file), 0, metaFile.getNewestVersion().getChunkIds(), new ArrayList<Chunk>());
-		logger.debug("Start downloading '" + file.getName() + "'");
+	public GetFileChunkStep(Path destination, FileVersion version) {
+		this(destination, 0, version.getChunkIds(), new ArrayList<Chunk>());
+		logger.debug("Start downloading '" + destination.toString() + "'");
 	}
 
 	/**
