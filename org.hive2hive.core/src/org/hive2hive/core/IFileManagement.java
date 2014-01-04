@@ -57,10 +57,21 @@ public interface IFileManagement {
 	 * @return the file configuration of this node
 	 */
 	IFileConfiguration getFileConfiguration();
-	
+
 	/**
 	 * Returns a list of the files currently stored in the network.
+	 * 
 	 * @return
 	 */
 	GetDigestProcess getDigest();
+
+	/**
+	 * Shares a folder and all it's children with another user.
+	 * 
+	 * @param folder the folder to share
+	 * @param userId the id of the user which will get access to the folder
+	 * @return an observable share process
+	 */
+	IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
+			IllegalFileLocation;
 }

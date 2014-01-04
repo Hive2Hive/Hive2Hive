@@ -201,6 +201,16 @@ public class ProcessTestUtil {
 			// never happens because session is set before
 		}
 	}
+	
+	public static void uploadNewFile(File file, NetworkManager networkManager)
+			throws IllegalFileLocation {
+		try {
+			NewFileProcess process = new NewFileProcess(file, networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
+	}
 
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config)

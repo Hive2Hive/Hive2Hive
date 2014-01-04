@@ -62,6 +62,7 @@ public class GetDigestProcessStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		// nothing to undo
+		getProcess().nextRollBackStep();
 	}
 
 }

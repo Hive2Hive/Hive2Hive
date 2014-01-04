@@ -15,12 +15,20 @@ public class CreateFolderStep extends ProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CreateFolderStep.class);
 
 	private boolean existedBefore = false;
-	private FileManager fileManager;
-	private FileTreeNode file;
+	private final FileManager fileManager;
+	private final FileTreeNode file;
+	private final ProcessStep nextProcessStep;
 
 	public CreateFolderStep(FileTreeNode file, FileManager fileManager) {
 		this.file = file;
 		this.fileManager = fileManager;
+		this.nextProcessStep = null;
+	}
+	
+	public CreateFolderStep(FileTreeNode file, FileManager fileManager, ProcessStep nextStep) {
+		this.file = file;
+		this.fileManager = fileManager;
+		this.nextProcessStep = nextStep;
 	}
 
 	@Override
@@ -42,7 +50,7 @@ public class CreateFolderStep extends ProcessStep {
 
 		// done with 'downloading' the file
 		logger.debug("New folder has successfuly been created on disk: " + file.getName());
-		getProcess().setNextStep(null);
+		getProcess().setNextStep(nextProcessStep);
 	}
 
 	@Override

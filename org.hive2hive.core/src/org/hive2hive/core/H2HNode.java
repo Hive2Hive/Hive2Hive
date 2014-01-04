@@ -22,6 +22,7 @@ import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
+import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.process.util.FileRecursionUtil;
@@ -235,6 +236,13 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	@Override
 	public int getChunkSize() {
 		return chunkSize;
+	}
+
+	@Override
+	public IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException, IllegalFileLocation {
+		ShareFolderProcess process = new ShareFolderProcess(folder, userId, networkManager);
+		autoStartProcess(process);
+		return process;
 	}
 
 }
