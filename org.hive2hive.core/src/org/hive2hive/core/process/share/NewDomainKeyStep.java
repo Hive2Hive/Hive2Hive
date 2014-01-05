@@ -10,6 +10,11 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.File2MetaFileStep;
 import org.hive2hive.core.security.EncryptionUtil;
 
+/**
+ * Generate a new domain key which will be used for storing the shared meta documents.
+ * 
+ * @author Seppi
+ */
 public class NewDomainKeyStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewDomainKeyStep.class);

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -28,6 +29,7 @@ import org.hive2hive.core.test.process.TestProcessListener;
 import org.hive2hive.core.test.process.files.NewFileTest;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -96,6 +98,56 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 		FileUtils.deleteDirectory(fileManagerA.getRoot().toFile());
 		FileUtils.deleteDirectory(fileManagerB.getRoot().toFile());
+	}
+	
+	@Test
+	public void initiallizationTest(){
+		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		
+		File file = new File(root, NetworkTestUtil.randomString());
+		try {
+			new ShareFolderProcess(file, "random", null);
+		} catch (IllegalArgumentException e) {
+			// is ok
+		} catch (IllegalFileLocation | NoSessionException e) {
+			Assert.fail();
+		}
+		
+		File folder = new File(root, "folder1");
+		folder.mkdirs();		
+		try {
+			new ShareFolderProcess(folder, "random", network.get(0));
+		} catch (NoSessionException e) {
+			// is ok
+		} catch (IllegalFileLocation | IllegalArgumentException e) {
+			Assert.fail();
+		}
+		
+		File otherRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		File otherFolder = new File(otherRoot, NetworkTestUtil.randomString());
+		otherFolder.mkdirs();		
+		try {
+			network.get(0).setSession(new H2HSession(null, null, null, new FileManager(root.toPath())));
+			new ShareFolderProcess(otherFolder, "random", network.get(0));
+		} catch (IllegalFileLocation e) {
+			// is ok
+		} catch (NoSessionException | IllegalArgumentException e) {
+			Assert.fail();
+		}
+		
+		try {
+			new ShareFolderProcess(root, "random", network.get(0));
+		} catch (IllegalFileLocation e) {
+			// is ok
+		} catch (NoSessionException | IllegalArgumentException e) {
+			Assert.fail();
+		}
+		
+		root.delete();
+		file.delete();
+		folder.delete();
+		otherRoot.delete();
+		otherFolder.delete();
 	}
 
 	@After

@@ -12,6 +12,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 
 /**
+ * A process for sharing a folder with another user.
  * 
  * @author Seppi
  */
