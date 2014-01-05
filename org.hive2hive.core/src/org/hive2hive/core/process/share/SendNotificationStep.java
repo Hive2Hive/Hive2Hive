@@ -1,10 +1,7 @@
 package org.hive2hive.core.process.share;
 
-import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.notify.INotificationMessageFactory;
 
@@ -14,17 +11,7 @@ public class SendNotificationStep extends ProcessStep {
 	public void start() {
 		ShareFolderProcessContext context = (ShareFolderProcessContext) getProcess().getContext();
 		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
-		UserProfileManager profileManager = context.getProfileManager();
-		
-		UserProfile userProfile;
-		try {
-			userProfile = profileManager.getUserProfile(getProcess().getID(), false);
-		} catch (GetFailedException e) {
-			getProcess().stop(e);
-			return;
-		}
-
-		FileTreeNode fileNode = userProfile.getFileById(metaFolder.getId());
+		FileTreeNode fileNode = context.getFileTreeNode();
 
 		// create a subtree containing all children
 		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair());

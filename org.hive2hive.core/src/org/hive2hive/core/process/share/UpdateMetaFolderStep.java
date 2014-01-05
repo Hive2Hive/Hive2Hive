@@ -49,9 +49,12 @@ public class UpdateMetaFolderStep extends ProcessStep {
 
 			// store for backup
 			originalDomainKey = fileNode.getDomainKeys();
-
-			// make and put modifications
+			// modify
 			fileNode.setDomainKeys(context.getDomainKey());
+			
+			context.setFileTreeNode(fileNode);
+			
+			// upload modified profile
 			logger.debug("Updating the domain key in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
 		} catch (GetFailedException | PutFailedException e) {

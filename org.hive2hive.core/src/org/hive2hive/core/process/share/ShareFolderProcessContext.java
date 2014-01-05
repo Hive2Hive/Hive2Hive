@@ -4,6 +4,7 @@ import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
@@ -18,6 +19,7 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 	private final UserProfileManager profileManager;
 	private KeyPair domainKey;
 	private MetaDocument metaDocument;
+	private FileTreeNode fileTreeNode;
 
 	public ShareFolderProcessContext(Process process, File folderToShare, String friendId,
 			UserProfileManager userProfileManager, FileManager fileManager) {
@@ -50,6 +52,14 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 
 	public KeyPair getDomainKey() {
 		return domainKey;
+	}
+	
+	public void setFileTreeNode(FileTreeNode fileTreeNode) {
+		this.fileTreeNode = fileTreeNode;
+	}
+
+	public FileTreeNode getFileTreeNode() {
+		return fileTreeNode;
 	}
 
 	@Override
