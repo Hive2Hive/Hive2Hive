@@ -20,8 +20,8 @@ public class MetaFolder extends MetaDocument {
 	private final List<UserPermission> userPermissions;
 	private final List<KeyPair> childKeys;
 
-	public MetaFolder(PublicKey id, String creatorName) {
-		super(id);
+	public MetaFolder(PublicKey id, String folderName, String creatorName) {
+		super(id, folderName);
 		userPermissions = new ArrayList<UserPermission>();
 		childKeys = new ArrayList<KeyPair>();
 

@@ -16,13 +16,19 @@ public abstract class MetaDocument extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 	private final PublicKey id;
+	private final String name;
 
-	public MetaDocument(PublicKey id) {
+	public MetaDocument(PublicKey id, String name) {
 		this.id = id;
+		this.name = name;
 	}
 
 	public PublicKey getId() {
 		return id;
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 	@Override

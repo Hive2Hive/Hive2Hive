@@ -4,13 +4,17 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IFileConfiguration;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.share.ShareFolderProcess;
@@ -46,7 +50,8 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareFolderTest() throws IOException, IllegalFileLocation, NoSessionException {
+	public void shareFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
+			GetFailedException {
 		File rootA = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		FileManager fileManagerA = new FileManager(rootA.toPath());
 
@@ -74,11 +79,20 @@ public class ShareFolderTest extends H2HJUnitTest {
 		shareFolderProcess.addListener(listener);
 		shareFolderProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(60);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
 			assertFalse(listener.hasFailed());
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
+
+		UserProfile userProfileB;
+		FileTreeNode fileTreeNode;
+		waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+			userProfileB = profileManagerB.getUserProfile(-1, false);
+			fileTreeNode = userProfileB.getFileByPath(Paths.get(folderToShare.getName()));
+		} while (fileTreeNode == null);
 
 		FileUtils.deleteDirectory(fileManagerA.getRoot().toFile());
 		FileUtils.deleteDirectory(fileManagerB.getRoot().toFile());

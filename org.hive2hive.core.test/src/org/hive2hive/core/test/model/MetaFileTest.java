@@ -31,7 +31,7 @@ public class MetaFileTest extends H2HJUnitTest {
 		// timestamp is older
 		versions.add(new FileVersion(2, 123, System.currentTimeMillis() - 1000 * 60));
 
-		MetaFile metaFile = new MetaFile(keys.getPublic(), versions);
+		MetaFile metaFile = new MetaFile(keys.getPublic(), "test file", versions);
 
 		FileVersion newestVersion = metaFile.getNewestVersion();
 		Assert.assertEquals(2, newestVersion.getIndex());

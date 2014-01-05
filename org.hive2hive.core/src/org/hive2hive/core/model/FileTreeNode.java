@@ -94,8 +94,7 @@ public class FileTreeNode implements Serializable {
 	}
 
 	public void setParent(FileTreeNode parent) {
-		if (!isRoot())
-			this.parent = parent;
+		this.parent = parent;
 	}
 
 	public Set<FileTreeNode> getChildren() {

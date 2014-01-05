@@ -39,8 +39,9 @@ public class UpdateMetaFolderStep extends ProcessStep {
 		try {
 			UserProfileManager profileManager = context.getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
+
 			FileTreeNode fileNode = userProfile.getFileById(metaFolder.getId());
-			
+
 			if (fileNode.isShared()) {
 				getProcess().stop(new IllegalStateException("Folder is already shared."));
 				return;
@@ -53,15 +54,16 @@ public class UpdateMetaFolderStep extends ProcessStep {
 			fileNode.setDomainKeys(context.getDomainKey());
 			logger.debug("Updating the domain key in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
-			
-			metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), PermissionType.WRITE));
-
-			logger.debug("Putting the modified meta folder (containing the new user permission)");
-			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFolder, new SendNotificationStep());
-			getProcess().setNextStep(putMetaStep);
 		} catch (GetFailedException | PutFailedException e) {
 			getProcess().stop(e);
+			return;
 		}
+
+		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), PermissionType.WRITE));
+
+		logger.debug("Putting the modified meta folder (containing the new user permission)");
+		PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFolder, new SendNotificationStep());
+		getProcess().setNextStep(putMetaStep);
 	}
 
 	@Override

@@ -16,8 +16,8 @@ public class MetaFile extends MetaDocument {
 	private static final long serialVersionUID = 1L;
 	private final List<FileVersion> versions;
 
-	public MetaFile(PublicKey id, List<FileVersion> versions) {
-		super(id);
+	public MetaFile(PublicKey id, String fileName, List<FileVersion> versions) {
+		super(id, fileName);
 		this.versions = versions;
 	}
 

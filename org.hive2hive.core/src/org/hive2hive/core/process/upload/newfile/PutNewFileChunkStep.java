@@ -29,7 +29,7 @@ public class PutNewFileChunkStep extends PutChunkStep {
 		MetaDocument metaDocument = null;
 		if (file.isDirectory()) {
 			// create a new meta folder
-			metaDocument = new MetaFolder(metaKeyPair.getPublic(), context.getCredentials().getUserId());
+			metaDocument = new MetaFolder(metaKeyPair.getPublic(), file.getName(), context.getCredentials().getUserId());
 		} else {
 			// create new meta file with new version
 			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis());
@@ -37,7 +37,7 @@ public class PutNewFileChunkStep extends PutChunkStep {
 			List<FileVersion> versions = new ArrayList<FileVersion>(1);
 			versions.add(version);
 
-			MetaFile metaFile = new MetaFile(metaKeyPair.getPublic(), versions);
+			MetaFile metaFile = new MetaFile(metaKeyPair.getPublic(), file.getName(), versions);
 			metaDocument = metaFile;
 		}
 

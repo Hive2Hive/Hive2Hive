@@ -1,24 +1,39 @@
 package org.hive2hive.core.process.share.notify;
 
-import java.security.PublicKey;
-
+import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
 
 public class ShareFolderNotificationProcessContext extends ProcessContext implements IGetMetaContext {
 
-	private final PublicKey folderKey;
+	private final FileTreeNode fileTreeNode;
+	private final UserProfileManager profileManager;
+	private final FileManager fileManager;
+
 	private MetaDocument metaDocument;
 
-	public ShareFolderNotificationProcessContext(Process process, PublicKey folderKey) {
+	public ShareFolderNotificationProcessContext(Process process, FileTreeNode fileTreeNode,
+			UserProfileManager profileManager, FileManager fileManager) {
 		super(process);
-		this.folderKey = folderKey;
+		this.fileTreeNode = fileTreeNode;
+		this.profileManager = profileManager;
+		this.fileManager = fileManager;
 	}
 
-	public PublicKey getFolderKey() {
-		return folderKey;
+	public UserProfileManager getProfileManager() {
+		return profileManager;
+	}
+
+	public FileManager getFileManager() {
+		return fileManager;
+	}
+
+	public FileTreeNode getFileTreeNode() {
+		return fileTreeNode;
 	}
 
 	@Override
@@ -30,4 +45,5 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
 	}
+
 }
