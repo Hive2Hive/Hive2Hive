@@ -39,6 +39,8 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 			logger.debug("Encrypting meta document in a hybrid manner");
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaDocument,
 					metaDocument.getId());
+			encrypted.setBasedOnKey(metaDocument.getVersionKey());
+			encrypted.generateVersionKey();
 			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {

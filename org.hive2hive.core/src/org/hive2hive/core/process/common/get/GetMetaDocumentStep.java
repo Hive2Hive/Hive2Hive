@@ -55,6 +55,8 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
+				decrypted.setVersionKey(content.getVersionKey());
+				decrypted.setBasedOnKey(content.getBasedOnKey());
 				context.setMetaDocument((MetaDocument) decrypted);
 				logger.debug("Successfully decrypted meta document");
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
