@@ -44,7 +44,7 @@ public class H2HStorageMemory extends StorageLayer {
 	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
 			boolean domainProtection) {
 		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
-			logger.debug(String.format(
+			logger.trace(String.format(
 					"Start put verification. location key = '%s' content key = '%s' version key = '%s' ",
 					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
 			Enum<?> status = validateVersion(key, newData);
@@ -56,12 +56,12 @@ public class H2HStorageMemory extends StorageLayer {
 				cleanupVersions(key);
 			}
 
-			logger.debug(String.format(
+			logger.trace(String.format(
 					"Put verification finished. location key = '%s' content key = '%s' version key = '%s' ",
 					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
 			return status;
 		} else {
-			logger.debug("Disabled the put verification strategy on the remote peer");
+			logger.trace("Disabled the put verification strategy on the remote peer");
 			return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
 		}
 	}
@@ -86,10 +86,10 @@ public class H2HStorageMemory extends StorageLayer {
 		/** 1. if version key is zero **/
 		if (key.getVersionKey().equals(Number160.ZERO)) {
 			if (history.isEmpty()) {
-				logger.debug("Initialy putting content with no version key.");
+				logger.trace("Initialy putting content with no version key.");
 				return PutStatusH2H.OK;
 			} else if (history.size() == 1 && history.firstKey().getVersionKey().equals(Number160.ZERO)) {
-				logger.debug("Overwriting content with no versioning.");
+				logger.trace("Overwriting content with no versioning.");
 				return PutStatusH2H.OK;
 			} else {
 				logger.warn("Trying to overwrite current version with content with no version key.");
@@ -100,14 +100,14 @@ public class H2HStorageMemory extends StorageLayer {
 		/** 1. if version is null or zero and no history yet, it is the first entry here **/
 		if (newData.basedOn().equals(Number160.ZERO)) {
 			if (history.isEmpty()) {
-				logger.debug("First version of a content is added");
+				logger.trace("First version of a content is added");
 				return PutStatusH2H.OK;
 			} else {
 				logger.warn("History is not empty and no based on key given.");
 				return PutStatusH2H.VERSION_CONFLICT_NO_BASED_ON;
 			}
 		} else if (history.isEmpty()) {
-			logger.debug("First version of a content is added, but a based on key is given.");
+			logger.trace("First version of a content is added, but a based on key is given.");
 			return PutStatusH2H.OK;
 		}
 
@@ -122,7 +122,7 @@ public class H2HStorageMemory extends StorageLayer {
 		/** 3. Check if previous version is latest one **/
 		if (newData.basedOn().timestamp() < key.getVersionKey().timestamp()) {
 			// previous version is the latest one (continue).
-			logger.debug("New content is based on latest version.");
+			logger.trace("New content is based on latest version.");
 			return PutStatusH2H.OK;
 		} else {
 			// previous version is newer than the new one
