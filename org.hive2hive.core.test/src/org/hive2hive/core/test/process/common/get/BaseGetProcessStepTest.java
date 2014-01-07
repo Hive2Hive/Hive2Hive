@@ -4,6 +4,9 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.Process;
@@ -42,10 +45,13 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		NetworkManager holder = network.get(1);
 
 		String locationKey = holder.getNodeId();
+		Number160 lKey = Number160.createHash(locationKey);
+		Number160 dKey = Number160.ZERO;
 		String contentKey = NetworkTestUtil.randomString();
+		Number160 cKey = Number160.createHash(contentKey);
 
 		// put in the memory of 2nd peer
-		holder.getDataManager().putLocal(locationKey, contentKey, data);
+		holder.getDataManager().put(lKey, dKey, cKey, data).awaitUninterruptibly();
 
 		TestGetProcessStep getStep = new TestGetProcessStep(locationKey, contentKey);
 		Process process = new Process(getter) {
@@ -53,10 +59,6 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.setNextStep(getStep);
-
-		// check that receiver does not have any content
-		Assert.assertNull(holder.getDataManager().getLocal(contentKey, contentKey));
-
 		process.start();
 
 		// wait for the process to finish
