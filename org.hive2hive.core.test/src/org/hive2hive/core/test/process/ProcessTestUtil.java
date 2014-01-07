@@ -56,7 +56,7 @@ public class ProcessTestUtil {
 	 * Executes a process step and waits until it's done. This is a simple helper method to reduce code
 	 * clones.
 	 */
-	private static void executeStep(NetworkManager networkManager, ProcessStep toExecute) {
+	public static void executeStep(NetworkManager networkManager, ProcessStep toExecute) {
 		Process process = new Process(networkManager) {
 		};
 		process.setNextStep(toExecute);
