@@ -206,6 +206,75 @@ public class FromToTest extends H2HJUnitTest {
 	}
 
 	@Test
+	public void removeFromToTest3() throws IOException, ClassNotFoundException {
+		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(5000)
+				.makeAndListen();
+		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
+				.makeAndListen();
+
+		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
+
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+		Number160 cKey = Number160.createHash("content");
+
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+
+		p2.put(lKey).setData(cKey, new Data(data)).setDomainKey(dKey).start().awaitUninterruptibly();
+
+		FutureRemove futureRemove = p1.remove(lKey).setDomainKey(dKey).contentKey(cKey).start();
+		futureRemove.awaitUninterruptibly();
+
+		// check with a normal digest
+		FutureDigest futureDigest = p1.digest(lKey).setContentKey(cKey).setDomainKey(dKey).start();
+		futureDigest.awaitUninterruptibly();
+		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+
+		// check with a from/to digest
+		futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+		futureDigest.awaitUninterruptibly();
+		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+
+		p1.shutdown().awaitUninterruptibly();
+		p2.shutdown().awaitUninterruptibly();
+	}
+
+	@Test
+	public void removeFromToTest4() throws IOException, ClassNotFoundException {
+		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(5000)
+				.makeAndListen();
+		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
+				.makeAndListen();
+
+		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
+
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+		Number160 cKey = Number160.createHash("content");
+
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+
+		p2.put(lKey).setData(cKey, new Data(data)).setDomainKey(dKey).start().awaitUninterruptibly();
+
+		FutureRemove futureRemove = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+		futureRemove.awaitUninterruptibly();
+
+		FutureDigest futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+		futureDigest.awaitUninterruptibly();
+
+		// should be empty
+		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+
+		p1.shutdown().awaitUninterruptibly();
+		p2.shutdown().awaitUninterruptibly();
+	}
+
+	@Test
 	public void digestFromToTest() throws IOException, ClassNotFoundException {
 		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(5000)
 				.makeAndListen();
@@ -318,10 +387,10 @@ public class FromToTest extends H2HJUnitTest {
 		p2.put(Number160.createHash(locationKey)).setData(Number160.createHash(contentKey), new Data(data))
 				.setVersionKey(data.getVersionKey()).start().awaitUninterruptibly();
 
-		FutureGet futureGet = p2.get(Number160.createHash(locationKey)).setContentKey(Number160.createHash(contentKey))
-				.setVersionKey(data.getVersionKey()).start();
+		FutureGet futureGet = p2.get(Number160.createHash(locationKey))
+				.setContentKey(Number160.createHash(contentKey)).setVersionKey(data.getVersionKey()).start();
 		futureGet.awaitUninterruptibly();
-		
+
 		assertNotNull(futureGet.getData());
 
 		p1.shutdown().awaitUninterruptibly();
