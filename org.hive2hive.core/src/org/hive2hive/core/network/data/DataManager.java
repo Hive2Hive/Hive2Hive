@@ -21,7 +21,6 @@ import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
-import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
  * This class offers an interface for putting, getting and removing data from the network.
@@ -61,13 +60,17 @@ public class DataManager {
 		putFuture.addListener(new FuturePutListener(lKey, dKey, cKey, content, listener, this));
 	}
 
-	public void putUserProfileTask(String locationKey, Number160 contentKey, UserProfileTask userProfileTask,
-			IPutListener listener) {
-		Number160 lKey = Number160.createHash(locationKey);
+	public void putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, IPutListener listener) {
+		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-		FuturePut putFuture = put(lKey, dKey, contentKey, userProfileTask);
-		// attach a listener to handle future results
-		putFuture.addListener(new FuturePutListener(lKey, dKey, contentKey, userProfileTask, listener, this));
+		FuturePut putFuture = put(lKey, dKey, contentKey, content);
+		if (putFuture == null) {
+			if (listener != null)
+				listener.onPutFailure();
+			return;
+		}
+
+		putFuture.addListener(new FuturePutListener(lKey, dKey, contentKey, content, listener, this));
 	}
 
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
@@ -122,18 +125,18 @@ public class DataManager {
 		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, versionKey, this, listener));
 	}
 
-	// public void getUserProfileTask(String locationKey, IGetListener listener) {
-	// Number160 lKey = Number160.createHash(locationKey);
-	// Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-	// FutureGet futureGet = getPeer().get(Number160.createHash(locationKey))
-	// .from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
-	// .to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
-	// .returnNr(1).start();
-	// futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
-	// }
+	public void getUserProfileTask(String userId, IGetListener listener) {
+		Number160 lKey = Number160.createHash(userId);
+		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+		FutureGet futureGet = getPeer().get(lKey)
+				.from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
+				.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
+				.returnNr(1).start();
+		futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
+	}
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
-		logger.debug(String.format("get key = '%s' domain key = '%s' content key = '%s'", locationKey,
+		logger.debug(String.format("get location key = '%s' domain key = '%s' content key = '%s'", locationKey,
 				domainKey, contentKey));
 		return getPeer().get(locationKey)
 				.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO))
@@ -143,7 +146,7 @@ public class DataManager {
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			Number160 versionKey) {
-		logger.debug(String.format("get key = '%s' domain Key = '%s' content key = '%s' version key = '%s'",
+		logger.debug(String.format("get location key = '%s' domain Key = '%s' content key = '%s' version key = '%s'",
 				locationKey, domainKey, contentKey, versionKey));
 		return getPeer().get(locationKey).setDomainKey(domainKey).setContentKey(contentKey)
 				.setVersionKey(versionKey).start();
@@ -189,15 +192,15 @@ public class DataManager {
 		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, versionKey, listener, this));
 	}
 
-	public void removeUserProfileTask(String locationKey, Number160 contentKey, IRemoveListener listener) {
-		Number160 lKey = Number160.createHash(locationKey);
+	public void removeUserProfileTask(String userId, Number160 contentKey, IRemoveListener listener) {
+		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 		FutureRemove futureRemove = remove(lKey, dKey, contentKey);
 		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, contentKey, listener, this));
 	}
 
 	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
-		logger.debug(String.format("remove key = '%s' domain key = '%s' content key = '%s'", locationKey,
+		logger.debug(String.format("remove location key = '%s' domain key = '%s' content key = '%s'", locationKey,
 				domainKey, contentKey));
 		return getPeer().remove(locationKey)
 				.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO))
@@ -207,7 +210,7 @@ public class DataManager {
 	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			Number160 versionKey) {
 		logger.debug(String.format(
-				"remove key = '%s' domain key = '%s' content key = '%s' version key = '%s'", locationKey,
+				"remove location key = '%s' domain key = '%s' content key = '%s' version key = '%s'", locationKey,
 				domainKey, contentKey, versionKey));
 		return getPeer().remove(locationKey).setDomainKey(domainKey).contentKey(contentKey)
 				.setVersionKey(versionKey).start();
