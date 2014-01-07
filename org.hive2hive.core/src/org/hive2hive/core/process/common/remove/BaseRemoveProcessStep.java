@@ -84,7 +84,6 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 		}
 
 		dataManager.put(locationKey, contentKey, contentToRemove, this);
-		getProcess().nextRollBackStep();
 	}
 
 	@Override
