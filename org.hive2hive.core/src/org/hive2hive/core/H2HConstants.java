@@ -85,8 +85,6 @@ public interface H2HConstants {
 	public static final RSA_KEYLENGTH KEYLENGTH_CHUNK_RSA = EncryptionUtil.RSA_KEYLENGTH.BIT_2048;
 
 	public static final String USER_PROFILE_TASK_DOMAIN = "USER-PROFILE-TASK";
-	public static final String USER_PROFILE_TASK_CONTENT_KEY_PREFIX = "USER-PROFILE_TASK";
-
 	// default key used in the TomP2P framework
 	public static final Number160 TOMP2P_DEFAULT_KEY = Number160.ZERO;
 
