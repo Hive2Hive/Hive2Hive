@@ -51,15 +51,14 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
-		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(4838)
+		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838)
 				.keyPair(keyPairPeer1).makeAndListen();
-
 		KeyPair keyPairPeer2 = gen.generateKeyPair();
-		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
+		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1)
 				.keyPair(keyPairPeer2).makeAndListen();
 
 		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
-
+        p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
 		KeyPair keyPair = gen.generateKeyPair();
 
 		String locationKey = "location";
@@ -68,24 +67,21 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash(contentKey);
 
 		String testData1 = "data1";
-		Data data = new Data(testData1);
+		Data data = new Data(testData1).setProtectedEntry();
 
 		// put trough peer 1 with key pair -------------------------------------------------------
-
+		
 		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).keyPair(keyPair).start();
 		futurePut1.awaitUninterruptibly();
-
 		assertTrue(futurePut1.isSuccess());
 
 		FutureGet futureGet1a = p1.get(lKey).setContentKey(cKey).start();
 		futureGet1a.awaitUninterruptibly();
-
 		assertTrue(futureGet1a.isSuccess());
 		assertEquals(testData1, (String) futureGet1a.getData().object());
-
+		
 		FutureGet futureGet1b = p2.get(lKey).setContentKey(cKey).start();
 		futureGet1b.awaitUninterruptibly();
-
 		assertTrue(futureGet1b.isSuccess());
 		assertEquals(testData1, (String) futureGet1b.getData().object());
 
@@ -93,20 +89,12 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		String testData2 = "data2";
 		Data data2 = new Data(testData2);
-
 		FuturePut futurePut2 = p2.put(lKey).setData(cKey, data2).start();
 		futurePut2.awaitUninterruptibly();
-
-		/*
-		 * Shouldn't the future fail here?
-		 * And why answers a peer here with a PutStatus.OK?
-		 * Should be not here something like PutStatus.FAILED_SECURITY?
-		 */
 		assertFalse(futurePut2.isSuccess());
 
 		FutureGet futureGet2 = p2.get(lKey).setContentKey(cKey).start();
 		futureGet2.awaitUninterruptibly();
-
 		assertTrue(futureGet2.isSuccess());
 		// should have been not modified
 		assertEquals(testData2, (String) futureGet2.getData().object());
@@ -115,20 +103,12 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		String testData3 = "data3";
 		Data data3 = new Data(testData3);
-
 		FuturePut futurePut3 = p2.put(lKey).setData(cKey, data3).start();
 		futurePut3.awaitUninterruptibly();
-
-		/*
-		 * Shouldn't the future fail here?
-		 * And why answers a peer here with PutStatus.OK from two peers?
-		 * Should be not here something like PutStatus.FAILED_SECURITY?
-		 */
 		assertFalse(futurePut3.isSuccess());
 
 		FutureGet futureGet3 = p2.get(lKey).setContentKey(cKey).start();
 		futureGet3.awaitUninterruptibly();
-
 		assertTrue(futureGet3.isSuccess());
 		// should have been not modified ---> why it has been modified without giving a key pair?
 		assertEquals(testData1, (String) futureGet3.getData().object());

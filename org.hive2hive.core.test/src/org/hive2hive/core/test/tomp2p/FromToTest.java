@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import net.tomp2p.futures.FutureDigest;
@@ -25,6 +27,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * A test which tests the range mechanisms (from/to) of the <code>TomP2P</code> project. Tests should be completely
+ * independent of <code>Hive2Hive</code>.
+ * 
+ * @author Seppi
+ */
 public class FromToTest extends H2HJUnitTest {
 
 	@BeforeClass
@@ -34,7 +42,7 @@ public class FromToTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void getFromToTest() throws IOException, ClassNotFoundException {
+	public void getFromToTest1() throws IOException, ClassNotFoundException {
 		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(4838)
 				.makeAndListen();
 		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
@@ -70,6 +78,67 @@ public class FromToTest extends H2HJUnitTest {
 
 		assertEquals(content.get(numberOfContent - 1).getTestString(), ((H2HTestData) future.getData()
 				.object()).getTestString());
+
+		p1.shutdown().awaitUninterruptibly();
+		p2.shutdown().awaitUninterruptibly();
+	}
+
+	@Test
+	public void getFromToTest2() throws IOException, ClassNotFoundException, InterruptedException {
+		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(4838)
+				.makeAndListen();
+		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
+				.makeAndListen();
+
+		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
+
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+
+		List<Long> timeStamps = new ArrayList<Long>();
+		for (int i = 0; i < 5; i++) {
+			long timeStamp = new Date().getTime();
+			timeStamps.add(timeStamp);
+			// to guarantee different time stamps
+			Thread.sleep(10);
+		}
+
+		// shuffle to change the order for put
+		List<Long> shuffledTimeStamps = new ArrayList<Long>(timeStamps);
+		Collections.shuffle(shuffledTimeStamps);
+		for (Long timeStamp : shuffledTimeStamps) {
+			Number160 contentKey = new Number160(timeStamp);
+			logger.debug(String.format("%s, %s", timeStamp, contentKey));
+			p2.put(lKey).setData(contentKey, new Data(timeStamp)).setDomainKey(dKey).start()
+					.awaitUninterruptibly();
+		}
+
+		// fetch time stamps from network, respectively the implicit queue
+		List<Long> downloadedTimestamps = new ArrayList<Long>();
+		while (true) {
+			FutureGet futureGet = p1.get(lKey)
+					.from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
+					.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
+					.returnNr(1).start();
+			futureGet.awaitUninterruptibly();
+			if (futureGet.getData() != null) {
+				long timeStamp = (Long) futureGet.getData().object();
+				Number160 contentKey = new Number160(timeStamp);
+				logger.debug(String.format("%s, %s", timeStamp, contentKey));
+				downloadedTimestamps.add(timeStamp);
+				// remove fetched time stamp from network
+				p2.remove(lKey).setDomainKey(dKey).contentKey(contentKey).start().awaitUninterruptibly();
+			} else {
+				break;
+			}
+		}
+
+		// order of fetched tasks should be like the inital one
+		assertEquals(timeStamps.size(), downloadedTimestamps.size());
+		for (int i = 0; i < timeStamps.size(); i++) {
+			assertEquals(timeStamps.get(i), downloadedTimestamps.get(i));
+		}
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
