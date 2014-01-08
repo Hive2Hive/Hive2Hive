@@ -108,12 +108,8 @@ public abstract class Process implements IProcess {
 	public void stop(Exception exception) {
 		if (state != ProcessState.STOPPED && state != ProcessState.ROLLBACKING) {
 			logger.error(this.getClass().getSimpleName() + " stopped. Reason: " + exception.getMessage());
-			// first roll back
+			// start roll back
 			rollBack(exception);
-
-			// then mark process as stopped
-			state = ProcessState.STOPPED;
-			ProcessManager.getInstance().detachProcess(this);
 		} else {
 			logger.warn("Process is already stopped or still rollbacking");
 		}
@@ -178,24 +174,18 @@ public abstract class Process implements IProcess {
 			}
 		}
 	}
+	
+	// TODO redesign this here
+	private Exception rollbackException;
 
 	private void rollBack(Exception exception) {
 		state = ProcessState.ROLLBACKING;
+		rollbackException = exception;
 		logger.warn(String.format("Rollback triggered. Reason = '%s'", exception));
 
 		// start roll back from current step
 		if (currentStep != null)
 			currentStep.rollBack();
-
-		// // rollback already executed steps
-		// Collections.reverse(executedSteps);
-		// for (ProcessStep step : executedSteps) {
-		// step.rollBack();
-		// }
-
-		for (IProcessListener listener : listeners) {
-			listener.onFail(exception);
-		}
 	}
 
 	public void nextRollBackStep() {
@@ -205,6 +195,14 @@ public abstract class Process implements IProcess {
 				ProcessStep step = executedSteps.remove(executedSteps.size() - 1);
 				// trigger rollback for this step
 				step.rollBack();
+			} else {
+				// mark process as stopped
+				state = ProcessState.STOPPED;
+				ProcessManager.getInstance().detachProcess(this);
+				// notify listeners about rollbacking 
+				for (IProcessListener listener : listeners) {
+					listener.onFail(rollbackException);
+				}
 			}
 		}
 	}
