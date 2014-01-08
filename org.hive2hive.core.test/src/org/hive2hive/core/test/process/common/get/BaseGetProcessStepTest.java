@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.network.NetworkManager;

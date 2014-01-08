@@ -191,14 +191,9 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String locationKey = node.getNodeId();
-		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
-		Number160 lKey = Number160.createHash(locationKey);
 		String contentKey1 = NetworkTestUtil.randomString();
-		Number160 cKey1 = Number160.createHash(contentKey1);
 		String contentKey2 = NetworkTestUtil.randomString();
-		Number160 cKey2 = Number160.createHash(contentKey2);
 		String contentKey3 = NetworkTestUtil.randomString();
-		Number160 cKey3 = Number160.createHash(contentKey3);
 
 		String data1 = NetworkTestUtil.randomString();
 		node.getDataManager().putLocal(locationKey, contentKey1, new H2HTestData(data1));
@@ -258,7 +253,7 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		String locationKey = nodeB.getNodeId();
 		Number160 lKey = Number160.createHash(locationKey);
-		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 domainKey = Number160.createHash("a domain key");
 		String contentKey = NetworkTestUtil.randomString();
 		Number160 cKey = Number160.createHash(contentKey);
 
@@ -267,13 +262,17 @@ public class DataManagerTest extends H2HJUnitTest {
 				.awaitUninterruptibly();
 
 		// test that it is there
-		assertNotNull(nodeB.getDataManager().getLocal(locationKey, contentKey));
+		FutureGet futureGet = nodeB.getDataManager().get(lKey, domainKey, cKey);
+		futureGet.awaitUninterruptibly();
+		assertNotNull(futureGet.getData());
 
 		// delete it
 		nodeA.getDataManager().remove(lKey, domainKey, cKey).awaitUninterruptibly();
 
 		// check that it is gone
-		assertNull(nodeB.getDataManager().getLocal(locationKey, contentKey));
+		futureGet = nodeB.getDataManager().get(lKey, domainKey, cKey);
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
 	}
 
 	@Test

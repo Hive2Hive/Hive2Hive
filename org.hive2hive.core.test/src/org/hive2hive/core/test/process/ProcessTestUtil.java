@@ -43,7 +43,7 @@ import org.junit.Assert;
  * Helper class for JUnit tests to get some documents from the DHT.
  * All methods are blocking until the result is here.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class ProcessTestUtil {
@@ -51,10 +51,33 @@ public class ProcessTestUtil {
 	private ProcessTestUtil() {
 		// only static methods
 	}
+	
+	public static void waitTillSucceded(TestProcessListener listener, int maxSeconds) {
+		H2HWaiter waiter = new H2HWaiter(maxSeconds);
+		do {
+			if (listener.hasFailed())
+				Assert.fail();
+			waiter.tickASecond();
+		} while (!listener.hasSucceeded());
+	}
+	
+	public static void waitTillFailed(TestProcessListener listener, int maxSeconds) {
+		H2HWaiter waiter = new H2HWaiter(maxSeconds);
+		do {
+			if (listener.hasSucceeded())
+				Assert.fail();
+			waiter.tickASecond();
+		} while (!listener.hasFailed());
+	}
 
 	/**
 	 * Executes a process step and waits until it's done. This is a simple helper method to reduce code
 	 * clones.
+	 * 
+	 * @param networkManager
+	 *            a network manager
+	 * @param toExecute
+	 *            the process step to execute
 	 */
 	public static void executeStep(NetworkManager networkManager, ProcessStep toExecute) {
 		Process process = new Process(networkManager) {
@@ -64,12 +87,7 @@ public class ProcessTestUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(30);
-		do {
-			if (listener.hasFailed())
-				Assert.fail();
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		waitTillSucceded(listener, 30);
 	}
 
 	/**
@@ -81,12 +99,7 @@ public class ProcessTestUtil {
 		process.addListener(listener);
 		process.start();
 
-		H2HWaiter waiter = new H2HWaiter(60);
-		do {
-			if (listener.hasFailed())
-				Assert.fail();
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		waitTillSucceded(listener, 60);
 	}
 
 	public static UserProfile register(UserCredentials credentials, NetworkManager networkManager) {
@@ -201,9 +214,8 @@ public class ProcessTestUtil {
 			// never happens because session is set before
 		}
 	}
-	
-	public static void uploadNewFile(File file, NetworkManager networkManager)
-			throws IllegalFileLocation {
+
+	public static void uploadNewFile(File file, NetworkManager networkManager) throws IllegalFileLocation {
 		try {
 			NewFileProcess process = new NewFileProcess(file, networkManager);
 			executeProcess(process);
@@ -252,9 +264,9 @@ public class ProcessTestUtil {
 		}
 	}
 
-	public static GetDigestProcess getDigest(NetworkManager networkManager, UserProfileManager profileManager,
-			FileManager fileManager, IFileConfiguration config) {
-		
+	public static GetDigestProcess getDigest(NetworkManager networkManager,
+			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
+
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
 		GetDigestProcess process = new GetDigestProcess(networkManager);

@@ -24,5 +24,10 @@ public class TestProcessListener implements IProcessListener {
 	public void onFail(Exception error) {
 		onFailure = true;
 	}
+	
+	public void reset(){
+		onSuccess = false;
+		onFailure = false;
+	}
 
 }
