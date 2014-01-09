@@ -1,26 +1,23 @@
 package org.hive2hive.core.process.share;
 
-import java.security.KeyPair;
-
 import org.apache.log4j.Logger;
-import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 
+/**
+ * A process step which adds a new user permission to the shared meta folder.
+ * 
+ * @author Seppi
+ */
 public class UpdateMetaFolderStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateMetaFolderStep.class);
 
-	private MetaFolder metaFolder;
-	private KeyPair originalDomainKey;
+	private boolean modified = false;
 
 	@Override
 	public void start() {
@@ -34,57 +31,36 @@ public class UpdateMetaFolderStep extends ProcessStep {
 
 		logger.debug("Updating meta folder for sharing.");
 
-		metaFolder = (MetaFolder) context.getMetaDocument();
-
-		try {
-			UserProfileManager profileManager = context.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
-
-			FileTreeNode fileNode = userProfile.getFileById(metaFolder.getId());
-
-			if (fileNode.isShared()) {
-				getProcess().stop(new IllegalStateException("Folder is already shared."));
-				return;
-			}
-
-			// store for backup
-			originalDomainKey = fileNode.getDomainKeys();
-			// modify
-			fileNode.setDomainKeys(context.getDomainKey());
-			
-			context.setFileTreeNode(fileNode);
-			
-			// upload modified profile
-			logger.debug("Updating the domain key in the user profile");
-			profileManager.readyToPut(userProfile, getProcess().getID());
-		} catch (GetFailedException | PutFailedException e) {
-			getProcess().stop(e);
+		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
+		if (metaFolder.getUserList().contains(context.getFriendId())) {
+			getProcess().stop(
+					String.format("The folder is already shared with the user '%s'", context.getFriendId()));
 			return;
 		}
-
 		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), PermissionType.WRITE));
 
+		// set modification flag needed for roll backs
+		modified = true;
+
 		logger.debug("Putting the modified meta folder (containing the new user permission)");
-		PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFolder, new SendNotificationStep());
+		PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFolder, new UpdateUserProfileStep());
 		getProcess().setNextStep(putMetaStep);
 	}
 
 	@Override
 	public void rollBack() {
-		if (metaFolder != null) {
-			// return to original domain key and put the userProfile
-			ShareFolderProcessContext context = (ShareFolderProcessContext) getProcess().getContext();
-			UserProfileManager profileManager = context.getProfileManager();
+		if (modified) {
 			try {
-				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
-				FileTreeNode fileNode = userProfile.getFileById(metaFolder.getId());
-				fileNode.setDomainKeys(originalDomainKey);
-				profileManager.readyToPut(userProfile, getProcess().getID());
+				ShareFolderProcessContext context = (ShareFolderProcessContext) getProcess().getContext();
+				MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
+				metaFolder.removeUserPermissions(context.getFriendId());
 			} catch (Exception e) {
-				// ignore
+				logger.error(String
+						.format("Rollbacking of updating meta folder step (sharing meta folder) failed. exception = '%s'",
+								e));
 			}
+			modified = false;
 		}
-
 		getProcess().nextRollBackStep();
 	}
 

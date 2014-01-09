@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.share.notify;
+package org.hive2hive.core.process.userprofiletask.share;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;

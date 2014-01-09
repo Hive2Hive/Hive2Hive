@@ -219,6 +219,16 @@ public abstract class Process implements IProcess {
 			logger.error("Could not notify all my clients since I don't have a session");
 		}
 	}
+	
+	/**
+	 * Notify all clients of an users
+	 */
+	public void notifyOtherUser(String userId, INotificationMessageFactory messageFactory) {
+		logger.debug(String.format("Start notifiying clients of user '%s'", userId));
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userId,
+				messageFactory);
+		notifyProcess.start();
+	}
 
 	/**
 	 * Notify all clients of multiple users

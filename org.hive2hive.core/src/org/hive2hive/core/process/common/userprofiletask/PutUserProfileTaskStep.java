@@ -27,29 +27,28 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public class PutUserProfileTaskStep extends ProcessStep implements IPutListener, IRemoveListener {
+public abstract class PutUserProfileTaskStep extends ProcessStep implements IPutListener, IRemoveListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutUserProfileTaskStep.class);
 
-	private final String userId;
-	private final UserProfileTask userProfileTask;
-	private final PublicKey publicKey;
-	private final ProcessStep nextStep;
-
+	private String userId;
 	private Number160 contentKey;
 
+	private ProcessStep nextStep = null;
 	private boolean putPerformed = false;
-
-	public PutUserProfileTaskStep(String userId, UserProfileTask userProfileTask, PublicKey publicKey,
-			ProcessStep nextStep) {
+	
+	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey,
+			ProcessStep nextStep){
+		if (userId == null)
+			throw new IllegalArgumentException("user id can be not null");
+		if (userProfileTask == null)
+			throw new IllegalArgumentException("user profile task can be not null");
+		if (publicKey == null)
+			throw new IllegalArgumentException("public key can be not null");
+		
 		this.userId = userId;
-		this.userProfileTask = userProfileTask;
-		this.publicKey = publicKey;
 		this.nextStep = nextStep;
-	}
-
-	@Override
-	public void start() {
+		
 		try {
 			logger.debug("Encrypting user profile task in a hybrid manner");
 			this.contentKey = userProfileTask.getContentKey();

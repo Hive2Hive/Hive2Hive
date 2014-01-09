@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.share.notify;
+package org.hive2hive.core.process.userprofiletask.share;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;

@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.share.notify;
+package org.hive2hive.core.process.userprofiletask.share;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;

@@ -2,48 +2,49 @@ package org.hive2hive.core.process.share;
 
 import java.io.File;
 import java.security.KeyPair;
+import java.security.PublicKey;
 
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
+import org.hive2hive.core.process.context.IGetPublicKeyContext;
 import org.hive2hive.core.process.context.ProcessContext;
 
-public class ShareFolderProcessContext extends ProcessContext implements IGetMetaContext {
+/**
+ * Process context for the {@link ShareFolderProcess} process.
+ * 
+ * @author Seppi
+ */
+public class ShareFolderProcessContext extends ProcessContext implements IGetMetaContext, IGetPublicKeyContext {
 
 	private final File folderToShare;
 	private final String friendId;
-	private final FileManager fileManager;
-	private final UserProfileManager profileManager;
+	private final H2HSession session;
+	
+	private PublicKey friendsPublicKey;
 	private KeyPair domainKey;
 	private MetaDocument metaDocument;
 	private FileTreeNode fileTreeNode;
-
-	public ShareFolderProcessContext(Process process, File folderToShare, String friendId,
-			UserProfileManager userProfileManager, FileManager fileManager) {
-		super(process);
+	
+	public ShareFolderProcessContext(ShareFolderProcess shareFolderProcess, File folderToShare,
+			String friendId, H2HSession session) {
+		super(shareFolderProcess);
 		this.folderToShare = folderToShare;
 		this.friendId = friendId;
-		this.fileManager = fileManager;
-		this.profileManager = userProfileManager;
+		this.session = session;
 	}
 
 	public File getFolderToShare() {
 		return folderToShare;
 	}
 
-	public FileManager getFileManager() {
-		return fileManager;
-	}
-
-	public UserProfileManager getProfileManager() {
-		return profileManager;
-	}
-
 	public String getFriendId() {
 		return friendId;
+	}
+	
+	public H2HSession getSession() {
+		return session;
 	}
 
 	public void setDomainKey(KeyPair domainKey) {
@@ -70,6 +71,16 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+
+	@Override
+	public void setPublicKey(PublicKey publicKey) {
+		this.friendsPublicKey = publicKey;
+	}
+
+	@Override
+	public PublicKey getPublicKey() {
+		return friendsPublicKey;
 	}
 
 }

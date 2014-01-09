@@ -27,11 +27,12 @@ public class NewDomainKeyStep extends ProcessStep {
 
 		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		context.setDomainKey(domainKey);
-		
+
 		File folderToShare = context.getFolderToShare();
-		
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(folderToShare, context.getProfileManager(),
-				context.getFileManager(), context, new UpdateMetaFolderStep());
+
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(folderToShare, context.getSession()
+				.getProfileManager(), context.getSession().getFileManager(), context,
+				new UpdateMetaFolderStep());
 		getProcess().setNextStep(file2MetaStep);
 	}
 

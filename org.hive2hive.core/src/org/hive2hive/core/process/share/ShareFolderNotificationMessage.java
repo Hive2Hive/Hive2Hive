@@ -1,43 +1,77 @@
 package org.hive2hive.core.process.share;
 
+import java.security.KeyPair;
+import java.security.PublicKey;
+
 import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.share.notify.ShareFolderNotificationProcess;
+import org.hive2hive.core.process.ProcessManager;
 
+/**
+ * 
+ * @author Seppi
+ */
 public class ShareFolderNotificationMessage extends BaseDirectMessage {
 
-	private static final long serialVersionUID = 7120823390008870462L;
-
+	private static final long serialVersionUID = 2507386739362186163L;
+	
 	private final static Logger logger = H2HLoggerFactory.getLogger(ShareFolderNotificationMessage.class);
+	
+	private final PublicKey metaFolderId;
+	private final KeyPair domainKey;
 
-	private final FileTreeNode fileTreeNode;
-
-	public ShareFolderNotificationMessage(PeerAddress targetAddress, FileTreeNode fileTreeNode) {
+	public ShareFolderNotificationMessage(PeerAddress targetAddress, PublicKey metaFolderId, KeyPair domainKey) {
 		super(targetAddress);
-		this.fileTreeNode = fileTreeNode;
+		this.metaFolderId = metaFolderId;
+		this.domainKey = domainKey;
 	}
 
 	@Override
 	public void run() {
-		logger.debug("Sharing a folder notification message received");
+		logger.debug("Received a notification message to update the user profile because a new user entered a shared folder.");
+
 		try {
-			ShareFolderNotificationProcess process = new ShareFolderNotificationProcess(fileTreeNode,
-					networkManager);
-			process.start();
-			logger.debug("Got notified and start to download the shared folder");
-		} catch (NoSessionException e) {
-			logger.error("Got notified but can not download the shared folder");
+			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
+			int pid = ProcessManager.createRandomPseudoPID();
+			UserProfile userProfile = profileManager.getUserProfile(pid, true);
+
+			FileTreeNode fileNode = userProfile.getFileById(metaFolderId);
+			
+			if (fileNode == null) {
+				logger.error("Can't find a file node under the given id (public key).");
+				return;
+			}
+
+			// TODO this is to restrictive, what about several users sharing one single folder?
+			if (fileNode.isShared()) {
+				logger.error("Folder is already shared.");
+				return;
+			}
+
+			// modify
+			fileNode.setDomainKeys(domainKey);
+
+			// upload modified profile
+			logger.debug("Updating the domain key in the user profile");
+			profileManager.readyToPut(userProfile, pid);
+		} catch (GetFailedException | PutFailedException | NoSessionException e) {
+			logger.error(String.format("Updating user profile failed (new users enters a sharing folder). reason = '%s'", e));
+			return;
 		}
 	}
 
 	@Override
 	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		// TODO verify signature from foreign user
+		// TODO fix this verification
 		return true;
 	}
 }

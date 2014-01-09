@@ -54,6 +54,20 @@ public class NotifyPeersProcess extends Process {
 		myKey.put(session.getCredentials().getUserId(), session.getKeyPair().getPublic());
 		setNextStep(new GetPublicKeysStep(new ArrayList<String>(), myKey));
 	}
+	
+	/**
+	 * Notify all clients of a single user
+	 */
+	public NotifyPeersProcess(NetworkManager networkManager, String userId, INotificationMessageFactory messageFactory) {
+		super(networkManager);
+		addCleanupListener();
+
+		Set<String> onlyOne = new HashSet<String>(1);
+		onlyOne.add(userId);
+
+		context = new NotifyPeersProcessContext(this, onlyOne, messageFactory);
+		setNextStep(new GetPublicKeysStep(onlyOne));
+	}
 
 	private void addCleanupListener() {
 		IProcessListener listener = new IProcessListener() {

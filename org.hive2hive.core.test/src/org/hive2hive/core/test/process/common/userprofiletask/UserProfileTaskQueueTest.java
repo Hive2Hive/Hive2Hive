@@ -69,7 +69,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
-		PutUserProfileTaskStep putStep = new PutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
 				null);
 
 		ProcessTestUtil.executeStep(node, putStep);
@@ -89,7 +89,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
-		PutUserProfileTaskStep putStep = new PutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
 				null);
 
 		Process process = new Process(node) {
@@ -127,7 +127,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, null);
-		PutUserProfileTaskStep putStep = new PutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
 				getStep);
 
 		ProcessTestUtil.executeStep(node, putStep);
@@ -147,7 +147,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, null);
-		PutUserProfileTaskStep putStep = new PutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
 				getStep);
 
 		Process process = new Process(node) {
@@ -188,7 +188,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		RemoveUserProfileTaskStep removeStep = new RemoveUserProfileTaskStep(context, null);
 		GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, removeStep);
-		PutUserProfileTaskStep putStep = new PutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
 				getStep);
 
 		ProcessTestUtil.executeStep(node, putStep);
@@ -273,7 +273,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		List<TestUserProfileTask> shuffledTasks = new ArrayList<TestUserProfileTask>(tasks);
 		Collections.shuffle(shuffledTasks);
 		for (TestUserProfileTask task : shuffledTasks) {
-			PutUserProfileTaskStep putStep = new PutUserProfileTaskStep(userId, task, key.getPublic(), null);
+			PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, task, key.getPublic(), null);
 			ProcessTestUtil.executeStep(node, putStep);
 		}
 
