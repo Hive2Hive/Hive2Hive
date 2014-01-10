@@ -17,7 +17,7 @@ public class PutShareFolderUserProfileTaskStep extends PutUserProfileTaskStep {
 		FileTreeNode fileNode = context.getFileTreeNode();
 
 		// create a subtree containing all children
-		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair());
+		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair(), context.getDomainKey());
 		sharedNode.setName(fileNode.getName());
 		sharedNode.getChildren().addAll(fileNode.getChildren());
 		sharedNode.setDomainKeys(fileNode.getDomainKeys());

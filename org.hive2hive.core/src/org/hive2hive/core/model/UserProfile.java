@@ -23,19 +23,17 @@ public class UserProfile extends NetworkContent {
 
 	private final String userId;
 	private final KeyPair encryptionKeys;
-	private final KeyPair domainKeys;
 	private final FileTreeNode root;
 
 	public UserProfile(String userId) {
 		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
-				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS));
+				.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA));
 	}
 
 	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair domainKeys) {
 		this.userId = userId;
 		this.encryptionKeys = encryptionKeys;
-		this.domainKeys = domainKeys;
-		root = new FileTreeNode(encryptionKeys);
+		root = new FileTreeNode(encryptionKeys, domainKeys);
 	}
 
 	public String getUserId() {
@@ -44,10 +42,6 @@ public class UserProfile extends NetworkContent {
 
 	public KeyPair getEncryptionKeys() {
 		return encryptionKeys;
-	}
-
-	public KeyPair getDomainKeys() {
-		return domainKeys;
 	}
 
 	public FileTreeNode getRoot() {

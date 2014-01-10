@@ -22,7 +22,7 @@ public class NewDomainKeyStep extends ProcessStep {
 	@Override
 	public void start() {
 		ShareFolderProcessContext context = (ShareFolderProcessContext) getProcess().getContext();
-		logger.debug(String.format("Genrating new domain key fo sharing the folder '%s' with user '%s'.",
+		logger.debug(String.format("Generating new domain key fo sharing the folder '%s' with user '%s'.",
 				context.getFolderToShare().getName(), context.getFriendId()));
 
 		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);

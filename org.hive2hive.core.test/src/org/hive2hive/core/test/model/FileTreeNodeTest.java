@@ -43,7 +43,8 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	public void createTreeNode() {
 		// create a tree
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
-		root = new FileTreeNode(keys);
+		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		root = new FileTreeNode(keys, domainKey);
 
 		// naming convention:
 		// [number][type][index] where number is the level and type is either 'f' for file or 'd' for
@@ -69,8 +70,8 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertEquals("1f1", child1.getFullPath().toString());
 		Assert.assertEquals("1f2", child2.getFullPath().toString());
 		Assert.assertEquals("1d", dir1.getFullPath().toString());
-		Assert.assertEquals(Paths.get("1d","2f").toString(), child3.getFullPath().toString());
-		Assert.assertEquals(Paths.get("1d","2d").toString(), dir2.getFullPath().toString());
+		Assert.assertEquals(Paths.get("1d", "2f").toString(), child3.getFullPath().toString());
+		Assert.assertEquals(Paths.get("1d", "2d").toString(), dir2.getFullPath().toString());
 	}
 
 	@Test
@@ -79,6 +80,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
 		dir1.setDomainKeys(keys);
 
+		
 		// 1d, 2f and 2d should return to be shared, others not
 		Assert.assertTrue(dir1.isShared());
 		Assert.assertTrue(dir2.isShared());
@@ -87,6 +89,22 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(root.isShared());
 		Assert.assertFalse(child1.isShared());
 		Assert.assertFalse(child2.isShared());
+	}
+	
+	@Test
+	public void testHasShared1() {		
+		// set 2d to be shared
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		dir2.setDomainKeys(keys);
+
+		// root, 1d and 2d should show that they contain a shared folder
+		Assert.assertTrue(root.hasShared());
+		Assert.assertTrue(dir1.hasShared());
+		Assert.assertTrue(dir2.hasShared());
+		
+		Assert.assertFalse(child1.hasShared());
+		Assert.assertFalse(child2.hasShared());
+		Assert.assertFalse(child3.hasShared());
 	}
 
 	@Test

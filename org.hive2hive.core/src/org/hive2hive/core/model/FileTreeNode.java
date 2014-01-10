@@ -53,6 +53,7 @@ public class FileTreeNode implements Serializable {
 	private FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder,
 			byte[] md5LatestVersion) {
 		this.parent = parent;
+		this.domainKeys = parent.getDomainKeys();
 		this.keyPair = keyPair;
 		this.name = name;
 		this.isFolder = isFolder;
@@ -66,8 +67,9 @@ public class FileTreeNode implements Serializable {
 	 * 
 	 * @param keyPair
 	 */
-	public FileTreeNode(KeyPair keyPair) {
+	public FileTreeNode(KeyPair keyPair, KeyPair domainKey) {
 		this.keyPair = keyPair;
+		this.domainKeys = domainKey;
 		this.isFolder = true;
 		this.parent = null;
 		children = new HashSet<FileTreeNode>();
@@ -137,10 +139,9 @@ public class FileTreeNode implements Serializable {
 	}
 
 	public void setDomainKeys(KeyPair domainKeys) {
-		if (isFolder) {
-			this.domainKeys = domainKeys;
-		} else {
-			throw new IllegalStateException("The tree object is a file, thus, cannot add a domain key here");
+		this.domainKeys = domainKeys;
+		for (FileTreeNode child : children) {
+			child.setDomainKeys(domainKeys);
 		}
 	}
 
@@ -157,23 +158,31 @@ public class FileTreeNode implements Serializable {
 	}
 
 	public boolean isShared() {
-		if (parent == null) {
+		if (isRoot()) {
 			// is root
 			return false;
 		} else if (isFolder) {
-			// TODO: Domain keys indicate if the folder can be written. How to properly indicate that the
-			// folder is shared?
-			if (domainKeys == null) {
-				// no domain keys --> ask parent if shared
-				return parent.isShared();
-			} else {
-				// having domain keys and not beeing root --> shared
-				return true;
+			FileTreeNode tmp = this;
+			while (!tmp.isRoot()) {
+				tmp = tmp.parent;
 			}
+			return !domainKeys.equals(tmp.domainKeys);
 		} else {
 			// ask parent folder
 			return parent.isShared();
 		}
+	}
+
+	public boolean hasShared() {
+		if (!isFolder)
+			return false;
+		if (isShared())
+			return true;
+
+		boolean shared = false;
+		for (FileTreeNode child : children)
+			shared |= child.hasShared();
+		return shared;
 	}
 
 	public boolean canWrite() {

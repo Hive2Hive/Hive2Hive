@@ -10,7 +10,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.File2MetaFileStep;
 
 /**
  * A process for sharing a folder with another user.
@@ -47,10 +46,7 @@ public class ShareFolderProcess extends Process {
 
 		logger.debug(String.format("Sharing folder '%s' with user '%s'.", folderToShare.getAbsolutePath(), friendId));
 		
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(folderToShare, context.getSession()
-				.getProfileManager(), context.getSession().getFileManager(), context,
-				new UpdateMetaFolderStep());
-		setNextStep(file2MetaStep);
+		setNextStep(new NewDomainKeyStep());
 	}
 
 	@Override

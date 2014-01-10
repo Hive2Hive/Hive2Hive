@@ -1,10 +1,7 @@
 package org.hive2hive.core.test.process.share;
 
-import static org.junit.Assert.assertFalse;
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -14,14 +11,11 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
@@ -66,9 +60,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		FileManager fileManagerB = new FileManager(rootB.toPath());
 
 		UserCredentials userB = NetworkTestUtil.generateRandomCredentials();
-		UserProfileManager profileManagerB = new UserProfileManager(network.get(1), userB);
 		ProcessTestUtil.register(userB, network.get(1));
-		ProcessTestUtil.login(userB, network.get(1), rootB);
 
 		File folderToShare = new File(rootA, "folder1");
 		folderToShare.mkdirs();
@@ -81,20 +73,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		shareFolderProcess.addListener(listener);
 		shareFolderProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		UserProfile userProfileB;
-		FileTreeNode fileTreeNode;
-		waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-			userProfileB = profileManagerB.getUserProfile(-1, false);
-			fileTreeNode = userProfileB.getFileByPath(Paths.get(folderToShare.getName()));
-		} while (fileTreeNode == null);
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 
 		FileUtils.deleteDirectory(fileManagerA.getRoot().toFile());
 		FileUtils.deleteDirectory(fileManagerB.getRoot().toFile());
