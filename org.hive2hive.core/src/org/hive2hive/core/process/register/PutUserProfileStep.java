@@ -44,7 +44,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
 			encryptedUserProfile.generateVersionKey();
-			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile);
+			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile, userProfile.getProtectionKeys());
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().stop("User profile could not be encrypted. Reason: " + e.getMessage());

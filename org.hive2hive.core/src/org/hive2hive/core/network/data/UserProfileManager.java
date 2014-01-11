@@ -27,7 +27,7 @@ import org.hive2hive.core.security.UserCredentials;
  * Manages the user profile resource. Each process waiting for get / put is added to a queue and delivered in
  * order.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class UserProfileManager {
