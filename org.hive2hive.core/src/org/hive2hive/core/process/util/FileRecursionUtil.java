@@ -46,19 +46,22 @@ public class FileRecursionUtil {
 		// synchronize the files that need to be uploaded into the DHT
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
 		for (Path path : files) {
-			ProcessTreeNode parent = getParent(rootProcess, path);
+			ProcessTreeNode parent = null;
 			try {
 				// initialize the process
 				Process process = null;
 				switch (action) {
 					case NEW_FILE:
 						process = new NewFileProcess(path.toFile(), networkManager);
+						parent = getParent(rootProcess, path, true);
 						break;
 					case MODIFY_FILE:
 						process = new NewVersionProcess(path.toFile(), networkManager);
+						parent = getParent(rootProcess, path, false);
 						break;
 					case DELETE:
 						process = new DeleteFileProcess(path.toFile(), networkManager);
+						parent = getParent(rootProcess, path, true);
 						break;
 					default:
 						logger.error("Type mismatch");
@@ -82,18 +85,45 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * Finds the parent process node
+	 * Finds the parent process node: Either the parent file or the sibling (to omit conflicts when modifying
+	 * the parent)
+	 * 
+	 * @param parentModificationSensitive normally this parameter is false. However, some processes (like
+	 *            adding files) modify some data of the parent, thus it can lead to race conditions when two
+	 *            sibling are running concurrent. To indicate this, the parameter should be true. Then, the
+	 *            previous sibling is returned.
 	 */
-	private static ProcessTreeNode getParent(FileProcessTreeNode root, Path path) {
+	private static ProcessTreeNode getParent(FileProcessTreeNode root, Path path,
+			boolean parentModificationSensitive) {
 		Path parent = path.getParent();
 		for (ProcessTreeNode node : root.getAllChildren()) {
 			FileProcessTreeNode fileNode = (FileProcessTreeNode) node;
 			if (fileNode.getPath().equals(parent)) {
-				return fileNode;
+				if (parentModificationSensitive) {
+					return getParentOrSibling(fileNode);
+				} else {
+					return fileNode;
+				}
+
 			}
 		}
 
 		return root;
+	}
+
+	/**
+	 * Returns the previous sibling or the parent when no sibling yet
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	private static ProcessTreeNode getParentOrSibling(ProcessTreeNode parent) {
+		if (parent.getChildren().isEmpty()) {
+			return parent;
+		} else {
+			List<ProcessTreeNode> children = parent.getChildren();
+			return children.get(children.size() - 1);
+		}
 	}
 
 	public static List<Path> getPreorderList(Path root) {
