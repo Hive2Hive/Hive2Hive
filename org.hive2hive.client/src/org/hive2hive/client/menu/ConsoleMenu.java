@@ -59,8 +59,8 @@ public abstract class ConsoleMenu {
 		}
 		onMenuExit();
 	}
-	
-	protected void onMenuExit(){
+
+	protected void onMenuExit() {
 		// do nothing by default
 	}
 
@@ -99,11 +99,13 @@ public abstract class ConsoleMenu {
 			printError("Exception while parsing the parameter.");
 			input.nextLine();
 			return null;
+		} finally {
+			input.close();
 		}
-		
+
 		Formatter.setDefaultForeground();
 		// do not close input
-		
+
 		return parameter;
 	}
 
@@ -130,7 +132,7 @@ public abstract class ConsoleMenu {
 	}
 
 	protected abstract String getInstruction();
-	
+
 	protected void printError(String errorMsg) {
 		Formatter.setErrorForeground();
 		System.err.println(errorMsg);
