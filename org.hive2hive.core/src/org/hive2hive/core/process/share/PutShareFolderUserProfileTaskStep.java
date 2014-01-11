@@ -20,7 +20,7 @@ public class PutShareFolderUserProfileTaskStep extends PutUserProfileTaskStep {
 		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair(), context.getDomainKey());
 		sharedNode.setName(fileNode.getName());
 		sharedNode.getChildren().addAll(fileNode.getChildren());
-		sharedNode.setDomainKeys(fileNode.getDomainKeys());
+		sharedNode.setProtectionKeys(fileNode.getProtectionKeys());
 		
 		ShareFolderUserProfileTask userProfileTask = new ShareFolderUserProfileTask(sharedNode);
 		

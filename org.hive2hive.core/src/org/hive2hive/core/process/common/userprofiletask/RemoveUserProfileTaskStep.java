@@ -60,7 +60,8 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 
 		contentKey = context.getUserProfileTask().getContentKey();
 
-		dataManager.removeUserProfileTask(userId, contentKey, this);
+		// TODO add protection keys for user profile tasks
+		dataManager.removeUserProfileTask(userId, contentKey, null, this);
 
 		removePerformed = true;
 	}
@@ -100,7 +101,8 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 			return;
 		}
 
-		dataManager.putUserProfileTask(userId, contentKey, context.getEncryptedUserProfileTask(), this);
+		// TODO add protection keys for user profile tasks
+		dataManager.putUserProfileTask(userId, contentKey, context.getEncryptedUserProfileTask(), null, this);
 	}
 
 	@Override

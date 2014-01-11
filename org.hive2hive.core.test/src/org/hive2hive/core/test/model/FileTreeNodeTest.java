@@ -78,7 +78,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	public void testShared() {
 		// set 1d to be shared
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
-		dir1.setDomainKeys(keys);
+		dir1.setProtectionKeys(keys);
 
 		
 		// 1d, 2f and 2d should return to be shared, others not
@@ -95,7 +95,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	public void testHasShared1() {		
 		// set 2d to be shared
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
-		dir2.setDomainKeys(keys);
+		dir2.setProtectionKeys(keys);
 
 		// root, 1d and 2d should show that they contain a shared folder
 		Assert.assertTrue(root.hasShared());

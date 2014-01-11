@@ -25,7 +25,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * 
  * @author Seppi
  */
 public class FutureGetTest extends H2HJUnitTest {
@@ -51,7 +50,7 @@ public class FutureGetTest extends H2HJUnitTest {
 
 		nodeA.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content).awaitUninterruptibly();
+						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
 		TestGetListener listener = new TestGetListener();
 
@@ -110,7 +109,7 @@ public class FutureGetTest extends H2HJUnitTest {
 
 			nodeA.getDataManager()
 					.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), data).awaitUninterruptibly();
+							Number160.createHash(contentKey), data, null).awaitUninterruptibly();
 		}
 
 		TestGetListener listener = new TestGetListener();
@@ -137,7 +136,7 @@ public class FutureGetTest extends H2HJUnitTest {
 
 		nodeA.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content).awaitUninterruptibly();
+						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
 		TestGetListener listener = new TestGetListener();
 

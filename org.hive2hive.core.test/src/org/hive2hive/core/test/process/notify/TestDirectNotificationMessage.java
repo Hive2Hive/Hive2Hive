@@ -34,7 +34,7 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 		// put for verification
 		networkManager.getDataManager().put(Number160.createHash(verificationLoc),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(verificationContentKey),
-				verificationData);
+				verificationData, null);
 	}
 
 	@Override

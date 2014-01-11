@@ -1,6 +1,9 @@
 package org.hive2hive.core.network.data;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.SignatureException;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
@@ -46,45 +49,54 @@ public class DataManager {
 		return networkManager.getConnection().getPeer();
 	}
 
-	public void put(String locationKey, String contentKey, NetworkContent content, IPutListener listener) {
+	public void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey,
+			IPutListener listener) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
-		FuturePut putFuture = put(lKey, dKey, cKey, content);
+		FuturePut putFuture = put(lKey, dKey, cKey, content, protectionKey);
 		if (putFuture == null) {
 			if (listener != null)
 				listener.onPutFailure();
 			return;
 		}
 
-		putFuture.addListener(new FuturePutListener(lKey, dKey, cKey, content, listener, this));
+		putFuture
+				.addListener(new FuturePutListener(lKey, dKey, cKey, content, protectionKey, listener, this));
 	}
 
-	public void putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, IPutListener listener) {
+	public void putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
+			KeyPair protectionKey, IPutListener listener) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-		FuturePut putFuture = put(lKey, dKey, contentKey, content);
+		FuturePut putFuture = put(lKey, dKey, contentKey, content, protectionKey);
 		if (putFuture == null) {
 			if (listener != null)
 				listener.onPutFailure();
 			return;
 		}
 
-		putFuture.addListener(new FuturePutListener(lKey, dKey, contentKey, content, listener, this));
+		putFuture.addListener(new FuturePutListener(lKey, dKey, contentKey, content, protectionKey, listener,
+				this));
 	}
 
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			NetworkContent content) {
+			NetworkContent content, KeyPair protectionKey) {
 		logger.debug(String.format(
 				"put location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 				locationKey, domainKey, contentKey, content.getVersionKey()));
 		try {
 			Data data = new Data(content);
 			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
-			// TODO add public key for content protection
-			return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-					.setVersionKey(content.getVersionKey()).start();
-		} catch (IOException e) {
+			if (protectionKey != null) {
+				data.setProtectedEntry().sign(protectionKey);
+				return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
+						.setVersionKey(content.getVersionKey()).keyPair(protectionKey).start();
+			} else {
+				return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
+						.setVersionKey(content.getVersionKey()).start();
+			}
+		} catch (IOException | InvalidKeyException | SignatureException e) {
 			logger.error(String
 					.format("Put failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s' exception = '%s'",
 							locationKey, domainKey, contentKey, content.getVersionKey(), e.getMessage()));
@@ -136,8 +148,8 @@ public class DataManager {
 	}
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
-		logger.debug(String.format("get location key = '%s' domain key = '%s' content key = '%s'", locationKey,
-				domainKey, contentKey));
+		logger.debug(String.format("get location key = '%s' domain key = '%s' content key = '%s'",
+				locationKey, domainKey, contentKey));
 		return getPeer().get(locationKey)
 				.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO))
 				.to(new Number640(locationKey, domainKey, contentKey, Number160.MAX_VALUE)).descending()
@@ -146,7 +158,8 @@ public class DataManager {
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			Number160 versionKey) {
-		logger.debug(String.format("get location key = '%s' domain Key = '%s' content key = '%s' version key = '%s'",
+		logger.debug(String.format(
+				"get location key = '%s' domain Key = '%s' content key = '%s' version key = '%s'",
 				locationKey, domainKey, contentKey, versionKey));
 		return getPeer().get(locationKey).setDomainKey(domainKey).setContentKey(contentKey)
 				.setVersionKey(versionKey).start();
@@ -176,44 +189,50 @@ public class DataManager {
 		return null;
 	}
 
-	public void remove(String locationKey, String contentKey, IRemoveListener listener) {
+	public void remove(String locationKey, String contentKey, KeyPair protectionKey, IRemoveListener listener) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
-		FutureRemove futureRemove = remove(lKey, dKey, cKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, listener, this));
+		FutureRemove futureRemove = remove(lKey, dKey, cKey, protectionKey);
+		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, protectionKey, listener, this));
 	}
 
-	public void remove(String locationKey, String contentKey, Number160 versionKey, IRemoveListener listener) {
+	public void remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey,
+			IRemoveListener listener) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
-		FutureRemove futureRemove = remove(lKey, dKey, cKey, versionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, versionKey, listener, this));
+		FutureRemove futureRemove = remove(lKey, dKey, cKey, versionKey, protectionKey);
+		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, versionKey, protectionKey,
+				listener, this));
 	}
 
-	public void removeUserProfileTask(String userId, Number160 contentKey, IRemoveListener listener) {
+	public void removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey,
+			IRemoveListener listener) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-		FutureRemove futureRemove = remove(lKey, dKey, contentKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, contentKey, listener, this));
-	}
-
-	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
-		logger.debug(String.format("remove location key = '%s' domain key = '%s' content key = '%s'", locationKey,
-				domainKey, contentKey));
-		return getPeer().remove(locationKey)
-				.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO))
-				.to(new Number640(locationKey, domainKey, contentKey, Number160.MAX_VALUE)).start();
+		FutureRemove futureRemove = remove(lKey, dKey, contentKey, protectionKey);
+		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, contentKey, protectionKey, listener,
+				this));
 	}
 
 	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey) {
+			KeyPair protectionKey) {
+		logger.debug(String.format("remove location key = '%s' domain key = '%s' content key = '%s'",
+				locationKey, domainKey, contentKey));
+		return getPeer().remove(locationKey)
+				.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO))
+				.to(new Number640(locationKey, domainKey, contentKey, Number160.MAX_VALUE))
+				.keyPair(protectionKey).start();
+	}
+
+	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey,
+			Number160 versionKey, KeyPair protectionKey) {
 		logger.debug(String.format(
-				"remove location key = '%s' domain key = '%s' content key = '%s' version key = '%s'", locationKey,
-				domainKey, contentKey, versionKey));
+				"remove location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+				locationKey, domainKey, contentKey, versionKey));
 		return getPeer().remove(locationKey).setDomainKey(domainKey).contentKey(contentKey)
-				.setVersionKey(versionKey).start();
+				.setVersionKey(versionKey).keyPair(protectionKey).start();
 	}
 
 	public DigestBuilder getDigest(Number160 locationKey) {

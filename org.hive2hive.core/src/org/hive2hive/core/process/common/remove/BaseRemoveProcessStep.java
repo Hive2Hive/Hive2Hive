@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.common.remove;
 
+import java.security.KeyPair;
+
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.log.H2HLogger;
@@ -24,6 +26,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 	protected String locationKey;
 	protected String contentKey;
 	protected NetworkContent contentToRemove;
+	protected KeyPair protectionKey;
 	protected ProcessStep nextStep;
 	private boolean removePerformed = false;
 
@@ -35,15 +38,17 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
+		// TODO add protection keys
+		this.protectionKey = null;
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
 			return;
 		}
 		if (contentToRemove.getVersionKey() == Number160.ZERO)
-			dataManager.remove(locationKey, contentKey, this);
+			dataManager.remove(locationKey, contentKey, protectionKey, this);
 		else
-			dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), this);
+			dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), protectionKey, this);
 		removePerformed = true;
 	}
 
@@ -83,7 +88,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			return;
 		}
 
-		dataManager.put(locationKey, contentKey, contentToRemove, this);
+		dataManager.put(locationKey, contentKey, contentToRemove, protectionKey, this);
 	}
 
 	@Override

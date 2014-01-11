@@ -117,7 +117,7 @@ public class RegisterTest extends H2HJUnitTest {
 		// already put a locations map
 		FuturePut putProfile = client.getDataManager().put(Number160.createHash(credentials.getUserId()),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS),
-				new Locations(credentials.getUserId()));
+				new Locations(credentials.getUserId()), null);
 		putProfile.awaitUninterruptibly();
 		putProfile.getFutureRequests().awaitUninterruptibly();
 		Assert.assertTrue(putProfile.isSuccess());

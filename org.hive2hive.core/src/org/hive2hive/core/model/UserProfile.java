@@ -14,7 +14,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 /**
  * File which contains all keys and meta information about the files of the owner.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class UserProfile extends NetworkContent {
@@ -26,14 +26,29 @@ public class UserProfile extends NetworkContent {
 	private final FileTreeNode root;
 
 	public UserProfile(String userId) {
-		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
-				.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA));
+		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil.generateProtectionKey());
 	}
 
-	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair domainKeys) {
+	/**
+	 * Constructor for the user profile.
+	 * 
+	 * @param userId
+	 *            the user id of the owner of the user profile
+	 * @param encryptionKeys
+	 *            the encryption keys for encrypting the user profile
+	 * @param protectionKeys
+	 *            the default keys for content protection
+	 */
+	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair protectionKeys) {
+		if (userId == null)
+			throw new IllegalArgumentException("User id can't be null.");
+		if (encryptionKeys == null)
+			throw new IllegalArgumentException("Encryption keys can't be null.");
+		if (protectionKeys == null)
+			throw new IllegalArgumentException("Protection keys can't be null.");
 		this.userId = userId;
 		this.encryptionKeys = encryptionKeys;
-		root = new FileTreeNode(encryptionKeys, domainKeys);
+		root = new FileTreeNode(encryptionKeys, protectionKeys);
 	}
 
 	public String getUserId() {
@@ -42,6 +57,10 @@ public class UserProfile extends NetworkContent {
 
 	public KeyPair getEncryptionKeys() {
 		return encryptionKeys;
+	}
+
+	public KeyPair getProtectionKeys() {
+		return root.getProtectionKeys();
 	}
 
 	public FileTreeNode getRoot() {

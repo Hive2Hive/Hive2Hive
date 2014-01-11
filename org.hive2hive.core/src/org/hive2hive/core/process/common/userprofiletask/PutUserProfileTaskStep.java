@@ -58,7 +58,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 				return;
 			}
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
-			dataManager.putUserProfileTask(userId, contentKey, encrypted, this);
+			// TODO add protection keys for user profile tasks
+			dataManager.putUserProfileTask(userId, contentKey, encrypted, null, this);
 			putPerformed = true;
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
@@ -92,8 +93,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 			getProcess().nextRollBackStep();
 			return;
 		}
-
-		dataManager.removeUserProfileTask(userId, contentKey, this);
+		// TODO add protection keys for user profile tasks
+		dataManager.removeUserProfileTask(userId, contentKey, null, this);
 	}
 
 	@Override

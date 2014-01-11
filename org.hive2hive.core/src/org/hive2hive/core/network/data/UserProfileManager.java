@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data;
 
+import java.security.KeyPair;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,6 +49,8 @@ public class UserProfileManager {
 	private final Queue<QueueEntry> readOnlyQueue;
 	private final Queue<PutQueueEntry> modifyQueue;
 	private volatile PutQueueEntry modifying;
+
+	private KeyPair defaultProtectionKey = null;
 
 	public UserProfileManager(NetworkManager networkManager, UserCredentials credentials) {
 		this.networkManager = networkManager;
@@ -138,6 +141,22 @@ public class UserProfileManager {
 		if (modifying != null && modifying.equals(pid)) {
 			modifying.abort();
 		}
+	}
+
+	/**
+	 * Get the default content protection keys. If called first time the method is called first time the user
+	 * profile gets loaded from network and the default protection key temporally gets stored for further
+	 * gets.
+	 * 
+	 * @return the default content protection keys
+	 * @throws GetFailedException 
+	 */
+	public KeyPair getDefaultProtectionKey() throws GetFailedException {
+		if (defaultProtectionKey == null) {
+			UserProfile userProfile = getUserProfile(0, false);
+			defaultProtectionKey = userProfile.getProtectionKeys();
+		}
+		return defaultProtectionKey;
 	}
 
 	private class QueueWorker implements Runnable {
@@ -266,7 +285,7 @@ public class UserProfileManager {
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
 				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
-						encryptedUserProfile, entry);
+						encryptedUserProfile, entry.getUserProfile().getProtectionKeys(), entry);
 
 				synchronized (entryWaiter) {
 					try {

@@ -220,7 +220,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 		FuturePut futurePut = node.getDataManager().put(lKey, dKey, userProfileTask.getContentKey(),
-				userProfileTask);
+				userProfileTask, null);
 		futurePut.awaitUninterruptibly();
 
 		RemoveUserProfileTaskStep removeStep = new RemoveUserProfileTaskStep(context, null);

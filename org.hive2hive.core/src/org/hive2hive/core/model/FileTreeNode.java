@@ -23,7 +23,7 @@ public class FileTreeNode implements Serializable {
 	private FileTreeNode parent;
 	private String name;
 	private byte[] md5LatestVersion;
-	private KeyPair domainKeys;
+	private KeyPair protectionKeys = null;
 	private final Set<FileTreeNode> children;
 
 	/**
@@ -53,7 +53,7 @@ public class FileTreeNode implements Serializable {
 	private FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder,
 			byte[] md5LatestVersion) {
 		this.parent = parent;
-		this.domainKeys = parent.getDomainKeys();
+		this.protectionKeys = parent.getProtectionKeys();
 		this.keyPair = keyPair;
 		this.name = name;
 		this.isFolder = isFolder;
@@ -69,7 +69,7 @@ public class FileTreeNode implements Serializable {
 	 */
 	public FileTreeNode(KeyPair keyPair, KeyPair domainKey) {
 		this.keyPair = keyPair;
-		this.domainKeys = domainKey;
+		this.protectionKeys = domainKey;
 		this.isFolder = true;
 		this.parent = null;
 		children = new HashSet<FileTreeNode>();
@@ -134,15 +134,18 @@ public class FileTreeNode implements Serializable {
 		return null;
 	}
 
-	public KeyPair getDomainKeys() {
-		return domainKeys;
+	public KeyPair getProtectionKeys() {
+		if (protectionKeys == null) {
+			return parent.getProtectionKeys();
+		} else {
+			return protectionKeys;
+		}
 	}
 
-	public void setDomainKeys(KeyPair domainKeys) {
-		this.domainKeys = domainKeys;
-		for (FileTreeNode child : children) {
-			child.setDomainKeys(domainKeys);
-		}
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		if (isRoot())
+			throw new IllegalStateException("Not allowed to change root's protection key.");
+		this.protectionKeys = protectionKeys;
 	}
 
 	public byte[] getMD5() {
@@ -158,35 +161,17 @@ public class FileTreeNode implements Serializable {
 	}
 
 	public boolean isShared() {
-		if (isRoot()) {
-			// is root
-			return false;
-		} else if (isFolder) {
-			FileTreeNode tmp = this;
-			while (!tmp.isRoot()) {
-				tmp = tmp.parent;
-			}
-			return !domainKeys.equals(tmp.domainKeys);
-		} else {
-			// ask parent folder
-			return parent.isShared();
-		}
+		// TODO implement is shared
+		return false;
 	}
 
 	public boolean hasShared() {
-		if (!isFolder)
-			return false;
-		if (isShared())
-			return true;
-
-		boolean shared = false;
-		for (FileTreeNode child : children)
-			shared |= child.hasShared();
-		return shared;
+		// TODO implement has shared
+		return false;
 	}
 
 	public boolean canWrite() {
-		if (domainKeys == null) {
+		if (protectionKeys == null) {
 			return parent.canWrite();
 		} else {
 			return true;
