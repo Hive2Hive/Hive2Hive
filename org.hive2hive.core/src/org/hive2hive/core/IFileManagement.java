@@ -59,7 +59,8 @@ public interface IFileManagement {
 	IFileConfiguration getFileConfiguration();
 
 	/**
-	 * Returns a list of the files currently stored in the network.
+	 * Returns a list of the files currently stored in the network. Folders are ignored here (digest contains
+	 * only files)
 	 * 
 	 * @return the observable process which additionally allows to get the result (digest) after finish
 	 */
