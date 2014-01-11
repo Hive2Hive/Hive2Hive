@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
@@ -145,6 +146,18 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 		});
+
+		add(new H2HConsoleMenuItem("Get Digest") {
+			protected void execute() {
+				try {
+					IProcess process = nodeMenu.getH2HNode().getFileManagement().getDigest();
+					executeBlocking(process);
+				} catch (Hive2HiveException e) {
+					System.out.println("Could not delete the file. Reason: " + e.getMessage());
+				}
+			}
+		});
+
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void execute() {
 				try {

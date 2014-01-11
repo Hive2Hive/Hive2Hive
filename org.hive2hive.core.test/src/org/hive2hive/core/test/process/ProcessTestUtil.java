@@ -24,6 +24,7 @@ import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.digest.GetDigestProcess;
+import org.hive2hive.core.process.digest.IGetDigestProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.process.login.LoginProcess;
@@ -51,7 +52,7 @@ public class ProcessTestUtil {
 	private ProcessTestUtil() {
 		// only static methods
 	}
-	
+
 	public static void waitTillSucceded(TestProcessListener listener, int maxSeconds) {
 		H2HWaiter waiter = new H2HWaiter(maxSeconds);
 		do {
@@ -60,7 +61,7 @@ public class ProcessTestUtil {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 	}
-	
+
 	public static void waitTillFailed(TestProcessListener listener, int maxSeconds) {
 		H2HWaiter waiter = new H2HWaiter(maxSeconds);
 		do {
@@ -264,13 +265,19 @@ public class ProcessTestUtil {
 		}
 	}
 
-	public static GetDigestProcess getDigest(NetworkManager networkManager,
+	public static IGetDigestProcess getDigest(NetworkManager networkManager,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-		GetDigestProcess process = new GetDigestProcess(networkManager);
-		executeProcess(process);
+		GetDigestProcess process = null;
+		try {
+			process = new GetDigestProcess(networkManager);
+			executeProcess(process);
+		} catch (NoSessionException e) {
+			// never happens because session is set before
+		}
+
 		return process;
 	}
 }

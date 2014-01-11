@@ -29,16 +29,15 @@ public class GetDigestProcessStep extends ProcessStep {
 
 		try {
 			UserProfileManager profileManager = getNetworkManager().getSession().getProfileManager();
-			
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), false);
-			
-			FileTreeNode root = userProfile.getRoot();		
+
+			FileTreeNode root = userProfile.getRoot();
 			List<Path> digest = new ArrayList<Path>();
-			
+
 			walkTrough(root, digest);
-			
+
 			Collections.sort(digest);
-			
+
 			GetDigestContext context = (GetDigestContext) getProcess().getContext();
 			context.setDigest(digest);
 
@@ -49,12 +48,12 @@ public class GetDigestProcessStep extends ProcessStep {
 			return;
 		}
 	}
-	
-	private void walkTrough(FileTreeNode node, List<Path> digest){
+
+	private void walkTrough(FileTreeNode node, List<Path> digest) {
 		if (!node.isFolder())
 			digest.add(node.getFullPath());
-		
-		for (FileTreeNode child: node.getChildren()){
+
+		for (FileTreeNode child : node.getChildren()) {
 			walkTrough(child, digest);
 		}
 	}

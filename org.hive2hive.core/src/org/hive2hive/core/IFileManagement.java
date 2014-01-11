@@ -5,7 +5,7 @@ import java.io.File;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.digest.GetDigestProcess;
+import org.hive2hive.core.process.digest.IGetDigestProcess;
 
 /**
  * Interface on all file operations that Hive2Hive currently supports.
@@ -61,9 +61,9 @@ public interface IFileManagement {
 	/**
 	 * Returns a list of the files currently stored in the network.
 	 * 
-	 * @return
+	 * @return the observable process which additionally allows to get the result (digest) after finish
 	 */
-	GetDigestProcess getDigest();
+	IGetDigestProcess getDigest() throws NoSessionException;
 
 	/**
 	 * Shares a folder and all it's children with another user.

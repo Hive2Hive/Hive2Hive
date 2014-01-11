@@ -16,6 +16,7 @@ import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.digest.GetDigestProcess;
+import org.hive2hive.core.process.digest.IGetDigestProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -209,11 +210,11 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		autoStartProcess(process);
 		return process;
 	}
-	
+
 	@Override
-	public GetDigestProcess getDigest() {
-		GetDigestProcess process = new GetDigestProcess(networkManager);
-		
+	public IGetDigestProcess getDigest() throws NoSessionException {
+		IGetDigestProcess process = new GetDigestProcess(networkManager);
+
 		autoStartProcess(process);
 		return process;
 	}
@@ -239,7 +240,8 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException, IllegalFileLocation {
+	public IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
+			IllegalFileLocation {
 		ShareFolderProcess process = new ShareFolderProcess(folder, userId, networkManager);
 		autoStartProcess(process);
 		return process;

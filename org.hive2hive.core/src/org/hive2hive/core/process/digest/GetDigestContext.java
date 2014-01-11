@@ -26,5 +26,4 @@ public class GetDigestContext extends ProcessContext {
 	public void setDigest(List<Path> digest) {
 		this.digest = digest;
 	}
-
 }
