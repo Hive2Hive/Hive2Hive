@@ -3,6 +3,7 @@ package org.hive2hive.core.process.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessManager;
@@ -19,10 +20,10 @@ public abstract class ProcessTreeNode extends Process {
 
 	private final Process process;
 	private final List<ProcessTreeNode> childProcesses;
-	private boolean done;
-	private boolean failed;
 	private final ProcessTreeNode parent;
 	private final List<Exception> exceptionList;
+	private final AtomicBoolean done;
+	private final AtomicBoolean childrenStarted;
 
 	/**
 	 * For the root node (does not do anything except holding children and starting them simultaneously
@@ -43,8 +44,9 @@ public abstract class ProcessTreeNode extends Process {
 		this.process = process;
 		this.parent = parent;
 		this.childProcesses = new ArrayList<ProcessTreeNode>();
-		this.done = false;
-		this.failed = false;
+		done = new AtomicBoolean(false);
+		childrenStarted = new AtomicBoolean(false);
+
 		if (parent == null) {
 			// root node
 			exceptionList = new CopyOnWriteArrayList<Exception>();
@@ -84,8 +86,8 @@ public abstract class ProcessTreeNode extends Process {
 	 */
 	public boolean isDone() {
 		// when failed, the children must not be checked since they never started
-		if (failed)
-			return true;
+		if (childrenStarted.get())
+			return done.get();
 
 		// children may have started and are already finished (note the recursion)
 		boolean allChildrenDone = true;
@@ -93,7 +95,7 @@ public abstract class ProcessTreeNode extends Process {
 			allChildrenDone &= child.isDone();
 		}
 
-		return done && allChildrenDone;
+		return done.get() && allChildrenDone;
 	}
 
 	public int getDepth() {
@@ -118,36 +120,38 @@ public abstract class ProcessTreeNode extends Process {
 			setNextStep(null);
 
 			// is root node --> start all children
-			for (ProcessTreeNode child : childProcesses) {
-				child.start();
-			}
+			startChildren();
 
 			// no further tasks for the root node
-			done = true;
+			done.set(true);
 		} else {
 			// after the current process is done, start the next process
 			process.addListener(new IProcessListener() {
 				@Override
 				public void onSuccess() {
 					ProcessManager.getInstance().detachProcess(ProcessTreeNode.this);
-					done = true;
-
-					for (ProcessTreeNode child : childProcesses) {
-						child.start();
-					}
+					done.set(true);
+					startChildren();
 				}
 
 				@Override
 				public void onFail(Exception exception) {
 					addProblem(exception);
 					ProcessManager.getInstance().detachProcess(ProcessTreeNode.this);
-					done = true;
-					failed = true;
+					done.set(true);
 				}
 			});
 
 			process.start();
 		}
+	}
+
+	private void startChildren() {
+		for (ProcessTreeNode child : childProcesses) {
+			child.start();
+		}
+
+		childrenStarted.set(true);
 	}
 
 	public List<Exception> getExceptionList() {
