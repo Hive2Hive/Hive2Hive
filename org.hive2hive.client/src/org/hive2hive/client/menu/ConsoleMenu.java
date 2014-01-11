@@ -88,36 +88,40 @@ public abstract class ConsoleMenu {
 	}
 
 	protected String awaitStringParameter() {
-
 		Formatter.setInputForeground();
 
+		// do not close input
+		@SuppressWarnings("resource")
 		Scanner input = new Scanner(System.in);
+
 		String parameter;
 		try {
 			parameter = input.nextLine();
 		} catch (Exception e) {
 			printError("Exception while parsing the parameter.");
-			input.nextLine();
+			try {
+				input.nextLine();
+			} catch (Exception ex) {
+				// ignore
+			}
 			return null;
-		} finally {
-			input.close();
 		}
 
 		Formatter.setDefaultForeground();
-		// do not close input
-
 		return parameter;
 	}
 
 	protected int awaitIntParameter() {
 		boolean success = false;
 		int number = 0;
-		while (!success) {
+		int tries = 0;
+		while (!success && tries < 5) {
 			try {
 				number = Integer.parseInt(awaitStringParameter());
 				success = true;
 			} catch (NumberFormatException e) {
-				printError("This was not a number... Try again.");
+				tries++;
+				printError("This was not a number... Try again! (" + (5 - tries) + " tries left)");
 			}
 		}
 		return number;

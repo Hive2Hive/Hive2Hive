@@ -1,14 +1,15 @@
 package org.hive2hive.client.menu;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.process.digest.IGetDigestProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
 
 /**
@@ -99,73 +100,56 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Add File") {
 			@Override
-			protected void execute() {
-				try {
-					IProcess process = nodeMenu.getH2HNode().getFileManagement().add(askForFile(true));
-					executeBlocking(process);
-				} catch (IllegalFileLocation | NoSessionException e) {
-					System.out.println("Could not add the file. Reason: " + e.getMessage());
-				}
+			protected void execute() throws Hive2HiveException {
+				IProcess process = nodeMenu.getH2HNode().getFileManagement().add(askForFile(true));
+				executeBlocking(process);
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Update File") {
-			protected void execute() {
-				try {
-					IProcess process = nodeMenu.getH2HNode().getFileManagement().update(askForFile(true));
-					executeBlocking(process);
-				} catch (IllegalArgumentException | NoSessionException e) {
-					System.out.println("Could not update the file. Reason: " + e.getMessage());
-				}
+			protected void execute() throws Hive2HiveException {
+				IProcess process = nodeMenu.getH2HNode().getFileManagement().update(askForFile(true));
+				executeBlocking(process);
 			}
 		});
 		add(new H2HConsoleMenuItem("Delete File") {
-			protected void execute() {
-				try {
-					IProcess process = nodeMenu.getH2HNode().getFileManagement().delete(askForFile(true));
-					executeBlocking(process);
-				} catch (IllegalArgumentException | NoSessionException e) {
-					System.out.println("Could not delete the file. Reason: " + e.getMessage());
-				}
+			protected void execute() throws Hive2HiveException {
+				IProcess process = nodeMenu.getH2HNode().getFileManagement().delete(askForFile(true));
+				executeBlocking(process);
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Move File") {
-			protected void execute() {
-				try {
-					System.out.println("Source path needed: ");
-					File source = askForFile(true);
+			protected void execute() throws Hive2HiveException {
+				System.out.println("Source path needed: ");
+				File source = askForFile(true);
 
-					System.out.println("Destination path needed: ");
-					File destination = askForFile(false);
+				System.out.println("Destination path needed: ");
+				File destination = askForFile(false);
 
-					IProcess process = nodeMenu.getH2HNode().getFileManagement().move(source, destination);
-					executeBlocking(process);
-				} catch (IllegalArgumentException | NoSessionException e) {
-					System.out.println("Could not delete the file. Reason: " + e.getMessage());
-				}
+				IProcess process = nodeMenu.getH2HNode().getFileManagement().move(source, destination);
+				executeBlocking(process);
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Get Digest") {
-			protected void execute() {
-				try {
-					IProcess process = nodeMenu.getH2HNode().getFileManagement().getDigest();
-					executeBlocking(process);
-				} catch (Hive2HiveException e) {
-					System.out.println("Could not delete the file. Reason: " + e.getMessage());
+			protected void execute() throws Hive2HiveException {
+				IGetDigestProcess process = nodeMenu.getH2HNode().getFileManagement().getDigest();
+				executeBlocking(process);
+
+				// print the digest
+				List<Path> digest = process.getDigest();
+				System.out.println("Digest request resulted:");
+				for (Path path : digest) {
+					System.out.println("* " + path.toString());
 				}
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Logout") {
-			protected void execute() {
-				try {
-					IProcess process = nodeMenu.getH2HNode().getUserManagement().logout();
-					executeBlocking(process);
-				} catch (NoSessionException e) {
-					System.out.println("Could not logout. Reason: " + e.getMessage());
-				}
+			protected void execute() throws Hive2HiveException {
+				IProcess process = nodeMenu.getH2HNode().getUserManagement().logout();
+				executeBlocking(process);
 			}
 		});
 		add(new H2HConsoleMenuItem("Unregister") {
