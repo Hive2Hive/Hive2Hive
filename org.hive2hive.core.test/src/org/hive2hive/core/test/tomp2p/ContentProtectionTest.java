@@ -27,7 +27,6 @@ import org.hive2hive.core.test.H2HTestData;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -190,7 +189,6 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		p2.shutdown().awaitUninterruptibly();
 	}
 
-	@Ignore
 	@Test
 	public void testPut3() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
 			InvalidKeyException, SignatureException {
@@ -239,7 +237,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
-		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838).keyPair(keyPairPeer1)
+		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4836).keyPair(keyPairPeer1)
 				.setEnableIndirectReplication(true).makeAndListen();
 		KeyPair keyPairPeer2 = gen.generateKeyPair();
 		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1).keyPair(keyPairPeer2)
@@ -346,7 +344,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
-		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838).keyPair(keyPairPeer1)
+		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4834).keyPair(keyPairPeer1)
 				.setEnableIndirectReplication(true).makeAndListen();
 		KeyPair keyPairPeer2 = gen.generateKeyPair();
 		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1).keyPair(keyPairPeer2)

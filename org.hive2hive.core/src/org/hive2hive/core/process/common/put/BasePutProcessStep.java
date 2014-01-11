@@ -31,13 +31,17 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 	public BasePutProcessStep(ProcessStep nextStep) {
 		this.nextStep = nextStep;
 	}
-
+	
+	@Deprecated
 	protected void put(String locationKey, String contentKey, NetworkContent content) {
+		put(locationKey, contentKey, content, null);
+	}
+
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
-		// TODO add protection keys
-		this.protectionKey = null;
+		this.protectionKey = protectionKey;
 
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {

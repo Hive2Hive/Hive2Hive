@@ -34,12 +34,16 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 		this.nextStep = nexStep;
 	}
 
+	@Deprecated
 	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove) {
+		remove(locationKey, contentKey, contentToRemove, null);
+	}
+	
+	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove, KeyPair protectionKey) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
-		// TODO add protection keys
-		this.protectionKey = null;
+		this.protectionKey = protectionKey;
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
