@@ -32,8 +32,9 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * Creates a process tree based on a list of files. Note that the list must be in
-	 * preorder (root first, even if the action is DELETE)
+	 * Creates a process queue based on a list of files. Note that the list must be in
+	 * preorder (root first, even if the action is DELETE). Each queue element is a process, when it has
+	 * finished, the process starts the next element in the queue.
 	 * 
 	 * @param files preorder list of files
 	 * @param networkManager the network manager
@@ -41,34 +42,34 @@ public class FileRecursionUtil {
 	 * @return the root process which can be started and holds all necessary information of its child
 	 *         processes
 	 */
-	public static ProcessTreeNode buildProcessTree(List<Path> files, NetworkManager networkManager,
+	public static ProcessTreeNode buildProcessList(List<Path> files, NetworkManager networkManager,
 			FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
 		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
+		ProcessTreeNode parent = rootProcess;
 		for (Path path : files) {
-			ProcessTreeNode parent = null;
 			try {
 				// initialize the process
 				Process process = null;
 				switch (action) {
 					case NEW_FILE:
 						process = new NewFileProcess(path.toFile(), networkManager);
-						parent = getParent(rootProcess, path, true);
+						// parent = getParent(rootProcess, path, true);
 						break;
 					case MODIFY_FILE:
 						process = new NewVersionProcess(path.toFile(), networkManager);
-						parent = getParent(rootProcess, path, false);
+						// parent = getParent(rootProcess, path, false);
 						break;
 					case DELETE:
 						process = new DeleteFileProcess(path.toFile(), networkManager);
-						parent = getParent(rootProcess, path, true);
+						// parent = getParent(rootProcess, path, true);
 						break;
 					default:
 						logger.error("Type mismatch");
 						continue;
 				}
 
-				new FileProcessTreeNode(process, parent, path);
+				parent = new FileProcessTreeNode(process, parent, path);
 			} catch (IllegalFileLocation e) {
 				logger.error("File cannot be uploaded", e);
 			} catch (NoSessionException e) {
@@ -95,10 +96,11 @@ public class FileRecursionUtil {
 	 */
 	private static ProcessTreeNode getParent(FileProcessTreeNode root, Path path,
 			boolean parentModificationSensitive) {
-		Path parent = path.getParent();
+		// iterate through all nodes
 		for (ProcessTreeNode node : root.getAllChildren()) {
 			FileProcessTreeNode fileNode = (FileProcessTreeNode) node;
-			if (fileNode.getPath().equals(parent)) {
+			// check if the path matches with the parent's path
+			if (fileNode.getPath().equals(path.getParent())) {
 				if (parentModificationSensitive) {
 					return getParentOrSibling(fileNode);
 				} else {
@@ -112,20 +114,26 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * Returns the previous sibling or the parent when no sibling yet
-	 * 
-	 * @param parent
-	 * @return
+	 * Returns the previous sibling or the parent itself when no sibling yet
 	 */
 	private static ProcessTreeNode getParentOrSibling(ProcessTreeNode parent) {
-		if (parent.getChildren().isEmpty()) {
+		List<ProcessTreeNode> children = parent.getChildren();
+		if (children == null || children.isEmpty()) {
+			// no children yet, add the first
 			return parent;
 		} else {
-			List<ProcessTreeNode> children = parent.getChildren();
+			// return the last children (by our definition)
 			return children.get(children.size() - 1);
 		}
 	}
 
+	/**
+	 * Get a list of all files and subfiles in the root directory. The files are visited and returned in
+	 * preorder
+	 * 
+	 * @param root
+	 * @return
+	 */
 	public static List<Path> getPreorderList(Path root) {
 		List<Path> allFiles = new ArrayList<Path>();
 		listFiles(root, allFiles);
@@ -201,7 +209,7 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * Reverses a tree (conserving the levels, but rearranging parent-child relations).
+	 * Reverse a tree (preserving the levels, but swapping parent-child relations).
 	 */
 	private static ProcessTreeNode reverseTree(ProcessTreeNode root) {
 		List<ProcessTreeNode> allNodes = root.getAllChildren();

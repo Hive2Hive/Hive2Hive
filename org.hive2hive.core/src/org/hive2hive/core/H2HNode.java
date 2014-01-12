@@ -169,7 +169,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			process = FileRecursionUtil.buildProcessTree(preorderList, networkManager,
+			process = FileRecursionUtil.buildProcessList(preorderList, networkManager,
 					FileProcessAction.NEW_FILE);
 		} else {
 			// add single file
@@ -200,7 +200,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			process = FileRecursionUtil.buildProcessTree(preorderList, networkManager,
+			process = FileRecursionUtil.buildProcessList(preorderList, networkManager,
 					FileProcessAction.DELETE);
 		} else {
 			// delete a single file
