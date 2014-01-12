@@ -82,9 +82,10 @@ public class DataManager {
 
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			NetworkContent content, KeyPair protectionKey) {
-		logger.debug(String.format(
-				"put location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-				locationKey, domainKey, contentKey, content.getVersionKey()));
+		logger.debug(String
+				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+						content.getClass().getName(), locationKey, domainKey, contentKey,
+						content.getVersionKey()));
 		try {
 			Data data = new Data(content);
 			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());

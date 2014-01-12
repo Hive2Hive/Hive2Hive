@@ -1,9 +1,9 @@
 package org.hive2hive.core.test.process.common.put;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +17,10 @@ import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.put.PutLocationStep;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -63,29 +64,27 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
 		newLocations.addPeerAddress(putter.getPeerAddress());
+		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutLocationStep step = new PutLocationStep(newLocations, null);
+		PutLocationStep step = new PutLocationStep(newLocations, protectionKeys, null);
 		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 
 		// get the locations
-		FutureGet future = proxy.getDataManager().get(Number160.createHash(userId), H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
+		FutureGet future = proxy.getDataManager().get(Number160.createHash(userId),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
 		future.awaitUninterruptibly();
 		Assert.assertNotNull(future.getData());
 		Locations found = (Locations) future.getData().object();
-		
+
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());
 
@@ -104,22 +103,19 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
 		newLocations.addPeerAddress(putter.getPeerAddress());
+		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(putter) {
 		};
-		PutLocationStep step = new PutLocationStep(newLocations, null);
+		PutLocationStep step = new PutLocationStep(newLocations, protectionKeys, null);
 		process.setNextStep(step);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceeded());
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		ProcessTestUtil.waitTillFailed(listener, 10);
 
 		// get the locations which should be stored at the proxy --> they should be null
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(userId),
