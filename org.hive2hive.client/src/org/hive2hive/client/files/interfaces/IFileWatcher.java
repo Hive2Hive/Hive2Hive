@@ -1,10 +1,12 @@
 package org.hive2hive.client.files.interfaces;
 
+import org.apache.commons.io.monitor.FileAlterationListener;
+
 public interface IFileWatcher {
 	
-	public void attachFileObserver(IFileObserver observer);
+	public void attachFileListener(FileAlterationListener listener);
 	
-	public void detachFileObserver(IFileObserver observer);
+	public void detachFileListener(FileAlterationListener listener);
 	
 	public void start();
 	
