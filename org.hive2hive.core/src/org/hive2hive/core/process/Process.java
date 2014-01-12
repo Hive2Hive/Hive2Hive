@@ -174,7 +174,7 @@ public abstract class Process implements IProcess {
 			}
 		}
 	}
-	
+
 	// TODO redesign this here
 	private Exception rollbackException;
 
@@ -199,7 +199,7 @@ public abstract class Process implements IProcess {
 				// mark process as stopped
 				state = ProcessState.STOPPED;
 				ProcessManager.getInstance().detachProcess(this);
-				// notify listeners about rollbacking 
+				// notify listeners about rollbacking
 				for (IProcessListener listener : listeners) {
 					listener.onFail(rollbackException);
 				}
@@ -219,14 +219,13 @@ public abstract class Process implements IProcess {
 			logger.error("Could not notify all my clients since I don't have a session");
 		}
 	}
-	
+
 	/**
 	 * Notify all clients of an users
 	 */
 	public void notifyOtherUser(String userId, INotificationMessageFactory messageFactory) {
 		logger.debug(String.format("Start notifiying clients of user '%s'", userId));
-		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userId,
-				messageFactory);
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userId, messageFactory);
 		notifyProcess.start();
 	}
 
@@ -249,11 +248,17 @@ public abstract class Process implements IProcess {
 		return networkManager;
 	}
 
+	@Override
 	public void addListener(IProcessListener listener) {
 		listeners.add(listener);
 	}
 
+	@Override
 	public boolean removeListener(IProcessListener listener) {
 		return listeners.remove(listener);
+	}
+
+	public List<IProcessListener> getListeners() {
+		return listeners;
 	}
 }

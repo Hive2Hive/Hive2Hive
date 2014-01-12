@@ -3,6 +3,7 @@ package org.hive2hive.core.process.login;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.file.FileManager;
@@ -12,7 +13,9 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.process.util.ProcessTreeNode;
@@ -64,12 +67,18 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		/*
 		 * Upload the locally added and updated files
+		 * count up to 2:
+		 * - until the uploadProcessNewFiles is done (using listeners)
+		 * - until the uploadProcessNewVersions is done (using listeners)
 		 */
+		CountDownLatch latch = new CountDownLatch(2);
 		List<Path> toUploadNewFiles = synchronizer.getAddedLocally();
-		ProcessTreeNode uploadProcessNewFiles = startUpload(toUploadNewFiles, FileProcessAction.NEW_FILE);
+		Process uploadProcessNewFiles = startUpload(toUploadNewFiles, FileProcessAction.NEW_FILE);
+		uploadProcessNewFiles.addListener(new CountdownListener(latch));
+
 		List<Path> toUploadNewVersions = synchronizer.getUpdatedLocally();
-		ProcessTreeNode uploadProcessNewVersions = startUpload(toUploadNewVersions,
-				FileProcessAction.MODIFY_FILE);
+		Process uploadProcessNewVersions = startUpload(toUploadNewVersions, FileProcessAction.MODIFY_FILE);
+		uploadProcessNewVersions.addListener(new CountdownListener(latch));
 
 		/*
 		 * Delete the files in the DHT
@@ -87,8 +96,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		// TODO check process state and if it does not change for a while, don't wait anymore (else, it may
 		// cause an endless loop)
-		while (!(downloadProcess.isDone() && uploadProcessNewFiles.isDone()
-				&& uploadProcessNewVersions.isDone() && deleteProcess.isDone())) {
+		while (!(downloadProcess.isDone() && deleteProcess.isDone()) && latch.getCount() > 0) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -129,13 +137,13 @@ public class SynchronizeFilesStep extends ProcessStep {
 		return rootProcess;
 	}
 
-	private ProcessTreeNode startUpload(List<Path> toUpload, FileProcessAction action) {
+	private Process startUpload(List<Path> toUpload, FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
-		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessList(toUpload, getNetworkManager(),
-				action);
+		Process rootProcess = FileRecursionUtil.buildProcessList(toUpload, getNetworkManager(), action);
 
-		if (toUpload.size() > 0)
+		if (toUpload.size() > 0) {
 			logger.debug("Start uploading new files with action " + action.name());
+		}
 
 		rootProcess.start();
 		return rootProcess;
@@ -155,5 +163,30 @@ public class SynchronizeFilesStep extends ProcessStep {
 	@Override
 	public void rollBack() {
 		getProcess().nextRollBackStep();
+	}
+
+	/**
+	 * Simply counts down the latch
+	 * 
+	 * @author Nico
+	 * 
+	 */
+	private class CountdownListener implements IProcessListener {
+
+		private final CountDownLatch latch;
+
+		public CountdownListener(CountDownLatch latch) {
+			this.latch = latch;
+		}
+
+		@Override
+		public void onSuccess() {
+			latch.countDown();
+		}
+
+		@Override
+		public void onFail(Exception exception) {
+			latch.countDown();
+		}
 	}
 }

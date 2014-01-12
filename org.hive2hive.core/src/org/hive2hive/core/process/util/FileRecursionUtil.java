@@ -3,6 +3,7 @@ package org.hive2hive.core.process.util;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -42,34 +43,26 @@ public class FileRecursionUtil {
 	 * @return the root process which can be started and holds all necessary information of its child
 	 *         processes
 	 */
-	public static ProcessTreeNode buildProcessList(List<Path> files, NetworkManager networkManager,
+	public static Process buildProcessList(List<Path> files, NetworkManager networkManager,
 			FileProcessAction action) {
-		// synchronize the files that need to be uploaded into the DHT
-		FileProcessTreeNode rootProcess = new FileProcessTreeNode();
-		ProcessTreeNode parent = rootProcess;
+		List<Process> processes = new ArrayList<Process>(files.size());
 		for (Path path : files) {
 			try {
-				// initialize the process
-				Process process = null;
+				// initialize the process and add it to the list
 				switch (action) {
 					case NEW_FILE:
-						process = new NewFileProcess(path.toFile(), networkManager);
-						// parent = getParent(rootProcess, path, true);
+						processes.add(new NewFileProcess(path.toFile(), networkManager));
 						break;
 					case MODIFY_FILE:
-						process = new NewVersionProcess(path.toFile(), networkManager);
-						// parent = getParent(rootProcess, path, false);
+						processes.add(new NewVersionProcess(path.toFile(), networkManager));
 						break;
 					case DELETE:
-						process = new DeleteFileProcess(path.toFile(), networkManager);
-						// parent = getParent(rootProcess, path, true);
+						processes.add(new DeleteFileProcess(path.toFile(), networkManager));
 						break;
 					default:
 						logger.error("Type mismatch");
-						continue;
+						return null;
 				}
-
-				parent = new FileProcessTreeNode(process, parent, path);
 			} catch (IllegalFileLocation e) {
 				logger.error("File cannot be uploaded", e);
 			} catch (NoSessionException e) {
@@ -79,9 +72,29 @@ public class FileRecursionUtil {
 
 		if (action == FileProcessAction.DELETE) {
 			// deletion happens in reverse order
-			return reverseTree(rootProcess);
+			Collections.reverse(processes);
+		}
+
+		// only start the next process if the previous failed at modify case
+		boolean startAtFail = action == FileProcessAction.MODIFY_FILE;
+
+		// the list is now in the correct order, build the processes now
+		Process previous = null;
+		for (Process process : processes) {
+			if (previous != null) {
+				previous.addListener(new StartNextProcessListener(process, previous, startAtFail));
+			}
+
+			previous = process;
+		}
+
+		// omit NullPointerExceptions
+		if (processes.isEmpty()) {
+			// return dummy process to omit NPE
+			return new Process(null) {
+			};
 		} else {
-			return rootProcess;
+			return processes.get(0);
 		}
 	}
 
