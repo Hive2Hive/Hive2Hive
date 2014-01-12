@@ -6,7 +6,6 @@ import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.Connection;
 
 public class H2HFileListener implements FileAlterationListener {
 	
@@ -19,44 +18,46 @@ public class H2HFileListener implements FileAlterationListener {
 
 	@Override
 	public void onDirectoryCreate(File directory) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onDirectoryCreate()");	
+		printFileDetails("created", directory);
 	}
 
 	@Override
 	public void onDirectoryChange(File directory) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onDirectoryChange()");	
+		printFileDetails("changed", directory);
 	}
 
 	@Override
 	public void onDirectoryDelete(File directory) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onDirectoryDelete()");	
+		printFileDetails("deleted", directory);
 	}
 
 	@Override
 	public void onFileCreate(File file) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onFileCreate()");		
+		printFileDetails("created", file);
 	}
 
 	@Override
 	public void onFileChange(File file) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onFileChange()");		
+		printFileDetails("changed", file);
 	}
 
 	@Override
 	public void onFileDelete(File file) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onFileDelete()");		
+		printFileDetails("deleted", file);
 	}
 
 	@Override
 	public void onStop(FileAlterationObserver observer) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onStop()");		
 	}
 
+	private void printFileDetails(String reason, File file) {
+		System.out.printf("%s %s: %s\n", file.isDirectory() ? "Directory" : "File", reason, file.getAbsolutePath());
+	}
 }
