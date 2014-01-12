@@ -1,4 +1,4 @@
-package org.hive2hive.client.files.interfaces;
+package org.hive2hive.client.files.events;
 
 import java.nio.file.Path;
 
