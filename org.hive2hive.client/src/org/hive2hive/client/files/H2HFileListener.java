@@ -14,8 +14,7 @@ public class H2HFileListener implements FileAlterationListener {
 
 	@Override
 	public void onStart(FileAlterationObserver observer) {
-		// TODO Auto-generated method stub
-		
+		logger.debug("onStart()");
 	}
 
 	@Override

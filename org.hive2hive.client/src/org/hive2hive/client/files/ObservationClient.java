@@ -3,9 +3,13 @@ package org.hive2hive.client.files;
 import java.io.File;
 import java.nio.file.Paths;
 
+import org.hive2hive.client.LoggerInit;
+
 public class ObservationClient {
 	
 	public static void main(String[] args) {
+		
+		LoggerInit.initLogger();
 		
 		File rootDirectory = new File(Paths.get(System.getProperty("user.home"), "Hive2Hive").toString());
 		
