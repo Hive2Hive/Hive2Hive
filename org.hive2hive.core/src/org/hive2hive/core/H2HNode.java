@@ -27,7 +27,6 @@ import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 
 /**

@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.userprofiletask.share;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -15,6 +17,7 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	private final FileManager fileManager;
 
 	private MetaDocument metaDocument;
+	private KeyPair protectionKeys;
 
 	public ShareFolderNotificationProcessContext(Process process, FileTreeNode fileTreeNode,
 			UserProfileManager profileManager, FileManager fileManager) {
@@ -44,6 +47,16 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+	
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
 	}
 
 }

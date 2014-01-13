@@ -8,17 +8,19 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.common.File2MetaFileStep;
 import org.hive2hive.core.process.upload.UploadFileProcessContext;
 
 /**
- * Process to upload a new version of a file into the DHT
+ * Process to upload a new version of a file into the DHT.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class NewVersionProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(NewVersionProcess.class);
+	
 	private final UploadFileProcessContext context;
 
 	public NewVersionProcess(File file, NetworkManager networkManager) throws NoSessionException,
@@ -26,8 +28,8 @@ public class NewVersionProcess extends Process {
 		super(networkManager);
 
 		H2HSession session = networkManager.getSession();
-		context = new UploadFileProcessContext(this, file, session.getProfileManager(),
-				session.getFileManager(), session.getFileConfiguration(), true);
+
+		context = new UploadFileProcessContext(this, file, session, true);
 
 		// TODO shared files not considered yet
 
@@ -39,7 +41,11 @@ public class NewVersionProcess extends Process {
 			// 5. update the user profile (md5 hash)
 			// 6. notify other clients
 			logger.debug("Adding a new file version to the DHT");
-			setNextStep(new PutNewVersionChunkStep(file, context));
+
+			File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getH2HSession()
+					.getProfileManager(), context.getH2HSession().getFileManager(), context,
+					new CreateNewVersionStep());
+			setNextStep(file2MetaStep);
 		} else {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}

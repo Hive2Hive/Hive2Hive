@@ -19,11 +19,14 @@ import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 public class DeleteChunkStep extends BaseRemoveProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteChunkStep.class);
+	
 	private List<KeyPair> chunksToDelete;
-
-	DeleteChunkStep(List<KeyPair> chunksToDelete) {
+	private KeyPair protectionKeys;
+	
+	DeleteChunkStep(List<KeyPair> chunksToDelete, KeyPair protectionsKeys) {
 		super(null);
 		this.chunksToDelete = chunksToDelete;
+		this.protectionKeys = protectionsKeys;
 	}
 
 	@Override
@@ -36,9 +39,9 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 			logger.debug("Cleaning up a old file version. " + chunksToDelete.size()
 					+ " more chunks to delete...");
 			KeyPair toDelete = chunksToDelete.remove(0);
-			nextStep = new DeleteChunkStep(chunksToDelete);
+			nextStep = new DeleteChunkStep(chunksToDelete, protectionKeys);
 			// TODO: original chunk is not here in case a rollback happens.
-			remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0));
+			remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0), protectionKeys);
 		}
 	}
 }

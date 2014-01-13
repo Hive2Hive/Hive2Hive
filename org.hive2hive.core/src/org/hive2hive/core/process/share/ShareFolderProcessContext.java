@@ -23,7 +23,7 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 	private final H2HSession session;
 	
 	private PublicKey friendsPublicKey;
-	private KeyPair domainKey;
+	private KeyPair protectionKeys;
 	private MetaDocument metaDocument;
 	private FileTreeNode fileTreeNode;
 	
@@ -47,12 +47,14 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 		return session;
 	}
 
-	public void setDomainKey(KeyPair domainKey) {
-		this.domainKey = domainKey;
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
 	}
 
-	public KeyPair getDomainKey() {
-		return domainKey;
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
 	}
 	
 	public void setFileTreeNode(FileTreeNode fileTreeNode) {

@@ -36,7 +36,7 @@ public class SendNotificationsStep extends ProcessStep {
 			logger.debug(String
 					.format("Sending a notification message to %s# other sharing user(s) about a newly added sharing user.",
 							otherUsers.size()));
-			getProcess().notfyOtherUsers(null, new ShareFolderNotificationMessageFactory(metaFolder.getId(), context.getDomainKey()));
+			getProcess().notfyOtherUsers(null, new ShareFolderNotificationMessageFactory(metaFolder.getId(), context.getProtectionKeys()));
 		}
 		
 		// notify other clients about the newly added user

@@ -1,27 +1,34 @@
 package org.hive2hive.core.process.delete;
 
-import java.security.PublicKey;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
+import org.hive2hive.core.process.common.put.BasePutProcessStep;
+import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * Updates the parent meta data such that the child is removed from the list
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
-public class UpdateParentMetaStep extends PutMetaDocumentStep {
+public class UpdateParentMetaStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
-	private final PublicKey childKey;
 	private final String childName;
 
-	public UpdateParentMetaStep(PublicKey childKey, String childName) {
-		super(null, null);
-		this.childKey = childKey;
+	public UpdateParentMetaStep(String childName) {
+		super(null); // next step is null, process is done
 		this.childName = childName;
 	}
 
@@ -29,23 +36,40 @@ public class UpdateParentMetaStep extends PutMetaDocumentStep {
 	public void start() {
 		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
 
-		// remove the child from the parent meta data
-		MetaFolder parentMeta = (MetaFolder) context.getMetaDocument();
+		MetaFolder parentMeta = (MetaFolder) context.getParentMetaFolder();
 		if (parentMeta == null) {
-			getProcess().stop("Could not find the parent meta data");
+			getProcess().stop("Parent meta folder is null.");
 			return;
 		}
-
-		parentMeta.removeChildKey(childKey);
+		KeyPair parentProtectionKeys = context.getParentProtectionKeys();
+		if (parentProtectionKeys == null) {
+			getProcess().stop("Content protection keys for parent meta folder are null (no write permission).");
+			return;
+		}
+		MetaDocument childMeta = context.getMetaDocument();
+		if (childMeta == null) {
+			getProcess().stop("Child meta document is null.");
+		}
+		
+		// remove the child from the parent meta data
+		parentMeta.removeChildKey(childMeta.getId());
 		logger.debug("Removed child from meta folder. Total children = " + parentMeta.getChildKeys().size());
 
 		// notify other clients (can be multiple users)
 		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentMeta.getId(),
 				childName);
 		getProcess().notfyOtherUsers(parentMeta.getUserList(), messageFactory);
-
-		// next step is null, process is done
-		super.metaDocument = parentMeta;
-		super.start();
+		
+		try {
+			logger.debug("Encrypting parent meta folder in a hybrid manner.");
+			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(parentMeta,
+					parentMeta.getId());
+			encrypted.setBasedOnKey(parentMeta.getVersionKey());
+			encrypted.generateVersionKey();
+			put(key2String(parentMeta.getId()), H2HConstants.META_DOCUMENT, encrypted, parentProtectionKeys);
+		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
+			getProcess().stop("Parent meta folder could not be encrypted.");
+		}
 	}
 }

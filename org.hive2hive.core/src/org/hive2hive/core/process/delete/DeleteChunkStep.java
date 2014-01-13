@@ -14,16 +14,15 @@ import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
  * Deletes chunks in the DHT. After deleting a chunk, it calls itself recursively until all chunks of all
  * versions are deleted.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class DeleteChunkStep extends BaseRemoveProcessStep {
-
+	
 	private List<KeyPair> chunksToDelete;
 
 	public DeleteChunkStep() {
 		super(null);
-
 	}
 
 	private DeleteChunkStep(List<KeyPair> chunksToDelete) {
@@ -34,6 +33,11 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 	@Override
 	public void start() {
 		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
+		
+		if (context.getProtectionKeys() == null) {
+			getProcess().stop("No content protection keys given. User has no write permission.");
+			return;
+		}
 
 		if (chunksToDelete == null) {
 			// first time called, initialize the list
@@ -59,7 +63,7 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 			KeyPair toDelete = chunksToDelete.remove(0);
 			nextStep = new DeleteChunkStep(chunksToDelete);
 			// TODO: original chunk is not here in case a rollback happens.
-			remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0));
+			remove(key2String(toDelete.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0), context.getProtectionKeys());
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.recover;
 
 import java.io.File;
+import java.security.KeyPair;
 
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -13,6 +14,7 @@ public class RecoverFileProcessContext extends ProcessContext implements IGetMet
 	private final IVersionSelector versionSelector;
 	private final File file;
 	private MetaDocument metaDocument;
+	private KeyPair protectionKeys;
 	private FileVersion version;
 
 	public RecoverFileProcessContext(Process process, File file, IVersionSelector versionSelector) {
@@ -45,5 +47,15 @@ public class RecoverFileProcessContext extends ProcessContext implements IGetMet
 
 	public File getFile() {
 		return file;
+	}
+
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
 	}
 }

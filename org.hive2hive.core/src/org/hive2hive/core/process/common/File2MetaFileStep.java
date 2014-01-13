@@ -63,6 +63,9 @@ public class File2MetaFileStep extends ProcessStep {
 					return;
 				}
 			}
+			
+			// set the corresponding content protection keys
+			metaContext.setProtectionKeys(fileNode.getProtectionKeys());
 
 			// get the appropriate meta document and then update it
 			GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(fileNode.getKeyPair(), nextStep,

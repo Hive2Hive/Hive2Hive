@@ -124,12 +124,16 @@ public class UserProfileManager {
 	 *             himself as intending to put)
 	 */
 	public void readyToPut(UserProfile profile, int pid) throws PutFailedException {
+		try {
 		if (modifying != null && modifying.equals(pid)) {
 			modifying.setUserProfile(profile);
 			modifying.readyToPut();
 			modifying.waitForPut();
 		} else {
 			throw new PutFailedException("Not allowed to put anymore");
+		}
+		}catch (PutFailedException e) {
+			throw new PutFailedException(e.getMessage());
 		}
 	}
 
@@ -226,7 +230,6 @@ public class UserProfileManager {
 						logger.debug("Process " + modifying.getPid()
 								+ " made modifcations and uploads them now");
 						put(modifying);
-						logger.debug("Notifying process " + modifying.getPid() + " that putting is finished");
 					} else if (!modifying.isAborted()) {
 						// request is not ready to put and has not been aborted
 						logger.error("Process " + modifying.getPid()
@@ -466,7 +469,7 @@ public class UserProfileManager {
 
 		@Override
 		public void onPutFailure() {
-			logger.error("Put failed. Notifying process " + getPid());
+			logger.error("Put failed. Notifying process " + getPid() + ".");
 			setPutError(new PutFailedException("Could not put the user profile into the DHT"));
 			synchronized (entryWaiter) {
 				entryWaiter.notify();

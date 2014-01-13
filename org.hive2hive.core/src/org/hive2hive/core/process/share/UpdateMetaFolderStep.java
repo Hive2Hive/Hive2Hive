@@ -43,7 +43,7 @@ public class UpdateMetaFolderStep extends ProcessStep {
 		modified = true;
 
 		logger.debug("Putting the modified meta folder (containing the new user permission)");
-		PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFolder, new UpdateUserProfileStep());
+		PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFolder, null, new UpdateUserProfileStep());
 		getProcess().setNextStep(putMetaStep);
 	}
 

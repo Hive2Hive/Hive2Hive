@@ -37,8 +37,9 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 
 		DeleteFileProcessContext context = (DeleteFileProcessContext) getProcess().getContext();
 
-		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getProfileManager(),
-				context.getFileManager(), context, new DeleteChunkStep());
+		File2MetaFileStep file2MetaStep = new File2MetaFileStep(file, context.getH2HSession()
+				.getProfileManager(), context.getH2HSession().getFileManager(), context,
+				new DeleteChunkStep());
 		getProcess().setNextStep(file2MetaStep);
 	}
 

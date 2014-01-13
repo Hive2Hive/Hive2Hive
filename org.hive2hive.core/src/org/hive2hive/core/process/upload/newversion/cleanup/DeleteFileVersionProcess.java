@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.upload.newversion.cleanup;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
@@ -17,10 +19,10 @@ public class DeleteFileVersionProcess extends Process {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileVersionProcess.class);
 
-	public DeleteFileVersionProcess(NetworkManager networkManager, FileVersion version) {
+	public DeleteFileVersionProcess(NetworkManager networkManager, FileVersion version, KeyPair protectionsKeys) {
 		super(networkManager);
 
 		logger.debug("Deleting file version '" + version.getIndex() + "'");
-		setNextStep(new DeleteChunkStep(version.getChunkIds()));
+		setNextStep(new DeleteChunkStep(version.getChunkIds(), protectionsKeys));
 	}
 }

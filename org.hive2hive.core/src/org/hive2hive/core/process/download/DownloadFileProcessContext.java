@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.download;
 
 import java.nio.file.Path;
+import java.security.KeyPair;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -14,7 +15,9 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	private final FileManager fileManager;
 	private final Path destination;
 	private final int indexToDownload;
+
 	private MetaDocument metaDocument;
+	private KeyPair protectionKeys;
 
 	public DownloadFileProcessContext(DownloadFileProcess process, FileTreeNode file,
 			FileManager fileManager, Path destination, int indexToDownload) {
@@ -41,6 +44,16 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
+	}
+
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
 	}
 
 	public Path getDestination() {

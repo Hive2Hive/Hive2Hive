@@ -48,7 +48,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// store for backup
 			originalDomainKey = fileNode.getProtectionKeys();
 			// modify
-			fileNode.setProtectionKeys(context.getDomainKey());
+			fileNode.setProtectionKeys(context.getProtectionKeys());
 
 			context.setFileTreeNode(fileNode);
 

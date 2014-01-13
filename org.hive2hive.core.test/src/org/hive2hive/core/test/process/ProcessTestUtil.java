@@ -150,6 +150,7 @@ public class ProcessTestUtil {
 		IGetMetaContext context = new IGetMetaContext() {
 
 			private MetaDocument metaDocument;
+			private KeyPair protectionKeys;
 
 			@Override
 			public void setMetaDocument(MetaDocument metaDocument) {
@@ -159,6 +160,16 @@ public class ProcessTestUtil {
 			@Override
 			public MetaDocument getMetaDocument() {
 				return metaDocument;
+			}
+
+			@Override
+			public void setProtectionKeys(KeyPair protectionKeys) {
+				this.protectionKeys = protectionKeys;				
+			}
+
+			@Override
+			public KeyPair getProtectionKeys() {
+				return protectionKeys;
 			}
 		};
 

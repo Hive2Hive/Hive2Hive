@@ -48,8 +48,8 @@ public class DeleteFileProcess extends Process {
 		verify(file);
 
 		H2HSession session = networkManager.getSession();
-		context = new DeleteFileProcessContext(this, session.getFileManager(), file.isDirectory(),
-				session.getProfileManager());
+
+		context = new DeleteFileProcessContext(session, file.isDirectory(), this);
 
 		// start by deleting the file
 		setNextStep(new DeleteFileOnDiskStep(file));
@@ -79,8 +79,8 @@ public class DeleteFileProcess extends Process {
 		logger.info("Deleting file/folder from the DHT");
 
 		H2HSession session = networkManager.getSession();
-		context = new DeleteFileProcessContext(this, session.getFileManager(), fileNode.isFolder(),
-				session.getProfileManager());
+		
+		context = new DeleteFileProcessContext(session, fileNode.isFolder(), this);
 
 		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, session.getProfileManager(),
 				session.getFileManager(), context, new DeleteChunkStep());
