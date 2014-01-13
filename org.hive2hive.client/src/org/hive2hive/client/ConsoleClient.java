@@ -1,10 +1,7 @@
 package org.hive2hive.client;
 
-import java.io.IOException;
-
 import org.fusesource.jansi.AnsiConsole;
 import org.hive2hive.client.menu.TopLevelMenu;
-import org.hive2hive.core.log.H2HLoggerFactory;
 
 /**
  * A console-based client to use the Hive2Hive library.
@@ -19,12 +16,8 @@ public class ConsoleClient {
 		AnsiConsole.systemInstall();
 		Formatter.setDefaultForeground();
 		printHeader();
-
-		try {
-			H2HLoggerFactory.initFactory();
-		} catch (IOException e) {
-			System.err.println("H2HLoggerFactory could not be initialized.");
-		}
+		
+		LoggerInit.initLogger();
 
 		new TopLevelMenu().open();
 		
