@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.login.postLogin;
+package org.hive2hive.core.test.process.login;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

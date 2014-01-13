@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.login.postLogin;
+package org.hive2hive.core.test.process.login;
 
 import java.io.File;
 import java.io.IOException;
@@ -142,7 +142,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		/** start sync **/
 		// the client that logs in
 		NetworkManager client = network.get(1);
-		startSync(client, fileManager1, 60);
+		startSync(client, fileManager1, 120);
 
 		/** verify if the remote changes are applied **/
 		file4 = new File(new File(fileManager1.getRoot().toFile(), "folder 1"), "file 4");
@@ -190,7 +190,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		/** start sync **/
 		// the client that logs in
 		NetworkManager client = network.get(1);
-		startSync(client, fileManager1, 60);
+		startSync(client, fileManager1, 120);
 
 		/** verify if the remote changes are applied **/
 		// modification of file 2 has been downloaded

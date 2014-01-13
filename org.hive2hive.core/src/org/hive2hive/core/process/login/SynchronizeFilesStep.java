@@ -66,25 +66,31 @@ public class SynchronizeFilesStep extends ProcessStep {
 		ProcessTreeNode downloadProcess = startDownload(toDownload);
 
 		/*
-		 * Upload the locally added and updated files
-		 * count up to 2:
-		 * - until the uploadProcessNewFiles is done (using listeners)
-		 * - until the uploadProcessNewVersions is done (using listeners)
+		 * count up to 3:
+		 * - until the uploadProcessNewFiles is done
+		 * - until the uploadProcessNewVersions is done
+		 * - until the deleteProess is done
 		 */
-		CountDownLatch latch = new CountDownLatch(2);
+		CountDownLatch latch = new CountDownLatch(3);
+		CountdownListener latchListener = new CountdownListener(latch);
+
+		/*
+		 * Upload the locally added and updated files
+		 */
 		List<Path> toUploadNewFiles = synchronizer.getAddedLocally();
 		Process uploadProcessNewFiles = startUpload(toUploadNewFiles, FileProcessAction.NEW_FILE);
-		uploadProcessNewFiles.addListener(new CountdownListener(latch));
+		uploadProcessNewFiles.addListener(latchListener);
 
 		List<Path> toUploadNewVersions = synchronizer.getUpdatedLocally();
 		Process uploadProcessNewVersions = startUpload(toUploadNewVersions, FileProcessAction.MODIFY_FILE);
-		uploadProcessNewVersions.addListener(new CountdownListener(latch));
+		uploadProcessNewVersions.addListener(latchListener);
 
 		/*
 		 * Delete the files in the DHT
 		 */
 		List<FileTreeNode> toDeleteInDHT = synchronizer.getDeletedLocally();
-		ProcessTreeNode deleteProcess = startDelete(toDeleteInDHT);
+		Process deleteProcess = startDelete(toDeleteInDHT);
+		deleteProcess.addListener(latchListener);
 
 		/*
 		 * Delete the remotely deleted files
@@ -96,7 +102,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		// TODO check process state and if it does not change for a while, don't wait anymore (else, it may
 		// cause an endless loop)
-		while (!(downloadProcess.isDone() && deleteProcess.isDone()) && latch.getCount() > 0) {
+		while (!(downloadProcess.isDone() && latch.getCount() == 0)) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -149,9 +155,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		return rootProcess;
 	}
 
-	private ProcessTreeNode startDelete(List<FileTreeNode> toDelete) {
-		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessTreeForDeletion(toDelete,
-				getNetworkManager());
+	private Process startDelete(List<FileTreeNode> toDelete) {
+		Process rootProcess = FileRecursionUtil.buildProcessTreeForDeletion(toDelete, getNetworkManager());
 
 		if (toDelete.size() > 0)
 			logger.debug("Start deleting files in DHT...");

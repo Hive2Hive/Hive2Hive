@@ -40,8 +40,7 @@ public class FileRecursionUtil {
 	 * @param files preorder list of files
 	 * @param networkManager the network manager
 	 * @param action which action to perform (decides over kind of process)
-	 * @return the root process which can be started and holds all necessary information of its child
-	 *         processes
+	 * @return the root process which can be started
 	 */
 	public static Process buildProcessList(List<Path> files, NetworkManager networkManager,
 			FileProcessAction action) {
@@ -78,66 +77,7 @@ public class FileRecursionUtil {
 		// only start the next process if the previous failed at modify case
 		boolean startAtFail = action == FileProcessAction.MODIFY_FILE;
 
-		// the list is now in the correct order, build the processes now
-		Process previous = null;
-		for (Process process : processes) {
-			if (previous != null) {
-				previous.addListener(new StartNextProcessListener(process, previous, startAtFail));
-			}
-
-			previous = process;
-		}
-
-		// omit NullPointerExceptions
-		if (processes.isEmpty()) {
-			// return dummy process to omit NPE
-			return new Process(null) {
-			};
-		} else {
-			return processes.get(0);
-		}
-	}
-
-	/**
-	 * Finds the parent process node: Either the parent file or the sibling (to omit conflicts when modifying
-	 * the parent)
-	 * 
-	 * @param parentModificationSensitive normally this parameter is false. However, some processes (like
-	 *            adding files) modify some data of the parent, thus it can lead to race conditions when two
-	 *            sibling are running concurrent. To indicate this, the parameter should be true. Then, the
-	 *            previous sibling is returned.
-	 */
-	private static ProcessTreeNode getParent(FileProcessTreeNode root, Path path,
-			boolean parentModificationSensitive) {
-		// iterate through all nodes
-		for (ProcessTreeNode node : root.getAllChildren()) {
-			FileProcessTreeNode fileNode = (FileProcessTreeNode) node;
-			// check if the path matches with the parent's path
-			if (fileNode.getPath().equals(path.getParent())) {
-				if (parentModificationSensitive) {
-					return getParentOrSibling(fileNode);
-				} else {
-					return fileNode;
-				}
-
-			}
-		}
-
-		return root;
-	}
-
-	/**
-	 * Returns the previous sibling or the parent itself when no sibling yet
-	 */
-	private static ProcessTreeNode getParentOrSibling(ProcessTreeNode parent) {
-		List<ProcessTreeNode> children = parent.getChildren();
-		if (children == null || children.isEmpty()) {
-			// no children yet, add the first
-			return parent;
-		} else {
-			// return the last children (by our definition)
-			return children.get(children.size() - 1);
-		}
+		return new ProcessChain(processes, startAtFail);
 	}
 
 	/**
@@ -189,66 +129,6 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * Creates a process tree based on a list of files to delete in the DHT. Note that the list must be in
-	 * preorder.
-	 * 
-	 * @param toDelete preorder list of files
-	 * @param networkManager the network manager
-	 * @return the root process which can be started and holds all necessary information of its child
-	 *         processes
-	 */
-	public static ProcessTreeNode buildProcessTreeForDeletion(List<FileTreeNode> toDelete,
-			NetworkManager networkManager) {
-		// delete the files in the DHT that are deleted while offline. First create a normal tree, but the
-		// order must be reverse. With the created tree, reverse it in a 2nd step.
-		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
-		for (FileTreeNode node : toDelete) {
-			ProcessTreeNode parent = getParent(rootProcess, node);
-			try {
-				// initialize the process
-				DeleteFileProcess deleteProcess = new DeleteFileProcess(node, networkManager);
-				new NodeProcessTreeNode(deleteProcess, parent, node);
-			} catch (IllegalArgumentException e) {
-				logger.error("File cannot be deleted", e);
-			} catch (NoSessionException e) {
-				logger.error("File cannot be deleted because there is no session", e);
-			}
-		}
-
-		// files are deleted in reverse order (not pre-order)
-		// get parent means get the child files --> start deletion at children,
-		// thus the tree must be reversed (by using the depth)
-		return reverseTree(rootProcess);
-	}
-
-	/**
-	 * Reverse a tree (preserving the levels, but swapping parent-child relations).
-	 */
-	private static ProcessTreeNode reverseTree(ProcessTreeNode root) {
-		List<ProcessTreeNode> allNodes = root.getAllChildren();
-		NodeProcessTreeNode reverseRootProcess = new NodeProcessTreeNode();
-		ProcessTreeNode currentParent = reverseRootProcess;
-		int currentDepth = allNodes.size();
-		while (currentDepth >= 0) {
-			for (ProcessTreeNode processNode : allNodes) {
-				if (processNode.getDepth() == currentDepth) {
-					currentParent.addChild(processNode);
-				}
-			}
-
-			if (currentParent.getChildren() != null && !currentParent.getChildren().isEmpty()) {
-				// children are filled --> take first child as new parent
-				currentParent = currentParent.getChildren().get(0);
-			}
-
-			// decrease depth
-			currentDepth--;
-		}
-
-		return reverseRootProcess;
-	}
-
-	/**
 	 * Finds the parent process node
 	 */
 	private static ProcessTreeNode getParent(NodeProcessTreeNode root, FileTreeNode node) {
@@ -262,5 +142,36 @@ public class FileRecursionUtil {
 		}
 
 		return root;
+	}
+
+	/**
+	 * Creates a process queue based on a list of files to delete in the DHT. Note that the list must be in
+	 * preorder.
+	 * 
+	 * @param toDelete preorder list of files
+	 * @param networkManager the network manager
+	 * @return the root process which can be started
+	 */
+	public static Process buildProcessTreeForDeletion(List<FileTreeNode> toDelete,
+			NetworkManager networkManager) {
+		// delete the files in the DHT that are deleted while offline. First create a normal queue, but the
+		// order must be reverse. With the created queue, reverse it in a 2nd step.
+		List<Process> processes = new ArrayList<Process>(toDelete.size());
+		for (FileTreeNode node : toDelete) {
+			try {
+				// initialize the process
+				processes.add(new DeleteFileProcess(node, networkManager));
+			} catch (IllegalArgumentException e) {
+				logger.error("File cannot be deleted", e);
+			} catch (NoSessionException e) {
+				logger.error("File cannot be deleted because there is no session", e);
+			}
+		}
+
+		// files are deleted in reverse order (not pre-order)
+		// get parent means get the child files --> start deletion at children,
+		// thus the list must be reversed (by using the depth)
+		Collections.reverse(processes);
+		return new ProcessChain(processes, false);
 	}
 }

@@ -77,6 +77,16 @@ public abstract class Process implements IProcess {
 	}
 
 	@Override
+	public void run() {
+		if (currentStep != null) {
+			currentStep.start();
+		} else {
+			logger.warn("No process step to start with specified.");
+			finish();
+		}
+	}
+
+	@Override
 	public void pause() {
 		if (state == ProcessState.RUNNING) {
 			state = ProcessState.PAUSED;
@@ -152,16 +162,6 @@ public abstract class Process implements IProcess {
 	 */
 	public ProcessContext getContext() {
 		return null;
-	}
-
-	@Override
-	public void run() {
-		if (currentStep != null) {
-			currentStep.start();
-		} else {
-			logger.warn("No process step to start with specified.");
-			finish();
-		}
 	}
 
 	private void finish() {
