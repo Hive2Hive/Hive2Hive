@@ -176,10 +176,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 					printPreconditionError("Cannot configure file observer: Root Path not defined yet. Please login first.");
 					Login.invoke();
 				}
+				if (nodeMenu.getH2HNode() == null) {
+					printPreconditionError("Cannot register: Please create a H2HNode first.");
+					nodeMenu.open();
+					checkPreconditions();
+				}
 			}
 			@Override
 			protected void execute() throws Exception {
-				fileObserverMenu = new FileObserverMenu(root);
+				fileObserverMenu = new FileObserverMenu(root, nodeMenu.getH2HNode());
 				fileObserverMenu.open();
 			}
 		});

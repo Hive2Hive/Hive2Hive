@@ -1,4 +1,4 @@
-package org.hive2hive.client.files;
+package org.hive2hive.client.fileobserver;
 
 import java.io.File;
 import java.io.FileFilter;
