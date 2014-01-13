@@ -1,6 +1,8 @@
 package org.hive2hive.client.menu;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
@@ -18,8 +20,11 @@ import org.hive2hive.core.process.listener.ProcessListener;
  */
 public final class TopLevelMenu extends ConsoleMenu {
 
+	public H2HConsoleMenuItem Login;
+	
 	private final UserMenu userMenu;
 	private final NodeCreationMenu nodeMenu;
+	private FileObserverMenu fileObserverMenu;
 	protected File root;
 
 	public TopLevelMenu() {
@@ -34,8 +39,54 @@ public final class TopLevelMenu extends ConsoleMenu {
 		if (nodeMenu.getH2HNode() != null) {
 			nodeMenu.getH2HNode().disconnect();
 		}
+		// shutdown file observer
+		if (fileObserverMenu != null && fileObserverMenu.getWatcher() != null){
+			try {
+				fileObserverMenu.getWatcher().stop();
+			} catch (Exception e) {
+				printError(e.getMessage());
+			}
+		}
 	}
 
+	@Override
+	protected void createItems() {
+		Login = new H2HConsoleMenuItem("Login") {
+			@Override
+			protected void checkPreconditions() {
+				if (nodeMenu.getH2HNode() == null) {
+					printPreconditionError("Cannot login: Please create a H2HNode first.");
+					nodeMenu.open();
+				}
+				if (userMenu.getUserCredentials() == null) {
+					printPreconditionError("Cannot login: Please create UserCredentials first.");
+					userMenu.CreateUserCredentials.invoke();
+				}
+				if (root == null) {
+					root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
+					System.out.printf("Specify root path or enter 'ok' if you agree to: %s", root.toPath());
+					String input = awaitStringParameter();
+					if (!input.equalsIgnoreCase("ok"))
+						root = new File(input);
+					if (!Files.exists(root.toPath(), LinkOption.NOFOLLOW_LINKS)){
+						try {
+							FileUtils.forceMkdir(root);
+						} catch(Exception e){
+							printError(String.format("Exception on creating the root directory %s: " + e, root.toPath()));
+							checkPreconditions();
+						}
+					}
+				}
+			}
+
+			protected void execute() {
+				IProcess process = nodeMenu.getH2HNode().getUserManagement()
+						.login(userMenu.getUserCredentials(), root.toPath());
+				executeBlocking(process);
+			}
+		};
+	}
+	
 	@Override
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Network Configuration") {
@@ -68,33 +119,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				executeBlocking(process);
 			}
 		});
-		add(new H2HConsoleMenuItem("Login") {
-			@Override
-			protected void checkPreconditions() {
-				if (nodeMenu.getH2HNode() == null) {
-					printPreconditionError("Cannot login: Please create a H2HNode first.");
-					nodeMenu.open();
-				}
-				if (userMenu.getUserCredentials() == null) {
-					printPreconditionError("Cannot login: Please create UserCredentials first.");
-					userMenu.CreateUserCredentials.invoke();
-				}
-			}
-
-			protected void execute() {
-				if (root == null)
-					root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
-				System.out.println("Specify root path or enter 'ok' if you're ok with: ");
-				System.out.println(root.getAbsolutePath());
-				String input = awaitStringParameter();
-				if (!input.equalsIgnoreCase("ok"))
-					root = new File(input);
-
-				IProcess process = nodeMenu.getH2HNode().getUserManagement()
-						.login(userMenu.getUserCredentials(), root.toPath());
-				executeBlocking(process);
-			}
-		});
+		
+		add(Login);
 
 		add(new H2HConsoleMenuItem("Add File") {
 			@Override
@@ -128,7 +154,6 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 		});
-
 		add(new H2HConsoleMenuItem("Move File") {
 			protected void execute() {
 				try {
@@ -143,6 +168,19 @@ public final class TopLevelMenu extends ConsoleMenu {
 				} catch (IllegalArgumentException | NoSessionException e) {
 					System.out.println("Could not delete the file. Reason: " + e.getMessage());
 				}
+			}
+		});
+		add(new H2HConsoleMenuItem("File Observer") {
+			protected void checkPreconditions() {
+				if (root == null){
+					printPreconditionError("Cannot configure file observer: Root Path not defined yet. Please login first.");
+					Login.invoke();
+				}
+			}
+			@Override
+			protected void execute() throws Exception {
+				fileObserverMenu = new FileObserverMenu(root);
+				fileObserverMenu.open();
 			}
 		});
 		add(new H2HConsoleMenuItem("Logout") {
@@ -191,10 +229,6 @@ public final class TopLevelMenu extends ConsoleMenu {
 				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again");
 		} while (expectExistence && (file == null || !file.exists()));
 		return file;
-	}
-
-	private void notImplemented() {
-		System.out.println("This option has not yet been implemented.\n");
 	}
 
 	@Override

@@ -136,4 +136,8 @@ public abstract class ConsoleMenu {
 		System.err.println(errorMsg);
 		Formatter.setDefaultForeground();
 	}
+
+	protected void notImplemented() {
+		System.out.println("This option has not yet been implemented.\n");
+	}
 }
