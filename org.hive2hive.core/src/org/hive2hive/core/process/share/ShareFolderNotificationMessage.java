@@ -61,7 +61,7 @@ public class ShareFolderNotificationMessage extends BaseDirectMessage {
 			}
 
 			// modify
-			fileNode.setDomainKeys(domainKey);
+			fileNode.setProtectionKeys(domainKey);
 
 			// upload modified profile
 			logger.debug("Updating the domain key in the user profile");

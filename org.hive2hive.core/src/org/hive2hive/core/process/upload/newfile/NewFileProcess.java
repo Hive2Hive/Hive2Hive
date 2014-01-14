@@ -11,9 +11,9 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 
 /**
- * Process to upload a new file into the DHT
+ * Process to upload a new file into the DHT.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class NewFileProcess extends Process {
@@ -37,19 +37,22 @@ public class NewFileProcess extends Process {
 			throw new IllegalFileLocation("File does not exist");
 		}
 
-		context = new NewFileProcessContext(this, file, session.getProfileManager(),
-				session.getFileManager(), session.getFileConfiguration());
+		logger.debug(String.format("Adding a new file/folder to the DHT: %s", file.getAbsolutePath()));
+
+		context = new NewFileProcessContext(this, file, session);
 
 		// TODO shared files not considered yet
 
 		// 1. validate file size, split the file content, encrypt it and upload it to the DHT
+		// 2. create the meta document
+		// 3. 
+		
 		// 2. get the parent meta document
 		// 3. put the new meta file
 		// 4. update the parent meta document
 		// 5. update the user profile
 		// 6. notify other clients
-		logger.debug("Adding a new file/folder to the DHT: " + file.getAbsolutePath());
-		setNextStep(new PutNewFileChunkStep(file, context));
+		setNextStep(new CreateMetaDocumentStep());
 	}
 
 	@Override

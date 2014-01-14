@@ -2,8 +2,10 @@ package org.hive2hive.core.process.common;
 
 import java.io.File;
 
+import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -16,10 +18,11 @@ import org.hive2hive.core.process.login.GetUserProfileStep;
  * Finds a given file in the user profile and gets the appropriate meta data. Note that a
  * {@link GetUserProfileStep} must be run before this step is run.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class File2MetaFileStep extends ProcessStep {
+	
+	private final static Logger logger = H2HLoggerFactory.getLogger(File2MetaFileStep.class);
 
 	private final File file;
 	private final IGetMetaContext metaContext;
@@ -53,6 +56,8 @@ public class File2MetaFileStep extends ProcessStep {
 		try {
 			// file node can be null or already present
 			if (fileNode == null) {
+				logger.info(String.format("Getting the corresponding file node for file '%s'.", file.getName()));
+				
 				// file node is null, first look it up in the user profile
 				UserProfile profile = profileManager.getUserProfile(getProcess().getID(), false);
 				fileNode = profile.getFileByPath(file, fileManager);
@@ -63,6 +68,9 @@ public class File2MetaFileStep extends ProcessStep {
 					return;
 				}
 			}
+			
+			// set the corresponding content protection keys
+			metaContext.setProtectionKeys(fileNode.getProtectionKeys());
 
 			// get the appropriate meta document and then update it
 			GetMetaDocumentStep getMetaStep = new GetMetaDocumentStep(fileNode.getKeyPair(), nextStep,

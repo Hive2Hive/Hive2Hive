@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.FileVersion;
@@ -26,9 +25,9 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
 /**
- * Updates the meta file of the changed file
+ * Updates the meta file of the changed file.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class UpdateMetaFileStep extends ProcessStep {
@@ -48,24 +47,15 @@ public class UpdateMetaFileStep extends ProcessStep {
 			return;
 		}
 
-		logger.debug("Adding a new version to the meta file");
 		metaFile = (MetaFile) context.getMetaDocument();
 		File file = context.getFile();
-		List<KeyPair> chunkKeys = context.getChunkKeys();
-		FileVersion version = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(file),
-				System.currentTimeMillis());
-		version.setChunkIds(chunkKeys);
-		metaFile.getVersions().add(version);
-
-		// cleanup old versions when too many versions
-		initiateCleanup();
 
 		// 1. update the md5 hash in the user profile
 		// 2. put the meta document
 		// 3. put the user profile
 		// 4. inform other clients
 		try {
-			UserProfileManager profileManager = context.getProfileManager();
+			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
 
@@ -81,9 +71,13 @@ public class UpdateMetaFileStep extends ProcessStep {
 			fileNode.setMD5(newMD5);
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
+			
+			// TODO wait till cleanup of versions ends
+			// cleanup old versions when too many versions
+			initiateCleanup(fileNode.getProtectionKeys());
 
 			logger.debug("Putting the modified meta file (containing the new version)");
-			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile,
+			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile, fileNode.getProtectionKeys(),
 					getStepsForNotification(userProfile));
 			getProcess().setNextStep(putMetaStep);
 		} catch (IOException e) {
@@ -92,8 +86,8 @@ public class UpdateMetaFileStep extends ProcessStep {
 			getProcess().stop(e);
 		}
 	}
-
-	private void initiateCleanup() {
+	
+	private void initiateCleanup(KeyPair protectionsKeys) {
 		try {
 			IFileConfiguration fileConfiguration = getNetworkManager().getSession().getFileConfiguration();
 			List<FileVersion> toRemove = new ArrayList<FileVersion>();
@@ -109,15 +103,15 @@ public class UpdateMetaFileStep extends ProcessStep {
 				toRemove.add(metaFile.getVersions().remove(0));
 			}
 
-			logger.debug("Need to remove " + toRemove.size() + " old versions");
+			logger.debug(String.format("Need to remove %s old versions", toRemove.size()));
 			for (FileVersion fileVersion : toRemove) {
 				DeleteFileVersionProcess deleteProcess = new DeleteFileVersionProcess(getNetworkManager(),
-						fileVersion);
+						fileVersion, protectionsKeys);
 				deleteProcess.start();
 			}
 		} catch (NoSessionException e) {
 			// should never happen since the session is used before, however, just skip the cleanup
-			logger.error("Cannot cleanup old versions because we don't have a session");
+			logger.error("Cannot cleanup old versions because we don't have a session.");
 		}
 	}
 
@@ -142,7 +136,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 		if (metaFile != null) {
 			// return to original MD5 and put the userProfile
 			UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
-			UserProfileManager profileManager = context.getProfileManager();
+			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 				FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());

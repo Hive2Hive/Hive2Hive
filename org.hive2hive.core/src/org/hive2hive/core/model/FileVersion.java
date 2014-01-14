@@ -31,10 +31,6 @@ public class FileVersion implements Serializable, IFileVersion {
 		return chunkIds;
 	}
 
-	public void setChunkIds(List<KeyPair> chunkIds) {
-		this.chunkIds = chunkIds;
-	}
-
 	@Override
 	public int getIndex() {
 		return index;

@@ -24,7 +24,6 @@ import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -137,12 +136,8 @@ public class NewFileTest extends H2HJUnitTest {
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
-
-		H2HWaiter waiter = new H2HWaiter(40);
-		do {
-			Assert.assertFalse(listener.hasSucceeded());
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		
+		ProcessTestUtil.waitTillFailed(listener, 40);
 	}
 
 	private void startUploadProcess(File toUpload) throws IllegalFileLocation, NoSessionException {
@@ -156,12 +151,7 @@ public class NewFileTest extends H2HJUnitTest {
 		process.start();
 
 		// wait maximally 1m because files could be large
-		H2HWaiter waiter = new H2HWaiter(60);
-		do {
-			Assert.assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
+		ProcessTestUtil.waitTillSucceded(listener, 60);
 	}
 
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException {

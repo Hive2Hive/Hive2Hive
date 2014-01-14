@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.common.userprofiletask;
 
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import javax.crypto.BadPaddingException;
@@ -33,6 +34,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 
 	private String userId;
 	private Number160 contentKey;
+	private KeyPair protectionKey;
 
 	private ProcessStep nextStep = null;
 	private boolean putPerformed = false;
@@ -52,13 +54,14 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 		try {
 			logger.debug("Encrypting user profile task in a hybrid manner");
 			this.contentKey = userProfileTask.getContentKey();
+			this.protectionKey = userProfileTask.getProtectionKey();
 			DataManager dataManager = getNetworkManager().getDataManager();
 			if (dataManager == null) {
 				getProcess().stop("Node is not connected.");
 				return;
 			}
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
-			dataManager.putUserProfileTask(userId, contentKey, encrypted, this);
+			dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey, this);
 			putPerformed = true;
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
@@ -93,7 +96,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 			return;
 		}
 
-		dataManager.removeUserProfileTask(userId, contentKey, this);
+		dataManager.removeUserProfileTask(userId, contentKey, protectionKey, this);
 	}
 
 	@Override

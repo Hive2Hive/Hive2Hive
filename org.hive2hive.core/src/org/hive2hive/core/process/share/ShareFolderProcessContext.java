@@ -10,6 +10,7 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetPublicKeyContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * Process context for the {@link ShareFolderProcess} process.
@@ -23,7 +24,8 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 	private final H2HSession session;
 	
 	private PublicKey friendsPublicKey;
-	private KeyPair domainKey;
+	private KeyPair protectionKeys;
+	private HybridEncryptedContent encryptedMetaDocument;
 	private MetaDocument metaDocument;
 	private FileTreeNode fileTreeNode;
 	
@@ -47,12 +49,24 @@ public class ShareFolderProcessContext extends ProcessContext implements IGetMet
 		return session;
 	}
 
-	public void setDomainKey(KeyPair domainKey) {
-		this.domainKey = domainKey;
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
 	}
 
-	public KeyPair getDomainKey() {
-		return domainKey;
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
+	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
 	}
 	
 	public void setFileTreeNode(FileTreeNode fileTreeNode) {

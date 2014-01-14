@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.userprofiletask.share;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
@@ -7,6 +9,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareFolderNotificationProcessContext extends ProcessContext implements IGetMetaContext {
 
@@ -15,6 +18,8 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	private final FileManager fileManager;
 
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
+	private KeyPair protectionKeys;
 
 	public ShareFolderNotificationProcessContext(Process process, FileTreeNode fileTreeNode,
 			UserProfileManager profileManager, FileManager fileManager) {
@@ -44,6 +49,26 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
+	}
+	
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
 	}
 
 }

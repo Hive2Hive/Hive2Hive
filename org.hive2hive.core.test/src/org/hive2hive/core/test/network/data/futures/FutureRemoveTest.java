@@ -48,11 +48,11 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 		nodeA.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content).awaitUninterruptibly();
+						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
 		TestRemoveListener listener = new TestRemoveListener();
 
-		nodeB.getDataManager().remove(locationKey, contentKey, listener);
+		nodeB.getDataManager().remove(locationKey, contentKey, null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -77,11 +77,11 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 		nodeA.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content).awaitUninterruptibly();
+						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
 		TestRemoveListener listener = new TestRemoveListener();
 
-		nodeB.getDataManager().remove(locationKey, contentKey, content.getVersionKey(), listener);
+		nodeB.getDataManager().remove(locationKey, contentKey, content.getVersionKey(), null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -113,13 +113,13 @@ public class FutureRemoveTest extends H2HJUnitTest {
 			}
 			nodeA.getDataManager()
 					.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), data).awaitUninterruptibly();
+							Number160.createHash(contentKey), data, null).awaitUninterruptibly();
 			content.add(data);
 		}
 
 		TestRemoveListener listener = new TestRemoveListener();
 
-		nodeB.getDataManager().remove(locationKey, contentKey, listener);
+		nodeB.getDataManager().remove(locationKey, contentKey, null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {

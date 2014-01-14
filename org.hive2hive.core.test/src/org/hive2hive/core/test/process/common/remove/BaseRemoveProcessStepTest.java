@@ -52,7 +52,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		network.get(0)
 				.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), testData).awaitUninterruptibly();
+						Number160.createHash(contentKey), testData, null).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {
@@ -93,7 +93,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		network.get(0)
 				.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), testData).awaitUninterruptibly();
+						Number160.createHash(contentKey), testData, null).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		Process process = new Process(network.get(0)) {

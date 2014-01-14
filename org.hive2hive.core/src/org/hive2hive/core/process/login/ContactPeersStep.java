@@ -154,7 +154,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 		// 1. Put the new location map
 		// 2. Synchronize files with network
 		SynchronizeFilesStep nextStep = new SynchronizeFilesStep();
-		PutLocationStep putStep = new PutLocationStep(newLocations, nextStep);
+		PutLocationStep putStep = new PutLocationStep(newLocations, context.getUserProfile().getProtectionKeys(), nextStep);
 		getProcess().setNextStep(putStep);
 	}
 

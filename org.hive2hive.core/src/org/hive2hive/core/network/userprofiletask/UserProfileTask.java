@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.userprofiletask;
 
+import java.security.KeyPair;
 import java.util.Date;
 
 import net.tomp2p.peers.Number160;
@@ -9,9 +10,10 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IGetListener;
+import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * The base class of all {@link UserProfileTask}s.</br>
@@ -40,8 +42,10 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 
 	protected NetworkManager networkManager;
 	protected Number160 contentKey;
+	protected KeyPair protectionKey;
 
 	public UserProfileTask() {
+		this.protectionKey = EncryptionUtil.generateProtectionKey();
 		generateContentKey();
 	}
 
@@ -55,13 +59,12 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 		contentKey = new Number160(timestamp);
 	}
 
-	/**
-	 * Getter
-	 * 
-	 * @return
-	 */
 	public Number160 getContentKey() {
 		return contentKey;
+	}
+	
+	public KeyPair getProtectionKey() {
+		return protectionKey;
 	}
 
 	/**

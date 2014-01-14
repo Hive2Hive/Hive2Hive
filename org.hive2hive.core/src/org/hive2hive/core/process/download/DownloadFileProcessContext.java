@@ -1,12 +1,14 @@
 package org.hive2hive.core.process.download;
 
 import java.nio.file.Path;
+import java.security.KeyPair;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DownloadFileProcessContext extends ProcessContext implements IGetMetaContext {
 
@@ -14,7 +16,10 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	private final FileManager fileManager;
 	private final Path destination;
 	private final int indexToDownload;
+
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
+	private KeyPair protectionKeys;
 
 	public DownloadFileProcessContext(DownloadFileProcess process, FileTreeNode file,
 			FileManager fileManager, Path destination, int indexToDownload) {
@@ -42,6 +47,26 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
 	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+	
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
+	}
+	
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
+	}
+
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
 
 	public Path getDestination() {
 		return destination;
@@ -50,4 +75,5 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	public int getIndexToDownload() {
 		return indexToDownload;
 	}
+
 }

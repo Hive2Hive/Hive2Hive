@@ -67,7 +67,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
 		FuturePut putGlobal = putter.getDataManager().put(
 				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(H2HConstants.USER_PROFILE), encrypted);
+				Number160.createHash(H2HConstants.USER_PROFILE), encrypted, null);
 		putGlobal.awaitUninterruptibly();
 
 		UserProfile profile = ProcessTestUtil.getUserProfile(putter, credentials);

@@ -77,7 +77,7 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		TestPutListener listener = new TestPutListener();
 
-		nodeB.getDataManager().put(locationKey, contentKey, data, listener);
+		nodeB.getDataManager().put(locationKey, contentKey, data, null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -112,7 +112,7 @@ public class FuturePutTest extends H2HJUnitTest {
 
 			TestPutListener listener = new TestPutListener();
 
-			nodeB.getDataManager().put(locationKey, contentKey, data, listener);
+			nodeB.getDataManager().put(locationKey, contentKey, data, null, listener);
 
 			H2HWaiter waiter = new H2HWaiter(10);
 			do {
@@ -143,7 +143,7 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		TestPutListener listener = new TestPutListener();
 
-		nodeB.getDataManager().put(locationKey, contentKey, content1, listener);
+		nodeB.getDataManager().put(locationKey, contentKey, content1, null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -171,7 +171,7 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		TestPutListener listener = new TestPutListener();
 
-		nodeB.getDataManager().put(locationKey, contentKey, data, listener);
+		nodeB.getDataManager().put(locationKey, contentKey, data, null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -206,13 +206,13 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		nodeB.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), data1).awaitUninterruptibly();
+						Number160.createHash(contentKey), data1, null).awaitUninterruptibly();
 		nodeB.getDataManager()
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), data2A).awaitUninterruptibly();
+						Number160.createHash(contentKey), data2A, null).awaitUninterruptibly();
 
 		TestPutListener listener = new TestPutListener();
-		nodeB.getDataManager().put(locationKey, contentKey, data2B, listener);
+		nodeB.getDataManager().put(locationKey, contentKey, data2B, null, listener);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -353,7 +353,7 @@ public class FuturePutTest extends H2HJUnitTest {
 		public TestFuturePutListener(String locationKey, String contentKey, NetworkContent content,
 				IPutListener listener, DataManager dataManager) {
 			super(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY, Number160
-					.createHash(contentKey), content, listener, dataManager);
+					.createHash(contentKey), content, null, listener, dataManager);
 		}
 
 		public boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest) {

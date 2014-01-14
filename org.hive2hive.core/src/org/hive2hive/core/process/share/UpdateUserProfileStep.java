@@ -46,9 +46,9 @@ public class UpdateUserProfileStep extends ProcessStep {
 			}
 
 			// store for backup
-			originalDomainKey = fileNode.getDomainKeys();
+			originalDomainKey = fileNode.getProtectionKeys();
 			// modify
-			fileNode.setDomainKeys(context.getDomainKey());
+			fileNode.setProtectionKeys(context.getProtectionKeys());
 
 			context.setFileTreeNode(fileNode);
 
@@ -76,7 +76,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 				FileTreeNode fileNode = userProfile.getFileById(context.getMetaDocument().getId());
-				fileNode.setDomainKeys(originalDomainKey);
+				fileNode.setProtectionKeys(originalDomainKey);
 				profileManager.readyToPut(userProfile, getProcess().getID());
 			} catch (Exception e) {
 				logger.warn(String.format(

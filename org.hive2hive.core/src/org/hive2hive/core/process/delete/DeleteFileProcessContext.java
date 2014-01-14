@@ -1,29 +1,40 @@
 package org.hive2hive.core.process.delete;
 
-import org.hive2hive.core.file.FileManager;
+import java.security.KeyPair;
+
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
+import org.hive2hive.core.process.context.IGetParentMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DeleteFileProcessContext extends ProcessContext implements IGetMetaContext {
+public class DeleteFileProcessContext extends ProcessContext implements IGetMetaContext, IGetParentMetaContext {
 
-	private final FileManager fileManager;
+	private final H2HSession session;
 	private final boolean isDirectory;
-	private final UserProfileManager profileManager;
+	
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
+	private KeyPair protectionKeys;
+	private MetaFolder parentMetaFolder;
+	private HybridEncryptedContent encryptedParentMetaFolder;
+	private KeyPair parentProtectionKeys;
 
-	public DeleteFileProcessContext(Process process, FileManager fileManager, boolean isDirectory,
-			UserProfileManager profileManager) {
+	public DeleteFileProcessContext(H2HSession session, boolean isDirectory, Process process) {
 		super(process);
-		this.fileManager = fileManager;
+		this.session = session;
 		this.isDirectory = isDirectory;
-		this.profileManager = profileManager;
 	}
 
-	public FileManager getFileManager() {
-		return fileManager;
+	public H2HSession getH2HSession() {
+		return session;
+	}
+
+	public boolean isDirectory() {
+		return isDirectory;
 	}
 
 	@Override
@@ -35,12 +46,55 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetMeta
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
 	}
-
-	public boolean isDirectory() {
-		return isDirectory;
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
 	}
 
-	public UserProfileManager getProfileManager() {
-		return profileManager;
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
 	}
+	
+	@Override
+	public KeyPair getProtectionKeys(){
+		return protectionKeys;
+	}
+	
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys){
+		this.protectionKeys = protectionKeys;
+	}
+	
+	@Override
+	public void setParentMetaFolder(MetaFolder parentMetaFolder) {
+		this.parentMetaFolder = parentMetaFolder;
+	}
+
+	@Override
+	public MetaFolder getParentMetaFolder() {
+		return parentMetaFolder;
+	}
+	
+	@Override
+	public HybridEncryptedContent getEncryptedParentMetaFolder() {
+		return encryptedParentMetaFolder;
+	}
+	
+	@Override
+	public void setEncryptedParentMetaFolder(HybridEncryptedContent encryptedParentMetaFolder) {
+		this.encryptedParentMetaFolder = encryptedParentMetaFolder;
+	}
+	
+	@Override
+	public KeyPair getParentProtectionKeys(){
+		return parentProtectionKeys;
+	}
+	
+	@Override
+	public void setParentProtectionKeys(KeyPair parentProtectionKeys){
+		this.parentProtectionKeys = parentProtectionKeys;
+	}
+
 }

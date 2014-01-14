@@ -41,11 +41,15 @@ public class PutChunkStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutChunkStep.class);
 
-	protected final File file;
 	private final long offset;
-	protected final List<KeyPair> chunkKeys;
-	private ProcessStep stepAfterPutting;
+	private final ProcessStep stepAfterPutting;
 
+	public PutChunkStep(ProcessStep stepAfterPutting) {
+		super(null);
+		this.offset = 0;
+		this.stepAfterPutting = stepAfterPutting;
+	}
+	
 	/**
 	 * Constructor only usable with subclass. Remember to configure the steps after uploading before starting
 	 * this step. This ensures that the step knows what to do when all parts are uploaded.
@@ -55,18 +59,21 @@ public class PutChunkStep extends BasePutProcessStep {
 	 * @param chunkKeys the collected chunk keys during upload. This also indicates the progress of the
 	 *            chunking
 	 */
-	protected PutChunkStep(File file, long offset, List<KeyPair> chunkKeys) {
+	protected PutChunkStep(long offset, ProcessStep stepAfterPutting) {
 		// the details are set later
 		super(null);
-		this.file = file;
 		this.offset = offset;
-		this.chunkKeys = chunkKeys;
+		this.stepAfterPutting = stepAfterPutting;
 	}
 
 	// TODO create 2nd constructor (private) for better readability and safety
 
 	@Override
 	public void start() {
+		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
+		List<KeyPair> chunkKeys = context.getChunkKeys();
+		File file = context.getFile();
+		
 		// only put sth. if the file has content
 		if (file.isDirectory()) {
 			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
@@ -74,11 +81,9 @@ public class PutChunkStep extends BasePutProcessStep {
 			return;
 		}
 
-		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
-
 		// first, validate the file size (only first time)
 		if (chunkKeys.isEmpty()) {
-			IFileConfiguration config = context.getConfig();
+			IFileConfiguration config = context.getH2HSession().getFileConfiguration();
 			long fileSize = FileUtil.getFileSize(file);
 
 			if (fileSize > config.getMaxFileSize()) {
@@ -87,7 +92,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			}
 		}
 
-		byte[] data = new byte[context.getConfig().getChunkSize()];
+		byte[] data = new byte[context.getH2HSession().getFileConfiguration().getChunkSize()];
 		int read = -1;
 		try {
 			// read the next chunk of the file considering the offset
@@ -112,8 +117,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			chunkKeys.add(chunkKey);
 
 			// more data to read (increase offset)
-			PutChunkStep nextChunkStep = new PutChunkStep(file, offset + data.length, chunkKeys);
-			nextChunkStep.setStepAfterPutting(stepAfterPutting);
+			PutChunkStep nextChunkStep = new PutChunkStep(offset + data.length, stepAfterPutting);
 			nextStep = nextChunkStep;
 
 			try {
@@ -123,7 +127,7 @@ public class PutChunkStep extends BasePutProcessStep {
 
 				// start the put and continue with next chunk
 				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getName());
-				put(key2String(chunk.getId()), H2HConstants.FILE_CHUNK, encryptedContent);
+				put(key2String(chunk.getId()), H2HConstants.FILE_CHUNK, encryptedContent, context.getProtectionKeys());
 			} catch (DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Could not encrypt the chunk", e);
@@ -132,8 +136,6 @@ public class PutChunkStep extends BasePutProcessStep {
 		} else {
 			logger.debug("File " + file.getName() + ": All chunks uploaded. Continue with meta data.");
 			// nothing read, stop putting chunks and start next step
-			context.setChunkKeys(chunkKeys);
-
 			getProcess().setNextStep(stepAfterPutting);
 		}
 	}
@@ -158,13 +160,4 @@ public class PutChunkStep extends BasePutProcessStep {
 		}
 	}
 
-	/**
-	 * Sets the step that is executed as soon as all chunks are in the DHT. Remember to call this method
-	 * before starting this step, else, the process might finish earlier...
-	 * 
-	 * @param stepAfterPutting
-	 */
-	protected void setStepAfterPutting(ProcessStep stepAfterPutting) {
-		this.stepAfterPutting = stepAfterPutting;
-	}
 }

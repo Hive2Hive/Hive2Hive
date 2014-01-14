@@ -26,7 +26,7 @@ public class NewDomainKeyStep extends ProcessStep {
 				context.getFolderToShare().getName(), context.getFriendId()));
 
 		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		context.setDomainKey(domainKey);
+		context.setProtectionKeys(domainKey);
 
 		File folderToShare = context.getFolderToShare();
 

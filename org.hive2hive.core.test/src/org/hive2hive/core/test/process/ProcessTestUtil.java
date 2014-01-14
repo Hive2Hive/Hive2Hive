@@ -35,6 +35,7 @@ import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
@@ -151,6 +152,8 @@ public class ProcessTestUtil {
 		IGetMetaContext context = new IGetMetaContext() {
 
 			private MetaDocument metaDocument;
+			private HybridEncryptedContent encryptedMetaDocument;
+			private KeyPair protectionKeys;
 
 			@Override
 			public void setMetaDocument(MetaDocument metaDocument) {
@@ -161,6 +164,27 @@ public class ProcessTestUtil {
 			public MetaDocument getMetaDocument() {
 				return metaDocument;
 			}
+
+			@Override
+			public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+				this.encryptedMetaDocument = encryptedMetaDocument;
+			}
+			
+			@Override
+			public HybridEncryptedContent getEncryptedMetaDocument() {
+				return encryptedMetaDocument;
+			}
+
+			@Override
+			public void setProtectionKeys(KeyPair protectionKeys) {
+				this.protectionKeys = protectionKeys;				
+			}
+
+			@Override
+			public KeyPair getProtectionKeys() {
+				return protectionKeys;
+			}
+
 		};
 
 		GetMetaDocumentStep step = new GetMetaDocumentStep(keys, null, context);

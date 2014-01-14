@@ -18,7 +18,6 @@ import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
@@ -108,11 +107,8 @@ public class LoginTest extends H2HJUnitTest {
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
-
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		
+		ProcessTestUtil.waitTillFailed(listener, 20);
 
 		return process;
 	}

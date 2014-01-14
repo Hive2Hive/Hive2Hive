@@ -1,7 +1,5 @@
 package org.hive2hive.core.process.common.userprofiletask;
 
-import net.tomp2p.peers.Number160;
-
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -25,7 +23,6 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 	private final ProcessStep nextStep;
 
 	private String userId;
-	private Number160 contentKey;
 
 	private boolean removePerformed = false;
 
@@ -58,9 +55,8 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 			return;
 		}
 
-		contentKey = context.getUserProfileTask().getContentKey();
-
-		dataManager.removeUserProfileTask(userId, contentKey, this);
+		dataManager.removeUserProfileTask(userId, context.getUserProfileTask().getContentKey(), context
+				.getUserProfileTask().getProtectionKey(), this);
 
 		removePerformed = true;
 	}
@@ -87,7 +83,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 		if (dataManager == null) {
 			logger.warn(String
 					.format("Roll back of remove user profile task failed. No connection. user id = '%s' content key = '%s'",
-							userId, contentKey));
+							userId, context.getUserProfileTask().getContentKey()));
 			getProcess().nextRollBackStep();
 			return;
 		}
@@ -95,19 +91,20 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 		if (context.getEncryptedUserProfileTask() == null) {
 			logger.warn(String
 					.format("Roll back of remove user profile task failed. Encrypted user profile task is null. user id = '%s' content key = '%s'",
-							userId, contentKey));
+							userId, context.getUserProfileTask().getContentKey()));
 			getProcess().nextRollBackStep();
 			return;
 		}
 
-		dataManager.putUserProfileTask(userId, contentKey, context.getEncryptedUserProfileTask(), this);
+		dataManager.putUserProfileTask(userId, context.getUserProfileTask().getContentKey(),
+				context.getEncryptedUserProfileTask(), context.getUserProfileTask().getProtectionKey(), this);
 	}
 
 	@Override
 	public void onPutSuccess() {
 		logger.debug(String.format(
 				"Roll back of removing user profile task succeeded. user id = '%s' content key = '%s'",
-				userId, contentKey));
+				userId, context.getUserProfileTask().getContentKey()));
 		getProcess().nextRollBackStep();
 	}
 
@@ -115,7 +112,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 	public void onPutFailure() {
 		logger.warn(String
 				.format("Roll back of removing user profile task failed. Re-put failed. user id = '%s' content key = '%s'",
-						userId, contentKey));
+						userId, context.getUserProfileTask().getContentKey()));
 		getProcess().nextRollBackStep();
 	}
 

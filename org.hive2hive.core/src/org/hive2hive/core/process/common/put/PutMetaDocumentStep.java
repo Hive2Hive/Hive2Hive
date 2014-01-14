@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.common.put;
 
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -26,11 +27,14 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class PutMetaDocumentStep extends BasePutProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutMetaDocumentStep.class);
+	
 	protected MetaDocument metaDocument;
+	protected KeyPair protectionKeys;
 
-	public PutMetaDocumentStep(MetaDocument metaDocument, ProcessStep nextStep) {
+	public PutMetaDocumentStep(MetaDocument metaDocument, KeyPair protectionKeys, ProcessStep nextStep) {
 		super(nextStep);
 		this.metaDocument = metaDocument;
+		this.protectionKeys = protectionKeys;
 	}
 
 	@Override
@@ -41,7 +45,7 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 					metaDocument.getId());
 			encrypted.setBasedOnKey(metaDocument.getVersionKey());
 			encrypted.generateVersionKey();
-			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted);
+			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");

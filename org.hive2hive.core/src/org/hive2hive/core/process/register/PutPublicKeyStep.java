@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.register;
 
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
@@ -11,22 +12,24 @@ import org.hive2hive.core.process.common.put.BasePutProcessStep;
  * Puts the user's public key to the network (which is used for encryption of messages and other
  * communication)
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class PutPublicKeyStep extends BasePutProcessStep {
 
 	private final String userId;
 	private final PublicKey publicKey;
+	private final KeyPair protectionKey;
 
-	protected PutPublicKeyStep(String userId, PublicKey publicKey, ProcessStep nextStep) {
+	protected PutPublicKeyStep(String userId, PublicKey publicKey, KeyPair protectionKey, ProcessStep nextStep) {
 		super(nextStep);
 		this.userId = userId;
 		this.publicKey = publicKey;
+		this.protectionKey = protectionKey;
 	}
 
 	@Override
 	public void start() {
-		put(userId, H2HConstants.USER_PUBLIC_KEY, new UserPublicKey(publicKey));
+		put(userId, H2HConstants.USER_PUBLIC_KEY, new UserPublicKey(publicKey), protectionKey);
 	}
 }

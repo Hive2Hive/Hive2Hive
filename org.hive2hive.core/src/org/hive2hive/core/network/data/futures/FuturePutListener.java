@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data.futures;
 
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private final Number160 locationKey;
 	private final Number160 domainKey;
 	private final Number160 contentKey;
+	private final KeyPair protectionKey;
 	private final NetworkContent content;
 	private final IPutListener listener;
 	private final DataManager dataManager;
@@ -52,10 +54,11 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private int putTries = 0;
 
 	public FuturePutListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			NetworkContent content, IPutListener listener, DataManager dataManager) {
+			NetworkContent content, KeyPair protectionKey, IPutListener listener, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
+		this.protectionKey = protectionKey;
 		this.content = content;
 		this.listener = listener;
 		this.dataManager = dataManager;
@@ -63,7 +66,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
-		logger.debug(String
+		logger.trace(String
 				.format("Start verification of put. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 						locationKey, domainKey, contentKey, content.getVersionKey()));
 
@@ -147,7 +150,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 							putTries, locationKey, domainKey, contentKey, content.getVersionKey()));
 			// remove succeeded puts
 			FutureRemove futureRemove = dataManager.remove(locationKey, domainKey, contentKey,
-					content.getVersionKey());
+					content.getVersionKey(), protectionKey);
 			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 				@Override
 				public void operationComplete(FutureRemove future) {
@@ -157,7 +160,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 										+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 										locationKey, domainKey, contentKey, content.getVersionKey()));
 
-					dataManager.put(locationKey, domainKey, contentKey, content).addListener(
+					dataManager.put(locationKey, domainKey, contentKey, content, protectionKey).addListener(
 							FuturePutListener.this);
 				}
 			});
@@ -221,13 +224,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).getKeyDigest();
 
 				if (keyDigest.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
-					logger.debug(String.format("Put verification: On peer '%s' entry is newest."
+					logger.trace(String.format("Put verification: On peer '%s' entry is newest."
 							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 
 				} else if (keyDigest.containsKey(new Number640(locationKey, domainKey, contentKey, content
 						.getVersionKey()))) {
-					logger.debug(String.format("Put verification: entry on peer '%s' exists in history."
+					logger.trace(String.format("Put verification: entry on peer '%s' exists in history."
 							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 
@@ -326,7 +329,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	}
 
 	private void notifySuccess() {
-		logger.debug(String
+		logger.trace(String
 				.format("Verification for put completed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 						locationKey, domainKey, contentKey, content.getVersionKey()));
 		// everything is ok
@@ -340,7 +343,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private void notifyFailure() {
 		// remove succeeded puts
 		FutureRemove futureRemove = dataManager.remove(locationKey, domainKey, contentKey,
-				content.getVersionKey());
+				content.getVersionKey(), protectionKey);
 		futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 			@Override
 			public void operationComplete(FutureRemove future) {

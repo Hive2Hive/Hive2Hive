@@ -50,7 +50,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash(contentKey);
 
 		// put in the memory of 2nd peer
-		holder.getDataManager().put(lKey, dKey, cKey, data).awaitUninterruptibly();
+		holder.getDataManager().put(lKey, dKey, cKey, data, null).awaitUninterruptibly();
 
 		TestGetProcessStep getStep = new TestGetProcessStep(locationKey, contentKey);
 		Process process = new Process(getter) {

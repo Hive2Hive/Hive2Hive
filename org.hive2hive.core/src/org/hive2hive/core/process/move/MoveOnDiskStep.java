@@ -44,17 +44,20 @@ public class MoveOnDiskStep extends ProcessStep {
 				throw new IllegalArgumentException("Source file could not be found in UserProfile");
 			}
 			context.setFileNodeKeys(fileNode.getKeyPair());
+			context.setSourceProtectionKeys(fileNode.getProtectionKeys());
 
 			// since we already have the user profile, get the destination parent as well
 			if (context.getDestination().getParentFile().getAbsolutePath()
 					.equalsIgnoreCase(session.getFileManager().getRoot().toAbsolutePath().toString())) {
 				// file is moved to root
 				context.setDestinationParentKeys(null);
+				context.setDestinationProtectionKeys(null);
 			} else {
 				// file is moved to other location
 				FileTreeNode parentNode = userProfile.getFileByPath(context.getDestination().getParentFile(),
 						session.getFileManager());
 				context.setDestinationParentKeys(parentNode.getKeyPair());
+				context.setDestinationProtectionKeys(parentNode.getProtectionKeys());
 			}
 
 			// need to update the former parent (if it was not located in root

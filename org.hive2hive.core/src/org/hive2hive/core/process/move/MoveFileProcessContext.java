@@ -9,16 +9,22 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class MoveFileProcessContext extends ProcessContext implements IGetMetaContext {
 
-	private MetaDocument metaDocument;
 	private final File source;
 	private final File destination;
 	private final Set<String> usersToNotifySource;
 	private final Set<String> usersToNotifyDestination;
+	
+	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
+	private KeyPair protectionKeys;
 	private KeyPair nodeKeyPair;
 	private KeyPair destinationParentKeys;
+	private KeyPair sourceProtectionKeys;
+	private KeyPair destinationProtectionKeys;
 
 	public MoveFileProcessContext(Process process, File source, File destination) {
 		super(process);
@@ -38,6 +44,26 @@ public class MoveFileProcessContext extends ProcessContext implements IGetMetaCo
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
+	}
+	
+	@Override
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
+	}
+
+	@Override
+	public void setProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
 	}
 
 	public File getSource() {
@@ -93,5 +119,21 @@ public class MoveFileProcessContext extends ProcessContext implements IGetMetaCo
 	 */
 	public Set<String> getUsersToNotifyDestination() {
 		return usersToNotifyDestination;
+	}
+	
+	public KeyPair getSourceProtectionKeys() {
+		return sourceProtectionKeys;
+	}
+
+	public void setSourceProtectionKeys(KeyPair sourceProtectionKeys) {
+		this.sourceProtectionKeys = sourceProtectionKeys;
+	}
+	
+	public KeyPair getDestinationProtectionKeys() {
+		return destinationProtectionKeys;
+	}
+
+	public void setDestinationProtectionKeys(KeyPair destinationProtectionKeys) {
+		this.destinationProtectionKeys = destinationProtectionKeys;
 	}
 }

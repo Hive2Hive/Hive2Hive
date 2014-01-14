@@ -57,7 +57,7 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 		};
 
 		network.get(0).getDataManager()
-				.put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()), listener);
+				.put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()), null, listener);
 		latch.await();
 	}
 

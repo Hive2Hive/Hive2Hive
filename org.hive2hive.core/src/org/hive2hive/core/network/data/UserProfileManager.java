@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data;
 
+import java.security.KeyPair;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +27,7 @@ import org.hive2hive.core.security.UserCredentials;
  * Manages the user profile resource. Each process waiting for get / put is added to a queue and delivered in
  * order.
  * 
- * @author Nico
+ * @author Nico, Seppi
  * 
  */
 public class UserProfileManager {
@@ -48,6 +49,8 @@ public class UserProfileManager {
 	private final Queue<QueueEntry> readOnlyQueue;
 	private final Queue<PutQueueEntry> modifyQueue;
 	private volatile PutQueueEntry modifying;
+
+	private KeyPair defaultProtectionKey = null;
 
 	public UserProfileManager(NetworkManager networkManager, UserCredentials credentials) {
 		this.networkManager = networkManager;
@@ -140,6 +143,22 @@ public class UserProfileManager {
 		}
 	}
 
+	/**
+	 * Get the default content protection keys. If called first time the method is called first time the user
+	 * profile gets loaded from network and the default protection key temporally gets stored for further
+	 * gets.
+	 * 
+	 * @return the default content protection keys
+	 * @throws GetFailedException 
+	 */
+	public KeyPair getDefaultProtectionKey() throws GetFailedException {
+		if (defaultProtectionKey == null) {
+			UserProfile userProfile = getUserProfile(0, false);
+			defaultProtectionKey = userProfile.getProtectionKeys();
+		}
+		return defaultProtectionKey;
+	}
+
 	private class QueueWorker implements Runnable {
 
 		@Override
@@ -207,7 +226,6 @@ public class UserProfileManager {
 						logger.debug("Process " + modifying.getPid()
 								+ " made modifcations and uploads them now");
 						put(modifying);
-						logger.debug("Notifying process " + modifying.getPid() + " that putting is finished");
 					} else if (!modifying.isAborted()) {
 						// request is not ready to put and has not been aborted
 						logger.error("Process " + modifying.getPid()
@@ -266,7 +284,7 @@ public class UserProfileManager {
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
 				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
-						encryptedUserProfile, entry);
+						encryptedUserProfile, entry.getUserProfile().getProtectionKeys(), entry);
 
 				synchronized (entryWaiter) {
 					try {
@@ -447,7 +465,7 @@ public class UserProfileManager {
 
 		@Override
 		public void onPutFailure() {
-			logger.error("Put failed. Notifying process " + getPid());
+			logger.error("Put failed. Notifying process " + getPid() + ".");
 			setPutError(new PutFailedException("Could not put the user profile into the DHT"));
 			synchronized (entryWaiter) {
 				entryWaiter.notify();

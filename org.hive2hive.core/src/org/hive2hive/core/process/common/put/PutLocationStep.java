@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.common.put;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.process.ProcessStep;
@@ -11,18 +13,20 @@ import org.hive2hive.core.process.ProcessStep;
  */
 public class PutLocationStep extends BasePutProcessStep {
 
-	protected Locations locations;
+	protected final Locations locations;
+	protected final KeyPair protectionKeys;
 
-	public PutLocationStep(Locations locations, ProcessStep nextStep) {
+	public PutLocationStep(Locations locations, KeyPair protectionKeys, ProcessStep nextStep) {
 		super(nextStep);
 		this.locations = locations;
+		this.protectionKeys = protectionKeys;
 	}
 
 	@Override
 	public void start() {
 		locations.setBasedOnKey(locations.getVersionKey());
 		locations.generateVersionKey();
-		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations);
+		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
 	}
 
 }

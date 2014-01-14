@@ -41,8 +41,9 @@ public class CheckIfUserExistsStep extends ProcessStep {
 		// third, put the public key of the user
 
 		PutPublicKeyStep third = new PutPublicKeyStep(userProfile.getUserId(), userProfile
-				.getEncryptionKeys().getPublic(), null);
-		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()), third);
+				.getEncryptionKeys().getPublic(), userProfile.getProtectionKeys(), null);
+		PutLocationStep second = new PutLocationStep(new Locations(userProfile.getUserId()),
+				userProfile.getProtectionKeys(), third);
 		PutUserProfileStep first = new PutUserProfileStep(userProfile, process.getContext()
 				.getUserCredentials(), second);
 		getProcess().setNextStep(first);

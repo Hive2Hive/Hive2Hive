@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.common.put;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -22,24 +24,31 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 	protected String locationKey;
 	protected String contentKey;
 	protected NetworkContent content;
+	protected KeyPair protectionKey;
 	protected ProcessStep nextStep;
 	private boolean putPerformed = false;
 
 	public BasePutProcessStep(ProcessStep nextStep) {
 		this.nextStep = nextStep;
 	}
-
+	
+	@Deprecated
 	protected void put(String locationKey, String contentKey, NetworkContent content) {
+		put(locationKey, contentKey, content, null);
+	}
+
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
+		this.protectionKey = protectionKey;
 
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.put(locationKey, contentKey, content, this);
+		dataManager.put(locationKey, contentKey, content, protectionKey, this);
 		putPerformed = true;
 	}
 
@@ -70,7 +79,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 			return;
 		}
 
-		dataManager.remove(locationKey, contentKey, content.getVersionKey(), this);
+		dataManager.remove(locationKey, contentKey, content.getVersionKey(), protectionKey, this);
 	}
 
 	@Override

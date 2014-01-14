@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -160,6 +161,16 @@ public final class EncryptionUtil {
 		//
 		// AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
 		// return keyPair;
+	}
+	
+	public static KeyPair generateProtectionKey() {
+		KeyPairGenerator gen = null;
+		try {
+			gen = KeyPairGenerator.getInstance("DSA");
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
+		return gen.generateKeyPair();
 	}
 
 	/**

@@ -28,9 +28,10 @@ public class CleanupLocationsProcess extends Process {
 		super(networkManager);
 		logger.debug("Start to remove " + toRemove.size() + " peers from own locations map");
 
-		context = new CleanupLocationsProcessContext(this);
-
 		H2HSession session = networkManager.getSession();
+
+		context = new CleanupLocationsProcessContext(session, this);
+
 		RemoveUnreachableStep removeStep = new RemoveUnreachableStep(toRemove);
 		GetLocationsStep first = new GetLocationsStep(session.getCredentials().getUserId(), removeStep,
 				context);

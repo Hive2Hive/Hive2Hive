@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
+import java.security.KeyPair;
+
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FutureRemove;
@@ -31,25 +33,28 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	protected final Number160 domainKey;
 	protected final Number160 contentKey;
 	protected final Number160 versionKey;
+	protected final KeyPair protectionKey;
 	protected final IRemoveListener listener;
 	protected final DataManager dataManager;
 
 	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			IRemoveListener listener, DataManager dataManager) {
+			KeyPair protectionKey, IRemoveListener listener, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
 		this.versionKey = null;
+		this.protectionKey = protectionKey;
 		this.listener = listener;
 		this.dataManager = dataManager;
 	}
 
 	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, IRemoveListener listener, DataManager dataManager) {
+			Number160 versionKey, KeyPair protectionKey, IRemoveListener listener, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
 		this.versionKey = versionKey;
+		this.protectionKey = protectionKey;
 		this.listener = listener;
 		this.dataManager = dataManager;
 	}
@@ -95,9 +100,10 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 					+ " location key = '%s' domain key = '%s' content key = '%s' versionKey = '%s'",
 					removeTries, locationKey, domainKey, contentKey, versionKey));
 			if (versionKey == null) {
-				dataManager.remove(locationKey, domainKey, contentKey).addListener(this);
+				dataManager.remove(locationKey, domainKey, contentKey, protectionKey).addListener(this);
 			} else {
-				dataManager.remove(locationKey, domainKey, contentKey, versionKey).addListener(this);
+				dataManager.remove(locationKey, domainKey, contentKey, versionKey, protectionKey)
+						.addListener(this);
 			}
 		} else {
 			logger.error(String.format("Remove verification failed. Data is not null after %s tries."
