@@ -28,6 +28,21 @@ import org.junit.Test;
 
 public class H2HFileWatcherTest extends H2HJUnitTest {
 
+	enum Event {
+		FILE_CREATED,
+		FILE_DELETED,
+		FILE_CHANGED,
+		DIRECTORY_CREATED,
+		DIRECTORY_DELETED,
+		DIRECTORY_CHANGED
+	}
+
+	enum Relation {
+		PARENT,
+		SELF,
+		CHILD
+	}
+
 	private H2HFileWatcher testWatcher;
 
 	@BeforeClass
@@ -145,57 +160,6 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		}
 	}
 
-	enum Event {
-		FILE_CREATED,
-		FILE_DELETED,
-		FILE_CHANGED,
-		DIRECTORY_CREATED,
-		DIRECTORY_DELETED,
-		DIRECTORY_CHANGED
-	}
-
-	enum Relation {
-		PARENT,
-		SELF,
-		CHILD
-	}
-
-	private class EventCheck {
-		private final Event event;
-		private final Relation relation;
-
-		private EventCheck(Event event, Relation relation) {
-			this.event = event;
-			this.relation = relation;
-		}
-
-		public Event getEvent() {
-			return event;
-		}
-
-		public Relation getRelation() {
-			return relation;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-		    if (obj == null) {
-		        return false;
-		    }
-		    if (!(obj instanceof EventCheck)) {
-		        return false;
-		    }
-		    final EventCheck other = (EventCheck) obj;
-		    if (this.event != other.event) {
-		        return false;
-		    }
-		    if (this.relation != other.relation) {
-		        return false;
-		    }
-		    return true;
-		}
-	}
-
 	@Test
 	public void fileCreatedRootTest() throws Exception {
 		
@@ -241,6 +205,53 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		testWatcher.stop();
 	}
 	
+	@Test
+	public void fileDeletedRootTest() throws Exception {
+		
+		// on root level
+		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
+		expectedOrder.add(new EventCheck(Event.FILE_DELETED, Relation.SELF));
+
+		File fileToDelete = new File(getTestDirectoryRoot(), "CreatedFile.txt");
+		fileToDelete.createNewFile();
+		FileEventOrderListener orderListener = new FileEventOrderListener(fileToDelete);
+		testWatcher.addFileListener(orderListener);
+		testWatcher.start();
+
+		FileUtils.deleteQuietly(fileToDelete);
+		
+		Thread.sleep(1000);
+		
+		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
+		
+		testWatcher.stop();
+	}
+	
+	@Test
+	public void fileDeletedTest() throws Exception {
+		
+		// below root level
+		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
+		expectedOrder.add(new EventCheck(Event.FILE_DELETED, Relation.SELF));
+
+		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
+		FileUtils.forceMkdir(subDirectory);
+		File fileToDelete = new File(subDirectory, "CreatedFile.txt");
+		fileToDelete.createNewFile();
+		FileEventOrderListener orderListener = new FileEventOrderListener(fileToDelete);
+		testWatcher.addFileListener(orderListener);
+		testWatcher.start();
+
+		FileUtils.deleteQuietly(fileToDelete);
+		
+		Thread.sleep(1000);
+		
+		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
+		
+		testWatcher.stop();
+	}
+	
 	private boolean validateOrder(List<EventCheck> expected, List<EventCheck> real) {
 		if (expected.size() != real.size())
 			return false;
@@ -252,47 +263,80 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		return true;
 	}
 
+	private static File getTestDirectoryRoot() {
+		return Paths.get(FileUtils.getUserDirectoryPath(), "Hive2Hive Test").toFile();
+	}
+
+	private class EventCheck {
+		
+		private final Event event;
+		private final Relation relation;
+	
+		private EventCheck(Event event, Relation relation) {
+			this.event = event;
+			this.relation = relation;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+		    if (obj == null) {
+		        return false;
+		    }
+		    if (!(obj instanceof EventCheck)) {
+		        return false;
+		    }
+		    final EventCheck other = (EventCheck) obj;
+		    if (this.event != other.event) {
+		        return false;
+		    }
+		    if (this.relation != other.relation) {
+		        return false;
+		    }
+		    return true;
+		}
+	}
+
 	private class FileEventOrderListener implements FileAlterationListener {
 		private final List<EventCheck> realOrder = new ArrayList<EventCheck>();
 		public List<EventCheck> getRealOrder() {
 			return realOrder;
 		}
 		private File relativeFile;
-
+	
 		public FileEventOrderListener(File relativeFile) {
 			this.relativeFile = relativeFile;
 		}
-
+	
 		public void onStop(FileAlterationObserver observer) {
 		}
-
+	
 		public void onStart(FileAlterationObserver observer) {
 		}
-
+	
 		public void onFileDelete(File file) {
 			realOrder.add(new EventCheck(Event.FILE_DELETED, relate(file)));
 		}
-
+	
 		public void onFileCreate(File file) {
 			realOrder.add(new EventCheck(Event.FILE_CREATED, relate(file)));
 		}
-
+	
 		public void onFileChange(File file) {
 			realOrder.add(new EventCheck(Event.FILE_CHANGED, relate(file)));
 		}
-
+	
 		public void onDirectoryDelete(File directory) {
 			realOrder.add(new EventCheck(Event.DIRECTORY_DELETED, relate(directory)));
 		}
-
+	
 		public void onDirectoryCreate(File directory) {
 			realOrder.add(new EventCheck(Event.DIRECTORY_CREATED, relate(directory)));
 		}
-
+	
 		public void onDirectoryChange(File directory) {
 			realOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, relate(directory)));
 		}
-
+	
 		private Relation relate(File eventFile) {
 			if (relativeFile.getParentFile().getAbsolutePath().equals(eventFile.getAbsolutePath())) {
 				return Relation.PARENT;
@@ -304,10 +348,6 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 				throw new IllegalArgumentException("Relation cannot be evaluated.");
 			}
 		}
-	}
-
-	private static File getTestDirectoryRoot() {
-		return Paths.get(FileUtils.getUserDirectoryPath(), "Hive2Hive Test").toFile();
 	}
 
 	private class TestFileFilter implements FileFilter {
