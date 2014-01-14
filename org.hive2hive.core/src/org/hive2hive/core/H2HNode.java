@@ -1,6 +1,7 @@
 package org.hive2hive.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,6 +23,8 @@ import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
+import org.hive2hive.core.process.recover.IVersionSelector;
+import org.hive2hive.core.process.recover.RecoverFileProcess;
 import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
@@ -214,6 +217,15 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	@Override
 	public IGetFileListProcess getFileList() throws NoSessionException {
 		IGetFileListProcess process = new GetDigestProcess(networkManager);
+
+		autoStartProcess(process);
+		return process;
+	}
+
+	@Override
+	public IProcess recover(File file, IVersionSelector versionSelector) throws NoSessionException,
+			FileNotFoundException {
+		RecoverFileProcess process = new RecoverFileProcess(networkManager, file, versionSelector);
 
 		autoStartProcess(process);
 		return process;

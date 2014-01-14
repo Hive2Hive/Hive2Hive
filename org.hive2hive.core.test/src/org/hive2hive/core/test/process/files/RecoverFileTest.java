@@ -107,7 +107,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until the file is restored
-		H2HWaiter waiter = new H2HWaiter(60);
+		H2HWaiter waiter = new H2HWaiter(120);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());

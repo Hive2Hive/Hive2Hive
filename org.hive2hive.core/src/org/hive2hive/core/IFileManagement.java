@@ -1,11 +1,13 @@
 package org.hive2hive.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.digest.IGetFileListProcess;
+import org.hive2hive.core.process.recover.IVersionSelector;
 
 /**
  * Interface on all file operations that Hive2Hive currently supports.
@@ -64,6 +66,16 @@ public interface IFileManagement {
 	 * @return the observable process which additionally allows to get the result (digest) after finish
 	 */
 	IGetFileListProcess getFileList() throws NoSessionException;
+
+	/**
+	 * Recover a previous file version
+	 * 
+	 * @param file the file to recover an old version from
+	 * @param versionSelector selects a version to recover
+	 * @return the observable process
+	 */
+	IProcess recover(File file, IVersionSelector versionSelector) throws NoSessionException,
+			FileNotFoundException;
 
 	/**
 	 * Shares a folder and all it's children with another user.
