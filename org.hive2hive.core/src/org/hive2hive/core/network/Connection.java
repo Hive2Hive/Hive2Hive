@@ -129,7 +129,7 @@ public class Connection {
 			isConnected = true;
 			return true;
 		} else {
-			logger.warn(String.format("Failed bootstraping: %s", futureDiscover.getFailedReason()));
+			logger.warn(String.format("Failed bootstraping: %s", futureBootstrap.getFailedReason()));
 			peer.shutdown();
 			isConnected = false;
 			return false;

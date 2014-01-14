@@ -8,6 +8,7 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DownloadFileProcessContext extends ProcessContext implements IGetMetaContext {
 
@@ -17,6 +18,7 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	private final int indexToDownload;
 
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
 	private KeyPair protectionKeys;
 
 	public DownloadFileProcessContext(DownloadFileProcess process, FileTreeNode file,
@@ -45,7 +47,17 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
 	}
-
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+	
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
+	}
+	
 	@Override
 	public KeyPair getProtectionKeys() {
 		return protectionKeys;
@@ -63,4 +75,5 @@ public class DownloadFileProcessContext extends ProcessContext implements IGetMe
 	public int getIndexToDownload() {
 		return indexToDownload;
 	}
+
 }

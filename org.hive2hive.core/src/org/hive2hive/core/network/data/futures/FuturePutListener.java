@@ -66,7 +66,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
-		logger.debug(String
+		logger.trace(String
 				.format("Start verification of put. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 						locationKey, domainKey, contentKey, content.getVersionKey()));
 
@@ -224,13 +224,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).getKeyDigest();
 
 				if (keyDigest.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
-					logger.debug(String.format("Put verification: On peer '%s' entry is newest."
+					logger.trace(String.format("Put verification: On peer '%s' entry is newest."
 							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 
 				} else if (keyDigest.containsKey(new Number640(locationKey, domainKey, contentKey, content
 						.getVersionKey()))) {
-					logger.debug(String.format("Put verification: entry on peer '%s' exists in history."
+					logger.trace(String.format("Put verification: entry on peer '%s' exists in history."
 							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 
@@ -329,7 +329,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	}
 
 	private void notifySuccess() {
-		logger.debug(String
+		logger.trace(String
 				.format("Verification for put completed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 						locationKey, domainKey, contentKey, content.getVersionKey()));
 		// everything is ok

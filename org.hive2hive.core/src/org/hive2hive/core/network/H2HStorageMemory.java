@@ -53,7 +53,7 @@ public class H2HStorageMemory extends StorageLayer {
 
 				// after adding the content to the memory, old versions should be cleaned up. How many old
 				// versions we keep can be parameterized in the constants.
-				cleanupVersions(key);
+				cleanupVersions(key, publicKey);
 			}
 
 			logger.trace(String.format(
@@ -131,7 +131,7 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 	}
 
-	private void cleanupVersions(Number640 key) {
+	private void cleanupVersions(Number640 key, PublicKey publicKey) {
 		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
 
 		long now = System.currentTimeMillis();
@@ -141,8 +141,10 @@ public class H2HStorageMemory extends StorageLayer {
 				// stop removal because oldest version is too 'young'
 				break;
 			} else {
-				// TODO add public key for removing
-				super.remove(toRemove, null);
+				logger.trace(String.format("Removing an older version. version key = '%s'",
+						key.getVersionKey()));
+				history.remove(toRemove);
+				super.remove(toRemove, publicKey);
 			}
 		}
 	}

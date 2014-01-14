@@ -22,12 +22,13 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Nico, Seppi
  */
-public class UpdateParentMetaStep extends BasePutProcessStep {
+public class DeleteUpdateParentMetaStep extends BasePutProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
+	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteUpdateParentMetaStep.class);
+
 	private final String childName;
 
-	public UpdateParentMetaStep(String childName) {
+	public DeleteUpdateParentMetaStep(String childName) {
 		super(null); // next step is null, process is done
 		this.childName = childName;
 	}
@@ -43,27 +44,30 @@ public class UpdateParentMetaStep extends BasePutProcessStep {
 		}
 		KeyPair parentProtectionKeys = context.getParentProtectionKeys();
 		if (parentProtectionKeys == null) {
-			getProcess().stop("Content protection keys for parent meta folder are null (no write permission).");
+			getProcess().stop(
+					"Content protection keys for parent meta folder are null (no write permission).");
 			return;
 		}
 		MetaDocument childMeta = context.getMetaDocument();
 		if (childMeta == null) {
 			getProcess().stop("Child meta document is null.");
+			return;
 		}
-		
+
+		logger.debug(String.format("Removing child meta document of file '%s' from parent meta folder.",
+				childMeta.getName()));
+
 		// remove the child from the parent meta data
 		parentMeta.removeChildKey(childMeta.getId());
-		logger.debug("Removed child from meta folder. Total children = " + parentMeta.getChildKeys().size());
 
 		// notify other clients (can be multiple users)
 		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentMeta.getId(),
 				childName);
 		getProcess().notfyOtherUsers(parentMeta.getUserList(), messageFactory);
-		
+
 		try {
-			logger.debug("Encrypting parent meta folder in a hybrid manner.");
-			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(parentMeta,
-					parentMeta.getId());
+			HybridEncryptedContent encrypted = H2HEncryptionUtil
+					.encryptHybrid(parentMeta, parentMeta.getId());
 			encrypted.setBasedOnKey(parentMeta.getVersionKey());
 			encrypted.generateVersionKey();
 			put(key2String(parentMeta.getId()), H2HConstants.META_DOCUMENT, encrypted, parentProtectionKeys);

@@ -9,6 +9,7 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class UploadFileProcessContext extends ProcessContext implements IGetMetaContext {
 
@@ -18,6 +19,7 @@ public class UploadFileProcessContext extends ProcessContext implements IGetMeta
 	
 	private List<KeyPair> chunkKeys;
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
 	private KeyPair protectionKeys;
 	
 	public UploadFileProcessContext(Process process, File file, H2HSession session, boolean fileAlreadyExists) {
@@ -56,6 +58,17 @@ public class UploadFileProcessContext extends ProcessContext implements IGetMeta
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
 	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+	
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
+	}
+
 	
 	@Override
 	public void setProtectionKeys(KeyPair protectionKeys) {

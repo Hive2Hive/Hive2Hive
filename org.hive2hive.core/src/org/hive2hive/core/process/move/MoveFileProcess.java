@@ -4,8 +4,11 @@ import java.io.File;
 
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
+import org.hive2hive.core.process.delete.DeleteFileOnDiskStep;
 
 /**
  * Moves the file to a new destination. The following steps are required: <br>
@@ -22,6 +25,8 @@ import org.hive2hive.core.process.Process;
  * 
  */
 public class MoveFileProcess extends Process {
+	
+	static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileOnDiskStep.class);
 
 	private final MoveFileProcessContext context;
 
@@ -32,6 +37,8 @@ public class MoveFileProcess extends Process {
 
 		// verify the file
 		verifyFiles(source, destination);
+		
+		logger.info(String.format("Moving a file '%s' from '%s' to '%s'.", source.getName(), source.getPath(), destination.getPath()));
 
 		setNextStep(new MoveOnDiskStep());
 	}

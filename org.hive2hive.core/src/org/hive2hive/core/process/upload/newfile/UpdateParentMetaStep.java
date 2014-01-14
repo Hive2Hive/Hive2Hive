@@ -42,7 +42,7 @@ public class UpdateParentMetaStep extends BasePutProcessStep {
 		}
 
 		parentMeta.addChildKeyPair(context.getNewMetaKeyPair());
-		logger.debug(String.format("MetaFolder has new child. Total children = ", parentMeta.getChildKeys()
+		logger.debug(String.format("MetaFolder has new child. Total children = %s", parentMeta.getChildKeys()
 				.size()));
 
 		try {

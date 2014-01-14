@@ -101,7 +101,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 				Assert.assertNull(get.getData());
 			}
 		}
-		System.err.println("done here");
 	}
 
 	@Test
@@ -133,8 +132,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNull(metaDocument);
-		
-		System.err.println("done here");
 	}
 
 	@Test
@@ -185,7 +182,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 		MetaFolder metaFolder = (MetaFolder) ProcessTestUtil.getMetaDocument(client, metaKeyPairFolder);
 		Assert.assertNotNull(metaFolder);
 		Assert.assertEquals(0, metaFolder.getChildKeys().size());
-		System.err.println("done here");
 	}
 
 	@Test
@@ -239,7 +235,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 		MetaFolder metaFolder = (MetaFolder) ProcessTestUtil.getMetaDocument(client, metaKeyPairFolder);
 		Assert.assertNotNull(metaFolder);
 		Assert.assertEquals(0, metaFolder.getChildKeys().size());
-		System.err.println("done here");
 	}
 
 	@AfterClass

@@ -9,6 +9,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareFolderNotificationProcessContext extends ProcessContext implements IGetMetaContext {
 
@@ -17,6 +18,7 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	private final FileManager fileManager;
 
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
 	private KeyPair protectionKeys;
 
 	public ShareFolderNotificationProcessContext(Process process, FileTreeNode fileTreeNode,
@@ -47,6 +49,16 @@ public class ShareFolderNotificationProcessContext extends ProcessContext implem
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
 	}
 	
 	@Override

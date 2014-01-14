@@ -23,11 +23,11 @@ import org.hive2hive.core.process.common.File2MetaFileStep;
  * 9. notify other clients
  * 
  * @author Nico
- * 
  */
 public class DeleteFileProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteFileProcess.class);
+	
 	private final DeleteFileProcessContext context;
 
 	/**
@@ -42,7 +42,7 @@ public class DeleteFileProcess extends Process {
 	public DeleteFileProcess(File file, NetworkManager networkManager) throws IllegalArgumentException,
 			NoSessionException {
 		super(networkManager);
-		logger.info("Deleting file/folder from the DHT");
+		logger.info(String.format("Deleting file/folder from the DHT. file = '%s'", file.getName()));
 
 		// verify if the file can be deleted
 		verify(file);
@@ -76,7 +76,7 @@ public class DeleteFileProcess extends Process {
 	public DeleteFileProcess(FileTreeNode fileNode, NetworkManager networkManager)
 			throws IllegalArgumentException, NoSessionException {
 		super(networkManager);
-		logger.info("Deleting file/folder from the DHT");
+		logger.info(String.format("Deleting file/folder from the DHT. fileNode = '%s'", fileNode.getName()));
 
 		H2HSession session = networkManager.getSession();
 		

@@ -9,6 +9,7 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class MoveFileProcessContext extends ProcessContext implements IGetMetaContext {
 
@@ -18,6 +19,7 @@ public class MoveFileProcessContext extends ProcessContext implements IGetMetaCo
 	private final Set<String> usersToNotifyDestination;
 	
 	private MetaDocument metaDocument;
+	private HybridEncryptedContent encryptedMetaDocument;
 	private KeyPair protectionKeys;
 	private KeyPair nodeKeyPair;
 	private KeyPair destinationParentKeys;
@@ -42,6 +44,16 @@ public class MoveFileProcessContext extends ProcessContext implements IGetMetaCo
 	@Override
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
+	}
+	
+	@Override
+	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+
+	@Override
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
 	}
 	
 	@Override

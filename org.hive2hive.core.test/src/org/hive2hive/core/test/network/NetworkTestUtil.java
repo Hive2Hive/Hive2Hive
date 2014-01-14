@@ -67,7 +67,7 @@ public class NetworkTestUtil {
 
 		return nodes;
 	}
-
+	
 	/**
 	 * Generate and assign public/private key pairs to the nodes.
 	 * 

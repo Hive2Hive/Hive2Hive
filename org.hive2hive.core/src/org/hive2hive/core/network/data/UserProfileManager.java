@@ -124,16 +124,12 @@ public class UserProfileManager {
 	 *             himself as intending to put)
 	 */
 	public void readyToPut(UserProfile profile, int pid) throws PutFailedException {
-		try {
 		if (modifying != null && modifying.equals(pid)) {
 			modifying.setUserProfile(profile);
 			modifying.readyToPut();
 			modifying.waitForPut();
 		} else {
 			throw new PutFailedException("Not allowed to put anymore");
-		}
-		}catch (PutFailedException e) {
-			throw new PutFailedException(e.getMessage());
 		}
 	}
 
