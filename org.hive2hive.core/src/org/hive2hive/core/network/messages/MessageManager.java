@@ -195,7 +195,7 @@ public final class MessageManager {
 			// asymmetrically encrypt message
 			byte[] messageBytes = EncryptionUtil.serializeObject(message);
 			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes,
-					targetPublicKey, H2HConstants.HYBRID_AES_KEYLENGTH);
+					targetPublicKey, H2HConstants.KEYLENGTH_HYBRID_AES);
 
 			// create signature
 			try {

@@ -27,7 +27,7 @@ public class UserProfile extends NetworkContent {
 
 	public UserProfile(String userId) {
 		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
-				.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA));
+				.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
 	}
 
 	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair domainKeys) {

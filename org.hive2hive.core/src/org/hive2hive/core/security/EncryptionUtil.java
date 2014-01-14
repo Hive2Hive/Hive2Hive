@@ -252,7 +252,6 @@ public final class EncryptionUtil {
 	 * Encrypts the provided data in a hybrid manner. First, the content is symmetrically encrypted with a
 	 * randomly generated IV and AES key of the specified length. Then, these encryption parameters are
 	 * asymmetrically encrypted with the provided RSA public key.</br>
-	 * <b>NOTE:</b> Use a minimum RSA key length of 2048 bit.
 	 * 
 	 * @param data The data to be encrypted in a hybrid manner.
 	 * @param publicKey The RSA public key with which the data shall be encrypted.

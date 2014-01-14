@@ -107,7 +107,7 @@ public class PutChunkStep extends BasePutProcessStep {
 			// the byte-Array may contain many empty slots if last chunk. Truncate it
 			data = truncateData(data, read);
 
-			KeyPair chunkKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK_RSA);
+			KeyPair chunkKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
 			Chunk chunk = new Chunk(chunkKey.getPublic(), data, chunkKeys.size(), read);
 			chunkKeys.add(chunkKey);
 

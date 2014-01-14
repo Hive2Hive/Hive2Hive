@@ -84,7 +84,7 @@ public final class H2HEncryptionUtil {
 		byte[] serialized = EncryptionUtil.serializeObject(content);
 
 		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey,
-				H2HConstants.HYBRID_AES_KEYLENGTH);
+				H2HConstants.KEYLENGTH_HYBRID_AES);
 		encryptHybrid.setTimeToLive(content.getTimeToLive());
 		return encryptHybrid;
 	}

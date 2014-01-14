@@ -42,8 +42,8 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	@Before
 	public void createTreeNode() {
 		// create a tree
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
-		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		root = new FileTreeNode(keys, domainKey);
 
 		// naming convention:
@@ -77,7 +77,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	@Test
 	public void testShared() {
 		// set 1d to be shared
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		dir1.setDomainKeys(keys);
 
 		
@@ -94,7 +94,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	@Test
 	public void testHasShared1() {		
 		// set 2d to be shared
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		dir2.setDomainKeys(keys);
 
 		// root, 1d and 2d should show that they contain a shared folder
