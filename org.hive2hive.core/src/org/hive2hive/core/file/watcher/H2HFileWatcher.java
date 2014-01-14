@@ -10,13 +10,13 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 
 public class H2HFileWatcher {
 
-	private FileAlterationObserver rootObserver;
-	private FileAlterationMonitor monitor;
-
 	private final File rootDirectory;
-	private FileFilter fileFilter;
-	private IOCase caseSensitivity;
-	private long interval;
+	private final FileFilter fileFilter;
+	private final IOCase caseSensitivity;
+	private final long interval;
+	
+	private final FileAlterationObserver rootObserver;
+	private final FileAlterationMonitor monitor;
 	
 	private H2HFileWatcher(H2HFileWatcherBuilder builder){
 		this.rootDirectory = builder.rootDirectory;
@@ -44,6 +44,22 @@ public class H2HFileWatcher {
 		rootObserver.removeListener(listener);
 	}
 	
+	public File getRootDirectory() {
+		return rootDirectory;
+	}
+
+	public FileFilter getFileFilter() {
+		return fileFilter;
+	}
+
+	public IOCase getCaseSensitivity() {
+		return caseSensitivity;
+	}
+
+	public long getInterval() {
+		return interval;
+	}
+
 	public static class H2HFileWatcherBuilder {
 		
 		// required
