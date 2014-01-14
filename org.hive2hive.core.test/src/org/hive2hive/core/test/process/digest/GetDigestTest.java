@@ -12,7 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.digest.IGetDigestProcess;
+import org.hive2hive.core.process.digest.IGetFileListProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
@@ -60,10 +60,10 @@ public class GetDigestTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
-		IGetDigestProcess getDigestProcess = ProcessTestUtil.getDigest(client, profileManager, fileManager,
+		IGetFileListProcess getDigestProcess = ProcessTestUtil.getDigest(client, profileManager, fileManager,
 				config);
 
-		assertTrue(getDigestProcess.getDigest().isEmpty());
+		assertTrue(getDigestProcess.getFiles().isEmpty());
 
 		// add child1 to the network
 		File child1 = new File(root, NetworkTestUtil.randomString());
@@ -71,8 +71,8 @@ public class GetDigestTest extends H2HJUnitTest {
 		ProcessTestUtil.uploadNewFile(client, child1, profileManager, fileManager, config);
 
 		getDigestProcess = ProcessTestUtil.getDigest(client, profileManager, fileManager, config);
-		assertEquals(1, getDigestProcess.getDigest().size());
-		assertEquals(root.toPath().relativize(child1.toPath()).toString(), getDigestProcess.getDigest()
+		assertEquals(1, getDigestProcess.getFiles().size());
+		assertEquals(root.toPath().relativize(child1.toPath()).toString(), getDigestProcess.getFiles()
 				.get(0).toString());
 
 		// add dir1 to the network
@@ -86,16 +86,16 @@ public class GetDigestTest extends H2HJUnitTest {
 		ProcessTestUtil.uploadNewFile(client, dir1Child1, profileManager, fileManager, config);
 
 		getDigestProcess = ProcessTestUtil.getDigest(client, profileManager, fileManager, config);
-		assertEquals(2, getDigestProcess.getDigest().size());
-		assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), getDigestProcess.getDigest()
+		assertEquals(2, getDigestProcess.getFiles().size());
+		assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), getDigestProcess.getFiles()
 				.get(1).toString());
 
 		// delete child1 from the network
 		ProcessTestUtil.deleteFile(client, child1, profileManager, fileManager, config);
 
 		getDigestProcess = ProcessTestUtil.getDigest(client, profileManager, fileManager, config);
-		assertEquals(1, getDigestProcess.getDigest().size());
-		assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), getDigestProcess.getDigest()
+		assertEquals(1, getDigestProcess.getFiles().size());
+		assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), getDigestProcess.getFiles()
 				.get(0).toString());
 	}
 

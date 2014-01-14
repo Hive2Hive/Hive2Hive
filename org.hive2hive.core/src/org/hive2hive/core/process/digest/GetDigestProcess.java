@@ -9,11 +9,11 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 
 /**
- * Simple process to fetch the digest (files currently stored in the network).
+ * Simple process to fetch the digest (files/folders currently stored in the network).
  * 
  * @author Seppi
  */
-public class GetDigestProcess extends Process implements IGetDigestProcess {
+public class GetDigestProcess extends Process implements IGetFileListProcess {
 
 	private final GetDigestContext context;
 
@@ -29,7 +29,7 @@ public class GetDigestProcess extends Process implements IGetDigestProcess {
 	}
 
 	@Override
-	public List<Path> getDigest() throws IllegalProcessStateException {
+	public List<Path> getFiles() throws IllegalProcessStateException {
 		List<Path> digest = context.getDigest();
 		if (digest == null)
 			throw new IllegalProcessStateException("The process is not done yet or has been stopped");

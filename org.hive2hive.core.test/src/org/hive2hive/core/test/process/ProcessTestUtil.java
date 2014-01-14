@@ -24,7 +24,7 @@ import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.digest.GetDigestProcess;
-import org.hive2hive.core.process.digest.IGetDigestProcess;
+import org.hive2hive.core.process.digest.IGetFileListProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.process.login.LoginProcess;
@@ -265,7 +265,7 @@ public class ProcessTestUtil {
 		}
 	}
 
-	public static IGetDigestProcess getDigest(NetworkManager networkManager,
+	public static IGetFileListProcess getDigest(NetworkManager networkManager,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 
 		networkManager.setSession(new H2HSession(EncryptionUtil

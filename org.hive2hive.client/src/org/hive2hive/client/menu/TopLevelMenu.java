@@ -11,7 +11,7 @@ import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.digest.IGetDigestProcess;
+import org.hive2hive.core.process.digest.IGetFileListProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
 
 /**
@@ -23,7 +23,7 @@ import org.hive2hive.core.process.listener.ProcessListener;
 public final class TopLevelMenu extends ConsoleMenu {
 
 	public H2HConsoleMenuItem Login;
-	
+
 	private final UserMenu userMenu;
 	private final NodeCreationMenu nodeMenu;
 	private FileObserverMenu fileObserverMenu;
@@ -42,7 +42,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			nodeMenu.getH2HNode().disconnect();
 		}
 		// shutdown file observer
-		if (fileObserverMenu != null && fileObserverMenu.getWatcher() != null){
+		if (fileObserverMenu != null && fileObserverMenu.getWatcher() != null) {
 			try {
 				fileObserverMenu.getWatcher().stop();
 			} catch (Exception e) {
@@ -70,11 +70,12 @@ public final class TopLevelMenu extends ConsoleMenu {
 					String input = awaitStringParameter();
 					if (!input.equalsIgnoreCase("ok"))
 						root = new File(input);
-					if (!Files.exists(root.toPath(), LinkOption.NOFOLLOW_LINKS)){
+					if (!Files.exists(root.toPath(), LinkOption.NOFOLLOW_LINKS)) {
 						try {
 							FileUtils.forceMkdir(root);
-						} catch(Exception e){
-							printError(String.format("Exception on creating the root directory %s: " + e, root.toPath()));
+						} catch (Exception e) {
+							printError(String.format("Exception on creating the root directory %s: " + e,
+									root.toPath()));
 							checkPreconditions();
 						}
 					}
@@ -88,7 +89,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 		};
 	}
-	
+
 	@Override
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Network Configuration") {
@@ -121,7 +122,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				executeBlocking(process);
 			}
 		});
-		
+
 		add(Login);
 
 		add(new H2HConsoleMenuItem("Add File") {
@@ -157,22 +158,23 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Get Digest") {
+		add(new H2HConsoleMenuItem("Get File list") {
 			protected void execute() throws Hive2HiveException {
-				IGetDigestProcess process = nodeMenu.getH2HNode().getFileManagement().getDigest();
+				IGetFileListProcess process = nodeMenu.getH2HNode().getFileManagement().getFileList();
 				executeBlocking(process);
 
 				// print the digest
-				List<Path> digest = process.getDigest();
+				List<Path> digest = process.getFiles();
 				System.out.println("Digest request resulted:");
 				for (Path path : digest) {
 					System.out.println("* " + path.toString());
 				}
 			}
 		});
+
 		add(new H2HConsoleMenuItem("File Observer") {
 			protected void checkPreconditions() {
-				if (root == null){
+				if (root == null) {
 					printPreconditionError("Cannot configure file observer: Root Path not defined yet. Please login first.");
 					Login.invoke();
 				}
@@ -182,6 +184,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 					checkPreconditions();
 				}
 			}
+
 			@Override
 			protected void execute() throws Exception {
 				fileObserverMenu = new FileObserverMenu(root, nodeMenu.getH2HNode());

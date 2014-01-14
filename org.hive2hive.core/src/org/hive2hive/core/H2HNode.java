@@ -16,7 +16,7 @@ import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.digest.GetDigestProcess;
-import org.hive2hive.core.process.digest.IGetDigestProcess;
+import org.hive2hive.core.process.digest.IGetFileListProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -212,8 +212,8 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IGetDigestProcess getDigest() throws NoSessionException {
-		IGetDigestProcess process = new GetDigestProcess(networkManager);
+	public IGetFileListProcess getFileList() throws NoSessionException {
+		IGetFileListProcess process = new GetDigestProcess(networkManager);
 
 		autoStartProcess(process);
 		return process;
