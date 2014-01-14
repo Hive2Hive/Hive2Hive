@@ -72,12 +72,16 @@ public class DownloadFileProcess extends Process {
 	 * @throws NoSessionException
 	 */
 	public DownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) throws GetFailedException,
-			NoSessionException {
+			NoSessionException, IllegalArgumentException {
 		super(networkManager);
 
 		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-		UserProfile userProfile = profileManager.getUserProfile(super.getID(), false);
+		UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 		FileTreeNode fileNode = userProfile.getFileById(fileKey);
+
+		if (fileNode == null) {
+			throw new IllegalArgumentException("File node in user profile not found");
+		}
 
 		FileManager fileManager = networkManager.getSession().getFileManager();
 		Path destination = fileManager.getPath(fileNode);

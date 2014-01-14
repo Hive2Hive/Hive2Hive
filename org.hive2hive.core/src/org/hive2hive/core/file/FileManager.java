@@ -16,8 +16,8 @@ public class FileManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileManager.class);
 	private final Path root;
-	
-	public static String getFileSep(){
+
+	public static String getFileSep() {
 		String fileSep = System.getProperty("file.separator");
 		if (fileSep.equals("\\"))
 			fileSep = "\\\\";
@@ -87,9 +87,11 @@ public class FileManager {
 	 * Returns the file on disk from a file node of the user profile
 	 * 
 	 * @param fileToFind
-	 * @return
+	 * @return the path to the file or null if the parameter is null
 	 */
 	public Path getPath(FileTreeNode fileToFind) {
+		if (fileToFind == null)
+			return null;
 		return Paths.get(root.toString(), fileToFind.getFullPath().toString());
 	}
 }
