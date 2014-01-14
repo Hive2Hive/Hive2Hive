@@ -81,7 +81,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 		userProfile = new UserProfile("test-user");
 		root = userProfile.getRoot();
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		node1f1 = new FileTreeNode(root, keys, "1f1", EncryptionUtil.generateMD5Hash(file1f1));
 		node1f2 = new FileTreeNode(root, keys, "1f2", EncryptionUtil.generateMD5Hash(file1f2));
 		node1d = new FileTreeNode(root, keys, "1d");
@@ -142,7 +142,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddedRemotely() throws IOException {
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		FileTreeNode node1f3 = new FileTreeNode(root, keys, "1f3", null);
 		FileTreeNode node2d2 = new FileTreeNode(node1d, keys, "2d2");
 

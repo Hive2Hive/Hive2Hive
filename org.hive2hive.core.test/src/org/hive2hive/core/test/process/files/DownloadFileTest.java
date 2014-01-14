@@ -131,7 +131,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		client.setSession(new H2HSession(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
 				profileManager, config, downloaderFileManager));
 		FileTreeNode wrongKeys = new FileTreeNode(file.getParent(),
-				EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA), "bla",
+				EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT), "bla",
 				"bla".getBytes());
 		DownloadFileProcess process = new DownloadFileProcess(wrongKeys, client);
 		TestProcessListener listener = new TestProcessListener();

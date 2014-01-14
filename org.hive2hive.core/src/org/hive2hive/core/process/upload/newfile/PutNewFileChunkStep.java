@@ -23,7 +23,7 @@ public class PutNewFileChunkStep extends PutChunkStep {
 
 	private void configureStepAfterUpload(NewFileProcessContext context) {
 		// generate the new key pair for the meta file (which are later stored in the user profile)
-		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT_RSA);
+		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		context.setNewMetaKeyPair(metaKeyPair);
 
 		MetaDocument metaDocument = null;
