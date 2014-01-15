@@ -60,11 +60,15 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		FileUtils.forceMkdir(getTestDirectoryRoot());
 		logger.debug("Test Directory created.");
 
-		testWatcher = getRootDirectoryWatcher();
+		testWatcher = new H2HFileWatcher.H2HFileWatcherBuilder(getTestDirectoryRoot()).build();
 	}
 
 	@After
 	public void removeTestDirectory() throws Exception {
+		try {
+			testWatcher.stop();
+		} catch (Exception e){
+		}
 		testWatcher = null;
 
 		FileUtils.deleteDirectory(getTestDirectoryRoot());
@@ -152,6 +156,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		FileUtils.deleteQuietly(file);
 		FileUtils.deleteQuietly(subDirectory);
 
+		testWatcher.removeFileListener(listener);
 		testWatcher.stop();
 
 		// check whether all events were triggered
@@ -179,6 +184,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
+		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
 
@@ -203,11 +209,12 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
+		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
 
 	@Test
-	public void fileDeletedTest() throws Exception {
+	public void fileDeletedRootTest() throws Exception {
 
 		// on root level
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
@@ -225,11 +232,12 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
+		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
 
 	@Test
-	public void fileDeletedRootTest() throws Exception {
+	public void fileDeletedTest() throws Exception {
 
 		// below root level
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
@@ -250,6 +258,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
+		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
 
@@ -273,6 +282,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
+		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
 
@@ -298,6 +308,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
+		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
 
@@ -310,10 +321,6 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 			}
 		}
 		return true;
-	}
-
-	private H2HFileWatcher getRootDirectoryWatcher() {
-		return new H2HFileWatcher.H2HFileWatcherBuilder(getTestDirectoryRoot()).build();
 	}
 
 	private static File getTestDirectoryRoot() {
@@ -349,8 +356,8 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		}
 	}
 
-	private class FileEventOrderListener implements FileAlterationListener {
-		private final List<EventCheck> realOrder = new ArrayList<EventCheck>();
+	private final class FileEventOrderListener implements FileAlterationListener {
+		private final List<EventCheck> realOrder;
 
 		public List<EventCheck> getRealOrder() {
 			return realOrder;
@@ -362,6 +369,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		public FileEventOrderListener(File relativeFile) {
 			this.absoluteFilePath = relativeFile.getAbsolutePath();
 			this.absoluteParentFilePath = relativeFile.getParentFile().getAbsolutePath();
+			this.realOrder = new ArrayList<EventCheck>();
 		}
 
 		public void onStop(FileAlterationObserver observer) {
