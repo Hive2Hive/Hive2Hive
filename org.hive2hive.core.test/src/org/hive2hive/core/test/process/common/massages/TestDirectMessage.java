@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.process.common.massages;
 
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.AcceptanceReply;
@@ -32,7 +33,9 @@ public class TestDirectMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, wrapper);
+		Number160 lKey = Number160.createHash(networkManager.getNodeId());
+		Number160 cKey = Number160.createHash(contentKey);
+		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null).awaitUninterruptibly();
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package org.hive2hive.core.test.network.messages;
 
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.test.H2HTestData;
@@ -28,7 +30,9 @@ public class TestMessage extends BaseMessage {
 
 	@Override
 	public void run() {
-		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, wrapper);
+		Number160 lKey = Number160.createHash(networkManager.getNodeId());
+		Number160 cKey = Number160.createHash(contentKey);
+		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null).awaitUninterruptibly();
 	}
 
 	@Override

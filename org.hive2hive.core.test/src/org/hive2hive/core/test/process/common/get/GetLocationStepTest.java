@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -16,6 +17,7 @@ import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -51,8 +53,12 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		newLocations.addPeerAddress(getter.getPeerAddress());
 		TestGetLocationContext context = new TestGetLocationContext();
 
+		Number160 lKey = Number160.createHash(userId);
+		Number160 dKey = Number160.ZERO;
+		Number160 cKey = Number160.createHash(H2HConstants.USER_LOCATIONS);
+		
 		// put the locations to the DHT
-		proxy.getDataManager().putLocal(userId, H2HConstants.USER_LOCATIONS, newLocations);
+		proxy.getDataManager().put(lKey, dKey, cKey, newLocations, null).awaitUninterruptibly();
 
 		GetLocationsStep getStep = new GetLocationsStep(userId, null, context);
 		Process process = new Process(getter) {
@@ -60,18 +66,10 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.setNextStep(getStep);
-
-		// check that receiver does not have any content
-		Assert.assertNull(getter.getDataManager().getLocal(userId, H2HConstants.USER_LOCATIONS));
-
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 
 		// verify if both objects are the same
 		Assert.assertEquals(userId, context.getLocations().getUserId());

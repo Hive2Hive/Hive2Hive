@@ -1,5 +1,7 @@
 package org.hive2hive.core.test.network.messages;
 
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -28,8 +30,10 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 	@Override
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
-
-		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
+		
+		Number160 lKey = Number160.createHash(networkManager.getNodeId());
+		Number160 cKey = Number160.createHash(contentKey);
+		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(secret), null).awaitUninterruptibly();
 
 		sendDirectResponse(createResponse(secret));
 	}
@@ -50,7 +54,9 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-			networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+			Number160 lKey = Number160.createHash(networkManager.getNodeId());
+			Number160 cKey = Number160.createHash(contentKey);
+			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(receivedSecret), null).awaitUninterruptibly();
 		}
 
 	}
