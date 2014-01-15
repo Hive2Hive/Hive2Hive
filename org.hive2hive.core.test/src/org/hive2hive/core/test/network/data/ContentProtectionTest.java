@@ -24,7 +24,7 @@ import org.junit.Test;
 public class ContentProtectionTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 5;
+	private static final int networkSize = 3;
 	private static Random random = new Random();
 
 	@BeforeClass
@@ -37,7 +37,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 	@Test
 	public void testOverwritting1() throws Exception {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 domainKey = Number160.ZERO;
+		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
 		KeyPair protectionKey = EncryptionUtil.generateProtectionKey();
 
@@ -66,7 +66,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 	@Test
 	public void testOverwritting2() throws Exception {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 domainKey = Number160.ZERO;
+		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
 		KeyPair protectionKey = EncryptionUtil.generateProtectionKey();
 
@@ -104,7 +104,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 	@Test
 	public void testOverwritting3() throws Exception {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 domainKey = Number160.ZERO;
+		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
 		KeyPair protectionKey1 = EncryptionUtil.generateProtectionKey();
 		KeyPair protectionKey2 = EncryptionUtil.generateProtectionKey();
@@ -134,7 +134,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 	@Test
 	public void testRemove1() throws Exception {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 domainKey = Number160.ZERO;
+		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
 		KeyPair protectionKey1 = EncryptionUtil.generateProtectionKey();
 		KeyPair protectionKey2 = EncryptionUtil.generateProtectionKey();
@@ -169,6 +169,50 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		futureRemove.awaitUninterruptibly();
 
 		futureGet = node.getDataManager().get(locationKey, domainKey, contentKey);
+		futureGet.awaitUninterruptibly();
+		assertNull(futureGet.getData());
+	}
+	
+	@Test
+	public void testRemove2() throws Exception {
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
+		KeyPair protectionKey1 = EncryptionUtil.generateProtectionKey();
+		KeyPair protectionKey2 = EncryptionUtil.generateProtectionKey();
+		
+		NetworkManager node = network.get(random.nextInt(networkSize));
+
+		H2HTestData data1 = new H2HTestData("bla1");
+		data1.generateVersionKey();
+		Number160 versionKey = data1.getVersionKey();
+
+		FuturePut futurePut = node.getDataManager()
+				.put(locationKey, domainKey, contentKey, data1, protectionKey1);
+		futurePut.awaitUninterruptibly();
+
+		FutureGet futureGet = node.getDataManager().get(locationKey, domainKey, contentKey, versionKey);
+		futureGet.awaitUninterruptibly();
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		
+		FutureRemove futureRemove = node.getDataManager().remove(locationKey, domainKey, contentKey, versionKey, null);
+		futureRemove.awaitUninterruptibly();
+
+		futureGet = node.getDataManager().get(locationKey, domainKey, contentKey, versionKey);
+		futureGet.awaitUninterruptibly();
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		
+		futureRemove = node.getDataManager().remove(locationKey, domainKey, contentKey, versionKey, protectionKey2);
+		futureRemove.awaitUninterruptibly();
+
+		futureGet = node.getDataManager().get(locationKey, domainKey, contentKey, versionKey);
+		futureGet.awaitUninterruptibly();
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		
+		futureRemove = node.getDataManager().remove(locationKey, domainKey, contentKey, versionKey, protectionKey1);
+		futureRemove.awaitUninterruptibly();
+
+		futureGet = node.getDataManager().get(locationKey, domainKey, contentKey, versionKey);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
