@@ -25,6 +25,7 @@ public class FileTreeNode implements Serializable {
 	private byte[] md5LatestVersion;
 	private KeyPair protectionKeys = null;
 	private final Set<FileTreeNode> children;
+	private boolean isShared = false;
 
 	/**
 	 * Constructor for child nodes of type 'folder'
@@ -161,13 +162,22 @@ public class FileTreeNode implements Serializable {
 	}
 
 	public boolean isShared() {
-		// TODO implement is shared
-		return false;
+		return isShared;
+	}
+
+	public void setIsShared(boolean isShared) {
+		if (isRoot() && isShared)
+			throw new IllegalStateException("Root node can't be shared.");
+		this.isShared = isShared;
+		for (FileTreeNode child: children)
+			child.setIsShared(isShared);
 	}
 
 	public boolean hasShared() {
-		// TODO implement has shared
-		return false;
+		boolean shared = isShared;
+		for (FileTreeNode child: children)
+			shared |= child.hasShared();
+		return shared;
 	}
 
 	public boolean canWrite() {

@@ -16,8 +16,7 @@ import org.junit.Test;
 /**
  * Tests the file tree node
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class FileTreeNodeTest extends H2HJUnitTest {
 
@@ -75,12 +74,10 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testShared() {
+	public void testShared1() {
 		// set 1d to be shared
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		dir1.setProtectionKeys(keys);
+		dir1.setIsShared(true);
 
-		
 		// 1d, 2f and 2d should return to be shared, others not
 		Assert.assertTrue(dir1.isShared());
 		Assert.assertTrue(dir2.isShared());
@@ -89,22 +86,55 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(root.isShared());
 		Assert.assertFalse(child1.isShared());
 		Assert.assertFalse(child2.isShared());
+		
+		// set 1d to be not shared
+		dir1.setIsShared(false);
+		
+		// root, 1f1, 1f2, 1d, 2f and 2d should return to be not shared
+		Assert.assertFalse(root.isShared());
+		Assert.assertFalse(dir1.isShared());
+		Assert.assertFalse(dir2.isShared());
+		Assert.assertFalse(child1.isShared());
+		Assert.assertFalse(child2.isShared());
+		Assert.assertFalse(child3.isShared());
+
 	}
-	
+
 	@Test
-	public void testHasShared1() {		
+	public void testShared2() {
+		try {
+			root.setIsShared(true);
+			Assert.fail();
+		} catch (IllegalStateException e) {
+			// has to be thrown
+		}
+	}
+
+	@Test
+	public void testHasShared() {
 		// set 2d to be shared
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		dir2.setProtectionKeys(keys);
+		dir2.setIsShared(true);
 
 		// root, 1d and 2d should show that they contain a shared folder
 		Assert.assertTrue(root.hasShared());
 		Assert.assertTrue(dir1.hasShared());
 		Assert.assertTrue(dir2.hasShared());
-		
+
 		Assert.assertFalse(child1.hasShared());
 		Assert.assertFalse(child2.hasShared());
 		Assert.assertFalse(child3.hasShared());
+		
+		// set 2d to be not shared
+		dir2.setIsShared(false);
+
+		// root, 1f1, 1f2, 1d, 2f and 2d should not contain a shared folder
+		Assert.assertFalse(root.hasShared());
+		Assert.assertFalse(dir1.hasShared());
+		Assert.assertFalse(dir2.hasShared());
+		Assert.assertFalse(child1.hasShared());
+		Assert.assertFalse(child2.hasShared());
+		Assert.assertFalse(child3.hasShared());
+		
 	}
 
 	@Test
