@@ -13,34 +13,41 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 public class FileObserverClient {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileObserverClient.class);
-	
+
 	public static void main(String args[]) {
 
 		LoggerInit.initLogger();
-		
+
 		H2HFileWatcher watcher = new H2HFileWatcher.H2HFileWatcherBuilder(Paths.get(
 				FileUtils.getUserDirectoryPath(), "Hive2Hive").toFile()).setInterval(1000).build();
-		watcher.addFileListener(new FileAlterationListener(){
+		watcher.addFileListener(new FileAlterationListener() {
 			public void onStart(FileAlterationObserver observer) {
 			}
+
 			public void onDirectoryCreate(File directory) {
-				printFileDetails("created", directory);
+				printFileDetails("Directory created", directory);
 			}
+
 			public void onDirectoryChange(File directory) {
-				printFileDetails("changed", directory);
+				printFileDetails("Directory changed", directory);
 			}
+
 			public void onDirectoryDelete(File directory) {
-				printFileDetails("deleted", directory);
+				printFileDetails("Directory deleted", directory);
 			}
+
 			public void onFileCreate(File file) {
-				printFileDetails("created", file);
+				printFileDetails("File created", file);
 			}
+
 			public void onFileChange(File file) {
-				printFileDetails("changed", file);
+				printFileDetails("File changed", file);
 			}
+
 			public void onFileDelete(File file) {
-				printFileDetails("deleted", file);
+				printFileDetails("File deleted", file);
 			}
+
 			public void onStop(FileAlterationObserver observer) {
 			}
 		});
@@ -50,9 +57,8 @@ public class FileObserverClient {
 			e.printStackTrace();
 		}
 	}
-	
-	private static void printFileDetails(String reason, File file) {
-		logger.debug(String.format("%s %s: %s\n", file.isDirectory() ? "Directory" : "File", reason,
-				file.getAbsolutePath()));
+
+	private static void printFileDetails(String event, File file) {
+		logger.debug(String.format("%s: %s\n", event, file.getAbsolutePath()));
 	}
 }

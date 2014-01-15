@@ -22,10 +22,13 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class H2HFileWatcherTest extends H2HJUnitTest {
 
+	// TODO the missing event order tests should be implemented
+	
 	enum Event {
 		FILE_CREATED,
 		FILE_DELETED,
@@ -355,6 +358,37 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		testWatcher.stop();
 	}
 
+	@Ignore
+	@Test
+	public void directoryDeletedRootTest() throws Exception {
+		
+		// on root level
+		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
+		expectedOrder.add(new EventCheck(Event.FILE_DELETED, Relation.CHILD));
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_DELETED, Relation.CHILD));
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_DELETED, Relation.SELF));
+
+		File directoryToDelete = new File(getTestDirectoryRoot(), "DirectoryToDelete");
+		FileUtils.forceMkdir(directoryToDelete);
+		File childFile = new File(directoryToDelete, "ChildFile.txt");
+		childFile.createNewFile();
+		File childDirectory = new File(directoryToDelete, "ChildDirectory");
+		FileUtils.forceMkdir(childDirectory);
+		
+		FileEventOrderListener orderListener = new FileEventOrderListener(directoryToDelete);
+		testWatcher.addFileListener(orderListener);
+		testWatcher.start();
+
+		FileUtils.deleteQuietly(directoryToDelete);
+
+		Thread.sleep(WAIT);
+
+		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
+
+		testWatcher.removeFileListener(orderListener);
+		testWatcher.stop();
+	}
+	
 	private static boolean validateOrder(List<EventCheck> expected, List<EventCheck> real) {
 		if (expected.size() != real.size())
 			return false;
