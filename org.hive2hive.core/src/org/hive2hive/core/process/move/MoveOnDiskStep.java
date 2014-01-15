@@ -16,10 +16,9 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 
 /**
- * Moves the file to the destination on disk
+ * Moves the file to the destination on disk.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class MoveOnDiskStep extends ProcessStep {
 
@@ -32,8 +31,8 @@ public class MoveOnDiskStep extends ProcessStep {
 			// move the file
 			Files.move(context.getSource().toPath(), context.getDestination().toPath(),
 					StandardCopyOption.ATOMIC_MOVE);
-			logger.debug("Moved the file from " + context.getSource().getAbsolutePath() + " to "
-					+ context.getDestination().getAbsolutePath());
+			logger.debug(String.format("Moved the file from '%s' to '%s'.", context.getSource()
+					.getAbsolutePath(), context.getDestination().getAbsolutePath()));
 
 			// now get the key of the meta file
 			H2HSession session = getNetworkManager().getSession();
@@ -41,7 +40,8 @@ public class MoveOnDiskStep extends ProcessStep {
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), false);
 			FileTreeNode fileNode = userProfile.getFileByPath(context.getSource(), session.getFileManager());
 			if (fileNode == null) {
-				throw new IllegalArgumentException("Source file could not be found in UserProfile");
+				getProcess().stop("Source file could not be found in UserProfile");
+				return;
 			}
 			context.setFileNodeKeys(fileNode.getKeyPair());
 			context.setSourceProtectionKeys(fileNode.getProtectionKeys());
@@ -62,7 +62,7 @@ public class MoveOnDiskStep extends ProcessStep {
 
 			// need to update the former parent (if it was not located in root
 			if (fileNode.getParent().isRoot()) {
-				logger.debug("File is in root; No need to update the source parent");
+				logger.debug("File is in root. No need to update the source parent.");
 				if (context.getDestinationParentKeys() == null) {
 					// file was in root and stays in root (simply renamed) next steps
 					// 1. update the user profile

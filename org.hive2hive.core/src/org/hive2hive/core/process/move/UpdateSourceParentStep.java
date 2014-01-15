@@ -29,8 +29,9 @@ public class UpdateSourceParentStep extends BasePutProcessStep {
 
 	@Override
 	public void start() {
-		logger.debug("Start removing the file from the former parent meta folder.");
 		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
+
+		logger.debug("Start removing the file from the former parent meta folder.");
 
 		MetaDocument sourceParent = context.getMetaDocument();
 		if (sourceParent == null) {

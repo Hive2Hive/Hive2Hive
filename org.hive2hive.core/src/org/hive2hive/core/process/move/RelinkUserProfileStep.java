@@ -25,8 +25,9 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		logger.debug("Start relinking the moved file in the user profile");
 		MoveFileProcessContext context = (MoveFileProcessContext) getProcess().getContext();
+
+		logger.debug("Start relinking the moved file in the user profile.");
 
 		// different possibilities of movement:
 		// - file moved from root to other destination
@@ -36,7 +37,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 			UserProfileManager profileManager = getNetworkManager().getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 
-			logger.debug("Start relinking the moved file in the user profile");
+			logger.debug("Start relinking the moved file in the user profile.");
 			FileTreeNode movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
 
 			// consider renaming
@@ -63,7 +64,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 			// update in DHT
 			profileManager.readyToPut(userProfile, getProcess().getID());
 			profileUpdated = true;
-			logger.debug("Successfully relinked the moved file in the user profile");
+			logger.debug("Successfully relinked the moved file in the user profile.");
 
 			// notify other users
 			notifyUsers(context.getUsersToNotifySource(), context.getUsersToNotifyDestination(), movedNode,
