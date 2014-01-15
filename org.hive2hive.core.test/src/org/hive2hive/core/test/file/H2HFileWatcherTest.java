@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class H2HFileWatcherTest extends H2HJUnitTest {
@@ -58,7 +56,6 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 			FileUtils.deleteDirectory(getTestDirectoryRoot());
 		}
 		FileUtils.forceMkdir(getTestDirectoryRoot());
-		logger.debug("Test Directory created.");
 
 		testWatcher = new H2HFileWatcher.H2HFileWatcherBuilder(getTestDirectoryRoot()).build();
 	}
@@ -67,12 +64,11 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 	public void removeTestDirectory() throws Exception {
 		try {
 			testWatcher.stop();
-		} catch (Exception e){
+		} catch (Exception e) {
 		}
 		testWatcher = null;
 
 		FileUtils.deleteDirectory(getTestDirectoryRoot());
-		logger.debug("Test Directory removed.");
 	}
 
 	@Test
@@ -161,32 +157,29 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 			// logger.debug(String.format("[%s]: %s", i+1, notifiedEvent[i]));
 			assertTrue(notifiedEvent[i]);
 		}
-		
+
 		testWatcher.removeFileListener(listener);
 		testWatcher.stop();
 	}
 
 	@Test
 	public void fileCreatedRootTest() throws Exception {
-	
-		// below root level
+
+		// on root level
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
-		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
 		expectedOrder.add(new EventCheck(Event.FILE_CREATED, Relation.SELF));
-	
-		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
-		FileUtils.forceMkdir(subDirectory);
-		File fileToCreate = new File(subDirectory, "CreatedFile.txt");
+
+		File fileToCreate = new File(getTestDirectoryRoot(), "CreatedFile.txt");
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToCreate);
 		testWatcher.addFileListener(orderListener);
 		testWatcher.start();
-	
+
 		fileToCreate.createNewFile();
-	
+
 		Thread.sleep(WAIT);
-	
+
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
-	
+
 		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
@@ -194,11 +187,14 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 	@Test
 	public void fileCreatedTest() throws Exception {
 
-		// on root level
+		// below root level
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
 		expectedOrder.add(new EventCheck(Event.FILE_CREATED, Relation.SELF));
 
-		File fileToCreate = new File(getTestDirectoryRoot(), "CreatedFile.txt");
+		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
+		FileUtils.forceMkdir(subDirectory);
+		File fileToCreate = new File(subDirectory, "CreatedFile.txt");
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToCreate);
 		testWatcher.addFileListener(orderListener);
 		testWatcher.start();
@@ -279,7 +275,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		Thread.sleep(WAIT);
 
-//		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
+		// assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 		assertTrue(containsOnly(orderListener.getRealOrder(), expectedOrder.get(0)));
 
 		testWatcher.removeFileListener(orderListener);
@@ -288,7 +284,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 	@Test
 	public void fileChangedTest() throws Exception {
-		
+
 		// below root level
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.FILE_CHANGED, Relation.SELF));
@@ -305,8 +301,55 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 
 		Thread.sleep(WAIT);
 
-//		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
+		// assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 		assertTrue(containsOnly(orderListener.getRealOrder(), expectedOrder.get(0)));
+
+		testWatcher.removeFileListener(orderListener);
+		testWatcher.stop();
+	}
+
+	@Test
+	public void directoryCreatedRootTest() throws Exception {
+
+		// on root level
+		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_CREATED, Relation.SELF));
+
+		File directoryToCreate = new File(getTestDirectoryRoot(), "CreatedDirectory");
+		FileEventOrderListener orderListener = new FileEventOrderListener(directoryToCreate);
+		testWatcher.addFileListener(orderListener);
+		testWatcher.start();
+
+		FileUtils.forceMkdir(directoryToCreate);
+
+		Thread.sleep(WAIT);
+
+		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
+
+		testWatcher.removeFileListener(orderListener);
+		testWatcher.stop();
+	}
+
+	@Test
+	public void directoryCreatedTest() throws Exception {
+
+		// below root level
+		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
+		expectedOrder.add(new EventCheck(Event.DIRECTORY_CREATED, Relation.SELF));
+
+		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
+		FileUtils.forceMkdir(subDirectory);
+		File directoryToCreate = new File(subDirectory, "CreatedDirectory");
+		FileEventOrderListener orderListener = new FileEventOrderListener(directoryToCreate);
+		testWatcher.addFileListener(orderListener);
+		testWatcher.start();
+
+		FileUtils.forceMkdir(directoryToCreate);
+
+		Thread.sleep(WAIT);
+
+		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
 
 		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
@@ -330,7 +373,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		}
 		return true;
 	}
-	
+
 	private static File getTestDirectoryRoot() {
 		return Paths.get(FileUtils.getUserDirectoryPath(), "Hive2Hive Test").toFile();
 	}
