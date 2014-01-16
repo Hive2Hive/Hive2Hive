@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDigest;
@@ -22,12 +23,11 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
 
 /**
  * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
- * notifying {@link IPutListener} listeners. In case of a successful put {@link IPutListener#onSuccess()} gets
- * called. In case of a failed put {@link IPutListener#onFailure()} gets called. </br></br>
+ * a blocking wait.</br></br>
+ * 
  * <b>Failure Handling</b></br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link PutStatusH2H} for possible failures. If putting fails the
@@ -36,7 +36,7 @@ import org.hive2hive.core.network.data.listener.IPutListener;
  * That's why the future listener attaches himself to the new future objects so that the adapter can finally
  * notify his/her listener about a success or failure.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
@@ -47,21 +47,37 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private final Number160 contentKey;
 	private final KeyPair protectionKey;
 	private final NetworkContent content;
-	private final IPutListener listener;
 	private final DataManager dataManager;
+	private final CountDownLatch latch;
 
 	// used to count put retries
 	private int putTries = 0;
+	private boolean success = false;
 
 	public FuturePutListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			NetworkContent content, KeyPair protectionKey, IPutListener listener, DataManager dataManager) {
+			NetworkContent content, KeyPair protectionKey, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
 		this.protectionKey = protectionKey;
 		this.content = content;
-		this.listener = listener;
 		this.dataManager = dataManager;
+		this.latch = new CountDownLatch(1);
+	}
+
+	/**
+	 * Wait (blocking) until the put is done
+	 * 
+	 * @return true if successfull, false if not successful
+	 */
+	public boolean await() {
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			logger.error("Could not wait until put has finished", e);
+		}
+
+		return success;
 	}
 
 	@Override
@@ -333,8 +349,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				.format("Verification for put completed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 						locationKey, domainKey, contentKey, content.getVersionKey()));
 		// everything is ok
-		if (listener != null)
-			listener.onPutSuccess();
+		success = true;
+		latch.countDown();
 	}
 
 	/**
@@ -352,8 +368,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 							locationKey, domainKey, contentKey, content.getVersionKey()));
 
-				if (listener != null)
-					listener.onPutFailure();
+				success = false;
+				latch.countDown();
 			}
 		});
 	}

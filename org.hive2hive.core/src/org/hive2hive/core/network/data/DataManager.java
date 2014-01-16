@@ -21,7 +21,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 
 /**
@@ -48,35 +47,33 @@ public class DataManager {
 		return networkManager.getConnection().getPeer();
 	}
 
-	public void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey,
-			IPutListener listener) {
+	public boolean put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
 		FuturePut putFuture = put(lKey, dKey, cKey, content, protectionKey);
 		if (putFuture == null) {
-			if (listener != null)
-				listener.onPutFailure();
-			return;
+			return false;
 		}
 
-		putFuture
-				.addListener(new FuturePutListener(lKey, dKey, cKey, content, protectionKey, listener, this));
+		FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, content, protectionKey, this);
+		putFuture.addListener(listener);
+		return listener.await();
 	}
 
-	public void putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
-			KeyPair protectionKey, IPutListener listener) {
+	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
+			KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 		FuturePut putFuture = put(lKey, dKey, contentKey, content, protectionKey);
 		if (putFuture == null) {
-			if (listener != null)
-				listener.onPutFailure();
-			return;
+			return false;
 		}
 
-		putFuture.addListener(new FuturePutListener(lKey, dKey, contentKey, content, protectionKey, listener,
-				this));
+		FuturePutListener listener = new FuturePutListener(lKey, dKey, contentKey, content, protectionKey,
+				this);
+		putFuture.addListener(listener);
+		return listener.await();
 	}
 
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,

@@ -14,7 +14,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
@@ -28,7 +27,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public abstract class PutUserProfileTaskStep extends ProcessStep implements IPutListener, IRemoveListener {
+public abstract class PutUserProfileTaskStep extends ProcessStep implements IRemoveListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutUserProfileTaskStep.class);
 
@@ -36,21 +35,19 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 	private Number160 contentKey;
 	private KeyPair protectionKey;
 
-	private ProcessStep nextStep = null;
 	private boolean putPerformed = false;
-	
+
 	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey,
-			ProcessStep nextStep){
+			ProcessStep nextStep) {
 		if (userId == null)
 			throw new IllegalArgumentException("user id can be not null");
 		if (userProfileTask == null)
 			throw new IllegalArgumentException("user profile task can be not null");
 		if (publicKey == null)
 			throw new IllegalArgumentException("public key can be not null");
-		
+
 		this.userId = userId;
-		this.nextStep = nextStep;
-		
+
 		try {
 			logger.debug("Encrypting user profile task in a hybrid manner");
 			this.contentKey = userProfileTask.getContentKey();
@@ -61,22 +58,18 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 				return;
 			}
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
-			dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey, this);
+			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
+
+			if (success) {
+				getProcess().setNextStep(nextStep);
+			} else {
+				getProcess().stop("Put of user profile task failed.");
+			}
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");
 		}
-	}
-
-	@Override
-	public void onPutSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onPutFailure() {
-		getProcess().stop("Put of user profile task failed.");
 	}
 
 	@Override

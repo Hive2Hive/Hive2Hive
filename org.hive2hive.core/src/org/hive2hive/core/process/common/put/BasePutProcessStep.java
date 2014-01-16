@@ -6,7 +6,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -17,7 +16,7 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public abstract class BasePutProcessStep extends ProcessStep implements IPutListener, IRemoveListener {
+public abstract class BasePutProcessStep extends ProcessStep implements IRemoveListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
 
@@ -31,7 +30,7 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 	public BasePutProcessStep(ProcessStep nextStep) {
 		this.nextStep = nextStep;
 	}
-	
+
 	@Deprecated
 	protected void put(String locationKey, String contentKey, NetworkContent content) {
 		put(locationKey, contentKey, content, null);
@@ -48,18 +47,14 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 			getProcess().stop("Node is not connected.");
 			return;
 		}
-		dataManager.put(locationKey, contentKey, content, protectionKey, this);
+		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
 		putPerformed = true;
-	}
 
-	@Override
-	public void onPutSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onPutFailure() {
-		getProcess().stop("Put failed.");
+		if (success) {
+			getProcess().setNextStep(nextStep);
+		} else {
+			getProcess().stop("Put failed.");
+		}
 	}
 
 	@Override

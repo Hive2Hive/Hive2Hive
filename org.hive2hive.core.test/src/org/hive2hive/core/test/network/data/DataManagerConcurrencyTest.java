@@ -2,7 +2,6 @@ package org.hive2hive.core.test.network.data;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -41,24 +39,11 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 
 		// put some content first
-		final CountDownLatch latch = new CountDownLatch(1);
-		IPutListener listener = new IPutListener() {
-
-			@Override
-			public void onPutSuccess() {
-				latch.countDown();
-			}
-
-			@Override
-			public void onPutFailure() {
-				Assert.fail();
-			}
-		};
-
-		network.get(0)
-				.getDataManager()
-				.put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()), null, listener);
-		latch.await();
+		boolean success = network.get(0).getDataManager()
+				.put(locationKey, contentKey, new H2HTestData(NetworkTestUtil.randomString()), null);
+		if (!success) {
+			Assert.fail();
+		}
 	}
 
 	@Test

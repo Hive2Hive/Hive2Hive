@@ -10,27 +10,25 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IGetListener;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * The base class of all {@link UserProfileTask}s.</br>
  * A ({@link Runnable}) task which is stored on the proxy node of the receiving user. This task will be stored
- * in a “queue”-like data structure. This allows an asynchronous communication between users (i.e., between
+ * in a ï¿½queueï¿½-like data structure. This allows an asynchronous communication between users (i.e., between
  * friends). This task is used in case an user needs to update its profile due to changes introduced by
  * friends.</br></br>
  * 
  * <b>User Profile Task Queue</b> All {@link UserProfileTask} objects have to be stored (encrypted with the
  * receivers public key) on the proxy node of the receiver. The {@link DataManager} provides the method
- * {@link DataManager#putUserProfileTask(String, Number160, NetworkContent, IPutListener)} which stores an
+ * {@link DataManager#putUserProfileTask(String, Number160, NetworkContent)} which stores an
  * {@link UserProfileTask} object in a specific domain (see {@link H2HConstants#USER_PROFILE_TASK_DOMAIN}).
  * For this purpose the constructor generates a content key which is based on a time stamp (taking the time at
  * creating the object). This allows us to build an implicit queue on the proxy node. The tasks are sorted
  * according their content keys respectively time stamps. The method
- * {@link DataManager#getUserProfileTask(String, IGetListener)} allows to get the oldest
- * {@link UserProfileTask} object of an user from the queue. The task can then be handled in a separate
+ * {@link DataManager#getUserProfileTask(String)} allows to get the oldest {@link UserProfileTask} object of
+ * an user from the queue. The task can then be handled in a separate
  * thread. After handling please don't forget to remove the handled task (see
  * {@link DataManager#removeUserProfileTask(String, Number160, IRemoveListener)}).
  * 
@@ -62,7 +60,7 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 	public Number160 getContentKey() {
 		return contentKey;
 	}
-	
+
 	public KeyPair getProtectionKey() {
 		return protectionKey;
 	}
