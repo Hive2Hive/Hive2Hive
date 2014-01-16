@@ -7,10 +7,12 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
@@ -33,6 +35,7 @@ public class NetworkManager {
 	private final DataManager dataManager;
 
 	private H2HSession session;
+	private PublicKeyManager publicKeyManager;
 
 	public NetworkManager(String nodeId) {
 		this.nodeId = nodeId;
@@ -79,7 +82,10 @@ public class NetworkManager {
 	public PublicKey getPublicKey() {
 		if (session == null)
 			return null;
-		return session.getKeyPair().getPublic();
+		if (publicKeyManager == null)
+			publicKeyManager = new PublicKeyManager(session.getCredentials().getUserId(),
+					session.getKeyPair(), dataManager);
+		return publicKeyManager.getUsersPublicKey();
 	}
 
 	/**
@@ -88,9 +94,28 @@ public class NetworkManager {
 	public PrivateKey getPrivateKey() {
 		if (session == null)
 			return null;
-		return session.getKeyPair().getPrivate();
+		if (publicKeyManager == null)
+			publicKeyManager = new PublicKeyManager(session.getCredentials().getUserId(),
+					session.getKeyPair(), dataManager);
+		return publicKeyManager.getUsersPrivateKey();
 	}
-	
+
+	/**
+	 * Get the public key of the given user. The call may block.
+	 * 
+	 * @param userId the unique id of the user
+	 * @return a public key
+	 * @throws GetFailedException if a failure occurs or no public key found
+	 */
+	public PublicKey getPublicKey(String userId) throws GetFailedException {
+		if (session == null)
+			return null;
+		if (publicKeyManager == null)
+			publicKeyManager = new PublicKeyManager(session.getCredentials().getUserId(),
+					session.getKeyPair(), dataManager);
+		return publicKeyManager.getPublicKey(userId);
+	}
+
 	/**
 	 * Helper method that returns the user id of the currently logged in user
 	 */

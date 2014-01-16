@@ -6,10 +6,9 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
 
 /**
- * Raw data part of a file that is added to the DHT
+ * Raw data part of a file that is added to the DHT.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class UserPublicKey extends NetworkContent {
 
@@ -17,6 +16,8 @@ public class UserPublicKey extends NetworkContent {
 	private final PublicKey publicKey;
 
 	public UserPublicKey(PublicKey publicKey) {
+		if (publicKey == null)
+			throw new IllegalArgumentException("Public key can't be null.");
 		this.publicKey = publicKey;
 	}
 
