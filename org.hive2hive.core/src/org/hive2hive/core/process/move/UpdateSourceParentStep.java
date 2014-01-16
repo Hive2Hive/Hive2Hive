@@ -11,9 +11,11 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -22,10 +24,6 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class UpdateSourceParentStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateSourceParentStep.class);
-
-	public UpdateSourceParentStep() {
-		super(null);
-	}
 
 	@Override
 	public void start() {
@@ -50,6 +48,7 @@ public class UpdateSourceParentStep extends BasePutProcessStep {
 		// keep the list of users to notify them about the movement
 		context.addUsersToNotifySource(parent.getUserList());
 
+		ProcessStep nextStep;
 		if (context.getDestinationParentKeys() == null) {
 			logger.debug("No need to update the new parent meta folder since it's moved to root.");
 			// file is going to be in root. Next steps:
@@ -72,9 +71,12 @@ public class UpdateSourceParentStep extends BasePutProcessStep {
 			encrypted.setBasedOnKey(parent.getVersionKey());
 			encrypted.generateVersionKey();
 			put(key2String(parent.getId()), H2HConstants.META_DOCUMENT, encrypted, sourceParentProtectionKeys);
+			getProcess().setNextStep(nextStep);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta folder of source parent could not be encrypted.");
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
 		}
 	}
 }

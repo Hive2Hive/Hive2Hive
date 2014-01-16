@@ -9,6 +9,7 @@ import javax.crypto.IllegalBlockSizeException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
@@ -27,14 +28,15 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class PutMetaDocumentStep extends BasePutProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutMetaDocumentStep.class);
-	
+
 	protected MetaDocument metaDocument;
 	protected KeyPair protectionKeys;
+	protected ProcessStep nextStep;
 
 	public PutMetaDocumentStep(MetaDocument metaDocument, KeyPair protectionKeys, ProcessStep nextStep) {
-		super(nextStep);
 		this.metaDocument = metaDocument;
 		this.protectionKeys = protectionKeys;
+		this.nextStep = nextStep;
 	}
 
 	@Override
@@ -46,9 +48,12 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 			encrypted.setBasedOnKey(metaDocument.getVersionKey());
 			encrypted.generateVersionKey();
 			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
+			getProcess().setNextStep(nextStep);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
 		}
 	}
 }

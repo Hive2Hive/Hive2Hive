@@ -80,7 +80,7 @@ public class DataManager {
 			NetworkContent content, KeyPair protectionKey) {
 		logger.debug(String
 				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-						content.getClass().getName(), locationKey, domainKey, contentKey,
+						content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
 						content.getVersionKey()));
 		try {
 			Data data = new Data(content);

@@ -2,6 +2,7 @@ package org.hive2hive.core.process.common.put;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -24,19 +25,16 @@ public abstract class BasePutProcessStep extends ProcessStep implements IRemoveL
 	protected String contentKey;
 	protected NetworkContent content;
 	protected KeyPair protectionKey;
-	protected ProcessStep nextStep;
 	private boolean putPerformed = false;
 
-	public BasePutProcessStep(ProcessStep nextStep) {
-		this.nextStep = nextStep;
-	}
-
 	@Deprecated
-	protected void put(String locationKey, String contentKey, NetworkContent content) {
+	protected void put(String locationKey, String contentKey, NetworkContent content)
+			throws PutFailedException {
 		put(locationKey, contentKey, content, null);
 	}
 
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+			throws PutFailedException {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
@@ -45,15 +43,13 @@ public abstract class BasePutProcessStep extends ProcessStep implements IRemoveL
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
-			return;
+			throw new PutFailedException();
 		}
 		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
 		putPerformed = true;
 
-		if (success) {
-			getProcess().setNextStep(nextStep);
-		} else {
-			getProcess().stop("Put failed.");
+		if (!success) {
+			throw new PutFailedException();
 		}
 	}
 
