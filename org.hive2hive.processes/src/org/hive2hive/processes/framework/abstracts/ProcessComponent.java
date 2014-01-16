@@ -23,40 +23,45 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 	
 	@Override
-	public void start() throws InvalidProcessStateException {
+	public final void start() throws InvalidProcessStateException {
 		if (state != ProcessState.READY){
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.RUNNING;
+		isRollbacking = false;
+		doExecute();
 	}
 
 	@Override
-	public void pause() throws InvalidProcessStateException {
+	public final void pause() throws InvalidProcessStateException {
 		if (state != ProcessState.RUNNING || state != ProcessState.ROLLBACKING) {
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.PAUSED;
+		doPause();
 	}
 
 	@Override
-	public void resume() throws InvalidProcessStateException {
+	public final void resume() throws InvalidProcessStateException {
 		if (state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
-		if (!isRollbacking()){
+		if (isRollbacking){
 			state = ProcessState.RUNNING;
 		} else {
 			state = ProcessState.ROLLBACKING;
 		}
+		doResume(); // TODO ensure this hook method takes correct resume (running or rollback)
 	}
 
 	@Override
-	public void cancel() throws InvalidProcessStateException {
+	public final void cancel() throws InvalidProcessStateException {
 		if (state != ProcessState.RUNNING || state != ProcessState.PAUSED){
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.ROLLBACKING;
 		isRollbacking = true;
+		doRollback();
 	}
 
 	@Override
@@ -77,17 +82,16 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public abstract void join();
 	
-	@Override
-	public abstract void rollback();
+	public abstract void doExecute();
 	
-	@Override
-	public boolean isRollbacking() {
-		return isRollbacking;
-	}
+	public abstract void doPause();
+	
+	public abstract void doResume();
+	
+	public abstract void doRollback();
 	
 	private static String generateID() {
-		// TODO generate a correct ID
-		return new UUID(0, 0).toString();
+		return UUID.randomUUID().toString();
 	}
 
 }
