@@ -42,12 +42,4 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 		return AcceptanceReply.OK;
 	}
 	
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 }

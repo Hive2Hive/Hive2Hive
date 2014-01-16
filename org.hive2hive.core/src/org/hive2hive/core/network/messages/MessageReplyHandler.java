@@ -1,10 +1,14 @@
 package org.hive2hive.core.network.messages;
 
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.SignatureException;
 
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -75,20 +79,27 @@ public class MessageReplyHandler implements ObjectDataReply {
 
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
-			byte[] data = EncryptionUtil.serializeObject(receivedMessage);
+		
+			// verify the signature
+			try {
+				byte[] data = EncryptionUtil.serializeObject(receivedMessage);
+				PublicKey publicKey = networkManager.getPublicKey(senderId);
+				if (EncryptionUtil.verify(data, signature, publicKey)) {
+					logger.debug(String.format("Message's signature from user '%s' verified. node id = '%s'",
+							senderId, networkManager.getNodeId()));
+				} else {
+					logger.error(String.format("Message from user '%s' has wrong signature. node id = '%s'",
+					senderId, networkManager.getNodeId()));
+					return AcceptanceReply.FAILURE_SIGNATURE;					
+				}
+			} catch (GetFailedException | InvalidKeyException | SignatureException e) {
+				logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'",
+						senderId, e.getMessage()));
+				return AcceptanceReply.FAILURE_SIGNATURE;
+			}
 
 			// give a network manager reference to work (verify, handle)
 			receivedMessage.setNetworkManager(networkManager);
-
-			// verify the signature
-			if (!receivedMessage.checkSignature(data, signature, senderId)) {
-				logger.error(String.format("Message has wrong signature. node id = '%s'",
-						networkManager.getNodeId()));
-				return AcceptanceReply.FAILURE_SIGNATURE;
-			} else {
-				logger.debug(String.format("Message's signature verified. node id = '%s'",
-						networkManager.getNodeId()));
-			}
 
 			// check if message gets accepted
 			AcceptanceReply reply = receivedMessage.accept();

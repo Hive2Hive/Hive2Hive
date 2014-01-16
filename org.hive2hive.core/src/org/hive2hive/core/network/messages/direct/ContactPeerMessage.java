@@ -31,15 +31,5 @@ public class ContactPeerMessage extends DirectRequestMessage {
 		// send a response with the evidentContent -> proves this peer could decrypt and read the message
 		sendDirectResponse(createResponse(evidenceContent));
 	}
-	
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			logger.error("Signature is not from the same user.");
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 
 }

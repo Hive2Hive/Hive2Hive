@@ -60,14 +60,5 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 		}
 
 	}
-
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 	
 }

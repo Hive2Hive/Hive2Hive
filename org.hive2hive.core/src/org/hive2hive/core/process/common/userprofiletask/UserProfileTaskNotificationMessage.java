@@ -42,14 +42,4 @@ public class UserProfileTaskNotificationMessage extends BaseDirectMessage {
 		}
 	}
 
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (networkManager.getUserId().equals(userId)) {
-			logger.error("Received an user profile task from same user.");
-			return false;
-		} else {
-			// TODO verify message from another user (problem: getting sender's public key)
-			return true;
-		}
-	}
 }

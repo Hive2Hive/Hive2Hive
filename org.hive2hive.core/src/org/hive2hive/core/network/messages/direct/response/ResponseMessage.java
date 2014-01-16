@@ -88,9 +88,4 @@ public class ResponseMessage extends BaseDirectMessage {
 		}
 	}
 
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		return true;
-	}
-
 }

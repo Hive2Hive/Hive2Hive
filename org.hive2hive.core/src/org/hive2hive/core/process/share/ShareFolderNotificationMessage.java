@@ -72,9 +72,4 @@ public class ShareFolderNotificationMessage extends BaseDirectMessage {
 		}
 	}
 
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		// TODO fix this verification
-		return true;
-	}
 }

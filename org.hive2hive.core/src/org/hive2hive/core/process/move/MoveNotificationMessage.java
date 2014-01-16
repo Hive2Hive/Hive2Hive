@@ -86,13 +86,4 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 
 	}
 
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			logger.error("Signature is not from the same user.");
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 }
