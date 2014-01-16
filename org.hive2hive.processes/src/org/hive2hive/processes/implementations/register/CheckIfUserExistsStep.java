@@ -5,10 +5,16 @@ import org.hive2hive.processes.framework.abstracts.RollbackReason;
 
 public class CheckIfUserExistsStep extends ProcessStep {
 
+	public CheckIfUserExistsStep(ICheckIfUserExistsContext context) {
+		
+	}
+	
 	@Override
 	protected void doExecute() {
 		// TODO Auto-generated method stub
 
+		
+		
 	}
 
 	@Override
