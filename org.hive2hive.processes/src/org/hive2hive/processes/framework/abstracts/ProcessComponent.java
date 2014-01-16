@@ -55,13 +55,13 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public final void cancel() throws InvalidProcessStateException {
+	public final void cancel(RollbackReason reason) throws InvalidProcessStateException {
 		if (state != ProcessState.RUNNING || state != ProcessState.PAUSED){
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.ROLLBACKING;
 		isRollbacking = true;
-		doRollback();
+		doRollback(reason);
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	
 	protected abstract void doResume();
 	
-	protected abstract void doRollback();
+	protected abstract void doRollback(RollbackReason reason);
 	
 	@Override
 	public boolean equals(Object obj) {

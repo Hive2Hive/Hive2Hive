@@ -4,31 +4,38 @@ import java.util.LinkedList;
 
 import org.hive2hive.processes.framework.abstracts.Process;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.processes.framework.abstracts.RollbackReason;
 
 public class SequentialProcess extends Process {
 
 	LinkedList<ProcessComponent> components = new LinkedList<ProcessComponent>();
-	
+
 	@Override
-	public void doExecute() {
+	public void join() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void doPause() {
+	protected void doExecute() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void doResume() {
+	protected void doPause() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void doRollback() {
+	protected void doResume() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void doRollback(RollbackReason reason) {
 		// TODO Auto-generated method stub
 
 	}
@@ -42,11 +49,4 @@ public class SequentialProcess extends Process {
 	public void remove(ProcessComponent component) {
 		components.remove(component);
 	}
-
-	@Override
-	public void join() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

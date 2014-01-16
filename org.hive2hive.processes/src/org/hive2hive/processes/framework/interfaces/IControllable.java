@@ -1,5 +1,6 @@
 package org.hive2hive.processes.framework.interfaces;
 
+import org.hive2hive.processes.framework.abstracts.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
 public interface IControllable {
@@ -10,5 +11,5 @@ public interface IControllable {
 	
 	public void resume() throws InvalidProcessStateException;
 	
-	public void cancel() throws InvalidProcessStateException;
+	public void cancel(RollbackReason reason) throws InvalidProcessStateException;
 }
