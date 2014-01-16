@@ -1,5 +1,9 @@
 package org.hive2hive.processes;
 
+import org.hive2hive.processes.framework.concretes.SequentialProcess;
+import org.hive2hive.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processes.implementations.register.CheckIfUserExistsStep;
+
 
 public final class ProcessFactory {
 
@@ -14,7 +18,11 @@ public final class ProcessFactory {
 	private ProcessFactory() {
 	}
 	
-//	public IProcessComponent createRegisterProcess() {
-//		
-//	}
+	public IProcessComponent createRegisterProcess() {
+		
+		SequentialProcess registerProcess = new SequentialProcess();
+		registerProcess.add(new CheckIfUserExistsStep());
+		
+		return registerProcess;
+	}
 }

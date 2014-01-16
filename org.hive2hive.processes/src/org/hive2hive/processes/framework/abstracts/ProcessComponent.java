@@ -12,7 +12,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private final String id;
 	private double progress;
 	private ProcessState state;
-	private IProcessContext context;
+	protected IProcessContext context;
 	
 	private boolean isRollbacking;
 	
@@ -82,14 +82,33 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public abstract void join();
 	
-	public abstract void doExecute();
+	protected abstract void doExecute();
 	
-	public abstract void doPause();
+	protected abstract void doPause();
 	
-	public abstract void doResume();
+	protected abstract void doResume();
 	
-	public abstract void doRollback();
+	protected abstract void doRollback();
 	
+	@Override
+	public boolean equals(Object obj) {
+	    if (obj == null)
+	        return false;
+	    if (obj == this)
+	        return true;
+	    if (!(obj instanceof ProcessComponent))
+	        return false;
+	
+	    ProcessComponent other = (ProcessComponent) obj;
+	    return id.equals(other.getID());
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+        return 31 * hash + id.hashCode();
+    }
+
 	private static String generateID() {
 		return UUID.randomUUID().toString();
 	}
