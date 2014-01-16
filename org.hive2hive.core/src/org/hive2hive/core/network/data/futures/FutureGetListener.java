@@ -35,22 +35,12 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			DataManager dataManager, IGetListener listener) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = contentKey;
-		this.versionKey = Number160.ZERO;
-		this.listener = listener;
-		this.dataManager = dataManager;
+		this(locationKey, domainKey, contentKey, Number160.ZERO, dataManager, listener);
 	}
 
 	public FutureGetListener(Number160 locationKey, Number160 domainKey, DataManager dataManager,
 			IGetListener listener) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = null;
-		this.versionKey = null;
-		this.listener = listener;
-		this.dataManager = dataManager;
+		this(locationKey, domainKey, null, null, dataManager, listener);
 		this.retry = false;
 	}
 
