@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
+import java.util.concurrent.CountDownLatch;
+
 import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
@@ -9,24 +11,26 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IGetListener;
 
 /**
- * A future listener for a get. Returns the given {@link IGetListener} listener the desired content or
- * <code>null</code> if the get fails or the content doesn't exist.
+ * A future listener for a get. It can be blocked until the result is here. Then, it returns the desired
+ * content or <code>null</code> if the get fails or the content doesn't exist.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(FutureGetListener.class);
 
-	private final IGetListener listener;
 	private final Number160 locationKey;
 	private final Number160 domainKey;
 	private final Number160 contentKey;
 	private final Number160 versionKey;
 	private final DataManager dataManager;
+	private final CountDownLatch latch;
+
+	// the result when it came back
+	private NetworkContent result = null;
 
 	// flag for retries
 	private boolean retry = true;
@@ -34,34 +38,39 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	private int getTries = 0;
 
 	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			DataManager dataManager, IGetListener listener) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = contentKey;
-		this.versionKey = Number160.ZERO;
-		this.listener = listener;
-		this.dataManager = dataManager;
+			DataManager dataManager) {
+		this(locationKey, domainKey, contentKey, Number160.ZERO, dataManager);
 	}
 
-	public FutureGetListener(Number160 locationKey, Number160 domainKey, DataManager dataManager,
-			IGetListener listener) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = null;
-		this.versionKey = null;
-		this.listener = listener;
-		this.dataManager = dataManager;
+	public FutureGetListener(Number160 locationKey, Number160 domainKey, DataManager dataManager) {
+		this(locationKey, domainKey, null, null, dataManager);
 		this.retry = false;
 	}
 
 	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, DataManager dataManager, IGetListener listener) {
+			Number160 versionKey, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
 		this.versionKey = versionKey;
-		this.listener = listener;
 		this.dataManager = dataManager;
+		this.latch = new CountDownLatch(1);
+	}
+
+	/**
+	 * Waits (blocking) until the operation is done
+	 * 
+	 * @return returns the content from the DHT
+	 */
+	public NetworkContent awaitAndGet() {
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			logger.error("Latch to wait for the get was interrupted");
+			return null;
+		}
+
+		return result;
 	}
 
 	@Override
@@ -80,8 +89,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 					logger.warn(String
 							.format("Get failed after %s tries. location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
 									getTries, locationKey, domainKey, contentKey, versionKey));
-					if (listener != null)
-						listener.handleGetResult(null);
+					notify(null);
 				}
 			} else {
 				NetworkContent content = (NetworkContent) future.getData().object();
@@ -94,31 +102,38 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 					else
 						dataManager.get(locationKey, domainKey, contentKey, versionKey).addListener(this);
 				} else {
-					logger.debug(String
-							.format("got result = '%s' location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
-									content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
-									versionKey));
-					if (listener != null)
-						listener.handleGetResult(content);
+					notify(content);
 				}
 			}
 		} else {
 			if (future.getData() == null) {
-				logger.warn(String
-						.format("Got null. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-								locationKey, domainKey, contentKey, versionKey));
-				if (listener != null)
-					listener.handleGetResult(null);
+				notify(null);
 			} else {
 				NetworkContent content = (NetworkContent) future.getData().object();
-				logger.debug(String
-						.format("got result = '%s' location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
-								content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
-								versionKey));
-				if (listener != null)
-					listener.handleGetResult(content);
+
+				notify(content);
 			}
 		}
+	}
+
+	/**
+	 * Sets the result and releases the lock
+	 * 
+	 * @param result
+	 */
+	private void notify(NetworkContent result) {
+		if (result == null) {
+			logger.warn(String.format(
+					"Got null. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+					locationKey, domainKey, contentKey, versionKey));
+		} else {
+			logger.debug(String
+					.format("got result = '%s' location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
+							result.getClass().getSimpleName(), locationKey, domainKey, contentKey, versionKey));
+		}
+
+		this.result = result;
+		latch.countDown();
 	}
 
 	@Override

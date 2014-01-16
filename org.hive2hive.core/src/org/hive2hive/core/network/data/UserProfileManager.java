@@ -16,8 +16,6 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.listener.IGetListener;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -33,14 +31,11 @@ import org.hive2hive.core.security.UserCredentials;
 public class UserProfileManager {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileManager.class);
-
-	public static final long PUT_GET_AWAIT_TIMEOUT = 10000;
 	public static final long MAX_MODIFICATION_TIME = 1000;
 
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
 
-	private final Object entryWaiter = new Object();
 	private final Object queueWaiter = new Object();
 
 	private final QueueWorker worker;
@@ -149,7 +144,7 @@ public class UserProfileManager {
 	 * gets.
 	 * 
 	 * @return the default content protection keys
-	 * @throws GetFailedException 
+	 * @throws GetFailedException
 	 */
 	public KeyPair getDefaultProtectionKey() throws GetFailedException {
 		if (defaultProtectionKey == null) {
@@ -252,15 +247,9 @@ public class UserProfileManager {
 				return;
 			}
 
-			dataManager.get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, entry);
-
-			synchronized (entryWaiter) {
-				try {
-					entryWaiter.wait(PUT_GET_AWAIT_TIMEOUT);
-				} catch (InterruptedException e) {
-					entry.setGetError(new GetFailedException("Could not wait to get the user profile"));
-				}
-			}
+			NetworkContent content = dataManager.get(credentials.getProfileLocationKey(),
+					H2HConstants.USER_PROFILE);
+			entry.processGetResult(content);
 		}
 
 		/**
@@ -284,15 +273,7 @@ public class UserProfileManager {
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
 				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
-						encryptedUserProfile, entry.getUserProfile().getProtectionKeys(), entry);
-
-				synchronized (entryWaiter) {
-					try {
-						entryWaiter.wait(PUT_GET_AWAIT_TIMEOUT);
-					} catch (InterruptedException e) {
-						entry.setPutError(new PutFailedException("Could not wait for put"));
-					}
-				}
+						encryptedUserProfile, entry.getUserProfile().getProtectionKeys());
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
@@ -302,7 +283,7 @@ public class UserProfileManager {
 		}
 	}
 
-	private class QueueEntry implements IGetListener {
+	private class QueueEntry {
 		private final int pid;
 		private final Object getWaiter;
 		private UserProfile userProfile; // got from DHT
@@ -361,8 +342,7 @@ public class UserProfileManager {
 			return this.pid == pid;
 		}
 
-		@Override
-		public void handleGetResult(NetworkContent content) {
+		public void processGetResult(NetworkContent content) {
 			try {
 				if (content == null) {
 					logger.warn("Did not find user profile.");
@@ -390,14 +370,10 @@ public class UserProfileManager {
 				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
 				setGetError(new GetFailedException(e.getMessage()));
 			}
-
-			synchronized (entryWaiter) {
-				entryWaiter.notify();
-			}
 		}
 	}
 
-	private class PutQueueEntry extends QueueEntry implements IPutListener {
+	private class PutQueueEntry extends QueueEntry {
 
 		private final AtomicBoolean readyToPut;
 		private final AtomicBoolean abort;
@@ -453,23 +429,6 @@ public class UserProfileManager {
 
 		public void setPutError(PutFailedException error) {
 			this.putFailedException = error;
-		}
-
-		@Override
-		public void onPutSuccess() {
-			logger.debug("Put was successful. Notifying process " + getPid());
-			synchronized (entryWaiter) {
-				entryWaiter.notify();
-			}
-		}
-
-		@Override
-		public void onPutFailure() {
-			logger.error("Put failed. Notifying process " + getPid() + ".");
-			setPutError(new PutFailedException("Could not put the user profile into the DHT"));
-			synchronized (entryWaiter) {
-				entryWaiter.notify();
-			}
 		}
 	}
 }

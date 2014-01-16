@@ -8,7 +8,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -19,7 +18,7 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemoveListener, IPutListener {
+public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemoveListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
@@ -38,8 +37,9 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove) {
 		remove(locationKey, contentKey, contentToRemove, null);
 	}
-	
-	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove, KeyPair protectionKey) {
+
+	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove,
+			KeyPair protectionKey) {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
@@ -92,22 +92,17 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			return;
 		}
 
-		dataManager.put(locationKey, contentKey, contentToRemove, protectionKey, this);
+		boolean success = dataManager.put(locationKey, contentKey, contentToRemove, protectionKey);
+		if (success) {
+			logger.debug(String.format(
+					"Roll back of remove succeeded. location key = '%s' content key = '%s'", locationKey,
+					contentKey));
+			getProcess().nextRollBackStep();
+		} else {
+			logger.warn(String.format(
+					"Roll back of remove failed. Re-put failed. location key = '%s' content key = '%s'",
+					locationKey, contentKey));
+			getProcess().nextRollBackStep();
+		}
 	}
-
-	@Override
-	public void onPutSuccess() {
-		logger.debug(String.format("Roll back of remove succeeded. location key = '%s' content key = '%s'",
-				locationKey, contentKey));
-		getProcess().nextRollBackStep();
-	}
-
-	@Override
-	public void onPutFailure() {
-		logger.warn(String.format(
-				"Roll back of remove failed. Re-put failed. location key = '%s' content key = '%s'",
-				locationKey, contentKey));
-		getProcess().nextRollBackStep();
-	}
-
 }

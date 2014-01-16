@@ -2,11 +2,11 @@ package org.hive2hive.core.process.common.put;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.process.ProcessStep;
 
@@ -17,7 +17,7 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public abstract class BasePutProcessStep extends ProcessStep implements IPutListener, IRemoveListener {
+public abstract class BasePutProcessStep extends ProcessStep implements IRemoveListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
 
@@ -25,19 +25,16 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 	protected String contentKey;
 	protected NetworkContent content;
 	protected KeyPair protectionKey;
-	protected ProcessStep nextStep;
 	private boolean putPerformed = false;
 
-	public BasePutProcessStep(ProcessStep nextStep) {
-		this.nextStep = nextStep;
-	}
-	
 	@Deprecated
-	protected void put(String locationKey, String contentKey, NetworkContent content) {
+	protected void put(String locationKey, String contentKey, NetworkContent content)
+			throws PutFailedException {
 		put(locationKey, contentKey, content, null);
 	}
 
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+			throws PutFailedException {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
@@ -46,20 +43,14 @@ public abstract class BasePutProcessStep extends ProcessStep implements IPutList
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
-			return;
+			throw new PutFailedException();
 		}
-		dataManager.put(locationKey, contentKey, content, protectionKey, this);
+		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
 		putPerformed = true;
-	}
 
-	@Override
-	public void onPutSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onPutFailure() {
-		getProcess().stop("Put failed.");
+		if (!success) {
+			throw new PutFailedException();
+		}
 	}
 
 	@Override

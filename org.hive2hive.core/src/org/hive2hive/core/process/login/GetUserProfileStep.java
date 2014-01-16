@@ -42,11 +42,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	@Override
 	public void start() {
-		get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-	}
-
-	@Override
-	public void handleGetResult(NetworkContent content) {
+		NetworkContent content = get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		if (content == null) {
 			// could have been intended...
 			logger.warn("Did not find user profile.");

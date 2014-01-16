@@ -82,12 +82,13 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 			logger.debug(String.format("Get the parent meta folder of deleted meta document of file '%s'.",
 					deletedFileNode.getName()));
 
-			get(key2String(parentFileNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
+			NetworkContent content = get(key2String(parentFileNode.getKeyPair().getPublic()),
+					H2HConstants.META_DOCUMENT);
+			evaluateResult(content);
 		}
 	}
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
+	private void evaluateResult(NetworkContent content) {
 		if (content == null) {
 			context.setParentMetaFolder(null);
 			context.setParentProtectionKeys(null);

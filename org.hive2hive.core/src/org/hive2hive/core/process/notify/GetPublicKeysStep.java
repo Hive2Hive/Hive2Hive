@@ -76,25 +76,21 @@ public class GetPublicKeysStep extends BaseGetProcessStep {
 
 			if (getRequired) {
 				// needs to perform a get call
-				get(current, H2HConstants.USER_PUBLIC_KEY);
+				NetworkContent content = get(current, H2HConstants.USER_PUBLIC_KEY);
+				if (content == null) {
+					logger.error("Could not get the public key for user '" + current + "'. He get's ignored.");
+				} else {
+					logger.debug("Got public key from user '" + current + "'. " + users.size()
+							+ " keys more to get.");
+					UserPublicKey key = (UserPublicKey) content;
+					keys.put(current, key.getPublicKey());
+				}
+
+				getProcess().setNextStep(new GetPublicKeysStep(users, keys));
 			} else {
 				// no get required --> go to next user
 				getProcess().setNextStep(new GetPublicKeysStep(users, keys));
 			}
 		}
 	}
-
-	@Override
-	public void handleGetResult(NetworkContent content) {
-		if (content == null) {
-			logger.error("Could not get the public key for user '" + current + "'. He get's ignored.");
-		} else {
-			logger.debug("Got public key from user '" + current + "'. " + users.size() + " keys more to get.");
-			UserPublicKey key = (UserPublicKey) content;
-			keys.put(current, key.getPublicKey());
-		}
-
-		getProcess().setNextStep(new GetPublicKeysStep(users, keys));
-	}
-
 }

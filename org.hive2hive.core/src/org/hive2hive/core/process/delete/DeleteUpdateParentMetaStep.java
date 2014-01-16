@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
@@ -29,7 +30,6 @@ public class DeleteUpdateParentMetaStep extends BasePutProcessStep {
 	private final String childName;
 
 	public DeleteUpdateParentMetaStep(String childName) {
-		super(null); // next step is null, process is done
 		this.childName = childName;
 	}
 
@@ -71,9 +71,12 @@ public class DeleteUpdateParentMetaStep extends BasePutProcessStep {
 			encrypted.setBasedOnKey(parentMeta.getVersionKey());
 			encrypted.generateVersionKey();
 			put(key2String(parentMeta.getId()), H2HConstants.META_DOCUMENT, encrypted, parentProtectionKeys);
+			getProcess().setNextStep(null); // next step is null, process is done
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Parent meta folder could not be encrypted.");
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
 		}
 	}
 }

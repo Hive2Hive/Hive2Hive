@@ -32,11 +32,8 @@ public class GetLocationsStep extends BaseGetProcessStep {
 	@Override
 	public void start() {
 		logger.debug("Get the locations for user '" + userId + "'.");
-		get(userId, H2HConstants.USER_LOCATIONS);
-	}
+		NetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			logger.warn("Did not find the locations.");
 			context.setLocations(null);

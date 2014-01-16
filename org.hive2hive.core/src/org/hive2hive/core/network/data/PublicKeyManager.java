@@ -11,14 +11,13 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserPublicKey;
-import org.hive2hive.core.network.data.listener.IGetListener;
 
 /**
  * A caching public key manager, which if necessary gets the desired public key of an user from the network.
  * 
  * @author Seppi
  */
-public class PublicKeyManager implements IGetListener {
+public class PublicKeyManager {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PublicKeyManager.class);
 
@@ -63,16 +62,8 @@ public class PublicKeyManager implements IGetListener {
 			exception = null;
 			requestingUserId = userId;
 
-			dataManager.get(requestingUserId, H2HConstants.USER_PUBLIC_KEY, this);
-
-			synchronized (lock) {
-				try {
-					lock.wait();
-				} catch (InterruptedException e) {
-					exception = new GetFailedException(String.format(
-							"Could not wait for getting the public key of user '%s'.", requestingUserId));
-				}
-			}
+			NetworkContent content = dataManager.get(requestingUserId, H2HConstants.USER_PUBLIC_KEY);
+			evaluateResult(content);
 
 			if (this.exception != null) {
 				throw exception;
@@ -82,8 +73,7 @@ public class PublicKeyManager implements IGetListener {
 		}
 	}
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
+	public void evaluateResult(NetworkContent content) {
 		if (content == null) {
 			logger.warn(String.format("Did not find the public key of user '%s'.", requestingUserId));
 			exception = new GetFailedException("No public key found.");
@@ -101,10 +91,6 @@ public class PublicKeyManager implements IGetListener {
 			} else {
 				publicKeys.put(requestingUserId, userPublicKey.getPublicKey());
 			}
-		}
-		// notify the waiting requester thread
-		synchronized (lock) {
-			lock.notify();
 		}
 	}
 

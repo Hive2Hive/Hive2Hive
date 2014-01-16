@@ -11,6 +11,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -21,6 +22,7 @@ import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -72,8 +74,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 		futureGet.awaitUninterruptibly();
-		assertEquals(data,
-				((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data, ((H2HTestData) futureGet.getData().object()).getTestString());
 	}
 
 	@Test
@@ -127,7 +128,6 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		private final H2HTestData data;
 
 		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data) {
-			super(null);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 			this.data = data;
@@ -135,7 +135,12 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		public void start() {
-			put(locationKey, contentKey, data);
+			try {
+				put(locationKey, contentKey, data);
+				getProcess().setNextStep(null);
+			} catch (PutFailedException e) {
+				Assert.fail();
+			}
 		}
 
 	}
