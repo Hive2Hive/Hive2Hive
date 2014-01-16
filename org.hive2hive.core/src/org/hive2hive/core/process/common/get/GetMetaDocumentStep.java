@@ -42,11 +42,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	@Override
 	public void start() {
-		get(key2String(keyPair.getPublic()), H2HConstants.META_DOCUMENT);
-	}
-
-	@Override
-	public void handleGetResult(NetworkContent content) {
+		NetworkContent content = get(key2String(keyPair.getPublic()), H2HConstants.META_DOCUMENT);
 		if (content == null) {
 			logger.warn("Meta document not found.");
 
@@ -77,5 +73,4 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 		// continue with next step
 		getProcess().setNextStep(nextStep);
 	}
-
 }

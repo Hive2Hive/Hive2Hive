@@ -53,7 +53,16 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 		} else {
 			// get next in the list
 			currentUser = moreToGet.remove(0);
-			get(currentUser, H2HConstants.USER_LOCATIONS);
+			NetworkContent content = get(currentUser, H2HConstants.USER_LOCATIONS);
+			if (content == null) {
+				allLocations.put(currentUser, new ArrayList<PeerAddress>());
+			} else {
+				Locations currentLoc = (Locations) content;
+				List<PeerAddress> addresses = new ArrayList<PeerAddress>(currentLoc.getPeerAddresses());
+				allLocations.put(currentUser, addresses);
+			}
+
+			getProcess().setNextStep(new GetAllLocationsStep(moreToGet, allLocations));
 		}
 	}
 
@@ -85,18 +94,5 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 		}
 
 		return tail;
-	}
-
-	@Override
-	public void handleGetResult(NetworkContent content) {
-		if (content == null) {
-			allLocations.put(currentUser, new ArrayList<PeerAddress>());
-		} else {
-			Locations currentLoc = (Locations) content;
-			List<PeerAddress> addresses = new ArrayList<PeerAddress>(currentLoc.getPeerAddresses());
-			allLocations.put(currentUser, addresses);
-		}
-
-		getProcess().setNextStep(new GetAllLocationsStep(moreToGet, allLocations));
 	}
 }

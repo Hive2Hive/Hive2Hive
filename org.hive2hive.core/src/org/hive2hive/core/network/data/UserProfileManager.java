@@ -16,7 +16,6 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -149,7 +148,7 @@ public class UserProfileManager {
 	 * gets.
 	 * 
 	 * @return the default content protection keys
-	 * @throws GetFailedException 
+	 * @throws GetFailedException
 	 */
 	public KeyPair getDefaultProtectionKey() throws GetFailedException {
 		if (defaultProtectionKey == null) {
@@ -252,15 +251,9 @@ public class UserProfileManager {
 				return;
 			}
 
-			dataManager.get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, entry);
-
-			synchronized (entryWaiter) {
-				try {
-					entryWaiter.wait(PUT_GET_AWAIT_TIMEOUT);
-				} catch (InterruptedException e) {
-					entry.setGetError(new GetFailedException("Could not wait to get the user profile"));
-				}
-			}
+			NetworkContent content = dataManager.get(credentials.getProfileLocationKey(),
+					H2HConstants.USER_PROFILE);
+			entry.processGetResult(content);
 		}
 
 		/**
@@ -302,7 +295,7 @@ public class UserProfileManager {
 		}
 	}
 
-	private class QueueEntry implements IGetListener {
+	private class QueueEntry {
 		private final int pid;
 		private final Object getWaiter;
 		private UserProfile userProfile; // got from DHT
@@ -361,8 +354,7 @@ public class UserProfileManager {
 			return this.pid == pid;
 		}
 
-		@Override
-		public void handleGetResult(NetworkContent content) {
+		public void processGetResult(NetworkContent content) {
 			try {
 				if (content == null) {
 					logger.warn("Did not find user profile.");
@@ -389,10 +381,6 @@ public class UserProfileManager {
 			} catch (Exception e) {
 				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
 				setGetError(new GetFailedException(e.getMessage()));
-			}
-
-			synchronized (entryWaiter) {
-				entryWaiter.notify();
 			}
 		}
 	}

@@ -2,7 +2,6 @@ package org.hive2hive.core.process.common.get;
 
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.process.ProcessStep;
 
 /**
@@ -12,15 +11,15 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Nico, Seppi
  */
-public abstract class BaseGetProcessStep extends ProcessStep implements IGetListener {
+public abstract class BaseGetProcessStep extends ProcessStep {
 
-	protected void get(String locationKey, String contentKey) {
+	protected NetworkContent get(String locationKey, String contentKey) {
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
-			return;
+			return null;
 		}
-		dataManager.get(locationKey, contentKey, this);
+		return dataManager.get(locationKey, contentKey);
 	}
 
 	@Override

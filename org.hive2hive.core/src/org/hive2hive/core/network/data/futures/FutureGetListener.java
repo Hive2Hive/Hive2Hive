@@ -11,7 +11,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IGetListener;
 
 /**
  * A future listener for a get. It can be blocked until the result is here. Then, it returns the desired
@@ -39,18 +38,17 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	private int getTries = 0;
 
 	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			DataManager dataManager, IGetListener listener) {
-		this(locationKey, domainKey, contentKey, Number160.ZERO, dataManager, listener);
+			DataManager dataManager) {
+		this(locationKey, domainKey, contentKey, Number160.ZERO, dataManager);
 	}
 
-	public FutureGetListener(Number160 locationKey, Number160 domainKey, DataManager dataManager,
-			IGetListener listener) {
-		this(locationKey, domainKey, null, null, dataManager, listener);
+	public FutureGetListener(Number160 locationKey, Number160 domainKey, DataManager dataManager) {
+		this(locationKey, domainKey, null, null, dataManager);
 		this.retry = false;
 	}
 
 	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, DataManager dataManager, IGetListener listener) {
+			Number160 versionKey, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;

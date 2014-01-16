@@ -115,12 +115,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		public void start() {
-			get(locationKey, contentKey);
-		}
-
-		@Override
-		public void handleGetResult(NetworkContent content) {
-			this.content = content;
+			this.content = get(locationKey, contentKey);
 			getProcess().setNextStep(null);
 		}
 
@@ -148,11 +143,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		public void start() {
-			get(locationKey, contentKey);
-		}
-
-		@Override
-		public void handleGetResult(NetworkContent content) {
+			NetworkContent content = get(locationKey, contentKey);
 			this.content = content;
 			if (content == null)
 				getProcess().stop("Content is null.");

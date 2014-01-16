@@ -21,7 +21,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
-import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.network.data.listener.IPutListener;
 import org.hive2hive.core.network.data.listener.IRemoveListener;
 
@@ -122,30 +121,39 @@ public class DataManager {
 		}
 	}
 
-	public void get(String locationKey, String contentKey, IGetListener listener) {
+	public NetworkContent get(String locationKey, String contentKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureGet futureGet = get(lKey, dKey, cKey);
-		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, this, listener));
+		FutureGetListener listener = new FutureGetListener(lKey, dKey, cKey, this);
+		futureGet.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
-	public void get(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
+	public NetworkContent get(String locationKey, String contentKey, Number160 versionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureGet futureGet = get(lKey, dKey, cKey, versionKey);
-		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, versionKey, this, listener));
+		FutureGetListener listener = new FutureGetListener(lKey, dKey, cKey, versionKey, this);
+		futureGet.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
-	public void getUserProfileTask(String userId, IGetListener listener) {
+	public NetworkContent getUserProfileTask(String userId) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+
 		FutureGet futureGet = getPeer().get(lKey)
 				.from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
 				.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
 				.returnNr(1).start();
-		futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
+		FutureGetListener listener = new FutureGetListener(lKey, dKey, this);
+		futureGet.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {

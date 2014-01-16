@@ -67,11 +67,11 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 		KeyPair firstInList = chunksToGet.remove(0);
 		decryptionKey = firstInList.getPrivate(); // store current private key
 		logger.info("File " + path + ": " + chunksToGet.size() + " chunk(s) more to download.");
-		get(key2String(firstInList.getPublic()), H2HConstants.FILE_CHUNK);
+		NetworkContent content = get(key2String(firstInList.getPublic()), H2HConstants.FILE_CHUNK);
+		evaluateResult(content);
 	}
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
+	public void evaluateResult(NetworkContent content) {
 		HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 		try {
 			NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, decryptionKey);

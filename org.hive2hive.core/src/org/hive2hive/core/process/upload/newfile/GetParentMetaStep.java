@@ -82,15 +82,16 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 				// 2. update the parent meta document
 				// 3. update the user profile
 				parentsKeyPair = parentNode.getKeyPair();
-				get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
+				NetworkContent content = get(key2String(parentNode.getKeyPair().getPublic()),
+						H2HConstants.META_DOCUMENT);
+				evaluateResult(content);
 			} catch (Exception e) {
 				getProcess().stop(e);
 			}
 		}
 	}
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
+	public void evaluateResult(NetworkContent content) {
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 		if (content == null) {
 			logger.error("Meta document not found.");
