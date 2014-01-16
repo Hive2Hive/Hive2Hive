@@ -27,8 +27,8 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * First validates the file size according to the limits set in the {@link IFileConfiguration} object.
- * Then, puts a chunk and recursively calls itself until all chunks are stored in the DHT.
- * This class is intended to be subclassed because there are two scenarios:
+ * Then, puts all chunks iteratively until all chunks are stored in the DHT.
+ * This class is intended to be used for two scenarios:
  * <ul>
  * <li>A new file is uploaded</li>
  * <li>A new version of an existing is uploaded</li>
