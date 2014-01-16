@@ -11,6 +11,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.rpc.DigestInfo;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -21,6 +22,7 @@ import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -83,7 +85,8 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 	public void testRemoveProcessStepRollBack() {
 		String locationKey = network.get(0).getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
-		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey), Number160.ZERO);
+		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO,
+				Number160.createHash(contentKey), Number160.ZERO);
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// manipulate the nodes, remove will not work
@@ -133,13 +136,13 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 			digestInfo.put(key, Number160.ZERO);
 			return digestInfo;
 		}
-		
+
 	}
 
 	/**
 	 * A simple remove process step used at {@link BaseRemoveProcessStepTest}.
 	 * 
-	 * @author Seppi
+	 * @author Seppi, Nico
 	 */
 	private class TestRemoveProcessStep extends BaseRemoveProcessStep {
 
@@ -148,7 +151,6 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		private final H2HTestData data;
 
 		public TestRemoveProcessStep(String locationKey, String contentKey, H2HTestData data) {
-			super(null);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 			this.data = data;
@@ -156,7 +158,13 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		public void start() {
-			remove(locationKey, contentKey, data);
+			try {
+				remove(locationKey, contentKey, data);
+				getProcess().setNextStep(null);
+			} catch (RemoveFailedException e) {
+				getProcess().stop(e);
+				Assert.fail();
+			}
 		}
 
 	}

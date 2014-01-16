@@ -21,7 +21,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 
 /**
  * This class offers an interface for putting, getting and removing data from the network.
@@ -195,31 +194,37 @@ public class DataManager {
 		return null;
 	}
 
-	public void remove(String locationKey, String contentKey, KeyPair protectionKey, IRemoveListener listener) {
+	public boolean remove(String locationKey, String contentKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureRemove futureRemove = remove(lKey, dKey, cKey, protectionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, protectionKey, listener, this));
+		FutureRemoveListener listener = new FutureRemoveListener(lKey, dKey, cKey, protectionKey, this);
+		futureRemove.addListener(listener);
+		return listener.await();
 	}
 
-	public void remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey,
-			IRemoveListener listener) {
+	public boolean remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureRemove futureRemove = remove(lKey, dKey, cKey, versionKey, protectionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, versionKey, protectionKey,
-				listener, this));
+		FutureRemoveListener listener = new FutureRemoveListener(lKey, dKey, cKey, versionKey, protectionKey,
+				this);
+		futureRemove.addListener(listener);
+		return listener.await();
 	}
 
-	public void removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey,
-			IRemoveListener listener) {
+	public boolean removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+
 		FutureRemove futureRemove = remove(lKey, dKey, contentKey, protectionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, contentKey, protectionKey, listener,
-				this));
+		FutureRemoveListener listener = new FutureRemoveListener(lKey, dKey, contentKey, protectionKey, this);
+		futureRemove.addListener(listener);
+		return listener.await();
 	}
 
 	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey,

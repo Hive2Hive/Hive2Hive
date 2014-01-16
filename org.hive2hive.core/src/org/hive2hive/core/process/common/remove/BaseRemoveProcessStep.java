@@ -4,11 +4,11 @@ import java.security.KeyPair;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.process.ProcessStep;
 
 /**
@@ -18,7 +18,7 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemoveListener {
+public abstract class BaseRemoveProcessStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
@@ -26,20 +26,16 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 	protected String contentKey;
 	protected NetworkContent contentToRemove;
 	protected KeyPair protectionKey;
-	protected ProcessStep nextStep;
 	private boolean removePerformed = false;
 
-	public BaseRemoveProcessStep(ProcessStep nexStep) {
-		this.nextStep = nexStep;
-	}
-
 	@Deprecated
-	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove) {
+	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove)
+			throws RemoveFailedException {
 		remove(locationKey, contentKey, contentToRemove, null);
 	}
 
 	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove,
-			KeyPair protectionKey) {
+			KeyPair protectionKey) throws RemoveFailedException {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
@@ -47,23 +43,21 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
-			return;
+			throw new RemoveFailedException();
 		}
-		if (contentToRemove.getVersionKey() == Number160.ZERO)
-			dataManager.remove(locationKey, contentKey, protectionKey, this);
-		else
-			dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(), protectionKey, this);
+
+		boolean success = false;
+		if (contentToRemove.getVersionKey() == Number160.ZERO) {
+			success = dataManager.remove(locationKey, contentKey, protectionKey);
+		} else {
+			success = dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(),
+					protectionKey);
+		}
 		removePerformed = true;
-	}
 
-	@Override
-	public void onRemoveSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onRemoveFailure() {
-		getProcess().stop("Remove failed.");
+		if (!success) {
+			throw new RemoveFailedException();
+		}
 	}
 
 	@Override
@@ -97,12 +91,12 @@ public abstract class BaseRemoveProcessStep extends ProcessStep implements IRemo
 			logger.debug(String.format(
 					"Roll back of remove succeeded. location key = '%s' content key = '%s'", locationKey,
 					contentKey));
-			getProcess().nextRollBackStep();
 		} else {
 			logger.warn(String.format(
 					"Roll back of remove failed. Re-put failed. location key = '%s' content key = '%s'",
 					locationKey, contentKey));
-			getProcess().nextRollBackStep();
 		}
+
+		getProcess().nextRollBackStep();
 	}
 }

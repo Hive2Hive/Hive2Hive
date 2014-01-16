@@ -14,7 +14,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -27,7 +26,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public abstract class PutUserProfileTaskStep extends ProcessStep implements IRemoveListener {
+public abstract class PutUserProfileTaskStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutUserProfileTaskStep.class);
 
@@ -89,23 +88,17 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IRem
 			return;
 		}
 
-		dataManager.removeUserProfileTask(userId, contentKey, protectionKey, this);
-	}
+		boolean success = dataManager.removeUserProfileTask(userId, contentKey, protectionKey);
+		if (success) {
+			logger.debug(String.format(
+					"Roll back of user profile task put succeeded. user id = '%s' content key = '%s'",
+					userId, contentKey));
+		} else {
+			logger.warn(String.format(
+					"Roll back of user profile put failed. Remove failed. user id = '%s' content key = '%s'",
+					userId, contentKey));
+		}
 
-	@Override
-	public void onRemoveSuccess() {
-		logger.debug(String.format(
-				"Roll back of user profile task put succeeded. user id = '%s' content key = '%s'", userId,
-				contentKey));
 		getProcess().nextRollBackStep();
 	}
-
-	@Override
-	public void onRemoveFailure() {
-		logger.warn(String.format(
-				"Roll back of user profile put failed. Remove failed. user id = '%s' content key = '%s'",
-				userId, contentKey));
-		getProcess().nextRollBackStep();
-	}
-
 }

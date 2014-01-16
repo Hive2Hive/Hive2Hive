@@ -68,7 +68,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	/**
 	 * Wait (blocking) until the put is done
 	 * 
-	 * @return true if successfull, false if not successful
+	 * @return true if successful, false if not successful
 	 */
 	public boolean await() {
 		try {

@@ -4,7 +4,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.context.IGetUserProfileTaskContext;
@@ -14,7 +13,7 @@ import org.hive2hive.core.process.context.IGetUserProfileTaskContext;
  * 
  * @author Seppi
  */
-public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveListener {
+public class RemoveUserProfileTaskStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(RemoveUserProfileTaskStep.class);
 
@@ -54,20 +53,15 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 			return;
 		}
 
-		dataManager.removeUserProfileTask(userId, context.getUserProfileTask().getContentKey(), context
-				.getUserProfileTask().getProtectionKey(), this);
-
+		boolean success = dataManager.removeUserProfileTask(userId, context.getUserProfileTask()
+				.getContentKey(), context.getUserProfileTask().getProtectionKey());
 		removePerformed = true;
-	}
 
-	@Override
-	public void onRemoveSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onRemoveFailure() {
-		getProcess().stop("Remove failed.");
+		if (success) {
+			getProcess().setNextStep(nextStep);
+		} else {
+			getProcess().stop("Remove failed.");
+		}
 	}
 
 	@Override

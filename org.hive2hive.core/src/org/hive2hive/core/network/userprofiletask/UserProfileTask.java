@@ -10,7 +10,6 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
@@ -30,7 +29,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  * {@link DataManager#getUserProfileTask(String)} allows to get the oldest {@link UserProfileTask} object of
  * an user from the queue. The task can then be handled in a separate
  * thread. After handling please don't forget to remove the handled task (see
- * {@link DataManager#removeUserProfileTask(String, Number160, IRemoveListener)}).
+ * {@link DataManager#removeUserProfileTask(String, Number160)}).
  * 
  * @author Christian, Seppi
  */

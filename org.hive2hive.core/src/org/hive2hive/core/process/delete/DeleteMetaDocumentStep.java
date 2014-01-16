@@ -3,6 +3,7 @@ package org.hive2hive.core.process.delete;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
@@ -18,10 +19,6 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class DeleteMetaDocumentStep extends BaseRemoveProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteMetaDocumentStep.class);
-
-	public DeleteMetaDocumentStep() {
-		super(new DeleteGetParentMetaStep());
-	}
 
 	@Override
 	public void start() {
@@ -45,7 +42,12 @@ public class DeleteMetaDocumentStep extends BaseRemoveProcessStep {
 		logger.debug(String.format("Deleting the meta document of file '%s'.", metaDocument.getName()));
 
 		// start the deletion
-		remove(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encryptedMetaDocument,
-				protectionKeys);
+		try {
+			remove(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encryptedMetaDocument,
+					protectionKeys);
+			getProcess().setNextStep(new DeleteGetParentMetaStep());
+		} catch (RemoveFailedException e) {
+			getProcess().stop(e);
+		}
 	}
 }
