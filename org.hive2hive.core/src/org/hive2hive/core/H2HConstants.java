@@ -71,7 +71,7 @@ public interface H2HConstants {
 
 	// number of threads that netty / tomp2p are allowed to have. Too few threads can lead to slow response
 	// times, too many threads can exceed the available memory
-	public static final int NUM_OF_NETWORK_THREADS = 250; // Runtime.getRuntime().availableProcessors();
+	public static final int NUM_OF_NETWORK_THREADS = 32;
 
 	/**
 	 * Encryption Key Management
@@ -81,10 +81,10 @@ public interface H2HConstants {
 
 	// key length for asymmetric meta document encryption
 	public static final RSA_KEYLENGTH KEYLENGTH_META_DOCUMENT = RSA_KEYLENGTH.BIT_2048;
-	
+
 	// key length for asymmetric chunk encryption
 	public static final RSA_KEYLENGTH KEYLENGTH_CHUNK = RSA_KEYLENGTH.BIT_2048;
-	
+
 	// key length for symmetric user profile encryption
 	public static final AES_KEYLENGTH KEYLENGTH_USER_PROFILE = AES_KEYLENGTH.BIT_256;
 
