@@ -113,10 +113,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 	}
 
 	/**
@@ -211,13 +208,10 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 20);
 		int sentMessages = msgFactory.getSentMessageCount();
 
-		waiter = new H2HWaiter(10);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
 			waiter.tickASecond();
 			// wait until all messages are here except 1
@@ -246,12 +240,9 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 20);
 
-		waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(20);
 		do {
 			waiter.tickASecond();
 			// wait until all processes (inclusive cleanup) are done

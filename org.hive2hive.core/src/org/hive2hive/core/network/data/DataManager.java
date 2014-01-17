@@ -100,23 +100,6 @@ public class DataManager {
 		}
 	}
 
-	@Deprecated
-	public void putLocal(String locationKey, String contentKey, NetworkContent content) {
-		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
-		try {
-			Number640 key = new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-					Number160.createHash(contentKey), content.getVersionKey());
-			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
-			// TODO add public key for content protection
-			getPeer().getPeerBean().storage().put(key, data, null, false, false);
-		} catch (IOException e) {
-			logger.error(String.format(
-					"Local put failed. location key = '%s' content key = '%s' exception = '%s'", locationKey,
-					contentKey, e.getMessage()));
-		}
-	}
-
 	public NetworkContent get(String locationKey, String contentKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -168,30 +151,6 @@ public class DataManager {
 				locationKey, domainKey, contentKey, versionKey));
 		return getPeer().get(locationKey).setDomainKey(domainKey).setContentKey(contentKey)
 				.setVersionKey(versionKey).start();
-	}
-
-	@Deprecated
-	public NetworkContent getLocal(String locationKey, String contentKey) {
-		return getLocal(locationKey, contentKey, H2HConstants.TOMP2P_DEFAULT_KEY);
-	}
-
-	@Deprecated
-	public NetworkContent getLocal(String locationKey, String contentKey, Number160 versionKey) {
-		logger.debug(String.format("local get key = '%s' content key = '%s' version key = '%s'", locationKey,
-				contentKey, versionKey));
-		Number640 key = new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(contentKey), versionKey);
-		Data data = getPeer().getPeerBean().storage().get(key);
-		if (data != null) {
-			try {
-				return (NetworkContent) data.object();
-			} catch (ClassNotFoundException | IOException e) {
-				logger.error(String.format("local get failed exception = '%s'", e.getMessage()));
-			}
-		} else {
-			logger.warn("futureDHT.getData() is null");
-		}
-		return null;
 	}
 
 	public boolean remove(String locationKey, String contentKey, KeyPair protectionKey) {

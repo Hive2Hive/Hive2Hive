@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.network.messages.direct;
 
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.NetworkManager;
@@ -27,8 +28,10 @@ public class TestDirectMessageWithReplyMaxSending extends DirectRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
-
+		Number160 lKey = Number160.createHash(networkManager.getNodeId());
+		Number160 cKey = Number160.createHash(contentKey);
+		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(secret), null).awaitUninterruptibly();
+		
 		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(),
 				getSenderAddress(), secret);
 		networkManager.sendDirect(responseMessage, getSenderPublicKey(), new TestBaseMessageListener());
@@ -50,7 +53,9 @@ public class TestDirectMessageWithReplyMaxSending extends DirectRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-			networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+			Number160 lKey = Number160.createHash(networkManager.getNodeId());
+			Number160 cKey = Number160.createHash(contentKey);
+			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(receivedSecret), null).awaitUninterruptibly();
 		}
 
 	}
