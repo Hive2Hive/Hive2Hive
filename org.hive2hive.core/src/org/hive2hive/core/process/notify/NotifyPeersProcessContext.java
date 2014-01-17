@@ -15,13 +15,15 @@ public class NotifyPeersProcessContext extends ProcessContext {
 	private final Set<String> users;
 	private final BaseNotificationMessageFactory messageFactory;
 	private final Set<PeerAddress> unreachableOwnPeers;
+	private final String ownUserId;
 	private Map<String, PublicKey> keys;
 
 	public NotifyPeersProcessContext(Process process, Set<String> users,
-			BaseNotificationMessageFactory messageFactory) {
+			BaseNotificationMessageFactory messageFactory, String ownUserId) {
 		super(process);
 		this.users = users;
 		this.messageFactory = messageFactory;
+		this.ownUserId = ownUserId;
 		unreachableOwnPeers = new HashSet<PeerAddress>();
 	}
 
@@ -47,5 +49,9 @@ public class NotifyPeersProcessContext extends ProcessContext {
 
 	public Set<PeerAddress> getUnreachableOwnPeers() {
 		return unreachableOwnPeers;
+	}
+
+	public String getOwnUserId() {
+		return ownUserId;
 	}
 }

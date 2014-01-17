@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.rpc.ObjectDataReply;
+
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -14,6 +17,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessState;
 import org.hive2hive.core.process.notify.NotifyPeersProcess;
@@ -185,7 +189,7 @@ public class NotificationTest extends H2HJUnitTest {
 
 	/**
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
-	 * (peer 3 and 4). Peer 4 of user B has done an unfriendly leave, never responding.
+	 * (peer 3 or 4). Peer 4 of user B has done an unfriendly leave, never responding.
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogout() throws ClassNotFoundException, IOException, InterruptedException {
@@ -201,7 +205,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.addListener(listener);
 
 		// kick out B
-		network.get(4).disconnect();
+		network.get(4).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent
@@ -233,7 +237,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.addListener(listener);
 
 		// kick out Peer 1
-		network.get(1).disconnect();
+		network.get(1).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent
@@ -254,5 +258,12 @@ public class NotificationTest extends H2HJUnitTest {
 	public static void endTest() {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
+	}
+
+	private class DenyingMessageReplyHandler implements ObjectDataReply {
+		@Override
+		public Object reply(PeerAddress sender, Object request) throws Exception {
+			return AcceptanceReply.FAILURE;
+		}
 	}
 }

@@ -12,6 +12,7 @@ import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -37,8 +38,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 
 	private boolean putPerformed = false;
 
-	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey,
-			ProcessStep nextStep) {
+	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey)
+			throws PutFailedException {
 		if (userId == null)
 			throw new IllegalArgumentException("user id can be not null");
 		if (userProfileTask == null)
@@ -61,14 +62,12 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
 
-			if (success) {
-				getProcess().setNextStep(nextStep);
-			} else {
-				getProcess().stop("Put of user profile task failed.");
+			if (!success) {
+				throw new PutFailedException();
 			}
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			getProcess().stop("Meta document could not be encrypted");
+			throw new PutFailedException("Meta document could not be encrypted");
 		}
 	}
 

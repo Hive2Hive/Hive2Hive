@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.share;
 
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.process.common.userprofiletask.PutUserProfileTaskStep;
 import org.hive2hive.core.process.userprofiletask.share.ShareFolderUserProfileTask;
@@ -21,11 +22,15 @@ public class PutShareFolderUserProfileTaskStep extends PutUserProfileTaskStep {
 		sharedNode.setName(fileNode.getName());
 		sharedNode.getChildren().addAll(fileNode.getChildren());
 		sharedNode.setProtectionKeys(fileNode.getProtectionKeys());
-		
+
 		ShareFolderUserProfileTask userProfileTask = new ShareFolderUserProfileTask(sharedNode);
-		
-		SendNotificationsStep sendNotificationStep = new SendNotificationsStep();
-		put(context.getFriendId(), userProfileTask, context.getSession().getKeyPair().getPublic(), sendNotificationStep);
+
+		try {
+			put(context.getFriendId(), userProfileTask, context.getSession().getKeyPair().getPublic());
+			getProcess().setNextStep(new SendNotificationsStep());
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
+		}
 	}
 
 }

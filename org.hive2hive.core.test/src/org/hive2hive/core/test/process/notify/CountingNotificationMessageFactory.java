@@ -15,6 +15,7 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.common.userprofiletask.TestUserProfileTask;
 import org.junit.Assert;
 
 /**
@@ -75,8 +76,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 
 	@Override
 	public UserProfileTask createUserProfileTask() {
-		// TODO
-		return null;
+		return new TestUserProfileTask();
 	}
 
 }

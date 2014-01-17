@@ -79,12 +79,11 @@ public class NetworkManager {
 	 * Helper method that returns the public key of the currently logged in user
 	 */
 	public PublicKey getPublicKey() {
-		if (session == null)
+		try {
+			return getPublicKey(getUserId());
+		} catch (GetFailedException e) {
 			return null;
-		if (publicKeyManager == null)
-			publicKeyManager = new PublicKeyManager(session.getCredentials().getUserId(),
-					session.getKeyPair(), dataManager);
-		return publicKeyManager.getUsersPublicKey();
+		}
 	}
 
 	/**

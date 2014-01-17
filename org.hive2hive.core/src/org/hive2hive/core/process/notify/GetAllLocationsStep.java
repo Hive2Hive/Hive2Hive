@@ -35,6 +35,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 
 	@Override
 	public void start() {
+		logger.debug("Starting to get all locations from the users to be notified");
 		Map<String, List<PeerAddress>> allLocations = new HashMap<String, List<PeerAddress>>();
 
 		// iterate over all users and get the locations of them

@@ -131,7 +131,7 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 			// do that through selecting the node with the lowest peer address
 			if (NetworkUtils.choseFirstPeerAddress(listToDetectMaster).equals(
 					getNetworkManager().getPeerAddress())) {
-				logger.warn(String.format(
+				logger.info(String.format(
 						"Node has been selected as master for handling user message. node id = '%s'",
 						getNetworkManager().getNodeId()));
 				isDefinedAsMaster = true;
