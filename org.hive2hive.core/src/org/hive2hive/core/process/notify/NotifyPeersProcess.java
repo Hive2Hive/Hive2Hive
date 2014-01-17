@@ -1,13 +1,5 @@
 package org.hive2hive.core.process.notify;
 
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -27,46 +19,13 @@ public class NotifyPeersProcess extends Process {
 	/**
 	 * Notify a set of users
 	 */
-	public NotifyPeersProcess(NetworkManager networkManager, Set<String> users,
-			INotificationMessageFactory messageFactory) {
+	public NotifyPeersProcess(NetworkManager networkManager, BaseNotificationMessageFactory messageFactory) {
 		super(networkManager);
 		addCleanupListener();
 
-		context = new NotifyPeersProcessContext(this, users, messageFactory);
-		setNextStep(new GetPublicKeysStep(users));
-	}
-
-	/**
-	 * Notify all clients of the currently logged in user (session is required)
-	 */
-	public NotifyPeersProcess(NetworkManager networkManager, INotificationMessageFactory messageFactory)
-			throws NoSessionException {
-		super(networkManager);
-		addCleanupListener();
-
-		H2HSession session = networkManager.getSession();
-		Set<String> onlyMe = new HashSet<String>(1);
-		onlyMe.add(session.getCredentials().getUserId());
-
-		context = new NotifyPeersProcessContext(this, onlyMe, messageFactory);
-
-		Map<String, PublicKey> myKey = new HashMap<String, PublicKey>(1);
-		myKey.put(session.getCredentials().getUserId(), session.getKeyPair().getPublic());
-		setNextStep(new GetPublicKeysStep(new ArrayList<String>(), myKey));
-	}
-	
-	/**
-	 * Notify all clients of a single user
-	 */
-	public NotifyPeersProcess(NetworkManager networkManager, String userId, INotificationMessageFactory messageFactory) {
-		super(networkManager);
-		addCleanupListener();
-
-		Set<String> onlyOne = new HashSet<String>(1);
-		onlyOne.add(userId);
-
-		context = new NotifyPeersProcessContext(this, onlyOne, messageFactory);
-		setNextStep(new GetPublicKeysStep(onlyOne));
+		context = new NotifyPeersProcessContext(this, messageFactory.getUsers(), messageFactory);
+		// TODO
+		// setNextStep(new GetPublicKeysStep(users));
 	}
 
 	private void addCleanupListener() {

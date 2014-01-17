@@ -13,12 +13,12 @@ import org.hive2hive.core.process.context.ProcessContext;
 public class NotifyPeersProcessContext extends ProcessContext {
 
 	private final Set<String> users;
-	private final INotificationMessageFactory messageFactory;
+	private final BaseNotificationMessageFactory messageFactory;
 	private final Set<PeerAddress> unreachableOwnPeers;
 	private Map<String, PublicKey> keys;
 
 	public NotifyPeersProcessContext(Process process, Set<String> users,
-			INotificationMessageFactory messageFactory) {
+			BaseNotificationMessageFactory messageFactory) {
 		super(process);
 		this.users = users;
 		this.messageFactory = messageFactory;
@@ -29,7 +29,7 @@ public class NotifyPeersProcessContext extends ProcessContext {
 		return users;
 	}
 
-	public INotificationMessageFactory getMessageFactory() {
+	public BaseNotificationMessageFactory getMessageFactory() {
 		return messageFactory;
 	}
 

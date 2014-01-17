@@ -2,6 +2,7 @@ package org.hive2hive.core.process.delete;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.util.HashSet;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -74,8 +75,8 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 							deletedFileNode.getName()));
 
 			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentFileNode
-					.getKeyPair().getPublic(), deletedFileNode.getName());
-			getProcess().notifyOtherClients(messageFactory);
+					.getKeyPair().getPublic(), deletedFileNode.getName(), new HashSet<String>());
+			getProcess().sendNotification(messageFactory);
 
 			getProcess().setNextStep(null);
 		} else {
@@ -111,9 +112,9 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 
 				// continue with next step
 				getProcess().setNextStep(new DeleteUpdateParentMetaStep(deletedFileNode.getName()));
-			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
-					| BadPaddingException | IllegalStateException | InvalidCipherTextException
-					| IllegalArgumentException e) {
+			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException
+					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
+					| InvalidCipherTextException | IllegalArgumentException e) {
 				context.setParentMetaFolder(null);
 				context.setParentProtectionKeys(null);
 				context.setEncryptedParentMetaFolder(null);

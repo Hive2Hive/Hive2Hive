@@ -105,9 +105,9 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyNobody() throws ClassNotFoundException, IOException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, new HashSet<String>(1), msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier,
+				new HashSet<String>(0));
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
@@ -122,12 +122,13 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userAProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier,
+				users);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -145,11 +146,11 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userAProfile.getUserId());
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier,
+				users);
 		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		process.start();
 
@@ -168,14 +169,14 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(2);
 		users.add(userAProfile.getUserId());
 		users.add(userBProfile.getUserId());
 		users.add(userCProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier,
+				users);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -193,13 +194,14 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyUnfriendlyLogout() throws ClassNotFoundException, IOException, InterruptedException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(2);
 		users.add(userAProfile.getUserId());
 		users.add(userBProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier,
+				users);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 
@@ -226,12 +228,13 @@ public class NotificationTest extends H2HJUnitTest {
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
 			InterruptedException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(2);
 		users.add(userAProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier,
+				users);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 

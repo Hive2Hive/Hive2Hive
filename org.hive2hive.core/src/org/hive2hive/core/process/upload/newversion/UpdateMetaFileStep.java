@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -71,7 +72,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 			fileNode.setMD5(newMD5);
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
-			
+
 			// TODO wait till cleanup of versions ends
 			// cleanup old versions when too many versions
 			initiateCleanup(fileNode.getProtectionKeys());
@@ -86,7 +87,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 			getProcess().stop(e);
 		}
 	}
-	
+
 	private void initiateCleanup(KeyPair protectionsKeys) {
 		try {
 			IFileConfiguration fileConfiguration = getNetworkManager().getSession().getFileConfiguration();
@@ -121,7 +122,8 @@ public class UpdateMetaFileStep extends ProcessStep {
 
 		if (parent.equals(userProfile.getRoot())) {
 			logger.debug("Inform only current user since file is in root");
-			getProcess().notifyOtherClients(new UploadNotificationMessageFactory(metaFile.getId()));
+			getProcess()
+					.sendNotification(new UploadNotificationMessageFactory(metaFile.getId(), new HashSet<String>()));
 			return null;
 		} else {
 			// 1. get the parent meta

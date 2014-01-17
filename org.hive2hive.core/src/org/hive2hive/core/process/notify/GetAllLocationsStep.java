@@ -61,7 +61,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 	private ProcessStep getSendingProcessSteps(Map<String, List<PeerAddress>> allLocations) {
 		NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
-		INotificationMessageFactory messageFactory = context.getMessageFactory();
+		BaseNotificationMessageFactory messageFactory = context.getMessageFactory();
 
 		ProcessStep tail = null;
 		for (String user : allLocations.keySet()) {
@@ -80,7 +80,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 					continue;
 				}
 
-				BaseDirectMessage msg = messageFactory.createNotificationMessage(peerAddress, user);
+				BaseDirectMessage msg = messageFactory.createPrivateNotificationMessage(peerAddress);
 				tail = new SendNotificationMessageStep(msg, userPublicKeys.get(user), tail, toOwnUser);
 			}
 		}

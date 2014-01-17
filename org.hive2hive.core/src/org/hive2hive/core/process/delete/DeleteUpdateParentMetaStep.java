@@ -63,8 +63,8 @@ public class DeleteUpdateParentMetaStep extends BasePutProcessStep {
 
 		// notify other clients (can be multiple users)
 		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentMeta.getId(),
-				childName);
-		getProcess().notfyOtherUsers(parentMeta.getUserList(), messageFactory);
+				childName, parentMeta.getUserList());
+		getProcess().sendNotification(messageFactory);
 
 		try {
 			HybridEncryptedContent encrypted = H2HEncryptionUtil
