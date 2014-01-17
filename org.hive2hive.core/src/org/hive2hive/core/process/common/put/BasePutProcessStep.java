@@ -42,7 +42,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
 			getProcess().stop("Node is not connected.");
-			throw new PutFailedException();
+			throw new PutFailedException("Node is not connected");
 		}
 		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
 		putPerformed = true;

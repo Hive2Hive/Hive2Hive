@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -9,21 +10,23 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * Simple test to test message signatures.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class MessageSignatureTest extends H2HJUnitTest {
+
+	private List<NetworkManager> network;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -31,13 +34,17 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		beforeClass();
 	}
 
+	@Before
+	public void createNetwork() {
+		network = NetworkTestUtil.createNetwork(2);
+	}
+
 	@Test
 	public void testMessageWithSignatureSameUser() {
-		List<NetworkManager> network = NetworkTestUtil.createNetwork(2);
 		NetworkTestUtil.createSameKeyPair(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
-		
+
 		// putting of the public key is not necessary
 
 		// location key is target node id
@@ -47,22 +54,11 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		TestMessageVerifyListener listener = new TestMessageVerifyListener();
-		sender.send(message, receiver.getPublicKey(), listener);
-
-		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			w.tickASecond();
-		} while (!listener.hasSucceded());
-
-		NetworkTestUtil.shutdownNetwork(network);
+		assertTrue(sender.send(message, receiver.getPublicKey()));
 	}
 
 	@Test
 	public void testMessageWithSignatureDifferentUser() {
-		List<NetworkManager> network = NetworkTestUtil.createNetwork(2);
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -80,22 +76,11 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		TestMessageVerifyListener listener = new TestMessageVerifyListener();
-		sender.send(message, receiver.getPublicKey(), listener);
-
-		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			w.tickASecond();
-		} while (!listener.hasSucceded());
-
-		NetworkTestUtil.shutdownNetwork(network);
+		assertTrue(sender.send(message, receiver.getPublicKey()));
 	}
 
 	@Test
 	public void testMessageWithWrongSignature1() {
-		List<NetworkManager> network = NetworkTestUtil.createNetwork(2);
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -109,22 +94,11 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		TestMessageVerifyListener listener = new TestMessageVerifyListener();
-		sender.send(message, receiver.getPublicKey(), listener);
-
-		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceded());
-			w.tickASecond();
-		} while (!listener.hasFailed());
-
-		NetworkTestUtil.shutdownNetwork(network);
+		assertFalse(sender.send(message, receiver.getPublicKey()));
 	}
 
 	@Test
 	public void testMessageWithWrongSignature2() {
-		List<NetworkManager> network = NetworkTestUtil.createNetwork(2);
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -144,42 +118,12 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		TestMessageVerifyListener listener = new TestMessageVerifyListener();
-		sender.send(message, receiver.getPublicKey(), listener);
-
-		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceded());
-			w.tickASecond();
-		} while (!listener.hasFailed());
-
-		NetworkTestUtil.shutdownNetwork(network);
+		assertFalse(sender.send(message, receiver.getPublicKey()));
 	}
 
-	private class TestMessageVerifyListener implements IBaseMessageListener {
-
-		private boolean failed = false;
-		private boolean succeded = false;
-
-		public boolean hasSucceded() {
-			return succeded;
-		}
-
-		public boolean hasFailed() {
-			return failed;
-		}
-
-		@Override
-		public void onSuccess() {
-			succeded = true;
-		}
-
-		@Override
-		public void onFailure() {
-			failed = true;
-		}
-
+	@After
+	public void shutdownNetwork() {
+		NetworkTestUtil.shutdownNetwork(network);
 	}
 
 	@AfterClass

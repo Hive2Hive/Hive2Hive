@@ -63,7 +63,7 @@ public final class MessageManager {
 	 * @param listener
 	 *            a listener which is interested in the result of sending
 	 */
-	public void send(BaseMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
+	public boolean send(BaseMessage message, PublicKey targetPublicKey) {
 		if (message.getTargetKey() == null)
 			throw new IllegalArgumentException("target key cannot be null");
 		if (targetPublicKey == null)
@@ -76,17 +76,26 @@ public final class MessageManager {
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null)
-			return;
+			return false;
 
 		// send message to the peer which is responsible for the given key
 		FutureSend futureSend = networkManager.getConnection().getPeer()
 				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
 				.setRequestP2PConfiguration(createSendingConfiguration()).start();
-		// attach a future listener to log, handle and notify events
-		futureSend.addListener(new FutureRoutedListener(listener, message, targetPublicKey, networkManager));
 
-		logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
-				message.getTargetKey(), message.getMessageID()));
+		// attach a future listener to log, handle and notify events
+		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, networkManager);
+		futureSend.addListener(listener);
+		boolean success = listener.await();
+
+		if (success) {
+			logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
+					message.getTargetKey(), message.getMessageID()));
+		} else {
+			logger.error(String.format("Message could not be sent. target key = '%s' message id = '%s'",
+					message.getTargetKey(), message.getMessageID()));
+		}
+		return success;
 	}
 
 	/**
@@ -102,10 +111,8 @@ public final class MessageManager {
 	 *            a direct message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @param listener
-	 *            a listener which is interested in the result of sending
 	 */
-	public void sendDirect(BaseDirectMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
+	public boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
 		if (message.getTargetAddress() == null)
 			throw new IllegalArgumentException("target address cannot be null");
 		if (targetPublicKey == null)
@@ -118,18 +125,26 @@ public final class MessageManager {
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null)
-			return;
+			return false;
 
 		// send message directly to the peer with the given peer address
 		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
-		futureDirect
-				.addListener(new FutureDirectListener(listener, message, targetPublicKey, networkManager));
+		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, networkManager);
+		futureDirect.addListener(listener);
+		boolean success = listener.await();
 
-		logger.debug(String.format(
-				"Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
-				message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
+		if (success) {
+			logger.debug(String.format(
+					"Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
+					message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
+		} else {
+			logger.error(String
+					.format("Message (direct) could not be sent. message id = '%s' target address = '%s' sender address = '%s'",
+							message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
+		}
+		return success;
 	}
 
 	/**

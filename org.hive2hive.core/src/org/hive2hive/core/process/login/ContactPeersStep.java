@@ -14,7 +14,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkUtils;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -91,8 +90,10 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 		// the process step is expecting a response
 		contactMsg.setCallBackHandler(this);
 		// send direct
-		getNetworkManager().sendDirect(contactMsg, getNetworkManager().getPublicKey(),
-				new ContactPeerMessageListener(address));
+		boolean success = getNetworkManager().sendDirect(contactMsg, getNetworkManager().getPublicKey());
+		if (!success) {
+			responses.put(address, false);
+		}
 	}
 
 	@Override
@@ -154,7 +155,8 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 		// 1. Put the new location map
 		// 2. Synchronize files with network
 		SynchronizeFilesStep nextStep = new SynchronizeFilesStep();
-		PutLocationStep putStep = new PutLocationStep(newLocations, context.getUserProfile().getProtectionKeys(), nextStep);
+		PutLocationStep putStep = new PutLocationStep(newLocations, context.getUserProfile()
+				.getProtectionKeys(), nextStep);
 		getProcess().setNextStep(putStep);
 	}
 
@@ -183,32 +185,4 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 							responseMessage.getSenderAddress()));
 		}
 	}
-
-	/**
-	 * To make it faster all failed messages get labeled as fail, so that the timer doesn't has to wait for a
-	 * already failed message, because there will no expected response.
-	 * 
-	 * @author Seppi
-	 */
-	private class ContactPeerMessageListener implements IBaseMessageListener {
-
-		private final PeerAddress receiverAddress;
-
-		public ContactPeerMessageListener(PeerAddress receiverAddress) {
-			this.receiverAddress = receiverAddress;
-		}
-
-		@Override
-		public void onSuccess() {
-			// do nothing
-		}
-
-		@Override
-		public void onFailure() {
-			// label as failure
-			responses.put(receiverAddress, false);
-		}
-
-	}
-
 }

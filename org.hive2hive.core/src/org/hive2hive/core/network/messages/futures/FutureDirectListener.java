@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.messages.futures;
 
 import java.security.PublicKey;
+import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDirect;
@@ -10,16 +11,15 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * Use this future adapter when sending a {@link BaseDirectMessage}. Attach this listener to the future which
- * gets returned at {@link MessageManager#sendDirect(BaseDirectMessage)} to enable an appropriate failure
- * handling and notifying {@link IBaseMessageListener} listeners. In case of a successful sending
- * {@link IBaseMessageListener#onSuccess()} gets called. In case of a failed sending
- * {@link IBaseMessageListener#onFailure()} gets called. </br></br>
+ * gets
+ * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling. Use the
+ * {link {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
+ * not).</br></br>
  * <b>Failure Handling</b></br>
  * Sending a direct message can fail when the future object failed, when the future object contains wrong data
  * or the
@@ -32,22 +32,21 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  * listener attaches himself to the new future objects (also in case of switching on the fall back mechanism)
  * so that the adapter can finally notify his/her listener about a success or failure.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureDirectListener.class);
 
-	private final IBaseMessageListener listener;
 	private final BaseDirectMessage message;
 	private final PublicKey receiverPublicKey;
 	private final NetworkManager networkManager;
+	private final CountDownLatch latch;
+	private boolean success = false;
 
 	/**
 	 * Constructor for a future adapter.
 	 * 
-	 * @param listener
-	 *            listener which gets notified when sending succeeded or failed
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
 	 * @param receiverPublicKey
@@ -55,12 +54,27 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
-	public FutureDirectListener(IBaseMessageListener listener, BaseDirectMessage message,
-			PublicKey receiverPublicKey, NetworkManager networkManager) {
-		this.listener = listener;
+	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey,
+			NetworkManager networkManager) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
 		this.networkManager = networkManager;
+		this.latch = new CountDownLatch(1);
+	}
+
+	/**
+	 * Wait (blocking) until the message is sent
+	 * 
+	 * @return true if successful, false if not successful
+	 */
+	public boolean await() {
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			logger.error("Could not wait until the message is sent successfully");
+		}
+
+		return success;
 	}
 
 	@Override
@@ -68,14 +82,15 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 		AcceptanceReply reply = extractAcceptanceReply(future);
 		if (reply == AcceptanceReply.OK) {
 			// notify the listener about the success of sending the message
-			if (listener != null)
-				listener.onSuccess();
+			success = true;
+			latch.countDown();
 		} else {
 			// check if a direct re-send is necessary / wished
 			boolean directResending = message.handleSendingFailure(reply);
 			if (directResending) {
 				// re-send directly the message
-				networkManager.sendDirect(message, receiverPublicKey, listener);
+				success = networkManager.sendDirect(message, receiverPublicKey);
+				latch.countDown();
 			} else {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
@@ -83,11 +98,12 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '%s' target address = '%s'",
 									message.getTargetKey(), message.getTargetAddress()));
 					// re-send the message (routed)
-					networkManager.send(message, receiverPublicKey, listener);
+					success = networkManager.send(message, receiverPublicKey);
+					latch.countDown();
 				} else {
 					// notify the listener about the fail of sending the message
-					if (listener != null)
-						listener.onFailure();
+					success = false;
+					latch.countDown();
 				}
 			}
 		}

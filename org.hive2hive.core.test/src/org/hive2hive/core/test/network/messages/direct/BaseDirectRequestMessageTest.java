@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.network.messages.direct;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.messages.TestBaseMessageListener;
 import org.hive2hive.core.test.network.messages.direct.TestDirectMessageWithReply.TestCallBackHandler;
 import org.hive2hive.core.test.network.messages.direct.TestDirectMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
 import org.junit.AfterClass;
@@ -44,7 +44,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 	public void testSendingDirectMessageWithRequest() throws ClassNotFoundException, IOException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
-		
+
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
@@ -53,9 +53,9 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
-		
+
 		// send message
-		nodeA.sendDirect(message, nodeB.getPublicKey(), new TestBaseMessageListener());
+		assertTrue(nodeA.sendDirect(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -77,10 +77,11 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSendingDirectMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException, IOException {
+	public void testSendingDirectMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException,
+			IOException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
-		
+
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
@@ -89,9 +90,9 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
-		
+
 		// send message
-		nodeA.sendDirect(message, nodeB.getPublicKey(), new TestBaseMessageListener());
+		assertTrue(nodeA.sendDirect(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);

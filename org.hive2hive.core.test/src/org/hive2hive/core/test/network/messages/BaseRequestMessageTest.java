@@ -1,6 +1,7 @@
 package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,7 +73,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
+		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -98,11 +99,12 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * from the responding node) is configured in a way that it will be blocked on the target node (requesting
 	 * node) till the maximum allowed numbers of retrying to send the very message is reached.
 	 * 
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException, IOException {
+	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode()
+			throws ClassNotFoundException, IOException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -117,7 +119,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
+		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
