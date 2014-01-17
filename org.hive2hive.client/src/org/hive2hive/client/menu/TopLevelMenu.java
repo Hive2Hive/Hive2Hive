@@ -11,7 +11,7 @@ import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.digest.IGetFileListProcess;
+import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
 
 /**
