@@ -1,6 +1,5 @@
 package org.hive2hive.core.test.process.common.remove;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.util.List;
@@ -18,11 +17,10 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -66,11 +64,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 
 		FutureGet futureGet = network
 				.get(0)
@@ -108,11 +102,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceeded());
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		ProcessTestUtil.waitTillFailed(listener, 10);
 	}
 
 	@AfterClass
@@ -159,11 +149,10 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		@Override
 		public void start() {
 			try {
-				remove(locationKey, contentKey, data);
+				remove(locationKey, contentKey, data, null);
 				getProcess().setNextStep(null);
 			} catch (RemoveFailedException e) {
 				getProcess().stop(e);
-				Assert.fail();
 			}
 		}
 

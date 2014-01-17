@@ -28,12 +28,6 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 	protected KeyPair protectionKey;
 	private boolean removePerformed = false;
 
-	@Deprecated
-	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove)
-			throws RemoveFailedException {
-		remove(locationKey, contentKey, contentToRemove, null);
-	}
-
 	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove,
 			KeyPair protectionKey) throws RemoveFailedException {
 		this.locationKey = locationKey;
@@ -42,8 +36,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		this.protectionKey = protectionKey;
 		DataManager dataManager = getNetworkManager().getDataManager();
 		if (dataManager == null) {
-			getProcess().stop("Node is not connected.");
-			throw new RemoveFailedException();
+			throw new RemoveFailedException("Node is not connected.");
 		}
 
 		boolean success = false;

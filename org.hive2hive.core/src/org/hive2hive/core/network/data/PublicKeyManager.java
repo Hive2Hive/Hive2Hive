@@ -26,7 +26,6 @@ public class PublicKeyManager {
 	private final DataManager dataManager;
 
 	private final Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
-	private final Object lock = new Object();
 
 	private volatile String requestingUserId;
 	private volatile GetFailedException exception;

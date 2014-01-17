@@ -1,7 +1,5 @@
 package org.hive2hive.core.test.process.common.get;
 
-import static org.junit.Assert.assertFalse;
-
 import java.util.List;
 
 import net.tomp2p.peers.Number160;
@@ -12,8 +10,8 @@ import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -61,11 +59,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 
 		Assert.assertEquals(data.getTestString(), ((H2HTestData) getStep.getContent()).getTestString());
 	}
@@ -87,11 +81,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceeded());
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		ProcessTestUtil.waitTillFailed(listener, 10);
 
 		Assert.assertNull(getStepRollBack.getContent());
 	}
