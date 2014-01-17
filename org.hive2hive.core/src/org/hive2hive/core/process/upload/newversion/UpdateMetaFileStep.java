@@ -122,8 +122,9 @@ public class UpdateMetaFileStep extends ProcessStep {
 
 		if (parent.equals(userProfile.getRoot())) {
 			logger.debug("Inform only current user since file is in root");
-			getProcess()
-					.sendNotification(new UploadNotificationMessageFactory(metaFile.getId(), new HashSet<String>()));
+			HashSet<String> userList = new HashSet<String>();
+			userList.add(userProfile.getUserId());
+			getProcess().sendNotification(new UploadNotificationMessageFactory(metaFile.getId()), userList);
 			return null;
 		} else {
 			// 1. get the parent meta

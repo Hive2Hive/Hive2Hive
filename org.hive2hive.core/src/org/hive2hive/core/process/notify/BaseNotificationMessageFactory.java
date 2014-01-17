@@ -1,7 +1,5 @@
 package org.hive2hive.core.process.notify;
 
-import java.util.Set;
-
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -16,22 +14,6 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
  * 
  */
 public abstract class BaseNotificationMessageFactory {
-
-	private final Set<String> users;
-
-	/**
-	 * Create a message factory
-	 * 
-	 * @param networkManager the network manager (requires a valid session)
-	 * @param users all users to notify using a {@link UserProfileTask}
-	 */
-	public BaseNotificationMessageFactory(Set<String> users) {
-		this.users = users;
-	}
-
-	public Set<String> getUsers() {
-		return users;
-	}
 
 	/**
 	 * Create a private message to notify clients of the same user.

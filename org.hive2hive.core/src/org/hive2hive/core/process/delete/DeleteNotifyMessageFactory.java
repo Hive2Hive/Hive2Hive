@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.delete;
 
 import java.security.PublicKey;
-import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -16,9 +15,9 @@ public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 
 	/**
 	 * @param parentFileKey the file that has been deleted
+	 * @param fileName to uniquely identify the deleted file
 	 */
-	public DeleteNotifyMessageFactory(PublicKey parentFileKey, String fileName, Set<String> users) {
-		super(users);
+	public DeleteNotifyMessageFactory(PublicKey parentFileKey, String fileName) {
 		this.parentFileKey = parentFileKey;
 		this.fileName = fileName;
 	}

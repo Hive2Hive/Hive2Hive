@@ -75,9 +75,10 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 							deletedFileNode.getName()));
 
 			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentFileNode
-					.getKeyPair().getPublic(), deletedFileNode.getName(), new HashSet<String>());
-			getProcess().sendNotification(messageFactory);
-
+					.getKeyPair().getPublic(), deletedFileNode.getName());
+			HashSet<String> users = new HashSet<String>();
+			users.add(userProfile.getUserId());
+			getProcess().sendNotification(messageFactory, users);
 			getProcess().setNextStep(null);
 		} else {
 			// normal case when file is not in root

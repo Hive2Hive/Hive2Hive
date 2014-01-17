@@ -30,8 +30,8 @@ public class SendNotificationsStep extends ProcessStep {
 				.format("Sending a notification message to %s# other sharing user(s) about a newly added sharing user.",
 						otherUsers.size()));
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(
-				metaFolder.getId(), context.getProtectionKeys(), context.getFriendId(), otherUsers);
-		getProcess().sendNotification(messageFactory);
+				metaFolder.getId(), context.getProtectionKeys(), context.getFriendId());
+		getProcess().sendNotification(messageFactory, otherUsers);
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package org.hive2hive.core.process.share;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -16,9 +15,7 @@ public class ShareFolderNotificationMessageFactory extends BaseNotificationMessa
 	private final KeyPair domainKey;
 	private String addedUser;
 
-	public ShareFolderNotificationMessageFactory(PublicKey metaFolderId, KeyPair domainKey, String addedUser,
-			Set<String> users) {
-		super(users);
+	public ShareFolderNotificationMessageFactory(PublicKey metaFolderId, KeyPair domainKey, String addedUser) {
 		this.metaFolderId = metaFolderId;
 		this.domainKey = domainKey;
 		this.addedUser = addedUser;

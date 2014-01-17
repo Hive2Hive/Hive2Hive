@@ -27,7 +27,7 @@ public class SendNotificationStep extends ProcessStep {
 			userList.addAll(metaFolder.getUserList());
 		}
 
-		getProcess().sendNotification(new UploadNotificationMessageFactory(modifiedFileKey, userList));
+		getProcess().sendNotification(new UploadNotificationMessageFactory(modifiedFileKey), userList);
 		getProcess().setNextStep(null);
 	}
 

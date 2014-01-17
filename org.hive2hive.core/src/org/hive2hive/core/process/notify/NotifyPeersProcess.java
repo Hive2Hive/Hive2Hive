@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.notify;
 
+import java.util.Set;
+
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -19,13 +21,13 @@ public class NotifyPeersProcess extends Process {
 	/**
 	 * Notify a set of users
 	 */
-	public NotifyPeersProcess(NetworkManager networkManager, BaseNotificationMessageFactory messageFactory) {
+	public NotifyPeersProcess(NetworkManager networkManager, BaseNotificationMessageFactory messageFactory,
+			Set<String> users) {
 		super(networkManager);
 		addCleanupListener();
 
-		context = new NotifyPeersProcessContext(this, messageFactory.getUsers(), messageFactory);
-		// TODO
-		// setNextStep(new GetPublicKeysStep(users));
+		context = new NotifyPeersProcessContext(this, users, messageFactory);
+		setNextStep(new GetPublicKeysStep(users));
 	}
 
 	private void addCleanupListener() {

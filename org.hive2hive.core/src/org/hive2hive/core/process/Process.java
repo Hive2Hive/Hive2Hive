@@ -2,6 +2,7 @@ package org.hive2hive.core.process;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalProcessStateException;
@@ -209,8 +210,8 @@ public abstract class Process implements IProcess {
 	 * Notify the other clients of the same users, other users, ... Configure this in the
 	 * {@link BaseNotificationMessageFactory}
 	 */
-	public void sendNotification(BaseNotificationMessageFactory messageFactory) {
-		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory);
+	public void sendNotification(BaseNotificationMessageFactory messageFactory, Set<String> users) {
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory, users);
 		notifyProcess.start();
 	}
 

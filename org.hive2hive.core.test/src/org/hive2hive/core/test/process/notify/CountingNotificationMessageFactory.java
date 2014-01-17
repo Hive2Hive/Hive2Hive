@@ -3,7 +3,6 @@ package org.hive2hive.core.test.process.notify;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
@@ -31,8 +30,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 	private final List<String> testContentKeys;
 	private final H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 
-	public CountingNotificationMessageFactory(NetworkManager sender, Set<String> users) {
-		super(users);
+	public CountingNotificationMessageFactory(NetworkManager sender) {
 		this.sender = sender;
 		testContentKeys = new ArrayList<String>();
 	}

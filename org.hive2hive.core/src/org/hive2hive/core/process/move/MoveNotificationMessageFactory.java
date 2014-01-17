@@ -1,7 +1,6 @@
 package org.hive2hive.core.process.move;
 
 import java.security.PublicKey;
-import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -25,8 +24,7 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 	 * @param newParent the key of the new parent
 	 */
 	public MoveNotificationMessageFactory(String sourceFileName, String destFileName, PublicKey oldParent,
-			PublicKey newParent, Set<String> users) {
-		super(users);
+			PublicKey newParent) {
 		this.sourceFileName = sourceFileName;
 		this.destFileName = destFileName;
 		this.oldParent = oldParent;
