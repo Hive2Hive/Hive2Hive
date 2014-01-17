@@ -50,7 +50,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, chunkKey.getPrivate());
 				chunkBuffer.add((Chunk) decrypted);
 				writeBufferToDisk();
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
+			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException
 					| IllegalArgumentException e) {
 				getProcess().stop("Could not decrypt file chunk. Reason: " + e.getMessage());

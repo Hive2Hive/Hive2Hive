@@ -194,7 +194,7 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testConcurrentModificationAnlysis() {
+	public void testConcurrentModificationAnlysis() throws IOException {
 		String locationKey = "a location key";
 		String contentKey = "content key";
 

@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.delete;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -72,7 +73,7 @@ public class DeleteUpdateParentMetaStep extends BasePutProcessStep {
 			encrypted.generateVersionKey();
 			put(key2String(parentMeta.getId()), H2HConstants.META_DOCUMENT, encrypted, parentProtectionKeys);
 			getProcess().setNextStep(null); // next step is null, process is done
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Parent meta folder could not be encrypted.");
 		} catch (PutFailedException e) {

@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.register;
 
+import java.io.IOException;
+
 import javax.crypto.SecretKey;
 
 import org.apache.log4j.Logger;
@@ -49,7 +51,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile,
 					userProfile.getProtectionKeys());
 			getProcess().setNextStep(nextStep);
-		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+		} catch (IOException | DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().stop("User profile could not be encrypted. Reason: " + e.getMessage());
 		} catch (PutFailedException e) {

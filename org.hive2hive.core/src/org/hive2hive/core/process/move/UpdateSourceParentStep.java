@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.move;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -72,7 +73,7 @@ public class UpdateSourceParentStep extends BasePutProcessStep {
 			encrypted.generateVersionKey();
 			put(key2String(parent.getId()), H2HConstants.META_DOCUMENT, encrypted, sourceParentProtectionKeys);
 			getProcess().setNextStep(nextStep);
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta folder of source parent could not be encrypted.");
 		} catch (PutFailedException e) {

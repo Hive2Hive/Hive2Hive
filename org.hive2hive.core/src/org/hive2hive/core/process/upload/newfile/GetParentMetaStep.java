@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -108,7 +109,7 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 				decrypted.setBasedOnKey(content.getBasedOnKey());
 				context.setMetaDocument((MetaDocument) decrypted);
 				logger.debug("Successfully decrypted meta document");
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
+			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException
 					| IllegalArgumentException e) {
 				logger.error("Cannot decrypt the meta document.", e);

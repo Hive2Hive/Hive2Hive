@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -276,7 +277,7 @@ public class UserProfileManager {
 						encryptedUserProfile, entry.getUserProfile().getProtectionKeys());
 				if (!success)
 					entry.setPutError(new PutFailedException("Put failed."));
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
 			} finally {

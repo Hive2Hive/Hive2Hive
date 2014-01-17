@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.notify.cleanup;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Set;
 
@@ -43,7 +44,12 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 		}
 
 		locations.setBasedOnKey(locations.getVersionKey());
-		locations.generateVersionKey();
+		
+		try {
+			locations.generateVersionKey();
+		} catch (IOException e) {
+			getProcess().stop(e);
+		}
 
 		try {
 			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);

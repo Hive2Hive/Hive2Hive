@@ -32,9 +32,10 @@ public final class H2HEncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalStateException
 	 * @throws DataLengthException
+	 * @throws IOException 
 	 */
 	public static EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException, IOException {
 		byte[] serialized = EncryptionUtil.serializeObject(content);
 		byte[] initVector = EncryptionUtil.generateIV();
 		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector);
@@ -55,9 +56,11 @@ public final class H2HEncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalStateException
 	 * @throws DataLengthException
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
 	public static NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey,
 				content.getInitVector());
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
@@ -77,10 +80,11 @@ public final class H2HEncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
+	 * @throws IOException 
 	 */
 	public static HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey)
 			throws DataLengthException, InvalidKeyException, IllegalStateException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
 		byte[] serialized = EncryptionUtil.serializeObject(content);
 
 		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey,
@@ -101,10 +105,12 @@ public final class H2HEncryptionUtil {
 	 * @throws BadPaddingException
 	 * @throws IllegalStateException
 	 * @throws InvalidCipherTextException
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
 	public static NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
 			throws InvalidKeyException, DataLengthException, IllegalBlockSizeException, BadPaddingException,
-			IllegalStateException, InvalidCipherTextException {
+			IllegalStateException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
 	}

@@ -1,5 +1,7 @@
 package org.hive2hive.core.test.network.data;
 
+import java.io.IOException;
+
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FileTreeNode;
@@ -52,7 +54,7 @@ public class UserProfileManagerExceptionHandlingTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutException() throws GetFailedException {
+	public void testPutException() throws GetFailedException, IOException {
 		ProcessTestUtil.register(userCredentials, client);
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 		UserProfile userProfile = profileManager.getUserProfile(-1, true);

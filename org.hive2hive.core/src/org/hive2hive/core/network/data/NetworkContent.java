@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
@@ -66,8 +67,9 @@ public abstract class NetworkContent implements Serializable {
 	/**
 	 * Call this method in front of a put into the network if the data is a new version or will have other
 	 * versions.
+	 * @throws IOException 
 	 */
-	public void generateVersionKey() {
+	public void generateVersionKey() throws IOException {
 		// get the current time
 		long timestamp = new Date().getTime();
 		// get a MD5 hash of the object itself

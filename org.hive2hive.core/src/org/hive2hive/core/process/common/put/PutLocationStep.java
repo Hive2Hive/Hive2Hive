@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.common.put;
 
+import java.io.IOException;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
@@ -27,7 +28,11 @@ public class PutLocationStep extends BasePutProcessStep {
 	@Override
 	public void start() {
 		locations.setBasedOnKey(locations.getVersionKey());
-		locations.generateVersionKey();
+		try {
+			locations.generateVersionKey();
+		} catch (IOException e) {
+			getProcess().stop(e);
+		}
 		try {
 			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
 			getProcess().setNextStep(nextStep);

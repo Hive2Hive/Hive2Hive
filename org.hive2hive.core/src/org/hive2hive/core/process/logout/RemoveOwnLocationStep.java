@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.logout;
 
+import java.io.IOException;
 import java.security.KeyPair;
 
 import org.apache.log4j.Logger;
@@ -45,7 +46,11 @@ public class RemoveOwnLocationStep extends BasePutProcessStep {
 			// remove this peer from the locations list and put it
 			loadedLocations.removePeerAddress(getNetworkManager().getPeerAddress());
 			loadedLocations.setBasedOnKey(loadedLocations.getVersionKey());
-			loadedLocations.generateVersionKey();
+			try {
+				loadedLocations.generateVersionKey();
+			} catch (IOException e) {
+				getProcess().stop(e);
+			}
 			try {
 				put(userId, H2HConstants.USER_LOCATIONS, loadedLocations, protectionKeys);
 				getProcess().setNextStep(null); // terminates process after this step

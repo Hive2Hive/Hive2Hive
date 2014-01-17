@@ -1,5 +1,7 @@
 package org.hive2hive.core.process.login;
 
+import java.io.IOException;
+
 import javax.crypto.SecretKey;
 
 import org.apache.log4j.Logger;
@@ -58,7 +60,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 				userProfile.setVersionKey(content.getVersionKey());
 				userProfile.setBasedOnKey(content.getBasedOnKey());
 				context.setUserProfile(userProfile);
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+			} catch (IOException | ClassNotFoundException | DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
 			}
 		}

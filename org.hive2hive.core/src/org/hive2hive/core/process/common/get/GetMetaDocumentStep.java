@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.common.get;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -60,7 +61,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 				logger.debug(String.format("Got and decrypted the meta document for file '%s'.",
 						((MetaDocument) decrypted).getName()));
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
+			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException
 					| IllegalArgumentException e) {
 				context.setMetaDocument(null);

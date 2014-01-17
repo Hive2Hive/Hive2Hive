@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.messages;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -75,7 +76,12 @@ public class MessageReplyHandler implements ObjectDataReply {
 		}
 
 		// deserialize decrypted message
-		Object message = EncryptionUtil.deserializeObject(decryptedMessage);
+		Object message = null;
+		try {
+			message = EncryptionUtil.deserializeObject(decryptedMessage);
+		} catch (IOException | ClassNotFoundException e){
+			logger.error(String.format("Message could not be deserialized. reason = '%s'", e.getMessage()));
+		}
 
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
@@ -92,7 +98,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 					senderId, networkManager.getNodeId()));
 					return AcceptanceReply.FAILURE_SIGNATURE;					
 				}
-			} catch (GetFailedException | InvalidKeyException | SignatureException e) {
+			} catch (GetFailedException | InvalidKeyException | SignatureException | IOException e) {
 				logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'",
 						senderId, e.getMessage()));
 				return AcceptanceReply.FAILURE_SIGNATURE;

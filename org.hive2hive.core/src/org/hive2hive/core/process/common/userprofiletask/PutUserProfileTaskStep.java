@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.common.userprofiletask;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -65,7 +66,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			} else {
 				getProcess().stop("Put of user profile task failed.");
 			}
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");
 		}

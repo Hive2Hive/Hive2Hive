@@ -99,7 +99,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetAVersion() {
+	public void testGetAVersion() throws IOException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();

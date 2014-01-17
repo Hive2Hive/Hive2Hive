@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.upload.newfile;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -50,7 +51,7 @@ public class UpdateParentMetaStep extends BasePutProcessStep {
 			encrypted.generateVersionKey();
 			put(key2String(parentMeta.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
 			getProcess().setNextStep(new UpdateUserProfileStep());
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");
 		} catch (PutFailedException e) {

@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.messages;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -208,7 +209,7 @@ public final class MessageManager {
 
 			return encryptedMessage;
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
+				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | IOException e) {
 			logger.error("An exception occured while encrypting the message. The message will not be sent.");
 			return null;
 		}

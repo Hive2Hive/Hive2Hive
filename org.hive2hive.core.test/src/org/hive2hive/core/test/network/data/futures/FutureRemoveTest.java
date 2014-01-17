@@ -3,6 +3,7 @@ package org.hive2hive.core.test.network.data.futures;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -58,7 +59,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveSingleVersion() {
+	public void testRemoveSingleVersion() throws IOException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -81,7 +82,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveMultipleVersions() {
+	public void testRemoveMultipleVersions() throws IOException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
