@@ -82,7 +82,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public abstract void join();
 	
-	protected abstract void doExecute();
+	protected abstract void doExecute() throws InvalidProcessStateException;
 	
 	protected abstract void doPause();
 	

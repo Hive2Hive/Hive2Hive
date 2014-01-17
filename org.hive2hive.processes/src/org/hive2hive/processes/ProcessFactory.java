@@ -17,6 +17,7 @@ public final class ProcessFactory {
 	private ProcessFactory() {
 	}
 	
+	// TODO the creation of this process can later on be moved into a factory method of a RegisterProcess class
 	public IProcessComponent createRegisterProcess() {
 		
 		SequentialProcess registerProcess = new SequentialProcess();
