@@ -103,7 +103,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 				testData.setBasedOnKey(last.getVersionKey());
 			last = testData;
 			versions.add(testData);
-			if (H2HConstants.MAX_VERSIONS_HISTORY - 1 <= i)
+			if (i >= numVersions - H2HConstants.MAX_VERSIONS_HISTORY - 1)
 				newerVersions.add(testData);
 			synchronized (this) {
 				Thread.sleep(10);
@@ -120,7 +120,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 
 		FutureDigest futureDigest = node.getDataManager().getDigest(lKey)
 				.from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).ascending().start();
 		futureDigest.awaitUninterruptibly();
 
 		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().getKeyDigest().size());
