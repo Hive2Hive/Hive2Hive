@@ -5,14 +5,12 @@ import java.util.UUID;
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.processes.framework.interfaces.IProcessContext;
 
 public abstract class ProcessComponent implements IProcessComponent {
 
 	private final String id;
 	private double progress;
 	private ProcessState state;
-	protected IProcessContext context;
 	
 	private boolean isRollbacking;
 	
@@ -46,12 +44,13 @@ public abstract class ProcessComponent implements IProcessComponent {
 		if (state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
-		if (isRollbacking){
+		if (!isRollbacking){
 			state = ProcessState.RUNNING;
+			doResumeExecution();
 		} else {
 			state = ProcessState.ROLLBACKING;
+			doResumeRollback();
 		}
-		doResume(); // TODO ensure this hook method takes correct resume (running or rollback)
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.ROLLBACKING;
-		isRollbacking = true;
+		
 		doRollback(reason);
 	}
 
@@ -86,7 +85,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 	
 	protected abstract void doPause();
 	
-	protected abstract void doResume();
+	protected abstract void doResumeExecution() throws InvalidProcessStateException;
+	
+	protected abstract void doResumeRollback();
 	
 	protected abstract void doRollback(RollbackReason reason);
 	
