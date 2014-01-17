@@ -272,8 +272,10 @@ public class UserProfileManager {
 
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
-				dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
+				boolean success = dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
 						encryptedUserProfile, entry.getUserProfile().getProtectionKeys());
+				if (!success)
+					entry.setPutError(new PutFailedException("Put failed."));
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
