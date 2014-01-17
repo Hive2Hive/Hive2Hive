@@ -1,5 +1,6 @@
 package org.hive2hive.processes.framework.concretes;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -53,12 +54,17 @@ public class SequentialProcess extends Process {
 	}
 
 	@Override
-	public void add(ProcessComponent component) {
+	protected void doAdd(ProcessComponent component) {
 		components.add(component);
 	}
 
 	@Override
-	public void remove(ProcessComponent component) {
+	protected void doRemove(ProcessComponent component) {
 		components.remove(component);
+	}
+
+	@Override
+	public Collection<ProcessComponent> getComponents() {
+		return components;
 	}
 }

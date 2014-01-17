@@ -14,6 +14,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 	
 	private boolean isRollbacking;
 	
+	private Process parent;
+	
 	protected ProcessComponent() {
 		this.id = generateID();
 		this.progress = 0.0;
@@ -76,6 +78,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public ProcessState getState() {
 		return state;
+	}
+	
+	public Process getParent() {
+		return parent;
+	}
+	
+	public void setParent(Process parent) {
+		this.parent = parent;
 	}
 
 	@Override
