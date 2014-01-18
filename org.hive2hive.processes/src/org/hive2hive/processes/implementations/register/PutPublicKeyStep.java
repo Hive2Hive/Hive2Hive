@@ -3,6 +3,7 @@ package org.hive2hive.processes.implementations.register;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.BasePutProcessStep;
@@ -10,8 +11,11 @@ import org.hive2hive.processes.implementations.common.BasePutProcessStep;
 public class PutPublicKeyStep extends BasePutProcessStep {
 
 	private final UserProfile profile;
+	
+	private boolean isPutCompleted;
 
-	public PutPublicKeyStep(UserProfile profile) {
+	public PutPublicKeyStep(UserProfile profile, NetworkManager networkManager) {
+		super(networkManager);
 		this.profile = profile;
 	}
 
@@ -23,6 +27,11 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 
 		put(profile.getUserId(), H2HConstants.USER_PUBLIC_KEY, publicKey,
 				profile.getProtectionKeys());
+		
+		// wait for PUT to complete
+		while (isPutCompleted == false) {
+			// TODO optimize busy wait (latch)
+		}
 	}
 
 	@Override
@@ -51,8 +60,7 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 
 	@Override
 	public void onPutSuccess() {
-		// TODO Auto-generated method stub
-
+		isPutCompleted = true;
 	}
 
 	@Override

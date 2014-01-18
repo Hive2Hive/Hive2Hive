@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -18,9 +19,12 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	private final UserCredentials credentials;
 	private final UserProfile userProfile;
+	
+	private boolean isPutCompleted;
 
 	public PutUserProfileStep(UserCredentials credentials,
-			UserProfile userProfile) {
+			UserProfile userProfile, NetworkManager networkManager) {
+		super(networkManager);
 		this.credentials = credentials;
 		this.userProfile = userProfile;
 	}
@@ -47,6 +51,12 @@ public class PutUserProfileStep extends BasePutProcessStep {
 		// put encrypted user profile
 		put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
 				encryptedProfile, userProfile.getProtectionKeys());
+
+		// wait for PUT to complete
+		while (isPutCompleted == false) {
+			// TODO optimize busy wait (latch)
+		}
+
 	}
 
 	@Override
@@ -75,8 +85,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	@Override
 	public void onPutSuccess() {
-		// TODO Auto-generated method stub
-
+		isPutCompleted = true;
 	}
 
 	@Override

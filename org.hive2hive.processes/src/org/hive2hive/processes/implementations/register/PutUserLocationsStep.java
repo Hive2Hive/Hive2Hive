@@ -4,6 +4,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.BasePutProcessStep;
@@ -13,18 +14,28 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 	private final Locations locations;
 	private final KeyPair protectionKeys;
 
-	public PutUserLocationsStep(Locations locations, KeyPair protectionKeys) {
+	private boolean isPutCompleted;
+
+	public PutUserLocationsStep(Locations locations, KeyPair protectionKeys,
+			NetworkManager networkManager) {
+		super(networkManager);
 		this.protectionKeys = protectionKeys;
 		this.locations = locations;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		
+
 		locations.setBasedOnKey(locations.getVersionKey());
 		locations.generateVersionKey();
-		
-		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
+
+		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations,
+				protectionKeys);
+
+		// wait for PUT to complete
+		while (isPutCompleted == false) {
+			// TODO optimize busy wait (latch)
+		}
 	}
 
 	@Override
@@ -53,26 +64,25 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 
 	@Override
 	public void onPutSuccess() {
-		// TODO Auto-generated method stub
-		
+		isPutCompleted = true;
 	}
 
 	@Override
 	public void onPutFailure() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onRemoveSuccess() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onRemoveFailure() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

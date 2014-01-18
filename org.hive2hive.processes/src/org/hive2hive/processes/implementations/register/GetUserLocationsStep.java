@@ -2,6 +2,7 @@ package org.hive2hive.processes.implementations.register;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -12,9 +13,11 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 	private final String userId;
 	private final IProvideLocations context;
 	
-	private NetworkContent loadedLocations;
+	private boolean isPutCompleted;
+	private NetworkContent loadedContent;
 	
-	public GetUserLocationsStep(String userId, IProvideLocations context) {
+	public GetUserLocationsStep(String userId, IProvideLocations context, NetworkManager networkManager) {
+		super (networkManager);
 		this.userId = userId;
 		this.context = context;
 	}
@@ -24,24 +27,23 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 
 		get(userId, H2HConstants.USER_LOCATIONS);
 		
-		// wait (blocking) for result
-		while(loadedLocations == null){
+		// wait for GET to complete
+		while(isPutCompleted == false) {
 			// TODO optimize busy wait (latch)
 		}
 		
-		// TODO check type
-		if (loadedLocations instanceof Locations) {
-			context.provideLocations((Locations) loadedLocations);
+		if (loadedContent == null) {
+			context.provideLocations(null);
 		} else {
-			// cancel process
-			cancel(new RollbackReason(this, "Loaded wrong type."));
+			context.provideLocations((Locations) loadedContent);
 		}
 		
 	}
 
 	@Override
 	public void handleGetResult(NetworkContent content) {
-		this.loadedLocations = content;
+		isPutCompleted = true;
+		this.loadedContent = content;
 	}
 
 	@Override

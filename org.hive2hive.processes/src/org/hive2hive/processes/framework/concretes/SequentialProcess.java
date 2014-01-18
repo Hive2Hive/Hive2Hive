@@ -1,7 +1,6 @@
 package org.hive2hive.processes.framework.concretes;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.hive2hive.processes.framework.RollbackReason;
@@ -12,9 +11,8 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 public class SequentialProcess extends Process {
 
 	LinkedList<ProcessComponent> components = new LinkedList<ProcessComponent>();
-	Iterator<ProcessComponent> iterator = components.iterator();
 
-	private boolean isPaused; // TODO might be moved up
+	private int executionIndex = 0;
 
 	@Override
 	public void join() {
@@ -24,27 +22,26 @@ public class SequentialProcess extends Process {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
-		while (iterator.hasNext() && !isPaused) {
-			iterator.next().start();
+				
+		for (int i = executionIndex; i < components.size(); i++, executionIndex++) {
+			ProcessComponent next = components.get(i);
+			next.start();
 		}
 	}
 
 	@Override
 	protected void doPause() {
-		isPaused = true;
+		// TODO Auto-generated method stub
 	}
 	
 	@Override
 	protected void doResumeExecution() throws InvalidProcessStateException {
-		isPaused = false;
-		doExecute();
+		// TODO Auto-generated method stub
 	}
 	
 	@Override
 	protected void doResumeRollback() {
-		isPaused = false;
-		doRollback(new RollbackReason(this, "Rollback resumed."));
+		// TODO Auto-generated method stub
 	}
 
 	@Override
