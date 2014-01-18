@@ -1,11 +1,14 @@
 package org.hive2hive.processes.framework.abstracts;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
 public abstract class ProcessComponent implements IProcessComponent {
 
@@ -16,6 +19,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private boolean isRollbacking;
 
 	private Process parent;
+	
+	private final List<IProcessComponentListener> listener;
 
 	protected ProcessComponent() {
 		this.id = generateID();
@@ -23,6 +28,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 		// TODO might be set somewhere else based on initialization work of
 		// concrete classes
 		this.state = ProcessState.READY;
+		
+		listener = new ArrayList<IProcessComponentListener>();
 	}
 
 	@Override
@@ -33,6 +40,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
 		doExecute();
+		notifySucceeded(); // TODO might not be at the right place!
 	}
 
 	@Override
@@ -67,6 +75,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		state = ProcessState.ROLLBACKING;
 
 		doRollback(reason);
+		notifyFailed(); // TODO might not be at the right place!
 	}
 
 	@Override
@@ -106,6 +115,18 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	protected abstract void doRollback(RollbackReason reason);
 
+	public void attachListener(IProcessComponentListener listener) {
+		this.listener.add(listener);
+	}
+	
+	public void detachListener(IProcessComponentListener listener) {
+		this.listener.remove(listener);
+	}
+	
+	public List<IProcessComponentListener> getListener() {
+		return listener; // TODO copy before return?
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
@@ -123,6 +144,26 @@ public abstract class ProcessComponent implements IProcessComponent {
 	public int hashCode() {
 		int hash = 7;
 		return 31 * hash + id.hashCode();
+	}
+
+	private void notifySucceeded() {
+		for (IProcessComponentListener listener : this.listener) {
+			listener.onSucceeded();
+		}
+		notifyFinished();
+	}
+
+	private void notifyFailed() {
+		for (IProcessComponentListener listener : this.listener) {
+			listener.onFailed();
+		}
+		notifyFinished();
+	}
+
+	private void notifyFinished() {
+		for (IProcessComponentListener listener : this.listener) {
+			listener.onFinished();
+		}
 	}
 
 	private static String generateID() {
