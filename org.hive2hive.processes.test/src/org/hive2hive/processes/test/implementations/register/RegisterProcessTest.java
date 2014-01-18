@@ -8,6 +8,7 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.processes.framework.concretes.ProcessListener;
+import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.register.RegisterProcess;
 import org.hive2hive.processes.implementations.register.RegisterProcessContext;
@@ -44,10 +45,12 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		ProcessListener listener = new ProcessListener();
 		
 		RegisterProcess process = new RegisterProcess(credentials, context);
-		process.attachListener(listener);
-		process.start();
+		AsyncComponent asyncProcess = new AsyncComponent(process);
 		
-		H2HWaiter waiter = new H2HWaiter(20);
+		asyncProcess.attachListener(listener);
+		asyncProcess.start();
+		
+		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());

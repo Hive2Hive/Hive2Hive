@@ -27,6 +27,7 @@ public class SequentialProcess extends Process {
 			ProcessComponent next = components.get(i);
 			next.start();
 		}
+		notifySucceeded();
 	}
 
 	@Override

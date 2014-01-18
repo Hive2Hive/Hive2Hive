@@ -40,7 +40,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
 		doExecute();
-		notifySucceeded(); // TODO might not be at the right place!
 	}
 
 	@Override
@@ -75,7 +74,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 		state = ProcessState.ROLLBACKING;
 
 		doRollback(reason);
-		notifyFailed(); // TODO might not be at the right place!
 	}
 
 	@Override
@@ -146,14 +144,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 		return 31 * hash + id.hashCode();
 	}
 
-	private void notifySucceeded() {
+	protected void notifySucceeded() {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onSucceeded();
 		}
 		notifyFinished();
 	}
 
-	private void notifyFailed() {
+	protected void notifyFailed() {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFailed();
 		}
