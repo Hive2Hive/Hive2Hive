@@ -4,5 +4,6 @@
 	<classpathentry kind="src" path="res"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="src" path="/org.hive2hive.core"/>
+	<classpathentry kind="src" path="/tomp2p-core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

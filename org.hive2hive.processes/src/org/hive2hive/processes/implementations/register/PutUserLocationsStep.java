@@ -1,15 +1,30 @@
 package org.hive2hive.processes.implementations.register;
 
-import org.hive2hive.processes.framework.RollbackReason;
-import org.hive2hive.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import java.security.KeyPair;
 
-public class PutUserLocationsStep extends ProcessStep {
+import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.Locations;
+import org.hive2hive.processes.framework.RollbackReason;
+import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processes.implementations.common.BasePutProcessStep;
+
+public class PutUserLocationsStep extends BasePutProcessStep {
+
+	private final Locations locations;
+	private final KeyPair protectionKeys;
+
+	public PutUserLocationsStep(Locations locations, KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+		this.locations = locations;
+	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		// TODO Auto-generated method stub
-
+		
+		locations.setBasedOnKey(locations.getVersionKey());
+		locations.generateVersionKey();
+		
+		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
 	}
 
 	@Override
@@ -34,6 +49,30 @@ public class PutUserLocationsStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void onPutSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onPutFailure() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onRemoveSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onRemoveFailure() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
