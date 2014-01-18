@@ -1,7 +1,7 @@
 package org.hive2hive.processes.implementations.register;
 
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.processes.framework.abstracts.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
 public class PutPublicKeyStep extends ProcessStep {

@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.Process;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.processes.framework.abstracts.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
 public class SequentialProcess extends Process {
@@ -50,7 +50,7 @@ public class SequentialProcess extends Process {
 	@Override
 	protected void doRollback(RollbackReason reason) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
@@ -67,4 +67,5 @@ public class SequentialProcess extends Process {
 	public Collection<ProcessComponent> getComponents() {
 		return components;
 	}
+	
 }

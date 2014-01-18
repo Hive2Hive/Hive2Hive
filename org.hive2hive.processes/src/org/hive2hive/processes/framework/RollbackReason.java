@@ -1,4 +1,6 @@
-package org.hive2hive.processes.framework.abstracts;
+package org.hive2hive.processes.framework;
+
+import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 
 public class RollbackReason {
 	

@@ -3,7 +3,7 @@ package org.hive2hive.processes.implementations.register;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.processes.framework.abstracts.RollbackReason;
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.BaseGetProcessStep;
 

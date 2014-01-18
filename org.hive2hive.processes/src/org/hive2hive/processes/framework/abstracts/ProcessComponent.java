@@ -3,6 +3,7 @@ package org.hive2hive.processes.framework.abstracts;
 import java.util.UUID;
 
 import org.hive2hive.processes.framework.ProcessState;
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 
