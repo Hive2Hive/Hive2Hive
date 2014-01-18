@@ -9,17 +9,20 @@ import org.hive2hive.processes.implementations.common.BaseGetProcessStep;
 
 public class GetUserLocationsStep extends BaseGetProcessStep {
 
+	private final String userId;
+	private final IProvideLocations context;
+	
 	private NetworkContent loadedLocations;
-	private IProvideLocations context;
 	
 	public GetUserLocationsStep(String userId, IProvideLocations context) {
-		super(userId, H2HConstants.USER_LOCATIONS);
+		this.userId = userId;
 		this.context = context;
 	}
 	
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		super.doExecute();
+
+		get(userId, H2HConstants.USER_LOCATIONS);
 		
 		// wait (blocking) for result
 		while(loadedLocations == null){
@@ -57,6 +60,11 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 	protected void doResumeRollback() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void doRollback(RollbackReason reason) {
+		// ignore: only a get was done
 	}
 
 }
