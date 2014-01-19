@@ -14,8 +14,6 @@ public class RollbackReason {
 	public RollbackReason(ProcessComponent component, String message) {
 		this.component = component;
 		this.message = message;
-		
-		logger.error(String.format("%s: %s", component.getClass().getName(), message));
 	}
 
 	public ProcessComponent getComponent() {

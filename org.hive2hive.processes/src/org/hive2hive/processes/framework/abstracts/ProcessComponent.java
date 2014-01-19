@@ -50,7 +50,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public final void pause() throws InvalidProcessStateException {
-		if (state != ProcessState.RUNNING || state != ProcessState.ROLLBACKING) {
+		if (state != ProcessState.RUNNING && state != ProcessState.ROLLBACKING) {
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.PAUSED;
@@ -74,11 +74,12 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public final void cancel(RollbackReason reason)
 			throws InvalidProcessStateException {
-		if (state != ProcessState.RUNNING || state != ProcessState.PAUSED) {
+		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.ROLLBACKING;
 
+//		logger.error(String.format("%s: %s", this.getClass().getSimpleName(), reason.getMessage()));
 		doRollback(reason);
 	}
 
