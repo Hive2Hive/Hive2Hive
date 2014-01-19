@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -12,6 +14,8 @@ import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
 public abstract class ProcessComponent implements IProcessComponent {
 
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ProcessComponent.class);
+	
 	private final String id;
 	private double progress;
 	private ProcessState state;
@@ -39,6 +43,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
+		
+		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 		doExecute();
 	}
 

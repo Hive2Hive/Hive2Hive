@@ -50,7 +50,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		asyncProcess.attachListener(listener);
 		asyncProcess.start();
 		
-		H2HWaiter waiter = new H2HWaiter(30);
+		H2HWaiter waiter = new H2HWaiter(1000);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());

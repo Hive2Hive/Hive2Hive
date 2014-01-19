@@ -6,6 +6,7 @@ import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processes.implementations.ProcessUtil;
 import org.hive2hive.processes.implementations.common.BasePutProcessStep;
 
 public class PutPublicKeyStep extends BasePutProcessStep {
@@ -30,7 +31,7 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 		
 		// wait for PUT to complete
 		while (isPutCompleted == false) {
-			// TODO optimize busy wait (latch)
+			ProcessUtil.wait(this);
 		}
 	}
 

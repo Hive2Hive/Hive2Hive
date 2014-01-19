@@ -29,7 +29,11 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 		
 		// wait for GET to complete
 		while(isPutCompleted == false) {
-			// TODO optimize busy wait (latch)
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				cancel(new RollbackReason(this, e.getMessage()));
+			}
 		}
 		
 		if (loadedContent == null) {

@@ -26,7 +26,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
@@ -60,7 +60,12 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 
 	@Override
 	public ProcessComponent call() throws Exception {
-		
+
+		try {
+			Thread.currentThread().checkAccess();
+			Thread.currentThread().setName("async-process");
+		} catch (SecurityException e) {};
+
 		decoratedComponent.start();
 		return decoratedComponent;
 	}
