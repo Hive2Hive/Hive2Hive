@@ -7,9 +7,8 @@ import org.hive2hive.processes.framework.concretes.SequentialProcess;
 
 public final class RegisterProcess extends SequentialProcess {
 
-	public RegisterProcess(UserCredentials credentials, RegisterProcessContext context) {
+	public RegisterProcess(UserProfile profile, UserCredentials credentials, RegisterProcessContext context) {
 		
-		UserProfile profile = new UserProfile(credentials.getUserId());
 		Locations locations = new Locations(profile.getUserId());
 		
 		add(new GetUserLocationsStep(profile.getUserId(), context, context.getNetworkManager()));
