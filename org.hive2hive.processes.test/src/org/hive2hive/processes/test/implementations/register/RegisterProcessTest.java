@@ -37,7 +37,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 	public void testRegisterProcessSuccess() throws InvalidProcessStateException {
 		
 		NetworkManager client = network.get(0);
-		NetworkManager otherClient = network.get(1);
+//		NetworkManager otherClient = network.get(1);
 		
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		

@@ -145,6 +145,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	protected void notifySucceeded() {
+		
+		state = ProcessState.SUCCEEDED;
+		
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onSucceeded();
 		}
@@ -152,6 +155,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	protected void notifyFailed() {
+		
+		state = ProcessState.FAILED;
+		
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFailed();
 		}
@@ -159,6 +165,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	private void notifyFinished() {
+		
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFinished();
 		}
