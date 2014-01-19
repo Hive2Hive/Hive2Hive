@@ -79,4 +79,10 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 		return new TestUserProfileTask();
 	}
 
+	@Override
+	public BaseDirectMessage createHintNotificationMessage(PeerAddress receiver, String userId) {
+		// trick a little bit: send the same message to other users. We are able to control the arrival.
+		return createPrivateNotificationMessage(receiver);
+	}
+
 }

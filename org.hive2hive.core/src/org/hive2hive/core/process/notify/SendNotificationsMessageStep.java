@@ -49,6 +49,12 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 		List<PeerAddress> ownPeers = locations.get(context.getOwnUserId());
 		logger.debug("Notifying " + ownPeers.size() + " other peers of myself");
 		for (PeerAddress peerAddress : ownPeers) {
+			if (peerAddress.equals(getNetworkManager().getPeerAddress())) {
+				// don't send myself
+				logger.trace("Skipping to send a message to myself");
+				continue;
+			}
+
 			try {
 				sendDirect(messageFactory.createPrivateNotificationMessage(peerAddress), ownPublicKey);
 			} catch (SendFailedException e) {
