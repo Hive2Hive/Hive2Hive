@@ -18,7 +18,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  * Use this future adapter when sending a {@link BaseDirectMessage}. Attach this listener to the future which
  * gets
  * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling. Use the
- * {link {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
+ * {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
  * not).</br></br>
  * <b>Failure Handling</b></br>
  * Sending a direct message can fail when the future object failed, when the future object contains wrong data
@@ -28,9 +28,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  * {@link BaseDirectMessage#handleSendingFailure(AcceptanceReply)} of the sent message recommends to re-send.
  * Depending on the {@link BaseDirectMessage#needsRedirectedSend()} flag a possible fall back is to use the
  * routing mechanism of {@link MessageManager#send(BaseMessage)}. For that another adapter
- * (see {@link FutureDirectListener}) is attached. Because all re-sends are also asynchronous the future
- * listener attaches himself to the new future objects (also in case of switching on the fall back mechanism)
- * so that the adapter can finally notify his/her listener about a success or failure.
+ * (see {@link FutureDirectListener}) is attached.
  * 
  * @author Seppi, Nico
  */
@@ -42,7 +40,14 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	private final PublicKey receiverPublicKey;
 	private final NetworkManager networkManager;
 	private final CountDownLatch latch;
-	private boolean success = false;
+	private DeliveryState state;
+
+	private enum DeliveryState {
+		SUCCESS,
+		ERROR,
+		RESEND_DIRECT,
+		RESEND_ROUTED
+	}
 
 	/**
 	 * Constructor for a future adapter.
@@ -74,7 +79,24 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			logger.error("Could not wait until the message is sent successfully");
 		}
 
-		return success;
+		switch (state) {
+			case SUCCESS:
+				// successfully delivered the message
+				return true;
+			case ERROR:
+				// failed to deliver message. Resend not recommended
+				return false;
+			case RESEND_DIRECT:
+				// resend direct is recommended
+				return networkManager.sendDirect(message, receiverPublicKey);
+			case RESEND_ROUTED:
+				// resend (this time routed) is recommended
+				return networkManager.send(message, receiverPublicKey);
+			default:
+				// invalid state
+				logger.error("The sending procedure has not finished, but the lock has already been released");
+				return false;
+		}
 	}
 
 	@Override
@@ -82,14 +104,14 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 		AcceptanceReply reply = extractAcceptanceReply(future);
 		if (reply == AcceptanceReply.OK) {
 			// notify the listener about the success of sending the message
-			success = true;
+			state = DeliveryState.SUCCESS;
 			latch.countDown();
 		} else {
 			// check if a direct re-send is necessary / wished
 			boolean directResending = message.handleSendingFailure(reply);
 			if (directResending) {
 				// re-send directly the message
-				success = networkManager.sendDirect(message, receiverPublicKey);
+				state = DeliveryState.RESEND_DIRECT;
 				latch.countDown();
 			} else {
 				// check if the routed sending fall back is allowed
@@ -98,11 +120,11 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '%s' target address = '%s'",
 									message.getTargetKey(), message.getTargetAddress()));
 					// re-send the message (routed)
-					success = networkManager.send(message, receiverPublicKey);
+					state = DeliveryState.RESEND_ROUTED;
 					latch.countDown();
 				} else {
 					// notify the listener about the fail of sending the message
-					success = false;
+					state = DeliveryState.ERROR;
 					latch.countDown();
 				}
 			}

@@ -41,4 +41,9 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 		if (!success)
 			throw new SendFailedException();
 	}
+
+	@Override
+	protected void send(BaseMessage message, PublicKey receiverPublicKey) throws SendFailedException {
+		throw new UnsupportedOperationException("Use 'sendDirect' when inheriting from this class");
+	}
 }

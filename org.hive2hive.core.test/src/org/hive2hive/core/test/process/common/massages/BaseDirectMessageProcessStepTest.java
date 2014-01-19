@@ -163,10 +163,12 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			public void start() {
 				try {
-					send(message, nodeB.getPublicKey());
+					sendDirect(message, nodeB.getPublicKey());
 					getProcess().setNextStep(null);
-				} catch (SendFailedException e) {
 					Assert.fail();
+				} catch (SendFailedException e) {
+					// expected
+					getProcess().stop(e);
 				}
 			}
 		};
@@ -234,9 +236,10 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			public void start() {
 				try {
-					send(message, nodeB.getPublicKey());
+					sendDirect(message, nodeB.getPublicKey());
+					getProcess().setNextStep(null);
 				} catch (SendFailedException e) {
-					Assert.fail();
+					getProcess().stop(e);
 				}
 			}
 		};
