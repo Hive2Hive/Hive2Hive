@@ -49,6 +49,8 @@ public class SequentialProcess extends Process {
 	protected void doRollback(RollbackReason reason) {
 		// TODO Auto-generated method stub
 		
+		
+		
 	}
 
 	@Override

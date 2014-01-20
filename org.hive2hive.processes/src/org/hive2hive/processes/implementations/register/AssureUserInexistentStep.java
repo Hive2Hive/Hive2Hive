@@ -39,8 +39,14 @@ public class AssureUserInexistentStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) {
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+		
 		// ignore, step does nothing
+		
+		// parent
+		if (getParent() != null) {
+			getParent().cancel(reason);
+		}
 	}
 
 }

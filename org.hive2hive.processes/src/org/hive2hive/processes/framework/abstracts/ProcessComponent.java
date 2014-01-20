@@ -29,8 +29,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 	protected ProcessComponent() {
 		this.id = generateID();
 		this.progress = 0.0;
-		// TODO might be set somewhere else based on initialization work of
-		// concrete classes
 		this.state = ProcessState.READY;
 		
 		listener = new ArrayList<IProcessComponentListener>();
@@ -46,6 +44,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 		
 		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 		doExecute();
+		
+		// TODO set SUCCEEDED state at appropriate place
 	}
 
 	@Override
@@ -81,6 +81,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 //		logger.error(String.format("%s: %s", this.getClass().getSimpleName(), reason.getMessage()));
 		doRollback(reason);
+		
+		// TODO set FAILED state at appropriate place
 	}
 
 	@Override
@@ -118,7 +120,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	protected abstract void doResumeRollback();
 
-	protected abstract void doRollback(RollbackReason reason);
+	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
