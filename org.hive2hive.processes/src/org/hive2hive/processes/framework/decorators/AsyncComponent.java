@@ -63,7 +63,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 
 		try {
 			Thread.currentThread().checkAccess();
-			Thread.currentThread().setName("async-process");
+			Thread.currentThread().setName(String.format("async-process %s ", decoratedComponent.getClass().getSimpleName()));
 		} catch (SecurityException e) {};
 
 		decoratedComponent.start();

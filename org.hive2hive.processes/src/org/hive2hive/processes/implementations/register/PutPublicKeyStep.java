@@ -5,6 +5,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.framework.ProcessUtil;
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.BasePutProcessStep;
 
@@ -13,6 +14,7 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 	private final UserProfile profile;
 	
 	private boolean isPutCompleted;
+	private boolean isPutFailed;
 
 	public PutPublicKeyStep(UserProfile profile, NetworkManager networkManager) {
 		super(networkManager);
@@ -32,6 +34,10 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 		while (isPutCompleted == false) {
 			ProcessUtil.wait(this);
 		}
+		
+		if (isPutFailed) {
+			cancel(new RollbackReason(this, "Put failed."));
+		}
 	}
 
 	@Override
@@ -41,8 +47,8 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 
 	@Override
 	public void onPutFailure() {
-		// TODO Auto-generated method stub
-
+		isPutCompleted = true;
+		isPutFailed = true;
 	}
 
 	@Override

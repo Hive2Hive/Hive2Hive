@@ -22,6 +22,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 	private final UserProfile userProfile;
 	
 	private boolean isPutCompleted;
+	private boolean isPutFailed;
 
 	public PutUserProfileStep(UserCredentials credentials,
 			UserProfile userProfile, NetworkManager networkManager) {
@@ -57,6 +58,10 @@ public class PutUserProfileStep extends BasePutProcessStep {
 		while (isPutCompleted == false) {
 			ProcessUtil.wait(this);
 		}
+		
+		if (isPutFailed) {
+			cancel(new RollbackReason(this, "Put failed."));
+		}
 
 	}
 
@@ -67,8 +72,8 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	@Override
 	public void onPutFailure() {
-		// TODO Auto-generated method stub
-
+		isPutCompleted = true;
+		isPutFailed = true;
 	}
 
 	@Override

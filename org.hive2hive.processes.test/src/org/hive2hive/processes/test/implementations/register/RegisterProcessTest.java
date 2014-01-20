@@ -20,15 +20,13 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.concretes.ProcessListener;
-import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.register.RegisterProcess;
-import org.hive2hive.processes.implementations.register.RegisterProcessContext;
+import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class RegisterProcessTest extends H2HJUnitTest {
@@ -60,7 +58,6 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	@Ignore
 	@Test
 	public void testRegisterProcessSuccess() throws InvalidProcessStateException, ClassNotFoundException,
 			IOException {
@@ -71,16 +68,10 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		UserProfile profile = new UserProfile(credentials.getUserId());
 
-		RegisterProcessContext context = new RegisterProcessContext(client);
-
-		RegisterProcess process = new RegisterProcess(profile, credentials, context);
-//		AsyncComponent asyncProcess = new AsyncComponent(process);
-
+		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, profile, client);
 		ProcessListener listener = new ProcessListener();
-//		asyncProcess.attachListener(listener);
-//		asyncProcess.start();
-		process.attachListener(listener);
-		process.start();
+		registerProcess.attachListener(listener);
+		registerProcess.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
@@ -134,16 +125,10 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		
 		assertTrue(putLocations.isSuccess());
 
-		RegisterProcessContext context = new RegisterProcessContext(client);
-
-		RegisterProcess process = new RegisterProcess(profile, credentials, context);
-//		AsyncComponent asyncProcess = new AsyncComponent(process);
-
+		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, profile, client);
 		ProcessListener listener = new ProcessListener();
-//		asyncProcess.attachListener(listener);
-//		asyncProcess.start();
-		process.attachListener(listener);
-		process.start();
+		registerProcess.attachListener(listener);
+		registerProcess.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {

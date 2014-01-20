@@ -11,4 +11,8 @@ public interface IProcessComponent extends IControllable {
 	public ProcessState getState();
 	
 	public void join();
+	
+	public void attachListener(IProcessComponentListener listener);
+	
+	public void detachListener(IProcessComponentListener listener);
 }
