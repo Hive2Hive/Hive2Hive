@@ -1,19 +1,20 @@
-package org.hive2hive.processes.implementations.register;
+package org.hive2hive.processes.implementations.common;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.processes.framework.RollbackReason;
+import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.common.BaseGetProcessStep;
+import org.hive2hive.processes.implementations.common.base.BaseGetProcessStep;
+import org.hive2hive.processes.implementations.context.interfaces.IProvideLocations;
 
 public class GetUserLocationsStep extends BaseGetProcessStep {
 
 	private final String userId;
 	private final IProvideLocations context;
 	
-	private boolean isPutCompleted;
+	private boolean isGetCompleted;
 	private NetworkContent loadedContent;
 	
 	public GetUserLocationsStep(String userId, IProvideLocations context, NetworkManager networkManager) {
@@ -28,12 +29,8 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 		get(userId, H2HConstants.USER_LOCATIONS);
 		
 		// wait for GET to complete
-		while(isPutCompleted == false) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				cancel(new RollbackReason(this, e.getMessage()));
-			}
+		while(isGetCompleted == false) {
+			ProcessUtil.wait(this);
 		}
 		
 		if (loadedContent == null) {
@@ -46,7 +43,7 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 
 	@Override
 	public void handleGetResult(NetworkContent content) {
-		isPutCompleted = true;
+		isGetCompleted = true;
 		this.loadedContent = content;
 	}
 

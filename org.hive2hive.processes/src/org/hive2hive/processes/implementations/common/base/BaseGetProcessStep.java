@@ -1,4 +1,4 @@
-package org.hive2hive.processes.implementations.common;
+package org.hive2hive.processes.implementations.common.base;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;

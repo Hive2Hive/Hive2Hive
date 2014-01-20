@@ -3,7 +3,6 @@ package org.hive2hive.processes.framework.decorators;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
@@ -14,8 +13,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
-
-	private Future<ProcessComponent> submit;
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
@@ -31,7 +28,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 	protected void doExecute() throws InvalidProcessStateException {
 
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		submit = executor.submit(this);
+		executor.submit(this);
 	}
 
 	@Override

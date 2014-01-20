@@ -3,6 +3,7 @@ package org.hive2hive.processes.implementations.register;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeLocations;
 
 public class AssureUserInexistentStep extends ProcessStep {
 

@@ -1,4 +1,4 @@
-package org.hive2hive.processes.implementations.common;
+package org.hive2hive.processes.implementations.common.base;
 
 import java.security.KeyPair;
 
@@ -13,7 +13,7 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 
 public abstract class BasePutProcessStep extends ProcessStep implements IPutListener, IRemoveListener {
 
-	private NetworkManager networkManager;
+	private final NetworkManager networkManager;
 
 	public BasePutProcessStep(NetworkManager networkManager) {
 		this.networkManager = networkManager;

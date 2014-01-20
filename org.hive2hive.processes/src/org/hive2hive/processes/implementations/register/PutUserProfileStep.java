@@ -14,7 +14,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.common.BasePutProcessStep;
+import org.hive2hive.processes.implementations.common.base.BasePutProcessStep;
 
 public class PutUserProfileStep extends BasePutProcessStep {
 
