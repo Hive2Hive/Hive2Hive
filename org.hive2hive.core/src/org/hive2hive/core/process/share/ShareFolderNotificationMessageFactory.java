@@ -5,20 +5,25 @@ import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.process.userprofiletask.share.ShareFolderUserProfileTask;
 
 public class ShareFolderNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final PublicKey metaFolderId;
 	private final KeyPair domainKey;
-	private String addedUser;
+	private final String addedUser;
+	private final FileTreeNode fileNode;
 
-	public ShareFolderNotificationMessageFactory(PublicKey metaFolderId, KeyPair domainKey, String addedUser) {
+	public ShareFolderNotificationMessageFactory(PublicKey metaFolderId, KeyPair domainKey, String addedUser,
+			FileTreeNode fileNode) {
 		this.metaFolderId = metaFolderId;
 		this.domainKey = domainKey;
 		this.addedUser = addedUser;
+		this.fileNode = fileNode;
 	}
 
 	@Override
@@ -28,7 +33,6 @@ public class ShareFolderNotificationMessageFactory extends BaseNotificationMessa
 
 	@Override
 	public UserProfileTask createUserProfileTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ShareFolderUserProfileTask(fileNode);
 	}
 }

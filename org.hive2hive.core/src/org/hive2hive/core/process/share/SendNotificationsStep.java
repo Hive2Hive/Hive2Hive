@@ -5,12 +5,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 
 /**
- * Sends a notification message to an user to check his user profile task queue.
+ * Starts the notification process that a file has been shared.
  * 
  * @author Seppi, Nico
  */
@@ -21,6 +22,13 @@ public class SendNotificationsStep extends ProcessStep {
 	@Override
 	public void start() {
 		ShareFolderProcessContext context = (ShareFolderProcessContext) getProcess().getContext();
+		FileTreeNode fileNode = context.getFileTreeNode();
+
+		// create a subtree containing all children
+		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair(), context.getProtectionKeys());
+		sharedNode.setName(fileNode.getName());
+		sharedNode.getChildren().addAll(fileNode.getChildren());
+		sharedNode.setProtectionKeys(fileNode.getProtectionKeys());
 
 		// notify all users that share this folder (already shared or newly shared)
 		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
@@ -30,7 +38,7 @@ public class SendNotificationsStep extends ProcessStep {
 				.format("Sending a notification message to %s# other sharing user(s) about a newly added sharing user.",
 						otherUsers.size()));
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(
-				metaFolder.getId(), context.getProtectionKeys(), context.getFriendId());
+				metaFolder.getId(), context.getProtectionKeys(), context.getFriendId(), sharedNode);
 		getProcess().sendNotification(messageFactory, otherUsers);
 	}
 
