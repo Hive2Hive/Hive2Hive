@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -27,19 +26,15 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetAllLocationsStep.class);
 
-	private final Set<String> userIds;
-
-	public GetAllLocationsStep(Set<String> userIds) {
-		this.userIds = userIds;
-	}
-
 	@Override
 	public void start() {
+		NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
+
 		logger.debug("Starting to get all locations from the users to be notified");
 		Map<String, List<PeerAddress>> allLocations = new HashMap<String, List<PeerAddress>>();
 
 		// iterate over all users and get the locations of them
-		for (String userId : userIds) {
+		for (String userId : context.getUsers()) {
 			NetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
 			if (content == null) {
 				allLocations.put(userId, new ArrayList<PeerAddress>());

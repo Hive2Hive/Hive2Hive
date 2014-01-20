@@ -14,8 +14,14 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 	@Override
 	public void start() {
 		NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
-
 		BaseNotificationMessageFactory messageFactory = context.getMessageFactory();
+
+		if (messageFactory.createUserProfileTask() == null) {
+			// skip that step
+			getProcess().setNextStep(new GetAllLocationsStep());
+			return;
+		}
+
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
 		for (String user : context.getUsers()) {
 			if (user.equalsIgnoreCase(context.getOwnUserId())) {
@@ -31,7 +37,7 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 			}
 		}
 
-		getProcess().setNextStep(new GetAllLocationsStep(context.getUsers()));
+		getProcess().setNextStep(new GetAllLocationsStep());
 	}
 
 }

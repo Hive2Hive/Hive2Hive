@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.notify;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -27,10 +28,23 @@ public class NotifyPeersProcess extends Process {
 	public NotifyPeersProcess(NetworkManager networkManager, BaseNotificationMessageFactory messageFactory,
 			Set<String> users) {
 		super(networkManager);
+		String userId = networkManager.getUserId();
+
+		// to cleanup the unreachable own peers
 		addCleanupListener();
 
-		String userId = networkManager.getUserId();
-		context = new NotifyPeersProcessContext(this, users, messageFactory, userId);
+		Set<String> usersToNotify = users;
+		if (messageFactory.createUserProfileTask() == null) {
+			// only private notification (or none)
+			usersToNotify = new HashSet<>(1);
+			if (users.contains(userId))
+				usersToNotify.add(userId);
+			else
+				throw new IllegalArgumentException(
+						"Users can't be notified because the UserProfileTask is null and no notification of the own user");
+		}
+
+		context = new NotifyPeersProcessContext(this, usersToNotify, messageFactory, userId);
 		setNextStep(new GetPublicKeysStep(users));
 	}
 
