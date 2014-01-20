@@ -3,6 +3,7 @@ package org.hive2hive.processes.framework.concretes;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.Process;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
@@ -13,6 +14,7 @@ public class SequentialProcess extends Process {
 	LinkedList<ProcessComponent> components = new LinkedList<ProcessComponent>();
 
 	private int executionIndex = 0;
+	private int rollbackIndex = 0;
 
 	@Override
 	public void join() {
@@ -23,11 +25,18 @@ public class SequentialProcess extends Process {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 				
-		for (int i = executionIndex; i < components.size(); i++, executionIndex++) {
-			ProcessComponent next = components.get(i);
+		while (executionIndex < components.size() && getState() == ProcessState.RUNNING) {
+			
+			ProcessComponent next = components.get(executionIndex);
 			next.start();
+			executionIndex++;
 		}
-		notifySucceeded();
+		
+//		for (int i = 0; i < components.size(); i++, executionIndex++) {
+//			ProcessComponent next = components.get(i);
+//			next.start();
+//		}
+//		notifySucceeded();
 	}
 
 	@Override
@@ -46,11 +55,24 @@ public class SequentialProcess extends Process {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) {
-		// TODO Auto-generated method stub
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+
+		rollbackIndex = executionIndex - 1;
 		
+		while (rollbackIndex >= 0 && getState() == ProcessState.ROLLBACKING) {
+			
+			ProcessComponent last = components.get(rollbackIndex);
+			last.cancel(reason);
+			rollbackIndex--;
+		}
 		
-		
+//		rollbackIndex = executionIndex - 1;
+//		
+//		for (int i = rollbackIndex; i >= 0; i--, rollbackIndex--) {
+//			ProcessComponent last = components.get(i);
+//			last.cancel(reason);
+//		}
+//		notifyFailed();
 	}
 
 	@Override

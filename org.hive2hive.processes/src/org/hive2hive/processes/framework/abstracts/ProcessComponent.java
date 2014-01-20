@@ -14,8 +14,9 @@ import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
 public abstract class ProcessComponent implements IProcessComponent {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ProcessComponent.class);
-	
+	private static final H2HLogger logger = H2HLoggerFactory
+			.getLogger(ProcessComponent.class);
+
 	private final String id;
 	private double progress;
 	private ProcessState state;
@@ -23,14 +24,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private boolean isRollbacking;
 
 	private Process parent;
-	
+
 	private final List<IProcessComponentListener> listener;
 
 	protected ProcessComponent() {
 		this.id = generateID();
 		this.progress = 0.0;
 		this.state = ProcessState.READY;
-		
+
 		listener = new ArrayList<IProcessComponentListener>();
 	}
 
@@ -41,11 +42,15 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
-		
-		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
+
+		logger.debug(String.format("Executing '%s'.", this.getClass()
+				.getSimpleName()));
 		doExecute();
-		
-		// TODO set SUCCEEDED state at appropriate place
+
+		if (state == ProcessState.RUNNING && parent == null) { // TODO set leafs to succeeded when composite succeeded
+			state = ProcessState.SUCCEEDED;
+			notifySucceeded();
+		}
 	}
 
 	@Override
@@ -79,10 +84,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 		state = ProcessState.ROLLBACKING;
 
-//		logger.error(String.format("%s: %s", this.getClass().getSimpleName(), reason.getMessage()));
+		// logger.error(String.format("%s: %s", this.getClass().getSimpleName(),
+		// reason.getMessage()));
 		doRollback(reason);
-		
-		// TODO set FAILED state at appropriate place
+
+		if (state == ProcessState.ROLLBACKING && parent == null) { // TODO set leafs to failed when composite failed
+			state = ProcessState.FAILED;
+			notifyFailed();
+		}
 	}
 
 	@Override
@@ -120,20 +129,21 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	protected abstract void doResumeRollback();
 
-	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
+	protected abstract void doRollback(RollbackReason reason)
+			throws InvalidProcessStateException;
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
 	}
-	
+
 	public void detachListener(IProcessComponentListener listener) {
 		this.listener.remove(listener);
 	}
-	
+
 	public List<IProcessComponentListener> getListener() {
 		return listener; // TODO copy before return?
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
@@ -154,9 +164,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	protected void notifySucceeded() {
-		
-		state = ProcessState.SUCCEEDED;
-		
+
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onSucceeded();
 		}
@@ -164,9 +172,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	protected void notifyFailed() {
-		
-		state = ProcessState.FAILED;
-		
+
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFailed();
 		}
@@ -174,7 +180,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	private void notifyFinished() {
-		
+
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFinished();
 		}
