@@ -20,33 +20,4 @@ public class AssureUserInexistentStep extends ProcessStep {
 		}
 	}
 
-	@Override
-	protected void doPause() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doResumeExecution() throws InvalidProcessStateException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doResumeRollback() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		
-		// ignore, step does nothing
-		
-		// parent
-		if (getParent() != null) {
-			getParent().cancel(reason);
-		}
-	}
-
 }

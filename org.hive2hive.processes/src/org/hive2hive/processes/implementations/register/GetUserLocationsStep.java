@@ -50,27 +50,4 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 		this.loadedContent = content;
 	}
 
-	@Override
-	protected void doPause() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void doResumeExecution() throws InvalidProcessStateException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void doResumeRollback() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void doRollback(RollbackReason reason) {
-		// ignore: only a get was done
-	}
-
 }

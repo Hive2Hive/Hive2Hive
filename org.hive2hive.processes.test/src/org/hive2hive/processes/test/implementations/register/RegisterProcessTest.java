@@ -74,11 +74,13 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		RegisterProcessContext context = new RegisterProcessContext(client);
 
 		RegisterProcess process = new RegisterProcess(profile, credentials, context);
-		AsyncComponent asyncProcess = new AsyncComponent(process);
+//		AsyncComponent asyncProcess = new AsyncComponent(process);
 
 		ProcessListener listener = new ProcessListener();
-		asyncProcess.attachListener(listener);
-		asyncProcess.start();
+//		asyncProcess.attachListener(listener);
+//		asyncProcess.start();
+		process.attachListener(listener);
+		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {

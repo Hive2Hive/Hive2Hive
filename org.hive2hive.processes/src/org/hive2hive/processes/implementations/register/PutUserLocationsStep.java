@@ -5,9 +5,8 @@ import java.security.KeyPair;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.processes.framework.RollbackReason;
+import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.ProcessUtil;
 import org.hive2hive.processes.implementations.common.BasePutProcessStep;
 
 public class PutUserLocationsStep extends BasePutProcessStep {
@@ -37,30 +36,6 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 		while (isPutCompleted == false) {
 			ProcessUtil.wait(this);
 		}
-	}
-
-	@Override
-	protected void doPause() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doResumeExecution() throws InvalidProcessStateException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doResumeRollback() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doRollback(RollbackReason reason) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

@@ -2,11 +2,11 @@ package org.hive2hive.processes.framework.abstracts;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.processes.framework.ProcessState;
+import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
@@ -28,7 +28,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private final List<IProcessComponentListener> listener;
 
 	protected ProcessComponent() {
-		this.id = generateID();
+		this.id = ProcessUtil.generateID();
 		this.progress = 0.0;
 		this.state = ProcessState.READY;
 
@@ -47,7 +47,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 				.getSimpleName()));
 		doExecute();
 
-		if (state == ProcessState.RUNNING && parent == null) { // TODO set leafs to succeeded when composite succeeded
+		// TODO set leafs to succeeded when composite succeeded
+		if (state == ProcessState.RUNNING && parent == null) {
 			state = ProcessState.SUCCEEDED;
 			notifySucceeded();
 		}
@@ -82,13 +83,22 @@ public abstract class ProcessComponent implements IProcessComponent {
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
-		state = ProcessState.ROLLBACKING;
 
-		// logger.error(String.format("%s: %s", this.getClass().getSimpleName(),
-		// reason.getMessage()));
-		doRollback(reason);
+		// inform parent (if it isn't yet)
+		if (parent != null && parent.getState() != ProcessState.ROLLBACKING) {
+			getParent().cancel(reason);
+		} else {
+			
+			// no parent or called from parent
+			state = ProcessState.ROLLBACKING;
+			logger.debug(String.format("Rolling back '%s'. Reason: %s", this
+					.getClass().getSimpleName(), reason.getMessage()));
 
-		if (state == ProcessState.ROLLBACKING && parent == null) { // TODO set leafs to failed when composite failed
+			doRollback(reason);
+		}
+
+		// TODO set leafs to failed when composite failed
+		if (state == ProcessState.ROLLBACKING && parent == null) {
 			state = ProcessState.FAILED;
 			notifyFailed();
 		}
@@ -184,10 +194,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFinished();
 		}
-	}
-
-	private static String generateID() {
-		return UUID.randomUUID().toString();
 	}
 
 }

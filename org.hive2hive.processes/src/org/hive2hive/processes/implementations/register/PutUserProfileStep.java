@@ -11,9 +11,9 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.ProcessUtil;
 import org.hive2hive.processes.implementations.common.BasePutProcessStep;
 
 public class PutUserProfileStep extends BasePutProcessStep {
@@ -57,30 +57,6 @@ public class PutUserProfileStep extends BasePutProcessStep {
 		while (isPutCompleted == false) {
 			ProcessUtil.wait(this);
 		}
-
-	}
-
-	@Override
-	protected void doPause() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doResumeExecution() throws InvalidProcessStateException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doResumeRollback() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doRollback(RollbackReason reason) {
-		// TODO Auto-generated method stub
 
 	}
 
