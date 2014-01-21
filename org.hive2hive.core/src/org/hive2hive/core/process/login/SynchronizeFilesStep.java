@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
@@ -16,6 +17,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.listener.IProcessListener;
+import org.hive2hive.core.process.userprofiletask.UserProfileTaskQueueProcess;
 import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 
@@ -116,19 +118,21 @@ public class SynchronizeFilesStep extends ProcessStep {
 			logger.error("Problem occurred: " + problem);
 		}
 
-		// if (context.getIsDefinedAsMaster()) {
-		// // TODO set when step is implemented
-		// // String userId = profileManager.getUserCredentials().getUserId();
-		// // HandleUserMessageQueueStep handleUmQueueStep = new HandleUserMessageQueueStep(userId);
-		// // GetUserMessageQueueStep getUMQueueStep = new GetUserMessageQueueStep(userId,
-		// // handleUmQueueStep);
-		// // context.setUserMessageQueueStep(getUMQueueStep);
-		// // getProcess().setNextStep(getUMQueueStep);
-		// getProcess().setNextStep(null);
-		// } else {
-		// // done with the post login process
-		// getProcess().setNextStep(null);
-		// }
+		/*
+		 * Process the user profile task queue if necessary
+		 */
+		if (context.isDefinedAsMaster()) {
+			try {
+				logger.debug("Starting to process all user tasks because I'm defined as master");
+				UserProfileTaskQueueProcess uptProcess = new UserProfileTaskQueueProcess(getNetworkManager());
+				uptProcess.start();
+			} catch (NoSessionException e) {
+				getProcess().stop(e);
+				return;
+			}
+		}
+
+		// done with the login process
 		getProcess().setNextStep(null);
 	}
 
