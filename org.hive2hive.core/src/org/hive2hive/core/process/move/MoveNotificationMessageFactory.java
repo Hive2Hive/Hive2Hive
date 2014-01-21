@@ -38,7 +38,6 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 
 	@Override
 	public UserProfileTask createUserProfileTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return new MoveUserProfileTask(sourceFileName, destFileName, oldParent, newParent);
 	}
 }
