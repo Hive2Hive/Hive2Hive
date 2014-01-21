@@ -47,7 +47,8 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 		NotifyPeersProcessContext context = (NotifyPeersProcessContext) getProcess().getContext();
 
 		List<PeerAddress> ownPeers = locations.get(context.getOwnUserId());
-		logger.debug("Notifying " + (ownPeers.size() - 1) + " other peers of myself");
+		ownPeers.remove(getNetworkManager().getPeerAddress());
+		logger.debug("Notifying " + ownPeers.size() + " other peers of me (without myself)");
 		for (PeerAddress peerAddress : ownPeers) {
 			if (peerAddress.equals(getNetworkManager().getPeerAddress())) {
 				// don't send myself

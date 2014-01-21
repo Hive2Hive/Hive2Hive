@@ -42,7 +42,7 @@ public class FileRecursionUtil {
 	 * @param action which action to perform (decides over kind of process)
 	 * @return the root process which can be started
 	 */
-	public static Process buildProcessList(List<Path> files, NetworkManager networkManager,
+	public static Process buildProcessChain(List<Path> files, NetworkManager networkManager,
 			FileProcessAction action) {
 		List<Process> processes = new ArrayList<Process>(files.size());
 		for (Path path : files) {
@@ -103,45 +103,27 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * Creates a process tree based on a list of files to download from the DHT. Note that the list must be in
-	 * preorder.
+	 * Creates a process chain based on a list of files to download from the DHT. Note that the list must be
+	 * in preorder.
 	 * 
 	 * @param toDownload preorder list of files
 	 * @param networkManager the network manager
-	 * @return the root process which can be started and holds all necessary information of its child
-	 *         processes
+	 * @return the root process which can be started
 	 */
-	public static ProcessTreeNode buildProcessTreeForDownload(List<FileTreeNode> toDownload,
+	public static Process buildProcessChainForDownload(List<FileTreeNode> toDownload,
 			NetworkManager networkManager) {
-		NodeProcessTreeNode rootProcess = new NodeProcessTreeNode();
+		// TODO: Currently implemented as a chain, could be more performing if it was a tree
+		List<Process> processes = new ArrayList<Process>(toDownload.size());
 		for (FileTreeNode node : toDownload) {
-			ProcessTreeNode parent = getParent(rootProcess, node);
 			try {
-				// initialize the process
-				Process process = new DownloadFileProcess(node, networkManager);
-				new NodeProcessTreeNode(process, parent, node);
+				// add the list
+				processes.add(new DownloadFileProcess(node, networkManager));
 			} catch (NoSessionException e) {
 				logger.error("File cannot be downloaded because there is no session");
 			}
 		}
 
-		return rootProcess;
-	}
-
-	/**
-	 * Finds the parent process node
-	 */
-	private static ProcessTreeNode getParent(NodeProcessTreeNode root, FileTreeNode node) {
-		FileTreeNode parent = node.getParent();
-		for (ProcessTreeNode child : root.getAllChildren()) {
-			NodeProcessTreeNode treeNode = (NodeProcessTreeNode) child;
-			// skip non-directories
-			if (treeNode.getNode().getFullPath().equals(parent.getFullPath())) {
-				return treeNode;
-			}
-		}
-
-		return root;
+		return new ProcessChain(processes, false);
 	}
 
 	/**
@@ -152,7 +134,7 @@ public class FileRecursionUtil {
 	 * @param networkManager the network manager
 	 * @return the root process which can be started
 	 */
-	public static Process buildProcessTreeForDeletion(List<FileTreeNode> toDelete,
+	public static Process buildProcessChainForDeletion(List<FileTreeNode> toDelete,
 			NetworkManager networkManager) {
 		// delete the files in the DHT that are deleted while offline. First create a normal queue, but the
 		// order must be reverse. With the created queue, reverse it in a 2nd step.

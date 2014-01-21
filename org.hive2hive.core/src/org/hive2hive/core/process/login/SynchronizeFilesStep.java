@@ -18,7 +18,6 @@ import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
-import org.hive2hive.core.process.util.ProcessTreeNode;
 
 /**
  * Synchronizes the local files with the entries in the user profile:
@@ -59,20 +58,22 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		/*
+		 * count up to 4:
+		 * - until the uploadProcessNewFiles is done
+		 * - until the uploadProcessNewVersions is done
+		 * - until the deleteProess is done
+		 * - until the downloadProcess is done
+		 */
+		CountDownLatch latch = new CountDownLatch(4);
+		CountdownListener latchListener = new CountdownListener(latch);
+
+		/*
 		 * Download the remotely added and updated files
 		 */
 		List<FileTreeNode> toDownload = synchronizer.getAddedRemotely();
 		toDownload.addAll(synchronizer.getUpdatedRemotely());
-		ProcessTreeNode downloadProcess = startDownload(toDownload);
-
-		/*
-		 * count up to 3:
-		 * - until the uploadProcessNewFiles is done
-		 * - until the uploadProcessNewVersions is done
-		 * - until the deleteProess is done
-		 */
-		CountDownLatch latch = new CountDownLatch(3);
-		CountdownListener latchListener = new CountdownListener(latch);
+		Process downloadProcess = startDownload(toDownload);
+		downloadProcess.addListener(latchListener);
 
 		/*
 		 * Upload the locally added and updated files
@@ -102,7 +103,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		// TODO check process state and if it does not change for a while, don't wait anymore (else, it may
 		// cause an endless loop)
-		while (!(downloadProcess.isDone() && latch.getCount() == 0)) {
+		while (latch.getCount() > 0) {
 			try {
 				logger.debug("Waiting until uploads and downloads finish...");
 				Thread.sleep(1000);
@@ -131,9 +132,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 		getProcess().setNextStep(null);
 	}
 
-	private ProcessTreeNode startDownload(List<FileTreeNode> toDownload) {
-		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessTreeForDownload(toDownload,
-				getNetworkManager());
+	private Process startDownload(List<FileTreeNode> toDownload) {
+		Process rootProcess = FileRecursionUtil.buildProcessChainForDownload(toDownload, getNetworkManager());
 
 		// start the download
 		if (toDownload.size() > 0)
@@ -145,7 +145,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	private Process startUpload(List<Path> toUpload, FileProcessAction action) {
 		// synchronize the files that need to be uploaded into the DHT
-		Process rootProcess = FileRecursionUtil.buildProcessList(toUpload, getNetworkManager(), action);
+		Process rootProcess = FileRecursionUtil.buildProcessChain(toUpload, getNetworkManager(), action);
 
 		if (toUpload.size() > 0) {
 			logger.debug("Start uploading new files with action " + action.name());
@@ -156,7 +156,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private Process startDelete(List<FileTreeNode> toDelete) {
-		Process rootProcess = FileRecursionUtil.buildProcessTreeForDeletion(toDelete, getNetworkManager());
+		Process rootProcess = FileRecursionUtil.buildProcessChainForDeletion(toDelete, getNetworkManager());
 
 		if (toDelete.size() > 0)
 			logger.debug("Start deleting files in DHT...");

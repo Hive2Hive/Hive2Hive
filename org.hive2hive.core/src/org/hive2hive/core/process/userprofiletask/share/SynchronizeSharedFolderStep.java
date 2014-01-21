@@ -3,6 +3,7 @@ package org.hive2hive.core.process.userprofiletask.share;
 import java.util.List;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.IllegalProcessStateException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
@@ -10,13 +11,14 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.util.FileRecursionUtil;
-import org.hive2hive.core.process.util.ProcessTreeNode;
 
 /**
+ * Downloads all files that the other user shared with us
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class SynchronizeSharedFolderStep extends ProcessStep {
 
@@ -24,7 +26,8 @@ public class SynchronizeSharedFolderStep extends ProcessStep {
 
 	@Override
 	public void start() {
-		ShareFolderNotificationProcessContext context = (ShareFolderNotificationProcessContext) getProcess().getContext();
+		ShareFolderNotificationProcessContext context = (ShareFolderNotificationProcessContext) getProcess()
+				.getContext();
 		UserProfileManager profileManager = context.getProfileManager();
 		FileManager fileManager = context.getFileManager();
 
@@ -41,35 +44,20 @@ public class SynchronizeSharedFolderStep extends ProcessStep {
 		 * Download the remotely added and updated files
 		 */
 		List<FileTreeNode> toDownload = synchronizer.getAddedRemotely();
-		ProcessTreeNode downloadProcess = startDownload(toDownload);
-
-		// TODO check process state and if it does not change for a while, don't wait anymore (else, it may
-		// cause an endless loop)
-		while (!downloadProcess.isDone()) {
-			try {
-				logger.debug("Waiting until uploads and downloads finish...");
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
+		Process downloadProcess = FileRecursionUtil.buildProcessChainForDownload(toDownload,
+				getNetworkManager());
+		downloadProcess.start();
+		try {
+			logger.debug("Waiting until uploads and downloads finish...");
+			downloadProcess.join();
+			logger.debug("All downloads of the shared folder are done");
+		} catch (IllegalProcessStateException | InterruptedException e) {
+			logger.error("Got interrupted while waiting until all files are downloaded");
 		}
 
-		logger.debug("All downloads of the shared folder are done");
-
+		// we're done
 		getProcess().setNextStep(null);
 	}
-
-	private ProcessTreeNode startDownload(List<FileTreeNode> toDownload) {
-		ProcessTreeNode rootProcess = FileRecursionUtil.buildProcessTreeForDownload(toDownload,
-				getNetworkManager());
-
-		// start the download
-		if (toDownload.size() > 0)
-			logger.debug("Start downloading new and modified files...");
-
-		rootProcess.start();
-		return rootProcess;
-	}
-
 
 	@Override
 	public void rollBack() {
