@@ -2,6 +2,8 @@ package org.hive2hive.core.network.userprofiletask;
 
 import java.security.KeyPair;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.tomp2p.peers.Number160;
 
@@ -10,6 +12,8 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.process.notify.NotifyPeersProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
@@ -31,7 +35,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  * thread. After handling please don't forget to remove the handled task (see
  * {@link DataManager#removeUserProfileTask(String, Number160)}).
  * 
- * @author Christian, Seppi
+ * @author Christian, Seppi, Nico
  */
 public abstract class UserProfileTask extends NetworkContent implements Runnable {
 
@@ -77,6 +81,18 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 	@Override
 	public int getTimeToLive() {
 		return TimeToLiveStore.getInstance().getUserMessageQueue();
+	}
+
+	/**
+	 * Helper method that asynchronously notifies all clients of the same user.
+	 * 
+	 * @param messageFactory
+	 */
+	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory) {
+		Set<String> onlyMe = new HashSet<String>(1);
+		onlyMe.add(networkManager.getUserId());
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(networkManager, messageFactory, onlyMe);
+		notifyProcess.start();
 	}
 
 }
