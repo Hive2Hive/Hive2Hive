@@ -79,26 +79,25 @@ public class MessageReplyHandler implements ObjectDataReply {
 		Object message = null;
 		try {
 			message = EncryptionUtil.deserializeObject(decryptedMessage);
-		} catch (IOException | ClassNotFoundException e){
+		} catch (IOException | ClassNotFoundException e) {
 			logger.error(String.format("Message could not be deserialized. reason = '%s'", e.getMessage()));
 		}
 
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
-		
+
 			// verify the signature
 			try {
-				byte[] data = EncryptionUtil.serializeObject(receivedMessage);
 				PublicKey publicKey = networkManager.getPublicKey(senderId);
-				if (EncryptionUtil.verify(data, signature, publicKey)) {
+				if (EncryptionUtil.verify(decryptedMessage, signature, publicKey)) {
 					logger.debug(String.format("Message's signature from user '%s' verified. node id = '%s'",
 							senderId, networkManager.getNodeId()));
 				} else {
 					logger.error(String.format("Message from user '%s' has wrong signature. node id = '%s'",
-					senderId, networkManager.getNodeId()));
-					return AcceptanceReply.FAILURE_SIGNATURE;					
+							senderId, networkManager.getNodeId()));
+					return AcceptanceReply.FAILURE_SIGNATURE;
 				}
-			} catch (GetFailedException | InvalidKeyException | SignatureException | IOException e) {
+			} catch (GetFailedException | InvalidKeyException | SignatureException e) {
 				logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'",
 						senderId, e.getMessage()));
 				return AcceptanceReply.FAILURE_SIGNATURE;
