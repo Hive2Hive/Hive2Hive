@@ -26,7 +26,6 @@ public class UploadNotificationMessageFactory extends BaseNotificationMessageFac
 
 	@Override
 	public UserProfileTask createUserProfileTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return new UploadUserProfileTask(fileKey);
 	}
 }

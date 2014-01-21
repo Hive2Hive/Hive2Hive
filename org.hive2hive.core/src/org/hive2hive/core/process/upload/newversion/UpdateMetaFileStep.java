@@ -79,7 +79,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 
 			logger.debug("Putting the modified meta file (containing the new version)");
 			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile, fileNode.getProtectionKeys(),
-					getStepsForNotification(userProfile));
+					getNextStep(userProfile));
 			getProcess().setNextStep(putMetaStep);
 		} catch (IOException e) {
 			getProcess().stop("The new MD5 hash for the user profile could not be generated");
@@ -116,7 +116,15 @@ public class UpdateMetaFileStep extends ProcessStep {
 		}
 	}
 
-	public ProcessStep getStepsForNotification(UserProfile userProfile) {
+	/**
+	 * Returns the next step. If the file is in root, the next step is to notify other clients. If the file is
+	 * not in root, we first need to find out who we need to notify (using notification message or a user
+	 * profile task)
+	 * 
+	 * @param userProfile
+	 * @return the next step
+	 */
+	private ProcessStep getNextStep(UserProfile userProfile) {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		FileTreeNode parent = userProfile.getFileById(metaFile.getId()).getParent();
 
