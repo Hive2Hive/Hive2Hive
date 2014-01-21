@@ -62,8 +62,8 @@ public class DeleteUpdateParentMetaStep extends BasePutProcessStep {
 		parentMeta.removeChildKey(childMeta.getId());
 
 		// notify other clients (can be multiple users)
-		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentMeta.getId(),
-				childName);
+		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(childMeta.getId(),
+				parentMeta.getId(), childName);
 		getProcess().sendNotification(messageFactory, parentMeta.getUserList());
 
 		try {

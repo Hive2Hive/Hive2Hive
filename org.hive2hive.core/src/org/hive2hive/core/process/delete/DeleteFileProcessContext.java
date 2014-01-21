@@ -11,11 +11,12 @@ import org.hive2hive.core.process.context.IGetParentMetaContext;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DeleteFileProcessContext extends ProcessContext implements IGetMetaContext, IGetParentMetaContext {
+public class DeleteFileProcessContext extends ProcessContext implements IGetMetaContext,
+		IGetParentMetaContext {
 
 	private final H2HSession session;
 	private final boolean isDirectory;
-	
+
 	private MetaDocument metaDocument;
 	private HybridEncryptedContent encryptedMetaDocument;
 	private KeyPair protectionKeys;
@@ -46,7 +47,7 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetMeta
 	public MetaDocument getMetaDocument() {
 		return metaDocument;
 	}
-	
+
 	@Override
 	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
 		this.encryptedMetaDocument = encryptedMetaDocument;
@@ -56,17 +57,17 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetMeta
 	public HybridEncryptedContent getEncryptedMetaDocument() {
 		return encryptedMetaDocument;
 	}
-	
+
 	@Override
-	public KeyPair getProtectionKeys(){
+	public KeyPair getProtectionKeys() {
 		return protectionKeys;
 	}
-	
+
 	@Override
-	public void setProtectionKeys(KeyPair protectionKeys){
+	public void setProtectionKeys(KeyPair protectionKeys) {
 		this.protectionKeys = protectionKeys;
 	}
-	
+
 	@Override
 	public void setParentMetaFolder(MetaFolder parentMetaFolder) {
 		this.parentMetaFolder = parentMetaFolder;
@@ -76,25 +77,24 @@ public class DeleteFileProcessContext extends ProcessContext implements IGetMeta
 	public MetaFolder getParentMetaFolder() {
 		return parentMetaFolder;
 	}
-	
+
 	@Override
 	public HybridEncryptedContent getEncryptedParentMetaFolder() {
 		return encryptedParentMetaFolder;
 	}
-	
+
 	@Override
 	public void setEncryptedParentMetaFolder(HybridEncryptedContent encryptedParentMetaFolder) {
 		this.encryptedParentMetaFolder = encryptedParentMetaFolder;
 	}
-	
+
 	@Override
-	public KeyPair getParentProtectionKeys(){
+	public KeyPair getParentProtectionKeys() {
 		return parentProtectionKeys;
 	}
-	
+
 	@Override
-	public void setParentProtectionKeys(KeyPair parentProtectionKeys){
+	public void setParentProtectionKeys(KeyPair parentProtectionKeys) {
 		this.parentProtectionKeys = parentProtectionKeys;
 	}
-
 }

@@ -27,7 +27,7 @@ import org.hive2hive.core.process.common.File2MetaFileStep;
 public class DeleteFileProcess extends Process {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteFileProcess.class);
-	
+
 	private final DeleteFileProcessContext context;
 
 	/**
@@ -79,7 +79,7 @@ public class DeleteFileProcess extends Process {
 		logger.info(String.format("Deleting file/folder from the DHT. fileNode = '%s'", fileNode.getName()));
 
 		H2HSession session = networkManager.getSession();
-		
+
 		context = new DeleteFileProcessContext(session, fileNode.isFolder(), this);
 
 		File2MetaFileStep file2MetaStep = new File2MetaFileStep(fileNode, session.getProfileManager(),

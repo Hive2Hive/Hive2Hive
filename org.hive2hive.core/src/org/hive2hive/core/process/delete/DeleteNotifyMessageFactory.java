@@ -10,6 +10,7 @@ import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 
 public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 
+	private final PublicKey fileKey;
 	private final PublicKey parentFileKey;
 	private final String fileName;
 
@@ -17,7 +18,8 @@ public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 	 * @param parentFileKey the file that has been deleted
 	 * @param fileName to uniquely identify the deleted file
 	 */
-	public DeleteNotifyMessageFactory(PublicKey parentFileKey, String fileName) {
+	public DeleteNotifyMessageFactory(PublicKey fileKey, PublicKey parentFileKey, String fileName) {
+		this.fileKey = fileKey;
 		this.parentFileKey = parentFileKey;
 		this.fileName = fileName;
 	}
@@ -29,7 +31,6 @@ public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 
 	@Override
 	public UserProfileTask createUserProfileTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return new DeleteUserProfileTask(fileKey);
 	}
 }
