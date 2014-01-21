@@ -90,6 +90,12 @@ public class DeleteUserProfileTask extends UserProfileTask {
 		return toDelete;
 	}
 
+	/**
+	 * Removes the file from the disk
+	 * 
+	 * @param fileManager
+	 * @param toDelete the {@link FileTreeNode} to remove
+	 */
 	private void removeFileOnDisk(FileManager fileManager, FileTreeNode toDelete) {
 		Path path = fileManager.getPath(toDelete);
 		if (path == null) {
@@ -107,6 +113,12 @@ public class DeleteUserProfileTask extends UserProfileTask {
 		}
 	}
 
+	/**
+	 * Starts a notification process to all other clients of this very same user that received the
+	 * {@link UserProfileTask}
+	 * 
+	 * @param toDelete the {@link FileTreeNode} that has been deleted
+	 */
 	private void notifyOtherClients(FileTreeNode toDelete) {
 		PublicKey fileKey = toDelete.getKeyPair().getPublic();
 		PublicKey parentFileKey = toDelete.getParent().getKeyPair().getPublic();
