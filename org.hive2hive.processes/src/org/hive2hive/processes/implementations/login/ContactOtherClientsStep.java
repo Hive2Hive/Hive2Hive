@@ -127,7 +127,7 @@ public class ContactOtherClientsStep extends ProcessStep implements
 							new PutUserLocationsStep(updatedLocations, context
 									.consumeUserProfile().getProtectionKeys(),
 									networkManager));
-					getParent().insert(++index, new SynchronizeFilesStep());
+					getParent().insert(++index, new SynchronizeFilesStep(context));
 
 				} else {
 					throw new NullPointerException("Step has no parent.");

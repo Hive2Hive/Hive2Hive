@@ -12,6 +12,7 @@ import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
+import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.processes.implementations.login.VerifyUserProfileStep;
@@ -69,6 +70,7 @@ public final class ProcessFactory {
 		process.add(new SessionCreationStep(params, context, networkManager));
 		process.add(new GetUserLocationsStep(credentials.getUserId(), context,
 				networkManager));
+		process.add(new ContactOtherClientsStep(context, networkManager));
 
 		AsyncComponent loginProcess = new AsyncComponent(process);
 
