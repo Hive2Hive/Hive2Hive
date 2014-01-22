@@ -1,6 +1,6 @@
 package org.hive2hive.processes.framework.abstracts;
 
-import java.util.Collection;
+import java.util.List;
 
 public abstract class Process extends ProcessComponent {
 
@@ -9,16 +9,23 @@ public abstract class Process extends ProcessComponent {
 		doAdd(component);
 	};
 	
+	public final void insert(int index, ProcessComponent component) {
+		component.setParent(this);
+		doInsert(index, component);
+	}
+	
 	public final void remove(ProcessComponent component) {
 		component.setParent(null);
 		doRemove(component);
 	}
 	
 	protected abstract void doAdd(ProcessComponent component);
+	
+	protected abstract void doInsert(int index, ProcessComponent component);
 
 	protected abstract void doRemove(ProcessComponent component);
 	
-	public abstract Collection<ProcessComponent> getComponents();
+	public abstract List<ProcessComponent> getComponents();
 	
 //	public abstract IProcessIterator createIterator();
 

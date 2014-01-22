@@ -1,4 +1,4 @@
-package org.hive2hive.processes.implementations.register;
+package org.hive2hive.processes.implementations.common;
 
 import java.security.KeyPair;
 

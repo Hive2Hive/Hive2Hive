@@ -1,7 +1,9 @@
 package org.hive2hive.processes.framework.concretes;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.RollbackReason;
@@ -70,13 +72,19 @@ public class SequentialProcess extends Process {
 	}
 
 	@Override
+	protected void doInsert(int index, ProcessComponent component) {
+		components.add(index, component);
+	}
+	
+	@Override
 	protected void doRemove(ProcessComponent component) {
 		components.remove(component);
 	}
 
 	@Override
-	public Collection<ProcessComponent> getComponents() {
-		return components;
+	public List<ProcessComponent> getComponents() {
+		
+		return Collections.unmodifiableList(components);
 	}
 	
 }

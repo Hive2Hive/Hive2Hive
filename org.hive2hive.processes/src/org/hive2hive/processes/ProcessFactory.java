@@ -9,6 +9,7 @@ import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
+import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.login.GetUserProfileStep;
@@ -16,7 +17,6 @@ import org.hive2hive.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.processes.implementations.login.VerifyUserProfileStep;
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
-import org.hive2hive.processes.implementations.register.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
 
 public final class ProcessFactory {
