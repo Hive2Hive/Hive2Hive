@@ -46,10 +46,10 @@ import org.hive2hive.core.security.UserCredentials;
 public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, IUserManagement {
 
 	private boolean autostartProcesses;
-	private final int maxSizeOfAllVersions;
-	private final int maxFileSize;
-	private final int maxNumOfVersions;
-	private final int chunkSize;
+	private final long maxSizeOfAllVersions;
+	private final long maxFileSize;
+	private final long maxNumOfVersions;
+	private final long chunkSize;
 
 	private final NetworkManager networkManager;
 
@@ -66,14 +66,21 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	 * @param bootstrapAddress
 	 * @param rootPath
 	 */
-	public H2HNode(int maxFileSize, int maxNumOfVersions, int maxSizeAllVersions, int chunkSize,
+	public H2HNode(long maxFileSize, long maxNumOfVersions, long maxSizeAllVersions, long chunkSize,
 			boolean autostartProcesses, boolean isMasterPeer, InetAddress bootstrapAddress) {
+		assert maxFileSize > 0;
 		this.maxFileSize = maxFileSize;
-		this.maxNumOfVersions = maxNumOfVersions;
-		this.maxSizeOfAllVersions = maxSizeAllVersions;
-		this.chunkSize = chunkSize;
-		this.autostartProcesses = autostartProcesses;
 
+		assert maxNumOfVersions > 0;
+		this.maxNumOfVersions = maxNumOfVersions;
+
+		assert maxSizeAllVersions > 0;
+		this.maxSizeOfAllVersions = maxSizeAllVersions;
+
+		assert chunkSize > 0;
+		this.chunkSize = chunkSize;
+
+		this.autostartProcesses = autostartProcesses;
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
 		if (isMasterPeer) {
 			networkManager.connect();
@@ -232,22 +239,22 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public int getMaxFileSize() {
+	public long getMaxFileSize() {
 		return maxFileSize;
 	}
 
 	@Override
-	public int getMaxNumOfVersions() {
+	public long getMaxNumOfVersions() {
 		return maxNumOfVersions;
 	}
 
 	@Override
-	public int getMaxSizeAllVersions() {
+	public long getMaxSizeAllVersions() {
 		return maxSizeOfAllVersions;
 	}
 
 	@Override
-	public int getChunkSize() {
+	public long getChunkSize() {
 		return chunkSize;
 	}
 

@@ -10,10 +10,10 @@ import java.net.InetAddress;
  */
 public class H2HNodeBuilder {
 
-	private int maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
-	private int maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
-	private int maxSizeOfAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
-	private int chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
+	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
+	private long maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
+	private long maxSizeOfAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
+	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
 	private boolean autostartProcesses = H2HConstants.DEFAULT_AUTOSTART_PROCESSES;
 	private boolean isMasterPeer = H2HConstants.DEFAULT_IS_MASTER_PEER;
 	private InetAddress bootstrapAddress = H2HConstants.DEFAULT_BOOTSTRAP_ADDRESS;
@@ -23,17 +23,17 @@ public class H2HNodeBuilder {
 				autostartProcesses, isMasterPeer, bootstrapAddress);
 	}
 
-	public H2HNodeBuilder setMaxFileSize(int maxFileSize) {
+	public H2HNodeBuilder setMaxFileSize(long maxFileSize) {
 		this.maxFileSize = maxFileSize;
 		return this;
 	}
 
-	public H2HNodeBuilder setMaxNumOfVersions(int maxNumOfVersions) {
+	public H2HNodeBuilder setMaxNumOfVersions(long maxNumOfVersions) {
 		this.maxNumOfVersions = maxNumOfVersions;
 		return this;
 	}
 
-	public H2HNodeBuilder setMaxSizeAllVersions(int maxSizeOfAllVersions) {
+	public H2HNodeBuilder setMaxSizeAllVersions(long maxSizeOfAllVersions) {
 		this.maxSizeOfAllVersions = maxSizeOfAllVersions;
 		return this;
 	}

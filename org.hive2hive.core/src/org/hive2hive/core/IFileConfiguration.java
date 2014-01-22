@@ -2,11 +2,11 @@ package org.hive2hive.core;
 
 public interface IFileConfiguration {
 
-	int getMaxFileSize();
+	long getMaxFileSize();
 
-	int getMaxNumOfVersions();
+	long getMaxNumOfVersions();
 
-	int getMaxSizeAllVersions();
+	long getMaxSizeAllVersions();
 
-	int getChunkSize();
+	long getChunkSize();
 }

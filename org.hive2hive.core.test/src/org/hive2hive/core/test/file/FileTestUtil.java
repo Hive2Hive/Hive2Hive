@@ -16,7 +16,7 @@ public class FileTestUtil {
 		// create file of size of multiple numbers of chunks
 		String random = "";
 		while (Math.ceil(1.0 * random.getBytes().length / config.getChunkSize()) < numOfChunks) {
-			random += H2HJUnitTest.generateRandomString(config.getChunkSize() - 1);
+			random += H2HJUnitTest.generateRandomString((int) config.getChunkSize() - 1);
 		}
 
 		String fileName = NetworkTestUtil.randomString();

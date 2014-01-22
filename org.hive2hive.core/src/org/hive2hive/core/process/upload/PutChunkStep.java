@@ -75,7 +75,7 @@ public class PutChunkStep extends BasePutProcessStep {
 		}
 
 		long offset = 0;
-		byte[] data = new byte[context.getH2HSession().getFileConfiguration().getChunkSize()];
+		byte[] data = new byte[(int) context.getH2HSession().getFileConfiguration().getChunkSize()];
 		int read = 1;
 
 		do {

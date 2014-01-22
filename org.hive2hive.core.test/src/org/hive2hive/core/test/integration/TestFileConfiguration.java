@@ -5,22 +5,22 @@ import org.hive2hive.core.IFileConfiguration;
 public class TestFileConfiguration implements IFileConfiguration {
 
 	@Override
-	public int getMaxFileSize() {
+	public long getMaxFileSize() {
 		return 1024 * 1024;
 	}
 
 	@Override
-	public int getMaxNumOfVersions() {
+	public long getMaxNumOfVersions() {
 		return 10;
 	}
 
 	@Override
-	public int getMaxSizeAllVersions() {
+	public long getMaxSizeAllVersions() {
 		return getMaxFileSize() * getMaxNumOfVersions();
 	}
 
 	@Override
-	public int getChunkSize() {
+	public long getChunkSize() {
 		return 1024;
 	}
 
