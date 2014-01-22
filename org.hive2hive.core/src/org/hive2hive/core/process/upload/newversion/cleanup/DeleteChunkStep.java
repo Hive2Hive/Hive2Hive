@@ -30,7 +30,7 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 
 	@Override
 	public void start() {
-		logger.debug("Cleaning " + chunksToDelete + " old file chunks");
+		logger.debug("Cleaning " + chunksToDelete.size() + " old file chunks");
 		int counter = 0;
 		try {
 			for (KeyPair keyPair : chunksToDelete) {
