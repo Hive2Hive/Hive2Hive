@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.core.IH2HNodeStatus;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
@@ -189,6 +190,20 @@ public final class TopLevelMenu extends ConsoleMenu {
 			protected void execute() throws Exception {
 				fileObserverMenu = new FileObserverMenu(root, nodeMenu.getH2HNode());
 				fileObserverMenu.open();
+			}
+		});
+
+		add(new H2HConsoleMenuItem("Get Status") {
+			protected void execute() throws Hive2HiveException {
+				IH2HNodeStatus status = nodeMenu.getH2HNode().getStatus();
+				System.out.println("Connected: " + status.isConnected());
+				if (status.isLoggedIn()) {
+					System.out.println("User ID: " + status.getUserId());
+					System.out.println("Root path: " + status.getRoot().getAbsolutePath());
+				} else {
+					System.out.println("Currently, nobody is logged in");
+				}
+				System.out.println("Number of processes: " + status.getNumberOfProcesses());
 			}
 		});
 

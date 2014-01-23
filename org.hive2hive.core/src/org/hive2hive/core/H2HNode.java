@@ -81,6 +81,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		this.chunkSize = chunkSize;
 
 		this.autostartProcesses = autostartProcesses;
+
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
 		if (isMasterPeer) {
 			networkManager.connect();
@@ -111,6 +112,20 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	@Override
 	public IFileManagement getFileManagement() {
 		return this;
+	}
+
+	@Override
+	public IH2HNodeStatus getStatus() {
+		boolean connected = networkManager.getConnection().isConnected();
+		int numberOfProcs = ProcessManager.getInstance().getAllProcesses().size();
+		try {
+			H2HSession session = networkManager.getSession();
+			Path root = session.getFileManager().getRoot();
+			String userId = session.getCredentials().getUserId();
+			return new H2HNodeStatus(root.toFile(), userId, connected, numberOfProcs);
+		} catch (NoSessionException e) {
+			return new H2HNodeStatus(null, null, connected, numberOfProcs);
+		}
 	}
 
 	@Override
@@ -265,5 +280,4 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		autoStartProcess(process);
 		return process;
 	}
-
 }

@@ -37,4 +37,5 @@ public interface IUserManagement {
 	 * @return the observable logout process.
 	 */
 	IProcess logout() throws NoSessionException;
+
 }
