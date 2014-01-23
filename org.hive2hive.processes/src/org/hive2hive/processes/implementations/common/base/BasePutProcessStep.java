@@ -2,43 +2,80 @@ package org.hive2hive.processes.implementations.common.base;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IPutListener;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
-public abstract class BasePutProcessStep extends ProcessStep implements IPutListener, IRemoveListener {
+public abstract class BasePutProcessStep extends ProcessStep {
+
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
 
 	private final NetworkManager networkManager;
+
+	private boolean putPerformed;
+
+	private String locationKey;
+	private String contentKey;
+	private KeyPair protectionKey;
+	private NetworkContent content;
 
 	public BasePutProcessStep(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 	}
-	
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) throws InvalidProcessStateException {
+
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+			throws InvalidProcessStateException, PutFailedException {
+
+		this.locationKey = locationKey;
+		this.contentKey = contentKey;
+		this.content = content;
+		this.protectionKey = protectionKey;
 
 		DataManager dataManager = networkManager.getDataManager();
 		if (dataManager == null) {
-			cancel(new RollbackReason(this, "Node is not connected."));
+			throw new PutFailedException("Node is not connected");
 		}
-		
-		dataManager.put(locationKey, contentKey, content, protectionKey, this);
+
+		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
+		putPerformed = true;
+
+		if (!success) {
+			throw new PutFailedException();
+		}
 	}
 
 	@Override
-	public abstract void onPutSuccess();
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 
-	@Override
-	public abstract void onPutFailure();
+		if (!putPerformed) {
+			logger.warn("Nothing to remove at rollback because nothing has been put.");
+			return;
+		}
 
-	@Override
-	public abstract void onRemoveSuccess();
+		DataManager dataManager = networkManager.getDataManager();
+		if (dataManager == null) {
+			logger.warn(String
+					.format("Rollback of put failed. No connection. location key = '%s' content key = '%s' version key = '%s'",
+							locationKey, contentKey, content.getVersionKey()));
+			return;
+		}
 
-	@Override
-	public abstract void onRemoveFailure();
+		boolean success = dataManager.remove(locationKey, contentKey, content.getVersionKey(), protectionKey);
+		if (success) {
+			logger.debug(String.format(
+					"Rollback of put succeeded. location key = '%s' content key = '%s' version key = '%s'",
+					locationKey, contentKey, content.getVersionKey()));
+		} else {
+			logger.warn(String
+					.format("Rollback of put failed. Remove failed. location key = '%s' content key = '%s' version key = '%s'",
+							locationKey, contentKey, content.getVersionKey()));
+		}
+	}
 
 }

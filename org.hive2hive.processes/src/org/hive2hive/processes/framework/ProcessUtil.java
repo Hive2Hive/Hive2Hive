@@ -8,13 +8,13 @@ import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
 public final class ProcessUtil {
-	
+
 	private final static H2HLogger logger = H2HLoggerFactory.getLogger(ProcessUtil.class);
 
 	public static void wait(ProcessComponent component) throws InvalidProcessStateException {
 		wait(component, 500);
 	}
-	
+
 	public static void wait(ProcessComponent component, int ms) throws InvalidProcessStateException {
 		try {
 			logger.warn(String.format("Thread '%s' sleeping.", Thread.currentThread().getName()));
@@ -24,7 +24,7 @@ public final class ProcessUtil {
 			component.cancel(new RollbackReason(component, e.getMessage()));
 		}
 	}
-	
+
 	public static String generateID() {
 		return UUID.randomUUID().toString();
 	}

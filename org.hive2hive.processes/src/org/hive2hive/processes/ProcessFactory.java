@@ -1,6 +1,5 @@
 package org.hive2hive.processes;
 
-import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -15,7 +14,7 @@ import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.processes.implementations.login.SessionCreationStep;
-import org.hive2hive.processes.implementations.login.VerifyUserProfileStep;
+import org.hive2hive.processes.implementations.login.SynchronizeFilesStep;
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
@@ -33,32 +32,26 @@ public final class ProcessFactory {
 	private ProcessFactory() {
 	}
 
-	public IProcessComponent createRegisterProcess(UserCredentials credentials,
-			UserProfile profile, NetworkManager networkManager) {
+	public IProcessComponent createRegisterProcess(UserCredentials credentials, UserProfile profile,
+			NetworkManager networkManager) {
 
-		RegisterProcessContext context = new RegisterProcessContext();
-		Locations locations = new Locations(profile.getUserId());
+		RegisterProcessContext context = new RegisterProcessContext(profile);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserLocationsStep(credentials.getUserId(), context,
-				networkManager));
-		process.add(new AssureUserInexistentStep(context));
-		process.add(new AsyncComponent(new PutUserProfileStep(credentials,
-				profile, networkManager)));
-		process.add(new AsyncComponent(new PutUserLocationsStep(locations,
-				profile.getProtectionKeys(), networkManager)));
-		process.add(new AsyncComponent(new PutPublicKeyStep(profile,
-				networkManager)));
+		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, networkManager));
+		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
+		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
+		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
 
 		AsyncComponent registerProcess = new AsyncComponent(process);
 
 		return registerProcess;
 	}
 
-	public IProcessComponent createLoginProcess(UserCredentials credentials,
-			SessionParameters params, NetworkManager networkManager) {
+	public IProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
+			NetworkManager networkManager) {
 
 		LoginProcessContext context = new LoginProcessContext();
 
@@ -66,11 +59,11 @@ public final class ProcessFactory {
 		SequentialProcess process = new SequentialProcess();
 
 		process.add(new GetUserProfileStep(credentials, context, networkManager));
-		process.add(new VerifyUserProfileStep(credentials.getUserId(), context));
 		process.add(new SessionCreationStep(params, context, networkManager));
-		process.add(new GetUserLocationsStep(credentials.getUserId(), context,
-				networkManager));
+		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager));
 		process.add(new ContactOtherClientsStep(context, networkManager));
+		process.add(new PutUserLocationsStep(context, context, networkManager));
+		process.add(new SynchronizeFilesStep(context));
 
 		AsyncComponent loginProcess = new AsyncComponent(process);
 

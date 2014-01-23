@@ -6,37 +6,34 @@ import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.context.LoginProcessContext;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeUserProfile;
 
 public class SessionCreationStep extends ProcessStep {
 
 	private final SessionParameters params;
-	private final LoginProcessContext context;
+	private final IConsumeUserProfile context;
 	private final NetworkManager networkManager;
 
-	public SessionCreationStep(SessionParameters params, LoginProcessContext context, NetworkManager networkManager) {
+	public SessionCreationStep(SessionParameters params, IConsumeUserProfile context, NetworkManager networkManager) {
 		this.params = params;
 		this.context = context;
 		this.networkManager = networkManager;
 	}
-	
+
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
 		// create session
 		params.setKeyPair(context.consumeUserProfile().getEncryptionKeys());
 		H2HSession session = new H2HSession(params);
-		context.provideSession(session);
-		
+
 		// set session
 		networkManager.setSession(session);
 	}
-	
+
 	@Override
-	protected void doRollback(RollbackReason reason)
-			throws InvalidProcessStateException {
-		super.doRollback(reason);
-		
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+
 		// invalidate the session
 		networkManager.setSession(null);
 	}

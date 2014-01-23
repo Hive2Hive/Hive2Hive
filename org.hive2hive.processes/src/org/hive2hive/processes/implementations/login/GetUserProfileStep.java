@@ -1,5 +1,7 @@
 package org.hive2hive.processes.implementations.login;
 
+import java.io.IOException;
+
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
@@ -12,7 +14,6 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BaseGetProcessStep;
@@ -23,11 +24,8 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	private final UserCredentials credentials;
 	private final IProvideUserProfile context;
 
-	private boolean isGetCompleted;
-	private NetworkContent loadedContent;
-
-	public GetUserProfileStep(UserCredentials credentials,
-			IProvideUserProfile context, NetworkManager networkManager) {
+	public GetUserProfileStep(UserCredentials credentials, IProvideUserProfile context,
+			NetworkManager networkManager) {
 		super(networkManager);
 		this.credentials = credentials;
 		this.context = context;
@@ -36,47 +34,33 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
-		get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-
-		// wait for GET to complete
-		while (isGetCompleted == false) {
-			ProcessUtil.wait(this);
-		}
+		NetworkContent loadedContent = get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 
 		if (loadedContent == null) {
-			context.provideUserProfile(null);
+			cancel(new RollbackReason(this, "User profile not found."));
 		} else {
 
 			// decrypt user profile
 			EncryptedNetworkContent encryptedContent = (EncryptedNetworkContent) loadedContent;
 
-			SecretKey decryptionKey = PasswordUtil.generateAESKeyFromPassword(
-					credentials.getPassword(), credentials.getPin(),
-					H2HConstants.KEYLENGTH_USER_PROFILE);
+			SecretKey decryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+					credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 
 			NetworkContent decryptedProfile = null;
 			try {
-				decryptedProfile = H2HEncryptionUtil.decryptAES(
-						encryptedContent, decryptionKey);
-			} catch (DataLengthException | IllegalStateException
-					| InvalidCipherTextException e) {
-				cancel(new RollbackReason(this,
-						"User profile could not be decrypted. Reason: "
-								+ e.getMessage()));
+				decryptedProfile = H2HEncryptionUtil.decryptAES(encryptedContent, decryptionKey);
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
+					| ClassNotFoundException | IOException e) {
+				cancel(new RollbackReason(this, "User profile could not be decrypted. Reason: "
+						+ e.getMessage()));
 			}
-			
+
 			UserProfile profile = (UserProfile) decryptedProfile;
 			profile.setVersionKey(loadedContent.getVersionKey());
 			profile.setBasedOnKey(loadedContent.getBasedOnKey());
 
 			context.provideUserProfile(profile);
 		}
-	}
-
-	@Override
-	public void handleGetResult(NetworkContent content) {
-		isGetCompleted = true;
-		this.loadedContent = content;
 	}
 
 }

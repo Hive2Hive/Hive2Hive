@@ -7,23 +7,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 
 // TODO this class should be split up into multiple steps
-public class ContactOtherClientsStep extends ProcessStep implements
-		IResponseCallBackHandler {
+public class ContactOtherClientsStep extends ProcessStep implements IResponseCallBackHandler {
+
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ContactOtherClientsStep.class);
 
 	private final ConcurrentHashMap<PeerAddress, String> evidences = new ConcurrentHashMap<PeerAddress, String>();
 	private final ConcurrentHashMap<PeerAddress, Boolean> responses = new ConcurrentHashMap<PeerAddress, Boolean>();
@@ -32,8 +31,7 @@ public class ContactOtherClientsStep extends ProcessStep implements
 	private final LoginProcessContext context;
 	private final NetworkManager networkManager;
 
-	public ContactOtherClientsStep(LoginProcessContext context,
-			NetworkManager networkManager) {
+	public ContactOtherClientsStep(LoginProcessContext context, NetworkManager networkManager) {
 		this.context = context;
 		this.networkManager = networkManager;
 	}
@@ -42,9 +40,9 @@ public class ContactOtherClientsStep extends ProcessStep implements
 	protected void doExecute() throws InvalidProcessStateException {
 
 		Locations locations = context.consumeLocations();
-		
+
 		if (!locations.getPeerAddresses().isEmpty()) {
-			
+
 			for (PeerAddress address : locations.getPeerAddresses()) {
 
 				// contact all other clients (exclude self)
@@ -53,39 +51,43 @@ public class ContactOtherClientsStep extends ProcessStep implements
 					String evidence = UUID.randomUUID().toString();
 					evidences.put(address, evidence);
 
-					ContactPeerMessage message = new ContactPeerMessage(address,
-							evidence);
+					ContactPeerMessage message = new ContactPeerMessage(address, evidence);
 					message.setCallBackHandler(this);
-					networkManager.sendDirect(message,
-							networkManager.getPublicKey(),
-							new FastFailMessageListener(address));
 
+					// TODO this is blocking, should be parallel (asynchronous)
+					boolean success = networkManager.sendDirect(message, networkManager.getPublicKey());
+					if (!success) {
+						responses.put(address, false);
+					}
 				}
 			}
-			
-			// wait for messages to be responded
-			ProcessUtil.wait(this, H2HConstants.CONTACT_PEERS_AWAIT_MS);
-		} 
-		
+		}
+
 		updateLocations();
 	}
 
 	@Override
 	public void handleResponseMessage(ResponseMessage responseMessage) {
 
-		// TODO deal with delayed responses
+		if (isUpdated) {
+			// TODO notify delayed response client nodes about removing him from location map
+			logger.warn(String
+					.format("Received a delayed contact peer response message, which gets ignored. peer address = '%s'",
+							responseMessage.getSenderAddress()));
+			return;
+		}
 
 		// verify response
-		if (evidences.get(responseMessage.getSenderAddress()).equals(
-				(String) responseMessage.getContent())) {
+		if (evidences.get(responseMessage.getSenderAddress()).equals((String) responseMessage.getContent())) {
 
 			responses.put(responseMessage.getSenderAddress(), true);
-			if (responses.size() >= context.consumeLocations()
-					.getPeerAddresses().size()) {
+			if (responses.size() >= context.consumeLocations().getPeerAddresses().size()) {
 				updateLocations();
 			}
 		} else {
-			// TODO deal with invalid responses
+			logger.error(String
+					.format("Received during liveness check of other clients a wrong evidence content. responding node = '%s'",
+							responseMessage.getSenderAddress()));
 		}
 	}
 
@@ -93,12 +95,9 @@ public class ContactOtherClientsStep extends ProcessStep implements
 		if (!isUpdated) {
 			isUpdated = true;
 
-			Locations updatedLocations = new Locations(context
-					.consumeLocations().getUserId());
-			updatedLocations.setBasedOnKey(context.consumeLocations()
-					.getBasedOnKey());
-			updatedLocations.setVersionKey(context.consumeLocations()
-					.getVersionKey());
+			Locations updatedLocations = new Locations(context.consumeLocations().getUserId());
+			updatedLocations.setBasedOnKey(context.consumeLocations().getBasedOnKey());
+			updatedLocations.setVersionKey(context.consumeLocations().getVersionKey());
 
 			// add addresses that responded and self
 			for (PeerAddress address : responses.keySet()) {
@@ -113,46 +112,12 @@ public class ContactOtherClientsStep extends ProcessStep implements
 			List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(
 					updatedLocations.getPeerAddresses());
 
-			if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
-					networkManager.getPeerAddress())) {
-
-				// TODO find better solution to put alternative steps (i.e., in
-				// ProcessFactory)
-
-				if (getParent() != null) {
-
-					int index = getParent().getComponents().indexOf(this);
-					getParent().insert(
-							++index,
-							new PutUserLocationsStep(updatedLocations, context
-									.consumeUserProfile().getProtectionKeys(),
-									networkManager));
-					getParent().insert(++index, new SynchronizeFilesStep(context));
-
-				} else {
-					throw new NullPointerException("Step has no parent.");
-				}
+			if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(networkManager.getPeerAddress())) {
+				context.setIsMaster(true);
+			} else {
+				context.setIsMaster(false);
 			}
 		}
 	}
 
-	private class FastFailMessageListener implements IBaseMessageListener {
-
-		private final PeerAddress receiver;
-
-		public FastFailMessageListener(PeerAddress receiver) {
-			this.receiver = receiver;
-		}
-
-		@Override
-		public void onSuccess() {
-			// ignore
-		}
-
-		@Override
-		public void onFailure() {
-			responses.put(receiver, false);
-		}
-
-	}
 }

@@ -7,7 +7,7 @@ public class ProcessListener implements IProcessComponentListener {
 	private boolean hasSucceeded;
 	private boolean hasFailed;
 	private boolean hasFinished;
-	
+
 	@Override
 	public void onSucceeded() {
 		hasSucceeded = true;

@@ -20,6 +20,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.concretes.ProcessListener;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -46,7 +47,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 
 		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
 	}
-	
+
 	@After
 	public void afterMethod() {
 		NetworkTestUtil.shutdownNetwork(network);
@@ -68,7 +69,8 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		UserProfile profile = new UserProfile(credentials.getUserId());
 
-		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, profile, client);
+		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
+				profile, client);
 		ProcessListener listener = new ProcessListener();
 		registerProcess.attachListener(listener);
 		registerProcess.start();
@@ -78,11 +80,11 @@ public class RegisterProcessTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasSucceeded());
 
-		// TODO verify put user profile
-		// UserProfile getUserProfile = ProcessTestUtil.getUserProfile(otherClient, credentials);
-		//
-		// assertNotNull(getUserProfile);
-		// assertEquals(credentials.getUserId(), getUserProfile.getUserId());
+		// verify put user profile
+		 UserProfile getUserProfile = ProcessTestUtil.getUserProfile(otherClient, credentials);
+		
+		 assertNotNull(getUserProfile);
+		 assertEquals(credentials.getUserId(), getUserProfile.getUserId());
 
 		// verify put locations
 		FutureGet getLocations = otherClient.getDataManager().get(
@@ -107,10 +109,10 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		assertEquals(profile.getEncryptionKeys().getPublic(), publicKey.getPublicKey());
 
 	}
-	
+
 	@Test
 	public void testFailOnExistingLocations() throws InvalidProcessStateException {
-		
+
 		NetworkManager client = network.get(0);
 
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
@@ -122,10 +124,11 @@ public class RegisterProcessTest extends H2HJUnitTest {
 				new Locations(credentials.getUserId()), null);
 		putLocations.awaitUninterruptibly();
 		putLocations.getFutureRequests().awaitUninterruptibly();
-		
+
 		assertTrue(putLocations.isSuccess());
 
-		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, profile, client);
+		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
+				profile, client);
 		ProcessListener listener = new ProcessListener();
 		registerProcess.attachListener(listener);
 		registerProcess.start();

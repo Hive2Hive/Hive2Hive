@@ -8,30 +8,29 @@ public abstract class ProcessStep extends ProcessComponent {
 	@Override
 	public final void join() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected final void doPause() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected final void doResumeExecution() throws InvalidProcessStateException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected final void doResumeRollback() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason)
-			throws InvalidProcessStateException {
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		// do nothing by default
 	}
 

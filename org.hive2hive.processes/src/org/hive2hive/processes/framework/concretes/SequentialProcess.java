@@ -26,26 +26,26 @@ public class SequentialProcess extends Process {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-				
+
 		while (executionIndex < components.size() && getState() == ProcessState.RUNNING) {
-			
+
 			ProcessComponent next = components.get(executionIndex);
 			next.start();
 			executionIndex++;
 		}
-		
+
 	}
 
 	@Override
 	protected void doPause() {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	protected void doResumeExecution() throws InvalidProcessStateException {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	protected void doResumeRollback() {
 		// TODO Auto-generated method stub
@@ -55,10 +55,10 @@ public class SequentialProcess extends Process {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 
 		// reason component rolls itself back before notifying parent component
-		rollbackIndex = executionIndex; 
-		
+		rollbackIndex = executionIndex;
+
 		while (rollbackIndex >= 0 && getState() == ProcessState.ROLLBACKING) {
-			
+
 			ProcessComponent last = components.get(rollbackIndex);
 			last.cancel(reason);
 			rollbackIndex--;
@@ -75,7 +75,7 @@ public class SequentialProcess extends Process {
 	protected void doInsert(int index, ProcessComponent component) {
 		components.add(index, component);
 	}
-	
+
 	@Override
 	protected void doRemove(ProcessComponent component) {
 		components.remove(component);
@@ -83,8 +83,8 @@ public class SequentialProcess extends Process {
 
 	@Override
 	public List<ProcessComponent> getComponents() {
-		
+
 		return Collections.unmodifiableList(components);
 	}
-	
+
 }

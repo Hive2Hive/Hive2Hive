@@ -14,8 +14,7 @@ import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
 public abstract class ProcessComponent implements IProcessComponent {
 
-	private static final H2HLogger logger = H2HLoggerFactory
-			.getLogger(ProcessComponent.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ProcessComponent.class);
 
 	private final String id;
 	private double progress;
@@ -43,8 +42,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
 
-		logger.debug(String.format("Executing '%s'.", this.getClass()
-				.getSimpleName()));
+		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 		doExecute();
 
 		// TODO set leafs to succeeded when composite succeeded
@@ -78,8 +76,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public final void cancel(RollbackReason reason)
-			throws InvalidProcessStateException {
+	public final void cancel(RollbackReason reason) throws InvalidProcessStateException {
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
@@ -88,11 +85,11 @@ public abstract class ProcessComponent implements IProcessComponent {
 		if (parent != null && parent.getState() != ProcessState.ROLLBACKING) {
 			getParent().cancel(reason);
 		} else {
-			
+
 			// no parent or called from parent
 			state = ProcessState.ROLLBACKING;
-			logger.debug(String.format("Rolling back '%s'. Reason: %s", this
-					.getClass().getSimpleName(), reason.getMessage()));
+			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
+					reason.getMessage()));
 
 			doRollback(reason);
 		}
@@ -134,13 +131,11 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	protected abstract void doPause();
 
-	protected abstract void doResumeExecution()
-			throws InvalidProcessStateException;
+	protected abstract void doResumeExecution() throws InvalidProcessStateException;
 
 	protected abstract void doResumeRollback();
 
-	protected abstract void doRollback(RollbackReason reason)
-			throws InvalidProcessStateException;
+	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);

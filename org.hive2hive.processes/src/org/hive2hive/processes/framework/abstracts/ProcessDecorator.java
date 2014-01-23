@@ -2,7 +2,6 @@ package org.hive2hive.processes.framework.abstracts;
 
 import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
-
 public abstract class ProcessDecorator extends ProcessComponent {
 
 	protected final ProcessComponent decoratedComponent;
@@ -10,7 +9,7 @@ public abstract class ProcessDecorator extends ProcessComponent {
 	public ProcessDecorator(ProcessComponent decoratedComponent) {
 		this.decoratedComponent = decoratedComponent;
 	}
-	
+
 	@Override
 	public void attachListener(IProcessComponentListener listener) {
 		super.attachListener(listener);
@@ -22,5 +21,5 @@ public abstract class ProcessDecorator extends ProcessComponent {
 		super.detachListener(listener);
 		decoratedComponent.attachListener(listener);
 	}
-	
+
 }

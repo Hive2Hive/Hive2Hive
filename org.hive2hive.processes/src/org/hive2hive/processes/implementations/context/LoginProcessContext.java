@@ -10,11 +10,13 @@ import org.hive2hive.processes.implementations.context.interfaces.IProvideLocati
 import org.hive2hive.processes.implementations.context.interfaces.IProvideSession;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideUserProfile;
 
-public class LoginProcessContext implements IProvideUserProfile, IConsumeUserProfile, IProvideSession, IConsumeSession, IProvideLocations, IConsumeLocations {
+public class LoginProcessContext implements IProvideUserProfile, IConsumeUserProfile, IProvideSession,
+		IConsumeSession, IProvideLocations, IConsumeLocations {
 
 	private UserProfile profile;
 	private H2HSession session;
 	private Locations locations;
+	private boolean isMaster;
 
 	@Override
 	public void provideUserProfile(UserProfile profile) {
@@ -44,6 +46,14 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 	@Override
 	public Locations consumeLocations() {
 		return locations;
+	}
+	
+	public void setIsMaster(boolean isMaster) {
+		this.isMaster = isMaster;
+	}
+	
+	public boolean getIsMaster() {
+		return isMaster;
 	}
 
 }

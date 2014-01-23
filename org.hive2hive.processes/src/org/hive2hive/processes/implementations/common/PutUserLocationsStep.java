@@ -1,70 +1,46 @@
 package org.hive2hive.processes.implementations.common;
 
-import java.security.KeyPair;
+import java.io.IOException;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.processes.framework.ProcessUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BasePutProcessStep;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeLocations;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeUserProfile;
 
 public class PutUserLocationsStep extends BasePutProcessStep {
 
-	private final Locations locations;
-	private final KeyPair protectionKeys;
+	private final IConsumeLocations locationsContext;
+	private final IConsumeUserProfile profileContext;
 
-	private boolean isPutCompleted;
-	private boolean isPutFailed;
-
-	public PutUserLocationsStep(Locations locations, KeyPair protectionKeys,
-			NetworkManager networkManager) {
+	public PutUserLocationsStep(IConsumeLocations locationsContext, IConsumeUserProfile profileContext, NetworkManager networkManager) {
 		super(networkManager);
-		this.protectionKeys = protectionKeys;
-		this.locations = locations;
+		this.locationsContext = locationsContext;
+		this.profileContext = profileContext;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
-		locations.setBasedOnKey(locations.getVersionKey());
-		locations.generateVersionKey();
-
-		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations,
-				protectionKeys);
-
-		// wait for PUT to complete
-		while (isPutCompleted == false) {
-			ProcessUtil.wait(this);
-		}
+		Locations locations = locationsContext.consumeLocations();
 		
-		if (isPutFailed) {
+		locations.setBasedOnKey(locations.getVersionKey());
+		try {
+			locations.generateVersionKey();
+		} catch (IOException e) {
+			cancel(new RollbackReason(this, "Could not generate version key."));
+			return;
+		}
+
+		try {
+			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, profileContext.consumeUserProfile().getProtectionKeys());
+		} catch (PutFailedException e) {
 			cancel(new RollbackReason(this, "Put failed."));
 		}
-	}
-
-	@Override
-	public void onPutSuccess() {
-		isPutCompleted = true;
-	}
-
-	@Override
-	public void onPutFailure() {
-		isPutCompleted = true;
-		isPutFailed = true;
-	}
-
-	@Override
-	public void onRemoveSuccess() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onRemoveFailure() {
-		// TODO Auto-generated method stub
-
 	}
 
 }
