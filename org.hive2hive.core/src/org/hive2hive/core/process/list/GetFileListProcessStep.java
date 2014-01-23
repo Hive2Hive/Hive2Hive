@@ -50,7 +50,8 @@ public class GetFileListProcessStep extends ProcessStep {
 	}
 
 	private void walkTrough(FileTreeNode node, List<Path> digest) {
-		digest.add(node.getFullPath());
+		if (!node.isRoot())
+			digest.add(node.getFullPath());
 
 		for (FileTreeNode child : node.getChildren()) {
 			walkTrough(child, digest);
