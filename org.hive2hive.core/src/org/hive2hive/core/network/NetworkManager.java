@@ -14,7 +14,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
@@ -80,12 +79,11 @@ public class NetworkManager {
 	 * Helper method that returns the public key of the currently logged in user
 	 */
 	public PublicKey getPublicKey() {
-		if (session == null)
+		try {
+			return getPublicKey(getUserId());
+		} catch (GetFailedException e) {
 			return null;
-		if (publicKeyManager == null)
-			publicKeyManager = new PublicKeyManager(session.getCredentials().getUserId(),
-					session.getKeyPair(), dataManager);
-		return publicKeyManager.getUsersPublicKey();
+		}
 	}
 
 	/**
@@ -181,15 +179,14 @@ public class NetworkManager {
 	 *            the message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @param listener
-	 *            a listener which gets notified about success or failure of sending
+	 * @return success or failure
 	 */
-	public void send(BaseMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
+	public boolean send(BaseMessage message, PublicKey targetPublicKey) {
 		if (!connection.isConnected()) {
 			logger.warn("Node is not connected!");
-			return;
+			return false;
 		}
-		messageManager.send(message, targetPublicKey, listener);
+		return messageManager.send(message, targetPublicKey);
 	}
 
 	/**
@@ -201,15 +198,14 @@ public class NetworkManager {
 	 *            the message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
-	 * @param listener
-	 *            a listener which gets notified about success or failure of sending
+	 * @return success or failure
 	 */
-	public void sendDirect(BaseDirectMessage message, PublicKey targetPublicKey, IBaseMessageListener listener) {
+	public boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
 		if (!connection.isConnected()) {
 			logger.warn("Node is not connected!");
-			return;
+			return false;
 		}
-		messageManager.sendDirect(message, targetPublicKey, listener);
+		return messageManager.sendDirect(message, targetPublicKey);
 	}
 
 	public DataManager getDataManager() {

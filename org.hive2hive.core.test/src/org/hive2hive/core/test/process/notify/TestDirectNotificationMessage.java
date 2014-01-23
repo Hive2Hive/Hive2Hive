@@ -34,7 +34,7 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 		// put for verification
 		networkManager.getDataManager().put(Number160.createHash(verificationLoc),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(verificationContentKey),
-				verificationData, null);
+				verificationData, null).awaitUninterruptibly();
 	}
 
 	@Override
@@ -42,12 +42,4 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 		return AcceptanceReply.OK;
 	}
 	
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 }

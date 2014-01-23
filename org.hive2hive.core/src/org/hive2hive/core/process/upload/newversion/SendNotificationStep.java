@@ -23,11 +23,12 @@ public class SendNotificationStep extends ProcessStep {
 		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
 
 		Set<String> userList = new HashSet<String>();
+		userList.add(getNetworkManager().getUserId());
 		if (metaFolder != null) {
 			userList.addAll(metaFolder.getUserList());
 		}
 
-		getProcess().notfyOtherUsers(userList, new UploadNotificationMessageFactory(modifiedFileKey));
+		getProcess().sendNotification(new UploadNotificationMessageFactory(modifiedFileKey), userList);
 		getProcess().setNextStep(null);
 	}
 

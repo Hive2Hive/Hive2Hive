@@ -1,11 +1,14 @@
 package org.hive2hive.core.process.register;
 
+import java.io.IOException;
+
 import javax.crypto.SecretKey;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.process.ProcessStep;
@@ -27,11 +30,12 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	protected UserProfile userProfile;
 	private final UserCredentials credentials;
+	private final ProcessStep nextStep;
 
 	public PutUserProfileStep(UserProfile profile, UserCredentials credentials, ProcessStep nextStep) {
-		super(nextStep);
 		this.userProfile = profile;
 		this.credentials = credentials;
+		this.nextStep = nextStep;
 	}
 
 	@Override
@@ -44,10 +48,14 @@ public class PutUserProfileStep extends BasePutProcessStep {
 					encryptionKey);
 			logger.debug("Putting UserProfile into the DHT");
 			encryptedUserProfile.generateVersionKey();
-			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile, userProfile.getProtectionKeys());
-		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedUserProfile,
+					userProfile.getProtectionKeys());
+			getProcess().setNextStep(nextStep);
+		} catch (IOException | DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 			logger.error("Cannot encrypt the user profile.", e);
 			getProcess().stop("User profile could not be encrypted. Reason: " + e.getMessage());
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
 		}
 	}
 }

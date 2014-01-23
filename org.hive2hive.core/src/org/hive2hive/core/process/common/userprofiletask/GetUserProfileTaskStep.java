@@ -7,7 +7,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.context.IGetUserProfileTaskContext;
@@ -19,13 +18,13 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public class GetUserProfileTaskStep extends ProcessStep implements IGetListener {
+public class GetUserProfileTaskStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserProfileTaskStep.class);
 
 	private final IGetUserProfileTaskContext context;
 	private final ProcessStep nextStep;
-	
+
 	private String userId;
 
 	public GetUserProfileTaskStep(IGetUserProfileTaskContext context, ProcessStep nextStep) {
@@ -52,19 +51,8 @@ public class GetUserProfileTaskStep extends ProcessStep implements IGetListener 
 		}
 
 		logger.debug(String.format("Get the next user profile task of user '%s'.", userId));
+		NetworkContent content = dataManager.getUserProfileTask(userId);
 
-		dataManager.getUserProfileTask(userId, this);
-	}
-
-	@Override
-	public void rollBack() {
-		context.setEncryptedUserProfileTask(null);
-		context.setUserProfileTask(null);
-		getProcess().nextRollBackStep();
-	}
-
-	@Override
-	public void handleGetResult(NetworkContent content) {
 		if (content == null) {
 			logger.warn(String.format("Did not get an user profile task. user id = '%s'", userId));
 			context.setEncryptedUserProfileTask(null);
@@ -77,9 +65,11 @@ public class GetUserProfileTaskStep extends ProcessStep implements IGetListener 
 				PrivateKey key = getNetworkManager().getSession().getKeyPair().getPrivate();
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, key);
 				context.setUserProfileTask((UserProfileTask) decrypted);
-				logger.debug(String.format("Successfully decrypted an user profile task. user id = '%s'", userId));
+				logger.debug(String.format("Successfully decrypted an user profile task. user id = '%s'",
+						userId));
 			} catch (Exception e) {
-				logger.error(String.format("Cannot decrypt the user profile task. reason = '%s' user id = '%s'", e, userId));
+				logger.error(String.format(
+						"Cannot decrypt the user profile task. reason = '%s' user id = '%s'", e, userId));
 				context.setEncryptedUserProfileTask(null);
 				context.setUserProfileTask(null);
 			}
@@ -88,4 +78,10 @@ public class GetUserProfileTaskStep extends ProcessStep implements IGetListener 
 		getProcess().setNextStep(nextStep);
 	}
 
+	@Override
+	public void rollBack() {
+		context.setEncryptedUserProfileTask(null);
+		context.setUserProfileTask(null);
+		getProcess().nextRollBackStep();
+	}
 }

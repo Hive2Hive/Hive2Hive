@@ -5,9 +5,10 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.notify.INotificationMessageFactory;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 
-public class MoveNotificationMessageFactory implements INotificationMessageFactory {
+public class MoveNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final String sourceFileName;
 	private final String destFileName;
@@ -31,7 +32,12 @@ public class MoveNotificationMessageFactory implements INotificationMessageFacto
 	}
 
 	@Override
-	public BaseDirectMessage createNotificationMessage(PeerAddress receiver, String userId) {
+	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
 		return new MoveNotificationMessage(receiver, sourceFileName, destFileName, oldParent, newParent);
+	}
+
+	@Override
+	public UserProfileTask createUserProfileTask() {
+		return new MoveUserProfileTask(sourceFileName, destFileName, oldParent, newParent);
 	}
 }

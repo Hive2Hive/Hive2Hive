@@ -20,19 +20,24 @@ import org.hive2hive.core.process.ProcessManager;
  * 
  * @author Seppi
  */
+// TODO this message is used for the new user and for the already existing users. The difference can be made
+// by comparing the 'addedUser' field to the own user id.
 public class ShareFolderNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 2507386739362186163L;
-	
+
 	private final static Logger logger = H2HLoggerFactory.getLogger(ShareFolderNotificationMessage.class);
-	
+
 	private final PublicKey metaFolderId;
 	private final KeyPair domainKey;
+	private final String addedUser;
 
-	public ShareFolderNotificationMessage(PeerAddress targetAddress, PublicKey metaFolderId, KeyPair domainKey) {
+	public ShareFolderNotificationMessage(PeerAddress targetAddress, PublicKey metaFolderId,
+			KeyPair domainKey, String addedUser) {
 		super(targetAddress);
 		this.metaFolderId = metaFolderId;
 		this.domainKey = domainKey;
+		this.addedUser = addedUser;
 	}
 
 	@Override
@@ -45,7 +50,7 @@ public class ShareFolderNotificationMessage extends BaseDirectMessage {
 			UserProfile userProfile = profileManager.getUserProfile(pid, true);
 
 			FileTreeNode fileNode = userProfile.getFileById(metaFolderId);
-			
+
 			if (fileNode == null) {
 				logger.error("Can't find a file node under the given id (public key).");
 				return;
@@ -67,14 +72,10 @@ public class ShareFolderNotificationMessage extends BaseDirectMessage {
 			logger.debug("Updating the domain key in the user profile");
 			profileManager.readyToPut(userProfile, pid);
 		} catch (GetFailedException | PutFailedException | NoSessionException e) {
-			logger.error(String.format("Updating user profile failed (new users enters a sharing folder). reason = '%s'", e));
+			logger.error(String.format(
+					"Updating user profile failed (new users enters a sharing folder). reason = '%s'", e));
 			return;
 		}
 	}
 
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		// TODO fix this verification
-		return true;
-	}
 }

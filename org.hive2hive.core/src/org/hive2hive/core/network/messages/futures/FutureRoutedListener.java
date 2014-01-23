@@ -2,6 +2,7 @@ package org.hive2hive.core.network.messages.futures;
 
 import java.security.PublicKey;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureSend;
@@ -11,50 +12,82 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.MessageManager;
 
 /**
  * Use this future adapter when sending a {@link BaseMessage}. Attach this listener to the future which gets
- * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling and notifying
- * {@link IBaseMessageListener} listeners. In case of a successful sending
- * {@link IBaseMessageListener#onSuccess()} gets called. In case of a failed sending
- * {@link IBaseMessageListener#onFailure()} gets called. </br></br>
+ * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling. Use the
+ * {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
+ * not).</br></br>
  * <b>Failure Handling</b></br>
  * Sending a message can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link AcceptanceReply} for possible failures. If sending of a
  * message fails the message gets re-send as long as {@link BaseMessage#handleSendingFailure(AcceptanceReply)}
- * of the sent message recommends to re-send. Because all re-sends are also asynchronous the future
- * listener attaches himself to the new future objects so that the adapter can finally notify his/her listener
- * about a success or failure.
+ * of the sent message recommends to re-send.
+ * Note that resending must happen in the same thread as the {@link FutureRoutedListener#await()} method is
+ * called because the callback threads should not be used for further long-calling procedures.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureRoutedListener.class);
 
-	private final IBaseMessageListener listener;
 	private final BaseMessage message;
 	private final PublicKey receiverPublicKey;
 	private final NetworkManager networkManager;
+	private final CountDownLatch latch;
+	private DeliveryState state;
+
+	private enum DeliveryState {
+		SUCCESS,
+		ERROR,
+		RESEND
+	}
 
 	/**
 	 * Constructor for a future adapter.
 	 * 
-	 * @param listener
-	 *            listener which gets notified when sending succeeded or failed
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
-	public FutureRoutedListener(IBaseMessageListener listener, BaseMessage message,
-			PublicKey receiverPublicKey, NetworkManager networkManager) {
-		this.listener = listener;
+	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey,
+			NetworkManager networkManager) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
 		this.networkManager = networkManager;
+		this.latch = new CountDownLatch(1);
+	}
+
+	/**
+	 * Wait (blocking) until the message is sent
+	 * 
+	 * @return true if successful, false if not successful
+	 */
+	public boolean await() {
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			logger.error("Could not wait until the message is sent successfully");
+		}
+
+		switch (state) {
+			case SUCCESS:
+				// successfully delivered the message
+				return true;
+			case ERROR:
+				// failed to deliver message. Resend not recommended
+				return false;
+			case RESEND:
+				// resend is recommended
+				return networkManager.send(message, receiverPublicKey);
+			default:
+				// invalid state
+				logger.error("The sending procedure has not finished, but the lock has already been released");
+				return false;
+		}
 	}
 
 	@Override
@@ -62,18 +95,21 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 		AcceptanceReply reply = extractAcceptanceReply(future);
 		if (reply == AcceptanceReply.OK) {
 			// notify the listener about the success of sending the message
-			if (listener != null)
-				listener.onSuccess();
+			state = DeliveryState.SUCCESS;
+			latch.countDown();
 		} else {
 			// check if a re-send is necessary / wished
 			boolean resending = message.handleSendingFailure(reply);
 			if (resending) {
 				// re-send the message
-				networkManager.send(message, receiverPublicKey, listener);
+				logger.debug("Try to resend the message");
+				state = DeliveryState.RESEND;
+				latch.countDown();
 			} else {
 				// notify the listener about the fail of sending the message
-				if (listener != null)
-					listener.onFailure();
+				logger.debug("No resend of the message. It failed");
+				state = DeliveryState.ERROR;
+				latch.countDown();
 			}
 		}
 	}

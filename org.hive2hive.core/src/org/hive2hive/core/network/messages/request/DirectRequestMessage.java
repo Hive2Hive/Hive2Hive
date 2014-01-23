@@ -35,8 +35,8 @@ public abstract class DirectRequestMessage extends BaseDirectMessage implements 
 	public final ResponseMessage createResponse(Serializable content) {
 		return new ResponseMessage(messageID, senderAddress, content);
 	}
-	
+
 	public void sendDirectResponse(ResponseMessage response) {
-		networkManager.sendDirect(response, getSenderPublicKey(), null);
+		networkManager.sendDirect(response, getSenderPublicKey());
 	}
 }

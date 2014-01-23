@@ -324,7 +324,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void serializationTest() {
+	public void serializationTest() throws IOException, ClassNotFoundException {
 
 		String data = generateRandomString(1000);
 		logger.debug("Testing data serialization.");

@@ -98,22 +98,24 @@ public class RelinkUserProfileStep extends ProcessStep {
 				common.add(user);
 		}
 
+		PublicKey fileKey = movedNode.getKeyPair().getPublic();
+
 		// inform common users
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
 		PublicKey newParentKey = movedNode.getParent().getKeyPair().getPublic();
-		getProcess().notfyOtherUsers(common,
-				new MoveNotificationMessageFactory(sourceName, destName, oldParentKey, newParentKey));
+		getProcess().sendNotification(
+				new MoveNotificationMessageFactory(sourceName, destName, oldParentKey, newParentKey), common);
 
 		// inform users that don't have access to the new destination anymore
 		logger.debug("Inform " + source.size() + " users that a file has been removed (after movement)");
 		source.removeAll(common);
-		getProcess().notfyOtherUsers(source, new DeleteNotifyMessageFactory(oldParentKey, sourceName));
+		getProcess().sendNotification(new DeleteNotifyMessageFactory(fileKey, oldParentKey, sourceName),
+				source);
 
 		// inform users that have now access to the moved file
 		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
 		destination.removeAll(common);
-		getProcess().notfyOtherUsers(destination,
-				new UploadNotificationMessageFactory(movedNode.getKeyPair().getPublic()));
+		getProcess().sendNotification(new UploadNotificationMessageFactory(fileKey), destination);
 	}
 
 	@Override

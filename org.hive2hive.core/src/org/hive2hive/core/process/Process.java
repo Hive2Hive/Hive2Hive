@@ -6,13 +6,12 @@ import java.util.Set;
 
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalProcessStateException;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.notify.INotificationMessageFactory;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.process.notify.NotifyPeersProcess;
 
 /**
@@ -208,34 +207,11 @@ public abstract class Process implements IProcess {
 	}
 
 	/**
-	 * Notify the clients of the same user
+	 * Notify the other clients of the same users, other users, ... Configure this in the
+	 * {@link BaseNotificationMessageFactory}
 	 */
-	public void notifyOtherClients(INotificationMessageFactory messageFactory) {
-		try {
-			logger.debug("Start notifying other clients of same user");
-			NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory);
-			notifyProcess.start();
-		} catch (NoSessionException e) {
-			logger.error("Could not notify all my clients since I don't have a session");
-		}
-	}
-
-	/**
-	 * Notify all clients of an users
-	 */
-	public void notifyOtherUser(String userId, INotificationMessageFactory messageFactory) {
-		logger.debug(String.format("Start notifiying clients of user '%s'", userId));
-		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userId, messageFactory);
-		notifyProcess.start();
-	}
-
-	/**
-	 * Notify all clients of multiple users
-	 */
-	public void notfyOtherUsers(Set<String> userIds, INotificationMessageFactory messageFactory) {
-		logger.debug("Start notifying " + userIds.size() + " users");
-		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), userIds,
-				messageFactory);
+	public void sendNotification(BaseNotificationMessageFactory messageFactory, Set<String> users) {
+		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory, users);
 		notifyProcess.start();
 	}
 

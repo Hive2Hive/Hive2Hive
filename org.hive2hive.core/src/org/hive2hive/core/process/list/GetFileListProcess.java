@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.digest;
+package org.hive2hive.core.process.list;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -13,19 +13,19 @@ import org.hive2hive.core.process.Process;
  * 
  * @author Seppi
  */
-public class GetDigestProcess extends Process implements IGetFileListProcess {
+public class GetFileListProcess extends Process implements IGetFileListProcess {
 
-	private final GetDigestContext context;
+	private final GetFileListContext context;
 
-	public GetDigestProcess(NetworkManager networkManager) throws NoSessionException {
+	public GetFileListProcess(NetworkManager networkManager) throws NoSessionException {
 		super(networkManager);
 		if (networkManager.getSession() == null) {
 			throw new NoSessionException();
 		}
 
-		context = new GetDigestContext(this);
+		context = new GetFileListContext(this);
 
-		setNextStep(new GetDigestProcessStep());
+		setNextStep(new GetFileListProcessStep());
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class GetDigestProcess extends Process implements IGetFileListProcess {
 	}
 
 	@Override
-	public GetDigestContext getContext() {
+	public GetFileListContext getContext() {
 		return context;
 	}
 

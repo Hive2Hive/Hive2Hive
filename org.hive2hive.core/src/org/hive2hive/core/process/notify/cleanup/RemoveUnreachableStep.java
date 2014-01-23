@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.notify.cleanup;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Set;
 
@@ -7,6 +8,7 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 
@@ -21,7 +23,6 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 	private Set<PeerAddress> unreachablePeers;
 
 	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers) {
-		super(null);
 		this.unreachablePeers = unreachablePeers;
 	}
 
@@ -43,9 +44,19 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 		}
 
 		locations.setBasedOnKey(locations.getVersionKey());
-		locations.generateVersionKey();
+		
+		try {
+			locations.generateVersionKey();
+		} catch (IOException e) {
+			getProcess().stop(e);
+		}
 
-		put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
+		try {
+			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
+			getProcess().setNextStep(null);
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
+		}
 	}
 
 }

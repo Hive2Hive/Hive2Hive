@@ -1,11 +1,20 @@
 package org.hive2hive.core.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+import org.apache.log4j.Logger;
+import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.FileTreeNode;
 
 public class FileUtil {
+
+	private final static Logger logger = H2HLoggerFactory.getLogger(FileUtil.class);
 
 	private FileUtil() {
 		// only static methods
@@ -34,5 +43,40 @@ public class FileUtil {
 				// ignore
 			}
 		}
+	}
+
+	/**
+	 * Move a file according to their nodes. This operation also support renaming and moving in the same step.
+	 * 
+	 * @param sourceName the name of the file at the source
+	 * @param destName the name of the file at the destination
+	 * @param oldParent the old parent {@link FileTreeNode}
+	 * @param newParent the new parent {@link FileTreeNode}
+	 * @param fileManager the {@link FileManager} of the user
+	 * @throws IOException when moving went wrong
+	 */
+	public static void moveFile(String sourceName, String destName, FileTreeNode oldParent,
+			FileTreeNode newParent, FileManager fileManager) throws IOException {
+		// find the file of this user on the disc
+		File oldParentFile = fileManager.getPath(oldParent).toFile();
+		File toMoveSource = new File(oldParentFile, sourceName);
+
+		if (!toMoveSource.exists()) {
+			throw new FileNotFoundException("Cannot move file '" + toMoveSource.getAbsolutePath()
+					+ "' because it's not at the source location anymore");
+		}
+
+		File newParentFile = fileManager.getPath(newParent).toFile();
+		File toMoveDest = new File(newParentFile, destName);
+
+		if (toMoveDest.exists()) {
+			logger.warn("Overwriting '" + toMoveDest.getAbsolutePath()
+					+ "' because file has been moved remotely");
+		}
+
+		// move the file
+		Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+		logger.debug("Successfully moved the file from " + toMoveSource.getAbsolutePath() + " to "
+				+ toMoveDest.getAbsolutePath());
 	}
 }

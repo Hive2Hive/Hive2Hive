@@ -1,16 +1,22 @@
 package org.hive2hive.core.test.process.notify;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.notify.INotificationMessageFactory;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.common.userprofiletask.TestUserProfileTask;
+import org.junit.Assert;
 
 /**
  * Simple message factory for testing. It counts the received messages by checking whether the
@@ -19,7 +25,7 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
  * @author Nico
  * 
  */
-public class CountingNotificationMessageFactory implements INotificationMessageFactory {
+public class CountingNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final NetworkManager sender;
 	private final List<String> testContentKeys;
@@ -28,13 +34,6 @@ public class CountingNotificationMessageFactory implements INotificationMessageF
 	public CountingNotificationMessageFactory(NetworkManager sender) {
 		this.sender = sender;
 		testContentKeys = new ArrayList<String>();
-	}
-
-	@Override
-	public BaseDirectMessage createNotificationMessage(PeerAddress receiver, String userId) {
-		String contentKey = NetworkTestUtil.randomString();
-		testContentKeys.add(contentKey);
-		return new TestDirectNotificationMessage(receiver, sender.getNodeId(), contentKey, data);
 	}
 
 	public boolean allMsgsArrived() {
@@ -48,18 +47,42 @@ public class CountingNotificationMessageFactory implements INotificationMessageF
 	public int getArrivedMessageCount() {
 		int counter = 0;
 		for (String contentKey : testContentKeys) {
-			NetworkContent content = sender.getDataManager().getLocal(sender.getNodeId(), contentKey);
-			if (content == null) {
+			FutureGet futureGet = sender.getDataManager().get(Number160.createHash(sender.getNodeId()),
+					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+			futureGet.awaitUninterruptibly();
+			if (futureGet.getData() == null) {
 				continue;
 			}
 
-			H2HTestData gotData = (H2HTestData) content;
-			if (gotData.getTestString().equalsIgnoreCase(data.getTestString())) {
-				counter++;
+			try {
+				H2HTestData gotData = (H2HTestData) futureGet.getData().object();
+				if (gotData.getTestString().equalsIgnoreCase(data.getTestString())) {
+					counter++;
+				}
+			} catch (ClassNotFoundException | IOException e) {
+				Assert.fail();
 			}
 		}
 
 		return counter;
+	}
+
+	@Override
+	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
+		String contentKey = NetworkTestUtil.randomString();
+		testContentKeys.add(contentKey);
+		return new TestDirectNotificationMessage(receiver, sender.getNodeId(), contentKey, data);
+	}
+
+	@Override
+	public UserProfileTask createUserProfileTask() {
+		return new TestUserProfileTask();
+	}
+
+	@Override
+	public BaseDirectMessage createHintNotificationMessage(PeerAddress receiver, String userId) {
+		// trick a little bit: send the same message to other users. We are able to control the arrival.
+		return createPrivateNotificationMessage(receiver);
 	}
 
 }

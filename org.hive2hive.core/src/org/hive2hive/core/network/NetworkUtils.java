@@ -56,6 +56,8 @@ public class NetworkUtils {
 	 *         the peer address with the lowest node id
 	 */
 	public static PeerAddress choseFirstPeerAddress(List<PeerAddress> list) {
+		if (list == null || list.isEmpty())
+			return null;
 		Collections.sort(list, new PeerAddressComperator());
 		return list.get(0);
 	}

@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.digest;
+package org.hive2hive.core.test.process.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,7 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.digest.IGetFileListProcess;
+import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
@@ -28,7 +28,7 @@ import org.junit.Test;
  * @author Seppi
  * 
  */
-public class GetDigestTest extends H2HJUnitTest {
+public class GetFileListTest extends H2HJUnitTest {
 
 	private final static int networkSize = 3;
 	private final TestFileConfiguration config = new TestFileConfiguration();
@@ -41,7 +41,7 @@ public class GetDigestTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = GetDigestTest.class;
+		testClass = GetFileListTest.class;
 		beforeClass();
 
 		/** create a network, register a user **/

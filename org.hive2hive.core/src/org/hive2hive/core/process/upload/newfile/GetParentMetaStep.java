@@ -1,6 +1,7 @@
 package org.hive2hive.core.process.upload.newfile;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -18,6 +19,7 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.common.get.BaseGetProcessStep;
 import org.hive2hive.core.process.common.put.PutMetaDocumentStep;
 import org.hive2hive.core.process.upload.PutChunkStep;
@@ -50,17 +52,21 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 			// no parent to update since the file is in root
 			logger.debug("File '" + file.getName()
 					+ "' is in root; skip getting the parent meta folder and update the profile directly");
-			KeyPair protectionKeys;
+
 			try {
-				protectionKeys = context.getH2HSession().getProfileManager().getDefaultProtectionKey();
+				KeyPair protectionKeys = context.getH2HSession().getProfileManager()
+						.getDefaultProtectionKey();
 				context.setProtectionKeys(protectionKeys);
 			} catch (GetFailedException e) {
-				getProcess().stop(e);
+				getProcess().stop("Default protection keys not found");
 				return;
 			}
-			getProcess().setNextStep(
-					new PutChunkStep(new PutMetaDocumentStep(context.getNewMetaDocument(), protectionKeys,
-							new UpdateUserProfileStep())));
+
+			ProcessStep third = new UpdateUserProfileStep();
+			ProcessStep second = new PutMetaDocumentStep(context.getNewMetaDocument(),
+					context.getProtectionKeys(), third);
+			ProcessStep first = new PutChunkStep(second);
+			getProcess().setNextStep(first);
 		} else {
 			// when file is not in root, the parent meta folder must be found
 			logger.debug("File '" + file.getName()
@@ -82,15 +88,16 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 				// 2. update the parent meta document
 				// 3. update the user profile
 				parentsKeyPair = parentNode.getKeyPair();
-				get(key2String(parentNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
+				NetworkContent content = get(key2String(parentNode.getKeyPair().getPublic()),
+						H2HConstants.META_DOCUMENT);
+				evaluateResult(content);
 			} catch (Exception e) {
 				getProcess().stop(e);
 			}
 		}
 	}
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
+	private void evaluateResult(NetworkContent content) throws Exception {
 		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
 		if (content == null) {
 			logger.error("Meta document not found.");
@@ -107,19 +114,20 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 				decrypted.setBasedOnKey(content.getBasedOnKey());
 				context.setMetaDocument((MetaDocument) decrypted);
 				logger.debug("Successfully decrypted meta document");
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
-					| BadPaddingException | IllegalStateException | InvalidCipherTextException
-					| IllegalArgumentException e) {
+			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException
+					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
+					| InvalidCipherTextException | IllegalArgumentException e) {
 				logger.error("Cannot decrypt the meta document.", e);
 				context.setMetaDocument(null);
-				getProcess().stop(e);
-				return;
+				throw e;
 			}
 		}
-		// continue with next step
-		getProcess().setNextStep(
-				new PutChunkStep(new PutMetaDocumentStep(context.getNewMetaDocument(), context
-						.getProtectionKeys(), new UpdateParentMetaStep())));
-	}
 
+		// continue with next steps
+		ProcessStep third = new UpdateParentMetaStep();
+		ProcessStep second = new PutMetaDocumentStep(context.getNewMetaDocument(),
+				context.getProtectionKeys(), third);
+		ProcessStep first = new PutChunkStep(second);
+		getProcess().setNextStep(first);
+	}
 }

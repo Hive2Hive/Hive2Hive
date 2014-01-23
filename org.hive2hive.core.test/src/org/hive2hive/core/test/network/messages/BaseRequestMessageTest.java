@@ -1,11 +1,16 @@
 package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
+import net.tomp2p.futures.FutureGet;
+import net.tomp2p.peers.Number160;
+
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -16,9 +21,7 @@ import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.network.messages.TestMessageWithReply.TestCallBackHandler;
 import org.hive2hive.core.test.network.messages.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,19 +34,13 @@ import org.junit.Test;
 public class BaseRequestMessageTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
+	private static final int networkSize = 5;
 	private static Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = BaseRequestMessageTest.class;
 		beforeClass();
-	}
-
-	@Override
-	@Before
-	public void beforeMethod() {
-		super.beforeMethod();
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkTestUtil.createSameKeyPair(network);
 	}
@@ -57,38 +54,43 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * node A handles the received response message and also locally puts the received secret into the DHT
 	 * (location key is node A's node id). Every think went right when under both location keys the same data
 	 * appears.
+	 * 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithReply() {
+	public void testSendingAnAsynchronousMessageWithReply() throws ClassNotFoundException, IOException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
-		// check if selected locations are empty
-		assertNull(nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey));
-		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
 		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
+
 		// send message
-		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
+		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
-		Object tmp = null;
+		FutureGet futureGet = null;
 		do {
 			w.tickASecond();
-			tmp = nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey);
-		} while (tmp == null);
+			futureGet = nodeB.getDataManager().get(Number160.createHash(nodeA.getNodeId()),
+					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+			futureGet.awaitUninterruptibly();
+		} while (futureGet.getData() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey))
-				.getTestString();
-
+		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		futureGet = nodeB.getDataManager().get(Number160.createHash(nodeB.getNodeId()),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
+		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 
@@ -96,51 +98,51 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * This tests sends a message with a request asynchronously to the target node. The response message (sent
 	 * from the responding node) is configured in a way that it will be blocked on the target node (requesting
 	 * node) till the maximum allowed numbers of retrying to send the very message is reached.
+	 * 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode() {
+	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode()
+			throws ClassNotFoundException, IOException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
-		// check if selected locations are empty
-		assertNull(nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey));
-		assertNull(nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey));
 		// create a message with target node B
 		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(),
 				contentKey);
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
+
 		// send message
-		nodeA.send(message, nodeB.getPublicKey(), new TestBaseMessageListener());
+		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
-		Object tmp = null;
+		FutureGet futureGet = null;
 		do {
 			w.tickASecond();
-			tmp = nodeA.getDataManager().getLocal(nodeA.getNodeId(), contentKey);
-		} while (tmp == null);
+			futureGet = nodeB.getDataManager().get(Number160.createHash(nodeA.getNodeId()),
+					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+			futureGet.awaitUninterruptibly();
+		} while (futureGet.getData() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) tmp).getTestString();
-		String originalSecret = ((H2HTestData) nodeB.getDataManager().getLocal(nodeB.getNodeId(), contentKey))
-				.getTestString();
-
+		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		futureGet = nodeB.getDataManager().get(Number160.createHash(nodeB.getNodeId()),
+				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet.awaitUninterruptibly();
+		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
-	}
-
-	@Override
-	@After
-	public void afterMethod() {
-		NetworkTestUtil.shutdownNetwork(network);
-		super.afterMethod();
 	}
 
 	@AfterClass
 	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 

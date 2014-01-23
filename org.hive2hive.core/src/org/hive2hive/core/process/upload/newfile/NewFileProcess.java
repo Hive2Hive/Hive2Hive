@@ -41,12 +41,10 @@ public class NewFileProcess extends Process {
 
 		context = new NewFileProcessContext(this, file, session);
 
-		// TODO shared files not considered yet
-
 		// 1. validate file size, split the file content, encrypt it and upload it to the DHT
 		// 2. create the meta document
-		// 3. 
-		
+		// 3.
+
 		// 2. get the parent meta document
 		// 3. put the new meta file
 		// 4. update the parent meta document

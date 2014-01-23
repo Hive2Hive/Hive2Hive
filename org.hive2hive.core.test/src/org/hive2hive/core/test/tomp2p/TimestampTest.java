@@ -2,7 +2,6 @@ package org.hive2hive.core.test.tomp2p;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.Date;
 
 import net.tomp2p.peers.Number160;

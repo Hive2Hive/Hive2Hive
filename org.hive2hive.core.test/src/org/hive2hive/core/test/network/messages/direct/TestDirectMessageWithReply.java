@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.network.messages.direct;
 
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.NetworkManager;
@@ -25,7 +26,9 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(secret));
+		Number160 lKey = Number160.createHash(networkManager.getNodeId());
+		Number160 cKey = Number160.createHash(contentKey);
+		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(secret), null).awaitUninterruptibly();
 
 		sendDirectResponse(createResponse(secret));
 	}
@@ -46,18 +49,11 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-			networkManager.getDataManager().putLocal(networkManager.getNodeId(), contentKey, new H2HTestData(receivedSecret));
+			Number160 lKey = Number160.createHash(networkManager.getNodeId());
+			Number160 cKey = Number160.createHash(contentKey);
+			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(receivedSecret), null).awaitUninterruptibly();
 		}
 
-	}
-
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
 	}
 
 }

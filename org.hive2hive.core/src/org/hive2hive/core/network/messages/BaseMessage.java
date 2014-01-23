@@ -2,10 +2,8 @@ package org.hive2hive.core.network.messages;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.SignatureException;
 
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.PeerAddress;
@@ -14,7 +12,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * This is the base class of all messages used by <code>Hive2Hive</code>.</br>
@@ -209,26 +206,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	public abstract AcceptanceReply accept();
 
 	/**
-	 * This method is called on the receiver node of this message. In
-	 * {@link MessageReplyHandler#reply(PeerAddress, Object)} the message reply handler checks if the
-	 * signature is correct. If not the receiving node rejects this message.
-	 * </br></br>
-	 * 
-	 * <b>Important:</b> Depending on the type of the message a verification is required. For this please use
-	 * {@link BaseMessage#verify(PublicKey)} with the according public key of the sender. Sometimes no
-	 * verification is required or possible. Then return just <code>true</code>.
-	 * 
-	 * @param data
-	 *            the message itself as byte to compare with signature
-	 * @param signature
-	 *            the signature of the message
-	 * @param userId
-	 *            the user id of the sender
-	 * @return <code>true</code> if given signature is correct, otherwise <code>false</code>
-	 */
-	public abstract boolean checkSignature(byte[] data, byte[] signature, String userId);
-
-	/**
 	 * This method is called if a failure is detected while sending this message. The idea is that sending
 	 * failures are handled by the message itself, because the message is the only entity which knows how to
 	 * perform from the point of a failure on. Some messages don't need do be sent again, while others need a
@@ -292,26 +269,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	protected static String createMessageID() {
 		return new BigInteger(56, new SecureRandom()).toString(32);
-	}
-
-	/**
-	 * Verifies the message according the sender's public key.
-	 * 
-	 * @param data
-	 *            the data to compare
-	 * @param signature
-	 *            the signature of the data
-	 * @param publicKey
-	 *            the public key of the sender to verify the message
-	 * @return <code>true</code> if signature is valid, otherwise <code>false</code>
-	 */
-	protected boolean verify(byte[] data, byte[] signature, PublicKey publicKey) {
-		try {
-			return EncryptionUtil.verify(data, signature, publicKey);
-		} catch (InvalidKeyException | SignatureException e) {
-			logger.error("Exception while verifying message: ", e);
-			return false;
-		}
 	}
 
 }

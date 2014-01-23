@@ -4,8 +4,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IPutListener;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.context.IGetUserProfileTaskContext;
@@ -15,7 +13,7 @@ import org.hive2hive.core.process.context.IGetUserProfileTaskContext;
  * 
  * @author Seppi
  */
-public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveListener, IPutListener {
+public class RemoveUserProfileTaskStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(RemoveUserProfileTaskStep.class);
 
@@ -55,20 +53,15 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 			return;
 		}
 
-		dataManager.removeUserProfileTask(userId, context.getUserProfileTask().getContentKey(), context
-				.getUserProfileTask().getProtectionKey(), this);
-
+		boolean success = dataManager.removeUserProfileTask(userId, context.getUserProfileTask()
+				.getContentKey(), context.getUserProfileTask().getProtectionKey());
 		removePerformed = true;
-	}
 
-	@Override
-	public void onRemoveSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onRemoveFailure() {
-		getProcess().stop("Remove failed.");
+		if (success) {
+			getProcess().setNextStep(nextStep);
+		} else {
+			getProcess().stop("Remove failed.");
+		}
 	}
 
 	@Override
@@ -96,24 +89,19 @@ public class RemoveUserProfileTaskStep extends ProcessStep implements IRemoveLis
 			return;
 		}
 
-		dataManager.putUserProfileTask(userId, context.getUserProfileTask().getContentKey(),
-				context.getEncryptedUserProfileTask(), context.getUserProfileTask().getProtectionKey(), this);
+		boolean success = dataManager.putUserProfileTask(userId,
+				context.getUserProfileTask().getContentKey(), context.getEncryptedUserProfileTask(), context
+						.getUserProfileTask().getProtectionKey());
+		if (success) {
+			logger.debug(String.format(
+					"Roll back of removing user profile task succeeded. user id = '%s' content key = '%s'",
+					userId, context.getUserProfileTask().getContentKey()));
+			getProcess().nextRollBackStep();
+		} else {
+			logger.warn(String
+					.format("Roll back of removing user profile task failed. Re-put failed. user id = '%s' content key = '%s'",
+							userId, context.getUserProfileTask().getContentKey()));
+			getProcess().nextRollBackStep();
+		}
 	}
-
-	@Override
-	public void onPutSuccess() {
-		logger.debug(String.format(
-				"Roll back of removing user profile task succeeded. user id = '%s' content key = '%s'",
-				userId, context.getUserProfileTask().getContentKey()));
-		getProcess().nextRollBackStep();
-	}
-
-	@Override
-	public void onPutFailure() {
-		logger.warn(String
-				.format("Roll back of removing user profile task failed. Re-put failed. user id = '%s' content key = '%s'",
-						userId, context.getUserProfileTask().getContentKey()));
-		getProcess().nextRollBackStep();
-	}
-
 }

@@ -49,7 +49,6 @@ public class UpdateUserProfileStep extends ProcessStep {
 			originalDomainKey = fileNode.getProtectionKeys();
 			// modify
 			fileNode.setProtectionKeys(context.getProtectionKeys());
-
 			context.setFileTreeNode(fileNode);
 
 			// upload modified profile
@@ -63,8 +62,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 		// set modification flag needed for roll backs
 		modified = true;
 
-		// next step is to upload an user profile task
-		getProcess().setNextStep(new PutShareFolderUserProfileTaskStep());
+		// next step is notify all users
+		getProcess().setNextStep(new SendNotificationsStep());
 	}
 
 	@Override

@@ -5,9 +5,10 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.notify.INotificationMessageFactory;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 
-public class UploadNotificationMessageFactory implements INotificationMessageFactory {
+public class UploadNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final PublicKey fileKey;
 
@@ -19,7 +20,12 @@ public class UploadNotificationMessageFactory implements INotificationMessageFac
 	}
 
 	@Override
-	public BaseDirectMessage createNotificationMessage(PeerAddress receiver, String userId) {
+	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
 		return new UploadNotificationMessage(receiver, fileKey);
+	}
+
+	@Override
+	public UserProfileTask createUserProfileTask() {
+		return new UploadUserProfileTask(fileKey);
 	}
 }

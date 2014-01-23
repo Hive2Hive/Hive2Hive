@@ -77,7 +77,7 @@ public class FileManager {
 			byte[] content = FileUtils.readFileToByteArray(h2hMetaFile.toFile());
 			PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
 			return metaData;
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Cannot read the last meta data");
 			return new PersistentMetaData();
 		}

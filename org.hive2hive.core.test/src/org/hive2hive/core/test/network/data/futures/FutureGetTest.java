@@ -14,11 +14,8 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.network.data.listener.IGetListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -52,16 +49,8 @@ public class FutureGetTest extends H2HJUnitTest {
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
 						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
-		TestGetListener listener = new TestGetListener();
-
-		nodeB.getDataManager().get(locationKey, contentKey, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.executed());
-
-		assertEquals(content.getTestString(), listener.getData().getTestString());
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey);
+		assertEquals(content.getTestString(), result.getTestString());
 	}
 
 	@Test
@@ -77,16 +66,8 @@ public class FutureGetTest extends H2HJUnitTest {
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
-		TestGetListener listener = new TestGetListener();
-
-		nodeB.getDataManager().get(locationKey, contentKey, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.executed());
-
-		assertNull(listener.getData());
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey);
+		assertNull(result);
 	}
 
 	@Test
@@ -112,21 +93,13 @@ public class FutureGetTest extends H2HJUnitTest {
 							Number160.createHash(contentKey), data, null).awaitUninterruptibly();
 		}
 
-		TestGetListener listener = new TestGetListener();
-
-		nodeB.getDataManager().get(locationKey, contentKey, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.executed());
-
-		assertNotNull(listener.getData());
-		assertEquals(content.get(numberOfContent - 1).getTestString(), listener.getData().getTestString());
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey);
+		assertNotNull(result);
+		assertEquals(content.get(numberOfContent - 1).getTestString(), result.getTestString());
 	}
 
 	@Test
-	public void testGetAVersion() {
+	public void testGetAVersion() throws IOException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -138,16 +111,9 @@ public class FutureGetTest extends H2HJUnitTest {
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
 						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
-		TestGetListener listener = new TestGetListener();
-
-		nodeB.getDataManager().get(locationKey, contentKey, content.getVersionKey(), listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.executed());
-
-		assertEquals(content.getTestString(), listener.getData().getTestString());
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey,
+				content.getVersionKey());
+		assertEquals(content.getTestString(), result.getTestString());
 	}
 
 	@Test
@@ -164,41 +130,13 @@ public class FutureGetTest extends H2HJUnitTest {
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
-		TestGetListener listener = new TestGetListener();
-
-		nodeB.getDataManager().get(locationKey, contentKey, versionKey, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.executed());
-
-		assertNull(listener.getData());
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey, versionKey);
+		assertNull(result);
 	}
 
 	@AfterClass
 	public static void cleanAfterClass() {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
-	}
-
-	private class TestGetListener implements IGetListener {
-		private boolean called = false;
-
-		public boolean executed() {
-			return called;
-		}
-
-		private H2HTestData data = null;
-
-		public H2HTestData getData() {
-			return data;
-		}
-
-		@Override
-		public void handleGetResult(NetworkContent content) {
-			called = true;
-			data = (H2HTestData) content;
-		}
 	}
 }

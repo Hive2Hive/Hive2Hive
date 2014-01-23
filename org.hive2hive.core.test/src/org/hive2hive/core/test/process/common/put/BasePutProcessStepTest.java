@@ -1,7 +1,6 @@
 package org.hive2hive.core.test.process.common.put;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -11,14 +10,15 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -63,17 +63,12 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
 		futureGet.awaitUninterruptibly();
-		assertEquals(data,
-				((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data, ((H2HTestData) futureGet.getData().object()).getTestString());
 	}
 
 	@Test
@@ -97,11 +92,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		process.start();
 
 		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceeded());
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		ProcessTestUtil.waitTillFailed(listener, 10);
 
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
@@ -127,7 +118,6 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		private final H2HTestData data;
 
 		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data) {
-			super(null);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 			this.data = data;
@@ -135,7 +125,12 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		public void start() {
-			put(locationKey, contentKey, data);
+			try {
+				put(locationKey, contentKey, data, null);
+				getProcess().setNextStep(null);
+			} catch (PutFailedException e) {
+				getProcess().stop(e);
+			}
 		}
 
 	}

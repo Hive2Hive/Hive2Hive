@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.userprofiletask.share;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -10,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.common.put.BasePutProcessStep;
@@ -26,10 +28,6 @@ public class UpdateRootMetaStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateRootMetaStep.class);
 
-	public UpdateRootMetaStep() {
-		super(new UpdateUserProfileStep());
-	}
-
 	@Override
 	public void start() {
 		ShareFolderNotificationProcessContext context = (ShareFolderNotificationProcessContext) getProcess()
@@ -42,7 +40,7 @@ public class UpdateRootMetaStep extends BasePutProcessStep {
 			return;
 		}
 		KeyPair protectionKeys = context.getProtectionKeys();
-		if (protectionKeys == null){
+		if (protectionKeys == null) {
 			getProcess().stop("Could not find the root meta data's content protection keys.");
 			return;
 		}
@@ -50,17 +48,19 @@ public class UpdateRootMetaStep extends BasePutProcessStep {
 		// add child (shared folder) to the root meta data
 		rootMeta.addChildKeyPair(context.getFileTreeNode().getKeyPair());
 		logger.debug("MetaFolder of the root has new child (shared folder).");
-		
+
 		try {
 			logger.debug("Encrypting meta document in a hybrid manner");
-			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(rootMeta,
-					rootMeta.getId());
+			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(rootMeta, rootMeta.getId());
 			encrypted.setBasedOnKey(rootMeta.getVersionKey());
 			encrypted.generateVersionKey();
 			put(key2String(rootMeta.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+			getProcess().setNextStep(new UpdateUserProfileStep());
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta document could not be encrypted");
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
 		}
 	}
 }

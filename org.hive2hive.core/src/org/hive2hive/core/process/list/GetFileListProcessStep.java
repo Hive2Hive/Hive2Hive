@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.digest;
+package org.hive2hive.core.process.list;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,9 +19,9 @@ import org.hive2hive.core.process.ProcessStep;
  * 
  * @author Seppi
  */
-public class GetDigestProcessStep extends ProcessStep {
+public class GetFileListProcessStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(GetDigestProcessStep.class);
+	private final static Logger logger = H2HLoggerFactory.getLogger(GetFileListProcessStep.class);
 
 	@Override
 	public void start() {
@@ -38,7 +38,7 @@ public class GetDigestProcessStep extends ProcessStep {
 
 			Collections.sort(digest);
 
-			GetDigestContext context = (GetDigestContext) getProcess().getContext();
+			GetFileListContext context = (GetFileListContext) getProcess().getContext();
 			context.setDigest(digest);
 
 			// done with all steps

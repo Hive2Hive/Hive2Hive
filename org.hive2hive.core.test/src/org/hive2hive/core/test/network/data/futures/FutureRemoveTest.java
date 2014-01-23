@@ -1,8 +1,9 @@
 package org.hive2hive.core.test.network.data.futures;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,10 +13,8 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -23,7 +22,7 @@ import org.junit.Test;
 
 /**
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class FutureRemoveTest extends H2HJUnitTest {
 
@@ -50,15 +49,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
 						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
-		TestRemoveListener listener = new TestRemoveListener();
-
-		nodeB.getDataManager().remove(locationKey, contentKey, null, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		boolean success = nodeB.getDataManager().remove(locationKey, contentKey, null);
+		assertTrue(success);
 
 		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey), content.getVersionKey());
@@ -67,7 +59,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveSingleVersion() {
+	public void testRemoveSingleVersion() throws IOException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -79,15 +71,9 @@ public class FutureRemoveTest extends H2HJUnitTest {
 				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
 						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
 
-		TestRemoveListener listener = new TestRemoveListener();
-
-		nodeB.getDataManager().remove(locationKey, contentKey, content.getVersionKey(), null, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		boolean success = nodeB.getDataManager().remove(locationKey, contentKey, content.getVersionKey(),
+				null);
+		assertTrue(success);
 
 		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey), content.getVersionKey());
@@ -96,7 +82,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveMultipleVersions() {
+	public void testRemoveMultipleVersions() throws IOException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
@@ -117,15 +103,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 			content.add(data);
 		}
 
-		TestRemoveListener listener = new TestRemoveListener();
-
-		nodeB.getDataManager().remove(locationKey, contentKey, null, listener);
-
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		boolean success = nodeB.getDataManager().remove(locationKey, contentKey, null);
+		assertTrue(success);
 
 		for (H2HTestData data : content) {
 			FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
@@ -140,31 +119,4 @@ public class FutureRemoveTest extends H2HJUnitTest {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
-
-	private class TestRemoveListener implements IRemoveListener {
-
-		boolean successed = false;
-
-		public boolean hasSucceeded() {
-			return successed;
-		}
-
-		boolean failed = false;
-
-		public boolean hasFailed() {
-			return failed;
-		}
-
-		@Override
-		public void onRemoveSuccess() {
-			successed = true;
-		}
-
-		@Override
-		public void onRemoveFailure() {
-			failed = true;
-		}
-
-	}
-
 }

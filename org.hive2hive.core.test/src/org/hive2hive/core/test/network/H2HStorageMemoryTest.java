@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.Random;
@@ -87,7 +88,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 	
 	@Test
-	public void putVersionKeyZeroPreviousVersionKeyNotZeroTest() {
+	public void putVersionKeyZeroPreviousVersionKeyNotZeroTest() throws IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -115,7 +116,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void putInitialTest() {
+	public void putInitialTest() throws IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -140,7 +141,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 	
 	@Test
-	public void putNoBasedOnTest() {
+	public void putNoBasedOnTest() throws IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -170,7 +171,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void putVersionConflictTest() {
+	public void putVersionConflictTest() throws IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -203,7 +204,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 	
 	@Test
-	public void putNewVersionTest() {
+	public void putNewVersionTest() throws IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -233,7 +234,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 	}
 	
 	@Test
-	public void putNewVersionWithOldTimestampTest() throws InterruptedException {
+	public void putNewVersionWithOldTimestampTest() throws InterruptedException, IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;

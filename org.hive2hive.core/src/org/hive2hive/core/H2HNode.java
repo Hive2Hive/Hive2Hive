@@ -16,8 +16,8 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
-import org.hive2hive.core.process.digest.GetDigestProcess;
-import org.hive2hive.core.process.digest.IGetFileListProcess;
+import org.hive2hive.core.process.list.GetFileListProcess;
+import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.login.LoginProcess;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -172,7 +172,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			process = FileRecursionUtil.buildProcessList(preorderList, networkManager,
+			process = FileRecursionUtil.buildProcessChain(preorderList, networkManager,
 					FileProcessAction.NEW_FILE);
 		} else {
 			// add single file
@@ -203,7 +203,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			process = FileRecursionUtil.buildProcessList(preorderList, networkManager,
+			process = FileRecursionUtil.buildProcessChain(preorderList, networkManager,
 					FileProcessAction.DELETE);
 		} else {
 			// delete a single file
@@ -216,7 +216,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 
 	@Override
 	public IGetFileListProcess getFileList() throws NoSessionException {
-		IGetFileListProcess process = new GetDigestProcess(networkManager);
+		IGetFileListProcess process = new GetFileListProcess(networkManager);
 
 		autoStartProcess(process);
 		return process;

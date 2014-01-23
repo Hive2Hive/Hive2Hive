@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.rpc.ObjectDataReply;
+
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -14,6 +17,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.ProcessState;
 import org.hive2hive.core.process.notify.NotifyPeersProcess;
@@ -24,8 +28,10 @@ import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,23 +44,26 @@ import org.junit.Test;
 public class NotificationTest extends H2HJUnitTest {
 
 	private static final int networkSize = 10;
-	private static List<NetworkManager> network;
 	private static final TestFileConfiguration config = new TestFileConfiguration();
+	private List<NetworkManager> network;
 
-	private static UserProfile userAProfile;
-	private static UserCredentials userACredentials;
+	private UserProfile userAProfile;
+	private UserCredentials userACredentials;
 
-	private static UserCredentials userBCredentials;
-	private static UserProfile userBProfile;
+	private UserCredentials userBCredentials;
+	private UserProfile userBProfile;
 
-	private static UserCredentials userCCredentials;
-	private static UserProfile userCProfile;
+	private UserCredentials userCCredentials;
+	private UserProfile userCProfile;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = NotificationTest.class;
 		beforeClass();
+	}
 
+	@Before
+	public void loginNodes() {
 		network = NetworkTestUtil.createNetwork(networkSize);
 
 		// create 10 nodes and login 5 of them:
@@ -106,17 +115,13 @@ public class NotificationTest extends H2HJUnitTest {
 	public void testNotifyNobody() throws ClassNotFoundException, IOException {
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, new HashSet<String>(1), msgFactory);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, new HashSet<String>(0));
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
 
 		// wait until all messages are sent
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 10);
 	}
 
 	/**
@@ -125,12 +130,12 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userAProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, users);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -148,12 +153,11 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userAProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, users);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -165,20 +169,19 @@ public class NotificationTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
-	 * (peer 3 and 4) and user C (peer 5)
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also the master client of user B
+	 * (peer 3 or 4) and user C (peer 5)
 	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-
 		// send notification to own peers
-		Set<String> users = new HashSet<String>(2);
+		Set<String> users = new HashSet<String>(3);
 		users.add(userAProfile.getUserId());
 		users.add(userBProfile.getUserId());
 		users.add(userCProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, users);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -186,42 +189,74 @@ public class NotificationTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!msgFactory.allMsgsArrived());
 
+		Assert.assertEquals(4, msgFactory.getSentMessageCount());
 		Assert.assertEquals(ProcessState.FINISHED, process.getState());
 	}
 
 	/**
-	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also all clients of user B
-	 * (peer 3 and 4). Peer 4 of user B has done an unfriendly leave, never responding.
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also user B
+	 * (peer 3 or 4). Peer 3 (master) has occurred an unfriendly logout, thus, the message must be sent to
+	 * Peer 4.
 	 */
 	@Test
-	public void testNotifyUnfriendlyLogout() throws ClassNotFoundException, IOException, InterruptedException {
+	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
+			InterruptedException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(2);
 		users.add(userAProfile.getUserId());
 		users.add(userBProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, users);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 
-		// kick out B
-		network.get(4).disconnect();
+		// kick out peer 3 (B)
+		network.get(3).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-		int sentMessages = msgFactory.getSentMessageCount();
+		ProcessTestUtil.waitTillSucceded(listener, 20);
 
-		waiter = new H2HWaiter(10);
+		H2HWaiter waiter = new H2HWaiter(10);
 		do {
 			waiter.tickASecond();
 			// wait until all messages are here except 1
-		} while (msgFactory.getArrivedMessageCount() != sentMessages - 1);
+		} while (msgFactory.getArrivedMessageCount() != 3);
+	}
+
+	/**
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also user B
+	 * (peer 3 or 4). All peers of user B have done an unfriendly logout.
+	 */
+	@Test
+	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
+			InterruptedException {
+		NetworkManager notifier = network.get(0);
+
+		// send notification to own peers
+		Set<String> users = new HashSet<String>(2);
+		users.add(userAProfile.getUserId());
+		users.add(userBProfile.getUserId());
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, users);
+		TestProcessListener listener = new TestProcessListener();
+		process.addListener(listener);
+
+		// kick out peer 3 and 4 (B)
+		network.get(3).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		network.get(4).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		process.start();
+
+		// wait until all messages are sent
+		ProcessTestUtil.waitTillSucceded(listener, 20);
+
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+			// wait until all messages are here except 1
+		} while (msgFactory.getArrivedMessageCount() != 2);
 	}
 
 	/**
@@ -232,26 +267,23 @@ public class NotificationTest extends H2HJUnitTest {
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
 			InterruptedException {
 		NetworkManager notifier = network.get(0);
-		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 
 		// send notification to own peers
-		Set<String> users = new HashSet<String>(2);
+		Set<String> users = new HashSet<String>(1);
 		users.add(userAProfile.getUserId());
-		NotifyPeersProcess process = new NotifyPeersProcess(notifier, users, msgFactory);
+		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
+		NotifyPeersProcess process = new NotifyPeersProcess(notifier, msgFactory, users);
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 
 		// kick out Peer 1
-		network.get(1).disconnect();
+		network.get(1).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		ProcessTestUtil.waitTillSucceded(listener, 20);
 
-		waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(20);
 		do {
 			waiter.tickASecond();
 			// wait until all processes (inclusive cleanup) are done
@@ -262,9 +294,20 @@ public class NotificationTest extends H2HJUnitTest {
 		Assert.assertEquals(2, locations.getPeerAddresses().size());
 	}
 
+	@After
+	public void shutdown() {
+		NetworkTestUtil.shutdownNetwork(network);
+	}
+
 	@AfterClass
 	public static void endTest() {
-		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
+	}
+
+	private class DenyingMessageReplyHandler implements ObjectDataReply {
+		@Override
+		public Object reply(PeerAddress sender, Object request) throws Exception {
+			return AcceptanceReply.FAILURE;
+		}
 	}
 }

@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.digest;
+package org.hive2hive.core.process.list;
 
 import java.nio.file.Path;
 import java.util.List;

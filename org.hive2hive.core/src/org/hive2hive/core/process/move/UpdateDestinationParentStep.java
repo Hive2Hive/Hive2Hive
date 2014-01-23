@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.move;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
@@ -10,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
@@ -25,10 +27,6 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class UpdateDestinationParentStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateDestinationParentStep.class);
-
-	public UpdateDestinationParentStep() {
-		super(new RelinkUserProfileStep());
-	}
 
 	@Override
 	public void start() {
@@ -57,9 +55,12 @@ public class UpdateDestinationParentStep extends BasePutProcessStep {
 			encrypted.setBasedOnKey(parent.getVersionKey());
 			encrypted.generateVersionKey();
 			put(key2String(parent.getId()), H2HConstants.META_DOCUMENT, encrypted, parentProtectionKeys);
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+			getProcess().setNextStep(new RelinkUserProfileStep());
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			getProcess().stop("Meta folder of destination could not be encrypted.");
+		} catch (PutFailedException e) {
+			getProcess().stop(e);
 		}
 	}
 }

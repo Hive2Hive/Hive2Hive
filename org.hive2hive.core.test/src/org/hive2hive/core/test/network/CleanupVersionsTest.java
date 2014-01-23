@@ -2,6 +2,7 @@ package org.hive2hive.core.test.network;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanUpFreshVersion() throws InterruptedException {
+	public void testCleanUpFreshVersion() throws InterruptedException, IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
@@ -82,7 +83,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanUpOutdatedVersion() throws InterruptedException {
+	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
@@ -103,7 +104,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 				testData.setBasedOnKey(last.getVersionKey());
 			last = testData;
 			versions.add(testData);
-			if (H2HConstants.MAX_VERSIONS_HISTORY - 1 <= i)
+			if (i >= numVersions - H2HConstants.MAX_VERSIONS_HISTORY - 1)
 				newerVersions.add(testData);
 			synchronized (this) {
 				Thread.sleep(10);
@@ -120,7 +121,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 
 		FutureDigest futureDigest = node.getDataManager().getDigest(lKey)
 				.from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).ascending().start();
 		futureDigest.awaitUninterruptibly();
 
 		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().getKeyDigest().size());
@@ -130,7 +131,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 		}
 	}
 
-	private H2HTestData generateTestData(long timeStamp) {
+	private H2HTestData generateTestData(long timeStamp) throws IOException {
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 		// get a MD5 hash of the test data object itself
 		byte[] hash = EncryptionUtil.generateMD5Hash(EncryptionUtil.serializeObject(testData));

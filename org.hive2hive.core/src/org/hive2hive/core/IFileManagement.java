@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.digest.IGetFileListProcess;
+import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
 
 /**

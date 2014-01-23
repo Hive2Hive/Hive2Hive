@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.common.userprofiletask;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -11,11 +12,10 @@ import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IPutListener;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -28,7 +28,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public abstract class PutUserProfileTaskStep extends ProcessStep implements IPutListener, IRemoveListener {
+public abstract class PutUserProfileTaskStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutUserProfileTaskStep.class);
 
@@ -36,21 +36,19 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 	private Number160 contentKey;
 	private KeyPair protectionKey;
 
-	private ProcessStep nextStep = null;
 	private boolean putPerformed = false;
-	
-	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey,
-			ProcessStep nextStep){
+
+	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey)
+			throws PutFailedException {
 		if (userId == null)
 			throw new IllegalArgumentException("user id can be not null");
 		if (userProfileTask == null)
 			throw new IllegalArgumentException("user profile task can be not null");
 		if (publicKey == null)
 			throw new IllegalArgumentException("public key can be not null");
-		
+
 		this.userId = userId;
-		this.nextStep = nextStep;
-		
+
 		try {
 			logger.debug("Encrypting user profile task in a hybrid manner");
 			this.contentKey = userProfileTask.getContentKey();
@@ -61,22 +59,16 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 				return;
 			}
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
-			dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey, this);
+			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
+
+			if (!success) {
+				throw new PutFailedException();
+			}
+		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			getProcess().stop("Meta document could not be encrypted");
+			throw new PutFailedException("Meta document could not be encrypted");
 		}
-	}
-
-	@Override
-	public void onPutSuccess() {
-		getProcess().setNextStep(nextStep);
-	}
-
-	@Override
-	public void onPutFailure() {
-		getProcess().stop("Put of user profile task failed.");
 	}
 
 	@Override
@@ -96,23 +88,17 @@ public abstract class PutUserProfileTaskStep extends ProcessStep implements IPut
 			return;
 		}
 
-		dataManager.removeUserProfileTask(userId, contentKey, protectionKey, this);
-	}
+		boolean success = dataManager.removeUserProfileTask(userId, contentKey, protectionKey);
+		if (success) {
+			logger.debug(String.format(
+					"Roll back of user profile task put succeeded. user id = '%s' content key = '%s'",
+					userId, contentKey));
+		} else {
+			logger.warn(String.format(
+					"Roll back of user profile put failed. Remove failed. user id = '%s' content key = '%s'",
+					userId, contentKey));
+		}
 
-	@Override
-	public void onRemoveSuccess() {
-		logger.debug(String.format(
-				"Roll back of user profile task put succeeded. user id = '%s' content key = '%s'", userId,
-				contentKey));
 		getProcess().nextRollBackStep();
 	}
-
-	@Override
-	public void onRemoveFailure() {
-		logger.warn(String.format(
-				"Roll back of user profile put failed. Remove failed. user id = '%s' content key = '%s'",
-				userId, contentKey));
-		getProcess().nextRollBackStep();
-	}
-
 }

@@ -44,6 +44,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
+import org.bouncycastle.util.encoders.Base64;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
@@ -437,7 +438,7 @@ public final class EncryptionUtil {
 		return md5;
 	}
 
-	public static byte[] serializeObject(Serializable object) {
+	public static byte[] serializeObject(Serializable object) throws IOException {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = null;
@@ -449,6 +450,7 @@ public final class EncryptionUtil {
 			result = baos.toByteArray();
 		} catch (IOException e) {
 			logger.error("Exception while serializing object:", e);
+			throw e;
 		} finally {
 			try {
 				if (oos != null)
@@ -457,21 +459,23 @@ public final class EncryptionUtil {
 					baos.close();
 			} catch (IOException e) {
 				logger.error("Exception while closing serialization process.");
+				throw e;
 			}
 		}
 		return result;
 	}
 
-	public static Object deserializeObject(byte[] bytes) {
+	public static Object deserializeObject(byte[] bytes) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = null;
 		Object result = null;
-
+	
 		try {
 			ois = new ObjectInputStream(bais);
 			result = ois.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Exception while deserializing object.");
+			throw e;
 		} finally {
 			try {
 				if (ois != null)
@@ -480,10 +484,21 @@ public final class EncryptionUtil {
 					bais.close();
 			} catch (IOException e) {
 				logger.error("Exception while closing deserialization process.");
+				throw e;
 			}
 		}
-
+	
 		return result;
+	}
+
+	public static String toBase64(Serializable object) throws IOException {
+		
+		return new String(Base64.encode(serializeObject(object)));
+	}
+
+	public static Object toBytes(String string) throws IOException, ClassNotFoundException {
+
+		return deserializeObject(Base64.decode(string));
 	}
 
 	/**

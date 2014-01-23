@@ -2,14 +2,12 @@ package org.hive2hive.core.process.common.messages;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
-import org.hive2hive.core.process.ProcessStep;
 
 /**
  * This is a process step for sending a {@link BaseDirectMessage}.
@@ -25,49 +23,27 @@ import org.hive2hive.core.process.ProcessStep;
  * step acts also as a {@link IResponseCallBackHandler} callback handler for this message. The whole callback
  * functionality has to be (if desired) implemented in the
  * {@link BaseDirectMessageProcessStep#handleResponseMessage(ResponseMessage)} method.</li>
- * <li>Because all message in <code>Hive2Hive</code> are sent asynchronously the message process step uses a
- * {@link FutureDirectListener} adapter to gets notified about success or failure of sending the message.
- * For that the process step implements the {@link IBaseMessageListener} interface.</li>
+ * <li>All messages in <code>Hive2Hive</code> are sent synchronous</li>
  * </ul>
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
 
-	public BaseDirectMessageProcessStep() {
-		super(null, null, null);
-	}
-	
-	public BaseDirectMessageProcessStep(BaseDirectMessage message, PublicKey receiverPublicKey, ProcessStep nextStep) {
-		super(message, receiverPublicKey, nextStep);
-	}
-
-	@Override
-	public void start() {
-		// casting necessary because message in parent is a BaseMessage
-		sendDirect((BaseDirectMessage) message);
-	}
-
-	protected void sendDirect(BaseDirectMessage message) {
+	protected void sendDirect(BaseDirectMessage message, PublicKey receiverPublicKey)
+			throws SendFailedException {
 		if (message instanceof IRequestMessage) {
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(this);
 		}
-		getNetworkManager().sendDirect(message, receiverPublicKey, this);
+
+		boolean success = getNetworkManager().sendDirect(message, receiverPublicKey);
+		if (!success)
+			throw new SendFailedException();
 	}
 
 	@Override
-	public void onSuccess() {
-		if (message instanceof IRequestMessage)
-			return;
-		getProcess().setNextStep(nextStep);
+	protected void send(BaseMessage message, PublicKey receiverPublicKey) throws SendFailedException {
+		throw new UnsupportedOperationException("Use 'sendDirect' when inheriting from this class");
 	}
-
-	@Override
-	public void onFailure() {
-		if (message instanceof IRequestMessage)
-			return;
-		getProcess().stop("Sending direct message failed.");
-	}
-
 }

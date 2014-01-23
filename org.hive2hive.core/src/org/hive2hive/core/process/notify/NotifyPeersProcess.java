@@ -1,21 +1,19 @@
 package org.hive2hive.core.process.notify;
 
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.listener.IProcessListener;
 import org.hive2hive.core.process.notify.cleanup.CleanupLocationsProcess;
 
 /**
- * Notifies all peers with a given message
+ * Notifies all peers with a given message. If the user list also contains other users, it puts a
+ * {@link UserProfileTask} into the DHT and sends them a hint message that they should check their user
+ * profile queue
  * 
  * @author Nico
  * 
@@ -27,46 +25,27 @@ public class NotifyPeersProcess extends Process {
 	/**
 	 * Notify a set of users
 	 */
-	public NotifyPeersProcess(NetworkManager networkManager, Set<String> users,
-			INotificationMessageFactory messageFactory) {
+	public NotifyPeersProcess(NetworkManager networkManager, BaseNotificationMessageFactory messageFactory,
+			Set<String> users) {
 		super(networkManager);
+		String userId = networkManager.getUserId();
+
+		// to cleanup the unreachable own peers
 		addCleanupListener();
 
-		context = new NotifyPeersProcessContext(this, users, messageFactory);
+		Set<String> usersToNotify = users;
+		if (messageFactory.createUserProfileTask() == null) {
+			// only private notification (or none)
+			usersToNotify = new HashSet<>(1);
+			if (users.contains(userId))
+				usersToNotify.add(userId);
+			else
+				throw new IllegalArgumentException(
+						"Users can't be notified because the UserProfileTask is null and no notification of the own user");
+		}
+
+		context = new NotifyPeersProcessContext(this, usersToNotify, messageFactory, userId);
 		setNextStep(new GetPublicKeysStep(users));
-	}
-
-	/**
-	 * Notify all clients of the currently logged in user (session is required)
-	 */
-	public NotifyPeersProcess(NetworkManager networkManager, INotificationMessageFactory messageFactory)
-			throws NoSessionException {
-		super(networkManager);
-		addCleanupListener();
-
-		H2HSession session = networkManager.getSession();
-		Set<String> onlyMe = new HashSet<String>(1);
-		onlyMe.add(session.getCredentials().getUserId());
-
-		context = new NotifyPeersProcessContext(this, onlyMe, messageFactory);
-
-		Map<String, PublicKey> myKey = new HashMap<String, PublicKey>(1);
-		myKey.put(session.getCredentials().getUserId(), session.getKeyPair().getPublic());
-		setNextStep(new GetPublicKeysStep(new ArrayList<String>(), myKey));
-	}
-	
-	/**
-	 * Notify all clients of a single user
-	 */
-	public NotifyPeersProcess(NetworkManager networkManager, String userId, INotificationMessageFactory messageFactory) {
-		super(networkManager);
-		addCleanupListener();
-
-		Set<String> onlyOne = new HashSet<String>(1);
-		onlyOne.add(userId);
-
-		context = new NotifyPeersProcessContext(this, onlyOne, messageFactory);
-		setNextStep(new GetPublicKeysStep(onlyOne));
 	}
 
 	private void addCleanupListener() {

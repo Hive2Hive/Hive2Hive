@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
@@ -14,8 +15,8 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 
 /**
- * Deletes chunks in the DHT. After deleting a chunk, it calls itself recursively until all chunks of all
- * versions are deleted.
+ * Deletes chunks in the DHT. It iteratively deletes all chunks from the DHT and then continues deleting the
+ * meta file itself.
  * 
  * @author Nico, Seppi
  * 
@@ -23,17 +24,6 @@ import org.hive2hive.core.process.common.remove.BaseRemoveProcessStep;
 public class DeleteChunkStep extends BaseRemoveProcessStep {
 
 	static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteChunkStep.class);
-
-	private List<KeyPair> chunksToDelete;
-
-	public DeleteChunkStep() {
-		super(null);
-	}
-
-	private DeleteChunkStep(List<KeyPair> chunksToDelete) {
-		super(null);
-		this.chunksToDelete = chunksToDelete;
-	}
 
 	@Override
 	public void start() {
@@ -49,33 +39,37 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 			return;
 		}
 
-		if (chunksToDelete == null) {
-			// first time called, initialize the list
-			chunksToDelete = new ArrayList<KeyPair>();
-			if (!context.isDirectory()) {
-				// no chunks to delete when directory
-				MetaFile metaFile = (MetaFile) metaDocument;
-				for (FileVersion version : metaFile.getVersions()) {
-					chunksToDelete.addAll(version.getChunkIds());
-				}
+		// initialize the list
+		List<KeyPair> chunksToDelete = new ArrayList<KeyPair>();
+		if (!context.isDirectory()) {
+			// no chunks to delete when directory
+			MetaFile metaFile = (MetaFile) metaDocument;
+			for (FileVersion version : metaFile.getVersions()) {
+				chunksToDelete.addAll(version.getChunkIds());
 			}
 		}
 
-		if (chunksToDelete.isEmpty()) {
-			logger.debug(String.format("All chunks of file '%s' deleted.", metaDocument.getName()));
-			// continue with next steps:
-			// 1. delete the meta document
-			// 2. update the parent meta document
-			// 2. update the user profile
-			// 3. put the updated user profile
-			getProcess().setNextStep(new DeleteMetaDocumentStep());
-		} else {
-			logger.debug(String.format("Deleting file chunks of file = '%s'. %s chunks to remove.",
-					metaDocument.getName(), chunksToDelete.size()));
-			nextStep = new DeleteChunkStep(chunksToDelete);
-			// TODO: original chunk is not here in case a rollback happens.
-			remove(key2String(chunksToDelete.remove(0).getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null,
-					null, 0, 0), context.getProtectionKeys());
+		int counter = 0;
+		try {
+			for (KeyPair keyPair : chunksToDelete) {
+				logger.debug(String.format("Deleting file chunks of file = '%s'. %s/%s chunks removed.",
+						metaDocument.getName(), counter++, chunksToDelete.size()));
+				remove(key2String(keyPair.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0),
+						context.getProtectionKeys());
+			}
+		} catch (RemoveFailedException e) {
+			logger.error("Could not delete all chunks. We're stuck at " + counter + " of "
+					+ chunksToDelete.size() + " chunks.");
+			getProcess().stop(e);
+			return;
 		}
+
+		logger.debug(String.format("All chunks of file '%s' deleted.", metaDocument.getName()));
+		// continue with next steps:
+		// 1. delete the meta document
+		// 2. update the parent meta document
+		// 2. update the user profile
+		// 3. put the updated user profile
+		getProcess().setNextStep(new DeleteMetaDocumentStep());
 	}
 }

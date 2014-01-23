@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.digest;
+package org.hive2hive.core.process.list;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -11,11 +11,11 @@ import org.hive2hive.core.process.context.ProcessContext;
  * 
  * @author Seppi
  */
-public class GetDigestContext extends ProcessContext {
+public class GetFileListContext extends ProcessContext {
 
 	private List<Path> digest;
 
-	public GetDigestContext(Process process) {
+	public GetFileListContext(Process process) {
 		super(process);
 	}
 

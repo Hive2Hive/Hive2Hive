@@ -1,6 +1,8 @@
 package org.hive2hive.core.process.delete;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.util.HashSet;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -72,22 +74,25 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 					.format("File '%s' is in root, skip getting the parent meta folder and notify my other clients directly.",
 							deletedFileNode.getName()));
 
-			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(parentFileNode
-					.getKeyPair().getPublic(), deletedFileNode.getName());
-			getProcess().notifyOtherClients(messageFactory);
-
+			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(deletedFileNode
+					.getKeyPair().getPublic(), parentFileNode.getKeyPair().getPublic(),
+					deletedFileNode.getName());
+			HashSet<String> users = new HashSet<String>();
+			users.add(userProfile.getUserId());
+			getProcess().sendNotification(messageFactory, users);
 			getProcess().setNextStep(null);
 		} else {
 			// normal case when file is not in root
 			logger.debug(String.format("Get the parent meta folder of deleted meta document of file '%s'.",
 					deletedFileNode.getName()));
 
-			get(key2String(parentFileNode.getKeyPair().getPublic()), H2HConstants.META_DOCUMENT);
+			NetworkContent content = get(key2String(parentFileNode.getKeyPair().getPublic()),
+					H2HConstants.META_DOCUMENT);
+			evaluateResult(content);
 		}
 	}
 
-	@Override
-	public void handleGetResult(NetworkContent content) {
+	private void evaluateResult(NetworkContent content) {
 		if (content == null) {
 			context.setParentMetaFolder(null);
 			context.setParentProtectionKeys(null);
@@ -109,9 +114,9 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 
 				// continue with next step
 				getProcess().setNextStep(new DeleteUpdateParentMetaStep(deletedFileNode.getName()));
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
-					| BadPaddingException | IllegalStateException | InvalidCipherTextException
-					| IllegalArgumentException e) {
+			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException
+					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
+					| InvalidCipherTextException | IllegalArgumentException e) {
 				context.setParentMetaFolder(null);
 				context.setParentProtectionKeys(null);
 				context.setEncryptedParentMetaFolder(null);

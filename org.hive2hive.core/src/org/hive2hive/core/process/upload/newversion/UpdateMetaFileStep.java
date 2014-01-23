@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -71,14 +72,14 @@ public class UpdateMetaFileStep extends ProcessStep {
 			fileNode.setMD5(newMD5);
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getProcess().getID());
-			
+
 			// TODO wait till cleanup of versions ends
 			// cleanup old versions when too many versions
 			initiateCleanup(fileNode.getProtectionKeys());
 
 			logger.debug("Putting the modified meta file (containing the new version)");
 			PutMetaDocumentStep putMetaStep = new PutMetaDocumentStep(metaFile, fileNode.getProtectionKeys(),
-					getStepsForNotification(userProfile));
+					getNextStep(userProfile));
 			getProcess().setNextStep(putMetaStep);
 		} catch (IOException e) {
 			getProcess().stop("The new MD5 hash for the user profile could not be generated");
@@ -86,7 +87,7 @@ public class UpdateMetaFileStep extends ProcessStep {
 			getProcess().stop(e);
 		}
 	}
-	
+
 	private void initiateCleanup(KeyPair protectionsKeys) {
 		try {
 			IFileConfiguration fileConfiguration = getNetworkManager().getSession().getFileConfiguration();
@@ -115,13 +116,23 @@ public class UpdateMetaFileStep extends ProcessStep {
 		}
 	}
 
-	public ProcessStep getStepsForNotification(UserProfile userProfile) {
+	/**
+	 * Returns the next step. If the file is in root, the next step is to notify other clients. If the file is
+	 * not in root, we first need to find out who we need to notify (using notification message or a user
+	 * profile task)
+	 * 
+	 * @param userProfile
+	 * @return the next step
+	 */
+	private ProcessStep getNextStep(UserProfile userProfile) {
 		UploadFileProcessContext context = (UploadFileProcessContext) getProcess().getContext();
 		FileTreeNode parent = userProfile.getFileById(metaFile.getId()).getParent();
 
 		if (parent.equals(userProfile.getRoot())) {
 			logger.debug("Inform only current user since file is in root");
-			getProcess().notifyOtherClients(new UploadNotificationMessageFactory(metaFile.getId()));
+			HashSet<String> userList = new HashSet<String>();
+			userList.add(userProfile.getUserId());
+			getProcess().sendNotification(new UploadNotificationMessageFactory(metaFile.getId()), userList);
 			return null;
 		} else {
 			// 1. get the parent meta

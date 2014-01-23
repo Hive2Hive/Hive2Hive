@@ -1,13 +1,17 @@
 package org.hive2hive.core.test.network.messages;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import net.tomp2p.peers.Number160;
+
+import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.IBaseMessageListener;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,12 +22,11 @@ import org.junit.Test;
 /**
  * Simple test to test message signatures.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class MessageSignatureTest extends H2HJUnitTest {
 
 	private List<NetworkManager> network;
-	private final int networkSize = 2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -31,19 +34,18 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		beforeClass();
 	}
 
-	@Override
 	@Before
-	public void beforeMethod() {
-		super.beforeMethod();
-		network = NetworkTestUtil.createNetwork(networkSize);
+	public void createNetwork() {
+		network = NetworkTestUtil.createNetwork(2);
 	}
 
 	@Test
-	public void testMessageWithSignature() {
+	public void testMessageWithSignatureSameUser() {
 		NetworkTestUtil.createSameKeyPair(network);
-
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
+
+		// putting of the public key is not necessary
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
@@ -52,23 +54,38 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		TestMessageVerifyListener listener = new TestMessageVerifyListener();
-		sender.send(message, receiver.getPublicKey(), listener);
-
-		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			w.tickASecond();
-		} while (!listener.hasSucceded());
+		assertTrue(sender.send(message, receiver.getPublicKey()));
 	}
 
 	@Test
-	public void testMessageWithWrongSignature() {
+	public void testMessageWithSignatureDifferentUser() {
 		NetworkTestUtil.createKeyPairs(network);
-
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
+
+		// put the public key of the sender into the network
+		sender.getDataManager()
+				.put(Number160.createHash(sender.getUserId()), H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(H2HConstants.USER_PUBLIC_KEY),
+						new UserPublicKey(sender.getPublicKey()), null).awaitUninterruptibly();
+
+		// location key is target node id
+		String locationKey = receiver.getNodeId();
+
+		// create a message with target node B
+		TestSignedMessage message = new TestSignedMessage(locationKey);
+
+		// send message
+		assertTrue(sender.send(message, receiver.getPublicKey()));
+	}
+
+	@Test
+	public void testMessageWithWrongSignature1() {
+		NetworkTestUtil.createKeyPairs(network);
+		NetworkManager sender = network.get(0);
+		NetworkManager receiver = network.get(1);
+
+		// don't upload the sender public key
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
@@ -77,47 +94,36 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		TestMessageVerifyListener listener = new TestMessageVerifyListener();
-		sender.send(message, receiver.getPublicKey(), listener);
-
-		// wait till message gets handled
-		H2HWaiter w = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceded());
-			w.tickASecond();
-		} while (!listener.hasFailed());
+		assertFalse(sender.send(message, receiver.getPublicKey()));
 	}
 
-	private class TestMessageVerifyListener implements IBaseMessageListener {
+	@Test
+	public void testMessageWithWrongSignature2() {
+		NetworkTestUtil.createKeyPairs(network);
+		NetworkManager sender = network.get(0);
+		NetworkManager receiver = network.get(1);
 
-		private boolean failed = false;
-		private boolean succeded = false;
+		// put a wrong public key of the sender into the network
+		sender.getDataManager()
+				.put(Number160.createHash(sender.getUserId()),
+						H2HConstants.TOMP2P_DEFAULT_KEY,
+						Number160.createHash(H2HConstants.USER_PUBLIC_KEY),
+						new UserPublicKey(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS)
+								.getPublic()), null).awaitUninterruptibly();
 
-		public boolean hasSucceded() {
-			return succeded;
-		}
+		// location key is target node id
+		String locationKey = receiver.getNodeId();
 
-		public boolean hasFailed() {
-			return failed;
-		}
+		// create a message with target node B, assign random public key
+		TestSignedMessage message = new TestSignedMessage(locationKey);
 
-		@Override
-		public void onSuccess() {
-			succeded = true;
-		}
-
-		@Override
-		public void onFailure() {
-			failed = true;
-		}
-
+		// send message
+		assertFalse(sender.send(message, receiver.getPublicKey()));
 	}
 
-	@Override
 	@After
-	public void afterMethod() {
+	public void shutdownNetwork() {
 		NetworkTestUtil.shutdownNetwork(network);
-		super.afterMethod();
 	}
 
 	@AfterClass

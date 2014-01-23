@@ -42,14 +42,5 @@ public class TestDirectMessage extends BaseDirectMessage {
 	public AcceptanceReply accept() {
 		return AcceptanceReply.OK;
 	}
-
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 	
 }

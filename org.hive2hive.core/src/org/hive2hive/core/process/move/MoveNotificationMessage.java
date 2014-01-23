@@ -1,10 +1,6 @@
 package org.hive2hive.core.process.move;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
@@ -13,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -58,41 +55,13 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 			UserProfile userProfile = profileManager.getUserProfile(ProcessManager.createRandomPseudoPID(),
 					false);
 
-			// find the file of this user on the disc
 			FileTreeNode oldParent = userProfile.getFileById(oldParentKey);
-			File oldParentFile = session.getFileManager().getPath(oldParent).toFile();
-			File toMoveSource = new File(oldParentFile, sourceFileName);
-
-			if (!toMoveSource.exists()) {
-				throw new FileNotFoundException("Cannot move file '" + toMoveSource.getAbsolutePath()
-						+ "' because it's not at the source location anymore");
-			}
-
 			FileTreeNode newParent = userProfile.getFileById(newParentKey);
-			File newParentFile = session.getFileManager().getPath(newParent).toFile();
-			File toMoveDest = new File(newParentFile, destFileName);
-
-			if (toMoveDest.exists()) {
-				logger.warn("Overwriting '" + toMoveDest.getAbsolutePath()
-						+ "' because file has been moved remotely");
-			}
-
-			// move the file
-			Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
-			logger.debug("Successfully moved the file");
+			FileUtil.moveFile(sourceFileName, destFileName, oldParent, newParent, session.getFileManager());
 		} catch (NoSessionException | GetFailedException | IOException e) {
 			logger.error("Could not process the notification message", e);
 		}
 
 	}
 
-	@Override
-	public boolean checkSignature(byte[] data, byte[] signature, String userId) {
-		if (!networkManager.getUserId().equals(userId)) {
-			logger.error("Signature is not from the same user.");
-			return false;
-		} else {
-			return verify(data, signature, networkManager.getPublicKey());
-		}
-	}
 }

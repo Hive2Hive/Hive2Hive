@@ -21,9 +21,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
-import org.hive2hive.core.network.data.listener.IGetListener;
-import org.hive2hive.core.network.data.listener.IPutListener;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 
 /**
  * This class offers an interface for putting, getting and removing data from the network.
@@ -49,42 +46,40 @@ public class DataManager {
 		return networkManager.getConnection().getPeer();
 	}
 
-	public void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey,
-			IPutListener listener) {
+	public boolean put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
 		FuturePut putFuture = put(lKey, dKey, cKey, content, protectionKey);
 		if (putFuture == null) {
-			if (listener != null)
-				listener.onPutFailure();
-			return;
+			return false;
 		}
 
-		putFuture
-				.addListener(new FuturePutListener(lKey, dKey, cKey, content, protectionKey, listener, this));
+		FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, content, protectionKey, this);
+		putFuture.addListener(listener);
+		return listener.await();
 	}
 
-	public void putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
-			KeyPair protectionKey, IPutListener listener) {
+	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
+			KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 		FuturePut putFuture = put(lKey, dKey, contentKey, content, protectionKey);
 		if (putFuture == null) {
-			if (listener != null)
-				listener.onPutFailure();
-			return;
+			return false;
 		}
 
-		putFuture.addListener(new FuturePutListener(lKey, dKey, contentKey, content, protectionKey, listener,
-				this));
+		FuturePutListener listener = new FuturePutListener(lKey, dKey, contentKey, content, protectionKey,
+				this);
+		putFuture.addListener(listener);
+		return listener.await();
 	}
 
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			NetworkContent content, KeyPair protectionKey) {
 		logger.debug(String
 				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-						content.getClass().getName(), locationKey, domainKey, contentKey,
+						content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
 						content.getVersionKey()));
 		try {
 			Data data = new Data(content);
@@ -105,47 +100,39 @@ public class DataManager {
 		}
 	}
 
-	@Deprecated
-	public void putLocal(String locationKey, String contentKey, NetworkContent content) {
-		logger.debug(String.format("local put key = '%s' content key = '%s'", locationKey, contentKey));
-		try {
-			Number640 key = new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-					Number160.createHash(contentKey), content.getVersionKey());
-			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
-			// TODO add public key for content protection
-			getPeer().getPeerBean().storage().put(key, data, null, false, false);
-		} catch (IOException e) {
-			logger.error(String.format(
-					"Local put failed. location key = '%s' content key = '%s' exception = '%s'", locationKey,
-					contentKey, e.getMessage()));
-		}
-	}
-
-	public void get(String locationKey, String contentKey, IGetListener listener) {
+	public NetworkContent get(String locationKey, String contentKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureGet futureGet = get(lKey, dKey, cKey);
-		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, this, listener));
+		FutureGetListener listener = new FutureGetListener(lKey, dKey, cKey, this);
+		futureGet.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
-	public void get(String locationKey, String contentKey, Number160 versionKey, IGetListener listener) {
+	public NetworkContent get(String locationKey, String contentKey, Number160 versionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureGet futureGet = get(lKey, dKey, cKey, versionKey);
-		futureGet.addListener(new FutureGetListener(lKey, dKey, cKey, versionKey, this, listener));
+		FutureGetListener listener = new FutureGetListener(lKey, dKey, cKey, versionKey, this);
+		futureGet.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
-	public void getUserProfileTask(String userId, IGetListener listener) {
+	public NetworkContent getUserProfileTask(String userId) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+
 		FutureGet futureGet = getPeer().get(lKey)
 				.from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
 				.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending()
 				.returnNr(1).start();
-		futureGet.addListener(new FutureGetListener(lKey, dKey, this, listener));
+		FutureGetListener listener = new FutureGetListener(lKey, dKey, this);
+		futureGet.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
 	public FutureGet get(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
@@ -166,55 +153,37 @@ public class DataManager {
 				.setVersionKey(versionKey).start();
 	}
 
-	@Deprecated
-	public NetworkContent getLocal(String locationKey, String contentKey) {
-		return getLocal(locationKey, contentKey, H2HConstants.TOMP2P_DEFAULT_KEY);
-	}
-
-	@Deprecated
-	public NetworkContent getLocal(String locationKey, String contentKey, Number160 versionKey) {
-		logger.debug(String.format("local get key = '%s' content key = '%s' version key = '%s'", locationKey,
-				contentKey, versionKey));
-		Number640 key = new Number640(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(contentKey), versionKey);
-		Data data = getPeer().getPeerBean().storage().get(key);
-		if (data != null) {
-			try {
-				return (NetworkContent) data.object();
-			} catch (ClassNotFoundException | IOException e) {
-				logger.error(String.format("local get failed exception = '%s'", e.getMessage()));
-			}
-		} else {
-			logger.warn("futureDHT.getData() is null");
-		}
-		return null;
-	}
-
-	public void remove(String locationKey, String contentKey, KeyPair protectionKey, IRemoveListener listener) {
+	public boolean remove(String locationKey, String contentKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureRemove futureRemove = remove(lKey, dKey, cKey, protectionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, protectionKey, listener, this));
+		FutureRemoveListener listener = new FutureRemoveListener(lKey, dKey, cKey, protectionKey, this);
+		futureRemove.addListener(listener);
+		return listener.await();
 	}
 
-	public void remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey,
-			IRemoveListener listener) {
+	public boolean remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
+
 		FutureRemove futureRemove = remove(lKey, dKey, cKey, versionKey, protectionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, cKey, versionKey, protectionKey,
-				listener, this));
+		FutureRemoveListener listener = new FutureRemoveListener(lKey, dKey, cKey, versionKey, protectionKey,
+				this);
+		futureRemove.addListener(listener);
+		return listener.await();
 	}
 
-	public void removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey,
-			IRemoveListener listener) {
+	public boolean removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
+
 		FutureRemove futureRemove = remove(lKey, dKey, contentKey, protectionKey);
-		futureRemove.addListener(new FutureRemoveListener(lKey, dKey, contentKey, protectionKey, listener,
-				this));
+		FutureRemoveListener listener = new FutureRemoveListener(lKey, dKey, contentKey, protectionKey, this);
+		futureRemove.addListener(listener);
+		return listener.await();
 	}
 
 	public FutureRemove remove(Number160 locationKey, Number160 domainKey, Number160 contentKey,

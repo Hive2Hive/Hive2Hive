@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.security.KeyPair;
+import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDigest;
@@ -13,14 +14,13 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.listener.IRemoveListener;
 
 /**
  * A future listener for a remove. After the operation completed the listener verifies with a get digest if
  * all data has been deleted. If not, the listener retries the remove (see {@link H2HConstants#REMOVE_RETRIES}
- * ). In both cases the given {@link IRemoveListener} listener gets notified.
+ * ).
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
@@ -34,29 +34,39 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	protected final Number160 contentKey;
 	protected final Number160 versionKey;
 	protected final KeyPair protectionKey;
-	protected final IRemoveListener listener;
 	protected final DataManager dataManager;
+	private final CountDownLatch latch;
+	private boolean success = false;
 
 	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			KeyPair protectionKey, IRemoveListener listener, DataManager dataManager) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = contentKey;
-		this.versionKey = null;
-		this.protectionKey = protectionKey;
-		this.listener = listener;
-		this.dataManager = dataManager;
+			KeyPair protectionKey, DataManager dataManager) {
+		this(locationKey, domainKey, contentKey, null, protectionKey, dataManager);
 	}
 
 	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, KeyPair protectionKey, IRemoveListener listener, DataManager dataManager) {
+			Number160 versionKey, KeyPair protectionKey, DataManager dataManager) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
 		this.versionKey = versionKey;
 		this.protectionKey = protectionKey;
-		this.listener = listener;
 		this.dataManager = dataManager;
+		this.latch = new CountDownLatch(1);
+	}
+
+	/**
+	 * Wait (blocking) until the remove is done
+	 * 
+	 * @return true if successful, false if not successful
+	 */
+	public boolean await() {
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			logger.error("Could not wait until put has finished", e);
+		}
+
+		return success;
 	}
 
 	@Override
@@ -84,8 +94,8 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 					logger.debug(String.format("Verification for remove completed."
 							+ " location key = '%s' domain key = '%s' content key = '%s' versionKey = '%s'",
 							locationKey, domainKey, contentKey, versionKey));
-					if (listener != null)
-						listener.onRemoveSuccess();
+					success = true;
+					latch.countDown();
 				}
 			}
 		});
@@ -109,8 +119,8 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 			logger.error(String.format("Remove verification failed. Data is not null after %s tries."
 					+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 					removeTries - 1, locationKey, domainKey, contentKey, versionKey));
-			if (listener != null)
-				listener.onRemoveFailure();
+			success = false;
+			latch.countDown();
 		}
 	}
 }
