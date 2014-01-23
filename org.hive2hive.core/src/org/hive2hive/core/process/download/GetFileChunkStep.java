@@ -34,7 +34,7 @@ public class GetFileChunkStep extends BaseGetProcessStep {
 
 	public GetFileChunkStep(Path destination, FileVersion version) {
 		this.path = destination;
-		this.chunkKeys = version.getChunkIds();
+		this.chunkKeys = version.getChunkKeys();
 		this.currentChunkOrder = 0;
 		this.chunkBuffer = new ArrayList<Chunk>();
 	}

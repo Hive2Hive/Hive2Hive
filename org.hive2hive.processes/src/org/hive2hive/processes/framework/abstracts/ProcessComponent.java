@@ -169,7 +169,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	protected void notifySucceeded() {
-
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onSucceeded();
 		}
@@ -177,7 +176,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	protected void notifyFailed() {
-
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFailed();
 		}
@@ -185,7 +183,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	private void notifyFinished() {
-
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFinished();
 		}

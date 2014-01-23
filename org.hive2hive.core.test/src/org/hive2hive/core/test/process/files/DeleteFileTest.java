@@ -90,7 +90,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		MetaFile metaFileBeforeDeletion = (MetaFile) metaDocumentBeforeDeletion;
 		for (FileVersion version : metaFileBeforeDeletion.getVersions()) {
-			for (KeyPair key : version.getChunkIds()) {
+			for (KeyPair key : version.getChunkKeys()) {
 				FutureGet get = client.getDataManager().get(
 						Number160.createHash(ProcessStep.key2String(key.getPublic())),
 						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.FILE_CHUNK));

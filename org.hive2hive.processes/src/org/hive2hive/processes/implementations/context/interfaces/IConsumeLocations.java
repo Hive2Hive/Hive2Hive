@@ -4,6 +4,6 @@ import org.hive2hive.core.model.Locations;
 
 public interface IConsumeLocations {
 
-	public Locations consumeLocations();
+	Locations consumeLocations();
 
 }

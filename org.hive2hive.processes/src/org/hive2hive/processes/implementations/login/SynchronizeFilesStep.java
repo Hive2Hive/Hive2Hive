@@ -32,7 +32,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		UserProfile profile = null;
 		try {
-			profile = profileManager.getUserProfile(0, false);
+			profile = profileManager.getUserProfile(getID(), false);
 		} catch (GetFailedException e) {
 			cancel(new RollbackReason(this, "User profile could not be accessed."));
 			return;

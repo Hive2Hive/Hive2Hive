@@ -1,6 +1,7 @@
 package org.hive2hive.processes.implementations.common.base;
 
 import java.security.KeyPair;
+import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
@@ -29,9 +30,13 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		this.networkManager = networkManager;
 	}
 
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
-			throws InvalidProcessStateException, PutFailedException {
+	protected void put(PublicKey locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+			throws PutFailedException {
+		put(key2String(locationKey), contentKey, content, protectionKey);
+	}
 
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+			throws PutFailedException {
 		this.locationKey = locationKey;
 		this.contentKey = contentKey;
 		this.content = content;
@@ -52,7 +57,6 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-
 		if (!putPerformed) {
 			logger.warn("Nothing to remove at rollback because nothing has been put.");
 			return;

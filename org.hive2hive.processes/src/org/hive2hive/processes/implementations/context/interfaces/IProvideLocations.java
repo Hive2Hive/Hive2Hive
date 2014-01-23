@@ -4,5 +4,5 @@ import org.hive2hive.core.model.Locations;
 
 public interface IProvideLocations {
 
-	public void provideLocations(Locations locations);
+	void provideLocations(Locations locations);
 }

@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.upload.newfile;
+package org.hive2hive.processes.implementations.files.add;
 
 import java.io.File;
 import java.security.KeyPair;
@@ -13,21 +13,27 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 
 /**
  * Create a new {@link MetaDocument}.
  * 
- * @author Seppi
+ * @author Nico, Chris
  */
 public class CreateMetaDocumentStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CreateMetaDocumentStep.class);
+	private final AddFileProcessContext context;
+
+	public CreateMetaDocumentStep(AddFileProcessContext context) {
+		this.context = context;
+	}
 
 	@Override
-	public void start() {
-		NewFileProcessContext context = (NewFileProcessContext) getProcess().getContext();
+	protected void doExecute() throws InvalidProcessStateException {
 		File file = context.getFile();
 
 		// generate the new key pair for the meta file (which are later stored in the user profile)
@@ -43,22 +49,14 @@ public class CreateMetaDocumentStep extends ProcessStep {
 		} else {
 			// create new meta file with new version
 			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis(),
-					new ArrayList<KeyPair>());
-			context.setChunkKeys(version.getChunkKeys());
+					context.getChunkKeys());
 			List<FileVersion> versions = new ArrayList<FileVersion>(1);
 			versions.add(version);
 
 			metaDocument = new MetaFile(metaKeyPair.getPublic(), file.getName(), versions);
 			logger.debug(String.format("New meta file created. file = '%s'", file.getName()));
 		}
-		context.setNewMetaDocument(metaDocument);
 
-		getProcess().setNextStep(new GetParentMetaStep());
+		context.provideParentMetaDocument(metaDocument);
 	}
-
-	@Override
-	public void rollBack() {
-		getProcess().nextRollBackStep();
-	}
-
 }

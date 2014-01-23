@@ -4,5 +4,5 @@ import org.hive2hive.core.H2HSession;
 
 public interface IProvideSession {
 
-	public void provideSession(H2HSession session);
+	void provideSession(H2HSession session);
 }

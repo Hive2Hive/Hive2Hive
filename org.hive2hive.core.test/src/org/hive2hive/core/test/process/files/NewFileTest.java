@@ -173,7 +173,7 @@ public class NewFileTest extends H2HJUnitTest {
 			MetaFile metaFile = (MetaFile) metaDocument;
 			Assert.assertNotNull(metaFile);
 			Assert.assertEquals(1, metaFile.getVersions().size());
-			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkIds().size());
+			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkKeys().size());
 		} else {
 			// get meta folder
 			MetaFolder metaFolder = (MetaFolder) metaDocument;

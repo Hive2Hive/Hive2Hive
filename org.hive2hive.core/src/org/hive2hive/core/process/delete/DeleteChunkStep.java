@@ -45,7 +45,7 @@ public class DeleteChunkStep extends BaseRemoveProcessStep {
 			// no chunks to delete when directory
 			MetaFile metaFile = (MetaFile) metaDocument;
 			for (FileVersion version : metaFile.getVersions()) {
-				chunksToDelete.addAll(version.getChunkIds());
+				chunksToDelete.addAll(version.getChunkKeys());
 			}
 		}
 

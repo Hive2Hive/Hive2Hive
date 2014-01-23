@@ -4,5 +4,5 @@ import org.hive2hive.core.H2HSession;
 
 public interface IConsumeSession {
 
-	public H2HSession consumeSession();
+	H2HSession consumeSession();
 }

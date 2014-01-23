@@ -1,5 +1,9 @@
 package org.hive2hive.processes;
 
+import java.io.File;
+import java.nio.file.Path;
+
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -8,9 +12,16 @@ import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
+import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
+import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
+import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
+import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
+import org.hive2hive.processes.implementations.files.add.PutChunksStep;
+import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
+import org.hive2hive.processes.implementations.files.add.UpdateUserProfileStep;
 import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.processes.implementations.login.SessionCreationStep;
@@ -68,5 +79,30 @@ public final class ProcessFactory {
 		AsyncComponent loginProcess = new AsyncComponent(process);
 
 		return loginProcess;
+	}
+
+	public IProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
+			throws NoSessionException {
+		Path root = networkManager.getSession().getFileManager().getRoot();
+		boolean inRoot = root.equals(file.toPath().getParent());
+
+		AddFileProcessContext context = new AddFileProcessContext(file, inRoot, networkManager.getSession());
+
+		SequentialProcess process = new SequentialProcess();
+		process.add(new GetParentMetaStep(context, networkManager));
+		process.add(new PutChunksStep(context, networkManager));
+		process.add(new CreateMetaDocumentStep(context));
+		process.add(new PutMetaDocumentStep(context, context, networkManager));
+
+		if (!inRoot) {
+			// need to update the parent if necessary
+			process.add(new UpdateParentMetaStep(context, networkManager));
+		}
+
+		process.add(new UpdateUserProfileStep(context));
+		// TODO notify others
+
+		AsyncComponent addFileProcess = new AsyncComponent(process);
+		return addFileProcess;
 	}
 }
