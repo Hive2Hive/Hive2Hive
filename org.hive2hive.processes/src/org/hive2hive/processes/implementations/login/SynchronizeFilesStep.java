@@ -10,8 +10,6 @@ import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -37,6 +35,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 			profile = profileManager.getUserProfile(0, false);
 		} catch (GetFailedException e) {
 			cancel(new RollbackReason(this, "User profile could not be accessed."));
+			return;
 		}
 
 		FileSynchronizer synchronizer = new FileSynchronizer(fileManager, profile);
