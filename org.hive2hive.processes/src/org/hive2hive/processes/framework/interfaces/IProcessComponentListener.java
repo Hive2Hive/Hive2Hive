@@ -2,9 +2,9 @@ package org.hive2hive.processes.framework.interfaces;
 
 public interface IProcessComponentListener {
 
-	public void onSucceeded();
+	void onSucceeded();
 
-	public void onFailed();
+	void onFailed();
 
-	public void onFinished();
+	void onFinished();
 }

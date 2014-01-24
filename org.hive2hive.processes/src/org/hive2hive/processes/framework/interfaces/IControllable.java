@@ -5,11 +5,11 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 
 public interface IControllable {
 
-	public void start() throws InvalidProcessStateException;
+	void start() throws InvalidProcessStateException;
 
-	public void pause() throws InvalidProcessStateException;
+	void pause() throws InvalidProcessStateException;
 
-	public void resume() throws InvalidProcessStateException;
+	void resume() throws InvalidProcessStateException;
 
-	public void cancel(RollbackReason reason) throws InvalidProcessStateException;
+	void cancel(RollbackReason reason) throws InvalidProcessStateException;
 }

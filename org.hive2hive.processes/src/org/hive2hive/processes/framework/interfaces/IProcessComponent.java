@@ -4,15 +4,15 @@ import org.hive2hive.processes.framework.ProcessState;
 
 public interface IProcessComponent extends IControllable {
 
-	public String getID();
+	String getID();
 
-	public double getProgress();
+	double getProgress();
 
-	public ProcessState getState();
+	ProcessState getState();
 
-	public void join();
+	void join();
 
-	public void attachListener(IProcessComponentListener listener);
+	void attachListener(IProcessComponentListener listener);
 
-	public void detachListener(IProcessComponentListener listener);
+	void detachListener(IProcessComponentListener listener);
 }
