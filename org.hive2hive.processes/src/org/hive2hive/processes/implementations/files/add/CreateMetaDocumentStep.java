@@ -57,6 +57,6 @@ public class CreateMetaDocumentStep extends ProcessStep {
 			logger.debug(String.format("New meta file created. file = '%s'", file.getName()));
 		}
 
-		context.provideParentMetaDocument(metaDocument);
+		context.provideNewMetaDocument(metaDocument);
 	}
 }

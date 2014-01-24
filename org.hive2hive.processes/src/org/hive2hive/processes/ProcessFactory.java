@@ -9,7 +9,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
@@ -43,22 +42,24 @@ public final class ProcessFactory {
 	private ProcessFactory() {
 	}
 
-	public IProcessComponent createRegisterProcess(UserCredentials credentials, UserProfile profile,
-			NetworkManager networkManager) {
-
+	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager) {
+		UserProfile profile = new UserProfile(credentials.getUserId());
 		RegisterProcessContext context = new RegisterProcessContext(profile);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
 		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, networkManager));
-		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
-		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
-		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
+		process.add(new PutUserProfileStep(credentials, profile, networkManager));
+		process.add(new PutUserLocationsStep(context, context, networkManager));
+		process.add(new PutPublicKeyStep(profile, networkManager));
+		// process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
+		// process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
+		// process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
 
-		AsyncComponent registerProcess = new AsyncComponent(process);
+		// AsyncComponent registerProcess = new AsyncComponent(process);
 
-		return registerProcess;
+		return process;
 	}
 
 	public IProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
@@ -76,9 +77,9 @@ public final class ProcessFactory {
 		process.add(new PutUserLocationsStep(context, context, networkManager));
 		process.add(new SynchronizeFilesStep(context));
 
-		AsyncComponent loginProcess = new AsyncComponent(process);
+		// AsyncComponent loginProcess = new AsyncComponent(process);
 
-		return loginProcess;
+		return process;
 	}
 
 	public IProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
@@ -102,7 +103,7 @@ public final class ProcessFactory {
 		process.add(new UpdateUserProfileStep(context));
 		// TODO notify others
 
-		AsyncComponent addFileProcess = new AsyncComponent(process);
-		return addFileProcess;
+		// AsyncComponent addFileProcess = new AsyncComponent(process);
+		return process;
 	}
 }

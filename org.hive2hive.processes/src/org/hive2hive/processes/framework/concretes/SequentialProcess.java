@@ -1,6 +1,5 @@
 package org.hive2hive.processes.framework.concretes;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,14 +25,11 @@ public class SequentialProcess extends Process {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		while (executionIndex < components.size() && getState() == ProcessState.RUNNING) {
-
 			ProcessComponent next = components.get(executionIndex);
 			next.start();
 			executionIndex++;
 		}
-
 	}
 
 	@Override
@@ -53,7 +49,6 @@ public class SequentialProcess extends Process {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-
 		// reason component rolls itself back before notifying parent component
 		rollbackIndex = executionIndex;
 
@@ -83,7 +78,6 @@ public class SequentialProcess extends Process {
 
 	@Override
 	public List<ProcessComponent> getComponents() {
-
 		return Collections.unmodifiableList(components);
 	}
 

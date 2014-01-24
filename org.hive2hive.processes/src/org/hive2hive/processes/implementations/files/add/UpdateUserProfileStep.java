@@ -65,14 +65,14 @@ public class UpdateUserProfileStep extends ProcessStep {
 		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(
 				metaDocument.getId());
 		context.setMessageFactory(messageFactory);
-		if (userProfile != null && userProfile.getRoot().getKeyPair().getPublic().equals(parentKey)) {
+		if (context.isInRoot()) {
 			// file is in root; notify only own client
 			Set<String> onlyMe = new HashSet<String>(1);
 			onlyMe.add(context.getH2HSession().getCredentials().getUserId());
 			context.setUsers(onlyMe);
 			// getProcess().sendNotification(messageFactory, onlyMe);
 		} else {
-			MetaFolder metaFolder = (MetaFolder) metaDocument;
+			MetaFolder metaFolder = (MetaFolder) context.consumeParentMetaDocument();
 			Set<String> userList = metaFolder.getUserList();
 			context.setUsers(userList);
 			// getProcess().sendNotification(messageFactory, userList);

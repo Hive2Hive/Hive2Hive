@@ -26,7 +26,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		executor.submit(this);
 	}

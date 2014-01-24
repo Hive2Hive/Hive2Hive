@@ -50,7 +50,6 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		// get and set the process context
 		File file = context.getFile();
-		logger.debug("Start getting the parent meta folder of file: " + file.getName());
 		File parent = file.getParentFile();
 
 		if (context.isInRoot()) {
@@ -68,6 +67,7 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 		try {
 			KeyPair protectionKeys = context.getH2HSession().getProfileManager().getDefaultProtectionKey();
 			context.provideProtectionKeys(protectionKeys);
+			logger.debug("Got the default protection keys");
 		} catch (GetFailedException e) {
 			cancel(new RollbackReason(this, "Default protection keys not found."));
 		}

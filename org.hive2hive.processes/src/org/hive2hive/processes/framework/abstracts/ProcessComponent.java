@@ -77,6 +77,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public final void cancel(RollbackReason reason) throws InvalidProcessStateException {
+		logger.error("Cancel called. Reason: " + reason.getMessage());
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.BadPaddingException;
@@ -48,11 +49,12 @@ public class PutChunksStep extends BasePutProcessStep {
 
 	public PutChunksStep(AddFileProcessContext context, NetworkManager networkManager) {
 		super(networkManager);
+		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		List<KeyPair> chunkKeys = context.getChunkKeys();
+		List<KeyPair> chunkKeys = new ArrayList<KeyPair>();
 		File file = context.getFile();
 
 		// only put sth. if the file has content

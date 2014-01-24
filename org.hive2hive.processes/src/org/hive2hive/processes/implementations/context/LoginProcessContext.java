@@ -47,11 +47,11 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 	public Locations consumeLocations() {
 		return locations;
 	}
-	
+
 	public void setIsMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}
-	
+
 	public boolean getIsMaster() {
 		return isMaster;
 	}

@@ -45,6 +45,14 @@ public class PutUserProfileStep extends BasePutProcessStep {
 			return;
 		}
 
+		try {
+			encryptedProfile.generateVersionKey();
+		} catch (IOException e) {
+			cancel(new RollbackReason(this, "User profile version key could not be generated. Reason: "
+					+ e.getMessage()));
+			return;
+		}
+
 		// put encrypted user profile
 		try {
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedProfile,

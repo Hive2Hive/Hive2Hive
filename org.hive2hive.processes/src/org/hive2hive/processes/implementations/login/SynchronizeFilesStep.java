@@ -26,7 +26,6 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		UserProfileManager profileManager = context.consumeSession().getProfileManager();
 		FileManager fileManager = context.consumeSession().getFileManager();
 

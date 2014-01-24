@@ -17,7 +17,8 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 	private final IConsumeLocations locationsContext;
 	private final IConsumeUserProfile profileContext;
 
-	public PutUserLocationsStep(IConsumeLocations locationsContext, IConsumeUserProfile profileContext, NetworkManager networkManager) {
+	public PutUserLocationsStep(IConsumeLocations locationsContext, IConsumeUserProfile profileContext,
+			NetworkManager networkManager) {
 		super(networkManager);
 		this.locationsContext = locationsContext;
 		this.profileContext = profileContext;
@@ -25,9 +26,8 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		Locations locations = locationsContext.consumeLocations();
-		
+
 		locations.setBasedOnKey(locations.getVersionKey());
 		try {
 			locations.generateVersionKey();
@@ -37,7 +37,8 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 		}
 
 		try {
-			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, profileContext.consumeUserProfile().getProtectionKeys());
+			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, profileContext
+					.consumeUserProfile().getProtectionKeys());
 		} catch (PutFailedException e) {
 			cancel(new RollbackReason(this, "Put failed."));
 		}
