@@ -30,14 +30,14 @@ import org.hive2hive.processes.implementations.context.AddFileProcessContext;
  * @author Nico
  * 
  */
-public class UpdateUserProfileStep extends ProcessStep {
+public class AddToUserProfileStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(UpdateUserProfileStep.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AddToUserProfileStep.class);
 
 	private final AddFileProcessContext context;
 	private PublicKey parentKey; // used for rollback
 
-	public UpdateUserProfileStep(AddFileProcessContext context) {
+	public AddToUserProfileStep(AddFileProcessContext context) {
 		this.context = context;
 	}
 

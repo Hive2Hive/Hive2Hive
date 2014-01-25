@@ -21,7 +21,6 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		NetworkContent loadedContent = get(userId, H2HConstants.USER_LOCATIONS);
 
 		if (loadedContent == null) {
