@@ -103,6 +103,19 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
+	public abstract void join();
+
+	protected abstract void doExecute() throws InvalidProcessStateException;
+
+	protected abstract void doPause();
+
+	protected abstract void doResumeExecution() throws InvalidProcessStateException;
+
+	protected abstract void doResumeRollback();
+
+	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
+
+	@Override
 	public String getID() {
 		return id;
 	}
@@ -124,19 +137,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 	public void setParent(Process parent) {
 		this.parent = parent;
 	}
-
-	@Override
-	public abstract void join();
-
-	protected abstract void doExecute() throws InvalidProcessStateException;
-
-	protected abstract void doPause();
-
-	protected abstract void doResumeExecution() throws InvalidProcessStateException;
-
-	protected abstract void doResumeRollback();
-
-	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
@@ -169,14 +169,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 		return 31 * hash + id.hashCode();
 	}
 
-	protected void notifySucceeded() {
+	private void notifySucceeded() {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onSucceeded();
 		}
 		notifyFinished();
 	}
 
-	protected void notifyFailed() {
+	private void notifyFailed() {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFailed();
 		}

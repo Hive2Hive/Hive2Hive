@@ -2,6 +2,7 @@ package org.hive2hive.processes;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -11,6 +12,8 @@ import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
+import org.hive2hive.processes.framework.interfaces.IProcessResultListener;
+import org.hive2hive.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
@@ -26,6 +29,7 @@ import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
+import org.hive2hive.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
@@ -150,5 +154,13 @@ public final class ProcessFactory {
 		process.add(new UpdateMD5inUserProfileStep(context));
 
 		return process;
+	}
+	
+	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
+		
+		GetFileListStep listStep = new GetFileListStep(networkManager);
+		
+		// TODO Chris: find a way to wrap in AsyncComponent (merge interface into hierarchy)
+		return listStep;
 	}
 }

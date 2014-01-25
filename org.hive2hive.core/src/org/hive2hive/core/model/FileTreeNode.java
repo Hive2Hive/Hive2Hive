@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.file.FileManager;
@@ -15,7 +18,7 @@ import org.hive2hive.core.file.FileManager;
  * @author Nico
  * 
  */
-public class FileTreeNode implements Serializable {
+public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;
@@ -74,6 +77,29 @@ public class FileTreeNode implements Serializable {
 		this.isFolder = true;
 		this.parent = null;
 		children = new HashSet<FileTreeNode>();
+	}
+	
+	/**
+	 * Walks recursively through the file tree to build, sort and return the digest.
+	 * @param node The root node from which the digest is started.
+	 * @return The digest in sorted order.
+	 */
+	public static List<Path> getDigest(FileTreeNode node) {
+		
+		List<Path> digest = new ArrayList<Path>();
+		
+		// add self
+		digest.add(node.getFullPath());
+
+		// add children
+		for (FileTreeNode child : node.getChildren()) {
+			digest.addAll(getDigest(child));
+		}
+		
+		// sort by full path
+		Collections.sort(digest);
+		
+		return digest;
 	}
 
 	public KeyPair getKeyPair() {
@@ -210,4 +236,10 @@ public class FileTreeNode implements Serializable {
 		sb.append(" children=").append(children.size()).append("]");
 		return sb.toString();
 	}
+
+	@Override
+	public int compareTo(FileTreeNode other) {
+		return this.getFullPath().compareTo(other.getFullPath());
+	}
+
 }

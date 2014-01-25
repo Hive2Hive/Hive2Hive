@@ -37,6 +37,7 @@ public abstract class ProcessStep extends ProcessComponent {
 		// do nothing by default
 	}
 
+	// TODO Nico: this method should not be here!
 	protected String key2String(PublicKey key) {
 		return EncryptionUtil.byteToHex(key.getEncoded());
 	}
