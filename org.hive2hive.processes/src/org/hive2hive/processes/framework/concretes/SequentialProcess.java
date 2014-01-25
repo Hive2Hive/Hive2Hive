@@ -53,7 +53,6 @@ public class SequentialProcess extends Process {
 		rollbackIndex = executionIndex;
 
 		while (rollbackIndex >= 0 && getState() == ProcessState.ROLLBACKING) {
-
 			ProcessComponent last = components.get(rollbackIndex);
 			last.cancel(reason);
 			rollbackIndex--;

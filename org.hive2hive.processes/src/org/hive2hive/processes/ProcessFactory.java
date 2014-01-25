@@ -18,11 +18,11 @@ import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
+import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
-import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
@@ -112,7 +112,7 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoSessionException, IllegalArgumentException {
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
@@ -129,6 +129,8 @@ public final class ProcessFactory {
 		process.add(new CreateNewVersionStep(context));
 		process.add(new PutMetaDocumentStep(context, context, networkManager));
 		process.add(new UpdateMD5inUserProfileStep(context));
+
+		// TODO notify others
 
 		return process;
 	}

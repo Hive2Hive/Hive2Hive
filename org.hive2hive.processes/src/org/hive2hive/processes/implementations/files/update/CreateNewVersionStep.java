@@ -20,7 +20,6 @@ public class CreateNewVersionStep extends ProcessStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(CreateNewVersionStep.class);
 
 	private final UpdateFileProcessContext context;
-	private MetaFile metaFile;
 	private FileVersion newVersion;
 
 	public CreateNewVersionStep(UpdateFileProcessContext context) {
@@ -36,7 +35,7 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		logger.debug("Adding a new version to the meta file.");
 
-		metaFile = (MetaFile) context.consumeMetaDocument();
+		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
 				System.currentTimeMillis(), context.getChunkKeys());
 		metaFile.getVersions().add(newVersion);
@@ -44,7 +43,8 @@ public class CreateNewVersionStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (metaFile != null) {
+		if (context.consumeMetaDocument() != null) {
+			MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
 			metaFile.getVersions().remove(newVersion);
 		}
 	}

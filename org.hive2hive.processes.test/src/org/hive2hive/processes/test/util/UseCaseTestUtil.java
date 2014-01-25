@@ -104,6 +104,11 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
+	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException {
+		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
+		executeProcess(process);
+	}
+
 	// public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
 	// IGetMetaContext context = new IGetMetaContext() {
 	//
