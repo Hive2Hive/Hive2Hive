@@ -82,7 +82,7 @@ public class UseCaseTestUtil {
 				sessionParameters, networkManager);
 		executeProcess(process);
 	}
-
+	
 	public static void registerAndLogin(UserCredentials credentials, NetworkManager networkManager, File root) {
 		register(credentials, networkManager);
 		login(credentials, networkManager, root);
