@@ -64,17 +64,17 @@ public class AddToUserProfileStep extends ProcessStep {
 		MetaDocument metaDocument = context.consumeMetaDocument();
 		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(
 				metaDocument.getId());
-		context.setMessageFactory(messageFactory);
+		context.provideMessageFactory(messageFactory);
 		if (context.isInRoot()) {
 			// file is in root; notify only own client
 			Set<String> onlyMe = new HashSet<String>(1);
 			onlyMe.add(context.getH2HSession().getCredentials().getUserId());
-			context.setUsers(onlyMe);
+			context.provideUsersToNotify(onlyMe);
 			// getProcess().sendNotification(messageFactory, onlyMe);
 		} else {
 			MetaFolder metaFolder = (MetaFolder) context.consumeParentMetaDocument();
 			Set<String> userList = metaFolder.getUserList();
-			context.setUsers(userList);
+			context.provideUsersToNotify(userList);
 			// getProcess().sendNotification(messageFactory, userList);
 		}
 

@@ -92,22 +92,22 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IProvidePr
 	}
 
 	@Override
-	public void setMessageFactory(BaseNotificationMessageFactory messageFactory) {
+	public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
 
 	@Override
-	public void setUsers(Set<String> users) {
+	public void provideUsersToNotify(Set<String> users) {
 		this.users = users;
 	}
 
 	@Override
-	public BaseNotificationMessageFactory provideMessageFactory() {
+	public BaseNotificationMessageFactory consumeMessageFactory() {
 		return messageFactory;
 	}
 
 	@Override
-	public Set<String> getUsers() {
+	public Set<String> consumeUsersToNotify() {
 		return users;
 	}
 }

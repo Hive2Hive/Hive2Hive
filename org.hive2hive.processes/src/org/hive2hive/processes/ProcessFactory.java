@@ -2,7 +2,9 @@ package org.hive2hive.processes;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -21,8 +23,10 @@ import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.LogoutProcessContext;
+import org.hive2hive.processes.implementations.context.NotifyProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
@@ -37,6 +41,11 @@ import org.hive2hive.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.processes.implementations.login.SynchronizeFilesStep;
 import org.hive2hive.processes.implementations.logout.RemoveOwnLocationsStep;
+import org.hive2hive.processes.implementations.notify.GetAllLocationsStep;
+import org.hive2hive.processes.implementations.notify.GetPublicKeysStep;
+import org.hive2hive.processes.implementations.notify.PutAllUserProfileTasksStep;
+import org.hive2hive.processes.implementations.notify.RemoveUnreachableStep;
+import org.hive2hive.processes.implementations.notify.SendNotificationsMessageStep;
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
@@ -167,5 +176,33 @@ public final class ProcessFactory {
 
 		// return new AsyncResultComponent<List<Path>>(listStep);
 		return listStep;
+	}
+
+	private IProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
+			NetworkManager networkManager) throws IllegalArgumentException {
+		String userId = networkManager.getUserId();
+		Set<String> usersToNotify = providerContext.consumeUsersToNotify();
+		if (providerContext.consumeMessageFactory().createUserProfileTask() == null) {
+			// only private notification (or none)
+			usersToNotify = new HashSet<>(1);
+			if (providerContext.consumeUsersToNotify().contains(userId))
+				usersToNotify.add(userId);
+			else
+				throw new IllegalArgumentException(
+						"Users can't be notified because the UserProfileTask is null and no notification of the own user");
+		}
+
+		NotifyProcessContext context = new NotifyProcessContext(providerContext);
+
+		SequentialProcess process = new SequentialProcess();
+		process.add(new GetPublicKeysStep(context, networkManager));
+		process.add(new PutAllUserProfileTasksStep(context, networkManager));
+		process.add(new GetAllLocationsStep(context, networkManager));
+		process.add(new SendNotificationsMessageStep(context, networkManager));
+		// cleanup my own locations
+		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager));
+		process.add(new RemoveUnreachableStep(context, networkManager));
+
+		return process;
 	}
 }

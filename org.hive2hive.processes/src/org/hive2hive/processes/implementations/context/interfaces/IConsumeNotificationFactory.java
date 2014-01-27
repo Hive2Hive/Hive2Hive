@@ -6,7 +6,7 @@ import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 
 public interface IConsumeNotificationFactory {
 
-	BaseNotificationMessageFactory provideMessageFactory();
+	BaseNotificationMessageFactory consumeMessageFactory();
 
-	Set<String> getUsers();
+	Set<String> consumeUsersToNotify();
 }
