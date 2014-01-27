@@ -46,10 +46,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 		doExecute();
 
-		initiateSuccess();
-	}
-
-	protected void initiateSuccess() {
 		// TODO set leafs to succeeded when composite succeeded
 		// TODO wait for all async components
 		if (state == ProcessState.RUNNING && parent == null) {

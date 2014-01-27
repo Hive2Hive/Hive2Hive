@@ -62,16 +62,13 @@ public final class ProcessFactory {
 		SequentialProcess process = new SequentialProcess();
 
 		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, networkManager));
-		process.add(new PutUserProfileStep(credentials, profile, networkManager));
-		process.add(new PutUserLocationsStep(context, context, networkManager));
-		process.add(new PutPublicKeyStep(profile, networkManager));
-		// process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
-		// process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
-		// process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
+		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
+		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
+		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
 
-		// AsyncComponent registerProcess = new AsyncComponent(process);
+		AsyncComponent registerProcess = new AsyncComponent(process);
 
-		return process;
+		return registerProcess;
 	}
 
 	public IProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
@@ -89,9 +86,9 @@ public final class ProcessFactory {
 		process.add(new PutUserLocationsStep(context, context, networkManager));
 		process.add(new SynchronizeFilesStep(context));
 
-		// AsyncComponent loginProcess = new AsyncComponent(process);
+		AsyncComponent loginProcess = new AsyncComponent(process);
 
-		return process;
+		return loginProcess;
 	}
 
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
@@ -111,6 +108,7 @@ public final class ProcessFactory {
 
 	public IProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException {
+
 		Path root = networkManager.getSession().getFileManager().getRoot();
 		boolean inRoot = root.equals(file.toPath().getParent());
 
@@ -130,8 +128,9 @@ public final class ProcessFactory {
 		process.add(new AddToUserProfileStep(context));
 		// TODO notify others
 
-		// AsyncComponent addFileProcess = new AsyncComponent(process);
-		return process;
+		AsyncComponent addFileProcess = new AsyncComponent(process);
+
+		return addFileProcess;
 	}
 
 	public IProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
@@ -158,14 +157,16 @@ public final class ProcessFactory {
 
 		// TODO notify others
 
-		return process;
+		AsyncComponent updateFileProcess = new AsyncComponent(process);
+
+		return updateFileProcess;
 	}
 
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
 
 		GetFileListStep listStep = new GetFileListStep(networkManager);
 
-		// return new AsyncResultComponent<List<Path>>(listStep);
 		return listStep;
+//		return new AsyncResultComponent<List<Path>>(listStep);
 	}
 }

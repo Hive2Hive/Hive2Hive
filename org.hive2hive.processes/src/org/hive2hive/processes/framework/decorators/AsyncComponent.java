@@ -13,10 +13,12 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	private final ExecutorService executor;
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
+		
+		executor = Executors.newSingleThreadExecutor();
 	}
 
 	@Override
