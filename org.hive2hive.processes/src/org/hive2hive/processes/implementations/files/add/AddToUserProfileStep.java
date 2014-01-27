@@ -5,19 +5,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
@@ -59,26 +54,6 @@ public class AddToUserProfileStep extends ProcessStep {
 			cancel(new RollbackReason(this, e.getMessage()));
 			return;
 		}
-
-		// provide the needed data for the notification
-		MetaDocument metaDocument = context.consumeMetaDocument();
-		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(
-				metaDocument.getId());
-		context.provideMessageFactory(messageFactory);
-		if (context.isInRoot()) {
-			// file is in root; notify only own client
-			Set<String> onlyMe = new HashSet<String>(1);
-			onlyMe.add(context.getH2HSession().getCredentials().getUserId());
-			context.provideUsersToNotify(onlyMe);
-			// getProcess().sendNotification(messageFactory, onlyMe);
-		} else {
-			MetaFolder metaFolder = (MetaFolder) context.consumeParentMetaDocument();
-			Set<String> userList = metaFolder.getUserList();
-			context.provideUsersToNotify(userList);
-			// getProcess().sendNotification(messageFactory, userList);
-		}
-
-		logger.debug(String.format("New file process finished for file %s.", context.getFile().getName()));
 	}
 
 	/**

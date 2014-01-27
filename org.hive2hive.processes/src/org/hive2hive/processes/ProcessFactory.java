@@ -2,7 +2,6 @@ package org.hive2hive.processes;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +12,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
@@ -31,6 +31,7 @@ import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotifi
 import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
+import org.hive2hive.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
@@ -47,6 +48,7 @@ import org.hive2hive.processes.implementations.notify.GetPublicKeysStep;
 import org.hive2hive.processes.implementations.notify.PutAllUserProfileTasksStep;
 import org.hive2hive.processes.implementations.notify.RemoveUnreachableStep;
 import org.hive2hive.processes.implementations.notify.SendNotificationsMessageStep;
+import org.hive2hive.processes.implementations.notify.VerifyNotificationFactoryStep;
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
@@ -105,7 +107,6 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
-
 		LogoutProcessContext context = new LogoutProcessContext(session);
 
 		// process composition
@@ -138,7 +139,8 @@ public final class ProcessFactory {
 		}
 
 		process.add(new AddToUserProfileStep(context));
-		// TODO notify others
+		process.add(new PrepareNotificationStep(context));
+		process.add(createNotificationProcess(context, networkManager));
 
 		// AsyncComponent addFileProcess = new AsyncComponent(process);
 		return process;
@@ -165,14 +167,16 @@ public final class ProcessFactory {
 
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new DeleteChunksStep(context, networkManager));
-
-		// TODO notify others
+		if (!inRoot) {
+			process.add(new GetParentMetaStep(context, networkManager));
+		}
+		process.add(new PrepareNotificationStep(context));
+		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
 	}
 
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
-
 		GetFileListStep listStep = new GetFileListStep(networkManager);
 
 		// return new AsyncResultComponent<List<Path>>(listStep);
@@ -197,23 +201,12 @@ public final class ProcessFactory {
 		return createNotificationProcess(context, networkManager);
 	}
 
-	private IProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
+	private ProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
 			NetworkManager networkManager) throws IllegalArgumentException {
-		String userId = networkManager.getUserId();
-		Set<String> usersToNotify = providerContext.consumeUsersToNotify();
-		if (providerContext.consumeMessageFactory().createUserProfileTask() == null) {
-			// only private notification (or none)
-			usersToNotify = new HashSet<>(1);
-			if (providerContext.consumeUsersToNotify().contains(userId))
-				usersToNotify.add(userId);
-			else
-				throw new IllegalArgumentException(
-						"Users can't be notified because the UserProfileTask is null and no notification of the own user");
-		}
-
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		SequentialProcess process = new SequentialProcess();
+		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));
 		process.add(new GetPublicKeysStep(context, networkManager));
 		process.add(new PutAllUserProfileTasksStep(context, networkManager));
 		process.add(new GetAllLocationsStep(context, networkManager));
