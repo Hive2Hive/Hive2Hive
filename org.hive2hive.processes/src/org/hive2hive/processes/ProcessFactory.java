@@ -12,7 +12,6 @@ import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.processes.implementations.common.File2MetaFileComponent;
@@ -31,6 +30,7 @@ import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
+import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
 import org.hive2hive.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.processes.implementations.login.GetUserProfileStep;
@@ -93,7 +93,7 @@ public final class ProcessFactory {
 
 		return process;
 	}
-	
+
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
 
 		LogoutProcessContext context = new LogoutProcessContext(session);
@@ -135,7 +135,7 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoSessionException, IllegalArgumentException {
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
@@ -153,14 +153,19 @@ public final class ProcessFactory {
 		process.add(new PutMetaDocumentStep(context, context, networkManager));
 		process.add(new UpdateMD5inUserProfileStep(context));
 
+		// TODO: cleanup can be made async because user operation does not depend on it
+		process.add(new DeleteChunksStep(context, networkManager));
+
+		// TODO notify others
+
 		return process;
 	}
-	
+
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
-		
+
 		GetFileListStep listStep = new GetFileListStep(networkManager);
-		
-//		return new AsyncResultComponent<List<Path>>(listStep);
+
+		// return new AsyncResultComponent<List<Path>>(listStep);
 		return listStep;
 	}
 }

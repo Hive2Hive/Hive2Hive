@@ -17,6 +17,8 @@ import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeKeyPair;
+import org.hive2hive.processes.implementations.context.interfaces.IProvideKeyPair;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDocument;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideProtectionKeys;
 
@@ -34,7 +36,6 @@ public class File2MetaFileComponent extends SequentialProcess {
 	private final UserProfileManager profileManager;
 	private final FileManager fileManager;
 
-	public KeyPair protectionKeys;
 	public KeyPair fileKey;
 
 	public File2MetaFileComponent(File file, IProvideMetaDocument metaContext,
@@ -53,17 +54,20 @@ public class File2MetaFileComponent extends SequentialProcess {
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)
 			throws NoSessionException {
 		this.file = file;
-		profileManager = networkManager.getSession().getProfileManager();
-		fileManager = networkManager.getSession().getFileManager();
+		this.profileManager = networkManager.getSession().getProfileManager();
+		this.fileManager = networkManager.getSession().getFileManager();
+
+		File2MetaContext file2MetaContext = new File2MetaContext();
 
 		// first get the protection a
 		if (fileNode == null) {
-			add(new GetFileKeysStep(protectionContext));
+			add(new GetFileKeysStep(protectionContext, file2MetaContext));
 		} else {
-			protectionKeys = fileNode.getProtectionKeys();
+			protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
+			file2MetaContext.provideKeyPair(fileNode.getKeyPair());
 		}
 
-		add(new GetMetaDocumentStep(fileKey, metaContext, networkManager));
+		add(new GetMetaDocumentStep(file2MetaContext, metaContext, networkManager));
 	}
 
 	/**
@@ -74,10 +78,12 @@ public class File2MetaFileComponent extends SequentialProcess {
 	 */
 	private class GetFileKeysStep extends ProcessStep {
 
-		private IProvideProtectionKeys protectionContext;
+		private final IProvideProtectionKeys protectionContext;
+		private final File2MetaContext file2MetaContext;
 
-		public GetFileKeysStep(IProvideProtectionKeys protectionContext) {
+		public GetFileKeysStep(IProvideProtectionKeys protectionContext, File2MetaContext file2MetaContext) {
 			this.protectionContext = protectionContext;
+			this.file2MetaContext = file2MetaContext;
 		}
 
 		@Override
@@ -91,6 +97,7 @@ public class File2MetaFileComponent extends SequentialProcess {
 				profile = profileManager.getUserProfile(getID(), false);
 			} catch (GetFailedException e) {
 				cancel(new RollbackReason(this, e.getMessage()));
+				return;
 			}
 
 			FileTreeNode fileNode = profile.getFileByPath(file, fileManager);
@@ -102,7 +109,24 @@ public class File2MetaFileComponent extends SequentialProcess {
 
 			// set the corresponding content protection keys
 			protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
-			fileKey = fileNode.getKeyPair();
+			file2MetaContext.provideKeyPair(fileNode.getKeyPair());
 		}
+	}
+
+	private class File2MetaContext implements IProvideKeyPair, IConsumeKeyPair {
+
+		private KeyPair keyPair;
+
+		@Override
+		public void provideKeyPair(KeyPair keyPair) {
+			this.keyPair = keyPair;
+
+		}
+
+		@Override
+		public KeyPair consumeKeyPair() {
+			return keyPair;
+		}
+
 	}
 }

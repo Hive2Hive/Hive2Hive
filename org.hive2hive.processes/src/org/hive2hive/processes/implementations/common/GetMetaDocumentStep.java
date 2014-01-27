@@ -22,6 +22,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BaseGetProcessStep;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDocument;
 
 /**
@@ -33,22 +34,23 @@ import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDo
 public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaDocumentStep.class);
+	private final IProvideMetaDocument metaContext;
+	private final IConsumeKeyPair keyContext;
 
-	protected KeyPair keyPair;
-	protected IProvideMetaDocument context;
-
-	public GetMetaDocumentStep(KeyPair keyPair, IProvideMetaDocument context, NetworkManager networkManager) {
+	public GetMetaDocumentStep(IConsumeKeyPair keyContext, IProvideMetaDocument metaContext,
+			NetworkManager networkManager) {
 		super(networkManager);
-		this.keyPair = keyPair;
-		this.context = context;
+		this.keyContext = keyContext;
+		this.metaContext = metaContext;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
+		KeyPair keyPair = keyContext.consumeKeyPair();
 		NetworkContent content = get(keyPair.getPublic(), H2HConstants.META_DOCUMENT);
 		if (content == null) {
 			logger.warn("Meta document not found.");
-			context.provideMetaDocument(null);
+			metaContext.provideMetaDocument(null);
 		} else {
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
@@ -56,14 +58,13 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 				decrypted.setVersionKey(content.getVersionKey());
 				decrypted.setBasedOnKey(content.getBasedOnKey());
 
-				context.provideMetaDocument((MetaDocument) decrypted);
+				metaContext.provideMetaDocument((MetaDocument) decrypted);
 				logger.debug(String.format("Got and decrypted the meta document for file '%s'.",
 						((MetaDocument) decrypted).getName()));
 			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException
 					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
 					| InvalidCipherTextException | IllegalArgumentException e) {
-				context.provideMetaDocument(null);
-
+				metaContext.provideMetaDocument(null);
 				cancel(new RollbackReason(this, "Cannot decrypt the meta document."));
 			}
 		}

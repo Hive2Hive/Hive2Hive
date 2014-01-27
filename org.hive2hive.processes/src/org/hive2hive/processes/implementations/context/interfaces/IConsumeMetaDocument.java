@@ -5,5 +5,4 @@ import org.hive2hive.core.model.MetaDocument;
 public interface IConsumeMetaDocument {
 
 	MetaDocument consumeMetaDocument();
-
 }
