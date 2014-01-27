@@ -30,6 +30,9 @@ import org.hive2hive.processes.implementations.context.interfaces.IProvideProtec
  */
 public class File2MetaFileComponent extends SequentialProcess {
 
+	// TODO this class should not exist, but rather should a factory compose this component
+	// TODO this class needs some refactoring
+	
 	private final static Logger logger = H2HLoggerFactory.getLogger(File2MetaFileComponent.class);
 
 	private final File file;

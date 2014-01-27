@@ -20,6 +20,7 @@ import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.processes.implementations.context.DeleteFileProcessContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.LogoutProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
@@ -29,6 +30,7 @@ import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
+import org.hive2hive.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
@@ -53,6 +55,7 @@ public final class ProcessFactory {
 	}
 
 	private ProcessFactory() {
+		// singleton
 	}
 
 	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager) {
@@ -161,6 +164,20 @@ public final class ProcessFactory {
 		AsyncComponent updateFileProcess = new AsyncComponent(process);
 
 		return updateFileProcess;
+	}
+
+	public IProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
+			throws NoSessionException {
+
+		DeleteFileProcessContext context = new DeleteFileProcessContext();
+
+		// process composition
+		SequentialProcess process = new SequentialProcess();
+
+		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
+		process.add(new File2MetaFileComponent(file, context, context, networkManager));
+
+		return process;
 	}
 
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
