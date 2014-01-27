@@ -84,6 +84,8 @@ public interface IFileManagement {
 	 * @param userId the id of the user which will get access to the folder
 	 * @return an observable share process
 	 */
+	@Deprecated
+	// this method is not tested yet, use with precaution!
 	IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
 			IllegalFileLocation;
 }
