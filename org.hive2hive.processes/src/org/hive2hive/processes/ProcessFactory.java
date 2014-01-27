@@ -24,6 +24,7 @@ import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
+import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
 import org.hive2hive.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.processes.implementations.login.GetUserProfileStep;
@@ -129,6 +130,9 @@ public final class ProcessFactory {
 		process.add(new CreateNewVersionStep(context));
 		process.add(new PutMetaDocumentStep(context, context, networkManager));
 		process.add(new UpdateMD5inUserProfileStep(context));
+
+		// TODO: cleanup can be made async because user operation does not depend on it
+		process.add(new DeleteChunksStep(context, networkManager));
 
 		// TODO notify others
 

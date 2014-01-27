@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -177,6 +178,11 @@ public class UpdateFileTest extends H2HJUnitTest {
 			}
 		};
 
+		H2HSession session = uploader.getSession();
+		H2HSession newSession = new H2HSession(session.getKeyPair(), session.getProfileManager(),
+				limitingConfig, session.getFileManager());
+		uploader.setSession(newSession);
+
 		// update the file
 		FileUtils.write(file, "bla", false);
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
@@ -220,6 +226,11 @@ public class UpdateFileTest extends H2HJUnitTest {
 				return H2HConstants.DEFAULT_CHUNK_SIZE;
 			}
 		};
+
+		H2HSession session = uploader.getSession();
+		H2HSession newSession = new H2HSession(session.getKeyPair(), session.getProfileManager(),
+				limitingConfig, session.getFileManager());
+		uploader.setSession(newSession);
 
 		// update the file (append some data)
 		FileUtils.write(file, NetworkTestUtil.randomString(), true);

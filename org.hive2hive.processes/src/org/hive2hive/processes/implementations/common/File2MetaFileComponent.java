@@ -63,7 +63,8 @@ public class File2MetaFileComponent extends SequentialProcess {
 		if (fileNode == null) {
 			add(new GetFileKeysStep(protectionContext, file2MetaContext));
 		} else {
-			file2MetaContext.provideKeyPair(fileNode.getProtectionKeys());
+			protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
+			file2MetaContext.provideKeyPair(fileNode.getKeyPair());
 		}
 
 		add(new GetMetaDocumentStep(file2MetaContext, metaContext, networkManager));
