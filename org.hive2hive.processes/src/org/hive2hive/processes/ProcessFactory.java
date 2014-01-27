@@ -2,6 +2,7 @@ package org.hive2hive.processes;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
 
@@ -172,6 +173,12 @@ public final class ProcessFactory {
 		}
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
+
+		return process;
+	}
+
+	public IProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
+		SequentialProcess process = new SequentialProcess();
 
 		return process;
 	}
