@@ -23,6 +23,7 @@ import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.LogoutProcessContext;
 import org.hive2hive.processes.implementations.context.NotifyProcessContext;
@@ -35,6 +36,7 @@ import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
+import org.hive2hive.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
@@ -179,6 +181,9 @@ public final class ProcessFactory {
 
 	public IProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
 		SequentialProcess process = new SequentialProcess();
+
+		DownloadFileContext context = new DownloadFileContext(fileKey);
+		process.add(new FindInUserProfileStep(context, networkManager));
 
 		return process;
 	}

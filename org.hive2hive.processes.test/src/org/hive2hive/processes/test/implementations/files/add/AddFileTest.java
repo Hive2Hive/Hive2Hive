@@ -18,7 +18,6 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
@@ -149,9 +148,11 @@ public class AddFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(client, toUpload);
 	}
 
-	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException {
+	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,
+			NoSessionException {
 		// pick new client to test
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		UseCaseTestUtil.login(userCredentials, client, FileUtils.getTempDirectory());
 
 		// test if there is something in the user profile
 		UserProfile gotProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
@@ -176,13 +177,8 @@ public class AddFileTest extends H2HJUnitTest {
 			Assert.assertEquals(originalFile.list().length, metaFolder.getChildKeys().size());
 		}
 
-		// create new filemanager
-		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager fileManager2 = new FileManager(root.toPath());
-
 		// verify the file after downloadig it
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		File file = ProcessTestUtil.downloadFile(client, node, profileManager, fileManager2, config);
+		File file = UseCaseTestUtil.downloadFile(client, node.getKeyPair().getPublic());
 		Assert.assertTrue(file.exists());
 		if (originalFile.isFile()) {
 			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));

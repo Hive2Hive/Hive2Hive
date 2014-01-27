@@ -1,6 +1,7 @@
 package org.hive2hive.processes.test.util;
 
 import java.io.File;
+import java.security.PublicKey;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -82,7 +83,7 @@ public class UseCaseTestUtil {
 				sessionParameters, networkManager);
 		executeProcess(process);
 	}
-	
+
 	public static void registerAndLogin(UserCredentials credentials, NetworkManager networkManager, File root) {
 		register(credentials, networkManager);
 		login(credentials, networkManager, root);
@@ -107,6 +108,16 @@ public class UseCaseTestUtil {
 	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException {
 		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 		executeProcess(process);
+	}
+
+	public static File downloadFile(NetworkManager networkManager, PublicKey fileKey)
+			throws NoSessionException, GetFailedException {
+		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey,
+				networkManager);
+		executeProcess(process);
+		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
+		return networkManager.getSession().getFileManager().getPath(userProfile.getFileById(fileKey))
+				.toFile();
 	}
 
 	// public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
@@ -172,34 +183,6 @@ public class UseCaseTestUtil {
 	// GetLocationsStep step = new GetLocationsStep(userId, null, context);
 	// executeStep(networkManager, step);
 	// return context.getLocations();
-	// }
-
-	// public static File downloadFile(NetworkManager networkManager, FileTreeNode file,
-	// UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
-	// networkManager.setSession(new H2HSession(EncryptionUtil
-	// .generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-	// try {
-	// DownloadFileProcess process = new DownloadFileProcess(file, networkManager);
-	// executeProcess(process);
-	// } catch (NoSessionException e) {
-	// // never happens because session is set before
-	// }
-	//
-	// return fileManager.getPath(file).toFile();
-	// }
-
-	// public static void uploadNewFileVersion(NetworkManager networkManager, File file,
-	// UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config)
-	// throws IllegalArgumentException {
-	// networkManager.setSession(new H2HSession(EncryptionUtil
-	// .generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-	//
-	// try {
-	// NewVersionProcess process = new NewVersionProcess(file, networkManager);
-	// executeProcess(process);
-	// } catch (NoSessionException e) {
-	// // never happens because session is set before
-	// }
 	// }
 
 	// public static void deleteFile(NetworkManager networkManager, File file,
