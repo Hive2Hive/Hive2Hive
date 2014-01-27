@@ -12,6 +12,7 @@ import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
+import org.hive2hive.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.processes.implementations.common.File2MetaFileComponent;
@@ -166,7 +167,6 @@ public final class ProcessFactory {
 
 		GetFileListStep listStep = new GetFileListStep(networkManager);
 
-		return listStep;
-//		return new AsyncResultComponent<List<Path>>(listStep);
+		return new AsyncResultComponent<List<Path>>(listStep);
 	}
 }

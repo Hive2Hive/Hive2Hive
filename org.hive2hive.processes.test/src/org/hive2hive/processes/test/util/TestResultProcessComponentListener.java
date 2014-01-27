@@ -2,7 +2,7 @@ package org.hive2hive.processes.test.util;
 
 import org.hive2hive.processes.framework.interfaces.IProcessResultListener;
 
-public class TestResultProcessComponentListener<T> extends TestProcessComponentListener implements
+public class TestResultProcessComponentListener<T> implements
 		IProcessResultListener<T> {
 
 	private boolean resultArrived;

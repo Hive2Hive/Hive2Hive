@@ -29,12 +29,11 @@ import org.hive2hive.processes.test.util.TestResultProcessComponentListener;
 import org.hive2hive.processes.test.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class GetFileListTest extends H2HJUnitTest {
+public class GetFileListProcessTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static UserCredentials credentials;
@@ -44,7 +43,7 @@ public class GetFileListTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = GetFileListTest.class;
+		testClass = GetFileListProcessTest.class;
 		beforeClass();
 	}
 
@@ -101,10 +100,8 @@ public class GetFileListTest extends H2HJUnitTest {
 		fileListProcess.attachListener(listener);
 		fileListProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(10);
+		H2HWaiter waiter = new H2HWaiter(1000);
 		do {
-			if (listener.hasFailed())
-				Assert.fail();
 			waiter.tickASecond();
 		} while (!listener.hasResultArrived());
 

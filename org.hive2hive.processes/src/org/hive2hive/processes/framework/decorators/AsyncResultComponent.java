@@ -18,11 +18,12 @@ public class AsyncResultComponent<T> extends AsyncComponent implements IResultPr
 
 	@Override
 	public void attachListener(IProcessResultListener<T> listener) {
-		decoratedComponent.attachListener(listener);
+		
+		((IResultProcessComponent<T>) decoratedComponent).attachListener(listener);
 	}
 
 	@Override
 	public void detachListener(IProcessResultListener<T> listener) {
-		decoratedComponent.attachListener(listener);
+		((IResultProcessComponent<T>) decoratedComponent).detachListener(listener);
 	}
 }
