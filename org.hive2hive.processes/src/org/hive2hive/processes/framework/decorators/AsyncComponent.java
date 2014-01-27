@@ -9,10 +9,11 @@ import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.abstracts.ProcessDecorator;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
-public class AsyncComponent extends ProcessDecorator implements Callable<ProcessComponent> {
-
+public class AsyncComponent extends ProcessDecorator implements Callable<Boolean> {
+	
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
+	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
@@ -26,8 +27,23 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		
 		executor.submit(this);
+	}
+	
+	@Override
+	public Boolean call() throws Exception {
+		
+		try {
+			Thread.currentThread().checkAccess();
+			Thread.currentThread().setName(
+					String.format("async-process %s ", decoratedComponent.getClass().getSimpleName()));
+		} catch (SecurityException e) {
+		}
+		;
+
+		decoratedComponent.start();
+		return true;
 	}
 
 	@Override
@@ -54,19 +70,5 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Process
 
 	}
 
-	@Override
-	public ProcessComponent call() throws Exception {
-
-		try {
-			Thread.currentThread().checkAccess();
-			Thread.currentThread().setName(
-					String.format("async-process %s ", decoratedComponent.getClass().getSimpleName()));
-		} catch (SecurityException e) {
-		}
-		;
-
-		decoratedComponent.start();
-		return decoratedComponent;
-	}
 
 }

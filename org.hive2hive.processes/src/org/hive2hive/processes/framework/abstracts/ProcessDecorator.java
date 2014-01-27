@@ -12,13 +12,15 @@ public abstract class ProcessDecorator extends ProcessComponent {
 
 	@Override
 	public void attachListener(IProcessComponentListener listener) {
-		super.attachListener(listener);
 		decoratedComponent.attachListener(listener);
+
+		// Note: in case a decorator wants to attach listeners, it can do so by overriding this method. But
+		// then, the current usage (whether attached to decorator or component directly) must be checked (and
+		// corrected).
 	}
 
 	@Override
 	public void detachListener(IProcessComponentListener listener) {
-		super.detachListener(listener);
 		decoratedComponent.attachListener(listener);
 	}
 

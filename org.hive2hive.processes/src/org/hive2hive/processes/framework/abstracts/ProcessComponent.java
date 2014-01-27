@@ -35,7 +35,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public final void start() throws InvalidProcessStateException {
+	public void start() throws InvalidProcessStateException {
 		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 
 		if (state != ProcessState.READY) {
@@ -46,7 +46,12 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 		doExecute();
 
+		initiateSuccess();
+	}
+
+	protected void initiateSuccess() {
 		// TODO set leafs to succeeded when composite succeeded
+		// TODO wait for all async components
 		if (state == ProcessState.RUNNING && parent == null) {
 			state = ProcessState.SUCCEEDED;
 			notifySucceeded();
