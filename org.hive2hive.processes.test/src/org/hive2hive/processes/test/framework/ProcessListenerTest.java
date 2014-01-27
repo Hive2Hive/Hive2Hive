@@ -1,19 +1,75 @@
 package org.hive2hive.processes.test.framework;
 
-import org.hive2hive.processes.framework.concretes.ProcessListener;
-import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processes.test.util.TestProcessComponentListener;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ProcessListenerTest {
+public class ProcessListenerTest extends H2HJUnitTest {
 
-	@Test
-	public void syncProcessListenerTest() {
-		
-		IProcessComponentListener listener = new ProcessListener();
+	@BeforeClass
+	public static void initTest() throws Exception {
+		testClass = ProcessListenerTest.class;
+		beforeClass();
+	}
+
+	@AfterClass
+	public static void endTest() {
+		afterClass();
 	}
 	
 	@Test
-	public void asyncProcessListenerTest() {
+	public void listenerStateTest() throws InvalidProcessStateException {
 		
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		assertFalse(listener.hasSucceeded());
+		assertFalse(listener.hasFailed());
+		assertFalse(listener.hasFinished());
+		
+		listener.onSucceeded();
+		assertTrue(listener.hasSucceeded());
+		assertFalse(listener.hasFailed());
+		assertFalse(listener.hasFinished());
+
+		listener.reset();
+		
+		listener.onFailed();
+		assertFalse(listener.hasSucceeded());
+		assertTrue(listener.hasFailed());
+		assertFalse(listener.hasFinished());
+		
+		listener.reset();
+		
+		listener.onFinished();
+		assertFalse(listener.hasSucceeded());
+		assertFalse(listener.hasFailed());
+		assertTrue(listener.hasFinished());
+		
+	}
+	
+	@Test
+	public void listenerResetTest() {
+		
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		assertFalse(listener.hasSucceeded());
+		assertFalse(listener.hasFailed());
+		assertFalse(listener.hasFinished());
+		
+		listener.onSucceeded();
+		listener.onFailed();
+		listener.onFinished();
+		assertTrue(listener.hasSucceeded());
+		assertTrue(listener.hasFailed());
+		assertTrue(listener.hasFinished());
+		
+		listener.reset();
+		assertFalse(listener.hasSucceeded());
+		assertFalse(listener.hasFailed());
+		assertFalse(listener.hasFinished());
 	}
 }

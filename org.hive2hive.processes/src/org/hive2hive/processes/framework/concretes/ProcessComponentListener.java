@@ -2,11 +2,11 @@ package org.hive2hive.processes.framework.concretes;
 
 import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
-public class ProcessListener implements IProcessComponentListener {
+public class ProcessComponentListener implements IProcessComponentListener {
 
-	private boolean hasSucceeded;
-	private boolean hasFailed;
-	private boolean hasFinished;
+	protected boolean hasSucceeded;
+	protected boolean hasFailed;
+	protected boolean hasFinished;
 
 	@Override
 	public void onSucceeded() {

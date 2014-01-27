@@ -25,7 +25,10 @@ public class SequentialProcess extends Process {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		while (executionIndex < components.size() && getState() == ProcessState.RUNNING) {
+
+		while (!components.isEmpty() && executionIndex < components.size()
+				&& getState() == ProcessState.RUNNING) {
+			rollbackIndex = executionIndex;
 			ProcessComponent next = components.get(executionIndex);
 			next.start();
 			executionIndex++;
@@ -49,10 +52,8 @@ public class SequentialProcess extends Process {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		// reason component rolls itself back before notifying parent component
-		rollbackIndex = executionIndex;
 
-		while (rollbackIndex >= 0 && getState() == ProcessState.ROLLBACKING) {
+		while (!components.isEmpty() && rollbackIndex >= 0 && getState() == ProcessState.ROLLBACKING) {
 			ProcessComponent last = components.get(rollbackIndex);
 			last.cancel(reason);
 			rollbackIndex--;

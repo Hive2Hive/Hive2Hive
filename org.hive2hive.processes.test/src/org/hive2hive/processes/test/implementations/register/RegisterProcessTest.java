@@ -22,7 +22,7 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.processes.ProcessFactory;
-import org.hive2hive.processes.framework.concretes.ProcessListener;
+import org.hive2hive.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.test.util.UseCaseTestUtil;
@@ -114,7 +114,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
 				client);
-		ProcessListener listener = new ProcessListener();
+		ProcessComponentListener listener = new ProcessComponentListener();
 		registerProcess.attachListener(listener);
 		registerProcess.start();
 

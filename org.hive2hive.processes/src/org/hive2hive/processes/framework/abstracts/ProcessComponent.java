@@ -36,13 +36,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public final void start() throws InvalidProcessStateException {
+		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
+
 		if (state != ProcessState.READY) {
 			throw new InvalidProcessStateException(state);
 		}
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
 
-		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 		doExecute();
 
 		// TODO set leafs to succeeded when composite succeeded
@@ -77,7 +78,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public final void cancel(RollbackReason reason) throws InvalidProcessStateException {
-		logger.error("Cancel called. Reason: " + reason.getMessage());
+		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(), reason.getMessage()));
+		
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
