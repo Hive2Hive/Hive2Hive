@@ -11,6 +11,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
@@ -176,6 +177,24 @@ public final class ProcessFactory {
 
 		// return new AsyncResultComponent<List<Path>>(listStep);
 		return listStep;
+	}
+
+	public IProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
+			final Set<String> usersToNotify, NetworkManager networkManager) {
+		// create a context here to provide the necessary data
+		IConsumeNotificationFactory context = new IConsumeNotificationFactory() {
+
+			@Override
+			public Set<String> consumeUsersToNotify() {
+				return usersToNotify;
+			}
+
+			@Override
+			public BaseNotificationMessageFactory consumeMessageFactory() {
+				return messageFactory;
+			}
+		};
+		return createNotificationProcess(context, networkManager);
 	}
 
 	private IProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
