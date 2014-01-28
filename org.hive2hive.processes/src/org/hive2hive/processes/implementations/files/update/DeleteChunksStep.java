@@ -23,6 +23,8 @@ import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
  */
 public class DeleteChunksStep extends BaseRemoveProcessStep {
 
+	// TODO this class should be merged with org.hive2hive.processes.implementations.files.delete.DeleteChunksProcess
+	
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteChunksStep.class);
 	private final UpdateFileProcessContext context;
 
@@ -42,7 +44,7 @@ public class DeleteChunksStep extends BaseRemoveProcessStep {
 			for (KeyPair keyPair : chunksToDelete) {
 				logger.debug("Delete chunk " + counter++ + "/" + chunksToDelete.size());
 				// TODO: original chunk is not here in case a rollback happens.
-				remove(H2HEncryptionUtil.key2String(keyPair.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0),
+				remove(keyPair.getPublic(), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0),
 						protectionKeys);
 			}
 

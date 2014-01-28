@@ -49,6 +49,7 @@ public class DeleteChunksProcess extends SequentialProcess {
 
 			// process composition
 			for (KeyPair keyPair : chunkKeys) {
+				// TODO at a later stage, this steps could be async (parallelized)
 				add(new DeleteSingleChunkStep(keyPair.getPublic(), context.consumeProtectionKeys(),
 						networkManager));
 			}

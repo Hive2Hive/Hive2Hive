@@ -28,7 +28,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 	// TODO this class needs to be refactored
 	// TODO this class is only rollbacking the last execution, however there are steps that execute remove()
 	// multiple times. Make sure, that a single step only calls remove() once. Otherwise, create multiple
-	// steps!
+	// steps! (e.g. DeleteSingleChunkStep)
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
@@ -61,10 +61,12 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		}
 
 		boolean success = false;
-		if (contentToRemove.getVersionKey() == Number160.ZERO) {
+		if (this.contentToRemove == null || this.contentToRemove.getVersionKey() == Number160.ZERO) {
+			// deletes all versions
 			success = dataManager.remove(locationKey, contentKey, protectionKey);
 		} else {
-			success = dataManager.remove(locationKey, contentKey, contentToRemove.getVersionKey(),
+			// deletes selected version
+			success = dataManager.remove(locationKey, contentKey, this.contentToRemove.getVersionKey(),
 					protectionKey);
 		}
 		removePerformed = true;

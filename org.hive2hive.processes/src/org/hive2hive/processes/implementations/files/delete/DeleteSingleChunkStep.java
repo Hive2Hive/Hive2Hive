@@ -5,7 +5,6 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -26,9 +25,9 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 
 		try {
-			remove(locationKey, H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0), protectionKeys);
+			remove(locationKey, H2HConstants.FILE_CHUNK, null, protectionKeys);
 		} catch (RemoveFailedException e) {
-			cancel(new RollbackReason(this, "Chunk could not be removed."));
+			cancel(new RollbackReason(this, "Remove of chunk failed."));
 		}
 	}
 
