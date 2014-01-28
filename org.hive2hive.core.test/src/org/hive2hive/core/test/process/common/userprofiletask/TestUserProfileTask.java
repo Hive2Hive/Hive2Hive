@@ -3,25 +3,25 @@ package org.hive2hive.core.test.process.common.userprofiletask;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 
-public class TestUserProfileTask extends UserProfileTask{
+public class TestUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -2539021366875667650L;
-	
+
 	private final String id;
-	
-	public TestUserProfileTask () {
+
+	public TestUserProfileTask() {
 		super();
 		this.id = NetworkTestUtil.randomString();
 	}
-	
+
 	public String getId() {
 		return id;
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

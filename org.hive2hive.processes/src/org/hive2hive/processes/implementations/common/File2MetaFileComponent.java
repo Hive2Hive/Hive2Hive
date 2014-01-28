@@ -32,14 +32,12 @@ public class File2MetaFileComponent extends SequentialProcess {
 
 	// TODO this class should not exist, but rather should a factory compose this component
 	// TODO this class needs some refactoring
-	
+
 	private final static Logger logger = H2HLoggerFactory.getLogger(File2MetaFileComponent.class);
 
 	private final File file;
 	private final UserProfileManager profileManager;
 	private final FileManager fileManager;
-
-	public KeyPair fileKey;
 
 	public File2MetaFileComponent(File file, IProvideMetaDocument metaContext,
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)

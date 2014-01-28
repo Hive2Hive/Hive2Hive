@@ -23,6 +23,7 @@ import org.hive2hive.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
+import org.hive2hive.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.processes.implementations.context.DeleteFileProcessContext;
 import org.hive2hive.processes.implementations.context.DownloadFileContext;
@@ -31,6 +32,7 @@ import org.hive2hive.processes.implementations.context.LogoutProcessContext;
 import org.hive2hive.processes.implementations.context.NotifyProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
+import org.hive2hive.processes.implementations.context.UserProfileTaskContext;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
@@ -59,6 +61,7 @@ import org.hive2hive.processes.implementations.notify.VerifyNotificationFactoryS
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
+import org.hive2hive.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 
 public final class ProcessFactory {
 
@@ -106,9 +109,23 @@ public final class ProcessFactory {
 		process.add(new PutUserLocationsStep(context, context, networkManager));
 		process.add(new SynchronizeFilesStep(context));
 
+		// TODO add user profile task step
+
 		AsyncComponent loginProcess = new AsyncComponent(process);
 
 		return loginProcess;
+	}
+
+	public ProcessComponent createUserProfileTaskStep(NetworkManager networkManager) {
+		SequentialProcess process = new SequentialProcess();
+
+		UserProfileTaskContext context = new UserProfileTaskContext();
+
+		process.add(new GetUserProfileTaskStep(context, networkManager));
+		// Note: this step will add the next steps since it depends on the get result
+		process.add(new HandleUserProfileTaskStep(context, networkManager));
+
+		return process;
 	}
 
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
@@ -199,7 +216,7 @@ public final class ProcessFactory {
 			throws NoSessionException {
 
 		// TODO is this process even necessary for folders?
-		
+
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
 
 		// process composition

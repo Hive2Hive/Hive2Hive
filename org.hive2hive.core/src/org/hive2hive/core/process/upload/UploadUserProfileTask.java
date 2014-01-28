@@ -20,7 +20,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		try {
 			DownloadFileProcess process = new DownloadFileProcess(fileKey, networkManager);
 			process.start();

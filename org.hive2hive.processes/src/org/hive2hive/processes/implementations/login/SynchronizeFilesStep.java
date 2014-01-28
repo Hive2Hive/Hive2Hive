@@ -47,6 +47,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		List<FileTreeNode> toDownload = new ArrayList<FileTreeNode>(synchronizer.getAddedRemotely());
 		toDownload.addAll(synchronizer.getUpdatedRemotely());
 
+		// TODO: if is master, add the "ProcessFactory.instance().createUserProfileTaskStep(networkManager);"
 	}
 
 	private void startDownload(List<FileTreeNode> toDownload) {

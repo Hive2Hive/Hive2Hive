@@ -12,13 +12,13 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(HandleUserProfileTaskStep.class);
 
 	private final UserProfileTaskQueueProcessContext context;
-	
+
 	public HandleUserProfileTaskStep(UserProfileTaskQueueProcessContext context) {
 		if (context == null)
 			throw new IllegalArgumentException("Context can't be null.");
 		this.context = context;
 	}
-	
+
 	@Override
 	public void start() {
 		UserProfileTask userProfileTask = context.getUserProfileTask();
@@ -35,16 +35,7 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 			// give the network manager reference to be able to run
 			userProfileTask.setNetworkManager(getNetworkManager());
 			// run the user profile task in own thread
-			Thread thread = new Thread(userProfileTask);
-			thread.start();
-			try {
-				// wait till it finishes
-				thread.join();
-			} catch (InterruptedException e) {
-				logger.error(String.format(
-						"Thred for executing of an user profile task has been interupted. exception = '%s'",
-						e.getMessage()));
-			}
+			userProfileTask.start();
 
 			/*
 			 * Initialize next steps.
