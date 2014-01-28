@@ -38,6 +38,7 @@ import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
+import org.hive2hive.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
@@ -197,13 +198,16 @@ public final class ProcessFactory {
 	public IProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException {
 
-		DeleteFileProcessContext context = new DeleteFileProcessContext();
+		// TODO is this process even necessary for folders?
+		
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
 		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
+		process.add(new DeleteChunksProcess(context, networkManager));
 
 		return process;
 	}

@@ -11,6 +11,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -23,6 +24,11 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
  * @author Seppi, Nico
  */
 public abstract class BaseRemoveProcessStep extends ProcessStep {
+
+	// TODO this class needs to be refactored
+	// TODO this class is only rollbacking the last execution, however there are steps that execute remove()
+	// multiple times. Make sure, that a single step only calls remove() once. Otherwise, create multiple
+	// steps!
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
@@ -39,7 +45,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 
 	protected void remove(PublicKey locationKey, String contentKey, NetworkContent contentToRemove,
 			KeyPair protectionKey) throws RemoveFailedException {
-		remove(key2String(locationKey), contentKey, contentToRemove, protectionKey);
+		remove(H2HEncryptionUtil.key2String(locationKey), contentKey, contentToRemove, protectionKey);
 	}
 
 	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove,
@@ -48,6 +54,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
 		this.protectionKey = protectionKey;
+		
 		DataManager dataManager = networkManager.getDataManager();
 		if (dataManager == null) {
 			throw new RemoveFailedException("Node is not connected.");

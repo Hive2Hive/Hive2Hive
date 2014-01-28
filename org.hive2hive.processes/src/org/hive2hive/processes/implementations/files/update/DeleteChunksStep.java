@@ -9,6 +9,7 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BaseRemoveProcessStep;
@@ -41,7 +42,7 @@ public class DeleteChunksStep extends BaseRemoveProcessStep {
 			for (KeyPair keyPair : chunksToDelete) {
 				logger.debug("Delete chunk " + counter++ + "/" + chunksToDelete.size());
 				// TODO: original chunk is not here in case a rollback happens.
-				remove(key2String(keyPair.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0),
+				remove(H2HEncryptionUtil.key2String(keyPair.getPublic()), H2HConstants.FILE_CHUNK, new Chunk(null, null, 0, 0),
 						protectionKeys);
 			}
 

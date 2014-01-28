@@ -88,7 +88,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		int counter = 0;
 		for (KeyPair chunkKey : chunkKeys) {
 			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + chunkKeys.size());
-			NetworkContent content = get(key2String(chunkKey.getPublic()), H2HConstants.FILE_CHUNK);
+			NetworkContent content = get(H2HEncryptionUtil.key2String(chunkKey.getPublic()), H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, chunkKey.getPrivate());

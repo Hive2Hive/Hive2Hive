@@ -155,4 +155,8 @@ public final class H2HEncryptionUtil {
 		// calculate the MD5 hash and compare it
 		return Arrays.equals(md5, expectedMD5);
 	}
+	
+	public static String key2String(PublicKey key) {
+		return EncryptionUtil.byteToHex(key.getEncoded());
+	}
 }

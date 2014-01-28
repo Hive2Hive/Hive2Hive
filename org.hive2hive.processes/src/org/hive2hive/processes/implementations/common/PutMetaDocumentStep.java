@@ -56,7 +56,7 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 					metaDocument.getId());
 			encrypted.setBasedOnKey(metaDocument.getVersionKey());
 			encrypted.generateVersionKey();
-			put(key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
+			put(H2HEncryptionUtil.key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			cancel(new RollbackReason(this, "Meta document could not be encrypted"));

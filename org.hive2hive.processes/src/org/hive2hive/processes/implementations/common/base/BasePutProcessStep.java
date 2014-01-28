@@ -9,6 +9,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -32,7 +33,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	protected void put(PublicKey locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
 			throws PutFailedException {
-		put(key2String(locationKey), contentKey, content, protectionKey);
+		put(H2HEncryptionUtil.key2String(locationKey), contentKey, content, protectionKey);
 	}
 
 	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
