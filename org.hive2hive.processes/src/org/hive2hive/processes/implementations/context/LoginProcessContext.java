@@ -4,14 +4,12 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.processes.implementations.context.interfaces.IConsumeSession;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeUserProfile;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideLocations;
-import org.hive2hive.processes.implementations.context.interfaces.IProvideSession;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideUserProfile;
 
-public class LoginProcessContext implements IProvideUserProfile, IConsumeUserProfile, IProvideSession,
-		IConsumeSession, IProvideLocations, IConsumeLocations {
+public class LoginProcessContext implements IProvideUserProfile, IConsumeUserProfile, IProvideLocations,
+		IConsumeLocations {
 
 	private UserProfile profile;
 	private H2HSession session;
@@ -26,16 +24,6 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 	@Override
 	public UserProfile consumeUserProfile() {
 		return profile;
-	}
-
-	@Override
-	public void provideSession(H2HSession session) {
-		this.session = session;
-	}
-
-	@Override
-	public H2HSession consumeSession() {
-		return session;
 	}
 
 	@Override

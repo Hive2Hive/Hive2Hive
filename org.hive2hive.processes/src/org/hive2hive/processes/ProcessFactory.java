@@ -107,7 +107,7 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager));
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new PutUserLocationsStep(context, context, networkManager));
-		process.add(new SynchronizeFilesStep(context));
+		process.add(new SynchronizeFilesStep(networkManager));
 
 		// TODO add user profile task step
 
@@ -203,7 +203,7 @@ public final class ProcessFactory {
 		return updateFileProcess;
 	}
 
-	public IProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
+	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
 		SequentialProcess process = new SequentialProcess();
 
 		DownloadFileContext context = new DownloadFileContext(fileKey);
