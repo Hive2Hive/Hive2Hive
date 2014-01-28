@@ -13,6 +13,7 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 	// the chunk keys to delete (if the configuration does not allow as many or as big chunks as existent)
 	private List<KeyPair> chunksToDelete;
 	private KeyPair protectionsKeys;
+	private KeyPair parentFileKey;
 
 	public UpdateFileProcessContext(File file, boolean inRoot, H2HSession session) {
 		super(file, inRoot, session);
@@ -37,5 +38,13 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 
 	public KeyPair getChunksToDeleteProtectionKeys() {
 		return protectionsKeys;
+	}
+
+	public void setParentFileKey(KeyPair parentFileKey) {
+		this.parentFileKey = parentFileKey;
+	}
+
+	public KeyPair getParentFileKey() {
+		return parentFileKey;
 	}
 }

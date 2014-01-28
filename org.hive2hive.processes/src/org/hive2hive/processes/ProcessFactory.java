@@ -2,14 +2,18 @@ package org.hive2hive.processes;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.util.List;
+import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.processes.framework.decorators.AsyncResultComponent;
@@ -21,16 +25,21 @@ import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.processes.implementations.context.DeleteFileProcessContext;
+import org.hive2hive.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.LogoutProcessContext;
+import org.hive2hive.processes.implementations.context.NotifyProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.add.GetParentMetaStep;
+import org.hive2hive.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
 import org.hive2hive.processes.implementations.files.delete.DeleteFileOnDiskStep;
+import org.hive2hive.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
@@ -40,6 +49,12 @@ import org.hive2hive.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.processes.implementations.login.SynchronizeFilesStep;
 import org.hive2hive.processes.implementations.logout.RemoveOwnLocationsStep;
+import org.hive2hive.processes.implementations.notify.GetAllLocationsStep;
+import org.hive2hive.processes.implementations.notify.GetPublicKeysStep;
+import org.hive2hive.processes.implementations.notify.PutAllUserProfileTasksStep;
+import org.hive2hive.processes.implementations.notify.RemoveUnreachableStep;
+import org.hive2hive.processes.implementations.notify.SendNotificationsMessageStep;
+import org.hive2hive.processes.implementations.notify.VerifyNotificationFactoryStep;
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
@@ -130,7 +145,8 @@ public final class ProcessFactory {
 		}
 
 		process.add(new AddToUserProfileStep(context));
-		// TODO notify others
+		process.add(new PrepareNotificationStep(context));
+		process.add(createNotificationProcess(context, networkManager));
 
 		AsyncComponent addFileProcess = new AsyncComponent(process);
 
@@ -158,12 +174,24 @@ public final class ProcessFactory {
 
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new DeleteChunksStep(context, networkManager));
-
-		// TODO notify others
+		if (!inRoot) {
+			process.add(new GetParentMetaStep(context, networkManager));
+		}
+		process.add(new PrepareNotificationStep(context));
+		process.add(createNotificationProcess(context, networkManager));
 
 		AsyncComponent updateFileProcess = new AsyncComponent(process);
 
 		return updateFileProcess;
+	}
+
+	public IProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
+		SequentialProcess process = new SequentialProcess();
+
+		DownloadFileContext context = new DownloadFileContext(fileKey);
+		process.add(new FindInUserProfileStep(context, networkManager));
+
+		return process;
 	}
 
 	public IProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
@@ -185,5 +213,40 @@ public final class ProcessFactory {
 		GetFileListStep listStep = new GetFileListStep(networkManager);
 
 		return new AsyncResultComponent<List<Path>>(listStep);
+	}
+
+	public IProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
+			final Set<String> usersToNotify, NetworkManager networkManager) {
+		// create a context here to provide the necessary data
+		IConsumeNotificationFactory context = new IConsumeNotificationFactory() {
+
+			@Override
+			public Set<String> consumeUsersToNotify() {
+				return usersToNotify;
+			}
+
+			@Override
+			public BaseNotificationMessageFactory consumeMessageFactory() {
+				return messageFactory;
+			}
+		};
+		return createNotificationProcess(context, networkManager);
+	}
+
+	private ProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
+			NetworkManager networkManager) throws IllegalArgumentException {
+		NotifyProcessContext context = new NotifyProcessContext(providerContext);
+
+		SequentialProcess process = new SequentialProcess();
+		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));
+		process.add(new GetPublicKeysStep(context, networkManager));
+		process.add(new PutAllUserProfileTasksStep(context, networkManager));
+		process.add(new GetAllLocationsStep(context, networkManager));
+		process.add(new SendNotificationsMessageStep(context, networkManager));
+		// cleanup my own locations
+		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager));
+		process.add(new RemoveUnreachableStep(context, networkManager));
+
+		return process;
 	}
 }

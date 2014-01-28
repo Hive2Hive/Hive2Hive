@@ -3,7 +3,6 @@ package org.hive2hive.processes.test.implementations.files.add;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -17,7 +16,6 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -57,7 +55,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 	private NetworkManager uploader;
 	private NetworkManager downloader;
-	private FileManager fileManagerDownloader;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -79,7 +76,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 		File rootUploader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		fileManagerUploader = new FileManager(rootUploader.toPath());
 		File rootDownloader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		fileManagerDownloader = new FileManager(rootDownloader.toPath());
 
 		// register a user
 		UseCaseTestUtil.register(userCredentials, registrar);
@@ -102,11 +98,10 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
 
 		// download the file and check if version is newer
-		UserProfileManager profileManager = new UserProfileManager(downloader, userCredentials);
-		UserProfile userProfile = profileManager.getUserProfile(UUID.randomUUID().toString(), false);
-		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
-		File downloaded = ProcessTestUtil.downloadFile(downloader, fileNode, profileManager,
-				fileManagerDownloader, config);
+		UseCaseTestUtil.login(userCredentials, downloader, FileUtils.getTempDirectory());
+		FileTreeNode fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(
+				file, fileManagerUploader);
+		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getKeyPair().getPublic());
 
 		// new content should be latest one
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));

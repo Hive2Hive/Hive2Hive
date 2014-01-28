@@ -11,7 +11,7 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 
 public abstract class BaseGetProcessStep extends ProcessStep {
 
-	private final NetworkManager networkManager;
+	protected final NetworkManager networkManager;
 
 	public BaseGetProcessStep(NetworkManager networkManager) {
 		this.networkManager = networkManager;

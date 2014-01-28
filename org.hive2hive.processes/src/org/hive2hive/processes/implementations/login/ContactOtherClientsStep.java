@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
@@ -26,7 +29,8 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 	private final ConcurrentHashMap<PeerAddress, String> evidences = new ConcurrentHashMap<PeerAddress, String>();
 	private final ConcurrentHashMap<PeerAddress, Boolean> responses = new ConcurrentHashMap<PeerAddress, Boolean>();
-	private boolean isUpdated;
+	private CountDownLatch waitForResponses;
+	private boolean isUpdated = false;
 
 	private final LoginProcessContext context;
 	private final NetworkManager networkManager;
@@ -38,16 +42,12 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		Locations locations = context.consumeLocations();
-
+		waitForResponses = new CountDownLatch(locations.getPeerAddresses().size());
 		if (!locations.getPeerAddresses().isEmpty()) {
-
 			for (PeerAddress address : locations.getPeerAddresses()) {
-
 				// contact all other clients (exclude self)
 				if (!address.equals(networkManager.getPeerAddress())) {
-
 					String evidence = UUID.randomUUID().toString();
 					evidences.put(address, evidence);
 
@@ -63,12 +63,17 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 			}
 		}
 
+		// wait (blocking) until all responses are here or the time's up
+		try {
+			waitForResponses.await(H2HConstants.CONTACT_PEERS_AWAIT_MS, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			logger.error("Could not wait the given time for the clients to respond", e);
+		}
 		updateLocations();
 	}
 
 	@Override
 	public void handleResponseMessage(ResponseMessage responseMessage) {
-
 		if (isUpdated) {
 			// TODO notify delayed response client nodes about removing him from location map
 			logger.warn(String
@@ -79,11 +84,8 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 		// verify response
 		if (evidences.get(responseMessage.getSenderAddress()).equals((String) responseMessage.getContent())) {
-
 			responses.put(responseMessage.getSenderAddress(), true);
-			if (responses.size() >= context.consumeLocations().getPeerAddresses().size()) {
-				updateLocations();
-			}
+			waitForResponses.countDown();
 		} else {
 			logger.error(String
 					.format("Received during liveness check of other clients a wrong evidence content. responding node = '%s'",
@@ -91,32 +93,29 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		}
 	}
 
-	private synchronized void updateLocations() {
-		if (!isUpdated) {
-			isUpdated = true;
+	private void updateLocations() {
+		isUpdated = true;
 
-			Locations updatedLocations = new Locations(context.consumeLocations().getUserId());
-			updatedLocations.setBasedOnKey(context.consumeLocations().getBasedOnKey());
-			updatedLocations.setVersionKey(context.consumeLocations().getVersionKey());
+		Locations updatedLocations = new Locations(context.consumeLocations().getUserId());
+		updatedLocations.setBasedOnKey(context.consumeLocations().getBasedOnKey());
+		updatedLocations.setVersionKey(context.consumeLocations().getVersionKey());
 
-			// add addresses that responded and self
-			for (PeerAddress address : responses.keySet()) {
-				if (responses.get(address)) {
-					updatedLocations.addPeerAddress(address);
-				}
+		// add addresses that responded and self
+		for (PeerAddress address : responses.keySet()) {
+			if (responses.get(address)) {
+				updatedLocations.addPeerAddress(address);
 			}
-			updatedLocations.addPeerAddress(networkManager.getPeerAddress());
-			context.provideLocations(updatedLocations);
+		}
+		updatedLocations.addPeerAddress(networkManager.getPeerAddress());
+		context.provideLocations(updatedLocations);
 
-			// evaluate if master
-			List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(
-					updatedLocations.getPeerAddresses());
+		// evaluate if master
+		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
 
-			if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(networkManager.getPeerAddress())) {
-				context.setIsMaster(true);
-			} else {
-				context.setIsMaster(false);
-			}
+		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(networkManager.getPeerAddress())) {
+			context.setIsMaster(true);
+		} else {
+			context.setIsMaster(false);
 		}
 	}
 
