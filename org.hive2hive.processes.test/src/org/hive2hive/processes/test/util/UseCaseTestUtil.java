@@ -57,7 +57,7 @@ public class UseCaseTestUtil {
 	 * Executes a process and waits until it's done. This is a simple helper method to reduce code
 	 * clones.
 	 */
-	private static void executeProcess(IProcessComponent process) {
+	public static void executeProcess(IProcessComponent process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		try {
