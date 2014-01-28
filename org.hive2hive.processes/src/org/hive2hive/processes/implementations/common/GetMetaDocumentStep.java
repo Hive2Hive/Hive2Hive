@@ -34,8 +34,9 @@ import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDo
 public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaDocumentStep.class);
-	private final IProvideMetaDocument metaContext;
+
 	private final IConsumeKeyPair keyContext;
+	private final IProvideMetaDocument metaContext;
 
 	public GetMetaDocumentStep(IConsumeKeyPair keyContext, IProvideMetaDocument metaContext,
 			NetworkManager networkManager) {
@@ -46,27 +47,35 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		KeyPair keyPair = keyContext.consumeKeyPair();
-		NetworkContent content = get(keyPair.getPublic(), H2HConstants.META_DOCUMENT);
-		if (content == null) {
-			logger.warn("Meta document not found.");
-			metaContext.provideMetaDocument(null);
-		} else {
-			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
-			try {
-				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, keyPair.getPrivate());
-				decrypted.setVersionKey(content.getVersionKey());
-				decrypted.setBasedOnKey(content.getBasedOnKey());
 
-				metaContext.provideMetaDocument((MetaDocument) decrypted);
-				logger.debug(String.format("Got and decrypted the meta document for file '%s'.",
-						((MetaDocument) decrypted).getName()));
-			} catch (IOException | ClassNotFoundException | InvalidKeyException | DataLengthException
-					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
-					| InvalidCipherTextException | IllegalArgumentException e) {
-				metaContext.provideMetaDocument(null);
-				cancel(new RollbackReason(this, "Cannot decrypt the meta document."));
+		KeyPair keyPair = keyContext.consumeKeyPair();
+		NetworkContent loadedContent = get(keyPair.getPublic(), H2HConstants.META_DOCUMENT);
+
+		if (loadedContent == null) {
+			logger.warn("Meta document not found.");
+			cancel(new RollbackReason(this, "Meta document not found."));
+		} else {
+
+			// decrypt meta document
+			HybridEncryptedContent encryptedContent = (HybridEncryptedContent) loadedContent;
+
+			NetworkContent decryptedContent = null;
+			try {
+				decryptedContent = H2HEncryptionUtil.decryptHybrid(encryptedContent, keyPair.getPrivate());
+			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
+					| BadPaddingException | IllegalStateException | InvalidCipherTextException
+					| ClassNotFoundException | IOException e) {
+				cancel(new RollbackReason(this, "Meta document could not be decrypted. Reason: "
+						+ e.getMessage()));
 			}
+
+			MetaDocument metaDocument = (MetaDocument) decryptedContent;
+			metaDocument.setVersionKey(loadedContent.getVersionKey());
+			metaDocument.setBasedOnKey(loadedContent.getBasedOnKey());
+
+			metaContext.provideMetaDocument(metaDocument);
+			logger.debug(String.format("Got and decrypted the meta document for file '%s'.",
+					metaDocument.getName()));
 		}
 	}
 }

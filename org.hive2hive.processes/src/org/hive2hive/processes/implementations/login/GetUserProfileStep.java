@@ -46,21 +46,20 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 			SecretKey decryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 					credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 
-			NetworkContent decryptedProfile = null;
+			NetworkContent decryptedContent = null;
 			try {
-				decryptedProfile = H2HEncryptionUtil.decryptAES(encryptedContent, decryptionKey);
+				decryptedContent = H2HEncryptionUtil.decryptAES(encryptedContent, decryptionKey);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
 					| ClassNotFoundException | IOException e) {
 				cancel(new RollbackReason(this, "User profile could not be decrypted. Reason: "
 						+ e.getMessage()));
 			}
 
-			UserProfile profile = (UserProfile) decryptedProfile;
+			UserProfile profile = (UserProfile) decryptedContent;
 			profile.setVersionKey(loadedContent.getVersionKey());
 			profile.setBasedOnKey(loadedContent.getBasedOnKey());
 
 			context.provideUserProfile(profile);
 		}
 	}
-
 }
