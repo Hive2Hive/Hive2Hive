@@ -151,7 +151,7 @@ public class FileRecursionUtil {
 		Map<FileTreeNode, AsyncComponent> fileMap = new HashMap<FileTreeNode, AsyncComponent>();
 
 		for (FileTreeNode file : files) {
-			PublicKey fileKey = file.getKeyPair().getPublic();
+			PublicKey fileKey = file.getFileKey();
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey,
 					networkManager);
 			if (file.isFolder()) {

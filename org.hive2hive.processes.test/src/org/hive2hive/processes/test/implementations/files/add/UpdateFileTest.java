@@ -101,7 +101,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, FileUtils.getTempDirectory());
 		FileTreeNode fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(
 				file, fileManagerUploader);
-		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getKeyPair().getPublic());
+		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getFileKey());
 
 		// new content should be latest one
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
