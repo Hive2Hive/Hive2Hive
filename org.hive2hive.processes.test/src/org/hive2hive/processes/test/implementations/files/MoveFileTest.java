@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.files;
+package org.hive2hive.processes.test.implementations.files;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,19 +8,20 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.ProcessTestUtil;
+import org.hive2hive.processes.test.util.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,6 +40,7 @@ public class MoveFileTest extends H2HJUnitTest {
 	private static List<NetworkManager> network;
 	private static IFileConfiguration config = new TestFileConfiguration();
 	private UserCredentials userCredentials;
+	private File root;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -53,38 +55,36 @@ public class MoveFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
-		ProcessTestUtil.register(userCredentials, network.get(0));
+		UseCaseTestUtil.register(userCredentials, network.get(0));
+		root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 	}
 
 	@Test
 	public void testRootToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException {
+			InterruptedException, NoSessionException {
 		NetworkManager client = network.get(1);
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		UseCaseTestUtil.login(userCredentials, client, root);
 
 		// add a file to the network
-		String randomName = NetworkTestUtil.randomString();
-		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		FileManager fileManager = new FileManager(root.toPath());
 		File file = FileTestUtil.createFileRandomContent(3, root, config);
-		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// add the target directory
-		File folder = new File(fileManager.getRoot().toFile(), "folder");
+		File folder = new File(root, "folder");
 		folder.mkdir();
-		ProcessTestUtil.uploadNewFile(client, folder, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, folder);
 
 		File destination = new File(folder, file.getName());
 
 		// move the file
-		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+		UseCaseTestUtil.moveFile(client, file, destination);
 
 		// assert that the file is moved
 		Assert.assertTrue(destination.exists());
 
 		// check that the user profile has a correct entry
-		UserProfile userProfile = profileManager.getUserProfile(-1, false);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
+		FileTreeNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(folder.getName(), fileNode.getParent().getName());
 
@@ -96,33 +96,31 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDirectoryToRoot() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException {
+			InterruptedException, NoSessionException {
 		NetworkManager client = network.get(1);
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager fileManager = new FileManager(root.toPath());
+		UseCaseTestUtil.login(userCredentials, client, root);
 
 		// add the source folder
 		File folder = new File(root, "folder");
 		folder.mkdir();
-		ProcessTestUtil.uploadNewFile(client, folder, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, folder);
 
 		// add a file to the folder
 		File file = new File(folder, "test-file");
 		FileUtils.write(file, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, file);
 
 		File destination = new File(root, file.getName());
 
 		// move the file
-		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+		UseCaseTestUtil.moveFile(client, file, destination);
 
 		// assert that the file is moved
 		Assert.assertTrue(destination.exists());
 
 		// check that the user profile has a correct entry
-		UserProfile userProfile = profileManager.getUserProfile(-1, false);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
+		FileTreeNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(userProfile.getRoot(), fileNode.getParent());
 
@@ -132,37 +130,36 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDirectoryToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException {
+			InterruptedException, NoSessionException {
 		NetworkManager client = network.get(1);
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager fileManager = new FileManager(root.toPath());
+		UseCaseTestUtil.login(userCredentials, client, root);
 
 		// add the source folder
 		File sourceFolder = new File(root, "source-folder");
 		sourceFolder.mkdir();
-		ProcessTestUtil.uploadNewFile(client, sourceFolder, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, sourceFolder);
 
 		// add a file to the folder
 		File file = new File(sourceFolder, "test-file");
 		FileUtils.write(file, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// add the destination folder
 		File destFolder = new File(root, "dest-folder");
 		destFolder.mkdir();
-		ProcessTestUtil.uploadNewFile(client, destFolder, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, destFolder);
 
 		File destination = new File(destFolder, file.getName());
 
 		// move the file
-		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+		UseCaseTestUtil.moveFile(client, file, destination);
 
 		// assert that the file is moved
 		Assert.assertTrue(destination.exists());
 
 		// check that the user profile has a correct entry
-		UserProfile userProfile = profileManager.getUserProfile(-1, false);
+		FileManager fileManager = new FileManager(root.toPath());
+		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(destFolder.getName(), fileNode.getParent().getName());
@@ -182,29 +179,27 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testRename() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException {
+			InterruptedException, NoSessionException {
 		NetworkManager client = network.get(1);
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		FileManager fileManager = new FileManager(root.toPath());
+		UseCaseTestUtil.login(userCredentials, client, root);
 
 		// add a file to the network
 		File file = new File(root, "test-file");
 		FileUtils.write(file, NetworkTestUtil.randomString());
-		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
+		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// don't move, only rename
 		File destination = new File(root, "test-file-moved");
 
 		// move the file
-		ProcessTestUtil.moveFile(client, file, destination, profileManager, fileManager, config);
+		UseCaseTestUtil.moveFile(client, file, destination);
 
 		// assert that the file is moved
 		Assert.assertTrue(destination.exists());
 
 		// check that the user profile has a correct entry
-		UserProfile userProfile = profileManager.getUserProfile(-1, false);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
+		FileTreeNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(fileNode.getName(), destination.getName());
 	}

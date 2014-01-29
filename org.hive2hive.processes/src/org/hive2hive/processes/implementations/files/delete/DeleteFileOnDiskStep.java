@@ -14,41 +14,44 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 public class DeleteFileOnDiskStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileOnDiskStep.class);
-	
+
 	private final File file;
 
 	public DeleteFileOnDiskStep(File file) {
 		this.file = file;
 	}
-	
+
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		if (file.exists()) {
 			logger.debug(String.format("Deleting file '%s' on disk.", file.getAbsolutePath()));
-			
+
 			try {
 				FileUtils.moveFileToDirectory(file, H2HConstants.TRASH_DIRECTORY, true);
 			} catch (IOException e) {
-				logger.warn(String.format("File '%s' could not be moved to the trash directory and gets deleted.", file.getAbsolutePath()));
+				logger.warn(String.format(
+						"File '%s' could not be moved to the trash directory and gets deleted.",
+						file.getAbsolutePath()));
 				FileUtils.deleteQuietly(file);
 			}
 		} else {
-			logger.warn(String.format("File '%s' cannot be deleted as it does not exist."));
+			logger.warn(String.format("File '%s' cannot be deleted as it does not exist.",
+					file.getAbsolutePath()));
 		}
 	}
-	
+
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 
 		File trashFile = new File(H2HConstants.TRASH_DIRECTORY, file.getName());
-		
+
 		if (trashFile.exists()) {
-			
+
 			try {
 				FileUtils.moveFileToDirectory(trashFile, file.getParentFile(), true);
 			} catch (IOException e) {
-				logger.warn(String.format("File '%s' could not be moved to the original folder.", trashFile.getAbsolutePath()));
+				logger.warn(String.format("File '%s' could not be moved to the original folder.",
+						trashFile.getAbsolutePath()));
 			}
 		} else {
 			logger.warn(String.format("File '%s' cannot be recovered from trash as it does not exist."));

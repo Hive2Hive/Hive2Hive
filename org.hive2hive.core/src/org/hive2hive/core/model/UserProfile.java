@@ -26,7 +26,8 @@ public class UserProfile extends NetworkContent {
 	private final FileTreeNode root;
 
 	public UserProfile(String userId) {
-		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil.generateProtectionKey());
+		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
+				.generateProtectionKey());
 	}
 
 	/**
@@ -77,7 +78,7 @@ public class UserProfile extends NetworkContent {
 	}
 
 	private FileTreeNode findById(FileTreeNode current, PublicKey fileId) {
-		if (current.getKeyPair().getPublic().equals(fileId)) {
+		if (current.getFileKey().equals(fileId)) {
 			return current;
 		}
 

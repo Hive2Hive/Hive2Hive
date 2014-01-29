@@ -29,7 +29,6 @@ public class SessionCreationStep extends ProcessStep {
 
 		// set session
 		networkManager.setSession(session);
-		context.provideSession(session);
 	}
 
 	@Override

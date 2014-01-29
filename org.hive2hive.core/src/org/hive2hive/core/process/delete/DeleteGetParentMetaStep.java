@@ -74,8 +74,8 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 					.format("File '%s' is in root, skip getting the parent meta folder and notify my other clients directly.",
 							deletedFileNode.getName()));
 
-			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(deletedFileNode
-					.getKeyPair().getPublic(), parentFileNode.getKeyPair().getPublic(),
+			DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(
+					deletedFileNode.getFileKey(), parentFileNode.getKeyPair().getPublic(),
 					deletedFileNode.getName());
 			HashSet<String> users = new HashSet<String>();
 			users.add(userProfile.getUserId());
@@ -135,7 +135,7 @@ public class DeleteGetParentMetaStep extends BaseGetProcessStep {
 				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), true);
 
 				// add the child again to the user profile
-				FileTreeNode parent = userProfile.getFileById(parentFileNode.getKeyPair().getPublic());
+				FileTreeNode parent = userProfile.getFileById(parentFileNode.getFileKey());
 				parent.addChild(deletedFileNode);
 				deletedFileNode.setParent(parent);
 

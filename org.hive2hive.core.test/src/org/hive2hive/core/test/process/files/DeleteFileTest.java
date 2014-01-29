@@ -69,7 +69,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		FileManager fileManager = new FileManager(root.toPath());
-		File file = FileTestUtil.createFileRandomContent(3, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(3, root, config);
 		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
 
 		// store the keys of the meta file to verify them later

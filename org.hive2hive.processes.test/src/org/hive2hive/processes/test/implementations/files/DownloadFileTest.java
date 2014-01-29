@@ -79,7 +79,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UseCaseTestUtil.login(userCredentials, client, newRoot);
 
-		UseCaseTestUtil.downloadFile(client, fileNode.getKeyPair().getPublic());
+		UseCaseTestUtil.downloadFile(client, fileNode.getFileKey());
 
 		// the downloaded file should now be on the disk
 		File downloadedFile = new File(newRoot, fileNode.getName());
@@ -119,7 +119,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
 
 		UseCaseTestUtil.login(userCredentials, client, newRoot);
-		UseCaseTestUtil.downloadFile(client, fileNode.getKeyPair().getPublic());
+		UseCaseTestUtil.downloadFile(client, fileNode.getFileKey());
 
 		// the downloaded file should still be on the disk
 		File downloadedFile = new File(newRoot, fileNode.getName());
@@ -146,7 +146,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		UseCaseTestUtil.login(userCredentials, client, newRoot);
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-				fileNode.getKeyPair().getPublic(), client);
+				fileNode.getFileKey(), client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();

@@ -46,9 +46,9 @@ public class AddFileTest extends H2HJUnitTest {
 
 	private final int networkSize = 3;
 	private List<NetworkManager> network;
-	private FileManager fileManager;
 	private IFileConfiguration config = new TestFileConfiguration();
 	private UserCredentials userCredentials;
+	private File root;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -63,8 +63,7 @@ public class AddFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		String randomName = NetworkTestUtil.randomString();
-		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		fileManager = new FileManager(root.toPath());
+		root = new File(System.getProperty("java.io.tmpdir"), randomName);
 
 		// register and login a user
 		UseCaseTestUtil.register(userCredentials, network.get(0));
@@ -73,7 +72,7 @@ public class AddFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException {
-		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(1, root, config);
 
 		startUploadProcess(file);
 		verifyUpload(file, 1);
@@ -83,7 +82,7 @@ public class AddFileTest extends H2HJUnitTest {
 	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException {
 		// creates a file with length of at least 5 chunks
-		File file = FileTestUtil.createFileRandomContent(5, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(5, root, config);
 
 		startUploadProcess(file);
 		verifyUpload(file, 5);
@@ -92,7 +91,7 @@ public class AddFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadFolder() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException {
-		File folder = new File(fileManager.getRoot().toFile(), "folder1");
+		File folder = new File(root, "folder1");
 		folder.mkdirs();
 
 		startUploadProcess(folder);
@@ -103,7 +102,7 @@ public class AddFileTest extends H2HJUnitTest {
 	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException {
 		// create a container
-		File folder = new File(fileManager.getRoot().toFile(), "folder-with-file");
+		File folder = new File(root, "folder-with-file");
 		folder.mkdirs();
 		startUploadProcess(folder);
 
@@ -116,11 +115,11 @@ public class AddFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException {
-		File folder = new File(fileManager.getRoot().toFile(), "folder-with-folder");
+		File folder = new File(root, "folder-with-folder");
 		folder.mkdirs();
 		startUploadProcess(folder);
 
-		File innerFolder = new File(fileManager.getRoot().toFile(), "inner-folder");
+		File innerFolder = new File(root, "inner-folder");
 		innerFolder.mkdir();
 		startUploadProcess(innerFolder);
 
@@ -133,7 +132,7 @@ public class AddFileTest extends H2HJUnitTest {
 		// skip the login and continue with the newfile process
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
-		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(1, root, config);
 		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
@@ -144,7 +143,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	private void startUploadProcess(File toUpload) throws IllegalFileLocation, NoSessionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		UseCaseTestUtil.login(userCredentials, client, fileManager.getRoot().toFile());
+		UseCaseTestUtil.login(userCredentials, client, root);
 		UseCaseTestUtil.uploadNewFile(client, toUpload);
 	}
 
@@ -158,7 +157,7 @@ public class AddFileTest extends H2HJUnitTest {
 		UserProfile gotProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
-		FileTreeNode node = gotProfile.getFileByPath(originalFile, fileManager);
+		FileTreeNode node = gotProfile.getFileByPath(originalFile, new FileManager(root.toPath()));
 		Assert.assertNotNull(node);
 
 		// verify the meta document
@@ -188,7 +187,7 @@ public class AddFileTest extends H2HJUnitTest {
 	@After
 	public void deleteAndShutdown() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(fileManager.getRoot().toFile());
+		FileUtils.deleteDirectory(root);
 	}
 
 	@AfterClass

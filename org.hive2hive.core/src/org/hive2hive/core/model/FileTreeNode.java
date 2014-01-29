@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -78,16 +79,17 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		this.parent = null;
 		children = new HashSet<FileTreeNode>();
 	}
-	
+
 	/**
 	 * Walks recursively through the file tree to build, sort and return the digest.
+	 * 
 	 * @param node The root node from which the digest is started.
 	 * @return The digest in sorted order.
 	 */
 	public static List<Path> getDigest(FileTreeNode node) {
-		
+
 		List<Path> digest = new ArrayList<Path>();
-		
+
 		// add self
 		digest.add(node.getFullPath());
 
@@ -95,15 +97,19 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		for (FileTreeNode child : node.getChildren()) {
 			digest.addAll(getDigest(child));
 		}
-		
+
 		// sort by full path
 		Collections.sort(digest);
-		
+
 		return digest;
 	}
 
 	public KeyPair getKeyPair() {
 		return keyPair;
+	}
+
+	public PublicKey getFileKey() {
+		return keyPair.getPublic();
 	}
 
 	public boolean isFolder() {
@@ -195,13 +201,13 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		if (isRoot() && isShared)
 			throw new IllegalStateException("Root node can't be shared.");
 		this.isShared = isShared;
-		for (FileTreeNode child: children)
+		for (FileTreeNode child : children)
 			child.setIsShared(isShared);
 	}
 
 	public boolean hasShared() {
 		boolean shared = isShared;
-		for (FileTreeNode child: children)
+		for (FileTreeNode child : children)
 			shared |= child.hasShared();
 		return shared;
 	}

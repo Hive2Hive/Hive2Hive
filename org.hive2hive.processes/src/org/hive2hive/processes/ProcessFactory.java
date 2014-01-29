@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
@@ -23,14 +24,17 @@ import org.hive2hive.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.processes.implementations.common.PutUserLocationsStep;
+import org.hive2hive.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.processes.implementations.context.DeleteFileProcessContext;
 import org.hive2hive.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.LogoutProcessContext;
+import org.hive2hive.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.processes.implementations.context.NotifyProcessContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
+import org.hive2hive.processes.implementations.context.UserProfileTaskContext;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.files.add.AddToUserProfileStep;
 import org.hive2hive.processes.implementations.files.add.CreateMetaDocumentStep;
@@ -43,6 +47,10 @@ import org.hive2hive.processes.implementations.files.delete.DeleteFileOnDiskStep
 import org.hive2hive.processes.implementations.files.delete.DeleteMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
+import org.hive2hive.processes.implementations.files.move.MoveOnDiskStep;
+import org.hive2hive.processes.implementations.files.move.RelinkUserProfileStep;
+import org.hive2hive.processes.implementations.files.move.UpdateDestinationParentStep;
+import org.hive2hive.processes.implementations.files.move.UpdateSourceParentStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
 import org.hive2hive.processes.implementations.files.update.UpdateMD5inUserProfileStep;
@@ -60,6 +68,7 @@ import org.hive2hive.processes.implementations.notify.VerifyNotificationFactoryS
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
+import org.hive2hive.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 
 public final class ProcessFactory {
 
@@ -87,9 +96,7 @@ public final class ProcessFactory {
 		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
 		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
 
-		AsyncComponent registerProcess = new AsyncComponent(process);
-
-		return registerProcess;
+		return new AsyncComponent(process);
 	}
 
 	public IProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
@@ -105,11 +112,21 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager));
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new PutUserLocationsStep(context, context, networkManager));
-		process.add(new SynchronizeFilesStep(context));
+		process.add(new SynchronizeFilesStep(context, networkManager));
 
-		AsyncComponent loginProcess = new AsyncComponent(process);
+		return new AsyncComponent(process);
+	}
 
-		return loginProcess;
+	public ProcessComponent createUserProfileTaskStep(NetworkManager networkManager) {
+		SequentialProcess process = new SequentialProcess();
+
+		UserProfileTaskContext context = new UserProfileTaskContext();
+
+		process.add(new GetUserProfileTaskStep(context, networkManager));
+		// Note: this step will add the next steps since it depends on the get result
+		process.add(new HandleUserProfileTaskStep(context, networkManager));
+
+		return new AsyncComponent(process);
 	}
 
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
@@ -122,12 +139,10 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, networkManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 
-		AsyncComponent logoutProcess = new AsyncComponent(process);
-
-		return logoutProcess;
+		return new AsyncComponent(process);
 	}
 
-	public IProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
+	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException {
 
 		Path root = networkManager.getSession().getFileManager().getRoot();
@@ -150,12 +165,10 @@ public final class ProcessFactory {
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
-		AsyncComponent addFileProcess = new AsyncComponent(process);
-
-		return addFileProcess;
+		return new AsyncComponent(process);
 	}
 
-	public IProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
+	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, IllegalArgumentException {
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("A folder can have one version only");
@@ -182,25 +195,26 @@ public final class ProcessFactory {
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
-		AsyncComponent updateFileProcess = new AsyncComponent(process);
-
-		return updateFileProcess;
+		return new AsyncComponent(process);
 	}
 
-	public IProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
+	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
+			throws NoSessionException {
+		// precondition: session is existent
+		networkManager.getSession();
+
 		SequentialProcess process = new SequentialProcess();
 
 		DownloadFileContext context = new DownloadFileContext(fileKey);
 		process.add(new FindInUserProfileStep(context, networkManager));
 
-		return process;
+		return new AsyncComponent(process);
 	}
 
-	public IProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
+	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException {
-
 		// TODO is this process even necessary for folders?
-		
+
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
 
 		// process composition
@@ -214,14 +228,44 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
+			throws NoSessionException {
+		// make some checks here, thus it's easier in the steps
+		FileManager fileManager = networkManager.getSession().getFileManager();
+		File root = fileManager.getRoot().toFile();
+		boolean sourceInRoot = root.equals(source.getParentFile());
+		boolean destinationInRoot = root.equals(destination.getParentFile());
+		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, sourceInRoot,
+				destinationInRoot, networkManager.getUserId());
+
+		SequentialProcess process = new SequentialProcess();
+		process.add(new MoveOnDiskStep(context, networkManager));
+
+		if (!sourceInRoot) {
+			process.add(new File2MetaFileComponent(source.getParentFile(), context, context, networkManager));
+			process.add(new UpdateSourceParentStep(context, networkManager));
+		}
+
+		if (!destinationInRoot) {
+			process.add(new File2MetaFileComponent(destination.getParentFile(), context, context,
+					networkManager));
+			process.add(new UpdateDestinationParentStep(context, networkManager));
+		}
+
+		process.add(new RelinkUserProfileStep(context, networkManager));
+		process.add(createNotificationProcess(context.getMoveNotificationContext(), networkManager));
+		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));
+		process.add(createNotificationProcess(context.getAddNotificationContext(), networkManager));
+
+		return new AsyncComponent(process);
+	}
+
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
-
 		GetFileListStep listStep = new GetFileListStep(networkManager);
-
 		return new AsyncResultComponent<List<Path>>(listStep);
 	}
 
-	public IProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
+	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
 			final Set<String> usersToNotify, NetworkManager networkManager) {
 		// create a context here to provide the necessary data
 		IConsumeNotificationFactory context = new IConsumeNotificationFactory() {

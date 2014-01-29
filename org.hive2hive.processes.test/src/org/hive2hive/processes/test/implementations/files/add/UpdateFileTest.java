@@ -83,7 +83,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, fileManagerUploader, config);
+		file = FileTestUtil.createFileRandomContent(3, rootUploader, config);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
@@ -101,7 +101,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, FileUtils.getTempDirectory());
 		FileTreeNode fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(
 				file, fileManagerUploader);
-		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getKeyPair().getPublic());
+		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getFileKey());
 
 		// new content should be latest one
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));

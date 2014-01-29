@@ -15,6 +15,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.processes.ProcessFactory;
+import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
@@ -29,7 +30,7 @@ import org.junit.Assert;
  */
 public class UseCaseTestUtil {
 
-	public static final int MAX_PROCESS_WAIT_TIME = 6000;
+	public static final int MAX_PROCESS_WAIT_TIME = 120;
 
 	private UseCaseTestUtil() {
 		// only static methods
@@ -57,7 +58,7 @@ public class UseCaseTestUtil {
 	 * Executes a process and waits until it's done. This is a simple helper method to reduce code
 	 * clones.
 	 */
-	private static void executeProcess(IProcessComponent process) {
+	public static void executeProcess(IProcessComponent process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		try {
@@ -118,6 +119,18 @@ public class UseCaseTestUtil {
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
 		return networkManager.getSession().getFileManager().getPath(userProfile.getFileById(fileKey))
 				.toFile();
+	}
+
+	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException {
+		ProcessComponent process = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
+		executeProcess(process);
+	}
+
+	public static void moveFile(NetworkManager networkManager, File source, File destination)
+			throws NoSessionException {
+		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination,
+				networkManager);
+		executeProcess(process);
 	}
 
 	// public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
@@ -183,19 +196,6 @@ public class UseCaseTestUtil {
 	// GetLocationsStep step = new GetLocationsStep(userId, null, context);
 	// executeStep(networkManager, step);
 	// return context.getLocations();
-	// }
-
-	// public static void deleteFile(NetworkManager networkManager, File file,
-	// UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
-	// networkManager.setSession(new H2HSession(EncryptionUtil
-	// .generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-	//
-	// try {
-	// DeleteFileProcess process = new DeleteFileProcess(file, networkManager);
-	// executeProcess(process);
-	// } catch (NoSessionException e) {
-	// // never happens because session is set before
-	// }
 	// }
 
 	// public static void moveFile(NetworkManager networkManager, File source, File destination,

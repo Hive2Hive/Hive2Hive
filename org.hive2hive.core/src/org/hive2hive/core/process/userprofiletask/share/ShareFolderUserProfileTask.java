@@ -19,12 +19,12 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		if (this.networkManager == null) {
 			logger.error("NetworkManager is not set.");
 			return;
 		}
-		
+
 		logger.debug("Executing a shared folder user profile task.");
 		try {
 			ShareFolderNotificationProcess process = new ShareFolderNotificationProcess(fileTree,

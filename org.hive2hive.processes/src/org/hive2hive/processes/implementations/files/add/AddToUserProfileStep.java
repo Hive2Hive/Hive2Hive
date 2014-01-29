@@ -77,7 +77,7 @@ public class AddToUserProfileStep extends ProcessStep {
 		// find the parent node using the relative path to navigate there
 		Path relativePath = fileRoot.relativize(parent);
 		FileTreeNode parentNode = userProfile.getFileByPath(relativePath);
-		parentKey = parentNode.getKeyPair().getPublic();
+		parentKey = parentNode.getFileKey();
 
 		// use the file keys generated in a previous step where the meta document is stored
 		if (file.isDirectory()) {

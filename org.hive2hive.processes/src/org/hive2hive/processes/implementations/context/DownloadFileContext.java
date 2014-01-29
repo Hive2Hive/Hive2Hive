@@ -1,6 +1,5 @@
 package org.hive2hive.processes.implementations.context;
 
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
@@ -18,7 +17,6 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 
 	private FileTreeNode fileNode;
 	private MetaDocument metaDocument;
-	private Path destination;
 
 	public DownloadFileContext(PublicKey fileKey) {
 		this(fileKey, null, -1);
