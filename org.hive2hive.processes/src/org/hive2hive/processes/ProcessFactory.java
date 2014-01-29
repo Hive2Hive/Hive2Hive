@@ -107,7 +107,7 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager));
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new PutUserLocationsStep(context, context, networkManager));
-		process.add(new SynchronizeFilesStep(networkManager));
+		process.add(new SynchronizeFilesStep(context, networkManager));
 
 		// TODO add user profile task step
 
@@ -143,7 +143,7 @@ public final class ProcessFactory {
 		return logoutProcess;
 	}
 
-	public IProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
+	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException {
 
 		Path root = networkManager.getSession().getFileManager().getRoot();
@@ -171,7 +171,7 @@ public final class ProcessFactory {
 		return addFileProcess;
 	}
 
-	public IProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
+	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, IllegalArgumentException {
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("A folder can have one version only");
@@ -203,7 +203,11 @@ public final class ProcessFactory {
 		return updateFileProcess;
 	}
 
-	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager) {
+	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
+			throws NoSessionException {
+		// precondition: session is existent
+		networkManager.getSession();
+
 		SequentialProcess process = new SequentialProcess();
 
 		DownloadFileContext context = new DownloadFileContext(fileKey);
@@ -212,7 +216,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public IProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
+	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException {
 
 		// TODO is this process even necessary for folders?

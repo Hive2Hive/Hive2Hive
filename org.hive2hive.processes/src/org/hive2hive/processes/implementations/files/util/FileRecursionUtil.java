@@ -4,12 +4,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.ProcessFactory;
@@ -19,8 +20,6 @@ import org.hive2hive.processes.framework.decorators.AsyncComponent;
 
 public class FileRecursionUtil {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileRecursionUtil.class);
-
 	private FileRecursionUtil() {
 		// only static methods
 	}
@@ -28,7 +27,110 @@ public class FileRecursionUtil {
 	public enum FileProcessAction {
 		NEW_FILE,
 		MODIFY_FILE,
-		DELETE;
+	}
+
+	/**
+	 * Creates an upload process. The order of the files does not depend.
+	 * 
+	 * @param files a list of files to upload
+	 * @param action whether the files are for updating or as new files
+	 * @param networkManager the network manager with a session
+	 * @return the root process (containing multiple async components) that manages the upload correctly
+	 * @throws NoSessionException
+	 */
+	public static ProcessComponent buildUploadProcess(List<Path> files, FileProcessAction action,
+			NetworkManager networkManager) throws NoSessionException {
+		// the sequential root process
+		SequentialProcess rootProcess = new SequentialProcess();
+
+		// key idea: Find the children with the same parents and add them to a sequential process. They need
+		// to be sequential because the parent meta file must be adapted. If they would run in parallel, they
+		// would modify the parent meta folder simultaneously.
+		Map<Path, SequentialProcess> sameParents = new HashMap<Path, SequentialProcess>();
+		for (Path file : files) {
+			// create the process which uploads or updates the file
+			ProcessComponent uploadProcess;
+			if (action == FileProcessAction.NEW_FILE)
+				uploadProcess = ProcessFactory.instance().createNewFileProcess(file.toFile(), networkManager);
+			else
+				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file.toFile(),
+						networkManager);
+
+			Path parentFile = file.getParent();
+			if (sameParents.containsKey(parentFile)) {
+				// a sibling exists that already created a sequential process
+				SequentialProcess sequentialProcess = sameParents.get(parentFile);
+				sequentialProcess.add(uploadProcess);
+			} else {
+				// first file with this parent; create new sequential process
+				SequentialProcess sequentialProcess = new SequentialProcess();
+				sequentialProcess.add(uploadProcess);
+				sameParents.put(parentFile, sequentialProcess);
+			}
+		}
+
+		// the children are now grouped together. Next, we need to link the parent files.
+		for (Path parent : sameParents.keySet()) {
+			AsyncComponent asyncChain = new AsyncComponent(sameParents.get(parent));
+			Path parentOfParent = parent.getParent();
+			if (sameParents.containsKey(parentOfParent)) {
+				// parent exists, we add this sub-process (sequential) to it. It can be async here
+				SequentialProcess sequentialProcess = sameParents.get(parentOfParent);
+				sequentialProcess.add(asyncChain);
+			} else {
+				// parent does not exist --> attach the sub-tree to the root
+				rootProcess.add(asyncChain);
+			}
+		}
+
+		return rootProcess;
+	}
+
+	/**
+	 * Creates a process chain to delete all files in the list. Note that the list must be in pre-order, else
+	 * there will occur errors.
+	 * 
+	 * @param files list of files to delete in preorder
+	 * @param networkManager the network manager with a session
+	 * @return the (async) root process component
+	 * @throws NoSessionException
+	 */
+	public static ProcessComponent buildDeletionProcess(List<Path> files, NetworkManager networkManager)
+			throws NoSessionException {
+		// the sequential root process
+		SequentialProcess rootProcess = new SequentialProcess();
+
+		// deletion must happen in reverse tree order. Since this is very complicated when it contains
+		// asynchronous components, we simply delete them all in the same thread (reverse preorder of course)
+		Collections.reverse(files);
+		for (Path file : files) {
+			ProcessComponent deletionProcess = ProcessFactory.instance().createDeleteFileProcess(
+					file.toFile(), networkManager);
+			rootProcess.add(deletionProcess);
+		}
+
+		return new AsyncComponent(rootProcess);
+	}
+
+	/**
+	 * This is a workaround to delete files when a {@link FileTreeNode} is already existent. Since the node is
+	 * already here, the deletion could be speed up because it must not be looked up in the user profile.
+	 * 
+	 * @param files
+	 * @param networkManager
+	 * @return
+	 * @throws NoSessionException
+	 */
+	@Deprecated
+	public static ProcessComponent buildDeletionProcessFromNodelist(List<FileTreeNode> files,
+			NetworkManager networkManager) throws NoSessionException {
+		List<Path> filesToDelete = new ArrayList<Path>();
+		FileManager fileManager = networkManager.getSession().getFileManager();
+		for (FileTreeNode fileTreeNode : files) {
+			filesToDelete.add(fileManager.getPath(fileTreeNode));
+		}
+
+		return buildDeletionProcess(filesToDelete, networkManager);
 	}
 
 	/**
@@ -37,10 +139,11 @@ public class FileRecursionUtil {
 	 * @param files the files to download (order does not depend)
 	 * @param networkManager the connected node (note, it must have a session)
 	 * @return the root process component containing all sub-processes (and sub-tasks)
+	 * @throws NoSessionException
 	 */
 	public static ProcessComponent buildDownloadProcess(List<FileTreeNode> files,
-			NetworkManager networkManager) {
-		// the root process, where everything runs in parallel
+			NetworkManager networkManager) throws NoSessionException {
+		// the root process, where everything runs in parallel (only async children are added)
 		SequentialProcess rootProcess = new SequentialProcess();
 
 		// build a flat map of the folders to download (such that O(1) for each lookup)

@@ -1,0 +1,237 @@
+package org.hive2hive.processes.test.implementations.login;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.rpc.ObjectDataReply;
+
+import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.NetworkUtils;
+import org.hive2hive.core.process.login.ContactPeersStep;
+import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.processes.implementations.context.LoginProcessContext;
+import org.hive2hive.processes.implementations.login.ContactOtherClientsStep;
+import org.hive2hive.processes.test.util.UseCaseTestUtil;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+/**
+ * Test class to check if the {@link ContactOtherClientsStep} process step works correctly. Only this process
+ * step
+ * will be tested in a own process environment.
+ * 
+ * node 0 is the new client node
+ * node 1, 2, 3 are other alive client nodes
+ * node 4, 5 are not responding client nodes
+ * 
+ * ranking from smallest to greatest node id:
+ * C, B, A, F, E, G, A, D
+ * 
+ * @author Seppi, Nico
+ */
+public class ContactOtherClientsStepTest extends H2HJUnitTest {
+
+	private static final int networkSize = 6;
+	// in seconds
+	private static List<NetworkManager> network;
+	private static String userId = "user id";
+
+	@BeforeClass
+	public static void initTest() throws Exception {
+		testClass = ContactOtherClientsStepTest.class;
+		beforeClass();
+		network = NetworkTestUtil.createNetwork(networkSize);
+		// assign to each node the same key pair (simulating same user)
+		NetworkTestUtil.createSameKeyPair(network);
+		// assign to a subset of the client nodes a rejecting message reply handler
+		network.get(4).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		network.get(5).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+	}
+
+	private boolean isMasterClient(Locations locations, PeerAddress client) {
+		ArrayList<PeerAddress> list = new ArrayList<PeerAddress>();
+		list.addAll(locations.getPeerAddresses());
+		PeerAddress master = NetworkUtils.choseFirstPeerAddress(list);
+		return (master.equals(client));
+	}
+
+	/**
+	 * All client nodes are alive.
+	 * 
+	 * @throws NoSessionException
+	 */
+	@Test
+	public void allClientsAreAlive() throws NoSessionException {
+		Locations fakedLocations = new Locations(userId);
+		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+		// responding nodes
+		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(2).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(3).getPeerAddress());
+
+		Locations result = runProcessStep(fakedLocations,
+				isMasterClient(fakedLocations, network.get(0).getPeerAddress()));
+
+		assertEquals(4, result.getPeerAddresses().size());
+		PeerAddress newClientsEntry = null;
+		for (PeerAddress address : result.getPeerAddresses()) {
+			if (address.equals(network.get(0).getPeerAddress())) {
+				newClientsEntry = address;
+				break;
+			}
+		}
+		assertNotNull(newClientsEntry);
+	}
+
+	/**
+	 * Some client nodes are offline.
+	 * 
+	 * @throws NoSessionException
+	 */
+	@Test
+	public void notAllClientsAreAlive() throws NoSessionException {
+		Locations fakedLocations = new Locations(userId);
+		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
+		// not responding nodes
+		fakedLocations.addPeerAddress(network.get(4).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(5).getPeerAddress());
+
+		Locations result = runProcessStep(fakedLocations,
+				isMasterClient(fakedLocations, network.get(0).getPeerAddress()));
+
+		assertEquals(2, result.getPeerAddresses().size());
+		PeerAddress newClientsEntry = null;
+		for (PeerAddress address : result.getPeerAddresses()) {
+			if (address.equals(network.get(0).getPeerAddress())) {
+				newClientsEntry = address;
+				break;
+			}
+		}
+		assertNotNull(newClientsEntry);
+	}
+
+	/**
+	 * No other clients are or have been online.
+	 * 
+	 * @throws NoSessionException
+	 */
+	@Test
+	public void noOtherClientsOrDeadClients() throws NoSessionException {
+		Locations fakedLocations = new Locations(userId);
+		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+
+		Locations result = runProcessStep(fakedLocations, true);
+
+		assertEquals(1, result.getPeerAddresses().size());
+		assertEquals(network.get(0).getPeerAddress(), result.getPeerAddresses().iterator().next());
+	}
+
+	/**
+	 * No client is responding.
+	 * 
+	 * @throws NoSessionException
+	 */
+	@Test
+	public void allOtherClientsAreDead() throws NoSessionException {
+		Locations fakedLocations = new Locations(userId);
+		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+		// not responding nodes
+		fakedLocations.addPeerAddress(network.get(4).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(5).getPeerAddress());
+
+		Locations result = runProcessStep(fakedLocations, true);
+
+		assertEquals(1, result.getPeerAddresses().size());
+		assertEquals(network.get(0).getPeerAddress(), result.getPeerAddresses().iterator().next());
+	}
+
+	/**
+	 * Received an empty location map.
+	 * 
+	 * @throws NoSessionException
+	 */
+	@Test
+	public void emptyLocations() throws NoSessionException {
+		Locations fakedLocations = new Locations(userId);
+
+		Locations result = runProcessStep(fakedLocations, true);
+
+		assertEquals(1, result.getPeerAddresses().size());
+		assertEquals(network.get(0).getPeerAddress(), result.getPeerAddresses().iterator().next());
+	}
+
+	/**
+	 * Received a location map without own location entry.
+	 * 
+	 * @throws NoSessionException
+	 */
+	@Test
+	public void notCompleteLocations() throws NoSessionException {
+		Locations fakedLocations = new Locations(userId);
+		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
+
+		Locations result = runProcessStep(fakedLocations,
+				isMasterClient(fakedLocations, network.get(0).getPeerAddress()));
+
+		assertEquals(2, result.getPeerAddresses().size());
+		PeerAddress newClientsEntry = null;
+		for (PeerAddress address : result.getPeerAddresses()) {
+			if (address.equals(network.get(0).getPeerAddress())) {
+				newClientsEntry = address;
+				break;
+			}
+		}
+		assertNotNull(newClientsEntry);
+	}
+
+	/**
+	 * Helper for running a process with a single {@link ContactOtherClientsStep} step. Method waits untill
+	 * process successfully finishes.
+	 * 
+	 * @param fakedLocations
+	 *            locations which the {@link ContactPeersStep} step has to handle
+	 * @return the updated locations
+	 * @throws NoSessionException
+	 */
+	private Locations runProcessStep(Locations fakedLocations, final boolean isMaster)
+			throws NoSessionException {
+		// initialize the process and the one and only step to test
+
+		LoginProcessContext context = new LoginProcessContext();
+		context.provideLocations(fakedLocations);
+		ContactOtherClientsStep processStep = new ContactOtherClientsStep(context, network.get(0));
+		UseCaseTestUtil.executeProcess(processStep);
+
+		Assert.assertEquals(isMaster, context.getIsMaster());
+		return context.consumeLocations();
+	}
+
+	@AfterClass
+	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
+		afterClass();
+	}
+
+	/**
+	 * A message reply handler which rejects all message.
+	 * 
+	 * @author Seppi
+	 */
+	private static class DenyingMessageReplyHandler implements ObjectDataReply {
+		@Override
+		public Object reply(PeerAddress sender, Object request) throws Exception {
+			return null;
+		}
+	}
+
+}
