@@ -72,7 +72,7 @@ public class NewFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException {
-		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(1, fileManager.getRoot().toFile(), config);
 
 		startUploadProcess(file);
 		verifyUpload(file, 1);
@@ -81,7 +81,7 @@ public class NewFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException {
 		// creates a file with length of at least 5 chunks
-		File file = FileTestUtil.createFileRandomContent(5, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(5, fileManager.getRoot().toFile(), config);
 
 		startUploadProcess(file);
 		verifyUpload(file, 5);
@@ -125,7 +125,7 @@ public class NewFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadWrongCredentials() throws IOException, IllegalFileLocation, NoSessionException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		File file = FileTestUtil.createFileRandomContent(1, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(1, fileManager.getRoot().toFile(), config);
 
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
@@ -136,7 +136,7 @@ public class NewFileTest extends H2HJUnitTest {
 		TestProcessListener listener = new TestProcessListener();
 		process.addListener(listener);
 		process.start();
-		
+
 		ProcessTestUtil.waitTillFailed(listener, 40);
 	}
 

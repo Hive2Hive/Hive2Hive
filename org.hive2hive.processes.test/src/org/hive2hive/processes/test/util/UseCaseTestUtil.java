@@ -126,6 +126,13 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
+	public static void moveFile(NetworkManager networkManager, File source, File destination)
+			throws NoSessionException {
+		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination,
+				networkManager);
+		executeProcess(process);
+	}
+
 	// public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
 	// IGetMetaContext context = new IGetMetaContext() {
 	//

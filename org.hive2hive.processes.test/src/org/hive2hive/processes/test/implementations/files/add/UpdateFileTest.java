@@ -83,7 +83,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, fileManagerUploader, config);
+		file = FileTestUtil.createFileRandomContent(3, rootUploader, config);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
