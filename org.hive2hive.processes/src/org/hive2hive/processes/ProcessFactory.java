@@ -100,7 +100,7 @@ public final class ProcessFactory {
 		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
 		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
@@ -118,7 +118,7 @@ public final class ProcessFactory {
 		process.add(new PutUserLocationsStep(context, context, networkManager));
 		process.add(new SynchronizeFilesStep(context, networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createUserProfileTaskStep(NetworkManager networkManager) {
@@ -130,7 +130,7 @@ public final class ProcessFactory {
 		// Note: this step will add the next steps since it depends on the get result
 		process.add(new HandleUserProfileTaskStep(context, networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
@@ -143,7 +143,7 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, networkManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
@@ -169,7 +169,7 @@ public final class ProcessFactory {
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
@@ -199,7 +199,7 @@ public final class ProcessFactory {
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
@@ -222,7 +222,7 @@ public final class ProcessFactory {
 		DownloadFileContext context = new DownloadFileContext(fileKey, destination, versionToDownload);
 		process.add(new FindInUserProfileStep(context, networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
@@ -271,7 +271,7 @@ public final class ProcessFactory {
 		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getAddNotificationContext(), networkManager));
 
-		return new AsyncComponent(process);
+		return process;
 	}
 
 	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector,
@@ -289,7 +289,8 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
-		return new AsyncComponent(process);
+		// return new AsyncComponent(process);
+		return process;
 	}
 
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {

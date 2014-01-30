@@ -23,7 +23,6 @@ import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 import org.hive2hive.processes.implementations.context.RecoverFileContext;
 
 /**
@@ -115,89 +114,18 @@ public class SelectVersionStep extends ProcessStep {
 
 			File destination = new File(context.getFile().getParentFile(), newFileName);
 
-			// start the process to download the files
+			// add the process to download the file
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(
 					selectedNode.getFileKey(), selected.getIndex(), destination, networkManager);
-			downloadProcess.attachListener(new StartAddRestoredFileListener(destination));
-			downloadProcess.start();
+			getParent().add(downloadProcess);
+
+			// add the process to upload the file
+			ProcessComponent addProcess = ProcessFactory.instance().createNewFileProcess(destination,
+					networkManager);
+			getParent().add(addProcess);
 		} catch (Hive2HiveException e) {
 			cancel(new RollbackReason(this, e.getMessage()));
 		}
 
-	}
-
-	/**
-	 * Listener that is called as soon the download of the restored version is done
-	 * 
-	 * @author Nico
-	 * 
-	 */
-	private class StartAddRestoredFileListener implements IProcessComponentListener {
-
-		private final File destination;
-
-		public StartAddRestoredFileListener(File destination) {
-			this.destination = destination;
-		}
-
-		@Override
-		public void onSucceeded() {
-			logger.debug("Downloading of the restored version finished. Continue with adding it as an own file");
-			try {
-				ProcessComponent process = ProcessFactory.instance().createNewFileProcess(destination,
-						networkManager);
-				process.attachListener(new FinalizeRestoreListener());
-				process.start();
-			} catch (Hive2HiveException e) {
-				try {
-					cancel(new RollbackReason(SelectVersionStep.this, e.getMessage()));
-				} catch (InvalidProcessStateException e1) {
-					logger.error("Double exception: Could not start the rollback.", e);
-				}
-			}
-		}
-
-		@Override
-		public void onFailed() {
-			try {
-				cancel(new RollbackReason(SelectVersionStep.this, "Could not download the restored version"));
-			} catch (InvalidProcessStateException e) {
-				logger.error("Double exception: Could not start the rollback", e);
-			}
-		}
-
-		@Override
-		public void onFinished() {
-			// ignore
-		}
-	}
-
-	/**
-	 * Listener that is called as soon as the restored file is uploaded to the DHT
-	 * 
-	 * @author Nico
-	 * 
-	 */
-	private class FinalizeRestoreListener implements IProcessComponentListener {
-
-		@Override
-		public void onSucceeded() {
-			logger.debug("Successfully restored the file version");
-		}
-
-		@Override
-		public void onFailed() {
-			try {
-				cancel(new RollbackReason(SelectVersionStep.this,
-						"Could not upload the restored file to the DHT"));
-			} catch (InvalidProcessStateException e) {
-				logger.error("Double exception: Could not start the rollback", e);
-			}
-		}
-
-		@Override
-		public void onFinished() {
-			// ignore
-		}
 	}
 }
