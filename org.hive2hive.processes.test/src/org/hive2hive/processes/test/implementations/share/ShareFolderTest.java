@@ -5,13 +5,10 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -75,54 +72,17 @@ public class ShareFolderTest extends H2HJUnitTest {
 		Assert.assertTrue(folderAtB.exists());
 	}
 
-	@Test
-	public void initiallizationTest() {
-		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+	@Test(expected = IllegalArgumentException.class)
+	public void shareFileTest() throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
+		File file = new File(rootA, NetworkTestUtil.randomString());
+		UseCaseTestUtil.shareFolder(network.get(0), file, "any");
+	}
 
-		File file = new File(root, NetworkTestUtil.randomString());
-		try {
-			new ShareFolderProcess(file, "random", null);
-		} catch (IllegalArgumentException e) {
-			// is ok
-		} catch (IllegalFileLocation | NoSessionException e) {
-			Assert.fail();
-		}
-
-		File folder = new File(root, "folder1");
-		folder.mkdirs();
-		try {
-			new ShareFolderProcess(folder, "random", network.get(0));
-		} catch (NoSessionException e) {
-			// is ok
-		} catch (IllegalFileLocation | IllegalArgumentException e) {
-			Assert.fail();
-		}
-
-		File otherRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		File otherFolder = new File(otherRoot, NetworkTestUtil.randomString());
-		otherFolder.mkdirs();
-		try {
-			network.get(0).setSession(new H2HSession(null, null, null, new FileManager(root.toPath())));
-			new ShareFolderProcess(otherFolder, "random", network.get(0));
-		} catch (IllegalFileLocation e) {
-			// is ok
-		} catch (NoSessionException | IllegalArgumentException e) {
-			Assert.fail();
-		}
-
-		try {
-			new ShareFolderProcess(root, "random", network.get(0));
-		} catch (IllegalFileLocation e) {
-			// is ok
-		} catch (NoSessionException | IllegalArgumentException e) {
-			Assert.fail();
-		}
-
-		root.delete();
-		file.delete();
-		folder.delete();
-		otherRoot.delete();
-		otherFolder.delete();
+	@Test(expected = IllegalFileLocation.class)
+	public void wrongFolderLocationTest() throws IllegalFileLocation, IllegalArgumentException,
+			NoSessionException {
+		// share root of B through client A
+		UseCaseTestUtil.shareFolder(network.get(0), rootB, "any");
 	}
 
 	@After
