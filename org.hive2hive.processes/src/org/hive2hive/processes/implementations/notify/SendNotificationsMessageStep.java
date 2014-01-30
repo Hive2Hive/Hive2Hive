@@ -59,7 +59,12 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			}
 
 			try {
-				sendDirect(messageFactory.createPrivateNotificationMessage(peerAddress), ownPublicKey);
+				BaseDirectMessage message = messageFactory.createPrivateNotificationMessage(peerAddress);
+				if (message == null) {
+					logger.info("Not notifying any of the own peers because the message to be sent is null");
+				} else {
+					sendDirect(message, ownPublicKey);
+				}
 			} catch (SendFailedException e) {
 				// add to the unreachable list, such that the next process can cleanup those
 				// locations

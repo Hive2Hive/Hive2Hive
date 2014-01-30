@@ -38,7 +38,7 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 		}
 
 		logger.debug(String.format("Executing a '%s' user profile task. user id = '%s'", userProfileTask
-				.getClass().getName(), userId));
+				.getClass().getSimpleName(), userId));
 		// give the network manager reference to be able to run
 		userProfileTask.setNetworkManager(networkManager);
 		// run the user profile task in own thread

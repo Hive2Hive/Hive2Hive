@@ -43,11 +43,10 @@ public class PrepareNotificationsStep extends ProcessStep {
 		Set<String> otherUsers = new HashSet<String>(metaFolder.getUserList());
 		otherUsers.remove(ownUserId);
 		logger.debug(String
-				.format("Sending a notification message to %s# other sharing user(s) about a newly added sharing user.",
+				.format("Sending a notification message to %s other sharing user(s) about a newly added sharing user.",
 						otherUsers.size()));
 
-		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(
-				metaFolder.getId(), context.consumeNewProtectionKeys(), context.getFriendId(), sharedNode);
+		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode);
 		context.provideMessageFactory(messageFactory);
 		context.provideUsersToNotify(otherUsers);
 	}

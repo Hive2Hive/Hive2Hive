@@ -5,6 +5,7 @@ import java.security.PublicKey;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
@@ -133,6 +134,13 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
+	public static void shareFolder(NetworkManager networkManager, File folder, String friendId)
+			throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
+		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder, friendId,
+				networkManager);
+		executeProcess(process);
+	}
+
 	// public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
 	// IGetMetaContext context = new IGetMetaContext() {
 	//
@@ -196,19 +204,6 @@ public class UseCaseTestUtil {
 	// GetLocationsStep step = new GetLocationsStep(userId, null, context);
 	// executeStep(networkManager, step);
 	// return context.getLocations();
-	// }
-
-	// public static void moveFile(NetworkManager networkManager, File source, File destination,
-	// UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
-	// networkManager.setSession(new H2HSession(EncryptionUtil
-	// .generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-	//
-	// try {
-	// MoveFileProcess process = new MoveFileProcess(networkManager, source, destination);
-	// executeProcess(process);
-	// } catch (NoSessionException e) {
-	// // never happens because session is set before
-	// }
 	// }
 
 	// public static IGetFileListProcess getDigest(NetworkManager networkManager,
