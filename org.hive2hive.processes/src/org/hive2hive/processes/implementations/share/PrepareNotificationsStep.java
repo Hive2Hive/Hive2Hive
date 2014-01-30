@@ -37,7 +37,6 @@ public class PrepareNotificationsStep extends ProcessStep {
 		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair(), context.consumeNewProtectionKeys());
 		sharedNode.setName(fileNode.getName());
 		sharedNode.getChildren().addAll(fileNode.getChildren());
-		sharedNode.setProtectionKeys(fileNode.getProtectionKeys());
 
 		// notify all users that share this folder (already shared or newly shared)
 		MetaFolder metaFolder = (MetaFolder) context.consumeMetaDocument();

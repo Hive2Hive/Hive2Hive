@@ -60,7 +60,7 @@ public class ShareFolderNotificationMessage extends BaseDirectMessage {
 			if (fileNode.isShared()) {
 				logger.error("Folder is already shared.");
 				return;
-			} else if (fileNode.hasShared()) {
+			} else if (fileNode.isSharedOrHasSharedChildren()) {
 				logger.error("Folder contains an shared folder.");
 				return;
 			}

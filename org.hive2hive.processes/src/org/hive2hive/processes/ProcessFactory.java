@@ -74,7 +74,7 @@ import org.hive2hive.processes.implementations.notify.VerifyNotificationFactoryS
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
-import org.hive2hive.processes.implementations.share.NewDomainKeyStep;
+import org.hive2hive.processes.implementations.share.NewProtectionKeyStep;
 import org.hive2hive.processes.implementations.share.PrepareNotificationsStep;
 import org.hive2hive.processes.implementations.share.UpdateMetaFolderStep;
 import org.hive2hive.processes.implementations.share.UpdateUserProfileStep;
@@ -361,7 +361,7 @@ public final class ProcessFactory {
 		ShareProcessContext context = new ShareProcessContext(folder, friendId);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new NewDomainKeyStep(context));
+		process.add(new NewProtectionKeyStep(context));
 		process.add(new File2MetaFileComponent(folder, context, context, networkManager));
 		process.add(new UpdateMetaFolderStep(context, networkManager));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));

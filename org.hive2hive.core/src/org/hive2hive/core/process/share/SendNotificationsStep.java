@@ -25,10 +25,9 @@ public class SendNotificationsStep extends ProcessStep {
 		FileTreeNode fileNode = context.getFileTreeNode();
 
 		// create a subtree containing all children
-		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair(), context.getProtectionKeys());
+		FileTreeNode sharedNode = new FileTreeNode(fileNode.getKeyPair(), fileNode.getProtectionKeys());
 		sharedNode.setName(fileNode.getName());
 		sharedNode.getChildren().addAll(fileNode.getChildren());
-		sharedNode.setProtectionKeys(fileNode.getProtectionKeys());
 
 		// notify all users that share this folder (already shared or newly shared)
 		MetaFolder metaFolder = (MetaFolder) context.getMetaDocument();
@@ -40,6 +39,9 @@ public class SendNotificationsStep extends ProcessStep {
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(
 				metaFolder.getId(), context.getProtectionKeys(), context.getFriendId(), sharedNode);
 		getProcess().sendNotification(messageFactory, otherUsers);
+
+		// done
+		getProcess().setNextStep(null);
 	}
 
 	@Override

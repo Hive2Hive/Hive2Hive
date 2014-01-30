@@ -11,16 +11,18 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 import org.hive2hive.processes.implementations.context.ShareProcessContext;
 
 /**
- * Generate a new domain key which will be used for storing the shared meta documents.
+ * Generate a new protection key which will be used for storing the shared meta documents. By default, the
+ * user uses his private protection key. This key must stay private, therefore we need to create a new
+ * protection key.
  * 
  * @author Seppi, Nico
  */
-public class NewDomainKeyStep extends ProcessStep {
+public class NewProtectionKeyStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(NewDomainKeyStep.class);
+	private final static Logger logger = H2HLoggerFactory.getLogger(NewProtectionKeyStep.class);
 	private final ShareProcessContext context;
 
-	public NewDomainKeyStep(ShareProcessContext context) {
+	public NewProtectionKeyStep(ShareProcessContext context) {
 		this.context = context;
 	}
 

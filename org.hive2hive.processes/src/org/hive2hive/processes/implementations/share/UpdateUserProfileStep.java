@@ -41,7 +41,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			if (fileNode.isShared()) {
 				cancel(new RollbackReason(this, "Folder is already shared."));
 				return;
-			} else if (fileNode.hasShared()) {
+			} else if (fileNode.isSharedOrHasSharedChildren()) {
 				cancel(new RollbackReason(this, "Folder contains an shared folder."));
 				return;
 			}

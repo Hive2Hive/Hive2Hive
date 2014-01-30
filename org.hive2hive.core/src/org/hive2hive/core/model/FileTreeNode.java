@@ -72,22 +72,21 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * 
 	 * @param keyPair
 	 */
-	public FileTreeNode(KeyPair keyPair, KeyPair domainKey) {
+	public FileTreeNode(KeyPair keyPair, KeyPair protectionKeys) {
 		this.keyPair = keyPair;
-		this.protectionKeys = domainKey;
+		this.protectionKeys = protectionKeys;
 		this.isFolder = true;
 		this.parent = null;
 		children = new HashSet<FileTreeNode>();
 	}
 
 	/**
-	 * Walks recursively through the file tree to build, sort and return the digest.
+	 * Walks recursively through the file tree to build, sort and return the whole file list.
 	 * 
 	 * @param node The root node from which the digest is started.
 	 * @return The digest in sorted order.
 	 */
-	public static List<Path> getDigest(FileTreeNode node) {
-
+	public static List<Path> getFileList(FileTreeNode node) {
 		List<Path> digest = new ArrayList<Path>();
 
 		// add self
@@ -95,7 +94,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 
 		// add children
 		for (FileTreeNode child : node.getChildren()) {
-			digest.addAll(getDigest(child));
+			digest.addAll(getFileList(child));
 		}
 
 		// sort by full path
@@ -194,21 +193,44 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	}
 
 	public boolean isShared() {
-		return isShared;
+		return isShared || parent.isShared;
 	}
 
-	public void setIsShared(boolean isShared) {
+	/**
+	 * Returns the folder that is shared (can be this node or a parent / grand-parent / ... of this node
+	 * 
+	 * @return
+	 */
+	public FileTreeNode getSharedTopFolder() {
+		if (isShared) {
+			return this;
+		} else {
+			if (isRoot()) {
+				return null;
+			} else {
+				return parent.getSharedTopFolder();
+			}
+		}
+	}
+
+	/**
+	 * Sets the share flag. Note that this flag must only be set to the top shared node.
+	 */
+	public void setIsShared(boolean isShared) throws IllegalStateException {
 		if (isRoot() && isShared)
 			throw new IllegalStateException("Root node can't be shared.");
+		if (!isFolder())
+			throw new IllegalStateException("Cannot set a shared flag to a file");
+
 		this.isShared = isShared;
 		for (FileTreeNode child : children)
 			child.setIsShared(isShared);
 	}
 
-	public boolean hasShared() {
+	public boolean isSharedOrHasSharedChildren() {
 		boolean shared = isShared;
 		for (FileTreeNode child : children)
-			shared |= child.hasShared();
+			shared |= child.isSharedOrHasSharedChildren();
 		return shared;
 	}
 
