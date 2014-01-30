@@ -70,6 +70,7 @@ public class GetUserProfileTaskStep extends ProcessStep {
 			} catch (Exception e) {
 				logger.error(String.format(
 						"Cannot decrypt the user profile task. reason = '%s' user id = '%s'", e, userId));
+				e.printStackTrace();
 				context.setEncryptedUserProfileTask(null);
 				context.setUserProfileTask(null);
 			}

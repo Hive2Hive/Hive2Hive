@@ -3,14 +3,18 @@ package org.hive2hive.processes.test.implementations.share;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.files.NewFileTest;
 import org.hive2hive.processes.test.util.UseCaseTestUtil;
@@ -21,12 +25,19 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * Test the share function. A folder can be shared among multiple users.
+ * 
+ * @author Nico
+ * 
+ */
+// TODO Test share with more than 1 user
 public class ShareFolderTest extends H2HJUnitTest {
 
+	private static final IFileConfiguration config = new TestFileConfiguration();
 	private static final int networkSize = 3;
-	private static final String FOLDER_NAME = "folder1";
+	private static List<NetworkManager> network;
 
-	private List<NetworkManager> network;
 	private File rootA;
 	private File rootB;
 	private UserCredentials userA;
@@ -36,17 +47,16 @@ public class ShareFolderTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = NewFileTest.class;
 		beforeClass();
+
+		network = NetworkTestUtil.createNetwork(networkSize);
 	}
 
 	/**
-	 * Setup two users with each one client, log them in and add a file at client 1
+	 * Setup two users with each one client, log them in
 	 */
 	@Before
 	public void setup() throws NoSessionException {
-		network = NetworkTestUtil.createNetwork(networkSize);
-
 		rootA = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
-
 		userA = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
@@ -54,22 +64,67 @@ public class ShareFolderTest extends H2HJUnitTest {
 		userB = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 
-		File folderToShare = new File(rootA, FOLDER_NAME);
-		folderToShare.mkdirs();
-
-		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
 	}
 
 	@Test
-	public void shareFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
+	public void shareEmptyFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException, InterruptedException {
-		UseCaseTestUtil.shareFolder(network.get(0), new File(rootA, FOLDER_NAME), userB.getUserId());
+		// upload an empty folder
+		File folderToShare = new File(rootA, "folder1");
+		folderToShare.mkdirs();
+		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
+
+		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId());
 
 		// TODO wait for userB to process the user profile task
 		Thread.sleep(10000);
 
-		File folderAtB = new File(rootB, FOLDER_NAME);
+		File folderAtB = new File(rootB, folderToShare.getName());
 		Assert.assertTrue(folderAtB.exists());
+	}
+
+	@Test
+	public void shareFilledFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
+			GetFailedException, InterruptedException {
+		// upload an empty folder
+		File folderToShare = new File(rootA, "folder1");
+		folderToShare.mkdirs();
+		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
+
+		File file1 = FileTestUtil.createFileRandomContent(new Random().nextInt(5), folderToShare, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), file1);
+		File file2 = FileTestUtil.createFileRandomContent(new Random().nextInt(5), folderToShare, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), file2);
+		File file3 = FileTestUtil.createFileRandomContent(new Random().nextInt(5), folderToShare, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), file3);
+		File subfolder = new File(folderToShare, "subfolder");
+		subfolder.mkdir();
+		UseCaseTestUtil.uploadNewFile(network.get(0), subfolder);
+
+		// share the filled folder
+		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId());
+
+		// TODO wait for userB to process the user profile task
+		Thread.sleep(20000);
+
+		// check the files and the folders at user B
+		File sharedFolderAtB = new File(rootB, folderToShare.getName());
+		Assert.assertTrue(sharedFolderAtB.exists());
+
+		File file1AtB = new File(sharedFolderAtB, file1.getName());
+		Assert.assertTrue(file1AtB.exists());
+		Assert.assertEquals(file1.length(), file1AtB.length());
+
+		File file2AtB = new File(sharedFolderAtB, file2.getName());
+		Assert.assertTrue(file2AtB.exists());
+		Assert.assertEquals(file2.length(), file2AtB.length());
+
+		File file3AtB = new File(sharedFolderAtB, file3.getName());
+		Assert.assertTrue(file3AtB.exists());
+		Assert.assertEquals(file3.length(), file3AtB.length());
+
+		File subfolderAtB = new File(sharedFolderAtB, subfolder.getName());
+		Assert.assertTrue(subfolderAtB.exists());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -86,12 +141,14 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@After
-	public void shutdown() throws IOException {
-		NetworkTestUtil.shutdownNetwork(network);
+	public void deleteRoots() throws IOException {
+		FileUtils.deleteDirectory(rootA);
+		FileUtils.deleteDirectory(rootB);
 	}
 
 	@AfterClass
 	public static void endTest() throws IOException {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 

@@ -10,7 +10,7 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 
 public class FileTestUtil {
 
-	public static File createFileRandomContent(int numOfChunks, File root, IFileConfiguration config)
+	public static File createFileRandomContent(int numOfChunks, File parent, IFileConfiguration config)
 			throws IOException {
 		// create file of size of multiple numbers of chunks
 		String random = "";
@@ -19,7 +19,7 @@ public class FileTestUtil {
 		}
 
 		String fileName = NetworkTestUtil.randomString();
-		File file = new File(root, fileName);
+		File file = new File(parent, fileName);
 		FileUtils.write(file, random);
 
 		return file;

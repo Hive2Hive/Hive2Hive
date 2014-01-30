@@ -270,4 +270,25 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		return this.getFullPath().compareTo(other.getFullPath());
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof FileTreeNode) {
+			FileTreeNode other = (FileTreeNode) obj;
+			return getFileKey().equals(other.getFileKey());
+		} else if (obj instanceof PublicKey) {
+			PublicKey publicKey = (PublicKey) obj;
+			return getFileKey().equals(publicKey);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		if (keyPair != null)
+			return keyPair.hashCode();
+		return super.hashCode();
+	}
 }
