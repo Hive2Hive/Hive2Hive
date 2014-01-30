@@ -1,6 +1,7 @@
 package org.hive2hive.processes;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.concretes.SequentialProcess;
@@ -32,6 +34,7 @@ import org.hive2hive.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.processes.implementations.context.LogoutProcessContext;
 import org.hive2hive.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.processes.implementations.context.NotifyProcessContext;
+import org.hive2hive.processes.implementations.context.RecoverFileContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.processes.implementations.context.UserProfileTaskContext;
@@ -51,6 +54,7 @@ import org.hive2hive.processes.implementations.files.move.MoveOnDiskStep;
 import org.hive2hive.processes.implementations.files.move.RelinkUserProfileStep;
 import org.hive2hive.processes.implementations.files.move.UpdateDestinationParentStep;
 import org.hive2hive.processes.implementations.files.move.UpdateSourceParentStep;
+import org.hive2hive.processes.implementations.files.recover.SelectVersionStep;
 import org.hive2hive.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.processes.implementations.files.update.DeleteChunksStep;
 import org.hive2hive.processes.implementations.files.update.UpdateMD5inUserProfileStep;
@@ -99,7 +103,7 @@ public final class ProcessFactory {
 		return new AsyncComponent(process);
 	}
 
-	public IProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
+	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) {
 
 		LoginProcessContext context = new LoginProcessContext();
@@ -200,12 +204,22 @@ public final class ProcessFactory {
 
 	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
 			throws NoSessionException {
+		return createDownloadFileProcess(fileKey, DownloadFileContext.NEWEST_VERSION_INDEX, null,
+				networkManager);
+	}
+
+	/**
+	 * Process for downloading with some extra parameters. This can for example be used to restore a file. The
+	 * version and the filename are only effective for files, not for folders.
+	 */
+	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, int versionToDownload,
+			File destination, NetworkManager networkManager) throws NoSessionException {
 		// precondition: session is existent
 		networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
 
-		DownloadFileContext context = new DownloadFileContext(fileKey);
+		DownloadFileContext context = new DownloadFileContext(fileKey, destination, versionToDownload);
 		process.add(new FindInUserProfileStep(context, networkManager));
 
 		return new AsyncComponent(process);
@@ -256,6 +270,24 @@ public final class ProcessFactory {
 		process.add(createNotificationProcess(context.getMoveNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getAddNotificationContext(), networkManager));
+
+		return new AsyncComponent(process);
+	}
+
+	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector,
+			NetworkManager networkManager) throws FileNotFoundException, IllegalArgumentException,
+			NoSessionException {
+		// do some verifications
+		if (file.isDirectory()) {
+			throw new IllegalArgumentException("A foler has only one version");
+		} else if (!file.exists()) {
+			throw new FileNotFoundException("File does not exist");
+		}
+
+		RecoverFileContext context = new RecoverFileContext(file);
+		SequentialProcess process = new SequentialProcess();
+		process.add(new File2MetaFileComponent(file, context, context, networkManager));
+		process.add(new SelectVersionStep(context, selector, networkManager));
 
 		return new AsyncComponent(process);
 	}

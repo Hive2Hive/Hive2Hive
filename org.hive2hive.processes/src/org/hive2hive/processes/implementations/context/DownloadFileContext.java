@@ -1,5 +1,6 @@
 package org.hive2hive.processes.implementations.context;
 
+import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
@@ -11,20 +12,19 @@ import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDo
 
 public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocument, IConsumeMetaDocument {
 
+	// set -1 for default
+	public static final int NEWEST_VERSION_INDEX = -1;
+
 	private final PublicKey fileKey;
-	private final String destinationFileName; // set null for default
-	private final int versionToDownload; // set -1 for default
+	private final File destination; // set null for default
+	private final int versionToDownload;
 
 	private FileTreeNode fileNode;
 	private MetaDocument metaDocument;
 
-	public DownloadFileContext(PublicKey fileKey) {
-		this(fileKey, null, -1);
-	}
-
-	public DownloadFileContext(PublicKey fileKey, String destinationFileName, int versionToDownload) {
+	public DownloadFileContext(PublicKey fileKey, File destination, int versionToDownload) {
 		this.fileKey = fileKey;
-		this.destinationFileName = destinationFileName;
+		this.destination = destination;
 		this.versionToDownload = versionToDownload;
 	}
 
@@ -59,8 +59,8 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 		return metaDocument;
 	}
 
-	public String getDestinationFileName() {
-		return destinationFileName;
+	public File getDestination() {
+		return destination;
 	}
 
 	public int getVersionToDownload() {

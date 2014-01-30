@@ -5,14 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.rpc.ObjectDataReply;
-
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -23,6 +19,7 @@ import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processes.test.util.DenyingMessageReplyHandler;
 import org.hive2hive.processes.test.util.TestProcessComponentListener;
 import org.hive2hive.processes.test.util.UseCaseTestUtil;
 import org.junit.After;
@@ -299,12 +296,5 @@ public class NotificationTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() {
 		afterClass();
-	}
-
-	private class DenyingMessageReplyHandler implements ObjectDataReply {
-		@Override
-		public Object reply(PeerAddress sender, Object request) throws Exception {
-			return AcceptanceReply.FAILURE;
-		}
 	}
 }

@@ -21,6 +21,7 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processes.test.util.DenyingMessageReplyHandler;
 import org.hive2hive.processes.test.util.TestProcessComponentListener;
 import org.hive2hive.processes.test.util.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -44,6 +45,8 @@ public class DownloadFileTest extends H2HJUnitTest {
 	private File uploadedFile;
 	private FileTreeNode fileNode;
 	private UserCredentials userCredentials;
+	private File downloaderRoot;
+	private NetworkManager downloader;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -57,32 +60,36 @@ public class DownloadFileTest extends H2HJUnitTest {
 	@Before
 	public void uploadFile() throws Exception {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		NetworkManager uploader = network.get(networkSize - 1);
+		downloader = network.get(new Random().nextInt(networkSize - 2));
 
-		// register and login
-		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		UseCaseTestUtil.registerAndLogin(userCredentials, client, root);
+		// register and login both users
+		File uploaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
+		downloaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);
+
+		// workaround that the downloader does not get notified about the newly added file (it will be done
+		// manually)
+		downloader.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// upload a file
 		String fileName = NetworkTestUtil.randomString();
-		uploadedFile = new File(root, fileName);
+		uploadedFile = new File(uploaderRoot, fileName);
 		FileUtils.write(uploadedFile, testContent);
-		UseCaseTestUtil.uploadNewFile(client, uploadedFile);
+		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 
-		UserProfile up = UseCaseTestUtil.getUserProfile(client, userCredentials);
+		UserProfile up = UseCaseTestUtil.getUserProfile(uploader, userCredentials);
 		fileNode = up.getRoot().getChildByName(fileName);
+
 	}
 
 	@Test
 	public void testDownload() throws IOException, NoSessionException, GetFailedException {
-		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		UseCaseTestUtil.login(userCredentials, client, newRoot);
-
-		UseCaseTestUtil.downloadFile(client, fileNode.getFileKey());
+		UseCaseTestUtil.downloadFile(downloader, fileNode.getFileKey());
 
 		// the downloaded file should now be on the disk
-		File downloadedFile = new File(newRoot, fileNode.getName());
+		File downloadedFile = new File(downloaderRoot, fileNode.getName());
 		Assert.assertTrue(downloadedFile.exists());
 
 		String content = FileUtils.readFileToString(downloadedFile);
@@ -92,14 +99,10 @@ public class DownloadFileTest extends H2HJUnitTest {
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
 			InvalidProcessStateException {
-		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		UseCaseTestUtil.login(userCredentials, client, newRoot);
-
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-				wrongKeys.getPublic(), client);
+				wrongKeys.getPublic(), downloader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();
@@ -108,21 +111,17 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
+	// should overwrite the existing file
 	public void testDownloadFileAlreadyExisting() throws IOException, NoSessionException, GetFailedException {
-		// should overwrite the existing file
-		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
-
 		// create the existing file
-		File existing = new File(newRoot, uploadedFile.getName());
+		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, "existing content");
 		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
 
-		UseCaseTestUtil.login(userCredentials, client, newRoot);
-		UseCaseTestUtil.downloadFile(client, fileNode.getFileKey());
+		UseCaseTestUtil.downloadFile(downloader, fileNode.getFileKey());
 
 		// the downloaded file should still be on the disk
-		File downloadedFile = new File(newRoot, fileNode.getName());
+		File downloadedFile = new File(downloaderRoot, fileNode.getName());
 		Assert.assertTrue(downloadedFile.exists());
 
 		String content = FileUtils.readFileToString(downloadedFile);
@@ -133,20 +132,16 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
+	// should NOT overwrite the existing file
 	public void testDownloadFileAlreadyExistingSameContent() throws IOException, NoSessionException,
 			InvalidProcessStateException {
-		// should not overwrite the existing file
-		File newRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
-
 		// create the existing file
-		File existing = new File(newRoot, uploadedFile.getName());
+		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, testContent);
 		long lastModifiedBefore = existing.lastModified();
 
-		UseCaseTestUtil.login(userCredentials, client, newRoot);
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-				fileNode.getFileKey(), client);
+				fileNode.getFileKey(), downloader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();

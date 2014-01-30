@@ -2,7 +2,6 @@ package org.hive2hive.processes.implementations.files.download;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 	private final DownloadFileContext context;
 	private final List<Chunk> chunkBuffer;
 	private int currentChunkOrder;
-	private Path destination;
+	private File destination;
 
 	public DownloadChunksStep(DownloadFileContext context, NetworkManager networkManager) {
 		super(networkManager);
@@ -52,43 +51,34 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		// support to download a specific version
 		int versionToDownload = context.getVersionToDownload();
 		List<KeyPair> chunkKeys = metaFile.getNewestVersion().getChunkKeys();
-		if (versionToDownload >= 0) {
+		if (versionToDownload != DownloadFileContext.NEWEST_VERSION_INDEX) {
 			chunkKeys = metaFile.getVersionByIndex(versionToDownload).getChunkKeys();
 		}
 
 		// support to store the file on another location than default (used for recover)
 		try {
-			destination = networkManager.getSession().getFileManager().getPath(context.getFileNode());
-			String fileName = context.getDestinationFileName();
-			if (fileName != null) {
-				destination = new File(destination.getParent().toFile(), fileName).toPath();
+			destination = networkManager.getSession().getFileManager().getPath(context.getFileNode())
+					.toFile();
+			if (context.getDestination() != null) {
+				destination = context.getDestination();
 			}
 		} catch (NoSessionException e) {
 			cancel(new RollbackReason(this, "No session, thus the filemanager is missing"));
 			return;
 		}
 
-		// verify before downloading
-		File existing = destination.toFile();
-		if (existing != null && existing.exists()) {
-			try {
-				if (H2HEncryptionUtil.compareMD5(existing, context.getFileNode().getMD5())) {
-					cancel(new RollbackReason(this,
-							"File already exists on disk. Content does match; no download needed"));
-					return;
-				} else {
-					logger.warn("File already exists on disk, it will be overwritten");
-				}
-			} catch (IOException e) {
-				// ignore and just downlaod the file
-			}
+		if (!verifyFile(destination)) {
+			cancel(new RollbackReason(this,
+					"File already exists on disk. Content does match; no download needed"));
+			return;
 		}
 
 		// start the download
 		int counter = 0;
 		for (KeyPair chunkKey : chunkKeys) {
 			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + chunkKeys.size());
-			NetworkContent content = get(H2HEncryptionUtil.key2String(chunkKey.getPublic()), H2HConstants.FILE_CHUNK);
+			NetworkContent content = get(H2HEncryptionUtil.key2String(chunkKey.getPublic()),
+					H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, chunkKey.getPrivate());
@@ -118,6 +108,27 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 	}
 
 	/**
+	 * @return true when ok, otherwise false
+	 * @throws InvalidProcessStateException
+	 */
+	private boolean verifyFile(File destination) throws InvalidProcessStateException {
+		// verify before downloading
+		if (destination != null && destination.exists()) {
+			try {
+				if (H2HEncryptionUtil.compareMD5(destination, context.getFileNode().getMD5())) {
+					return false;
+				} else {
+					logger.warn("File already exists on disk, it will be overwritten");
+				}
+			} catch (IOException e) {
+				// ignore and just downlaod the file
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Writes the buffered chunks to the disk (in the correct order)
 	 * 
 	 * @throws IOException
@@ -131,7 +142,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 					// append only if already written a chunk, else overwrite the possibly existent file
 					boolean append = currentChunkOrder != 0;
 
-					FileUtils.writeByteArrayToFile(destination.toFile(), chunk.getData(), append);
+					FileUtils.writeByteArrayToFile(destination, chunk.getData(), append);
 					wroteToDisk.add(chunk);
 					currentChunkOrder++;
 				}
