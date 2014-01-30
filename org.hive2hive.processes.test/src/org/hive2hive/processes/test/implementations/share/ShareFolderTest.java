@@ -65,8 +65,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@Test
 	public void shareFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException {
+			GetFailedException, InterruptedException {
 		UseCaseTestUtil.shareFolder(network.get(0), new File(rootA, FOLDER_NAME), userB.getUserId());
+
+		// TODO wait for userB to process the user profile task
+		Thread.sleep(10000);
 
 		File folderAtB = new File(rootB, FOLDER_NAME);
 		Assert.assertTrue(folderAtB.exists());

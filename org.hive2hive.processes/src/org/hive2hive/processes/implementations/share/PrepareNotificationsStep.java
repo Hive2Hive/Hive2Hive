@@ -8,7 +8,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.process.share.ShareFolderNotificationMessageFactory;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.context.ShareProcessContext;
