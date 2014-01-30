@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
@@ -36,6 +37,7 @@ import org.hive2hive.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.processes.implementations.context.NotifyProcessContext;
 import org.hive2hive.processes.implementations.context.RecoverFileContext;
 import org.hive2hive.processes.implementations.context.RegisterProcessContext;
+import org.hive2hive.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.processes.implementations.context.UserProfileTaskContext;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
@@ -72,6 +74,10 @@ import org.hive2hive.processes.implementations.notify.VerifyNotificationFactoryS
 import org.hive2hive.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.processes.implementations.register.PutUserProfileStep;
+import org.hive2hive.processes.implementations.share.NewDomainKeyStep;
+import org.hive2hive.processes.implementations.share.PrepareNotificationsStep;
+import org.hive2hive.processes.implementations.share.UpdateMetaFolderStep;
+import org.hive2hive.processes.implementations.share.UpdateUserProfileStep;
 import org.hive2hive.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 
 public final class ProcessFactory {
@@ -329,6 +335,38 @@ public final class ProcessFactory {
 		// cleanup my own locations
 		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager));
 		process.add(new RemoveUnreachableStep(context, networkManager));
+
+		return process;
+	}
+
+	public ProcessComponent createShareProcess(File folder, String friendId, NetworkManager networkManager)
+			throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
+		// verify
+		if (!folder.isDirectory())
+			throw new IllegalArgumentException("File has to be a folder.");
+		if (!folder.exists())
+			throw new IllegalFileLocation("Folder does not exist.");
+
+		H2HSession session = networkManager.getSession();
+		Path root = session.getFileManager().getRoot();
+
+		// folder must be in the given root directory
+		if (!folder.toPath().toString().startsWith(root.toString()))
+			throw new IllegalFileLocation("Folder must be in root of the H2H directory.");
+
+		// sharing root folder is not allowed
+		if (folder.toPath().toString().equals(root.toString()))
+			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
+
+		ShareProcessContext context = new ShareProcessContext(folder, friendId);
+
+		SequentialProcess process = new SequentialProcess();
+		process.add(new NewDomainKeyStep(context));
+		process.add(new File2MetaFileComponent(folder, context, context, networkManager));
+		process.add(new UpdateMetaFolderStep(context, networkManager));
+		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
+		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
+		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
 	}
