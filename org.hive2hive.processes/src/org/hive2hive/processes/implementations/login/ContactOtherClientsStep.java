@@ -10,11 +10,13 @@ import java.util.concurrent.TimeUnit;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
+import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -33,11 +35,14 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 	private boolean isUpdated = false;
 
 	private final LoginProcessContext context;
+	private final MessageManager messageManager;
 	private final NetworkManager networkManager;
 
-	public ContactOtherClientsStep(LoginProcessContext context, NetworkManager networkManager) {
+	public ContactOtherClientsStep(LoginProcessContext context, NetworkManager networkManager)
+			throws NoPeerConnectionException {
 		this.context = context;
 		this.networkManager = networkManager;
+		this.messageManager = networkManager.getMessageManager();
 	}
 
 	@Override
@@ -55,7 +60,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 					message.setCallBackHandler(this);
 
 					// TODO this is blocking, should be parallel (asynchronous)
-					boolean success = networkManager.sendDirect(message, networkManager.getPublicKey());
+					boolean success = messageManager.sendDirect(message, networkManager.getPublicKey());
 					if (!success) {
 						responses.put(address, false);
 					}

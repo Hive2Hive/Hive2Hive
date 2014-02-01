@@ -41,7 +41,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithSignatureSameUser() {
+	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException {
 		NetworkTestUtil.createSameKeyPair(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -55,7 +55,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertTrue(sender.send(message, receiver.getPublicKey()));
+		assertTrue(sender.getMessageManager().send(message, receiver.getPublicKey()));
 	}
 
 	@Test
@@ -77,11 +77,11 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertTrue(sender.send(message, receiver.getPublicKey()));
+		assertTrue(sender.getMessageManager().send(message, receiver.getPublicKey()));
 	}
 
 	@Test
-	public void testMessageWithWrongSignature1() {
+	public void testMessageWithWrongSignature1() throws NoPeerConnectionException {
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -95,7 +95,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertFalse(sender.send(message, receiver.getPublicKey()));
+		assertFalse(sender.getMessageManager().send(message, receiver.getPublicKey()));
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertFalse(sender.send(message, receiver.getPublicKey()));
+		assertFalse(sender.getMessageManager().send(message, receiver.getPublicKey()));
 	}
 
 	@After

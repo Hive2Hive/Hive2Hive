@@ -46,7 +46,7 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 
 		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(),
 				getSenderAddress(), secret);
-		Assert.assertTrue(networkManager.sendDirect(responseMessage, getSenderPublicKey()));
+		Assert.assertTrue(messageManager.sendDirect(responseMessage, getSenderPublicKey()));
 	}
 
 	@Override

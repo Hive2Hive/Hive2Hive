@@ -35,6 +35,6 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 	}
 
 	public void sendDirectResponse(ResponseMessage response) {
-		networkManager.sendDirect(response, getSenderPublicKey());
+		messageManager.sendDirect(response, getSenderPublicKey());
 	}
 }

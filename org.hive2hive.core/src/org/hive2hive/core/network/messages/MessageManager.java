@@ -10,7 +10,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
 import net.tomp2p.futures.FutureDirect;
-import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.futures.FutureSend;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
@@ -35,7 +34,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Seppi
  */
-public final class MessageManager {
+public final class MessageManager implements IMessageManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageManager.class);
 
@@ -47,22 +46,7 @@ public final class MessageManager {
 		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
 	}
 
-	/**
-	 * Send a message which gets routed to the next responsible node according the
-	 * {@link BaseMessage#getTargetKey()} key.</br>
-	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.</br></br>
-	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
-	 * listeners a {@link FutureRoutedListener} future listener gets attached to the {@link FutureDirect}
-	 * object.
-	 * 
-	 * @param message
-	 *            a message to send
-	 * @param targetPublicKey
-	 *            the public key of the receivers node to encrypt the message
-	 * @param listener
-	 *            a listener which is interested in the result of sending
-	 */
+	@Override
 	public boolean send(BaseMessage message, PublicKey targetPublicKey) {
 		if (message.getTargetKey() == null)
 			throw new IllegalArgumentException("target key cannot be null");
@@ -84,7 +68,7 @@ public final class MessageManager {
 				.setRequestP2PConfiguration(createSendingConfiguration()).start();
 
 		// attach a future listener to log, handle and notify events
-		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, networkManager);
+		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this);
 		futureSend.addListener(listener);
 		boolean success = listener.await();
 
@@ -98,20 +82,7 @@ public final class MessageManager {
 		return success;
 	}
 
-	/**
-	 * Send a message directly to a node according the {@link BaseDirectMessage#getTargetAddress()} peer
-	 * address.</br>
-	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.</br></br>
-	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
-	 * listeners a {@link FutureDirectListener} future listener gets attached to the {@link FutureResponse}
-	 * object.
-	 * 
-	 * @param message
-	 *            a direct message to send
-	 * @param targetPublicKey
-	 *            the public key of the receivers node to encrypt the message
-	 */
+	@Override
 	public boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
 		if (message.getTargetAddress() == null)
 			throw new IllegalArgumentException("target address cannot be null");
@@ -131,7 +102,7 @@ public final class MessageManager {
 		FutureDirect futureDirect = networkManager.getConnection().getPeer()
 				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
-		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, networkManager);
+		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this);
 		futureDirect.addListener(listener);
 		boolean success = listener.await();
 

@@ -8,7 +8,6 @@ import net.tomp2p.futures.FutureDirect;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
@@ -38,7 +37,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 
 	private final BaseDirectMessage message;
 	private final PublicKey receiverPublicKey;
-	private final NetworkManager networkManager;
+	private final MessageManager messageManager;
 	private final CountDownLatch latch;
 	private DeliveryState state;
 
@@ -60,10 +59,10 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 *            reference needed for re-sending)
 	 */
 	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey,
-			NetworkManager networkManager) {
+			MessageManager messageManager) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
-		this.networkManager = networkManager;
+		this.messageManager = messageManager;
 		this.latch = new CountDownLatch(1);
 	}
 
@@ -88,10 +87,10 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 				return false;
 			case RESEND_DIRECT:
 				// resend direct is recommended
-				return networkManager.sendDirect(message, receiverPublicKey);
+				return messageManager.sendDirect(message, receiverPublicKey);
 			case RESEND_ROUTED:
 				// resend (this time routed) is recommended
-				return networkManager.send(message, receiverPublicKey);
+				return messageManager.send(message, receiverPublicKey);
 			default:
 				// invalid state
 				logger.error("The sending procedure has not finished, but the lock has already been released");

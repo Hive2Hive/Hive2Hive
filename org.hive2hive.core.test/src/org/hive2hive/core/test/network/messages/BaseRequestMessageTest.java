@@ -76,7 +76,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -123,7 +123,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);

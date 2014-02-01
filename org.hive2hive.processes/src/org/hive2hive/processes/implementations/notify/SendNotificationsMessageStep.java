@@ -7,6 +7,7 @@ import java.util.Map;
 import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -22,10 +23,13 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(SendNotificationsMessageStep.class);
 	private final NotifyProcessContext context;
+	private final NetworkManager networkManager;
 
-	public SendNotificationsMessageStep(NotifyProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public SendNotificationsMessageStep(NotifyProcessContext context, NetworkManager networkManager)
+			throws NoPeerConnectionException {
+		super(networkManager.getMessageManager());
 		this.context = context;
+		this.networkManager = networkManager;
 	}
 
 	@Override

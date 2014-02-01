@@ -37,6 +37,6 @@ public abstract class DirectRequestMessage extends BaseDirectMessage implements 
 	}
 
 	public void sendDirectResponse(ResponseMessage response) {
-		networkManager.sendDirect(response, getSenderPublicKey());
+		messageManager.sendDirect(response, getSenderPublicKey());
 	}
 }

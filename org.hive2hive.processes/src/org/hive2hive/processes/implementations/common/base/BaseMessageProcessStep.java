@@ -5,8 +5,8 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.exceptions.SendFailedException;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -34,10 +34,10 @@ import org.hive2hive.processes.framework.abstracts.ProcessStep;
  */
 abstract public class BaseMessageProcessStep extends ProcessStep implements IResponseCallBackHandler {
 
-	protected final NetworkManager networkManager;
+	protected final IMessageManager messageManager;
 
-	public BaseMessageProcessStep(NetworkManager networkManager) {
-		this.networkManager = networkManager;
+	public BaseMessageProcessStep(IMessageManager messageManager) {
+		this.messageManager = messageManager;
 	}
 
 	protected void send(BaseMessage message, PublicKey receiverPublicKey) throws SendFailedException {
@@ -45,7 +45,7 @@ abstract public class BaseMessageProcessStep extends ProcessStep implements IRes
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(this);
 		}
-		boolean success = networkManager.send(message, receiverPublicKey);
+		boolean success = messageManager.send(message, receiverPublicKey);
 		if (!success) {
 			throw new SendFailedException();
 		}

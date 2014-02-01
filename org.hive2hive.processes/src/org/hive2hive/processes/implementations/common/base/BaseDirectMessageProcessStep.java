@@ -3,8 +3,8 @@ package org.hive2hive.processes.implementations.common.base;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.SendFailedException;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.BaseMessage;
+import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -31,8 +31,8 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
  */
 abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
 
-	public BaseDirectMessageProcessStep(NetworkManager networkManager) {
-		super(networkManager);
+	public BaseDirectMessageProcessStep(MessageManager messageManager) {
+		super(messageManager);
 	}
 
 	protected void sendDirect(BaseDirectMessage message, PublicKey receiverPublicKey)
@@ -42,7 +42,7 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 			requestMessage.setCallBackHandler(this);
 		}
 
-		boolean success = networkManager.sendDirect(message, receiverPublicKey);
+		boolean success = messageManager.sendDirect(message, receiverPublicKey);
 		if (!success)
 			throw new SendFailedException();
 	}

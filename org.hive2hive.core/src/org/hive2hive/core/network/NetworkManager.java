@@ -14,9 +14,7 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
-import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
 /**
  * The NetworkManager provides methods for establishing a connection to the
@@ -50,10 +48,6 @@ public class NetworkManager {
 
 	public Connection getConnection() {
 		return connection;
-	}
-
-	public MessageManager getMessageManager() {
-		return messageManager;
 	}
 
 	public PeerAddress getPeerAddress() {
@@ -170,49 +164,18 @@ public class NetworkManager {
 		logger.debug(String.format("Peer '%s' is shut down.", nodeId));
 	}
 
-	/**
-	 * Sends a given message to the peer which is responsible of the given key. </br>
-	 * For sending message directly use {@link MessageManager#sendDirect(BaseDirectMessage)} </br></br>
-	 * <b>Important:</b> This message gets encrypted with the node's public key. Use this method for direct
-	 * sending to nodes, which have the according private key.
-	 * 
-	 * @param message
-	 *            the message to send
-	 * @param targetPublicKey
-	 *            the public key of the receivers node to encrypt the message
-	 * @return success or failure
-	 */
-	public boolean send(BaseMessage message, PublicKey targetPublicKey) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return false;
-		}
-		return messageManager.send(message, targetPublicKey);
-	}
-
-	/**
-	 * Message is sent directly using TCP.</br></br>
-	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.
-	 * 
-	 * @param message
-	 *            the message to send
-	 * @param targetPublicKey
-	 *            the public key of the receivers node to encrypt the message
-	 * @return success or failure
-	 */
-	public boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return false;
-		}
-		return messageManager.sendDirect(message, targetPublicKey);
-	}
-
 	public DataManager getDataManager() throws NoPeerConnectionException {
 		if (!connection.isConnected() || dataManager == null) {
 			throw new NoPeerConnectionException();
 		}
 		return dataManager;
 	}
+
+	public MessageManager getMessageManager() throws NoPeerConnectionException {
+		if (!connection.isConnected() || messageManager == null) {
+			throw new NoPeerConnectionException();
+		}
+		return messageManager;
+	}
+
 }
