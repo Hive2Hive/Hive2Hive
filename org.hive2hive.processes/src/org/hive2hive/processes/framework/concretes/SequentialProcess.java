@@ -1,8 +1,13 @@
 package org.hive2hive.processes.framework.concretes;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.RollbackReason;
@@ -12,7 +17,7 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 
 public class SequentialProcess extends Process {
 
-	LinkedList<ProcessComponent> components = new LinkedList<ProcessComponent>();
+	List<ProcessComponent> components = new ArrayList<ProcessComponent>();
 
 	private int executionIndex = 0;
 	private int rollbackIndex = 0;
@@ -26,6 +31,7 @@ public class SequentialProcess extends Process {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
+		// execute all child components
 		while (!components.isEmpty() && executionIndex < components.size()
 				&& getState() == ProcessState.RUNNING) {
 			rollbackIndex = executionIndex;
@@ -33,6 +39,9 @@ public class SequentialProcess extends Process {
 			next.start();
 			executionIndex++;
 		}
+
+		// wait for all child components
+		waitForAll();
 	}
 
 	@Override
@@ -79,6 +88,43 @@ public class SequentialProcess extends Process {
 	@Override
 	public List<ProcessComponent> getComponents() {
 		return Collections.unmodifiableList(components);
+	}
+
+	// TODO this method could also be implemented as decorator if necessary
+	private void waitForAll() {
+		if (getState() == ProcessState.RUNNING) {
+	
+			// if all child sync, then already completed
+			if (checkIfAllFinished())
+				return;
+	
+			// wait for async components
+			final CountDownLatch latch = new CountDownLatch(1);
+			ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+			ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					if (checkIfAllFinished() || getState() != ProcessState.RUNNING) {
+						latch.countDown();
+					}
+				}
+			}, 500, 500, TimeUnit.MILLISECONDS);
+			
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			handle.cancel(true);
+		}
+	}
+
+	private boolean checkIfAllFinished() {
+		for (ProcessComponent component : components) {
+			if (component.getState() != ProcessState.SUCCEEDED && component.getState() != ProcessState.FAILED)
+				return false;
+		}
+		return true;
 	}
 
 }

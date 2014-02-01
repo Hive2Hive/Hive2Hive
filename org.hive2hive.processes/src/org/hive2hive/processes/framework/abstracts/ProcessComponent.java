@@ -46,12 +46,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 		doExecute();
 
-		// TODO set leafs to succeeded when composite succeeded
-		// TODO wait for all async components
-		if (state == ProcessState.RUNNING && parent == null) {
-			state = ProcessState.SUCCEEDED;
-			notifySucceeded();
-		}
+		succeed();
 	}
 
 	@Override
@@ -79,9 +74,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public final void cancel(RollbackReason reason) throws InvalidProcessStateException {
-		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(), reason.getMessage()));
-		
-		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED) {
+		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(),
+				reason.getMessage()));
+
+		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED && state != ProcessState.SUCCEEDED) {
 			throw new InvalidProcessStateException(state);
 		}
 
@@ -98,11 +94,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			doRollback(reason);
 		}
 
-		// TODO set leafs to failed when composite failed
-		if (state == ProcessState.ROLLBACKING && parent == null) {
-			state = ProcessState.FAILED;
-			notifyFailed();
-		}
+		fail();
 	}
 
 	@Override
@@ -117,6 +109,20 @@ public abstract class ProcessComponent implements IProcessComponent {
 	protected abstract void doResumeRollback();
 
 	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
+
+	protected void succeed() {
+		if (state == ProcessState.RUNNING) {
+			state = ProcessState.SUCCEEDED;
+			notifySucceeded();
+		}
+	}
+
+	protected void fail() {
+		if (state == ProcessState.ROLLBACKING) {
+			state = ProcessState.FAILED;
+			notifyFailed();
+		}
+	}
 
 	@Override
 	public String getID() {
