@@ -50,6 +50,8 @@ import org.hive2hive.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.processes.implementations.files.add.UpdateParentMetaStep;
 import org.hive2hive.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.processes.implementations.files.delete.DeleteFileOnDiskStep;
+import org.hive2hive.processes.implementations.files.delete.DeleteFromParentMetaStep;
+import org.hive2hive.processes.implementations.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.processes.implementations.files.delete.DeleteMetaDocumentStep;
 import org.hive2hive.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.processes.implementations.files.list.GetFileListStep;
@@ -249,6 +251,8 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new DeleteChunksProcess(context, networkManager));
 		process.add(new DeleteMetaDocumentStep(context, networkManager));
+		process.add(new DeleteFromUserProfileStep(context, networkManager));
+		process.add(new DeleteFromParentMetaStep(context, networkManager));
 
 		return process;
 	}

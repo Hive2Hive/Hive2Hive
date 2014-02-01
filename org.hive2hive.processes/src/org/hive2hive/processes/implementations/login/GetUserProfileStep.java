@@ -53,6 +53,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 					| ClassNotFoundException | IOException e) {
 				cancel(new RollbackReason(this, "User profile could not be decrypted. Reason: "
 						+ e.getMessage()));
+				return;
 			}
 
 			UserProfile profile = (UserProfile) decryptedContent;

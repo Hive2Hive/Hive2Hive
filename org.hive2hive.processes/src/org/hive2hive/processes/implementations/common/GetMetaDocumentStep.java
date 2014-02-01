@@ -66,6 +66,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 					| ClassNotFoundException | IOException e) {
 				cancel(new RollbackReason(this, "Meta document could not be decrypted. Reason: "
 						+ e.getMessage()));
+				return;
 			}
 
 			MetaDocument metaDocument = (MetaDocument) decryptedContent;
