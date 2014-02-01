@@ -22,11 +22,6 @@ import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 
-/**
- * This class offers an interface for putting, getting and removing data from the network.
- * 
- * @author Seppi, Nico
- */
 public class DataManager implements IDataManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DataManager.class);
@@ -212,7 +207,6 @@ public class DataManager implements IDataManager {
 				.setVersionKey(versionKey).keyPair(protectionKey).start();
 	}
 
-	@Override
 	public DigestBuilder getDigest(Number160 locationKey) {
 		return getPeer().digest(locationKey);
 	}
