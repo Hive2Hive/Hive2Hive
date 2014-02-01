@@ -37,12 +37,12 @@ public class UpdateUserProfileStep extends ProcessStep {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 			FileTreeNode fileNode = userProfile.getFileById(context.consumeMetaDocument().getId());
 
-			// TODO this is to restrictive, what about several users sharing one single folder?
 			if (fileNode.isShared()) {
+				// TODO this is to restrictive, what about several users sharing one single folder?
 				cancel(new RollbackReason(this, "Folder is already shared."));
 				return;
 			} else if (fileNode.isSharedOrHasSharedChildren()) {
-				cancel(new RollbackReason(this, "Folder contains an shared folder."));
+				cancel(new RollbackReason(this, "Folder already contains an shared folder."));
 				return;
 			}
 
@@ -55,13 +55,12 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// upload modified profile
 			logger.debug("Updating the domain key in the user profile");
 			profileManager.readyToPut(userProfile, getID());
+
+			// set modification flag needed for roll backs
+			modified = true;
 		} catch (GetFailedException | PutFailedException e) {
 			cancel(new RollbackReason(this, e.getMessage()));
-			return;
 		}
-
-		// set modification flag needed for roll backs
-		modified = true;
 	}
 
 	@Override

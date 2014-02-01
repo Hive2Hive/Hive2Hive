@@ -127,6 +127,50 @@ public class ShareFolderTest extends H2HJUnitTest {
 		Assert.assertTrue(subfolderAtB.exists());
 	}
 
+	@Test
+	public void shareFolderFillAfterwardsTest() throws IOException, IllegalFileLocation, NoSessionException,
+			GetFailedException, InterruptedException {
+		// upload an empty folder
+		File sharedFolderAtA = new File(rootA, "folder1");
+		sharedFolderAtA.mkdirs();
+		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderAtA);
+
+		// share the empty folder
+		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId());
+
+		// TODO wait for userB to process the user profile task
+		Thread.sleep(10000);
+
+		// check the folder at user B
+		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
+		Assert.assertTrue(sharedFolderAtB.exists());
+
+		// upload a new file at A
+		File file1atA = FileTestUtil
+				.createFileRandomContent(new Random().nextInt(5), sharedFolderAtA, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), file1atA);
+
+		// TODO wait for userB to receive the file
+		Thread.sleep(10000);
+
+		// verify if user B got the file too
+		File file1AtB = new File(sharedFolderAtB, file1atA.getName());
+		Assert.assertTrue(file1AtB.exists());
+		Assert.assertEquals(file1atA.length(), file1AtB.length());
+
+		// upload a new file at B
+		File file2AtB = FileTestUtil
+				.createFileRandomContent(new Random().nextInt(5), sharedFolderAtB, config);
+		UseCaseTestUtil.uploadNewFile(network.get(1), file2AtB);
+
+		// TODO wait for userA to receive the file
+		Thread.sleep(10000);
+
+		File file2AtA = new File(sharedFolderAtA, file2AtB.getName());
+		Assert.assertTrue(file2AtA.exists());
+		Assert.assertEquals(file2AtB.length(), file2AtA.length());
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void shareFileTest() throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
 		File file = new File(rootA, NetworkTestUtil.randomString());

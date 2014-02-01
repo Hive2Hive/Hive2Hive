@@ -4,9 +4,11 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.Set;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -19,9 +21,10 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	private final File folder;
 	private final String friendId;
+	private final KeyPair newProtectionKeys;
+
 	private KeyPair protectionKeys;
 	private MetaDocument metaDocument;
-	private KeyPair newProtectionKeys;
 	private FileTreeNode fileTreeNode;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
@@ -29,6 +32,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	public ShareProcessContext(File folder, String friendId) {
 		this.folder = folder;
 		this.friendId = friendId;
+		this.newProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 	}
 
 	public File getFolder() {
@@ -41,10 +45,6 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	public KeyPair consumeNewProtectionKeys() {
 		return newProtectionKeys;
-	}
-
-	public void provideNewProtectionKeys(KeyPair newProtectionKeys) {
-		this.newProtectionKeys = newProtectionKeys;
 	}
 
 	public void setFileTreeNode(FileTreeNode fileTreeNode) {

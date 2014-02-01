@@ -25,7 +25,7 @@ import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 /**
  * This class offers an interface for putting, getting and removing data from the network.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class DataManager {
 

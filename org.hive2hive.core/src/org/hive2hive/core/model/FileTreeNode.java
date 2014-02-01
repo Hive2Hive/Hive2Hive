@@ -167,7 +167,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	}
 
 	public KeyPair getProtectionKeys() {
-		if (protectionKeys == null) {
+		if (protectionKeys == null || !isFolder()) {
 			return parent.getProtectionKeys();
 		} else {
 			return protectionKeys;
@@ -177,6 +177,9 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	public void setProtectionKeys(KeyPair protectionKeys) {
 		if (isRoot())
 			throw new IllegalStateException("Not allowed to change root's protection key.");
+		else if (!isFolder())
+			throw new IllegalStateException(
+					"Not allowed to change a file protection key. Only folders hold protection keys.");
 		this.protectionKeys = protectionKeys;
 	}
 
