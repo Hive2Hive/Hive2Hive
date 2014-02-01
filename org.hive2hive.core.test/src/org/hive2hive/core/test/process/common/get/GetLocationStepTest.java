@@ -9,6 +9,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -43,7 +44,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccess() throws InterruptedException {
+	public void testStepSuccess() throws InterruptedException, NoPeerConnectionException {
 		NetworkManager getter = network.get(0); // where the process runs
 		NetworkManager proxy = network.get(1); // where the user profile is stored
 
@@ -56,7 +57,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.ZERO;
 		Number160 cKey = Number160.createHash(H2HConstants.USER_LOCATIONS);
-		
+
 		// put the locations to the DHT
 		proxy.getDataManager().put(lKey, dKey, cKey, newLocations, null).awaitUninterruptibly();
 

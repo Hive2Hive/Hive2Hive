@@ -4,6 +4,7 @@ import java.security.KeyPair;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -34,8 +35,10 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
 		this.protectionKey = protectionKey;
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
 			throw new RemoveFailedException("Node is not connected.");
 		}
 
@@ -70,8 +73,10 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 			return;
 		}
 
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
 			logger.warn(String.format(
 					"Roll back of remove failed. No connection. location key = '%s' content key = '%s'",
 					locationKey, contentKey));

@@ -8,6 +8,7 @@ import java.util.List;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -58,7 +59,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithSignatureDifferentUser() {
+	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException {
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -98,7 +99,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithWrongSignature2() {
+	public void testMessageWithWrongSignature2() throws NoPeerConnectionException {
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);

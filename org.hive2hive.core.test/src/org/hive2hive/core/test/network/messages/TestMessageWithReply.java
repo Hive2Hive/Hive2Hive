@@ -2,6 +2,7 @@ package org.hive2hive.core.test.network.messages;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -9,6 +10,7 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.junit.Assert;
 
 /**
  * Used to test response messages and callback handlers. For further detail see
@@ -30,10 +32,15 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 	@Override
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
-		
+
 		Number160 lKey = Number160.createHash(networkManager.getNodeId());
 		Number160 cKey = Number160.createHash(contentKey);
-		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(secret), null).awaitUninterruptibly();
+		try {
+			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(secret), null)
+					.awaitUninterruptibly();
+		} catch (NoPeerConnectionException e) {
+			Assert.fail();
+		}
 
 		sendDirectResponse(createResponse(secret));
 	}
@@ -56,9 +63,15 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 			String receivedSecret = (String) responseMessage.getContent();
 			Number160 lKey = Number160.createHash(networkManager.getNodeId());
 			Number160 cKey = Number160.createHash(contentKey);
-			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(receivedSecret), null).awaitUninterruptibly();
+			try {
+				networkManager.getDataManager()
+						.put(lKey, Number160.ZERO, cKey, new H2HTestData(receivedSecret), null)
+						.awaitUninterruptibly();
+			} catch (NoPeerConnectionException e) {
+				Assert.fail();
+			}
 		}
 
 	}
-	
+
 }

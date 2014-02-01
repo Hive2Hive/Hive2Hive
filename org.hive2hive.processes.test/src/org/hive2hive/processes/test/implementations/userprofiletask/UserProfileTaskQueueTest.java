@@ -22,6 +22,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -64,7 +65,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPut() {
+	public void testPut() throws NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -85,7 +86,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	// TODO: how to test this?
 	@Ignore
 	@Test
-	public void testPutRollback() throws InvalidProcessStateException {
+	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -153,7 +154,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGetRemove() {
+	public void testPutGetRemove() throws NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);

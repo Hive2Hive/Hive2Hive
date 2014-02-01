@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
@@ -253,8 +254,10 @@ public class UserProfileManager {
 		 */
 		private void get(QueueEntry entry) {
 			logger.debug("Getting the user profile from the DHT");
-			DataManager dataManager = networkManager.getDataManager();
-			if (dataManager == null) {
+			DataManager dataManager;
+			try {
+				dataManager = networkManager.getDataManager();
+			} catch (NoPeerConnectionException e) {
 				entry.setGetError(new GetFailedException("Node is not connected to the network"));
 				return;
 			}
@@ -277,11 +280,6 @@ public class UserProfileManager {
 				logger.debug("Putting UserProfile into the DHT");
 
 				DataManager dataManager = networkManager.getDataManager();
-				if (dataManager == null) {
-					entry.setPutError(new PutFailedException("Node is not connected to the network"));
-					return;
-				}
-
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
 				boolean success = dataManager.put(credentials.getProfileLocationKey(),
@@ -292,6 +290,8 @@ public class UserProfileManager {
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
+			} catch (NoPeerConnectionException e) {
+				entry.setPutError(new PutFailedException("Node is not connected to the network"));
 			} finally {
 				entry.notifyPut();
 			}

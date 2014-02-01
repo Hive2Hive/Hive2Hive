@@ -13,6 +13,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
@@ -58,9 +59,11 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void baseDirectMessageProcessStepTestOnSuccess() throws ClassNotFoundException, IOException {
+	public void baseDirectMessageProcessStepTestOnSuccess() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -125,9 +128,11 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	/**
 	 * Sends an asynchronous message through a process step. This test checks if the process step fails
 	 * when the message gets denied at the target node (node which is responsible for the given key).
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void baseDirectMessageProcessStepTestOnFailure() {
+	public void baseDirectMessageProcessStepTestOnFailure() throws NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -192,10 +197,11 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
 	public void baseDirectMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException,
-			IOException {
+			IOException, NoPeerConnectionException {
 		// select two random nodes
 		final NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -227,8 +233,13 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
-				nodeA.getDataManager().put(lKeyA, dKey, cKey, new H2HTestData(receivedSecret), null)
-						.awaitUninterruptibly();
+				try {
+					nodeA.getDataManager().put(lKeyA, dKey, cKey, new H2HTestData(receivedSecret), null)
+							.awaitUninterruptibly();
+				} catch (NoPeerConnectionException e) {
+					Assert.fail();
+				}
+
 				// step finished go further
 				getProcess().setNextStep(null);
 			}

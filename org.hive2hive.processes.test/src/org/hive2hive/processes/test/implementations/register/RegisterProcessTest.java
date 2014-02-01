@@ -13,6 +13,7 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
@@ -62,7 +63,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 
 	@Test
 	public void testRegisterProcessSuccess() throws InvalidProcessStateException, ClassNotFoundException,
-			IOException, GetFailedException {
+			IOException, GetFailedException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 		NetworkManager otherClient = network.get(1);
 
@@ -98,7 +99,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testFailOnExistingLocations() throws InvalidProcessStateException {
+	public void testFailOnExistingLocations() throws InvalidProcessStateException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();

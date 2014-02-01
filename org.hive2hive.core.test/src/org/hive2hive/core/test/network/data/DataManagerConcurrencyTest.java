@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -102,7 +103,13 @@ public class DataManagerConcurrencyTest extends H2HJUnitTest {
 			}
 
 			// get the test data
-			NetworkContent content = getter.getDataManager().get(locationKey, contentKey);
+			NetworkContent content = null;
+			try {
+				content = getter.getDataManager().get(locationKey, contentKey);
+			} catch (NoPeerConnectionException e1) {
+				Assert.fail();
+			}
+
 			if (content == null) {
 				Assert.fail("Got null result but not expected");
 			} else {

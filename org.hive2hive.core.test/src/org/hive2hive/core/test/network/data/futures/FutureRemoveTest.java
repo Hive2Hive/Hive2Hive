@@ -12,6 +12,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -38,7 +39,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemove() {
+	public void testRemove() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -59,7 +60,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveSingleVersion() throws IOException {
+	public void testRemoveSingleVersion() throws IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -82,7 +83,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveMultipleVersions() throws IOException {
+	public void testRemoveMultipleVersions() throws IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 

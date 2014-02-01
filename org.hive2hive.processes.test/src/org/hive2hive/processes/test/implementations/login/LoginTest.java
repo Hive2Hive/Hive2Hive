@@ -11,6 +11,7 @@ import net.tomp2p.peers.Number160;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
@@ -55,7 +56,8 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testValidCredentials() throws ClassNotFoundException, IOException, NoSessionException {
+	public void testValidCredentials() throws ClassNotFoundException, IOException, NoSessionException,
+			NoPeerConnectionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
 		// login with valid credentials

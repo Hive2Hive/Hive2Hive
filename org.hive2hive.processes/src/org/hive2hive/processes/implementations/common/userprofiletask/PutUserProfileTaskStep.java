@@ -12,6 +12,7 @@ import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -62,10 +63,6 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			this.contentKey = userProfileTask.getContentKey();
 			this.protectionKey = userProfileTask.getProtectionKey();
 			DataManager dataManager = networkManager.getDataManager();
-			if (dataManager == null) {
-				cancel(new RollbackReason(this, "Node is not connected."));
-				return;
-			}
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
 			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
@@ -76,6 +73,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new PutFailedException("Meta document could not be encrypted");
+		} catch (NoPeerConnectionException e) {
+			throw new PutFailedException(e.getMessage());
 		}
 	}
 
@@ -86,8 +85,10 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
-		DataManager dataManager = networkManager.getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = networkManager.getDataManager();
+		} catch (NoPeerConnectionException e) {
 			logger.warn(String
 					.format("Roll back of user profile task put failed. No connection. user id = '%s' content key = '%s'",
 							userId, contentKey));

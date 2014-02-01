@@ -14,6 +14,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -61,7 +62,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException {
+			InterruptedException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 

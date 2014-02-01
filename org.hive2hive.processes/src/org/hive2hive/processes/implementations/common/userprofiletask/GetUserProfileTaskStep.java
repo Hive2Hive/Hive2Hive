@@ -3,6 +3,7 @@ package org.hive2hive.processes.implementations.common.userprofiletask;
 import java.security.PrivateKey;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
@@ -40,8 +41,10 @@ public class GetUserProfileTaskStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		userId = networkManager.getUserId();
 
-		DataManager dataManager = networkManager.getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = networkManager.getDataManager();
+		} catch (NoPeerConnectionException e1) {
 			cancel(new RollbackReason(this, "Node is not connected."));
 			return;
 		}

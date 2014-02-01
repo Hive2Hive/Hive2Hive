@@ -11,6 +11,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -57,9 +58,11 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithReply() throws ClassNotFoundException, IOException {
+	public void testSendingAnAsynchronousMessageWithReply() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -101,10 +104,11 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode()
-			throws ClassNotFoundException, IOException {
+			throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);

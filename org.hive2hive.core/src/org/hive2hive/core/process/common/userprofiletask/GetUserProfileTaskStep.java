@@ -3,6 +3,7 @@ package org.hive2hive.core.process.common.userprofiletask;
 import java.security.PrivateKey;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
@@ -44,9 +45,11 @@ public class GetUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
-			getProcess().stop("Node is not connected.");
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
+			getProcess().stop(e);
 			return;
 		}
 

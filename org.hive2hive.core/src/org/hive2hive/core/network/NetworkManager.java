@@ -8,6 +8,7 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -208,10 +209,9 @@ public class NetworkManager {
 		return messageManager.sendDirect(message, targetPublicKey);
 	}
 
-	public DataManager getDataManager() {
-		if (!connection.isConnected()) {
-			logger.warn("Node is not connected!");
-			return null;
+	public DataManager getDataManager() throws NoPeerConnectionException {
+		if (!connection.isConnected() || dataManager == null) {
+			throw new NoPeerConnectionException();
 		}
 		return dataManager;
 	}

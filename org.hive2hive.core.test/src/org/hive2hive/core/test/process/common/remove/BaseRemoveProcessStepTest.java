@@ -10,6 +10,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.rpc.DigestInfo;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
@@ -43,7 +44,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveProcessStepSuccess() {
+	public void testRemoveProcessStepSuccess() throws NoPeerConnectionException {
 		String locationKey = network.get(0).getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
@@ -76,7 +77,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveProcessStepRollBack() {
+	public void testRemoveProcessStepRollBack() throws NoPeerConnectionException {
 		String locationKey = network.get(0).getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO,

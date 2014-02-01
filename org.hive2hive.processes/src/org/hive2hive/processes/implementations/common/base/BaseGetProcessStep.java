@@ -2,6 +2,7 @@ package org.hive2hive.processes.implementations.common.base;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -24,13 +25,13 @@ public abstract class BaseGetProcessStep extends ProcessStep {
 	}
 
 	protected NetworkContent get(String locationKey, String contentKey) throws InvalidProcessStateException {
-		DataManager dataManager = networkManager.getDataManager();
-		if (dataManager == null) {
-			cancel(new RollbackReason(this, "Node is not connected."));
-			// TODO throw GET failed exception
-			return null;
-		} else {
+		DataManager dataManager;
+		try {
+			dataManager = networkManager.getDataManager();
 			return dataManager.get(locationKey, contentKey);
+		} catch (NoPeerConnectionException e) {
+			cancel(new RollbackReason(this, "Node is not connected."));
+			return null;
 		}
 	}
 

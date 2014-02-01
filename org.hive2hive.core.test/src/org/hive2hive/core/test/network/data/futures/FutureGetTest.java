@@ -13,6 +13,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -38,7 +39,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetNoVersion() {
+	public void testGetNoVersion() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -54,7 +55,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetNoVersionNoData() {
+	public void testGetNoVersionNoData() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
@@ -71,7 +72,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetNewestVersion() throws ClassNotFoundException, IOException {
+	public void testGetNewestVersion() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
@@ -99,7 +100,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetAVersion() throws IOException {
+	public void testGetAVersion() throws IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 		String locationKey = nodeA.getNodeId();
@@ -117,7 +118,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetAVersionNoData() {
+	public void testGetAVersionNoData() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 

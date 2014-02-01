@@ -8,6 +8,7 @@ import javax.crypto.IllegalBlockSizeException;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -42,8 +43,10 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		String userId = networkManager.getUserId();
 
-		DataManager dataManager = networkManager.getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = networkManager.getDataManager();
+		} catch (NoPeerConnectionException e) {
 			cancel(new RollbackReason(this, "Node is not connected."));
 			return;
 		}
@@ -80,8 +83,10 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		}
 
 		String userId = networkManager.getUserId();
-		DataManager dataManager = networkManager.getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = networkManager.getDataManager();
+		} catch (NoPeerConnectionException e) {
 			logger.warn(String
 					.format("Roll back of remove user profile task failed. No connection. user id = '%s' content key = '%s'",
 							userId, upTask.getContentKey()));

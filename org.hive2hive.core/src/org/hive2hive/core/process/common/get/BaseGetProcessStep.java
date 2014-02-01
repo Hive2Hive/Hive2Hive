@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.common.get;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.ProcessStep;
@@ -14,8 +15,10 @@ import org.hive2hive.core.process.ProcessStep;
 public abstract class BaseGetProcessStep extends ProcessStep {
 
 	protected NetworkContent get(String locationKey, String contentKey) {
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
 			getProcess().stop("Node is not connected.");
 			return null;
 		}

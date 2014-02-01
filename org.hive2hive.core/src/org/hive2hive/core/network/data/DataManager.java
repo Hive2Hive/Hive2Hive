@@ -27,7 +27,7 @@ import org.hive2hive.core.network.data.futures.FutureRemoveListener;
  * 
  * @author Seppi, Nico
  */
-public class DataManager {
+public class DataManager implements IDataManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DataManager.class);
 
@@ -46,6 +46,7 @@ public class DataManager {
 		return networkManager.getConnection().getPeer();
 	}
 
+	@Override
 	public boolean put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -60,6 +61,7 @@ public class DataManager {
 		return listener.await();
 	}
 
+	@Override
 	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
 			KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
@@ -100,6 +102,7 @@ public class DataManager {
 		}
 	}
 
+	@Override
 	public NetworkContent get(String locationKey, String contentKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -122,6 +125,7 @@ public class DataManager {
 		return listener.awaitAndGet();
 	}
 
+	@Override
 	public NetworkContent getUserProfileTask(String userId) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
@@ -153,6 +157,7 @@ public class DataManager {
 				.setVersionKey(versionKey).start();
 	}
 
+	@Override
 	public boolean remove(String locationKey, String contentKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -164,6 +169,7 @@ public class DataManager {
 		return listener.await();
 	}
 
+	@Override
 	public boolean remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -176,6 +182,7 @@ public class DataManager {
 		return listener.await();
 	}
 
+	@Override
 	public boolean removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
@@ -205,6 +212,7 @@ public class DataManager {
 				.setVersionKey(versionKey).keyPair(protectionKey).start();
 	}
 
+	@Override
 	public DigestBuilder getDigest(Number160 locationKey) {
 		return getPeer().digest(locationKey);
 	}
