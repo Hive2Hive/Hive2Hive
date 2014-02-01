@@ -12,6 +12,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -48,7 +49,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void setup() {
+	public void setup() throws NoPeerConnectionException {
 		super.beforeMethod();
 
 		// network
@@ -108,70 +109,70 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		assertEquals(1, listener.getResult().size());
 
 		// TODO get sure about what a digest should actually deliver and adapt asserts below
-//		// add child1 to the network
-//		File child1 = new File(root, NetworkTestUtil.randomString());
-//		FileUtils.writeStringToFile(child1, NetworkTestUtil.randomString());
-//		ProcessTestUtil.uploadNewFile(client, child1, profileManager, fileManager, fileConfig);
-//
-//		fileListProcess = ProcessFactory.instance().createFileListProcess(client);
-//		listener = new TestResultProcessComponentListener<List<Path>>();
-//		fileListProcess.attachListener(listener);
-//		fileListProcess.start();
-//
-//		waiter = new H2HWaiter(10);
-//		do {
-//			if (listener.hasFailed())
-//				Assert.fail();
-//			waiter.tickASecond();
-//		} while (!listener.hasResultArrived());
-//
-//		assertEquals(1, listener.getResult().size());
-//		assertEquals(root.toPath().relativize(child1.toPath()).toString(), listener.getResult().get(0)
-//				.toString());
-//
-//		// add dir1 to the network
-//		File dir1 = new File(root, NetworkTestUtil.randomString());
-//		dir1.mkdir();
-//		ProcessTestUtil.uploadNewFile(client, dir1, profileManager, fileManager, fileConfig);
-//
-//		// add dir1/child1 to the network
-//		File dir1Child1 = new File(dir1, NetworkTestUtil.randomString());
-//		FileUtils.writeStringToFile(dir1Child1, NetworkTestUtil.randomString());
-//		ProcessTestUtil.uploadNewFile(client, dir1Child1, profileManager, fileManager, fileConfig);
-//
-//		fileListProcess = ProcessFactory.instance().createFileListProcess(client);
-//		listener = new TestResultProcessComponentListener<List<Path>>();
-//		fileListProcess.attachListener(listener);
-//		fileListProcess.start();
-//
-//		waiter = new H2HWaiter(10);
-//		do {
-//			if (listener.hasFailed())
-//				Assert.fail();
-//			waiter.tickASecond();
-//		} while (!listener.hasResultArrived());
-//
-//		assertEquals(2, listener.getResult());
-//		assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), listener.getResult().get(1)
-//				.toString());
-//
-//		// delete child1 from the network
-//		ProcessTestUtil.deleteFile(client, child1, profileManager, fileManager, fileConfig);
-//
-//		fileListProcess = ProcessFactory.instance().createFileListProcess(client);
-//		listener = new TestResultProcessComponentListener<List<Path>>();
-//		fileListProcess.attachListener(listener);
-//		fileListProcess.start();
-//
-//		waiter = new H2HWaiter(10);
-//		do {
-//			if (listener.hasFailed())
-//				Assert.fail();
-//			waiter.tickASecond();
-//		} while (!listener.hasResultArrived());
-//
-//		assertEquals(1, listener.getResult().size());
-//		assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), listener.getResult().get(0)
-//				.toString());
+		// // add child1 to the network
+		// File child1 = new File(root, NetworkTestUtil.randomString());
+		// FileUtils.writeStringToFile(child1, NetworkTestUtil.randomString());
+		// ProcessTestUtil.uploadNewFile(client, child1, profileManager, fileManager, fileConfig);
+		//
+		// fileListProcess = ProcessFactory.instance().createFileListProcess(client);
+		// listener = new TestResultProcessComponentListener<List<Path>>();
+		// fileListProcess.attachListener(listener);
+		// fileListProcess.start();
+		//
+		// waiter = new H2HWaiter(10);
+		// do {
+		// if (listener.hasFailed())
+		// Assert.fail();
+		// waiter.tickASecond();
+		// } while (!listener.hasResultArrived());
+		//
+		// assertEquals(1, listener.getResult().size());
+		// assertEquals(root.toPath().relativize(child1.toPath()).toString(), listener.getResult().get(0)
+		// .toString());
+		//
+		// // add dir1 to the network
+		// File dir1 = new File(root, NetworkTestUtil.randomString());
+		// dir1.mkdir();
+		// ProcessTestUtil.uploadNewFile(client, dir1, profileManager, fileManager, fileConfig);
+		//
+		// // add dir1/child1 to the network
+		// File dir1Child1 = new File(dir1, NetworkTestUtil.randomString());
+		// FileUtils.writeStringToFile(dir1Child1, NetworkTestUtil.randomString());
+		// ProcessTestUtil.uploadNewFile(client, dir1Child1, profileManager, fileManager, fileConfig);
+		//
+		// fileListProcess = ProcessFactory.instance().createFileListProcess(client);
+		// listener = new TestResultProcessComponentListener<List<Path>>();
+		// fileListProcess.attachListener(listener);
+		// fileListProcess.start();
+		//
+		// waiter = new H2HWaiter(10);
+		// do {
+		// if (listener.hasFailed())
+		// Assert.fail();
+		// waiter.tickASecond();
+		// } while (!listener.hasResultArrived());
+		//
+		// assertEquals(2, listener.getResult());
+		// assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), listener.getResult().get(1)
+		// .toString());
+		//
+		// // delete child1 from the network
+		// ProcessTestUtil.deleteFile(client, child1, profileManager, fileManager, fileConfig);
+		//
+		// fileListProcess = ProcessFactory.instance().createFileListProcess(client);
+		// listener = new TestResultProcessComponentListener<List<Path>>();
+		// fileListProcess.attachListener(listener);
+		// fileListProcess.start();
+		//
+		// waiter = new H2HWaiter(10);
+		// do {
+		// if (listener.hasFailed())
+		// Assert.fail();
+		// waiter.tickASecond();
+		// } while (!listener.hasResultArrived());
+		//
+		// assertEquals(1, listener.getResult().size());
+		// assertEquals(root.toPath().relativize(dir1Child1.toPath()).toString(), listener.getResult().get(0)
+		// .toString());
 	}
 }

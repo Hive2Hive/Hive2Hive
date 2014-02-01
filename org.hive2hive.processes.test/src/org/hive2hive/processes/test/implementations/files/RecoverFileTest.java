@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.network.NetworkManager;
@@ -53,7 +54,8 @@ public class RecoverFileTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void registerAndAddFileVersions() throws IOException, IllegalFileLocation, NoSessionException {
+	public void registerAndAddFileVersions() throws IOException, IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		client = network.get(new Random().nextInt(networkSize));
 
@@ -67,13 +69,15 @@ public class RecoverFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(client, file);
 	}
 
-	private void uploadVersion(String content) throws IOException, NoSessionException {
+	private void uploadVersion(String content) throws IOException, NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException {
 		FileUtils.write(file, content);
 		UseCaseTestUtil.uploadNewVersion(client, file);
 	}
 
 	@Test
-	public void testRestoreVersion() throws IOException, NoSessionException, InvalidProcessStateException {
+	public void testRestoreVersion() throws IOException, NoSessionException, InvalidProcessStateException,
+			IllegalArgumentException, NoPeerConnectionException {
 		// add 3 new versions (total 4)
 		uploadVersion("1");
 		uploadVersion("2");

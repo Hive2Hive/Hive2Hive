@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -50,7 +51,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void setupFiles() throws IOException, IllegalFileLocation, NoSessionException {
+	public void setupFiles() throws IOException, IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkManager uploader = network.get(0);
 
@@ -92,7 +94,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testNothingChanged() throws NoSessionException, InvalidProcessStateException {
+	public void testNothingChanged() throws NoSessionException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		UseCaseTestUtil.login(userCredentials, network.get(1), root1);
 
 		// check if the size is still the same
@@ -101,7 +104,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testAdditionsDeletions() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InvalidProcessStateException {
+			GetFailedException, InvalidProcessStateException, NoPeerConnectionException {
 		/** do some modifications on client **/
 		// add a file
 		FileUtils.write(new File(root1, "added-file"), NetworkTestUtil.randomString());
@@ -142,7 +145,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testModifications() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InvalidProcessStateException {
+			GetFailedException, InvalidProcessStateException, IllegalArgumentException,
+			NoPeerConnectionException {
 		/** do some modifications on client **/
 		// modify file 1
 		File file1 = new File(root1, "file 1");

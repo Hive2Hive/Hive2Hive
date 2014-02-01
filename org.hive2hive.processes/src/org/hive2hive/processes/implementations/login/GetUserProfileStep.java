@@ -8,7 +8,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -25,8 +25,8 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	private final IProvideUserProfile context;
 
 	public GetUserProfileStep(UserCredentials credentials, IProvideUserProfile context,
-			NetworkManager networkManager) {
-		super(networkManager);
+			IDataManager dataManager) {
+		super(dataManager);
 		this.credentials = credentials;
 		this.context = context;
 	}

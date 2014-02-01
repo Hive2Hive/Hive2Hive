@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -37,9 +38,10 @@ public class FileRecursionUtil {
 	 * @param networkManager the network manager with a session
 	 * @return the root process (containing multiple async components) that manages the upload correctly
 	 * @throws NoSessionException
+	 * @throws NoPeerConnectionException
 	 */
 	public static ProcessComponent buildUploadProcess(List<Path> files, FileProcessAction action,
-			NetworkManager networkManager) throws NoSessionException {
+			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		// the sequential root process
 		SequentialProcess rootProcess = new SequentialProcess();
 
@@ -94,9 +96,10 @@ public class FileRecursionUtil {
 	 * @param networkManager the network manager with a session
 	 * @return the (async) root process component
 	 * @throws NoSessionException
+	 * @throws NoPeerConnectionException
 	 */
 	public static ProcessComponent buildDeletionProcess(List<Path> files, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoSessionException, NoPeerConnectionException {
 		// the sequential root process
 		SequentialProcess rootProcess = new SequentialProcess();
 
@@ -120,10 +123,11 @@ public class FileRecursionUtil {
 	 * @param networkManager
 	 * @return
 	 * @throws NoSessionException
+	 * @throws NoPeerConnectionException
 	 */
 	@Deprecated
 	public static ProcessComponent buildDeletionProcessFromNodelist(List<FileTreeNode> files,
-			NetworkManager networkManager) throws NoSessionException {
+			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		List<Path> filesToDelete = new ArrayList<Path>();
 		FileManager fileManager = networkManager.getSession().getFileManager();
 		for (FileTreeNode fileTreeNode : files) {

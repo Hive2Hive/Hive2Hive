@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
@@ -79,6 +80,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 		} catch (NoSessionException e) {
 			cancel(new RollbackReason(this, "No session. This exception should have been caught earlier"));
 			return;
+		} catch (NoPeerConnectionException e) {
+			cancel(new RollbackReason(this, e.getMessage()));
+			return;
 		}
 
 		if (context.getIsMaster()) {
@@ -89,7 +93,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private void synchronizeFiles(FileSynchronizer synchronizer) throws NoSessionException,
-			InvalidProcessStateException {
+			InvalidProcessStateException, NoPeerConnectionException {
 		/*
 		 * count up to 4:
 		 * - until the uploadProcessNewFiles is done

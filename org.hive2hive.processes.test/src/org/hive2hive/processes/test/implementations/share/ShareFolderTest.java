@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
@@ -53,9 +54,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	/**
 	 * Setup two users with each one client, log them in
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Before
-	public void setup() throws NoSessionException {
+	public void setup() throws NoSessionException, NoPeerConnectionException {
 		rootA = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		userA = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
@@ -68,7 +71,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@Test
 	public void shareEmptyFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InterruptedException {
+			GetFailedException, InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File folderToShare = new File(rootA, "folder1");
 		folderToShare.mkdirs();
@@ -85,7 +88,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@Test
 	public void shareFilledFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InterruptedException {
+			GetFailedException, InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File folderToShare = new File(rootA, "folder1");
 		folderToShare.mkdirs();
@@ -129,7 +132,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@Test
 	public void shareFolderFillAfterwardsTest() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InterruptedException {
+			GetFailedException, InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File sharedFolderAtA = new File(rootA, "folder1");
 		sharedFolderAtA.mkdirs();
@@ -172,14 +175,15 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void shareFileTest() throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
+	public void shareFileTest() throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
+			NoPeerConnectionException {
 		File file = new File(rootA, NetworkTestUtil.randomString());
 		UseCaseTestUtil.shareFolder(network.get(0), file, "any");
 	}
 
 	@Test(expected = IllegalFileLocation.class)
 	public void wrongFolderLocationTest() throws IllegalFileLocation, IllegalArgumentException,
-			NoSessionException {
+			NoSessionException, NoPeerConnectionException {
 		// share root of B through client A
 		UseCaseTestUtil.shareFolder(network.get(0), rootB, "any");
 	}

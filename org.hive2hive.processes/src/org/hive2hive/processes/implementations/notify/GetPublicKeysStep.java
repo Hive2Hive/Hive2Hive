@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -23,11 +24,14 @@ import org.hive2hive.processes.implementations.context.NotifyProcessContext;
 public class GetPublicKeysStep extends BaseGetProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetPublicKeysStep.class);
-	private NotifyProcessContext context;
+	private final NotifyProcessContext context;
+	private final NetworkManager networkManager;
 
-	public GetPublicKeysStep(NotifyProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public GetPublicKeysStep(NotifyProcessContext context, NetworkManager networkManager)
+			throws NoPeerConnectionException {
+		super(networkManager.getDataManager());
 		this.context = context;
+		this.networkManager = networkManager;
 	}
 
 	@Override

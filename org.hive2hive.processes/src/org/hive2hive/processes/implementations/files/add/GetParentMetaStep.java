@@ -17,7 +17,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -41,8 +41,8 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 
 	private final AddFileProcessContext context;
 
-	public GetParentMetaStep(AddFileProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public GetParentMetaStep(AddFileProcessContext context, IDataManager dataManager) {
+		super(dataManager);
 		this.context = context;
 	}
 

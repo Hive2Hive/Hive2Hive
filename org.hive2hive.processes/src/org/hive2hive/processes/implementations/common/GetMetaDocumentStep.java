@@ -15,7 +15,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -39,15 +39,14 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	private final IProvideMetaDocument metaContext;
 
 	public GetMetaDocumentStep(IConsumeKeyPair keyContext, IProvideMetaDocument metaContext,
-			NetworkManager networkManager) {
-		super(networkManager);
+			IDataManager dataManager) {
+		super(dataManager);
 		this.keyContext = keyContext;
 		this.metaContext = metaContext;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		KeyPair keyPair = keyContext.consumeKeyPair();
 		NetworkContent loadedContent = get(keyPair.getPublic(), H2HConstants.META_DOCUMENT);
 

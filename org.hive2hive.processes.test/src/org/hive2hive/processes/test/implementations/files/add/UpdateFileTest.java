@@ -10,6 +10,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -64,7 +65,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void createProfileUploadBaseFile() throws IOException, IllegalFileLocation, NoSessionException {
+	public void createProfileUploadBaseFile() throws IOException, IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkManager registrar = network.get(0);
 		uploader = network.get(1);
@@ -88,7 +90,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadNewVersion() throws IOException, GetFailedException, NoSessionException {
+	public void testUploadNewVersion() throws IOException, GetFailedException, NoSessionException,
+			NoPeerConnectionException {
 		// overwrite the content in the file
 		String newContent = NetworkTestUtil.randomString();
 		FileUtils.write(file, newContent, false);
@@ -112,7 +115,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException,
-			NoSessionException, InvalidProcessStateException {
+			NoSessionException, InvalidProcessStateException, IllegalArgumentException,
+			NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, uploader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
@@ -135,7 +139,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testNewFolderVersion() throws IllegalFileLocation, NoSessionException {
+	public void testNewFolderVersion() throws IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException {
 		// new folder version is illegal
 		File folder = new File(fileManagerUploader.getRoot().toFile(), "test-folder");
 		folder.mkdir();
@@ -148,7 +153,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanupMaxNumVersions() throws IOException, GetFailedException, NoSessionException {
+	public void testCleanupMaxNumVersions() throws IOException, GetFailedException, NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException {
 		// overwrite config
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
@@ -196,7 +202,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanupMaxSize() throws IOException, GetFailedException, NoSessionException {
+	public void testCleanupMaxSize() throws IOException, GetFailedException, NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException {
 		// overwrite config and set the currently max limit
 		final long fileSize = file.length();
 		IFileConfiguration limitingConfig = new IFileConfiguration() {

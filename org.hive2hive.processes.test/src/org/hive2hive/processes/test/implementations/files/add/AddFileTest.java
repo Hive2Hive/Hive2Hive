@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -58,7 +59,7 @@ public class AddFileTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void register() {
+	public void register() throws NoPeerConnectionException {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
@@ -71,7 +72,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException {
+			GetFailedException, NoPeerConnectionException {
 		File file = FileTestUtil.createFileRandomContent(1, root, config);
 
 		startUploadProcess(file);
@@ -80,7 +81,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException {
+			GetFailedException, NoPeerConnectionException {
 		// creates a file with length of at least 5 chunks
 		File file = FileTestUtil.createFileRandomContent(5, root, config);
 
@@ -90,7 +91,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolder() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException {
+			GetFailedException, NoPeerConnectionException {
 		File folder = new File(root, "folder1");
 		folder.mkdirs();
 
@@ -100,7 +101,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException {
+			GetFailedException, NoPeerConnectionException {
 		// create a container
 		File folder = new File(root, "folder-with-file");
 		folder.mkdirs();
@@ -114,7 +115,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException {
+			GetFailedException, NoPeerConnectionException {
 		File folder = new File(root, "folder-with-folder");
 		folder.mkdirs();
 		startUploadProcess(folder);
@@ -128,7 +129,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testUploadNoSession() throws IOException, IllegalFileLocation, NoSessionException,
-			InvalidProcessStateException {
+			InvalidProcessStateException, NoPeerConnectionException {
 		// skip the login and continue with the newfile process
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 
@@ -141,14 +142,15 @@ public class AddFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 40);
 	}
 
-	private void startUploadProcess(File toUpload) throws IllegalFileLocation, NoSessionException {
+	private void startUploadProcess(File toUpload) throws IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UseCaseTestUtil.login(userCredentials, client, root);
 		UseCaseTestUtil.uploadNewFile(client, toUpload);
 	}
 
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,
-			NoSessionException {
+			NoSessionException, NoPeerConnectionException {
 		// pick new client to test
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		UseCaseTestUtil.login(userCredentials, client, FileUtils.getTempDirectory());

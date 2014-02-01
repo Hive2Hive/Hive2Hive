@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BaseGetProcessStep;
@@ -30,8 +30,8 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetAllLocationsStep.class);
 	private final NotifyProcessContext context;
 
-	public GetAllLocationsStep(NotifyProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public GetAllLocationsStep(NotifyProcessContext context, IDataManager dataManager) {
+		super(dataManager);
 		this.context = context;
 	}
 

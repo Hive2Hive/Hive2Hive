@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
@@ -93,14 +94,16 @@ public final class ProcessFactory {
 		// singleton
 	}
 
-	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager) {
+	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
+			throws NoPeerConnectionException {
 		UserProfile profile = new UserProfile(credentials.getUserId());
 		RegisterProcessContext context = new RegisterProcessContext(profile);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, networkManager));
+		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, networkManager
+				.getDataManager()));
 		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
 		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
 		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
@@ -109,16 +112,17 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
-			NetworkManager networkManager) {
+			NetworkManager networkManager) throws NoPeerConnectionException {
 
 		LoginProcessContext context = new LoginProcessContext();
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserProfileStep(credentials, context, networkManager));
+		process.add(new GetUserProfileStep(credentials, context, networkManager.getDataManager()));
 		process.add(new SessionCreationStep(params, context, networkManager));
-		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager));
+		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager
+				.getDataManager()));
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new PutUserLocationsStep(context, context, networkManager));
 		process.add(new SynchronizeFilesStep(context, networkManager));
@@ -138,21 +142,23 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager) {
+	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager)
+			throws NoPeerConnectionException {
 
 		LogoutProcessContext context = new LogoutProcessContext(session);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, networkManager));
+		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, networkManager
+				.getDataManager()));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 
 		return process;
 	}
 
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoSessionException, NoPeerConnectionException {
 
 		Path root = networkManager.getSession().getFileManager().getRoot();
 		boolean inRoot = root.equals(file.toPath().getParent());
@@ -160,7 +166,7 @@ public final class ProcessFactory {
 		AddFileProcessContext context = new AddFileProcessContext(file, inRoot, networkManager.getSession());
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new GetParentMetaStep(context, networkManager));
+		process.add(new GetParentMetaStep(context, networkManager.getDataManager()));
 		process.add(new PutChunksStep(context, networkManager));
 		process.add(new CreateMetaDocumentStep(context));
 		process.add(new PutMetaDocumentStep(context, context, networkManager));
@@ -178,7 +184,7 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException, IllegalArgumentException {
+			throws NoSessionException, IllegalArgumentException, NoPeerConnectionException {
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
@@ -199,7 +205,7 @@ public final class ProcessFactory {
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new DeleteChunksStep(context, networkManager));
 		if (!inRoot) {
-			process.add(new GetParentMetaStep(context, networkManager));
+			process.add(new GetParentMetaStep(context, networkManager.getDataManager()));
 		}
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
@@ -231,7 +237,7 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoSessionException, NoPeerConnectionException {
 		// TODO is this process even necessary for folders?
 
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
@@ -248,7 +254,7 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoSessionException, NoPeerConnectionException {
 		// make some checks here, thus it's easier in the steps
 		FileManager fileManager = networkManager.getSession().getFileManager();
 		File root = fileManager.getRoot().toFile();
@@ -281,7 +287,7 @@ public final class ProcessFactory {
 
 	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector,
 			NetworkManager networkManager) throws FileNotFoundException, IllegalArgumentException,
-			NoSessionException {
+			NoSessionException, NoPeerConnectionException {
 		// do some verifications
 		if (file.isDirectory()) {
 			throw new IllegalArgumentException("A foler has only one version");
@@ -304,7 +310,8 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
-			final Set<String> usersToNotify, NetworkManager networkManager) {
+			final Set<String> usersToNotify, NetworkManager networkManager) throws IllegalArgumentException,
+			NoPeerConnectionException {
 		// create a context here to provide the necessary data
 		IConsumeNotificationFactory context = new IConsumeNotificationFactory() {
 
@@ -322,24 +329,26 @@ public final class ProcessFactory {
 	}
 
 	private ProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
-			NetworkManager networkManager) throws IllegalArgumentException {
+			NetworkManager networkManager) throws IllegalArgumentException, NoPeerConnectionException {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));
 		process.add(new GetPublicKeysStep(context, networkManager));
 		process.add(new PutAllUserProfileTasksStep(context, networkManager));
-		process.add(new GetAllLocationsStep(context, networkManager));
+		process.add(new GetAllLocationsStep(context, networkManager.getDataManager()));
 		process.add(new SendNotificationsMessageStep(context, networkManager));
 		// cleanup my own locations
-		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager));
+		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager
+				.getDataManager()));
 		process.add(new RemoveUnreachableStep(context, networkManager));
 
 		return process;
 	}
 
 	public ProcessComponent createShareProcess(File folder, String friendId, NetworkManager networkManager)
-			throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
+			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
+			NoPeerConnectionException {
 		// verify
 		if (!folder.isDirectory())
 			throw new IllegalArgumentException("File has to be a folder.");

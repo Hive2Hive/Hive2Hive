@@ -76,7 +76,8 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = NoSessionException.class)
-	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException {
+	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
 				NetworkTestUtil.randomString(), userCredentials.getPin());
 
@@ -84,7 +85,8 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = NoSessionException.class)
-	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException {
+	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
 				userCredentials.getPassword(), NetworkTestUtil.randomString());
 
@@ -92,7 +94,8 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = NoSessionException.class)
-	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException {
+	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(),
 				userCredentials.getPassword(), userCredentials.getPin());
 
@@ -100,7 +103,7 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials)
-			throws InvalidProcessStateException, NoSessionException {
+			throws InvalidProcessStateException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setProfileManager(new UserProfileManager(client, wrongCredentials));

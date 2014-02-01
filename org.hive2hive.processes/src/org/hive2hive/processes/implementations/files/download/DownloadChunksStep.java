@@ -15,11 +15,11 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -34,12 +34,14 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 	private final DownloadFileContext context;
 	private final List<Chunk> chunkBuffer;
+	private final FileManager fileManager;
 	private int currentChunkOrder;
 	private File destination;
 
-	public DownloadChunksStep(DownloadFileContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public DownloadChunksStep(DownloadFileContext context, IDataManager dataManager, FileManager fileManager) {
+		super(dataManager);
 		this.context = context;
+		this.fileManager = fileManager;
 		this.currentChunkOrder = 0;
 		this.chunkBuffer = new ArrayList<Chunk>();
 	}
@@ -56,15 +58,9 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		}
 
 		// support to store the file on another location than default (used for recover)
-		try {
-			destination = networkManager.getSession().getFileManager().getPath(context.getFileNode())
-					.toFile();
-			if (context.getDestination() != null) {
-				destination = context.getDestination();
-			}
-		} catch (NoSessionException e) {
-			cancel(new RollbackReason(this, "No session, thus the filemanager is missing"));
-			return;
+		destination = fileManager.getPath(context.getFileNode()).toFile();
+		if (context.getDestination() != null) {
+			destination = context.getDestination();
 		}
 
 		if (!verifyFile(destination)) {

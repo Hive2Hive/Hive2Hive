@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
@@ -70,13 +71,15 @@ public class UseCaseTestUtil {
 		}
 	}
 
-	public static void register(UserCredentials credentials, NetworkManager networkManager) {
+	public static void register(UserCredentials credentials, NetworkManager networkManager)
+			throws NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createRegisterProcess(credentials,
 				networkManager);
 		executeProcess(process);
 	}
 
-	public static void login(UserCredentials credentials, NetworkManager networkManager, File root) {
+	public static void login(UserCredentials credentials, NetworkManager networkManager, File root)
+			throws NoPeerConnectionException {
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setFileConfig(new TestFileConfiguration());
 		sessionParameters.setFileManager(new FileManager(root.toPath()));
@@ -86,7 +89,8 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
-	public static void registerAndLogin(UserCredentials credentials, NetworkManager networkManager, File root) {
+	public static void registerAndLogin(UserCredentials credentials, NetworkManager networkManager, File root)
+			throws NoPeerConnectionException {
 		register(credentials, networkManager);
 		login(credentials, networkManager, root);
 	}
@@ -102,12 +106,14 @@ public class UseCaseTestUtil {
 		executeProcess(new PutUserProfileStep(credentials, profile, networkManager));
 	}
 
-	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException {
+	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
+			NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, networkManager);
 		executeProcess(process);
 	}
 
-	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException {
+	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 		executeProcess(process);
 	}
@@ -122,20 +128,22 @@ public class UseCaseTestUtil {
 				.toFile();
 	}
 
-	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException {
+	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,
+			NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
 		executeProcess(process);
 	}
 
 	public static void moveFile(NetworkManager networkManager, File source, File destination)
-			throws NoSessionException {
+			throws NoSessionException, NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination,
 				networkManager);
 		executeProcess(process);
 	}
 
 	public static void shareFolder(NetworkManager networkManager, File folder, String friendId)
-			throws IllegalFileLocation, IllegalArgumentException, NoSessionException {
+			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
+			NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder, friendId,
 				networkManager);
 		executeProcess(process);

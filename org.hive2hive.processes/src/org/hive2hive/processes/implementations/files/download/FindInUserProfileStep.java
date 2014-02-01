@@ -2,11 +2,14 @@ package org.hive2hive.processes.implementations.files.download;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
@@ -51,8 +54,14 @@ public class FindInUserProfileStep extends ProcessStep {
 			getParent().add(new CreateFolderStep(context, networkManager));
 		} else {
 			logger.info("Initalize the process for downloading file " + fileNode.getFullPath());
-			getParent().add(new GetMetaDocumentStep(context, context, networkManager));
-			getParent().add(new DownloadChunksStep(context, networkManager));
+			try {
+				FileManager fileManager = networkManager.getSession().getFileManager();
+				IDataManager dataManager = networkManager.getDataManager();
+				getParent().add(new GetMetaDocumentStep(context, context, dataManager));
+				getParent().add(new DownloadChunksStep(context, dataManager, fileManager));
+			} catch (Hive2HiveException e) {
+				cancel(new RollbackReason(this, e.getMessage()));
+			}
 		}
 	}
 }

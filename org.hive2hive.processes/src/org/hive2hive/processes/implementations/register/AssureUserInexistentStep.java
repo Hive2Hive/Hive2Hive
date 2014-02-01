@@ -1,7 +1,7 @@
 package org.hive2hive.processes.implementations.register;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
@@ -12,8 +12,8 @@ public class AssureUserInexistentStep extends GetUserLocationsStep {
 	private final RegisterProcessContext context;
 	private final String userId;
 
-	public AssureUserInexistentStep(String userId, RegisterProcessContext context, NetworkManager networkManager) {
-		super(userId, context, networkManager);
+	public AssureUserInexistentStep(String userId, RegisterProcessContext context, IDataManager dataManager) {
+		super(userId, context, dataManager);
 		this.userId = userId;
 		this.context = context;
 	}
@@ -21,7 +21,7 @@ public class AssureUserInexistentStep extends GetUserLocationsStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		super.doExecute();
-		
+
 		if (context.consumeLocations() != null) {
 			cancel(new RollbackReason(this, "Locations already exist."));
 		} else {

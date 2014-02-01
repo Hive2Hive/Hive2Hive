@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -51,7 +52,7 @@ public class MoveFileTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void register() {
+	public void register() throws NoPeerConnectionException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// register a user
@@ -61,7 +62,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testRootToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException {
+			InterruptedException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UseCaseTestUtil.login(userCredentials, client, root);
 
@@ -96,7 +97,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDirectoryToRoot() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException {
+			InterruptedException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UseCaseTestUtil.login(userCredentials, client, root);
 
@@ -130,7 +131,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDirectoryToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException {
+			InterruptedException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UseCaseTestUtil.login(userCredentials, client, root);
 
@@ -179,7 +180,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testRename() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException {
+			InterruptedException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UseCaseTestUtil.login(userCredentials, client, root);
 
