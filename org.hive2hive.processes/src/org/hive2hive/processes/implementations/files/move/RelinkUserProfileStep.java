@@ -15,7 +15,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.process.move.MoveNotificationMessageFactory;
-import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -23,6 +22,7 @@ import org.hive2hive.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.processes.implementations.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;
 import org.hive2hive.processes.implementations.context.MoveFileProcessContext.MoveNotificationContext;
+import org.hive2hive.processes.implementations.files.add.UploadNotificationMessageFactory;
 
 public class RelinkUserProfileStep extends ProcessStep {
 
@@ -132,7 +132,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
 		destination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
-		addContext.provideMessageFactory(new UploadNotificationMessageFactory(fileKey));
+		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode
+				.getParent().getFileKey()));
 		addContext.provideUsersToNotify(destination);
 	}
 

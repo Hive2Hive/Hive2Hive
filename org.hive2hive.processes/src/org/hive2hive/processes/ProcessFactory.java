@@ -231,7 +231,6 @@ public final class ProcessFactory {
 		networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
-
 		DownloadFileContext context = new DownloadFileContext(fileKey, destination, versionToDownload);
 		process.add(new FindInUserProfileStep(context, networkManager));
 

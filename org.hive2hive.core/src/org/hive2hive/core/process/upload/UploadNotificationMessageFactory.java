@@ -8,6 +8,8 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 
+@Deprecated
+// updated in new project
 public class UploadNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final PublicKey fileKey;
