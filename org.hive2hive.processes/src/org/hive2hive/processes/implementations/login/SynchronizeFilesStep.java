@@ -165,7 +165,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		}
 
 		@Override
-		public void onFailed() {
+		public void onFailed(RollbackReason reason) {
 			latch.countDown();
 		}
 

@@ -59,18 +59,18 @@ public class SequentialProcessTest extends H2HJUnitTest {
 
 	@Test
 	public void syncFailTest() throws InvalidProcessStateException {
-	
+
 		// empty
 		SequentialProcess process = new FailingSequentialProcess();
 		process.start();
 		assertTrue(process.getState() == ProcessState.FAILED);
-	
+
 		// sync components
 		process = new SequentialProcess();
 		process.add(new FailingProcessStep());
 		process.start();
 		assertTrue(process.getState() == ProcessState.FAILED);
-	
+
 		// async components
 		process = new SequentialProcess();
 		process.add(new AsyncComponent(new BusyFailingStep()));
@@ -91,11 +91,12 @@ public class SequentialProcessTest extends H2HJUnitTest {
 
 		// sync components
 		process = new SequentialProcess();
-		process.add(new SucceedingProcessStep());
+		process.add(new BusySucceedingStep());
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
+		assertFalse(asyncProcess.getState() == ProcessState.SUCCEEDED);
 
-		TestUtil.wait(500);
+		TestUtil.wait(3500);
 		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
 
 		// async components
@@ -107,6 +108,38 @@ public class SequentialProcessTest extends H2HJUnitTest {
 
 		TestUtil.wait(3500);
 		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
+	}
+
+	@Test
+	public void asyncFailTest() throws InvalidProcessStateException {
+
+		// empty
+		SequentialProcess process = new FailingSequentialProcess();
+		AsyncComponent asyncProcess = new AsyncComponent(process);
+		asyncProcess.start();
+		
+		TestUtil.wait(500);
+		assertTrue(process.getState() == ProcessState.FAILED);
+
+		// sync components
+		process = new SequentialProcess();
+		process.add(new BusyFailingStep());
+		asyncProcess = new AsyncComponent(process);
+		asyncProcess.start();
+		assertFalse(asyncProcess.getState() == ProcessState.FAILED);
+
+		TestUtil.wait(3500);
+		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
+
+		// async components
+		process = new SequentialProcess();
+		process.add(new AsyncComponent(new BusyFailingStep()));
+		asyncProcess = new AsyncComponent(process);
+		asyncProcess.start();
+		assertFalse(asyncProcess.getState() == ProcessState.FAILED);
+
+		TestUtil.wait(3500);
+		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 	}
 
 	@Test

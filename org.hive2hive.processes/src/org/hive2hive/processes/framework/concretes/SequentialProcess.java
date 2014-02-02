@@ -35,7 +35,9 @@ public class SequentialProcess extends Process {
 		}
 
 		// wait for all child components
-		waitForAll();
+		if (getState() == ProcessState.RUNNING) {
+			waitForAll();
+		}
 	}
 
 	@Override
@@ -62,6 +64,10 @@ public class SequentialProcess extends Process {
 			rollbackIndex--;
 		}
 
+		// wait for all child components
+		if (getState() == ProcessState.ROLLBACKING) {
+			waitForAll();
+		}
 	}
 
 	@Override
@@ -86,31 +92,29 @@ public class SequentialProcess extends Process {
 
 	// TODO this method could also be implemented as decorator if necessary
 	private void waitForAll() {
-		if (getState() == ProcessState.RUNNING) {
-	
-			// if all child sync, then already completed
-			if (checkIfAllFinished())
-				return;
-	
-			// wait for async components
-			final CountDownLatch latch = new CountDownLatch(1);
-			ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
-			ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
-				@Override
-				public void run() {
-					if (checkIfAllFinished() || getState() != ProcessState.RUNNING) {
-						latch.countDown();
-					}
+
+		// if all child sync, then already completed
+		if (checkIfAllFinished())
+			return;
+
+		// wait for async components
+		final CountDownLatch latch = new CountDownLatch(1);
+		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+		ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				if (checkIfAllFinished() || getState() != ProcessState.RUNNING) {
+					latch.countDown();
 				}
-			}, 500, 500, TimeUnit.MILLISECONDS);
-			
-			try {
-				latch.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
-			handle.cancel(true);
+		}, 500, 500, TimeUnit.MILLISECONDS);
+
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+		handle.cancel(true);
 	}
 
 	private boolean checkIfAllFinished() {

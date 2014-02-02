@@ -1,5 +1,6 @@
 package org.hive2hive.processes.framework.concretes;
 
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.interfaces.IProcessComponentListener;
 
 public class ProcessComponentListener implements IProcessComponentListener {
@@ -14,7 +15,7 @@ public class ProcessComponentListener implements IProcessComponentListener {
 	}
 
 	@Override
-	public void onFailed() {
+	public void onFailed(RollbackReason reason) {
 		hasFailed = true;
 	}
 

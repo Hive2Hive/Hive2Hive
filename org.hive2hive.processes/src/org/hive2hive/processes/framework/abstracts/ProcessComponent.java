@@ -19,10 +19,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private final String id;
 	private double progress;
 	private ProcessState state;
+	private Process parent;
 
 	private boolean isRollbacking;
 
-	private Process parent;
 
 	private final List<IProcessComponentListener> listener;
 
@@ -50,7 +50,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public final void pause() throws InvalidProcessStateException {
+	public void pause() throws InvalidProcessStateException {
 		if (state != ProcessState.RUNNING && state != ProcessState.ROLLBACKING) {
 			throw new InvalidProcessStateException(state);
 		}
@@ -59,7 +59,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public final void resume() throws InvalidProcessStateException {
+	public void resume() throws InvalidProcessStateException {
 		if (state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
@@ -73,7 +73,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public final void cancel(RollbackReason reason) throws InvalidProcessStateException {
+	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
 		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(),
 				reason.getMessage()));
 
@@ -81,12 +81,12 @@ public abstract class ProcessComponent implements IProcessComponent {
 			throw new InvalidProcessStateException(state);
 		}
 
-		// inform parent (if it isn't yet)
+		// inform parent (if exists and not informed yet)
 		if (parent != null && parent.getState() != ProcessState.ROLLBACKING) {
 			getParent().cancel(reason);
 		} else {
 
-			// no parent or called from parent
+			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
 			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
 					reason.getMessage()));
@@ -94,7 +94,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			doRollback(reason);
 		}
 
-		fail();
+		fail(reason);
 	}
 
 	protected abstract void doExecute() throws InvalidProcessStateException;
@@ -114,10 +114,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 	}
 
-	protected void fail() {
+	protected void fail(RollbackReason reason) {
 		if (state == ProcessState.ROLLBACKING) {
 			state = ProcessState.FAILED;
-			notifyFailed();
+			notifyFailed(reason);
 		}
 	}
 
@@ -136,12 +136,12 @@ public abstract class ProcessComponent implements IProcessComponent {
 		return state;
 	}
 
-	public Process getParent() {
-		return parent;
-	}
-
 	public void setParent(Process parent) {
 		this.parent = parent;
+	}
+
+	public Process getParent() {
+		return parent;
 	}
 
 	public void attachListener(IProcessComponentListener listener) {
@@ -182,9 +182,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 		notifyFinished();
 	}
 
-	private void notifyFailed() {
+	private void notifyFailed(RollbackReason reason) {
 		for (IProcessComponentListener listener : this.listener) {
-			listener.onFailed();
+			listener.onFailed(reason);
 		}
 		notifyFinished();
 	}

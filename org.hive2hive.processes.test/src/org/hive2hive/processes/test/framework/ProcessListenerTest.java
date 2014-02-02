@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.test.util.TestProcessComponentListener;
 import org.junit.AfterClass;
@@ -38,7 +39,7 @@ public class ProcessListenerTest extends H2HJUnitTest {
 
 		listener.reset();
 		
-		listener.onFailed();
+		listener.onFailed(new RollbackReason(null, "Test fail."));
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
 		assertFalse(listener.hasFinished());
@@ -61,7 +62,7 @@ public class ProcessListenerTest extends H2HJUnitTest {
 		assertFalse(listener.hasFinished());
 		
 		listener.onSucceeded();
-		listener.onFailed();
+		listener.onFailed(new RollbackReason(null, "Test fail."));
 		listener.onFinished();
 		assertTrue(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
