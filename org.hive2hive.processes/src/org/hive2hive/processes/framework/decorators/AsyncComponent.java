@@ -30,12 +30,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	}
 
 	@Override
-	public void join() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
 		IProcessComponentListener componentListener = new IProcessComponentListener() {

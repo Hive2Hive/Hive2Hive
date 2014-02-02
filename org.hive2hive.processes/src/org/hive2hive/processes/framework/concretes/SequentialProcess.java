@@ -23,12 +23,6 @@ public class SequentialProcess extends Process {
 	private int rollbackIndex = 0;
 
 	@Override
-	public void join() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
 		// execute all child components

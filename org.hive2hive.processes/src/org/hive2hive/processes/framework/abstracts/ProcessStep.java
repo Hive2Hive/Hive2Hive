@@ -6,12 +6,6 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 public abstract class ProcessStep extends ProcessComponent {
 
 	@Override
-	public final void join() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected final void doPause() {
 		// TODO Auto-generated method stub
 

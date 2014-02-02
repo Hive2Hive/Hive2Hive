@@ -97,9 +97,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 		fail();
 	}
 
-	@Override
-	public abstract void join();
-
 	protected abstract void doExecute() throws InvalidProcessStateException;
 
 	protected abstract void doPause();

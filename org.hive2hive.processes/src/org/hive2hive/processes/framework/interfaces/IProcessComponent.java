@@ -4,8 +4,6 @@ import org.hive2hive.processes.framework.ProcessState;
 
 public interface IProcessComponent extends IControllable {
 
-	void join();
-
 	void attachListener(IProcessComponentListener listener);
 
 	void detachListener(IProcessComponentListener listener);

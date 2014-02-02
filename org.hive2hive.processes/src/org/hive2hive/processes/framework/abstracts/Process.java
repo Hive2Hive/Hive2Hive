@@ -29,7 +29,4 @@ public abstract class Process extends ProcessComponent {
 
 	// public abstract IProcessIterator createIterator();
 
-	@Override
-	public abstract void join();
-
 }
