@@ -9,6 +9,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -28,11 +29,14 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(RemoveUnreachableStep.class);
 
-	private NotifyProcessContext context;
+	private final NotifyProcessContext context;
+	private final NetworkManager networkManager;
 
-	public RemoveUnreachableStep(NotifyProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public RemoveUnreachableStep(NotifyProcessContext context, NetworkManager networkManager)
+			throws NoPeerConnectionException {
+		super(networkManager.getDataManager());
 		this.context = context;
+		this.networkManager = networkManager;
 	}
 
 	@Override

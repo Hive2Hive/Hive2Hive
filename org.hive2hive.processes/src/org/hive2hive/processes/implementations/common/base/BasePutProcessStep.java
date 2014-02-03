@@ -3,12 +3,10 @@ package org.hive2hive.processes.implementations.common.base;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
@@ -19,8 +17,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
 
-	protected final NetworkManager networkManager;
-
+	private final IDataManager dataManager;
 	private boolean putPerformed;
 
 	private String locationKey;
@@ -28,8 +25,8 @@ public abstract class BasePutProcessStep extends ProcessStep {
 	private KeyPair protectionKey;
 	private NetworkContent content;
 
-	public BasePutProcessStep(NetworkManager networkManager) {
-		this.networkManager = networkManager;
+	public BasePutProcessStep(IDataManager dataManager) {
+		this.dataManager = dataManager;
 	}
 
 	protected void put(PublicKey locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
@@ -44,13 +41,6 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		this.content = content;
 		this.protectionKey = protectionKey;
 
-		DataManager dataManager;
-		try {
-			dataManager = networkManager.getDataManager();
-		} catch (NoPeerConnectionException e) {
-			throw new PutFailedException(e.getMessage());
-		}
-
 		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
 		putPerformed = true;
 
@@ -63,16 +53,6 @@ public abstract class BasePutProcessStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (!putPerformed) {
 			logger.warn("Nothing to remove at rollback because nothing has been put.");
-			return;
-		}
-
-		DataManager dataManager;
-		try {
-			dataManager = networkManager.getDataManager();
-		} catch (NoPeerConnectionException e) {
-			logger.warn(String
-					.format("Rollback of put failed. No connection. location key = '%s' content key = '%s' version key = '%s'",
-							locationKey, contentKey, content.getVersionKey()));
 			return;
 		}
 

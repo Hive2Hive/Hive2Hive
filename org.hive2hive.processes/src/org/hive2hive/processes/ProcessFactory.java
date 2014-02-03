@@ -14,6 +14,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.process.recover.IVersionSelector;
@@ -99,34 +100,34 @@ public final class ProcessFactory {
 	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		UserProfile profile = new UserProfile(credentials.getUserId());
+		DataManager dataManager = networkManager.getDataManager();
 		RegisterProcessContext context = new RegisterProcessContext(profile);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, networkManager
-				.getDataManager()));
-		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, networkManager)));
-		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, networkManager)));
-		process.add(new AsyncComponent(new PutPublicKeyStep(profile, networkManager)));
+		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, dataManager));
+		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, dataManager)));
+		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, dataManager)));
+		process.add(new AsyncComponent(new PutPublicKeyStep(profile, dataManager)));
 
 		return process;
 	}
 
 	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
-
+		DataManager dataManager = networkManager.getDataManager();
 		LoginProcessContext context = new LoginProcessContext();
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserProfileStep(credentials, context, networkManager.getDataManager()));
+		process.add(new GetUserProfileStep(credentials, context, dataManager));
 		process.add(new SessionCreationStep(params, context, networkManager));
 		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager
 				.getDataManager()));
 		process.add(new ContactOtherClientsStep(context, networkManager));
-		process.add(new PutUserLocationsStep(context, context, networkManager));
+		process.add(new PutUserLocationsStep(context, context, dataManager));
 		process.add(new SynchronizeFilesStep(context, networkManager));
 
 		return process;
@@ -146,14 +147,13 @@ public final class ProcessFactory {
 
 	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager)
 			throws NoPeerConnectionException {
-
+		DataManager dataManager = networkManager.getDataManager();
 		LogoutProcessContext context = new LogoutProcessContext(session);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, networkManager
-				.getDataManager()));
+		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 
 		return process;
@@ -165,21 +165,21 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-
 		Path root = networkManager.getSession().getFileManager().getRoot();
 		boolean inRoot = root.equals(file.toPath().getParent());
 
+		DataManager dataManager = networkManager.getDataManager();
 		AddFileProcessContext context = new AddFileProcessContext(file, inRoot, networkManager.getSession());
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new GetParentMetaStep(context, networkManager.getDataManager()));
-		process.add(new PutChunksStep(context, networkManager));
+		process.add(new GetParentMetaStep(context, dataManager));
+		process.add(new PutChunksStep(context, dataManager));
 		process.add(new CreateMetaDocumentStep(context));
-		process.add(new PutMetaDocumentStep(context, context, networkManager));
+		process.add(new PutMetaDocumentStep(context, context, dataManager));
 
 		if (!inRoot) {
 			// need to update the parent if necessary
-			process.add(new UpdateParentMetaStep(context, networkManager));
+			process.add(new UpdateParentMetaStep(context, dataManager));
 		}
 
 		process.add(new AddToUserProfileStep(context));
@@ -198,14 +198,15 @@ public final class ProcessFactory {
 		Path root = networkManager.getSession().getFileManager().getRoot();
 		boolean inRoot = root.equals(file.toPath().getParent());
 
+		DataManager dataManager = networkManager.getDataManager();
 		UpdateFileProcessContext context = new UpdateFileProcessContext(file, inRoot,
 				networkManager.getSession());
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		process.add(new PutChunksStep(context, networkManager));
+		process.add(new PutChunksStep(context, dataManager));
 		process.add(new CreateNewVersionStep(context));
-		process.add(new PutMetaDocumentStep(context, context, networkManager));
+		process.add(new PutMetaDocumentStep(context, context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
@@ -250,6 +251,7 @@ public final class ProcessFactory {
 		File root = networkManager.getSession().getFileManager().getRoot().toFile();
 		boolean fileInRoot = root.equals(file.getParentFile());
 
+		DataManager dataManager = networkManager.getDataManager();
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory(), fileInRoot);
 
 		// process composition
@@ -264,7 +266,7 @@ public final class ProcessFactory {
 		if (!fileInRoot) {
 			// file is not in root, thus change the parent meta folder
 			process.add(new File2MetaFileComponent(file.getParentFile(), context, context, networkManager));
-			process.add(new DeleteFromParentMetaStep(context, networkManager));
+			process.add(new DeleteFromParentMetaStep(context, dataManager));
 		}
 
 		process.add(new org.hive2hive.processes.implementations.files.delete.PrepareNotificationStep(context,
@@ -284,18 +286,19 @@ public final class ProcessFactory {
 		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, sourceInRoot,
 				destinationInRoot, networkManager.getUserId());
 
+		DataManager dataManager = networkManager.getDataManager();
 		SequentialProcess process = new SequentialProcess();
 		process.add(new MoveOnDiskStep(context, networkManager));
 
 		if (!sourceInRoot) {
 			process.add(new File2MetaFileComponent(source.getParentFile(), context, context, networkManager));
-			process.add(new UpdateSourceParentStep(context, networkManager));
+			process.add(new UpdateSourceParentStep(context, dataManager));
 		}
 
 		if (!destinationInRoot) {
 			process.add(new File2MetaFileComponent(destination.getParentFile(), context, context,
 					networkManager));
-			process.add(new UpdateDestinationParentStep(context, networkManager));
+			process.add(new UpdateDestinationParentStep(context, dataManager));
 		}
 
 		process.add(new RelinkUserProfileStep(context, networkManager));
@@ -391,7 +394,7 @@ public final class ProcessFactory {
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new File2MetaFileComponent(folder, context, context, networkManager));
-		process.add(new UpdateMetaFolderStep(context, networkManager));
+		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
 		process.add(new PrepareNotificationsStep(context));
 		process.add(createNotificationProcess(context, networkManager));

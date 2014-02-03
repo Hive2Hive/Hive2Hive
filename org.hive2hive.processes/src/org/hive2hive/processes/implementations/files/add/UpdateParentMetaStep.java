@@ -14,7 +14,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.framework.RollbackReason;
@@ -27,8 +27,8 @@ public class UpdateParentMetaStep extends BasePutProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(UpdateParentMetaStep.class);
 	private final AddFileProcessContext context;
 
-	public UpdateParentMetaStep(AddFileProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public UpdateParentMetaStep(AddFileProcessContext context, IDataManager dataManager) {
+		super(dataManager);
 		this.context = context;
 	}
 

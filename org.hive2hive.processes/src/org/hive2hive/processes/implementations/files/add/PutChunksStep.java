@@ -20,7 +20,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -47,8 +47,8 @@ public class PutChunksStep extends BasePutProcessStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutChunksStep.class);
 	private AddFileProcessContext context;
 
-	public PutChunksStep(AddFileProcessContext context, NetworkManager networkManager) {
-		super(networkManager);
+	public PutChunksStep(AddFileProcessContext context, IDataManager dataManager) {
+		super(dataManager);
 		this.context = context;
 	}
 

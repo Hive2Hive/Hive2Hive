@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BasePutProcessStep;
@@ -18,8 +18,8 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 	private final IConsumeUserProfile profileContext;
 
 	public PutUserLocationsStep(IConsumeLocations locationsContext, IConsumeUserProfile profileContext,
-			NetworkManager networkManager) {
-		super(networkManager);
+			IDataManager dataManager) {
+		super(dataManager);
 		this.locationsContext = locationsContext;
 		this.profileContext = profileContext;
 	}

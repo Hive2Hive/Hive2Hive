@@ -20,7 +20,6 @@ import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.processes.implementations.register.PutUserProfileStep;
 import org.junit.Assert;
 
 /**
@@ -101,10 +100,10 @@ public class UseCaseTestUtil {
 		return manager.getUserProfile(UUID.randomUUID().toString(), false);
 	}
 
-	public static void putUserProfile(NetworkManager networkManager, UserProfile profile,
-			UserCredentials credentials) {
-		executeProcess(new PutUserProfileStep(credentials, profile, networkManager));
-	}
+	// public static void putUserProfile(NetworkManager networkManager, UserProfile profile,
+	// UserCredentials credentials) throws NoPeerConnectionException {
+	// executeProcess(new PutUserProfileStep(credentials, profile, networkManager.getDataManager()));
+	// }
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {

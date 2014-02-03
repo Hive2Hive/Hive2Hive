@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -23,16 +23,14 @@ public class PutUserProfileStep extends BasePutProcessStep {
 	private final UserCredentials credentials;
 	private final UserProfile userProfile;
 
-	public PutUserProfileStep(UserCredentials credentials, UserProfile userProfile,
-			NetworkManager networkManager) {
-		super(networkManager);
+	public PutUserProfileStep(UserCredentials credentials, UserProfile userProfile, IDataManager dataManager) {
+		super(dataManager);
 		this.credentials = credentials;
 		this.userProfile = userProfile;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		// encrypt user profile
 		SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);

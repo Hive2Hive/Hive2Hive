@@ -1,7 +1,7 @@
 package org.hive2hive.processes.implementations.files.delete;
 
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
@@ -13,8 +13,8 @@ public class DeleteFromParentMetaStep extends PutMetaDocumentStep {
 
 	private final DeleteFileProcessContext context;
 
-	public DeleteFromParentMetaStep(DeleteFileProcessContext context, NetworkManager networkManager) {
-		super(context, context, networkManager);
+	public DeleteFromParentMetaStep(DeleteFileProcessContext context, IDataManager dataManager) {
+		super(context, context, dataManager);
 		this.context = context;
 	}
 

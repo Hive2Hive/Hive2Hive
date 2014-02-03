@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
@@ -18,8 +18,8 @@ public class UpdateSourceParentStep extends PutMetaDocumentStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateSourceParentStep.class);
 	private final MoveFileProcessContext context;
 
-	public UpdateSourceParentStep(MoveFileProcessContext context, NetworkManager networkManager) {
-		super(context, context, networkManager);
+	public UpdateSourceParentStep(MoveFileProcessContext context, IDataManager dataManager) {
+		super(context, context, dataManager);
 		this.context = context;
 	}
 

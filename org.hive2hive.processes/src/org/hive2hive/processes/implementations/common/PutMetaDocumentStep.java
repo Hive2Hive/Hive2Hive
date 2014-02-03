@@ -16,7 +16,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.framework.RollbackReason;
@@ -39,8 +39,8 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 	private final IConsumeProtectionKeys protectionKeyContext;
 
 	public PutMetaDocumentStep(IConsumeMetaDocument metaDocumentContext,
-			IConsumeProtectionKeys protectionKeyContext, NetworkManager networkManager) {
-		super(networkManager);
+			IConsumeProtectionKeys protectionKeyContext, IDataManager dataManager) {
+		super(dataManager);
 		this.metaDocumentContext = metaDocumentContext;
 		this.protectionKeyContext = protectionKeyContext;
 	}
@@ -56,7 +56,8 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 					metaDocument.getId());
 			encrypted.setBasedOnKey(metaDocument.getVersionKey());
 			encrypted.generateVersionKey();
-			put(H2HEncryptionUtil.key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
+			put(H2HEncryptionUtil.key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted,
+					protectionKeys);
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			cancel(new RollbackReason(this, "Meta document could not be encrypted"));

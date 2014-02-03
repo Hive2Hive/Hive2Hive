@@ -5,7 +5,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.PutMetaDocumentStep;
@@ -21,8 +21,8 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateMetaFolderStep.class);
 	private final ShareProcessContext context;
 
-	public UpdateMetaFolderStep(ShareProcessContext context, NetworkManager networkManager) {
-		super(context, context, networkManager);
+	public UpdateMetaFolderStep(ShareProcessContext context, IDataManager dataManager) {
+		super(context, context, dataManager);
 		this.context = context;
 	}
 
