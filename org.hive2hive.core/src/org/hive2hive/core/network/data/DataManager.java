@@ -75,9 +75,9 @@ public class DataManager implements IDataManager {
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			NetworkContent content, KeyPair protectionKey) {
 		logger.debug(String
-				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s' protected = '%b'",
 						content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
-						content.getVersionKey()));
+						content.getVersionKey(), protectionKey != null));
 		try {
 			Data data = new Data(content);
 			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());

@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -43,16 +42,16 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			// add it to the root (by definition)
 			userProfile.getRoot().addChild(fileTree);
 			fileTree.setParent(userProfile.getRoot());
-
 			profileManager.readyToPut(userProfile, pid);
+			logger.debug("Added the newly shared folder to the own user profile");
 
 			/** 2. download the files that are now available */
-			FileSynchronizer synchronizer = new FileSynchronizer(
-					networkManager.getSession().getFileManager(), userProfile);
-			List<FileTreeNode> sharedFiles = synchronizer.getAddedRemotely();
-			ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(sharedFiles,
+			List<FileTreeNode> fileList = FileTreeNode.getFileNodeList(fileTree);
+			// the folder itself is also contained, so remove it
+			fileList.remove(fileTree);
+			ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,
 					networkManager);
-			logger.debug("Start to download " + sharedFiles.size() + " files that have been shared with me");
+			logger.debug("Start to download " + fileList.size() + " files that have been shared with me");
 			downloadProcess.start();
 		} catch (Hive2HiveException e) {
 			logger.error("Cannot execute the task", e);

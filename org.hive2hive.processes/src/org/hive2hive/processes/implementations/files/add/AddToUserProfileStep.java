@@ -80,12 +80,16 @@ public class AddToUserProfileStep extends ProcessStep {
 		parentKey = parentNode.getFileKey();
 
 		// use the file keys generated in a previous step where the meta document is stored
+		FileTreeNode newNode;
 		if (file.isDirectory()) {
-			new FileTreeNode(parentNode, metaKeyPair, file.getName());
+			newNode = new FileTreeNode(parentNode, metaKeyPair, file.getName());
 		} else {
 			byte[] md5 = EncryptionUtil.generateMD5Hash(file);
-			new FileTreeNode(parentNode, metaKeyPair, file.getName(), md5);
+			newNode = new FileTreeNode(parentNode, metaKeyPair, file.getName(), md5);
 		}
+
+		// for later usage
+		context.setNewFileTreeNode(newNode);
 	}
 
 	@Override

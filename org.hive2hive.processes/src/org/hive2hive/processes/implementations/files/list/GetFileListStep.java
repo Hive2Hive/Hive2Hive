@@ -43,7 +43,7 @@ public class GetFileListStep extends ResultProcessStep<List<Path>> {
 
 		// build the digest recursively
 		FileTreeNode root = profile.getRoot();
-		List<Path> digest = FileTreeNode.getFileList(root);
+		List<Path> digest = FileTreeNode.getFilePathList(root);
 
 		notifyResultComputed(digest);
 	}

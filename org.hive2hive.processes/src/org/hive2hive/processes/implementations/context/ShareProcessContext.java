@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.Set;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
@@ -23,7 +22,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	private final String friendId;
 	private final KeyPair newProtectionKeys;
 
-	private KeyPair protectionKeys;
+	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
 	private FileTreeNode fileTreeNode;
 	private BaseNotificationMessageFactory messageFactory;
@@ -32,7 +31,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	public ShareProcessContext(File folder, String friendId) {
 		this.folder = folder;
 		this.friendId = friendId;
-		this.newProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		this.newProtectionKeys = EncryptionUtil.generateProtectionKey();
 	}
 
 	public File getFolder() {
@@ -55,14 +54,14 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		return fileTreeNode;
 	}
 
-	/**
-	 * Note that these are the old protection keys!
-	 */
+	public KeyPair consumeOldProtectionKeys() {
+		return oldProtectionKeys;
+	}
+
 	@Override
 	public KeyPair consumeProtectionKeys() {
-		// TODO
-		// return null for the old protection keys (same as in Seppi's version). Verify that!
-		return null;
+		// returns the new protection keys to store the meta document, ...
+		return newProtectionKeys;
 	}
 
 	/**
@@ -70,7 +69,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	 */
 	@Override
 	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
+		this.oldProtectionKeys = protectionKeys;
 	}
 
 	@Override

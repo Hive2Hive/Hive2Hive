@@ -9,7 +9,6 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.common.base.BaseRemoveProcessStep;
@@ -23,8 +22,9 @@ import org.hive2hive.processes.implementations.context.UpdateFileProcessContext;
  */
 public class DeleteChunksStep extends BaseRemoveProcessStep {
 
-	// TODO this class should be merged with org.hive2hive.processes.implementations.files.delete.DeleteChunksProcess
-	
+	// TODO this class should be merged with
+	// org.hive2hive.processes.implementations.files.delete.DeleteChunksProcess
+
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteChunksStep.class);
 	private final UpdateFileProcessContext context;
 

@@ -1,6 +1,5 @@
 package org.hive2hive.processes.implementations.context;
 
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeLocations;
@@ -12,7 +11,6 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 		IConsumeLocations {
 
 	private UserProfile profile;
-	private H2HSession session;
 	private Locations locations;
 	private boolean isMaster;
 

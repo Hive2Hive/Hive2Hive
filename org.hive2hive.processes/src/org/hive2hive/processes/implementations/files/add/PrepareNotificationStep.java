@@ -1,11 +1,11 @@
 package org.hive2hive.processes.implementations.files.add;
 
+import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
 import org.hive2hive.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.implementations.context.AddFileProcessContext;
@@ -26,9 +26,13 @@ public class PrepareNotificationStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		MetaDocument metaDocument = context.consumeMetaDocument();
-		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(
-				metaDocument.getId());
+		// prepare the file tree node for sending to other users
+		FileTreeNode fileNode = context.getNewFileTreeNode();
+		PublicKey parentKey = fileNode.getParent().getFileKey();
+		fileNode.setParent(null);
+
+		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(fileNode,
+				parentKey);
 		context.provideMessageFactory(messageFactory);
 
 		if (context.isInRoot()) {
