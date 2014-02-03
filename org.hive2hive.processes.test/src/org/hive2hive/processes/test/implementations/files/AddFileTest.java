@@ -24,7 +24,6 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
@@ -162,7 +161,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 		// verify the meta document
 		KeyPair metaFileKeys = node.getKeyPair();
-		MetaDocument metaDocument = ProcessTestUtil.getMetaDocument(client, metaFileKeys);
+		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaFileKeys);
 		if (originalFile.isFile()) {
 			// get the meta file with the keys (decrypt it)
 			MetaFile metaFile = (MetaFile) metaDocument;

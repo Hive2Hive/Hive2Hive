@@ -1,6 +1,7 @@
 package org.hive2hive.processes.test.util;
 
 import java.io.File;
+import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -20,6 +22,7 @@ import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processes.implementations.common.GetMetaDocumentStep;
 import org.junit.Assert;
 
 /**
@@ -148,49 +151,13 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
-	// public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
-	// IGetMetaContext context = new IGetMetaContext() {
-	//
-	// private MetaDocument metaDocument;
-	// private HybridEncryptedContent encryptedMetaDocument;
-	// private KeyPair protectionKeys;
-	//
-	// @Override
-	// public void setMetaDocument(MetaDocument metaDocument) {
-	// this.metaDocument = metaDocument;
-	// }
-	//
-	// @Override
-	// public MetaDocument getMetaDocument() {
-	// return metaDocument;
-	// }
-	//
-	// @Override
-	// public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
-	// this.encryptedMetaDocument = encryptedMetaDocument;
-	// }
-	//
-	// @Override
-	// public HybridEncryptedContent getEncryptedMetaDocument() {
-	// return encryptedMetaDocument;
-	// }
-	//
-	// @Override
-	// public void setProtectionKeys(KeyPair protectionKeys) {
-	// this.protectionKeys = protectionKeys;
-	// }
-	//
-	// @Override
-	// public KeyPair getProtectionKeys() {
-	// return protectionKeys;
-	// }
-	//
-	// };
-	//
-	// GetMetaDocumentStep step = new GetMetaDocumentStep(keys, null, context);
-	// executeStep(networkManager, step);
-	// return context.getMetaDocument();
-	// }
+	public static MetaDocument getMetaDocument(NetworkManager networkManager, final KeyPair keys)
+			throws NoPeerConnectionException {
+		GetMetaDocumentContext context = new GetMetaDocumentContext(keys);
+		GetMetaDocumentStep step = new GetMetaDocumentStep(context, context, networkManager.getDataManager());
+		executeProcess(step);
+		return context.metaDocument;
+	}
 
 	// public static Locations getLocations(NetworkManager networkManager, String userId) {
 	// IGetLocationsContext context = new IGetLocationsContext() {

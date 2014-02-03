@@ -26,7 +26,6 @@ import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
@@ -134,7 +133,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
 
 		// verify that only one version was created
-		MetaFile metaDocument = (MetaFile) ProcessTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
+		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -197,7 +196,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
-		MetaFile metaDocument = (MetaFile) ProcessTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
+		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -247,7 +246,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
-		MetaFile metaDocument = (MetaFile) ProcessTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
+		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 

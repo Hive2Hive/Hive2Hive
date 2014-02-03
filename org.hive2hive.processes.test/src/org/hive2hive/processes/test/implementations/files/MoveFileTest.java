@@ -21,7 +21,6 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.processes.test.util.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -89,7 +88,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(folder.getName(), fileNode.getParent().getName());
 
-		MetaDocument parentMetaDocument = ProcessTestUtil.getMetaDocument(client, fileNode.getParent()
+		MetaDocument parentMetaDocument = UseCaseTestUtil.getMetaDocument(client, fileNode.getParent()
 				.getKeyPair());
 		MetaFolder parentFolder = (MetaFolder) parentMetaDocument;
 		Assert.assertEquals(1, parentFolder.getChildKeys().size());
@@ -166,13 +165,13 @@ public class MoveFileTest extends H2HJUnitTest {
 		Assert.assertEquals(destFolder.getName(), fileNode.getParent().getName());
 
 		// check that the new meta document has the file
-		MetaDocument destParentMetaDocument = ProcessTestUtil.getMetaDocument(client, fileNode.getParent()
+		MetaDocument destParentMetaDocument = UseCaseTestUtil.getMetaDocument(client, fileNode.getParent()
 				.getKeyPair());
 		MetaFolder parentFolder = (MetaFolder) destParentMetaDocument;
 		Assert.assertEquals(1, parentFolder.getChildKeys().size());
 
 		// check that the old meta document does not contain the file anymore
-		MetaDocument sourceParentMetaDocument = ProcessTestUtil.getMetaDocument(client, userProfile
+		MetaDocument sourceParentMetaDocument = UseCaseTestUtil.getMetaDocument(client, userProfile
 				.getFileByPath(sourceFolder, fileManager).getKeyPair());
 		parentFolder = (MetaFolder) sourceParentMetaDocument;
 		Assert.assertEquals(0, parentFolder.getChildKeys().size());
