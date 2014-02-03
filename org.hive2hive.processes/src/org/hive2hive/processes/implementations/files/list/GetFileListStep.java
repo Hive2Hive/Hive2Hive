@@ -45,6 +45,9 @@ public class GetFileListStep extends ResultProcessStep<List<Path>> {
 		FileTreeNode root = profile.getRoot();
 		List<Path> digest = FileTreeNode.getFilePathList(root);
 
+		// remove the root
+		digest.remove(root.getFullPath());
+
 		notifyResultComputed(digest);
 	}
 }
