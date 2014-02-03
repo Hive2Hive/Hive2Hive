@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -14,7 +15,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.ProcessManager;
 
 /**
  * Performs the necessary processes when another user did any modification on the file
@@ -44,10 +44,10 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 	private void delete() {
 		try {
 			H2HSession session = networkManager.getSession();
+			String pid = UUID.randomUUID().toString();
 
 			FileManager fileManager = session.getFileManager();
-			UserProfile userProfile = session.getProfileManager().getUserProfile(
-					ProcessManager.createRandomPseudoPID(), false);
+			UserProfile userProfile = session.getProfileManager().getUserProfile(pid, false);
 			FileTreeNode parentNode = userProfile.getFileById(parentFileKey);
 
 			if (parentNode == null) {
