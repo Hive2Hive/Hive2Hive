@@ -18,7 +18,7 @@ import org.hive2hive.processes.implementations.context.AddFileProcessContext;
  */
 public class PrepareNotificationStep extends ProcessStep {
 
-	private AddFileProcessContext context;
+	private final AddFileProcessContext context;
 
 	public PrepareNotificationStep(AddFileProcessContext context) {
 		this.context = context;

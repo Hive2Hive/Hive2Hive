@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -88,6 +89,11 @@ public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMet
 	@Override
 	public void provideMetaDocument(MetaDocument metaDocument) {
 		this.metaDocument = metaDocument;
+	}
+
+	@Override
+	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		// ignore because only used for deletion
 	}
 
 	public void setFileNodeKeys(KeyPair fileNodeKeys) {

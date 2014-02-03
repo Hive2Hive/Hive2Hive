@@ -19,7 +19,6 @@ public class DeleteMetaDocumentStep extends BaseRemoveProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		if (context.consumeMetaDocument() == null) {
 			cancel(new RollbackReason(this, "No meta document given."));
 			return;
@@ -34,7 +33,6 @@ public class DeleteMetaDocumentStep extends BaseRemoveProcessStep {
 		}
 
 		try {
-			// TODO why is the encrypted meta document needed here?
 			remove(context.consumeMetaDocument().getId(), H2HConstants.META_DOCUMENT,
 					context.getEncryptedMetaDocument(), context.consumeProtectionKeys());
 		} catch (RemoveFailedException e) {

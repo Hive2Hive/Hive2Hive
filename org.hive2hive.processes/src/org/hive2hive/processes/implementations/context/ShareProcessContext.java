@@ -8,6 +8,7 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -78,6 +79,11 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	}
 
 	@Override
+	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		// ignore because only used for deletion
+	}
+
+	@Override
 	public MetaDocument consumeMetaDocument() {
 		return metaDocument;
 	}
@@ -101,5 +107,4 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	public Set<String> consumeUsersToNotify() {
 		return users;
 	}
-
 }

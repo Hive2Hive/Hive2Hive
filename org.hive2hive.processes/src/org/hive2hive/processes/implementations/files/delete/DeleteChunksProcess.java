@@ -26,7 +26,6 @@ public class DeleteChunksProcess extends SequentialProcess {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		if (context.consumeMetaDocument() == null) {
 			cancel(new RollbackReason(this, "No meta document given."));
 			return;

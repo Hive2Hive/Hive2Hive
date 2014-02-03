@@ -239,9 +239,10 @@ public final class ProcessFactory {
 
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		// TODO is this process even necessary for folders?
+		File root = networkManager.getSession().getFileManager().getRoot().toFile();
+		boolean fileIsInRoot = root.equals(file.getParentFile());
 
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory(), fileIsInRoot);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
@@ -251,7 +252,16 @@ public final class ProcessFactory {
 		process.add(new DeleteChunksProcess(context, networkManager));
 		process.add(new DeleteMetaDocumentStep(context, networkManager));
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
-		process.add(new DeleteFromParentMetaStep(context, networkManager));
+
+		if (!fileIsInRoot) {
+			// file is not in root, thus change the parent meta folder
+			process.add(new File2MetaFileComponent(file.getParentFile(), context, context, networkManager));
+			process.add(new DeleteFromParentMetaStep(context, networkManager));
+		}
+
+		process.add(new org.hive2hive.processes.implementations.files.delete.PrepareNotificationStep(context,
+				networkManager.getUserId()));
+		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
 	}

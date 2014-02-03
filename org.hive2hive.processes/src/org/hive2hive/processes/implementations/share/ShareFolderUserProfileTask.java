@@ -48,7 +48,6 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			/** 2. download the files that are now available */
 			List<FileTreeNode> fileList = FileTreeNode.getFileNodeList(fileTree);
 			// the folder itself is also contained, so remove it
-			fileList.remove(fileTree);
 			ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,
 					networkManager);
 			logger.debug("Start to download " + fileList.size() + " files that have been shared with me");

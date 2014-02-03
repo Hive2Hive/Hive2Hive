@@ -14,7 +14,7 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 
 	private final PublicKey locationKey;
 	private final KeyPair protectionKeys;
-	
+
 	public DeleteSingleChunkStep(PublicKey locationKey, KeyPair protectionKeys, NetworkManager networkManager) {
 		super(networkManager);
 		this.locationKey = locationKey;
@@ -23,7 +23,6 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-
 		try {
 			remove(locationKey, H2HConstants.FILE_CHUNK, null, protectionKeys);
 		} catch (RemoveFailedException e) {

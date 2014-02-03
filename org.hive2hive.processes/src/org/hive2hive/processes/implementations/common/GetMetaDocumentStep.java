@@ -74,6 +74,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 			metaDocument.setBasedOnKey(loadedContent.getBasedOnKey());
 
 			metaContext.provideMetaDocument(metaDocument);
+			metaContext.provideEncryptedMetaDocument(encryptedContent);
 			logger.debug(String.format("Got and decrypted the meta document for file '%s'.",
 					metaDocument.getName()));
 		}

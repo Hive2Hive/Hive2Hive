@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDocument;
 
 public class UpdateFileProcessContext extends AddFileProcessContext implements IProvideMetaDocument {
@@ -22,6 +23,11 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 	@Override
 	public void provideMetaDocument(MetaDocument metaDocument) {
 		provideNewMetaDocument(metaDocument);
+	}
+
+	@Override
+	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		// ignore because only used for deletion
 	}
 
 	public List<KeyPair> getChunksToDelete() {

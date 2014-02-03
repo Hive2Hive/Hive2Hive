@@ -4,6 +4,7 @@ import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDocument;
@@ -42,5 +43,10 @@ public class RecoverFileContext implements IProvideMetaDocument, IConsumeMetaDoc
 	@Override
 	public void provideMetaDocument(MetaDocument metaDocument) {
 		this.metaDocument = metaDocument;
+	}
+
+	@Override
+	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		// ignore because only used for deletion
 	}
 }

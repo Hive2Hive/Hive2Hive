@@ -6,6 +6,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDocument;
@@ -47,6 +48,11 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 	@Override
 	public void provideMetaDocument(MetaDocument metaDocument) {
 		this.metaDocument = metaDocument;
+	}
+
+	@Override
+	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		// ignore because only used for deletion
 	}
 
 	@Override

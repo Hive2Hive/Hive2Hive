@@ -1,44 +1,51 @@
 package org.hive2hive.processes.implementations.context;
 
 import java.security.KeyPair;
+import java.util.Set;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.process.context.IGetParentMetaContext;
+import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.processes.implementations.context.interfaces.IProvideProtectionKeys;
 
-public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeMetaDocument, IProvideProtectionKeys, IConsumeProtectionKeys, IGetParentMetaContext {
+public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeMetaDocument,
+		IProvideProtectionKeys, IConsumeProtectionKeys, IProvideNotificationFactory,
+		IConsumeNotificationFactory {
 
-	// TODO refactor this class, interfaces
-	
 	private final boolean isDirectory;
+	private final boolean fileInRoot;
 
 	private MetaDocument metaDocument;
 	private KeyPair protectionKeys;
 	private HybridEncryptedContent encryptedMetaDocument;
-
-	private MetaFolder parentMetaFolder;
-	private KeyPair parentProtectionKeys;
-	private HybridEncryptedContent encryptedParentMetaFolder;
-
-	private boolean isInRoot;
-
+	private FileTreeNode deletedFileNode;
 	private FileTreeNode parentNode;
+	private Set<String> users;
+	private BaseNotificationMessageFactory messageFactory;
 
-	private FileTreeNode fileNode;
-	
-	public DeleteFileProcessContext(boolean isDirectory) {
+	public DeleteFileProcessContext(boolean isDirectory, boolean fileInRoot) {
 		this.isDirectory = isDirectory;
+		this.fileInRoot = fileInRoot;
 	}
-	
+
 	@Override
 	public void provideMetaDocument(MetaDocument metaDocument) {
 		this.metaDocument = metaDocument;
+	}
+
+	@Override
+	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaDocument = encryptedMetaDocument;
+	}
+
+	public HybridEncryptedContent getEncryptedMetaDocument() {
+		return encryptedMetaDocument;
 	}
 
 	@Override
@@ -56,70 +63,47 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 		return protectionKeys;
 	}
 
-	public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
-		this.encryptedMetaDocument = encryptedMetaDocument;
-	}
-
-	public HybridEncryptedContent getEncryptedMetaDocument() {
-		return encryptedMetaDocument;
-	}
-
 	public boolean isDirectory() {
 		return isDirectory;
 	}
-	
-	@Override
-	public void setParentMetaFolder(MetaFolder parentMetaFolder) {
-		this.parentMetaFolder = parentMetaFolder;
-		
+
+	public boolean isFileInRoot() {
+		return fileInRoot;
 	}
 
-	@Override
-	public MetaFolder getParentMetaFolder() {
-		return parentMetaFolder;
+	public void setDeletedNode(FileTreeNode deletedFileNode) {
+		this.deletedFileNode = deletedFileNode;
 	}
 
-	@Override
-	public void setParentProtectionKeys(KeyPair parentProtectionKeys) {
-		this.parentProtectionKeys = parentProtectionKeys;
-	}
-
-	@Override
-	public KeyPair getParentProtectionKeys() {
-		return parentProtectionKeys;
-	}
-
-	@Override
-	public void setEncryptedParentMetaFolder(HybridEncryptedContent encryptedParentMetaFolder) {
-		this.encryptedParentMetaFolder = encryptedParentMetaFolder;
-	}
-
-	@Override
-	public HybridEncryptedContent getEncryptedParentMetaFolder() {
-		return encryptedParentMetaFolder;
-	}
-
-	public void setIsInRootFile(boolean isInRoot) {
-		this.isInRoot = isInRoot;
-	}
-	
-	public boolean getIsInRootFile() {
-		return isInRoot;
-	}
-
-	public void setChildNode(FileTreeNode fileNode) {
-		this.fileNode = fileNode;
-	}
-
-	public FileTreeNode getChildNode() {
-		return fileNode;
+	public FileTreeNode getDeletedNode() {
+		return deletedFileNode;
 	}
 
 	public void setParentNode(FileTreeNode parentNode) {
 		this.parentNode = parentNode;
 	}
-	
+
 	public FileTreeNode getParentNode() {
 		return parentNode;
+	}
+
+	@Override
+	public BaseNotificationMessageFactory consumeMessageFactory() {
+		return messageFactory;
+	}
+
+	@Override
+	public Set<String> consumeUsersToNotify() {
+		return users;
+	}
+
+	@Override
+	public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
+	}
+
+	@Override
+	public void provideUsersToNotify(Set<String> users) {
+		this.users = users;
 	}
 }
