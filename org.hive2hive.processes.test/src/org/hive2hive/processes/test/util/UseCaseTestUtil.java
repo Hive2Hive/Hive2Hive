@@ -10,6 +10,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -23,6 +24,7 @@ import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.processes.implementations.common.GetMetaDocumentStep;
+import org.hive2hive.processes.implementations.common.GetUserLocationsStep;
 import org.junit.Assert;
 
 /**
@@ -159,26 +161,13 @@ public class UseCaseTestUtil {
 		return context.metaDocument;
 	}
 
-	// public static Locations getLocations(NetworkManager networkManager, String userId) {
-	// IGetLocationsContext context = new IGetLocationsContext() {
-	//
-	// private Locations locations;
-	//
-	// @Override
-	// public void setLocations(Locations locations) {
-	// this.locations = locations;
-	// }
-	//
-	// @Override
-	// public Locations getLocations() {
-	// return locations;
-	// }
-	// };
-	//
-	// GetLocationsStep step = new GetLocationsStep(userId, null, context);
-	// executeStep(networkManager, step);
-	// return context.getLocations();
-	// }
+	public static Locations getLocations(NetworkManager networkManager, String userId)
+			throws NoPeerConnectionException {
+		GetUserLocationsContext context = new GetUserLocationsContext();
+		GetUserLocationsStep step = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
+		executeProcess(step);
+		return context.locations;
+	}
 
 	// public static IGetFileListProcess getDigest(NetworkManager networkManager,
 	// UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {

@@ -15,7 +15,6 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
 import org.hive2hive.processes.ProcessFactory;
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
@@ -304,7 +303,7 @@ public class NotificationTest extends H2HJUnitTest {
 		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
 
 		// check the locations map; should have 2 entries only
-		Locations locations = ProcessTestUtil.getLocations(network.get(0), userACredentials.getUserId());
+		Locations locations = UseCaseTestUtil.getLocations(network.get(0), userACredentials.getUserId());
 		Assert.assertEquals(2, locations.getPeerAddresses().size());
 	}
 
