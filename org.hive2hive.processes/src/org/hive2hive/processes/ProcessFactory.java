@@ -159,6 +159,10 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	/**
+	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
+	 * tree.
+	 */
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 
@@ -237,12 +241,16 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	/**
+	 * Deletes the specified file. Note that this is only valid for a single file or an empty folder
+	 * (non-recursive)
+	 */
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		File root = networkManager.getSession().getFileManager().getRoot().toFile();
-		boolean fileIsInRoot = root.equals(file.getParentFile());
+		boolean fileInRoot = root.equals(file.getParentFile());
 
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory(), fileIsInRoot);
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory(), fileInRoot);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
@@ -253,7 +261,7 @@ public final class ProcessFactory {
 		process.add(new DeleteMetaDocumentStep(context, networkManager));
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
 
-		if (!fileIsInRoot) {
+		if (!fileInRoot) {
 			// file is not in root, thus change the parent meta folder
 			process.add(new File2MetaFileComponent(file.getParentFile(), context, context, networkManager));
 			process.add(new DeleteFromParentMetaStep(context, networkManager));

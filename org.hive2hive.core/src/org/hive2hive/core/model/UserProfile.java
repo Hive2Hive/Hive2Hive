@@ -97,6 +97,11 @@ public class UserProfile extends NetworkContent {
 		return getFileByPath(relativePath);
 	}
 
+	public FileTreeNode getFileByPath(File file, File root) {
+		Path relativePath = root.toPath().relativize(file.toPath());
+		return getFileByPath(relativePath);
+	}
+
 	public FileTreeNode getFileByPath(Path relativePath) {
 		String[] split = relativePath.toString().split(FileManager.getFileSep());
 		FileTreeNode current = root;

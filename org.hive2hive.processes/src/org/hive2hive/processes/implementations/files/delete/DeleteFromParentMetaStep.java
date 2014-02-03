@@ -47,7 +47,7 @@ public class DeleteFromParentMetaStep extends PutMetaDocumentStep {
 
 		// update parent meta folder (delete child)
 		MetaFolder parentMetaFolder = (MetaFolder) context.consumeMetaDocument();
-		parentMetaFolder.removeChildKey(context.consumeMetaDocument().getId());
+		parentMetaFolder.removeChildKey(context.getDeletedNode().getFileKey());
 
 		// put the meta folder
 		super.doExecute();
