@@ -1,4 +1,4 @@
-package org.hive2hive.processes.test.implementations.files.add;
+package org.hive2hive.processes.test.implementations.files;
 
 import java.io.File;
 import java.io.IOException;

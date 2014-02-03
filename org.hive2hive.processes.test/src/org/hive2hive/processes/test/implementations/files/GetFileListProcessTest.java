@@ -1,4 +1,4 @@
-package org.hive2hive.processes.test.implementations.files.list;
+package org.hive2hive.processes.test.implementations.files;
 
 import static org.junit.Assert.assertEquals;
 
