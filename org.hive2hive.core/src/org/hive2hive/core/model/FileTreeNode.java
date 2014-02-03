@@ -86,7 +86,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * @param node The root node from which the digest is started.
 	 * @return The digest in sorted order.
 	 */
-	public static List<Path> getFileList(FileTreeNode node) {
+	public static List<Path> getFilePathList(FileTreeNode node) {
 		List<Path> digest = new ArrayList<Path>();
 
 		// add self
@@ -94,11 +94,30 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 
 		// add children
 		for (FileTreeNode child : node.getChildren()) {
-			digest.addAll(getFileList(child));
+			digest.addAll(getFilePathList(child));
 		}
 
 		// sort by full path
 		Collections.sort(digest);
+
+		return digest;
+	}
+
+	/**
+	 * Walks recursively through the file tree and returns a preorder list
+	 * 
+	 * @param node The root node from which the digest is started.
+	 * @return The digest in preorder
+	 */
+	public static List<FileTreeNode> getFileNodeList(FileTreeNode node) {
+		List<FileTreeNode> digest = new ArrayList<FileTreeNode>();
+		// add self
+		digest.add(node);
+
+		// add children
+		for (FileTreeNode child : node.getChildren()) {
+			digest.addAll(getFileNodeList(child));
+		}
 
 		return digest;
 	}

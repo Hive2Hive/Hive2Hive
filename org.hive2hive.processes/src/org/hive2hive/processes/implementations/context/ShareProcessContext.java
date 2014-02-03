@@ -22,7 +22,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	private final String friendId;
 	private final KeyPair newProtectionKeys;
 
-	private KeyPair protectionKeys;
+	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
 	private FileTreeNode fileTreeNode;
 	private BaseNotificationMessageFactory messageFactory;
@@ -54,14 +54,14 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		return fileTreeNode;
 	}
 
-	/**
-	 * Note that these are the old protection keys!
-	 */
+	public KeyPair consumeOldProtectionKeys() {
+		return oldProtectionKeys;
+	}
+
 	@Override
 	public KeyPair consumeProtectionKeys() {
-		// TODO
-		// return null for the old protection keys (same as in Seppi's version). Verify that!
-		return null;
+		// returns the new protection keys to store the meta document, ...
+		return newProtectionKeys;
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	 */
 	@Override
 	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
+		this.oldProtectionKeys = protectionKeys;
 	}
 
 	@Override
