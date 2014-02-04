@@ -8,8 +8,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 
@@ -24,20 +24,17 @@ public class UpdateSourceParentStep extends PutMetaDocumentStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Start removing the file from the former parent meta folder.");
 
 		MetaDocument sourceParent = context.consumeMetaDocument();
 		if (sourceParent == null) {
-			cancel(new RollbackReason(this, "Parent meta folder (source) not found."));
-			return;
+			throw new ProcessExecutionException("Parent meta folder (source) not found.");
 		}
 
 		KeyPair sourceParentProtectionKeys = context.consumeProtectionKeys();
 		if (sourceParentProtectionKeys == null) {
-			cancel(new RollbackReason(this,
-					"Parent meta folder's (source) content protection keys not found."));
-			return;
+			throw new ProcessExecutionException("Parent meta folder's (source) content protection keys not found.");
 		}
 
 		MetaFolder parent = (MetaFolder) sourceParent;

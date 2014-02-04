@@ -20,8 +20,8 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -47,7 +47,7 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// get and set the process context
 		File file = context.getFile();
 		File parent = file.getParentFile();
@@ -63,39 +63,40 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 		}
 	}
 
-	private void provideDefaultProtectionKeys() throws InvalidProcessStateException {
+	private void provideDefaultProtectionKeys() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			KeyPair protectionKeys = context.getH2HSession().getProfileManager().getDefaultProtectionKey();
 			context.provideProtectionKeys(protectionKeys);
 			logger.debug("Got the default protection keys");
 		} catch (GetFailedException e) {
-			cancel(new RollbackReason(this, "Default protection keys not found."));
+			throw new ProcessExecutionException("Default protection keys not found.", e);
 		}
 	}
 
-	private void getParentMetaFolder(File parent) throws InvalidProcessStateException {
-		try {
+	private void getParentMetaFolder(File parent) throws InvalidProcessStateException, ProcessExecutionException {
+		
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getID(), false);
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException("Could not get the user profile.", e);
+			}
 			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getH2HSession()
 					.getFileManager());
 			if (parentNode == null) {
-				cancel(new RollbackReason(this, "Parent file is not in user profile"));
-				return;
+				throw new ProcessExecutionException("Parent file is not in the user profile.");
 			}
 			context.provideProtectionKeys(parentNode.getProtectionKeys());
 			parentsKeyPair = parentNode.getKeyPair();
 			NetworkContent content = get(parentNode.getKeyPair().getPublic(), H2HConstants.META_DOCUMENT);
 			evaluateResult(content);
-		} catch (Exception e) {
-			cancel(new RollbackReason(this, e.getMessage()));
-		}
 	}
 
-	private void evaluateResult(NetworkContent content) throws Exception {
+	private void evaluateResult(NetworkContent content) throws ProcessExecutionException {
 		if (content == null) {
 			logger.error("Meta document not found.");
-			cancel(new RollbackReason(this, "Meta document not found."));
+			throw new ProcessExecutionException("Meta document not found.");
 		} else {
 			logger.debug("Got encrypted meta document");
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
@@ -110,7 +111,7 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
 					| InvalidCipherTextException | IllegalArgumentException e) {
 				logger.error("Cannot decrypt the meta document.", e);
-				throw e;
+				throw new ProcessExecutionException("Cannot decrypt the meta document.", e);
 			}
 		}
 	}

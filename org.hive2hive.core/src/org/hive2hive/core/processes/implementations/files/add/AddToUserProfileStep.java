@@ -16,6 +16,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 
@@ -37,23 +38,30 @@ public class AddToUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Start updating the user profile where adding the file: " + context.getFile().getName());
 
 		// update the user profile by adding the new file
 		UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 		UserProfile userProfile = null;
-		try {
-			userProfile = profileManager.getUserProfile(getID(), true);
+			try {
+				userProfile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
 
 			// create a file tree node in the user profile
-			addFileToUserProfile(userProfile);
+			try {
+				addFileToUserProfile(userProfile);
+			} catch (IOException e) {
+				throw new ProcessExecutionException("Could not add file to the user profile.", e);
+			}
 
-			profileManager.readyToPut(userProfile, getID());
-		} catch (PutFailedException | GetFailedException | IOException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
-			return;
-		}
+			try {
+				profileManager.readyToPut(userProfile, getID());
+			} catch (PutFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
 	}
 
 	/**

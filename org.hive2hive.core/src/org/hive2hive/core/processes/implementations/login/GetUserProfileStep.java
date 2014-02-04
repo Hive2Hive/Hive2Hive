@@ -10,8 +10,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfile;
 import org.hive2hive.core.security.EncryptedNetworkContent;
@@ -32,12 +32,12 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 
 		NetworkContent loadedContent = get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 
 		if (loadedContent == null) {
-			cancel(new RollbackReason(this, "User profile not found."));
+			throw new ProcessExecutionException("User profile not found.");
 		} else {
 
 			// decrypt user profile
@@ -51,9 +51,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 				decryptedContent = H2HEncryptionUtil.decryptAES(encryptedContent, decryptionKey);
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
 					| ClassNotFoundException | IOException e) {
-				cancel(new RollbackReason(this, "User profile could not be decrypted. Reason: "
-						+ e.getMessage()));
-				return;
+				throw new ProcessExecutionException("User profile could not be decrypted.");
 			}
 
 			UserProfile profile = (UserProfile) decryptedContent;

@@ -13,6 +13,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 
 public class CreateFolderStep extends ProcessStep {
@@ -29,7 +30,7 @@ public class CreateFolderStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		FileTreeNode file = context.getFileNode();
 		logger.debug("Try creating a new folder on disk: " + file.getName());
 		try {
@@ -42,8 +43,7 @@ public class CreateFolderStep extends ProcessStep {
 				throw new IOException("Folder could not be created");
 			}
 		} catch (IOException | NoSessionException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
-			return;
+			throw new ProcessExecutionException(e);
 		}
 
 		// done with 'downloading' the file

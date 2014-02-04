@@ -19,10 +19,10 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.RecoverFileContext;
 
 /**
@@ -46,14 +46,12 @@ public class SelectVersionStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		MetaDocument metaDocument = context.consumeMetaDocument();
 		if (metaDocument == null) {
-			cancel(new RollbackReason(this, "Meta document not found"));
-			return;
+			throw new ProcessExecutionException("Meta document not found.");
 		} else if (!(metaDocument instanceof MetaFile)) {
-			cancel(new RollbackReason(this, "Meta document is not a meta file"));
-			return;
+			throw new ProcessExecutionException("Meta document is not a meta file.");
 		}
 
 		MetaFile metaFile = (MetaFile) metaDocument;
@@ -73,8 +71,7 @@ public class SelectVersionStep extends ProcessStep {
 				+ versions.size() + " versions");
 		IFileVersion selected = selector.selectVersion(versions);
 		if (selected == null) {
-			cancel(new RollbackReason(this, "Selected file version is null"));
-			return;
+			throw new ProcessExecutionException("Selected file version is null.");
 		}
 
 		// find the selected version
@@ -88,8 +85,7 @@ public class SelectVersionStep extends ProcessStep {
 
 		// check if the developer returned an invalid index
 		if (selectedVersion == null) {
-			cancel(new RollbackReason(this, "Invalid version index selected"));
-			return;
+			throw new ProcessExecutionException("Invalid version index selected.");
 		}
 
 		logger.debug("Selected version " + selected.getIndex() + " where "
@@ -124,7 +120,7 @@ public class SelectVersionStep extends ProcessStep {
 					networkManager);
 			getParent().add(addProcess);
 		} catch (Hive2HiveException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 
 	}

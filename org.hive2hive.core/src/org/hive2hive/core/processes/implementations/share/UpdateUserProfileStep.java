@@ -12,6 +12,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 
 public class UpdateUserProfileStep extends ProcessStep {
@@ -30,7 +31,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Updating user profile for sharing.");
 
 		try {
@@ -39,11 +40,9 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 			if (fileNode.isShared()) {
 				// TODO this is to restrictive, what about several users sharing one single folder?
-				cancel(new RollbackReason(this, "Folder is already shared."));
-				return;
+				throw new ProcessExecutionException("Folder is already shared.");
 			} else if (fileNode.isSharedOrHasSharedChildren()) {
-				cancel(new RollbackReason(this, "Folder already contains an shared folder."));
-				return;
+				throw new ProcessExecutionException("Folder already contains an shared folder.");
 			}
 
 			// store for backup
@@ -59,7 +58,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// set modification flag needed for roll backs
 			modified = true;
 		} catch (GetFailedException | PutFailedException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 	}
 

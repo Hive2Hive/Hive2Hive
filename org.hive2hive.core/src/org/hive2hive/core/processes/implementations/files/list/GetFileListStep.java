@@ -9,9 +9,9 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.ResultProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
 public class GetFileListStep extends ResultProcessStep<List<Path>> {
 
@@ -22,23 +22,21 @@ public class GetFileListStep extends ResultProcessStep<List<Path>> {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 
 		// get the user profile
 		UserProfileManager profileManager = null;
 		try {
 			profileManager = networkManager.getSession().getProfileManager();
 		} catch (NoSessionException e) {
-			cancel(new RollbackReason(this, "No session found."));
-			return;
+			throw new ProcessExecutionException(e);
 		}
 
 		UserProfile profile = null;
 		try {
 			profile = profileManager.getUserProfile(getID(), false);
 		} catch (GetFailedException e) {
-			cancel(new RollbackReason(this, "User profile could not be loaded."));
-			return;
+			throw new ProcessExecutionException("User profile could not be loaded.");
 		}
 
 		// build the digest recursively

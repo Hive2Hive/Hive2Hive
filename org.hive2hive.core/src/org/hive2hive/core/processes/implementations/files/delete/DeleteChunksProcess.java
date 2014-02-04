@@ -7,9 +7,9 @@ import java.util.List;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
 // TODO this class should be merged with org.hive2hive.processes.implementations.files.update.DeleteChunksStep
@@ -25,14 +25,12 @@ public class DeleteChunksProcess extends SequentialProcess {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.consumeMetaDocument() == null) {
-			cancel(new RollbackReason(this, "No meta document given."));
-			return;
+			throw new ProcessExecutionException("No meta document given.");
 		}
 		if (context.consumeProtectionKeys() == null) {
-			cancel(new RollbackReason(this, "No protection keys given."));
-			return;
+			throw new ProcessExecutionException("No protection keys given.");
 		}
 
 		// if file, enlist all chunks to delete

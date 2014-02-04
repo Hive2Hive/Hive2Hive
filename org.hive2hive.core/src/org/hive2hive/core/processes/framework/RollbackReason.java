@@ -1,23 +1,19 @@
 package org.hive2hive.core.processes.framework;
 
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+
+// TODO atm only a wrapper class, might be removed in a later stage
 
 public class RollbackReason {
 
-	private final ProcessComponent component;
-	private final String message;
-
-	public RollbackReason(ProcessComponent component, String message) {
-		this.component = component;
-		this.message = message;
+	private final ProcessExecutionException exception;
+	
+	public RollbackReason(ProcessExecutionException exception) {
+		this.exception = exception;
 	}
 
-	public ProcessComponent getComponent() {
-		return component;
-	}
-
-	public String getMessage() {
-		return message;
+	public ProcessExecutionException getException() {
+		return exception;
 	}
 
 }

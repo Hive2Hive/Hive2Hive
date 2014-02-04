@@ -12,6 +12,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
 public class AsyncComponent extends ProcessDecorator implements Callable<Boolean> {
 	
@@ -30,7 +31,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	}
 
 	@Override
-	public void start() throws InvalidProcessStateException {
+	public void start() throws InvalidProcessStateException, ProcessExecutionException {
 		super.start();
 
 		handle = executor.submit(this);

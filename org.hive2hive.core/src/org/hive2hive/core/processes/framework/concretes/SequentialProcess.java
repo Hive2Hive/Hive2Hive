@@ -16,6 +16,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.Process;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
 public class SequentialProcess extends Process {
 
@@ -27,7 +28,7 @@ public class SequentialProcess extends Process {
 	private int rollbackIndex = 0;
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 
 		// execute all child components
 		while (!components.isEmpty() && executionIndex < components.size()

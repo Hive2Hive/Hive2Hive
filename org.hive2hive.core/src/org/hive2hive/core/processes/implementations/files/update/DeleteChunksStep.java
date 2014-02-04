@@ -9,8 +9,8 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseRemoveProcessStep;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 
@@ -34,7 +34,7 @@ public class DeleteChunksStep extends BaseRemoveProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		List<KeyPair> chunksToDelete = context.getChunksToDelete();
 		KeyPair protectionKeys = context.getChunksToDeleteProtectionKeys();
 
@@ -51,7 +51,7 @@ public class DeleteChunksStep extends BaseRemoveProcessStep {
 			// done with deleting all chunks
 			logger.debug("Finished deleting all chunks of the version to cleanup.");
 		} catch (RemoveFailedException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 
 	}

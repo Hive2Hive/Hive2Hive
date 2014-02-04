@@ -10,8 +10,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -30,7 +30,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// encrypt user profile
 		SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
@@ -39,16 +39,13 @@ public class PutUserProfileStep extends BasePutProcessStep {
 		try {
 			encryptedProfile = H2HEncryptionUtil.encryptAES(userProfile, encryptionKey);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
-			cancel(new RollbackReason(this, "User profile could not be encrypted. Reason: " + e.getMessage()));
-			return;
+			throw new ProcessExecutionException("User profile could not be encrypted.");
 		}
 
 		try {
 			encryptedProfile.generateVersionKey();
 		} catch (IOException e) {
-			cancel(new RollbackReason(this, "User profile version key could not be generated. Reason: "
-					+ e.getMessage()));
-			return;
+			throw new ProcessExecutionException("User profile version key could not be generated.", e);
 		}
 
 		// put encrypted user profile
@@ -56,7 +53,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedProfile,
 					userProfile.getProtectionKeys());
 		} catch (PutFailedException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 
 	}

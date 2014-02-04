@@ -18,6 +18,7 @@ import org.hive2hive.core.process.move.MoveNotificationMessageFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;
@@ -40,7 +41,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Start relinking the moved file in the user profile.");
 
 		// different possibilities of movement:
@@ -86,7 +87,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 							.getDestination().getName());
 
 		} catch (NoSessionException | GetFailedException | PutFailedException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 	}
 

@@ -17,6 +17,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 
 /**
@@ -36,19 +37,17 @@ public class MoveOnDiskStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			verifyFiles();
 		} catch (NoSessionException | IllegalArgumentException e) {
-			cancel(new RollbackReason(this, "File verification failed. Reason: " + e.getMessage()));
-			return;
+			throw new ProcessExecutionException("File verification failed.", e);
 		}
 
 		try {
 			getFileKeys();
 		} catch (GetFailedException | NoSessionException | IllegalStateException e) {
-			cancel(new RollbackReason(this, "File keys could not be fetched. Reason: " + e.getMessage()));
-			return;
+			throw new ProcessExecutionException("File keys could not be fetched.", e);
 		}
 
 		try {
@@ -58,8 +57,7 @@ public class MoveOnDiskStep extends ProcessStep {
 			logger.debug(String.format("Moved the file from '%s' to '%s'.", context.getSource()
 					.getAbsolutePath(), context.getDestination().getAbsolutePath()));
 		} catch (IOException e) {
-			cancel(new RollbackReason(this, "File could not be moved to destination. Reason: "
-					+ e.getMessage()));
+			throw new ProcessExecutionException("File could not be moved to destination.", e);
 		}
 	}
 

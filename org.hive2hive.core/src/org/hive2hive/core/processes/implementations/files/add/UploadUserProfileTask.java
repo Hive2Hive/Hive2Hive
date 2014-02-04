@@ -14,6 +14,7 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
 public class UploadUserProfileTask extends UserProfileTask {
 
@@ -58,8 +59,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 					fileTreeNode.getFileKey(), networkManager);
 			logger.debug("Start downloading a file");
 			process.start();
-		} catch (NoSessionException | InvalidProcessStateException e) {
-			logger.error("Could not start the download of the newly shared file");
+		} catch (NoSessionException | InvalidProcessStateException | ProcessExecutionException e) {
+			logger.error("Could not start the download of the newly shared file or something went wrong.");
 		}
 
 		notifyOtherClients(new UploadNotificationMessageFactory(fileTreeNode, parentKey));

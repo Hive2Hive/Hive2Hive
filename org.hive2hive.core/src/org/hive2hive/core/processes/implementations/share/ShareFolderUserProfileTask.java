@@ -11,6 +11,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 
 public class ShareFolderUserProfileTask extends UserProfileTask {
@@ -52,8 +53,8 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 					networkManager);
 			logger.debug("Start to download " + fileList.size() + " files that have been shared with me");
 			downloadProcess.start();
-		} catch (Hive2HiveException e) {
-			logger.error("Cannot execute the task", e);
+		} catch (Hive2HiveException | ProcessExecutionException e) {
+			logger.error("Cannot execute the task or an exception occured.", e);
 		}
 	}
 }

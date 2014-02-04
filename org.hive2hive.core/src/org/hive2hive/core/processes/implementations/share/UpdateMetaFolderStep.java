@@ -6,8 +6,8 @@ import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 
@@ -27,20 +27,17 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.consumeMetaDocument() == null) {
-			cancel(new RollbackReason(this,
-					"Meta folder does not exist, but folder is in user profile. You are in an inconsistent state"));
-			return;
+			throw new ProcessExecutionException("Meta folder does not exist, but folder is in user profile. You are in an inconsistent state.");
 		}
 
 		logger.debug("Updating meta folder for sharing.");
 
 		MetaFolder metaFolder = (MetaFolder) context.consumeMetaDocument();
 		if (metaFolder.getUserList().contains(context.getFriendId())) {
-			cancel(new RollbackReason(this, String.format("The folder is already shared with the user '%s'",
-					context.getFriendId())));
-			return;
+			throw new ProcessExecutionException(String.format("The folder is already shared with the user '%s'",
+					context.getFriendId()));
 		}
 		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), PermissionType.WRITE));
 

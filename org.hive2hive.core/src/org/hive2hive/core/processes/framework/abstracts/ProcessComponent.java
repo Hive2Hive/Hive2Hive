@@ -9,6 +9,7 @@ import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.ProcessUtil;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
@@ -35,7 +36,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public void start() throws InvalidProcessStateException {
+	public void start() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 
 		if (state != ProcessState.READY) {
@@ -44,7 +45,15 @@ public abstract class ProcessComponent implements IProcessComponent {
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
 
-		doExecute();
+		try {
+			doExecute();
+		} catch (ProcessExecutionException e) {
+			// TODO initiate rollback
+			cancel(new RollbackReason(e));
+			
+			// TODO return the exception
+			throw e;
+		}
 
 		succeed();
 	}
@@ -75,7 +84,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
 		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(),
-				reason.getMessage()));
+				reason.getException().getMessage()));
 
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED && state != ProcessState.SUCCEEDED) {
 			throw new InvalidProcessStateException(state);
@@ -89,7 +98,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
 			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
-					reason.getMessage()));
+					reason.getException().getMessage()));
 
 			// TODO wait for doExecute() to complete
 			doRollback(reason);
@@ -98,7 +107,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		fail(reason);
 	}
 
-	protected abstract void doExecute() throws InvalidProcessStateException;
+	protected abstract void doExecute() throws InvalidProcessStateException, ProcessExecutionException;
 
 	protected abstract void doPause();
 

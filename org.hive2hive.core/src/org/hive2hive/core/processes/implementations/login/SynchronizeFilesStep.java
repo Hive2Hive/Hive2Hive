@@ -21,6 +21,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
@@ -55,34 +56,30 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		UserProfileManager profileManager;
 		FileManager fileManager;
 		try {
 			profileManager = networkManager.getSession().getProfileManager();
 			fileManager = networkManager.getSession().getFileManager();
 		} catch (NoSessionException e) {
-			cancel(new RollbackReason(this, "No session"));
-			return;
+			throw new ProcessExecutionException(e);
 		}
 
 		UserProfile profile = null;
 		try {
 			profile = profileManager.getUserProfile(getID(), false);
 		} catch (GetFailedException e) {
-			cancel(new RollbackReason(this, "User profile could not be accessed."));
-			return;
+			throw new ProcessExecutionException("User profile could not be loaded.");
 		}
 
 		FileSynchronizer synchronizer = new FileSynchronizer(fileManager, profile);
 		try {
 			synchronizeFiles(synchronizer);
 		} catch (NoSessionException e) {
-			cancel(new RollbackReason(this, "No session. This exception should have been caught earlier"));
-			return;
+			throw new ProcessExecutionException(e);
 		} catch (NoPeerConnectionException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
-			return;
+			throw new ProcessExecutionException(e);
 		}
 
 		if (context.getIsMaster()) {
@@ -93,7 +90,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private void synchronizeFiles(FileSynchronizer synchronizer) throws NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException {
+			InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
 		/*
 		 * count up to 4:
 		 * - until the uploadProcessNewFiles is done

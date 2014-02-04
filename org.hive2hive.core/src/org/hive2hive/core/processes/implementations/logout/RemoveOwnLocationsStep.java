@@ -9,8 +9,8 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.LogoutProcessContext;
 
@@ -27,13 +27,12 @@ public class RemoveOwnLocationsStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 
 		Locations locations = context.consumeLocations();
 
 		if (locations == null) {
-			cancel(new RollbackReason(this, "Locations not found."));
-			return;
+			throw new ProcessExecutionException("Locations not found.");
 		} else {
 
 			// remove peer
@@ -42,8 +41,7 @@ public class RemoveOwnLocationsStep extends BasePutProcessStep {
 			try {
 				locations.generateVersionKey();
 			} catch (IOException e) {
-				cancel(new RollbackReason(this, "Version key could not be generated."));
-				return;
+				throw new ProcessExecutionException("Version key could not be generated.", e);
 			}
 
 			// put updated locations
@@ -53,14 +51,13 @@ public class RemoveOwnLocationsStep extends BasePutProcessStep {
 			try {
 				protectionKeys = context.consumeSession().getProfileManager().getDefaultProtectionKey();
 			} catch (GetFailedException e) {
-				cancel(new RollbackReason(this, "Default protection keys could not be loaded."));
-				return;
+				throw new ProcessExecutionException("Default protection keys could not be loaded.", e);
 			}
 
 			try {
 				put(userId, H2HConstants.USER_LOCATIONS, locations, protectionKeys);
 			} catch (PutFailedException e) {
-				cancel(new RollbackReason(this, "Put failed."));
+				throw new ProcessExecutionException(e);
 			}
 		}
 	}

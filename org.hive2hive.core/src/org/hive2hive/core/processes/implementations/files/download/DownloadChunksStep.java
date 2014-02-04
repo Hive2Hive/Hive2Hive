@@ -21,8 +21,8 @@ import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -47,7 +47,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
 
 		// support to download a specific version
@@ -64,9 +64,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		}
 
 		if (!verifyFile(destination)) {
-			cancel(new RollbackReason(this,
-					"File already exists on disk. Content does match; no download needed"));
-			return;
+			throw new ProcessExecutionException("File already exists on disk. Content does match; no download needed.");
 		}
 
 		// start the download
@@ -83,11 +81,9 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
 					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
 					| InvalidCipherTextException | IllegalArgumentException e) {
-				cancel(new RollbackReason(this, "Could not decrypt file chunk. Reason: " + e.getMessage()));
-				return;
+				throw new ProcessExecutionException("Could not decrypt file chunk.", e);
 			} catch (IOException e) {
-				cancel(new RollbackReason(this, "Could not write file chunk. Reason: " + e.getMessage()));
-				return;
+				throw new ProcessExecutionException("Could not write file chunk.", e);
 			}
 		}
 
@@ -98,8 +94,8 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		} else {
 			// should be empty
 			logger.error("All chunks downloaded but still some in buffer.");
-			cancel(new RollbackReason(this, "Could not write all chunks to disk. We're stuck at chunk "
-					+ currentChunkOrder));
+			throw new ProcessExecutionException("Could not write all chunks to disk. We're stuck at chunk "
+					+ currentChunkOrder);
 		}
 	}
 
