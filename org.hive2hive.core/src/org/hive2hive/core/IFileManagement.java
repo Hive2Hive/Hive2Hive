@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
  * Interface on all file operations that Hive2Hive currently supports.
@@ -23,8 +25,10 @@ public interface IFileManagement {
 	 * 
 	 * @param file the file to be added
 	 * @return an observable add file process
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess add(File file) throws IllegalFileLocation, NoSessionException;
+	IProcessComponent add(File file) throws IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException;
 
 	/**
 	 * Update a file or a folder in the network.
@@ -49,8 +53,10 @@ public interface IFileManagement {
 	 * 
 	 * @param the file to delete
 	 * @return an observable deletion process
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess delete(File file) throws IllegalArgumentException, NoSessionException;
+	IProcessComponent delete(File file) throws IllegalArgumentException, NoSessionException,
+			NoPeerConnectionException;
 
 	/**
 	 * Returns the file configuration. If you want to change this, use the {@link H2HNodeBuilder} when

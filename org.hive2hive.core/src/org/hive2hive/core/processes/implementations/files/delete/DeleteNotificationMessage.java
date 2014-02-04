@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.delete;
+package org.hive2hive.core.processes.implementations.files.delete;
 
 import java.io.File;
 import java.io.FileNotFoundException;

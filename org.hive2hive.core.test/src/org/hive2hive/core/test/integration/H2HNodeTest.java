@@ -10,14 +10,10 @@ import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
@@ -77,43 +73,26 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			NoPeerConnectionException {
 		File testFile = new File(rootDirectory, "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		IProcess process = loggedInNode.getFileManagement().add(testFile);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(30);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		IProcessComponent process = loggedInNode.getFileManagement().add(testFile);
+		UseCaseTestUtil.executeProcess(process);
 
 		// is now added; delete it
 		process = loggedInNode.getFileManagement().delete(testFile);
-		listener = new TestProcessListener();
-		process.addListener(listener);
-
-		// wait for the process to finish
-		waiter = new H2HWaiter(30);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		UseCaseTestUtil.executeProcess(process);
 	}
 
-	@Test
-	public void testAddFileWrongDir() throws IOException, NoSessionException {
+	@Test(expected = IllegalFileLocation.class)
+	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation,
+			NoPeerConnectionException {
 		File testFile = new File(FileUtils.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		try {
-			loggedInNode.getFileManagement().add(testFile);
-			Assert.fail("Should not be able to add a file that is not in the root");
-		} catch (IllegalFileLocation e) {
-			// intended exception
-		}
+		loggedInNode.getFileManagement().add(testFile);
 	}
 
 	@Test
@@ -132,35 +111,16 @@ public class H2HNodeTest extends H2HJUnitTest {
 		File test2File = new File(folder2, "test2.txt");
 		FileUtils.write(test2File, "Hello World 2");
 
-		IProcess process = loggedInNode.getFileManagement().add(folder1);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
+		IProcessComponent process = loggedInNode.getFileManagement().add(folder1);
+		UseCaseTestUtil.executeProcess(process);
 
-		// wait for the process to finish the upload
-		H2HWaiter waiter = new H2HWaiter(30);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-
-		// wait for all uploading processes to finish
-		waiter = new H2HWaiter(60);
-		do {
-			waiter.tickASecond();
-		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+		// TODO wait for all async process to upload
 
 		// then start 2nd client and login
 		File rootUser2 = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
 		IProcessComponent loginProcess = newNode.getUserManagement().login(credentials, rootUser2.toPath());
-		TestProcessComponentListener loginListener = new TestProcessComponentListener();
-		loginProcess.attachListener(loginListener);
-		UseCaseTestUtil.waitTillSucceded(loginListener, 20);
-
-		// wait for the post-loginprocess to finish
-		waiter = new H2HWaiter(60);
-		do {
-			waiter.tickASecond();
-		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
+		UseCaseTestUtil.executeProcess(loginProcess);
 
 		// verfiy that all files are here
 		folder1 = new File(rootUser2, "folder1");

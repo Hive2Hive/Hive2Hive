@@ -13,7 +13,6 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.process.move.MoveNotificationMessageFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -23,6 +22,7 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.MoveNotificationContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
 
 public class RelinkUserProfileStep extends ProcessStep {
 

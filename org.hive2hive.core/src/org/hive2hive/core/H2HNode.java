@@ -16,23 +16,21 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
-import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.process.recover.RecoverFileProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
-import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
-import org.hive2hive.core.process.util.FileRecursionUtil;
-import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
+import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -214,16 +212,17 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess add(File file) throws IllegalFileLocation, NoSessionException {
-		IProcess process;
+	public IProcessComponent add(File file) throws IllegalFileLocation, NoSessionException,
+			NoPeerConnectionException {
+		IProcessComponent process;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			process = FileRecursionUtil.buildProcessChain(preorderList, networkManager,
-					FileProcessAction.NEW_FILE);
+			process = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE,
+					networkManager);
 		} else {
 			// add single file
-			process = new NewFileProcess(file, networkManager);
+			process = ProcessFactory.instance().createNewFileProcess(file, networkManager);
 		}
 
 		autoStartProcess(process);
@@ -245,16 +244,16 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess delete(File file) throws IllegalArgumentException, NoSessionException {
-		IProcess process;
+	public IProcessComponent delete(File file) throws IllegalArgumentException, NoSessionException,
+			NoPeerConnectionException {
+		IProcessComponent process;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			process = FileRecursionUtil.buildProcessChain(preorderList, networkManager,
-					FileProcessAction.DELETE);
+			process = FileRecursionUtil.buildDeletionProcess(preorderList, networkManager);
 		} else {
 			// delete a single file
-			process = new DeleteFileProcess(file, networkManager);
+			process = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
 		}
 
 		autoStartProcess(process);

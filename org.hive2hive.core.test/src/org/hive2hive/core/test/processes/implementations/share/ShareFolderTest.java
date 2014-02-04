@@ -17,7 +17,6 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.files.NewFileTest;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -46,7 +45,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = NewFileTest.class;
+		testClass = ShareFolderTest.class;
 		beforeClass();
 
 		network = NetworkTestUtil.createNetwork(networkSize);

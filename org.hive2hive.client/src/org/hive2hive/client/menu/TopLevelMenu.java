@@ -132,7 +132,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Add File") {
 			@Override
 			protected void execute() throws Hive2HiveException {
-				IProcess process = nodeMenu.getH2HNode().getFileManagement().add(askForFile(true));
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement().add(askForFile(true));
 				executeBlocking(process);
 			}
 		});
@@ -145,7 +145,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Delete File") {
 			protected void execute() throws Hive2HiveException {
-				IProcess process = nodeMenu.getH2HNode().getFileManagement().delete(askForFile(true));
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
+						.delete(askForFile(true));
 				executeBlocking(process);
 			}
 		});

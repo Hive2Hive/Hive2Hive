@@ -5,7 +5,6 @@ import java.util.HashSet;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.process.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;

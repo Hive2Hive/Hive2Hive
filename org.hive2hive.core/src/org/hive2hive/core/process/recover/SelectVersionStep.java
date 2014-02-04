@@ -16,11 +16,9 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessStep;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 
 /**
  * Asks the user which version to restore and initiates the restore steps
@@ -134,13 +132,13 @@ public class SelectVersionStep extends ProcessStep {
 		@Override
 		public void onSuccess() {
 			logger.debug("Downloading of the restored version finished. Continue with adding it as an own file");
-			try {
-				IProcess process = new NewFileProcess(path.toFile(), getNetworkManager());
-				process.addListener(new FinalizeRestoreListener());
-				process.start();
-			} catch (Hive2HiveException e) {
-				getProcess().stop(e);
-			}
+			// try {
+			// IProcess process = new NewFileProcess(path.toFile(), getNetworkManager());
+			// process.addListener(new FinalizeRestoreListener());
+			// process.start();
+			// } catch (Hive2HiveException e) {
+			// getProcess().stop(e);
+			// }
 		}
 
 		@Override

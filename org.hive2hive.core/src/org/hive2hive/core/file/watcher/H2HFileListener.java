@@ -6,6 +6,7 @@ import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -67,7 +68,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void addFile(File file) {
 		try {
 			node.getFileManagement().add(file);
-		} catch (IllegalFileLocation | NoSessionException e) {
+		} catch (IllegalFileLocation | NoSessionException | NoPeerConnectionException e) {
 			logger.error(e.getMessage());
 		}
 	}
@@ -75,7 +76,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void removeFile(File file) {
 		try {
 			node.getFileManagement().delete(file);
-		} catch (IllegalArgumentException | NoSessionException e) {
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
 			logger.error(e.getMessage());
 		}
 	}
