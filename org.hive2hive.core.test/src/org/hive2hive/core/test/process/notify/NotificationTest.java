@@ -11,6 +11,7 @@ import net.tomp2p.rpc.ObjectDataReply;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
@@ -126,9 +127,11 @@ public class NotificationTest extends H2HJUnitTest {
 
 	/**
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2)
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void testNotifyOwnUser() throws ClassNotFoundException, IOException {
+	public void testNotifyOwnUser() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -149,9 +152,12 @@ public class NotificationTest extends H2HJUnitTest {
 	/**
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2). Use the session of the current
 	 * user here for performance improvements
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException {
+	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException,
+			NoPeerConnectionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
@@ -171,9 +177,11 @@ public class NotificationTest extends H2HJUnitTest {
 	/**
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also the master client of user B
 	 * (peer 3 or 4) and user C (peer 5)
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException {
+	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(3);
@@ -197,10 +205,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also user B
 	 * (peer 3 or 4). Peer 3 (master) has occurred an unfriendly logout, thus, the message must be sent to
 	 * Peer 4.
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
-			InterruptedException {
+			InterruptedException, NoPeerConnectionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -229,10 +239,12 @@ public class NotificationTest extends H2HJUnitTest {
 	/**
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also user B
 	 * (peer 3 or 4). All peers of user B have done an unfriendly logout.
+	 * 
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
-			InterruptedException {
+			InterruptedException, NoPeerConnectionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers

@@ -41,15 +41,13 @@ public class NewFileProcess extends Process {
 
 		context = new NewFileProcessContext(this, file, session);
 
-		// 1. validate file size, split the file content, encrypt it and upload it to the DHT
-		// 2. create the meta document
-		// 3.
-
+		// 1. create the meta document
 		// 2. get the parent meta document
-		// 3. put the new meta file
-		// 4. update the parent meta document
-		// 5. update the user profile
-		// 6. notify other clients
+		// 3. validate file size, split the file content, encrypt it and upload it to the DHT
+		// 4. put the new meta file
+		// 5. update the parent meta document
+		// 6. update the user profile
+		// 7. notify other clients
 		setNextStep(new CreateMetaDocumentStep());
 	}
 

@@ -15,6 +15,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -38,7 +39,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanUpFreshVersion() throws InterruptedException, IOException {
+	public void testCleanUpFreshVersion() throws InterruptedException, IOException, NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
@@ -77,13 +78,14 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 
 		assertEquals(versions.size(), futureDigest.getDigest().getKeyDigest().size());
 		int i = 0;
-		for (Number160 storedVersion: futureDigest.getDigest().getKeyDigest().values()) {
+		for (Number160 storedVersion : futureDigest.getDigest().getKeyDigest().values()) {
 			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
 		}
 	}
 
 	@Test
-	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException {
+	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException,
+			NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
@@ -126,7 +128,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 
 		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().getKeyDigest().size());
 		int i = 0;
-		for (Number160 storedVersion: futureDigest.getDigest().getKeyDigest().values()) {
+		for (Number160 storedVersion : futureDigest.getDigest().getKeyDigest().values()) {
 			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
 		}
 	}

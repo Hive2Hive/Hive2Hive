@@ -14,6 +14,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -61,7 +62,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException {
+			InterruptedException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 
@@ -69,7 +70,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		FileManager fileManager = new FileManager(root.toPath());
-		File file = FileTestUtil.createFileRandomContent(3, fileManager, config);
+		File file = FileTestUtil.createFileRandomContent(3, root, config);
 		ProcessTestUtil.uploadNewFile(client, file, profileManager, fileManager, config);
 
 		// store the keys of the meta file to verify them later
@@ -90,7 +91,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		MetaFile metaFileBeforeDeletion = (MetaFile) metaDocumentBeforeDeletion;
 		for (FileVersion version : metaFileBeforeDeletion.getVersions()) {
-			for (KeyPair key : version.getChunkIds()) {
+			for (KeyPair key : version.getChunkKeys()) {
 				FutureGet get = client.getDataManager().get(
 						Number160.createHash(ProcessStep.key2String(key.getPublic())),
 						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.FILE_CHUNK));

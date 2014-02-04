@@ -10,6 +10,7 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -104,7 +105,12 @@ public class MessageReplyHandler implements ObjectDataReply {
 			}
 
 			// give a network manager reference to work (verify, handle)
-			receivedMessage.setNetworkManager(networkManager);
+			try {
+				receivedMessage.setNetworkManager(networkManager);
+			} catch (NoPeerConnectionException e) {
+				logger.error("Cannot process the message because the peer is not connected");
+				return AcceptanceReply.FAILURE;
+			}
 
 			// check if message gets accepted
 			AcceptanceReply reply = receivedMessage.accept();

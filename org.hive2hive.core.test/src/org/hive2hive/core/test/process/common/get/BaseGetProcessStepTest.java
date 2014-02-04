@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.process.Process;
@@ -36,7 +37,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetProcessStepSuccess() {
+	public void testGetProcessStepSuccess() throws NoPeerConnectionException {
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		NetworkManager getter = network.get(0);
 		NetworkManager holder = network.get(1);

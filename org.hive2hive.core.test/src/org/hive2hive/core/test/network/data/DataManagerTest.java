@@ -13,6 +13,7 @@ import net.tomp2p.futures.FuturePut;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -46,7 +47,8 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = node.getDataManager().put(locationKey, domainKey, contentKey, new H2HTestData(data), null);
+		FuturePut future = node.getDataManager().put(locationKey, domainKey, contentKey,
+				new H2HTestData(data), null);
 		future.awaitUninterruptibly();
 
 		FutureGet futureGet = node.getDataManager().get(locationKey, domainKey, contentKey);
@@ -66,7 +68,8 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		String data = NetworkTestUtil.randomString();
-		FuturePut future = nodeA.getDataManager().put(locationKey, domainKey, contentKey, new H2HTestData(data), null);
+		FuturePut future = nodeA.getDataManager().put(locationKey, domainKey, contentKey,
+				new H2HTestData(data), null);
 		future.awaitUninterruptibly();
 
 		FutureGet futureGet = nodeB.getDataManager().get(locationKey, domainKey, contentKey);
@@ -87,15 +90,18 @@ public class DataManagerTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = node.getDataManager().put(locationKey, domainKey, contentKey1, new H2HTestData(data1), null);
+		FuturePut future1 = node.getDataManager().put(locationKey, domainKey, contentKey1,
+				new H2HTestData(data1), null);
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = node.getDataManager().put(locationKey, domainKey, contentKey2, new H2HTestData(data2), null);
+		FuturePut future2 = node.getDataManager().put(locationKey, domainKey, contentKey2,
+				new H2HTestData(data2), null);
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = node.getDataManager().put(locationKey, domainKey, contentKey3, new H2HTestData(data3), null);
+		FuturePut future3 = node.getDataManager().put(locationKey, domainKey, contentKey3,
+				new H2HTestData(data3), null);
 		future3.awaitUninterruptibly();
 
 		FutureGet get1 = node.getDataManager().get(locationKey, domainKey, contentKey1);
@@ -123,38 +129,41 @@ public class DataManagerTest extends H2HJUnitTest {
 		Number160 contentKey3 = Number160.createHash(NetworkTestUtil.randomString());
 
 		String data1 = NetworkTestUtil.randomString();
-		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, domainKey, contentKey1,
-				new H2HTestData(data1), null);
+		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager()
+				.put(locationKey, domainKey, contentKey1, new H2HTestData(data1), null);
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
-		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, domainKey, contentKey2,
-				new H2HTestData(data2), null);
+		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager()
+				.put(locationKey, domainKey, contentKey2, new H2HTestData(data2), null);
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
-		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager().put(locationKey, domainKey, contentKey3,
-				new H2HTestData(data3), null);
+		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager()
+				.put(locationKey, domainKey, contentKey3, new H2HTestData(data3), null);
 		future3.awaitUninterruptibly();
 
-		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, domainKey, contentKey1);
+		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager()
+				.get(locationKey, domainKey, contentKey1);
 		get1.awaitUninterruptibly();
 		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
 		assertEquals(data1, result1);
 
-		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, domainKey, contentKey2);
+		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager()
+				.get(locationKey, domainKey, contentKey2);
 		get2.awaitUninterruptibly();
 		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
 		assertEquals(data2, result2);
 
-		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().get(locationKey, domainKey, contentKey3);
+		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager()
+				.get(locationKey, domainKey, contentKey3);
 		get3.awaitUninterruptibly();
 		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
 		assertEquals(data3, result3);
 	}
 
 	@Test
-	public void testRemovalOneContentKey() {
+	public void testRemovalOneContentKey() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		String locationKey = nodeB.getNodeId();
@@ -164,7 +173,8 @@ public class DataManagerTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash(contentKey);
 
 		// put a content
-		nodeA.getDataManager().put(lKey, domainKey, cKey, new H2HTestData(NetworkTestUtil.randomString()), null)
+		nodeA.getDataManager()
+				.put(lKey, domainKey, cKey, new H2HTestData(NetworkTestUtil.randomString()), null)
 				.awaitUninterruptibly();
 
 		// test that it is there
@@ -182,7 +192,8 @@ public class DataManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemovalMultipleContentKey() throws ClassNotFoundException, IOException {
+	public void testRemovalMultipleContentKey() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
@@ -201,13 +212,16 @@ public class DataManagerTest extends H2HJUnitTest {
 		String testString3 = NetworkTestUtil.randomString();
 
 		// insert them
-		FuturePut put1 = nodeA.getDataManager().put(lKey, domainKey, cKey1, new H2HTestData(testString1), null);
+		FuturePut put1 = nodeA.getDataManager().put(lKey, domainKey, cKey1, new H2HTestData(testString1),
+				null);
 		put1.awaitUninterruptibly();
 
-		FuturePut put2 = nodeA.getDataManager().put(lKey, domainKey, cKey2, new H2HTestData(testString2), null);
+		FuturePut put2 = nodeA.getDataManager().put(lKey, domainKey, cKey2, new H2HTestData(testString2),
+				null);
 		put2.awaitUninterruptibly();
 
-		FuturePut put3 = nodeA.getDataManager().put(lKey, domainKey, cKey3, new H2HTestData(testString3), null);
+		FuturePut put3 = nodeA.getDataManager().put(lKey, domainKey, cKey3, new H2HTestData(testString3),
+				null);
 		put3.awaitUninterruptibly();
 
 		// check that they are all stored

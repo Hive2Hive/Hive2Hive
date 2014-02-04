@@ -48,6 +48,7 @@ import org.junit.Assert;
  * @author Nico, Seppi
  * 
  */
+@Deprecated
 public class ProcessTestUtil {
 
 	private ProcessTestUtil() {
@@ -169,7 +170,7 @@ public class ProcessTestUtil {
 			public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
 				this.encryptedMetaDocument = encryptedMetaDocument;
 			}
-			
+
 			@Override
 			public HybridEncryptedContent getEncryptedMetaDocument() {
 				return encryptedMetaDocument;
@@ -177,7 +178,7 @@ public class ProcessTestUtil {
 
 			@Override
 			public void setProtectionKeys(KeyPair protectionKeys) {
-				this.protectionKeys = protectionKeys;				
+				this.protectionKeys = protectionKeys;
 			}
 
 			@Override

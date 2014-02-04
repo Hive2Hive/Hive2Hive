@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
@@ -90,10 +91,18 @@ public class ContactPeersStep extends ProcessStep implements IResponseCallBackHa
 		// the process step is expecting a response
 		contactMsg.setCallBackHandler(this);
 		// send direct
-		boolean success = getNetworkManager().sendDirect(contactMsg, getNetworkManager().getPublicKey());
-		if (!success) {
+		try {
+			boolean success = getNetworkManager().getMessageManager().sendDirect(contactMsg,
+					getNetworkManager().getPublicKey());
+
+			if (!success) {
+				responses.put(address, false);
+			}
+		} catch (NoPeerConnectionException e) {
+			logger.error("Could not send a message because our peer is not connected", e);
 			responses.put(address, false);
 		}
+
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.hive2hive.core.process.common.userprofiletask;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -39,9 +40,11 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
-			getProcess().stop("Node is not connected.");
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
+			getProcess().stop(e);
 			return;
 		}
 
@@ -72,8 +75,10 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
 			logger.warn(String
 					.format("Roll back of remove user profile task failed. No connection. user id = '%s' content key = '%s'",
 							userId, context.getUserProfileTask().getContentKey()));

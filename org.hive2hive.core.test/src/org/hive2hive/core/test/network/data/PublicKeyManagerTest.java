@@ -14,6 +14,7 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -45,7 +46,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGettingLocalUserKeys() throws GetFailedException {
+	public void testGettingLocalUserKeys() throws GetFailedException, NoPeerConnectionException {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
@@ -60,7 +61,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testFetchingFromNetwork() throws GetFailedException {
+	public void testFetchingFromNetwork() throws GetFailedException, NoPeerConnectionException {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
@@ -89,7 +90,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCachingOfPublicKeys() throws GetFailedException {
+	public void testCachingOfPublicKeys() throws GetFailedException, NoPeerConnectionException {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
@@ -125,7 +126,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testNonExistingPublicKey() {
+	public void testNonExistingPublicKey() throws NoPeerConnectionException {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
@@ -144,7 +145,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetFailedExceptions() {
+	public void testGetFailedExceptions() throws NoPeerConnectionException {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
@@ -167,9 +168,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			// should have been triggered
 		}
 	}
-	
+
 	@Test
-	public void testAllMixed() throws GetFailedException {
+	public void testAllMixed() throws GetFailedException, NoPeerConnectionException {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
@@ -197,7 +198,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		for (int i = 0; i < 20; i++) {
 			gettingList.add(userIds.get(random.nextInt(userIds.size())));
 		}
-		
+
 		// get several times the public key
 		for (String userId : gettingList) {
 			assertEquals(publicKeys.get(userId), publicKeyManager.getPublicKey(userId));

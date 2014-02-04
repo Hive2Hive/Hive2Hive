@@ -73,7 +73,7 @@ public class FileSynchronizer {
 					// file is still in user profile
 					if (H2HEncryptionUtil.compareMD5(node.getMD5(), before.get(path))) {
 						// file has not been modified remotely, delete it
-						logger.debug("File " + path + " has been deleted locally during absence");
+						logger.debug("File '" + path + "' has been deleted locally during absence");
 						deletedLocally.add(node);
 					}
 				}
@@ -128,7 +128,7 @@ public class FileSynchronizer {
 			FileTreeNode node = userProfile.getFileByPath(path);
 			if (node == null) {
 				// not in profile --> it has been added locally
-				logger.debug("File " + p + " has been added locally during absence");
+				logger.debug("File '" + p + "' has been added locally during absence");
 				addedLocally.add(Paths.get(fileManager.getRoot().toString(), path.toString()));
 			}
 		}
@@ -154,9 +154,9 @@ public class FileSynchronizer {
 			FileTreeNode top = fileStack.pop();
 			if (now.containsKey(top.getFullPath().toString())) {
 				// was here before and is still here --> nothing to add
-				logger.trace("File " + top.getFullPath() + " was already here");
+				logger.trace("File '" + top.getFullPath() + "' was already here");
 			} else {
-				logger.debug("File " + top.getFullPath() + " has been added remotely during absence");
+				logger.debug("File '" + top.getFullPath() + "' has been added remotely during absence");
 				addedRemotely.add(top);
 			}
 
@@ -201,7 +201,7 @@ public class FileSynchronizer {
 			// different versions. Thus, the profile wins.
 			if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))
 					&& !H2HEncryptionUtil.compareMD5(fileNode.getMD5(), now.get(path))) {
-				logger.debug("File " + path + " has been updated locally during absence");
+				logger.debug("File '" + path + "' has been updated locally during absence");
 				updatedLocally.add(fileManager.getPath(fileNode));
 			}
 		}
@@ -225,12 +225,14 @@ public class FileSynchronizer {
 		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
 			FileTreeNode top = fileStack.pop();
-			if (before.containsKey(top.getFullPath().toString()) && now.containsKey(top.getFullPath().toString())) {
+			if (before.containsKey(top.getFullPath().toString())
+					&& now.containsKey(top.getFullPath().toString())) {
 				// was here before and is still here
 				if (!H2HEncryptionUtil.compareMD5(top.getMD5(), now.get(top.getFullPath().toString()))
-						&& !H2HEncryptionUtil.compareMD5(top.getMD5(), before.get(top.getFullPath().toString()))) {
+						&& !H2HEncryptionUtil.compareMD5(top.getMD5(),
+								before.get(top.getFullPath().toString()))) {
 					// different md5 hashes than 'before' and 'now'
-					logger.debug("File " + top.getFullPath() + " has been updated remotely during absence");
+					logger.debug("File '" + top.getFullPath() + "' has been updated remotely during absence");
 					updatedRemotely.add(top);
 				}
 			}

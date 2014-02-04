@@ -10,6 +10,7 @@ import net.tomp2p.peers.Number160;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
@@ -51,7 +52,8 @@ public class LogoutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException {
+	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException,
+			NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 
 		// verify the locations map before logout

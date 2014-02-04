@@ -10,6 +10,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
@@ -43,7 +44,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutProcessSuccess() throws ClassNotFoundException, IOException {
+	public void testPutProcessSuccess() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager putter = network.get(0);
 		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1);
@@ -72,7 +73,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutProcessFailure() {
+	public void testPutProcessFailure() throws NoPeerConnectionException {
 		NetworkManager putter = network.get(0);
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1);

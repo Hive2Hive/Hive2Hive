@@ -37,7 +37,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  * 
  * @author Christian, Seppi, Nico
  */
-public abstract class UserProfileTask extends NetworkContent implements Runnable {
+public abstract class UserProfileTask extends NetworkContent {
 
 	private static final long serialVersionUID = -773794512479641000L;
 
@@ -49,6 +49,11 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 		this.protectionKey = EncryptionUtil.generateProtectionKey();
 		generateContentKey();
 	}
+
+	/**
+	 * Starts the execution of the user profile task
+	 */
+	public abstract void start();
 
 	/**
 	 * Creates a key which is a time stamp (taking current time).
@@ -94,5 +99,4 @@ public abstract class UserProfileTask extends NetworkContent implements Runnable
 		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(networkManager, messageFactory, onlyMe);
 		notifyProcess.start();
 	}
-
 }

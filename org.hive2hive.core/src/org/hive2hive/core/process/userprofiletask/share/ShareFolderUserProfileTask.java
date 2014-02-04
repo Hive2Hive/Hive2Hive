@@ -6,6 +6,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
+@Deprecated
+// has been updated with the process framework
 public class ShareFolderUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -2476009828696898562L;
@@ -19,12 +21,12 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		if (this.networkManager == null) {
 			logger.error("NetworkManager is not set.");
 			return;
 		}
-		
+
 		logger.debug("Executing a shared folder user profile task.");
 		try {
 			ShareFolderNotificationProcess process = new ShareFolderNotificationProcess(fileTree,

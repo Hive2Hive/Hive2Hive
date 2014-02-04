@@ -9,6 +9,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 
+@Deprecated
+// does not work for shared files
 public class UploadUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -4568985873058024202L;
@@ -20,7 +22,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		try {
 			DownloadFileProcess process = new DownloadFileProcess(fileKey, networkManager);
 			process.start();

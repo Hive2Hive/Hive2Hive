@@ -42,16 +42,17 @@ public class CreateMetaDocumentStep extends ProcessStep {
 			logger.debug(String.format("New meta folder created. folder = '%s'", file.getName()));
 		} else {
 			// create new meta file with new version
-			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis());
-			context.setChunkKeys(version.getChunkIds());
+			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis(),
+					new ArrayList<KeyPair>());
+			context.setChunkKeys(version.getChunkKeys());
 			List<FileVersion> versions = new ArrayList<FileVersion>(1);
 			versions.add(version);
 
 			metaDocument = new MetaFile(metaKeyPair.getPublic(), file.getName(), versions);
-			logger.debug(String.format("New meta file created. file = '%s'", file.getName()));			
+			logger.debug(String.format("New meta file created. file = '%s'", file.getName()));
 		}
 		context.setNewMetaDocument(metaDocument);
-		
+
 		getProcess().setNextStep(new GetParentMetaStep());
 	}
 

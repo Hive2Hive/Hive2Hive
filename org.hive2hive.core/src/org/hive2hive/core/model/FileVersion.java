@@ -2,7 +2,6 @@ package org.hive2hive.core.model;
 
 import java.io.Serializable;
 import java.security.KeyPair;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,17 +17,17 @@ public class FileVersion implements Serializable, IFileVersion {
 	private final int index; // version count
 	private final long size; // size of the version
 	private final long date; // date when it's created
-	private List<KeyPair> chunkIds;
+	private final List<KeyPair> chunkKeys; // the chunk keys to find and decrypt chunks
 
-	public FileVersion(int index, long size, long date) {
+	public FileVersion(int index, long size, long date, List<KeyPair> chunkKeys) {
 		this.index = index;
 		this.size = size;
 		this.date = date;
-		chunkIds = new ArrayList<KeyPair>();
+		this.chunkKeys = chunkKeys;
 	}
 
-	public List<KeyPair> getChunkIds() {
-		return chunkIds;
+	public List<KeyPair> getChunkKeys() {
+		return chunkKeys;
 	}
 
 	@Override

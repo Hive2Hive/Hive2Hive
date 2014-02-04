@@ -19,6 +19,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
@@ -66,7 +67,7 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPut() throws ClassNotFoundException, IOException {
+	public void testPut() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
@@ -84,7 +85,8 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutMultipleVersions() throws ClassNotFoundException, IOException {
+	public void testPutMultipleVersions() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
@@ -112,7 +114,7 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutMajorityFailed() {
+	public void testPutMajorityFailed() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 		NetworkManager nodeC = network.get(2);
@@ -134,7 +136,7 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutMinorityFailed() throws ClassNotFoundException, IOException {
+	public void testPutMinorityFailed() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
@@ -154,7 +156,8 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutVersionConflictWin() throws ClassNotFoundException, IOException {
+	public void testPutVersionConflictWin() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 

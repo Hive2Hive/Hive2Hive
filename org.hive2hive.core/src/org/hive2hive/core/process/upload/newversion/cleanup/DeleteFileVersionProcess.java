@@ -23,6 +23,6 @@ public class DeleteFileVersionProcess extends Process {
 		super(networkManager);
 
 		logger.debug("Deleting file version '" + version.getIndex() + "'");
-		setNextStep(new DeleteChunkStep(version.getChunkIds(), protectionsKeys));
+		setNextStep(new DeleteChunkStep(version.getChunkKeys(), protectionsKeys));
 	}
 }

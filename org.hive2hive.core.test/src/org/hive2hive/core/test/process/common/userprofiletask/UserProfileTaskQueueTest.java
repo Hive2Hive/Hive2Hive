@@ -23,6 +23,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -63,14 +64,14 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPut() {
+	public void testPut() throws NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
-		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
-				null);
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask,
+				key.getPublic(), null);
 
 		ProcessTestUtil.executeStep(node, putStep);
 
@@ -83,14 +84,14 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutRollback() {
+	public void testPutRollback() throws NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
-		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
-				null);
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask,
+				key.getPublic(), null);
 
 		Process process = new Process(node) {
 		};
@@ -127,8 +128,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, null);
-		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
-				getStep);
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask,
+				key.getPublic(), getStep);
 
 		ProcessTestUtil.executeStep(node, putStep);
 
@@ -137,7 +138,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGetRollback() {
+	public void testPutGetRollback() throws NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -147,8 +148,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, null);
-		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
-				getStep);
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask,
+				key.getPublic(), getStep);
 
 		Process process = new Process(node) {
 		};
@@ -177,7 +178,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGetRemove() {
+	public void testPutGetRemove() throws NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -188,8 +189,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		RemoveUserProfileTaskStep removeStep = new RemoveUserProfileTaskStep(context, null);
 		GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, removeStep);
-		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(),
-				getStep);
+		PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask,
+				key.getPublic(), getStep);
 
 		ProcessTestUtil.executeStep(node, putStep);
 
@@ -204,7 +205,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	@Test
 	public void testRemoveRollback() throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException,
-			ClassNotFoundException, IOException {
+			ClassNotFoundException, IOException, NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -273,7 +274,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		List<TestUserProfileTask> shuffledTasks = new ArrayList<TestUserProfileTask>(tasks);
 		Collections.shuffle(shuffledTasks);
 		for (TestUserProfileTask task : shuffledTasks) {
-			PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, task, key.getPublic(), null);
+			PutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, task, key.getPublic(),
+					null);
 			ProcessTestUtil.executeStep(node, putStep);
 		}
 

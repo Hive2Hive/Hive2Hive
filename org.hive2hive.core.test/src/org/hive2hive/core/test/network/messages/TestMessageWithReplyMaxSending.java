@@ -3,6 +3,7 @@ package org.hive2hive.core.test.network.messages;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -33,15 +34,19 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		networkManager
-				.getDataManager()
-				.put(Number160.createHash(networkManager.getNodeId()), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), new H2HTestData(secret), null)
-				.awaitUninterruptibly();
+		try {
+			networkManager
+					.getDataManager()
+					.put(Number160.createHash(networkManager.getNodeId()), H2HConstants.TOMP2P_DEFAULT_KEY,
+							Number160.createHash(contentKey), new H2HTestData(secret), null)
+					.awaitUninterruptibly();
+		} catch (NoPeerConnectionException e) {
+			Assert.fail();
+		}
 
 		TestResponseMessageMaxSending responseMessage = new TestResponseMessageMaxSending(getMessageID(),
 				getSenderAddress(), secret);
-		Assert.assertTrue(networkManager.sendDirect(responseMessage, getSenderPublicKey()));
+		Assert.assertTrue(messageManager.sendDirect(responseMessage, getSenderPublicKey()));
 	}
 
 	@Override
@@ -61,11 +66,15 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
 
-			networkManager
-					.getDataManager()
-					.put(Number160.createHash(networkManager.getNodeId()), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), new H2HTestData(receivedSecret), null)
-					.awaitUninterruptibly();
+			try {
+				networkManager
+						.getDataManager()
+						.put(Number160.createHash(networkManager.getNodeId()),
+								H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey),
+								new H2HTestData(receivedSecret), null).awaitUninterruptibly();
+			} catch (NoPeerConnectionException e) {
+				Assert.fail();
+			}
 		}
 
 	}

@@ -71,7 +71,7 @@ public class NewVersionTest extends H2HJUnitTest {
 		String randomName = NetworkTestUtil.randomString();
 		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
 		fileManager = new FileManager(root.toPath());
-		file = FileTestUtil.createFileRandomContent(3, fileManager, config);
+		file = FileTestUtil.createFileRandomContent(3, root, config);
 		originalContent = FileUtils.readFileToString(file);
 		ProcessTestUtil.uploadNewFile(network.get(0), file, new UserProfileManager(network.get(0),
 				userCredentials), fileManager, config);

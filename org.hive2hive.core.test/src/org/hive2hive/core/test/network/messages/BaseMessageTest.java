@@ -12,6 +12,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -43,10 +44,11 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyToTargetNode() throws ClassNotFoundException,
-			IOException {
+			IOException, NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -58,7 +60,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
 		// send message
-		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
@@ -83,10 +85,11 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws NoPeerConnectionException
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode()
-			throws ClassNotFoundException, IOException {
+			throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -99,7 +102,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 				new H2HTestData(data));
 
 		// send message
-		assertTrue(nodeA.send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
 
 		// wait till message gets handled
 		// this might need some time

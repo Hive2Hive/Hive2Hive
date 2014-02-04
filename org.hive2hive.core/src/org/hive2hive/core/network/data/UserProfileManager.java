@@ -3,6 +3,7 @@ package org.hive2hive.core.network.data;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,6 +14,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
@@ -69,6 +71,16 @@ public class UserProfileManager {
 		return credentials;
 	}
 
+	@Deprecated
+	public UserProfile getUserProfile(int pid, boolean intendsToPut) throws GetFailedException {
+		return getUserProfile(String.valueOf(pid), intendsToPut);
+	}
+
+	@Deprecated
+	public void readyToPut(UserProfile profile, int pid) throws PutFailedException {
+		readyToPut(profile, String.valueOf(pid));
+	}
+
 	/**
 	 * Gets the user profile. The call blocks until the most recent profile is here.
 	 * 
@@ -78,7 +90,7 @@ public class UserProfileManager {
 	 * @param the user profile
 	 * @throws GetFailedException if the profile cannot be fetched
 	 */
-	public UserProfile getUserProfile(int pid, boolean intendsToPut) throws GetFailedException {
+	public UserProfile getUserProfile(String pid, boolean intendsToPut) throws GetFailedException {
 		QueueEntry entry;
 
 		if (intendsToPut) {
@@ -119,7 +131,7 @@ public class UserProfileManager {
 	 *             An error is also thrown when the process is not allowed to put (because he did not register
 	 *             himself as intending to put)
 	 */
-	public void readyToPut(UserProfile profile, int pid) throws PutFailedException {
+	public void readyToPut(UserProfile profile, String pid) throws PutFailedException {
 		if (modifying != null && modifying.equals(pid)) {
 			modifying.setUserProfile(profile);
 			modifying.readyToPut();
@@ -132,7 +144,7 @@ public class UserProfileManager {
 	/**
 	 * Notifies that a process is done with a modification on the user profile.
 	 */
-	private void stopModification(int pid) {
+	private void stopModification(String pid) {
 		// test whether is the current modifying process
 		if (modifying != null && modifying.equals(pid)) {
 			modifying.abort();
@@ -149,7 +161,7 @@ public class UserProfileManager {
 	 */
 	public KeyPair getDefaultProtectionKey() throws GetFailedException {
 		if (defaultProtectionKey == null) {
-			UserProfile userProfile = getUserProfile(0, false);
+			UserProfile userProfile = getUserProfile(UUID.randomUUID().toString(), false);
 			defaultProtectionKey = userProfile.getProtectionKeys();
 		}
 		return defaultProtectionKey;
@@ -242,8 +254,10 @@ public class UserProfileManager {
 		 */
 		private void get(QueueEntry entry) {
 			logger.debug("Getting the user profile from the DHT");
-			DataManager dataManager = networkManager.getDataManager();
-			if (dataManager == null) {
+			DataManager dataManager;
+			try {
+				dataManager = networkManager.getDataManager();
+			} catch (NoPeerConnectionException e) {
 				entry.setGetError(new GetFailedException("Node is not connected to the network"));
 				return;
 			}
@@ -266,20 +280,18 @@ public class UserProfileManager {
 				logger.debug("Putting UserProfile into the DHT");
 
 				DataManager dataManager = networkManager.getDataManager();
-				if (dataManager == null) {
-					entry.setPutError(new PutFailedException("Node is not connected to the network"));
-					return;
-				}
-
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
-				boolean success = dataManager.put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE,
-						encryptedUserProfile, entry.getUserProfile().getProtectionKeys());
+				boolean success = dataManager.put(credentials.getProfileLocationKey(),
+						H2HConstants.USER_PROFILE, encryptedUserProfile, entry.getUserProfile()
+								.getProtectionKeys());
 				if (!success)
 					entry.setPutError(new PutFailedException("Put failed."));
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 				logger.error("Cannot encrypt the user profile.", e);
 				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
+			} catch (NoPeerConnectionException e) {
+				entry.setPutError(new PutFailedException("Node is not connected to the network"));
 			} finally {
 				entry.notifyPut();
 			}
@@ -287,17 +299,17 @@ public class UserProfileManager {
 	}
 
 	private class QueueEntry {
-		private final int pid;
+		private final String pid;
 		private final Object getWaiter;
 		private UserProfile userProfile; // got from DHT
 		private GetFailedException getFailedException;
 
-		public QueueEntry(int pid) {
+		public QueueEntry(String pid) {
 			this.pid = pid;
 			this.getWaiter = new Object();
 		}
 
-		public int getPid() {
+		public String getPid() {
 			return pid;
 		}
 
@@ -341,8 +353,8 @@ public class UserProfileManager {
 			this.userProfile = userProfile;
 		}
 
-		public boolean equals(int pid) {
-			return this.pid == pid;
+		public boolean equals(String pid) {
+			return this.pid.equals(pid);
 		}
 
 		public void processGetResult(NetworkContent content) {
@@ -383,7 +395,7 @@ public class UserProfileManager {
 		private final Object putWaiter;
 		private PutFailedException putFailedException;
 
-		public PutQueueEntry(int pid) {
+		public PutQueueEntry(String pid) {
 			super(pid);
 			putWaiter = new Object();
 			readyToPut = new AtomicBoolean(false);

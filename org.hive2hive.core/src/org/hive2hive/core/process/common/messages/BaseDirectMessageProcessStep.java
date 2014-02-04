@@ -2,6 +2,7 @@ package org.hive2hive.core.process.common.messages;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -37,9 +38,13 @@ abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 			requestMessage.setCallBackHandler(this);
 		}
 
-		boolean success = getNetworkManager().sendDirect(message, receiverPublicKey);
-		if (!success)
-			throw new SendFailedException();
+		try {
+			boolean success = getNetworkManager().getMessageManager().sendDirect(message, receiverPublicKey);
+			if (!success)
+				throw new SendFailedException();
+		} catch (NoPeerConnectionException e) {
+			throw new SendFailedException(e.getMessage());
+		}
 	}
 
 	@Override

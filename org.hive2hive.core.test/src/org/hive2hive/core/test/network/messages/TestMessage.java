@@ -2,9 +2,11 @@ package org.hive2hive.core.test.network.messages;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.test.H2HTestData;
+import org.junit.Assert;
 
 /**
  * This test message is used to put locally some content into the target node where the location key is equals
@@ -32,12 +34,17 @@ public class TestMessage extends BaseMessage {
 	public void run() {
 		Number160 lKey = Number160.createHash(networkManager.getNodeId());
 		Number160 cKey = Number160.createHash(contentKey);
-		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null).awaitUninterruptibly();
+		try {
+			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null)
+					.awaitUninterruptibly();
+		} catch (NoPeerConnectionException e) {
+			Assert.fail();
+		}
 	}
 
 	@Override
 	public AcceptanceReply accept() {
 		return AcceptanceReply.OK;
 	}
-	
+
 }

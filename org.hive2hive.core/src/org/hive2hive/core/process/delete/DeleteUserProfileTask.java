@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.PublicKey;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
@@ -17,7 +18,6 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.process.ProcessManager;
 
 /**
  * {@link UserProfileTask} that is pushed into the queue when a shared file is deleted. It removes the dead
@@ -38,7 +38,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		try {
 			H2HSession session = networkManager.getSession();
 
@@ -66,7 +66,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 */
 	private FileTreeNode updateUserProfile(UserProfileManager profileManager) throws GetFailedException,
 			PutFailedException {
-		int randomPID = ProcessManager.createRandomPseudoPID();
+		String randomPID = UUID.randomUUID().toString();
 
 		UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
 		FileTreeNode toDelete = userProfile.getFileById(fileKey);
@@ -117,7 +117,6 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * @param toDelete the {@link FileTreeNode} that has been deleted
 	 */
 	private void startNotification(FileTreeNode toDelete) {
-		PublicKey fileKey = toDelete.getKeyPair().getPublic();
 		PublicKey parentFileKey = toDelete.getParent().getKeyPair().getPublic();
 		String fileName = toDelete.getName();
 		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(fileKey, parentFileKey,

@@ -9,6 +9,7 @@ import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -40,6 +41,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	protected NetworkManager networkManager;
+	protected MessageManager messageManager;
 	protected PublicKey senderPublicKey;
 
 	protected final String messageID;
@@ -171,9 +173,11 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 * 
 	 * @param aNetworkManager
 	 *            the {@link NetworkManager} to be used by this message
+	 * @throws NoPeerConnectionException
 	 */
-	public void setNetworkManager(NetworkManager aNetworkManager) {
-		networkManager = aNetworkManager;
+	public void setNetworkManager(NetworkManager networkManager) throws NoPeerConnectionException {
+		this.networkManager = networkManager;
+		this.messageManager = networkManager.getMessageManager();
 	}
 
 	/**

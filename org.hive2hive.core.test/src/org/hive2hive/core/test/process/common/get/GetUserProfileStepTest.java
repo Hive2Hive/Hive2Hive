@@ -14,6 +14,7 @@ import net.tomp2p.peers.Number160;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.Process;
@@ -53,7 +54,8 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testStepSuccess() throws InterruptedException, InvalidKeySpecException, DataLengthException,
-			IllegalStateException, InvalidCipherTextException, ClassNotFoundException, IOException {
+			IllegalStateException, InvalidCipherTextException, ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager putter = network.get(0); // where the process runs
 
 		// create the needed objects

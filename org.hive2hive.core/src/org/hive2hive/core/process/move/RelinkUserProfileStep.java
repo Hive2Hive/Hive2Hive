@@ -98,11 +98,11 @@ public class RelinkUserProfileStep extends ProcessStep {
 				common.add(user);
 		}
 
-		PublicKey fileKey = movedNode.getKeyPair().getPublic();
+		PublicKey fileKey = movedNode.getFileKey();
 
 		// inform common users
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
-		PublicKey newParentKey = movedNode.getParent().getKeyPair().getPublic();
+		PublicKey newParentKey = movedNode.getParent().getFileKey();
 		getProcess().sendNotification(
 				new MoveNotificationMessageFactory(sourceName, destName, oldParentKey, newParentKey), common);
 

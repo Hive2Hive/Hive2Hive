@@ -3,10 +3,12 @@ package org.hive2hive.core.test.process.common.massages;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.messages.BaseMessageTest;
+import org.junit.Assert;
 
 /**
  * This test message is used to put locally some content into the target node which is given through the peer
@@ -35,12 +37,17 @@ public class TestDirectMessage extends BaseDirectMessage {
 	public void run() {
 		Number160 lKey = Number160.createHash(networkManager.getNodeId());
 		Number160 cKey = Number160.createHash(contentKey);
-		networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null).awaitUninterruptibly();
+		try {
+			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null)
+					.awaitUninterruptibly();
+		} catch (NoPeerConnectionException e) {
+			Assert.fail();
+		}
 	}
 
 	@Override
 	public AcceptanceReply accept() {
 		return AcceptanceReply.OK;
 	}
-	
+
 }

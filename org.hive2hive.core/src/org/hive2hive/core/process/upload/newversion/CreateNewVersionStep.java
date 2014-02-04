@@ -1,5 +1,8 @@
 package org.hive2hive.core.process.upload.newversion;
 
+import java.security.KeyPair;
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -35,9 +38,9 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		metaFile = (MetaFile) context.getMetaDocument();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
-				System.currentTimeMillis());
+				System.currentTimeMillis(), new ArrayList<KeyPair>());
 		metaFile.getVersions().add(newVersion);
-		context.setChunkKeys(newVersion.getChunkIds());
+		context.setChunkKeys(newVersion.getChunkKeys());
 
 		PutChunkStep putChunkStep = new PutChunkStep(new UpdateMetaFileStep());
 		getProcess().setNextStep(putChunkStep);

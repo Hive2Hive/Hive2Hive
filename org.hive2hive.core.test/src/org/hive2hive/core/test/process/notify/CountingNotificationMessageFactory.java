@@ -9,6 +9,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -36,7 +37,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 		testContentKeys = new ArrayList<String>();
 	}
 
-	public boolean allMsgsArrived() {
+	public boolean allMsgsArrived() throws NoPeerConnectionException {
 		return getSentMessageCount() == getArrivedMessageCount();
 	}
 
@@ -44,7 +45,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 		return testContentKeys.size();
 	}
 
-	public int getArrivedMessageCount() {
+	public int getArrivedMessageCount() throws NoPeerConnectionException {
 		int counter = 0;
 		for (String contentKey : testContentKeys) {
 			FutureGet futureGet = sender.getDataManager().get(Number160.createHash(sender.getNodeId()),

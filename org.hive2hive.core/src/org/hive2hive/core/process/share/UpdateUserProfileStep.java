@@ -40,7 +40,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			if (fileNode.isShared()) {
 				getProcess().stop(new IllegalStateException("Folder is already shared."));
 				return;
-			} else if (fileNode.hasShared()) {
+			} else if (fileNode.isSharedOrHasSharedChildren()) {
 				logger.error("Folder contains an shared folder.");
 				return;
 			}

@@ -10,6 +10,7 @@ import net.tomp2p.peers.Number160;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
@@ -48,7 +49,7 @@ public class RegisterTest extends H2HJUnitTest {
 
 	@Test
 	public void testRegisterProcessSuccess() throws ClassNotFoundException, IOException, DataLengthException,
-			IllegalStateException, InvalidCipherTextException {
+			IllegalStateException, InvalidCipherTextException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 		NetworkManager otherClient = network.get(1);
 
@@ -109,7 +110,7 @@ public class RegisterTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRegisterProcessProfileExists() {
+	public void testRegisterProcessProfileExists() throws NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();

@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HConstants;
@@ -168,6 +169,10 @@ public class NetworkTestUtil {
 	public static UserCredentials generateRandomCredentials() {
 		return new UserCredentials(NetworkTestUtil.randomString(), NetworkTestUtil.randomString(),
 				NetworkTestUtil.randomString());
+	}
+	
+	public static NetworkManager getRandomNode(List<NetworkManager> network){
+		return network.get(new Random().nextInt(network.size()));
 	}
 
 }

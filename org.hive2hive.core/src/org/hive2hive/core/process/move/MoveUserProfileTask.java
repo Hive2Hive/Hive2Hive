@@ -41,7 +41,7 @@ public class MoveUserProfileTask extends UserProfileTask {
 	}
 
 	@Override
-	public void run() {
+	public void start() {
 		try {
 			H2HSession session = networkManager.getSession();
 			int randomPID = ProcessManager.createRandomPseudoPID();

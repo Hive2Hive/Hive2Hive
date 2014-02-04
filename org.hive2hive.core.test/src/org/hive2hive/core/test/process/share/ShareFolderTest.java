@@ -78,11 +78,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 		FileUtils.deleteDirectory(fileManagerA.getRoot().toFile());
 		FileUtils.deleteDirectory(fileManagerB.getRoot().toFile());
 	}
-	
+
 	@Test
-	public void initiallizationTest(){
+	public void initiallizationTest() {
 		File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		
+
 		File file = new File(root, NetworkTestUtil.randomString());
 		try {
 			new ShareFolderProcess(file, "random", null);
@@ -91,9 +91,9 @@ public class ShareFolderTest extends H2HJUnitTest {
 		} catch (IllegalFileLocation | NoSessionException e) {
 			Assert.fail();
 		}
-		
+
 		File folder = new File(root, "folder1");
-		folder.mkdirs();		
+		folder.mkdirs();
 		try {
 			new ShareFolderProcess(folder, "random", network.get(0));
 		} catch (NoSessionException e) {
@@ -101,10 +101,10 @@ public class ShareFolderTest extends H2HJUnitTest {
 		} catch (IllegalFileLocation | IllegalArgumentException e) {
 			Assert.fail();
 		}
-		
+
 		File otherRoot = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		File otherFolder = new File(otherRoot, NetworkTestUtil.randomString());
-		otherFolder.mkdirs();		
+		otherFolder.mkdirs();
 		try {
 			network.get(0).setSession(new H2HSession(null, null, null, new FileManager(root.toPath())));
 			new ShareFolderProcess(otherFolder, "random", network.get(0));
@@ -113,7 +113,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		} catch (NoSessionException | IllegalArgumentException e) {
 			Assert.fail();
 		}
-		
+
 		try {
 			new ShareFolderProcess(root, "random", network.get(0));
 		} catch (IllegalFileLocation e) {
@@ -121,7 +121,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		} catch (NoSessionException | IllegalArgumentException e) {
 			Assert.fail();
 		}
-		
+
 		root.delete();
 		file.delete();
 		folder.delete();

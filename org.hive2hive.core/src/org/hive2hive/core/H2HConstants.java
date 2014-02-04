@@ -61,7 +61,7 @@ public interface H2HConstants {
 	public static final int GET_RETRIES = 3; // number of allowed tries to retry a get
 
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
-	public static final long CONTACT_PEERS_AWAIT_MS = 10000;
+	public static final int CONTACT_PEERS_AWAIT_MS = 10000;
 
 	public static final String USER_PROFILE_TASK_DOMAIN = "USER-PROFILE-TASK";
 

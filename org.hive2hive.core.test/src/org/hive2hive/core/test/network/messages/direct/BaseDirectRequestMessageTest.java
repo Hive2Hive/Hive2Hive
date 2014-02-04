@@ -10,6 +10,7 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -41,7 +42,8 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSendingDirectMessageWithRequest() throws ClassNotFoundException, IOException {
+	public void testSendingDirectMessageWithRequest() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
@@ -55,7 +57,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.sendDirect(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().sendDirect(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -78,7 +80,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 
 	@Test
 	public void testSendingDirectMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException,
-			IOException {
+			IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
@@ -92,7 +94,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.sendDirect(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().sendDirect(message, nodeB.getPublicKey()));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);

@@ -12,6 +12,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
@@ -54,7 +55,8 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccessful() throws InterruptedException, ClassNotFoundException, IOException {
+	public void testStepSuccessful() throws InterruptedException, ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
@@ -93,7 +95,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException {
+	public void testStepRollback() throws InterruptedException, NoPeerConnectionException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored

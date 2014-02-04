@@ -9,7 +9,6 @@ import net.tomp2p.futures.FutureSend;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
@@ -35,7 +34,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 
 	private final BaseMessage message;
 	private final PublicKey receiverPublicKey;
-	private final NetworkManager networkManager;
+	private final MessageManager messageManager;
 	private final CountDownLatch latch;
 	private DeliveryState state;
 
@@ -54,10 +53,10 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	 *            reference needed for re-sending)
 	 */
 	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey,
-			NetworkManager networkManager) {
+			MessageManager messageManager) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
-		this.networkManager = networkManager;
+		this.messageManager = messageManager;
 		this.latch = new CountDownLatch(1);
 	}
 
@@ -82,7 +81,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 				return false;
 			case RESEND:
 				// resend is recommended
-				return networkManager.send(message, receiverPublicKey);
+				return messageManager.send(message, receiverPublicKey);
 			default:
 				// invalid state
 				logger.error("The sending procedure has not finished, but the lock has already been released");

@@ -2,6 +2,7 @@ package org.hive2hive.core.process.common.put;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -39,11 +40,14 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		this.content = content;
 		this.protectionKey = protectionKey;
 
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
 			getProcess().stop("Node is not connected.");
 			throw new PutFailedException("Node is not connected");
 		}
+
 		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
 		putPerformed = true;
 
@@ -60,8 +64,10 @@ public abstract class BasePutProcessStep extends ProcessStep {
 			return;
 		}
 
-		DataManager dataManager = getNetworkManager().getDataManager();
-		if (dataManager == null) {
+		DataManager dataManager;
+		try {
+			dataManager = getNetworkManager().getDataManager();
+		} catch (NoPeerConnectionException e) {
 			logger.warn(String
 					.format("Roll back of put failed. No connection. location key = '%s' content key = '%s' version key = '%s'",
 							locationKey, contentKey, content.getVersionKey()));

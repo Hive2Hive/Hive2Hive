@@ -30,19 +30,22 @@ public interface IRequestMessage {
 	 * @return the callback handler (if set)
 	 */
 	public IResponseCallBackHandler getCallBackHandler();
-	
+
 	/**
-	 * Configures the {@link ResponseMessage} for this {@link RoutedRequestMessage} with the correct message ID
+	 * Configures the {@link ResponseMessage} for this {@link RoutedRequestMessage} with the correct message
+	 * ID
 	 * and receiver address.
 	 * 
 	 * @param content The content of the response.
 	 * @return The configured {@link ResponseMessage}.
 	 */
 	public ResponseMessage createResponse(Serializable content);
-	
+
 	/**
 	 * Sends the {@link ResponseMessage} <b>directly</b> to its requester.
-	 * @param response The {@link ResponseMessage} created with {@link RoutedRequestMessage#createResponse(Serializable)}.
+	 * 
+	 * @param response The {@link ResponseMessage} created with
+	 *            {@link RoutedRequestMessage#createResponse(Serializable)}.
 	 */
 	public void sendDirectResponse(ResponseMessage response);
 
