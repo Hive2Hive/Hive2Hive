@@ -2,8 +2,10 @@ package org.hive2hive.core;
 
 import java.nio.file.Path;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -28,8 +30,9 @@ public interface IUserManagement {
 	 * @param credentials The user's credentials with which it shall be logged in.
 	 * @param rootPath The user's root path to his files
 	 * @return Returns an observable login process.
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess login(UserCredentials credentials, Path rootPath);
+	IProcessComponent login(UserCredentials credentials, Path rootPath) throws NoPeerConnectionException;
 
 	/**
 	 * Initiates and returns a logout process.

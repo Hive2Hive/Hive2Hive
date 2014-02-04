@@ -4,7 +4,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.login.SessionParameters;
+import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HSession {

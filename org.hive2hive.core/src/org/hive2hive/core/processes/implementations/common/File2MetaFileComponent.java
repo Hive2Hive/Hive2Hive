@@ -7,7 +7,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.login.GetUserProfileStep;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideKeyPair;
@@ -15,8 +14,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IProvideM
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 
 /**
- * Finds a given file in the user profile and gets the appropriate meta data. Note that a
- * {@link GetUserProfileStep} must be run before this step is run.
+ * Finds a given file in the user profile and gets the appropriate meta data.
  * 
  * @author Nico, Seppi
  */

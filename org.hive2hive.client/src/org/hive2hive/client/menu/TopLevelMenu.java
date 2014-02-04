@@ -11,9 +11,12 @@ import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.IH2HNodeStatus;
 import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
+import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
  * The top-level menu of the {@link ConsoleClient}.
@@ -83,8 +86,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() {
-				IProcess process = nodeMenu.getH2HNode().getUserManagement()
+			protected void execute() throws NoPeerConnectionException {
+				IProcessComponent process = nodeMenu.getH2HNode().getUserManagement()
 						.login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
 			}
@@ -226,6 +229,22 @@ public final class TopLevelMenu extends ConsoleMenu {
 	private void executeBlocking(IProcess process) {
 		ProcessListener processListener = new ProcessListener();
 		process.addListener(processListener);
+
+		while (!processListener.hasFinished()) {
+			// busy waiting
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	/**
+	 * Executes the given process (autostart anyhow) and blocks until it is done
+	 */
+	private void executeBlocking(IProcessComponent process) {
+		ProcessComponentListener processListener = new ProcessComponentListener();
+		process.attachListener(processListener);
 
 		while (!processListener.hasFinished()) {
 			// busy waiting

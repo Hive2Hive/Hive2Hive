@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.login;
+package org.hive2hive.core.processes.implementations.login;
 
 import java.security.KeyPair;
 

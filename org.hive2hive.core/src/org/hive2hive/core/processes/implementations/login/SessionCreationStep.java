@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.implementations.login;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;

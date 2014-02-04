@@ -6,7 +6,9 @@ import java.security.KeyPair;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IFileConfiguration;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileTreeNode;
@@ -21,14 +23,10 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
-import org.hive2hive.core.process.context.IGetUserProfileContext;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
-import org.hive2hive.core.process.login.GetUserProfileStep;
-import org.hive2hive.core.process.login.LoginProcess;
-import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.register.PutUserProfileStep;
 import org.hive2hive.core.process.register.RegisterProcess;
@@ -38,7 +36,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
-import org.hive2hive.core.test.integration.TestFileConfiguration;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.Assert;
 
 /**
@@ -111,36 +109,24 @@ public class ProcessTestUtil {
 		return register.getContext().getUserProfile();
 	}
 
+	@Deprecated
 	public static UserProfile login(UserCredentials credentials, NetworkManager networkManager, File root) {
-		SessionParameters sessionParameters = new SessionParameters();
-		sessionParameters.setFileConfig(new TestFileConfiguration());
-		sessionParameters.setFileManager(new FileManager(root.toPath()));
-		sessionParameters.setProfileManager(new UserProfileManager(networkManager, credentials));
-		LoginProcess login = new LoginProcess(credentials, sessionParameters, networkManager);
-		executeProcess(login);
+		try {
+			UseCaseTestUtil.login(credentials, networkManager, root);
+		} catch (NoPeerConnectionException e) {
+			return null;
+		}
 
-		return login.getContext().getUserProfile();
+		return getUserProfile(networkManager, credentials);
 	}
 
+	@Deprecated
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials) {
-		IGetUserProfileContext context = new IGetUserProfileContext() {
-
-			private UserProfile userProfile;
-
-			@Override
-			public void setUserProfile(UserProfile userProfile) {
-				this.userProfile = userProfile;
-			}
-
-			@Override
-			public UserProfile getUserProfile() {
-				return userProfile;
-			}
-		};
-
-		GetUserProfileStep step = new GetUserProfileStep(credentials, context, null);
-		executeStep(networkManager, step);
-		return context.getUserProfile();
+		try {
+			return UseCaseTestUtil.getUserProfile(networkManager, credentials);
+		} catch (GetFailedException e) {
+			return null;
+		}
 	}
 
 	public static void putUserProfile(NetworkManager networkManager, UserProfile profile,

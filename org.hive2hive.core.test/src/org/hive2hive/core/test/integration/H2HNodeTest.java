@@ -8,14 +8,18 @@ import java.util.Random;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.IH2HNode;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.process.TestProcessListener;
+import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -53,7 +57,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void testRegisterLogin() throws IOException {
+	public void testRegisterLogin() throws IOException, NoPeerConnectionException {
 		credentials = NetworkTestUtil.generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
@@ -69,15 +73,11 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		rootDirectory = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcess loginProcess = loggedInNode.getUserManagement().login(credentials, rootDirectory.toPath());
-		listener = new TestProcessListener();
-		loginProcess.addListener(listener);
-
-		// wait for the process to finish
-		waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		IProcessComponent loginProcess = loggedInNode.getUserManagement().login(credentials,
+				rootDirectory.toPath());
+		TestProcessComponentListener loginListener = new TestProcessComponentListener();
+		loginProcess.attachListener(loginListener);
+		UseCaseTestUtil.waitTillSucceded(loginListener, 20);
 	}
 
 	@Test
@@ -123,7 +123,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddFileTree() throws IOException, IllegalFileLocation, NoSessionException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			NoPeerConnectionException {
 		// /folder1/test1.txt
 		// /folder1/folder2/test2.txt
 		File folder1 = new File(rootDirectory, "folder1");
@@ -155,15 +156,10 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// then start 2nd client and login
 		File rootUser2 = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
-		IProcess loginProcess = newNode.getUserManagement().login(credentials, rootUser2.toPath());
-		listener = new TestProcessListener();
-		loginProcess.addListener(listener);
-
-		// wait for the process to finish
-		waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		IProcessComponent loginProcess = newNode.getUserManagement().login(credentials, rootUser2.toPath());
+		TestProcessComponentListener loginListener = new TestProcessComponentListener();
+		loginProcess.attachListener(loginListener);
+		UseCaseTestUtil.waitTillSucceded(loginListener, 20);
 
 		// wait for the post-loginprocess to finish
 		waiter = new H2HWaiter(60);

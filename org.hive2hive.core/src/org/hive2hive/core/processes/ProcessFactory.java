@@ -15,7 +15,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -66,6 +65,7 @@ import org.hive2hive.core.processes.implementations.files.update.UpdateMD5inUser
 import org.hive2hive.core.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.core.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.core.processes.implementations.login.SessionCreationStep;
+import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.processes.implementations.login.SynchronizeFilesStep;
 import org.hive2hive.core.processes.implementations.logout.RemoveOwnLocationsStep;
 import org.hive2hive.core.processes.implementations.notify.GetAllLocationsStep;

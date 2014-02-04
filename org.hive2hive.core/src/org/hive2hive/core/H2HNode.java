@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.IllegalProcessStateException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
@@ -19,8 +20,6 @@ import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.login.LoginProcess;
-import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
@@ -31,6 +30,11 @@ import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
+import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -99,6 +103,15 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		}
 	}
 
+	private void autoStartProcess(IProcessComponent process) {
+		try {
+			if (autostartProcesses)
+				process.start();
+		} catch (InvalidProcessStateException e) {
+			// ignore
+		}
+	}
+
 	@Override
 	public IFileConfiguration getFileConfiguration() {
 		return this;
@@ -142,14 +155,15 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess login(UserCredentials credentials, Path rootPath) {
+	public IProcessComponent login(UserCredentials credentials, Path rootPath)
+			throws NoPeerConnectionException {
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setProfileManager(new UserProfileManager(networkManager, credentials));
 		sessionParameters.setFileManager(new FileManager(rootPath));
 		sessionParameters.setFileConfig(H2HNode.this);
 
-		LoginProcess loginProcess = new LoginProcess(credentials, sessionParameters, networkManager);
-
+		ProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials,
+				sessionParameters, networkManager);
 		autoStartProcess(loginProcess);
 		return loginProcess;
 	}
