@@ -8,7 +8,7 @@ public class BusyFailingStep extends FailingProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		
 		// super busy
-		TestUtil.wait(10000);
+		TestUtil.wait(3000);
 
 		super.doExecute();
 	}
