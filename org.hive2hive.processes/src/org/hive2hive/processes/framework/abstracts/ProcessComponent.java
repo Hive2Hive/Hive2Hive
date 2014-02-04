@@ -91,6 +91,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
 					reason.getMessage()));
 
+			// TODO wait for doExecute() to complete
 			doRollback(reason);
 		}
 

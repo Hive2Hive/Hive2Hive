@@ -1,7 +1,6 @@
 package org.hive2hive.processes.framework.interfaces;
 
 import org.hive2hive.processes.framework.ProcessState;
-import org.hive2hive.processes.framework.abstracts.Process;
 
 public interface IProcessComponent extends IControllable {
 
@@ -14,9 +13,5 @@ public interface IProcessComponent extends IControllable {
 	double getProgress();
 
 	ProcessState getState();
-	
-	void setParent(Process parent);
-	
-	Process getParent();
 	
 }

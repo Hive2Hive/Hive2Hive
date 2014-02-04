@@ -3,18 +3,25 @@ package org.hive2hive.processes.framework.decorators;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.processes.framework.abstracts.ProcessDecorator;
 import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException;
 
 public class AsyncComponent extends ProcessDecorator implements Callable<Boolean> {
-
+	
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
+
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AsyncComponent.class);
 	
 	private final ExecutorService executor;
+	private Future<Boolean> handle;
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
@@ -26,7 +33,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	public void start() throws InvalidProcessStateException {
 		super.start();
 
-		executor.submit(this);
+		handle = executor.submit(this);
 	}
 
 	@Override
@@ -40,6 +47,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 		}
 		;
 
+		logger.debug("Starting async component...");
 		decoratedComponent.start();
 		return true;
 	}
@@ -60,9 +68,29 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 
 	@Override
 	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
-		super.cancel(reason);
+		
+		// only called from outside (this is the AsyncComponent, not the decorated component)
+		// decorated component handles itself
+		// TODO but who tells AsyncComponents parent that failed?
 
+		logger.debug(Thread.currentThread().getName());
+		
+		// cancel async thread
+		if (!handle.isDone()) {
+			logger.debug("Cancelling async thread.");
+			handle.cancel(true); // TODO does the thread really need to be killed? or just awaited?
+		}
+		try {
+			executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			logger.error(e);
+		}
+		
+		// sync again
 		decoratedComponent.cancel(reason);
+
+		super.cancel(reason);
 	}
 
 	@Override

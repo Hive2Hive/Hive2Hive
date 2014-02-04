@@ -9,6 +9,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.hive2hive.core.log.H2HLogger;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.processes.framework.ProcessState;
 import org.hive2hive.processes.framework.RollbackReason;
 import org.hive2hive.processes.framework.abstracts.Process;
@@ -17,6 +19,8 @@ import org.hive2hive.processes.framework.exceptions.InvalidProcessStateException
 
 public class SequentialProcess extends Process {
 
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SequentialProcess.class);
+	
 	List<ProcessComponent> components = new ArrayList<ProcessComponent>();
 
 	private int executionIndex = 0;
@@ -36,7 +40,7 @@ public class SequentialProcess extends Process {
 
 		// wait for all child components
 		if (getState() == ProcessState.RUNNING) {
-			waitForAll();
+			waitForAllAsync("Waiting for all async components to finish execution.");
 		}
 	}
 
@@ -66,7 +70,7 @@ public class SequentialProcess extends Process {
 
 		// wait for all child components
 		if (getState() == ProcessState.ROLLBACKING) {
-			waitForAll();
+			waitForAllAsync("Waiting for all async components to finish rollback.");
 		}
 	}
 
@@ -91,8 +95,10 @@ public class SequentialProcess extends Process {
 	}
 
 	// TODO this method could also be implemented as decorator if necessary
-	private void waitForAll() {
+	private void waitForAllAsync(final String message) {
 
+		logger.debug("Starting " + message);
+		
 		// if all child sync, then already completed
 		if (checkIfAllFinished())
 			return;
@@ -103,6 +109,7 @@ public class SequentialProcess extends Process {
 		ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
+				logger.debug(message);
 				if (checkIfAllFinished() || getState() != ProcessState.RUNNING) {
 					latch.countDown();
 				}
@@ -119,7 +126,9 @@ public class SequentialProcess extends Process {
 
 	private boolean checkIfAllFinished() {
 		for (ProcessComponent component : components) {
-			if (component.getState() != ProcessState.SUCCEEDED && component.getState() != ProcessState.FAILED)
+			if (component.getState() == ProcessState.RUNNING)
+				return false;
+			if (component.getState() == ProcessState.ROLLBACKING)
 				return false;
 		}
 		return true;
