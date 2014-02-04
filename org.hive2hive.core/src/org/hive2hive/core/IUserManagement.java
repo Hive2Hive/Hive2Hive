@@ -4,7 +4,6 @@ import java.nio.file.Path;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -39,7 +38,8 @@ public interface IUserManagement {
 	 * Initiates and returns a logout process.
 	 * 
 	 * @return the observable logout process.
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess logout() throws NoSessionException;
+	IProcessComponent logout() throws NoSessionException, NoPeerConnectionException;
 
 }

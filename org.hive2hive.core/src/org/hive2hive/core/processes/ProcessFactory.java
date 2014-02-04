@@ -145,9 +145,10 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public IProcessComponent createLogoutProcess(H2HSession session, NetworkManager networkManager)
-			throws NoPeerConnectionException {
+	public IProcessComponent createLogoutProcess(NetworkManager networkManager)
+			throws NoPeerConnectionException, NoSessionException {
 		DataManager dataManager = networkManager.getDataManager();
+		H2HSession session = networkManager.getSession();
 		LogoutProcessContext context = new LogoutProcessContext(session);
 
 		// process composition
@@ -269,8 +270,8 @@ public final class ProcessFactory {
 			process.add(new DeleteFromParentMetaStep(context, dataManager));
 		}
 
-		process.add(new org.hive2hive.core.processes.implementations.files.delete.PrepareNotificationStep(context,
-				networkManager.getUserId()));
+		process.add(new org.hive2hive.core.processes.implementations.files.delete.PrepareNotificationStep(
+				context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;

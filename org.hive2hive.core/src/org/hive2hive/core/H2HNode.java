@@ -19,8 +19,6 @@ import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.delete.DeleteFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
-import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.process.recover.RecoverFileProcess;
@@ -30,9 +28,11 @@ import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.process.util.FileRecursionUtil;
 import org.hive2hive.core.process.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -168,17 +168,29 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess logout() throws NoSessionException {
-		LogoutProcess logoutProcess = new LogoutProcess(networkManager);
-		logoutProcess.addListener(new IProcessListener() {
+	public IProcessComponent logout() throws NoSessionException, NoPeerConnectionException {
+		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
+		logoutProcess.attachListener(new IProcessComponentListener() {
+
+			private boolean done = false;
+
 			@Override
-			public void onSuccess() {
-				postLogoutWork();
+			public void onSucceeded() {
+				onFinished();
 			}
 
 			@Override
-			public void onFail(Exception error) {
-				postLogoutWork();
+			public void onFinished() {
+				if (!done) {
+					done = true;
+					postLogoutWork();
+				}
+
+			}
+
+			@Override
+			public void onFailed(RollbackReason reason) {
+				onFinished();
 			}
 		});
 

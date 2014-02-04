@@ -212,7 +212,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void execute() throws Hive2HiveException {
-				IProcess process = nodeMenu.getH2HNode().getUserManagement().logout();
+				IProcessComponent process = nodeMenu.getH2HNode().getUserManagement().logout();
 				executeBlocking(process);
 			}
 		});

@@ -177,16 +177,9 @@ public class H2HNodeTest extends H2HJUnitTest {
 	}
 
 	@After
-	public void logoutAndUnregister() throws NoSessionException {
-		IProcess process = loggedInNode.getUserManagement().logout();
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+	public void logoutAndUnregister() throws NoSessionException, NoPeerConnectionException {
+		IProcessComponent process = loggedInNode.getUserManagement().logout();
+		UseCaseTestUtil.executeProcess(process);
 
 		// TODO unregister
 	}
