@@ -158,22 +158,22 @@ public class UpdateFileTest extends H2HJUnitTest {
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
 			@Override
-			public int getMaxSizeAllVersions() {
+			public long getMaxSizeAllVersions() {
 				return Integer.MAX_VALUE;
 			}
 
 			@Override
-			public int getMaxNumOfVersions() {
+			public long getMaxNumOfVersions() {
 				return 1;
 			}
 
 			@Override
-			public int getMaxFileSize() {
+			public long getMaxFileSize() {
 				return Integer.MAX_VALUE;
 			}
 
 			@Override
-			public int getChunkSize() {
+			public long getChunkSize() {
 				return H2HConstants.DEFAULT_CHUNK_SIZE;
 			}
 		};
@@ -208,22 +208,22 @@ public class UpdateFileTest extends H2HJUnitTest {
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
 			@Override
-			public int getMaxSizeAllVersions() {
-				return (int) fileSize;
+			public long getMaxSizeAllVersions() {
+				return fileSize;
 			}
 
 			@Override
-			public int getMaxNumOfVersions() {
-				return Integer.MAX_VALUE;
+			public long getMaxNumOfVersions() {
+				return Long.MAX_VALUE;
 			}
 
 			@Override
-			public int getMaxFileSize() {
-				return Integer.MAX_VALUE;
+			public long getMaxFileSize() {
+				return Long.MAX_VALUE;
 			}
 
 			@Override
-			public int getChunkSize() {
+			public long getChunkSize() {
 				return H2HConstants.DEFAULT_CHUNK_SIZE;
 			}
 		};

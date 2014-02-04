@@ -73,7 +73,8 @@ public class PutChunksStep extends BasePutProcessStep {
 		}
 
 		long offset = 0;
-		byte[] data = new byte[context.getH2HSession().getFileConfiguration().getChunkSize()];
+		// TODO check if the cast is ok!
+		byte[] data = new byte[(int) context.getH2HSession().getFileConfiguration().getChunkSize()];
 		int read = 1;
 
 		do {
