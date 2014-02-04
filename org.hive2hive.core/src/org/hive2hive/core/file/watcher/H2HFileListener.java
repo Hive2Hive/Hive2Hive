@@ -84,7 +84,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void modifyFile(File file) {
 		try {
 			node.getFileManagement().update(file);
-		} catch (IllegalArgumentException | NoSessionException e) {
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
 			logger.error(e.getMessage());
 		}
 	}

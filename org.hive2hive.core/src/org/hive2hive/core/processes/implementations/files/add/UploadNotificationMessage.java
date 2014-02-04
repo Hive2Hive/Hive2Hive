@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.upload;
+package org.hive2hive.core.processes.implementations.files.add;
 
 import java.security.PublicKey;
 

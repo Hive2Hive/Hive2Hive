@@ -35,8 +35,10 @@ public interface IFileManagement {
 	 * 
 	 * @param file the file to be updated
 	 * @return an observable update process
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess update(File file) throws NoSessionException, IllegalArgumentException;
+	IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
+			NoPeerConnectionException;
 
 	/**
 	 * Moves a file from source to destination

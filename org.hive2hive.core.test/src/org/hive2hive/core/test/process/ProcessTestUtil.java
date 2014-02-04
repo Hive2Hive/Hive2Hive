@@ -27,7 +27,6 @@ import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
-import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.security.UserCredentials;
@@ -231,14 +230,11 @@ public class ProcessTestUtil {
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config)
 			throws IllegalArgumentException {
-		networkManager.setSession(new H2HSession(EncryptionUtil
-				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-
+		login(profileManager.getUserCredentials(), networkManager, fileManager.getRoot().toFile());
 		try {
-			NewVersionProcess process = new NewVersionProcess(file, networkManager);
-			executeProcess(process);
-		} catch (NoSessionException e) {
-			// never happens because session is set before
+			UseCaseTestUtil.uploadNewVersion(networkManager, file);
+		} catch (NoSessionException | NoPeerConnectionException e) {
+			Assert.fail();
 		}
 	}
 

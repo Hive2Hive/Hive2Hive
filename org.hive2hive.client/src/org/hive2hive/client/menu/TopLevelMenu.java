@@ -139,7 +139,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Update File") {
 			protected void execute() throws Hive2HiveException {
-				IProcess process = nodeMenu.getH2HNode().getFileManagement().update(askForFile(true));
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
+						.update(askForFile(true));
 				executeBlocking(process);
 			}
 		});

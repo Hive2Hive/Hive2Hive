@@ -22,7 +22,6 @@ import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.process.recover.RecoverFileProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
-import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -230,8 +229,9 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess update(File file) throws NoSessionException, IllegalArgumentException {
-		NewVersionProcess process = new NewVersionProcess(file, networkManager);
+	public IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
+			NoPeerConnectionException {
+		ProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 		autoStartProcess(process);
 		return process;
 	}

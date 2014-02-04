@@ -8,7 +8,6 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.process.upload.UploadNotificationMessage;
 
 public class UploadNotificationMessageFactory extends BaseNotificationMessageFactory {
 
@@ -17,6 +16,7 @@ public class UploadNotificationMessageFactory extends BaseNotificationMessageFac
 
 	/**
 	 * @param fileTreeNode the file that has been added
+	 * @param parentKey the new parent's public key
 	 */
 	public UploadNotificationMessageFactory(FileTreeNode fileTreeNode, PublicKey parentKey) {
 		this.fileTreeNode = fileTreeNode;

@@ -23,11 +23,11 @@ import org.hive2hive.core.test.process.common.put.PutUserProfileStepTest;
 import org.hive2hive.core.test.process.common.remove.BaseRemoveProcessStepTest;
 import org.hive2hive.core.test.process.files.DeleteFileTest;
 import org.hive2hive.core.test.process.files.MoveFileTest;
-import org.hive2hive.core.test.process.files.NewVersionTest;
 import org.hive2hive.core.test.process.files.RecoverFileTest;
 import org.hive2hive.core.test.process.manager.ProcessManagerTest;
 import org.hive2hive.core.test.processes.implementations.files.AddFileTest;
 import org.hive2hive.core.test.processes.implementations.files.DownloadFileTest;
+import org.hive2hive.core.test.processes.implementations.files.UpdateFileTest;
 import org.hive2hive.core.test.processes.implementations.login.LoginTest;
 import org.hive2hive.core.test.processes.implementations.logout.LogoutTest;
 import org.hive2hive.core.test.processes.implementations.register.RegisterProcessTest;
@@ -71,7 +71,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		RegisterProcessTest.class, LoginTest.class, LogoutTest.class,
 
 		// Process: Upload and download
-		AddFileTest.class, NewVersionTest.class, DownloadFileTest.class,
+		AddFileTest.class, UpdateFileTest.class, DownloadFileTest.class,
 
 		// Process: Delete
 		DeleteFileTest.class,

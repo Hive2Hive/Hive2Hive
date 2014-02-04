@@ -13,7 +13,7 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.upload.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
 
 public class RelinkUserProfileStep extends ProcessStep {
@@ -115,7 +115,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 		// inform users that have now access to the moved file
 		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
 		destination.removeAll(common);
-		getProcess().sendNotification(new UploadNotificationMessageFactory(fileKey), destination);
+		getProcess().sendNotification(new UploadNotificationMessageFactory(movedNode, newParentKey),
+				destination);
 	}
 
 	@Override
