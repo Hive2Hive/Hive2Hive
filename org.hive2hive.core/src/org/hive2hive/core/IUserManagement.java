@@ -21,8 +21,9 @@ public interface IUserManagement {
 	 * 
 	 * @param credentials The user's credentials with which it shall be registered.
 	 * @return Returns an observable register process.
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess register(UserCredentials credentials);
+	IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
 	 * Initiates and returns a login process.

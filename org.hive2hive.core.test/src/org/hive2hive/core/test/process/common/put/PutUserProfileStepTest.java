@@ -1,6 +1,5 @@
 package org.hive2hive.core.test.process.common.put;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -18,16 +17,16 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.register.PutUserProfileStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
+import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -64,20 +63,8 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
 
 		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		PutUserProfileStep step = new PutUserProfileStep(testProfile, credentials, null);
-		process.setNextStep(step);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasFailed());
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		PutUserProfileStep step = new PutUserProfileStep(credentials, testProfile, putter.getDataManager());
+		UseCaseTestUtil.executeProcess(step);
 
 		// get the user profile which should be stored at the proxy
 		FutureGet global = client.getDataManager().get(
@@ -98,7 +85,8 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException, NoPeerConnectionException {
+	public void testStepRollback() throws InterruptedException, NoPeerConnectionException,
+			InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
@@ -109,20 +97,12 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
 
 		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		PutUserProfileStep step = new PutUserProfileStep(testProfile, credentials, null);
-		process.setNextStep(step);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
+		PutUserProfileStep step = new PutUserProfileStep(credentials, testProfile, putter.getDataManager());
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		step.attachListener(listener);
+		step.start();
 
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(10);
-		do {
-			assertFalse(listener.hasSucceeded());
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		UseCaseTestUtil.waitTillFailed(listener, 20);
 
 		// get the locations which should be stored at the proxy --> they should be null
 		FutureGet futureGet = proxy.getDataManager().get(

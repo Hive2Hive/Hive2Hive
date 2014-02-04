@@ -24,7 +24,6 @@ import org.hive2hive.core.process.logout.LogoutProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.process.recover.RecoverFileProcess;
-import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
@@ -147,11 +146,11 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess register(UserCredentials credentials) {
-		final RegisterProcess process = new RegisterProcess(credentials, networkManager);
-
-		autoStartProcess(process);
-		return process;
+	public IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException {
+		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
+				networkManager);
+		autoStartProcess(registerProcess);
+		return registerProcess;
 	}
 
 	@Override

@@ -28,8 +28,6 @@ import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
-import org.hive2hive.core.process.register.PutUserProfileStep;
-import org.hive2hive.core.process.register.RegisterProcess;
 import org.hive2hive.core.process.upload.newfile.NewFileProcess;
 import org.hive2hive.core.process.upload.newversion.NewVersionProcess;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -103,10 +101,15 @@ public class ProcessTestUtil {
 		waitTillSucceded(listener, 60);
 	}
 
+	@Deprecated
 	public static UserProfile register(UserCredentials credentials, NetworkManager networkManager) {
-		RegisterProcess register = new RegisterProcess(credentials, networkManager);
-		executeProcess(register);
-		return register.getContext().getUserProfile();
+		try {
+			UseCaseTestUtil.register(credentials, networkManager);
+		} catch (NoPeerConnectionException e) {
+			Assert.fail(e.getMessage());
+		}
+
+		return getUserProfile(networkManager, credentials);
 	}
 
 	@Deprecated
@@ -114,6 +117,7 @@ public class ProcessTestUtil {
 		try {
 			UseCaseTestUtil.login(credentials, networkManager, root);
 		} catch (NoPeerConnectionException e) {
+			Assert.fail(e.getMessage());
 			return null;
 		}
 
@@ -125,14 +129,9 @@ public class ProcessTestUtil {
 		try {
 			return UseCaseTestUtil.getUserProfile(networkManager, credentials);
 		} catch (GetFailedException e) {
+			Assert.fail(e.getMessage());
 			return null;
 		}
-	}
-
-	public static void putUserProfile(NetworkManager networkManager, UserProfile profile,
-			UserCredentials credentials) {
-		PutUserProfileStep step = new PutUserProfileStep(profile, credentials, null);
-		executeStep(networkManager, step);
 	}
 
 	public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {

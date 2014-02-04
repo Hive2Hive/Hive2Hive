@@ -120,8 +120,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() {
-				IProcess process = nodeMenu.getH2HNode().getUserManagement()
+			protected void execute() throws NoPeerConnectionException {
+				IProcessComponent process = nodeMenu.getH2HNode().getUserManagement()
 						.register(userMenu.getUserCredentials());
 				executeBlocking(process);
 			}

@@ -28,7 +28,8 @@ import org.hive2hive.core.test.process.files.NewFileTest;
 import org.hive2hive.core.test.process.files.NewVersionTest;
 import org.hive2hive.core.test.process.files.RecoverFileTest;
 import org.hive2hive.core.test.process.manager.ProcessManagerTest;
-import org.hive2hive.core.test.process.register.RegisterTest;
+import org.hive2hive.core.test.processes.implementations.login.LoginTest;
+import org.hive2hive.core.test.processes.implementations.register.RegisterProcessTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -65,8 +66,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		// ProcessStep, Common, Message
 		BaseMessageProcessStepTest.class, BaseDirectMessageProcessStepTest.class,
 
-		// Process: Register
-		RegisterTest.class,
+		// Process: Register, Login
+		RegisterProcessTest.class, LoginTest.class,
 
 		// Process: Upload and download
 		NewFileTest.class, NewVersionTest.class, DownloadFileTest.class,

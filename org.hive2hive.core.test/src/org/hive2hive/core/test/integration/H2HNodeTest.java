@@ -61,15 +61,10 @@ public class H2HNodeTest extends H2HJUnitTest {
 		credentials = NetworkTestUtil.generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcess registerProcess = registerNode.getUserManagement().register(credentials);
-		TestProcessListener listener = new TestProcessListener();
-		registerProcess.addListener(listener);
-
-		// wait for the process to finish
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
+		IProcessComponent registerProcess = registerNode.getUserManagement().register(credentials);
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		registerProcess.attachListener(listener);
+		UseCaseTestUtil.waitTillSucceded(listener, 20);
 
 		rootDirectory = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
