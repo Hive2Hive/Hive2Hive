@@ -19,8 +19,6 @@ import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
-import org.hive2hive.core.process.recover.IVersionSelector;
-import org.hive2hive.core.process.recover.RecoverFileProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -28,6 +26,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
@@ -269,10 +268,10 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess recover(File file, IVersionSelector versionSelector) throws NoSessionException,
-			FileNotFoundException {
-		RecoverFileProcess process = new RecoverFileProcess(networkManager, file, versionSelector);
-
+	public ProcessComponent recover(File file, IVersionSelector versionSelector) throws NoSessionException,
+			FileNotFoundException, IllegalArgumentException, NoPeerConnectionException {
+		ProcessComponent process = ProcessFactory.instance().createRecoverFileProcess(file, versionSelector,
+				networkManager);
 		autoStartProcess(process);
 		return process;
 	}

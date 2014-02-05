@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.recover;
+package org.hive2hive.core.processes.implementations.files.recover;
 
 import java.util.List;
 
