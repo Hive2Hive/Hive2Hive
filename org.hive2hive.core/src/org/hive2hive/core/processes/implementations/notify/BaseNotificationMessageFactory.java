@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.notify;
+package org.hive2hive.core.processes.implementations.notify;
 
 import net.tomp2p.peers.PeerAddress;
 

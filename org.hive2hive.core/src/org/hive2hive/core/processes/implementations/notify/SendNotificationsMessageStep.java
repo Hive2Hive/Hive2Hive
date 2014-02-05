@@ -14,7 +14,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;

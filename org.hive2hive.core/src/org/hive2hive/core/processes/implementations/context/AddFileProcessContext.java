@@ -8,12 +8,12 @@ import java.util.Set;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 public class AddFileProcessContext implements IConsumeProtectionKeys, IProvideProtectionKeys,
 		IConsumeMetaDocument, IConsumeNotificationFactory, IProvideNotificationFactory {

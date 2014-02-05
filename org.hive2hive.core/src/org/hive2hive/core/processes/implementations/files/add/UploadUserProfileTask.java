@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
@@ -62,7 +63,11 @@ public class UploadUserProfileTask extends UserProfileTask {
 			logger.error("Could not start the download of the newly shared file");
 		}
 
-		notifyOtherClients(new UploadNotificationMessageFactory(fileTreeNode, parentKey));
-		logger.debug("Notified other clients that a file has been updated by another user");
+		try {
+			notifyOtherClients(new UploadNotificationMessageFactory(fileTreeNode, parentKey));
+			logger.debug("Notified other clients that a file has been updated by another user");
+		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException e) {
+			logger.error("Could not notify other clients of me about the new file", e);
+		}
 	}
 }

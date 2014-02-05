@@ -31,6 +31,7 @@ import org.hive2hive.core.test.processes.implementations.files.RecoverFileTest;
 import org.hive2hive.core.test.processes.implementations.files.UpdateFileTest;
 import org.hive2hive.core.test.processes.implementations.login.LoginTest;
 import org.hive2hive.core.test.processes.implementations.logout.LogoutTest;
+import org.hive2hive.core.test.processes.implementations.notify.NotificationTest;
 import org.hive2hive.core.test.processes.implementations.register.RegisterProcessTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
 import org.junit.runner.RunWith;
@@ -85,6 +86,9 @@ import org.junit.runners.Suite.SuiteClasses;
 
 		// Process: Filelist
 		GetFileListProcessTest.class,
+
+		// Process: Notification
+		NotificationTest.class,
 
 		// Files
 		FileManagerTest.class, FileSynchronizerTest.class,

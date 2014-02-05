@@ -8,7 +8,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 /**
  * Starts the notification process that a file has been shared.

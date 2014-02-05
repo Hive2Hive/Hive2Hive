@@ -9,10 +9,10 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 public class NotifyProcessContext implements IConsumeNotificationFactory, IConsumeLocations,
 		IProvideLocations {

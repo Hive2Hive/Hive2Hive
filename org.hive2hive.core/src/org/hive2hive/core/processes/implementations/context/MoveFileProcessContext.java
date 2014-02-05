@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMetaDocument,

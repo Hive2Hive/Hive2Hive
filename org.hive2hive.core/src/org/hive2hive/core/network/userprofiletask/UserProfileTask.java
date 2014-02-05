@@ -9,11 +9,14 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.process.notify.NotifyPeersProcess;
+import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
@@ -92,11 +95,16 @@ public abstract class UserProfileTask extends NetworkContent {
 	 * Helper method that asynchronously notifies all clients of the same user.
 	 * 
 	 * @param messageFactory
+	 * @throws NoPeerConnectionException
+	 * @throws IllegalArgumentException
+	 * @throws InvalidProcessStateException
 	 */
-	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory) {
+	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory)
+			throws IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException {
 		Set<String> onlyMe = new HashSet<String>(1);
 		onlyMe.add(networkManager.getUserId());
-		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(networkManager, messageFactory, onlyMe);
-		notifyProcess.start();
+		ProcessComponent notificationProcess = ProcessFactory.instance().createNotificationProcess(
+				messageFactory, onlyMe, networkManager);
+		notificationProcess.start();
 	}
 }

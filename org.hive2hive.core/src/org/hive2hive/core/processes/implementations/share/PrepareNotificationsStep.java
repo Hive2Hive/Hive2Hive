@@ -6,10 +6,10 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileTreeNode;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 /**
  * Starts the notification process that a file has been shared.

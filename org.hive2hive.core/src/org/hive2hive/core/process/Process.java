@@ -11,8 +11,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.context.ProcessContext;
 import org.hive2hive.core.process.listener.IProcessListener;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.process.notify.NotifyPeersProcess;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 /**
  * This abstract process is used for executing workflows. It keeps the order of the process steps.
@@ -210,9 +209,11 @@ public abstract class Process implements IProcess {
 	 * Notify the other clients of the same users, other users, ... Configure this in the
 	 * {@link BaseNotificationMessageFactory}
 	 */
+	@Deprecated
 	public void sendNotification(BaseNotificationMessageFactory messageFactory, Set<String> users) {
-		NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory, users);
-		notifyProcess.start();
+		// NotifyPeersProcess notifyProcess = new NotifyPeersProcess(getNetworkManager(), messageFactory,
+		// users);
+		// notifyProcess.start();
 	}
 
 	/**

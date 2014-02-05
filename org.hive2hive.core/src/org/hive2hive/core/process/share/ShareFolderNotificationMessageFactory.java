@@ -5,8 +5,8 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.process.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.process.userprofiletask.share.ShareFolderUserProfileTask;
+import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 public class ShareFolderNotificationMessageFactory extends BaseNotificationMessageFactory {
 
