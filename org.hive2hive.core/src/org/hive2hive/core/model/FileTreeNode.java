@@ -62,7 +62,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		this.keyPair = keyPair;
 		this.name = name;
 		this.isFolder = isFolder;
-		this.setMD5(md5LatestVersion);
+		this.md5LatestVersion = md5LatestVersion;
 		parent.addChild(this);
 		children = new HashSet<FileTreeNode>();
 	}
@@ -215,7 +215,12 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	}
 
 	public boolean isShared() {
-		return isShared || parent.isShared;
+		if (isShared)
+			return true;
+		else if (parent == null)
+			return false;
+		else
+			return parent.isShared();
 	}
 
 	/**
@@ -245,15 +250,19 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 			throw new IllegalStateException("Cannot set a shared flag to a file");
 
 		this.isShared = isShared;
-		for (FileTreeNode child : children)
-			child.setIsShared(isShared);
 	}
 
 	public boolean isSharedOrHasSharedChildren() {
-		boolean shared = isShared;
+		if (isShared)
+			return true;
+
+		// check for shared children
 		for (FileTreeNode child : children)
-			shared |= child.isSharedOrHasSharedChildren();
-		return shared;
+			if (child.isSharedOrHasSharedChildren())
+				return true;
+
+		// not shared and children not shared either
+		return false;
 	}
 
 	public boolean canWrite() {
@@ -298,7 +307,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 			return false;
 		} else if (obj instanceof FileTreeNode) {
 			FileTreeNode other = (FileTreeNode) obj;
-			return getFileKey().equals(other.getFileKey());
+			return getFileKey().equals(other.getFileKey()) && getName().equalsIgnoreCase(other.getName());
 		} else if (obj instanceof PublicKey) {
 			PublicKey publicKey = (PublicKey) obj;
 			return getFileKey().equals(publicKey);

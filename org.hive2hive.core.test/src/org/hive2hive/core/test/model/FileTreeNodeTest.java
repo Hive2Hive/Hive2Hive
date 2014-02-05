@@ -86,10 +86,10 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(root.isShared());
 		Assert.assertFalse(child1.isShared());
 		Assert.assertFalse(child2.isShared());
-		
+
 		// set 1d to be not shared
 		dir1.setIsShared(false);
-		
+
 		// root, 1f1, 1f2, 1d, 2f and 2d should return to be not shared
 		Assert.assertFalse(root.isShared());
 		Assert.assertFalse(dir1.isShared());
@@ -100,14 +100,9 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 
 	}
 
-	@Test
+	@Test(expected = IllegalStateException.class)
 	public void testShared2() {
-		try {
-			root.setIsShared(true);
-			Assert.fail();
-		} catch (IllegalStateException e) {
-			// has to be thrown
-		}
+		root.setIsShared(true);
 	}
 
 	@Test
@@ -123,7 +118,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(child1.isSharedOrHasSharedChildren());
 		Assert.assertFalse(child2.isSharedOrHasSharedChildren());
 		Assert.assertFalse(child3.isSharedOrHasSharedChildren());
-		
+
 		// set 2d to be not shared
 		dir2.setIsShared(false);
 
@@ -134,7 +129,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(child1.isSharedOrHasSharedChildren());
 		Assert.assertFalse(child2.isSharedOrHasSharedChildren());
 		Assert.assertFalse(child3.isSharedOrHasSharedChildren());
-		
+
 	}
 
 	@Test
