@@ -19,12 +19,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.Process;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.common.get.GetLocationsStep;
-import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
-import org.hive2hive.core.process.context.IGetLocationsContext;
-import org.hive2hive.core.process.context.IGetMetaContext;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
@@ -127,69 +122,22 @@ public class ProcessTestUtil {
 		}
 	}
 
+	@Deprecated
 	public static MetaDocument getMetaDocument(NetworkManager networkManager, KeyPair keys) {
-		IGetMetaContext context = new IGetMetaContext() {
-
-			private MetaDocument metaDocument;
-			private HybridEncryptedContent encryptedMetaDocument;
-			private KeyPair protectionKeys;
-
-			@Override
-			public void setMetaDocument(MetaDocument metaDocument) {
-				this.metaDocument = metaDocument;
-			}
-
-			@Override
-			public MetaDocument getMetaDocument() {
-				return metaDocument;
-			}
-
-			@Override
-			public void setEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
-				this.encryptedMetaDocument = encryptedMetaDocument;
-			}
-
-			@Override
-			public HybridEncryptedContent getEncryptedMetaDocument() {
-				return encryptedMetaDocument;
-			}
-
-			@Override
-			public void setProtectionKeys(KeyPair protectionKeys) {
-				this.protectionKeys = protectionKeys;
-			}
-
-			@Override
-			public KeyPair getProtectionKeys() {
-				return protectionKeys;
-			}
-
-		};
-
-		GetMetaDocumentStep step = new GetMetaDocumentStep(keys, null, context);
-		executeStep(networkManager, step);
-		return context.getMetaDocument();
+		try {
+			return UseCaseTestUtil.getMetaDocument(networkManager, keys);
+		} catch (NoPeerConnectionException e) {
+			return null;
+		}
 	}
 
+	@Deprecated
 	public static Locations getLocations(NetworkManager networkManager, String userId) {
-		IGetLocationsContext context = new IGetLocationsContext() {
-
-			private Locations locations;
-
-			@Override
-			public void setLocations(Locations locations) {
-				this.locations = locations;
-			}
-
-			@Override
-			public Locations getLocations() {
-				return locations;
-			}
-		};
-
-		GetLocationsStep step = new GetLocationsStep(userId, null, context);
-		executeStep(networkManager, step);
-		return context.getLocations();
+		try {
+			return UseCaseTestUtil.getLocations(networkManager, userId);
+		} catch (NoPeerConnectionException e) {
+			return null;
+		}
 	}
 
 	@Deprecated

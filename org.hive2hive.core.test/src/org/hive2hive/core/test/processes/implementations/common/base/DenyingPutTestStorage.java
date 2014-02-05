@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common.put;
+package org.hive2hive.core.test.processes.implementations.common.base;
 
 import java.security.PublicKey;
 

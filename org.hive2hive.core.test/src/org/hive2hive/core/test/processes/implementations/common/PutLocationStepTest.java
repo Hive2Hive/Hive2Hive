@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeP
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.common.put.DenyingPutTestStorage;
+import org.hive2hive.core.test.processes.implementations.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
@@ -152,6 +152,5 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		public KeyPair consumeProtectionKeys() {
 			return protectionKeys;
 		}
-
 	}
 }
