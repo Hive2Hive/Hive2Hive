@@ -30,6 +30,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
@@ -86,7 +87,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	// TODO: how to test this?
 	@Ignore
 	@Test
-	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException {
+	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -101,7 +102,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		// start and cancel immediately
 		component.start();
-		putStep.cancel(new RollbackReason(putStep, "Testing whether rollback works"));
+		putStep.cancel(new RollbackReason(new ProcessExecutionException("Testing whether rollback works")));
 		UseCaseTestUtil.waitTillFailed(listener, 10);
 
 		Number160 lKey = Number160.createHash(userId);

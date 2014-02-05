@@ -19,6 +19,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -77,7 +78,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
 				NetworkTestUtil.randomString(), userCredentials.getPin());
 
@@ -86,7 +87,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
 				userCredentials.getPassword(), NetworkTestUtil.randomString());
 
@@ -95,7 +96,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(),
 				userCredentials.getPassword(), userCredentials.getPin());
 
@@ -103,7 +104,7 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials)
-			throws InvalidProcessStateException, NoSessionException, NoPeerConnectionException {
+			throws InvalidProcessStateException, NoSessionException, NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setProfileManager(new UserProfileManager(client, wrongCredentials));

@@ -14,6 +14,7 @@ import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -85,10 +86,11 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyNobody() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException {
+			IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory,
@@ -107,10 +109,11 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException {
+			IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -136,10 +139,11 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
@@ -164,10 +168,11 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(3);
@@ -196,11 +201,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -234,11 +240,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -273,11 +280,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers

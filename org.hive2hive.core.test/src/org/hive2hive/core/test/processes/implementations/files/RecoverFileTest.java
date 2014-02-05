@@ -16,6 +16,7 @@ import org.hive2hive.core.process.recover.IVersionSelector;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -77,7 +78,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testRestoreVersion() throws IOException, NoSessionException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException {
+			IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		// add 3 new versions (total 4)
 		uploadVersion("1");
 		uploadVersion("2");
