@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common.messages;
+package org.hive2hive.core.test.processes.implementations.common;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
