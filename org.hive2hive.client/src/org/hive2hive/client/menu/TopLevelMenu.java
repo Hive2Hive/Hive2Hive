@@ -13,10 +13,11 @@ import org.hive2hive.core.IH2HNodeStatus;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
+import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 
 /**
  * The top-level menu of the {@link ConsoleClient}.
@@ -166,15 +167,21 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Get File list") {
 			protected void execute() throws Hive2HiveException {
-				IGetFileListProcess process = nodeMenu.getH2HNode().getFileManagement().getFileList();
-				executeBlocking(process);
+				IResultProcessComponent<List<Path>> process = nodeMenu.getH2HNode().getFileManagement()
+						.getFileList();
+				IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
+					@Override
+					public void onResultReady(List<Path> result) {
+						// print the digest
+						System.out.println("Digest request resulted:");
+						for (Path path : result) {
+							System.out.println("* " + path.toString());
+						}
+					}
+				};
 
-				// print the digest
-				List<Path> digest = process.getFiles();
-				System.out.println("Digest request resulted:");
-				for (Path path : digest) {
-					System.out.println("* " + path.toString());
-				}
+				process.attachListener(resultListener);
+				executeBlocking(process);
 			}
 		});
 

@@ -16,8 +16,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
-import org.hive2hive.core.process.list.GetFileListProcess;
-import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -26,6 +24,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
@@ -260,9 +259,9 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IGetFileListProcess getFileList() throws NoSessionException {
-		IGetFileListProcess process = new GetFileListProcess(networkManager);
-
+	public IResultProcessComponent<List<Path>> getFileList() throws NoSessionException {
+		IResultProcessComponent<List<Path>> process = ProcessFactory.instance().createFileListProcess(
+				networkManager);
 		autoStartProcess(process);
 		return process;
 	}

@@ -2,14 +2,16 @@ package org.hive2hive.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 
 /**
@@ -74,7 +76,7 @@ public interface IFileManagement {
 	 * 
 	 * @return the observable process which additionally allows to get the result (digest) after finish
 	 */
-	IGetFileListProcess getFileList() throws NoSessionException;
+	IResultProcessComponent<List<Path>> getFileList() throws NoSessionException;
 
 	/**
 	 * Recover a previous file version

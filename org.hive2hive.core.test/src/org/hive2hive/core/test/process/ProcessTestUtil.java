@@ -23,8 +23,6 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
-import org.hive2hive.core.process.list.GetFileListProcess;
-import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -257,21 +255,5 @@ public class ProcessTestUtil {
 		} catch (NoSessionException e) {
 			// never happens because session is set before
 		}
-	}
-
-	public static IGetFileListProcess getDigest(NetworkManager networkManager,
-			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
-
-		networkManager.setSession(new H2HSession(EncryptionUtil
-				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-		GetFileListProcess process = null;
-		try {
-			process = new GetFileListProcess(networkManager);
-			executeProcess(process);
-		} catch (NoSessionException e) {
-			// never happens because session is set before
-		}
-
-		return process;
 	}
 }

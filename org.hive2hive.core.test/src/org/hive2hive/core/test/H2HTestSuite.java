@@ -26,6 +26,7 @@ import org.hive2hive.core.test.process.files.MoveFileTest;
 import org.hive2hive.core.test.process.manager.ProcessManagerTest;
 import org.hive2hive.core.test.processes.implementations.files.AddFileTest;
 import org.hive2hive.core.test.processes.implementations.files.DownloadFileTest;
+import org.hive2hive.core.test.processes.implementations.files.GetFileListProcessTest;
 import org.hive2hive.core.test.processes.implementations.files.RecoverFileTest;
 import org.hive2hive.core.test.processes.implementations.files.UpdateFileTest;
 import org.hive2hive.core.test.processes.implementations.login.LoginTest;
@@ -81,6 +82,9 @@ import org.junit.runners.Suite.SuiteClasses;
 
 		// Process: Recover
 		RecoverFileTest.class,
+
+		// Process: Filelist
+		GetFileListProcessTest.class,
 
 		// Files
 		FileManagerTest.class, FileSynchronizerTest.class,
