@@ -1,4 +1,4 @@
-package org.hive2hive.core.process.move;
+package org.hive2hive.core.processes.implementations.files.move;
 
 import java.security.PublicKey;
 

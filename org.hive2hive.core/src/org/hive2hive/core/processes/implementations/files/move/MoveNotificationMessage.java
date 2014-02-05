@@ -1,7 +1,8 @@
-package org.hive2hive.core.process.move;
+package org.hive2hive.core.processes.implementations.files.move;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -15,7 +16,6 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.ProcessManager;
 
 /**
  * This message is sent after a file has been moved and the receiver had access to the file before and after
@@ -52,8 +52,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 		try {
 			H2HSession session = networkManager.getSession();
 			UserProfileManager profileManager = session.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(ProcessManager.createRandomPseudoPID(),
-					false);
+			UserProfile userProfile = profileManager.getUserProfile(UUID.randomUUID().toString(), false);
 
 			FileTreeNode oldParent = userProfile.getFileById(oldParentKey);
 			FileTreeNode newParent = userProfile.getFileById(newParentKey);

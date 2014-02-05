@@ -23,7 +23,6 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
-import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.security.UserCredentials;
@@ -223,6 +222,7 @@ public class ProcessTestUtil {
 		}
 	}
 
+	@Deprecated
 	public static void uploadNewFileVersion(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config)
 			throws IllegalArgumentException {
@@ -234,6 +234,7 @@ public class ProcessTestUtil {
 		}
 	}
 
+	@Deprecated
 	public static void deleteFile(NetworkManager networkManager, File file,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 		login(profileManager.getUserCredentials(), networkManager, fileManager.getRoot().toFile());
@@ -244,16 +245,14 @@ public class ProcessTestUtil {
 		}
 	}
 
+	@Deprecated
 	public static void moveFile(NetworkManager networkManager, File source, File destination,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
-		networkManager.setSession(new H2HSession(EncryptionUtil
-				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-
+		login(profileManager.getUserCredentials(), networkManager, fileManager.getRoot().toFile());
 		try {
-			MoveFileProcess process = new MoveFileProcess(networkManager, source, destination);
-			executeProcess(process);
-		} catch (NoSessionException e) {
-			// never happens because session is set before
+			UseCaseTestUtil.moveFile(networkManager, source, destination);
+		} catch (NoSessionException | NoPeerConnectionException e) {
+			Assert.fail();
 		}
 	}
 }

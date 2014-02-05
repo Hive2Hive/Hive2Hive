@@ -49,8 +49,10 @@ public interface IFileManagement {
 	 * @param source the file to move
 	 * @param destination the destination of the file
 	 * @return an observable move process
+	 * @throws NoPeerConnectionException
 	 */
-	IProcess move(File source, File destination) throws NoSessionException, IllegalArgumentException;
+	ProcessComponent move(File source, File destination) throws NoSessionException, IllegalArgumentException,
+			NoPeerConnectionException;
 
 	/**
 	 * Delete the file or the folder in the network. Note that when a whole file tree should be deleted, the

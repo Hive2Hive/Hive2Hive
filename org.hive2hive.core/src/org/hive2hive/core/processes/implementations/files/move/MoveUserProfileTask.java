@@ -1,7 +1,8 @@
-package org.hive2hive.core.process.move;
+package org.hive2hive.core.processes.implementations.files.move;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
@@ -44,7 +45,7 @@ public class MoveUserProfileTask extends UserProfileTask {
 	public void start() {
 		try {
 			H2HSession session = networkManager.getSession();
-			int randomPID = ProcessManager.createRandomPseudoPID();
+			String randomPID = UUID.randomUUID().toString();
 			UserProfileManager profileManager = session.getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
 

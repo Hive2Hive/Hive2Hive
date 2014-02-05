@@ -16,7 +16,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
-import org.hive2hive.core.process.move.MoveFileProcess;
 import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -235,8 +234,10 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess move(File source, File destination) throws NoSessionException, IllegalArgumentException {
-		MoveFileProcess process = new MoveFileProcess(networkManager, source, destination);
+	public ProcessComponent move(File source, File destination) throws NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException {
+		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination,
+				networkManager);
 		autoStartProcess(process);
 		return process;
 	}
