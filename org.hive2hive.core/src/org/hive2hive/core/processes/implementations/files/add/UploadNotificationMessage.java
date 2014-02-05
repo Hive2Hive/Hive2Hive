@@ -7,7 +7,8 @@ import net.tomp2p.peers.PeerAddress;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
-import org.hive2hive.core.process.download.DownloadFileProcess;
+import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 
 /**
  * This message is sent after an upload has finished. It downloads the newest version at the receiver side
@@ -34,7 +35,8 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 
 	private void download() {
 		try {
-			DownloadFileProcess process = new DownloadFileProcess(fileKey, networkManager);
+			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey,
+					networkManager);
 			process.start();
 			logger.debug("Got notified and start to download the file");
 		} catch (Exception e) {

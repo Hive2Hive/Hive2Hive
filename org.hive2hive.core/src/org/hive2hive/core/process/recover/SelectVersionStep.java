@@ -17,7 +17,6 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.ProcessStep;
-import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.listener.IProcessListener;
 
 /**
@@ -99,10 +98,10 @@ public class SelectVersionStep extends ProcessStep {
 			logger.debug("Starting to download the restored file under the name '" + newFileName + "'");
 
 			// start the process to download the files
-			DownloadFileProcess process = new DownloadFileProcess(selectedNode, getNetworkManager(),
-					selected.getIndex(), newFileName);
-			process.addListener(new StartAddRestoredFileListener(process.getContext().getDestination()));
-			process.start();
+			// DownloadFileProcess process = new DownloadFileProcess(selectedNode, getNetworkManager(),
+			// selected.getIndex(), newFileName);
+			// process.addListener(new StartAddRestoredFileListener(process.getContext().getDestination()));
+			// process.start();
 		} catch (Hive2HiveException e) {
 			getProcess().stop(e);
 		}

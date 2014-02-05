@@ -23,7 +23,6 @@ import org.hive2hive.core.process.common.get.GetLocationsStep;
 import org.hive2hive.core.process.common.get.GetMetaDocumentStep;
 import org.hive2hive.core.process.context.IGetLocationsContext;
 import org.hive2hive.core.process.context.IGetMetaContext;
-import org.hive2hive.core.process.download.DownloadFileProcess;
 import org.hive2hive.core.process.list.GetFileListProcess;
 import org.hive2hive.core.process.list.IGetFileListProcess;
 import org.hive2hive.core.process.move.MoveFileProcess;
@@ -196,18 +195,17 @@ public class ProcessTestUtil {
 		return context.getLocations();
 	}
 
+	@Deprecated
 	public static File downloadFile(NetworkManager networkManager, FileTreeNode file,
 			UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
 		networkManager.setSession(new H2HSession(EncryptionUtil
 				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
+		login(profileManager.getUserCredentials(), networkManager, fileManager.getRoot().toFile());
 		try {
-			DownloadFileProcess process = new DownloadFileProcess(file, networkManager);
-			executeProcess(process);
-		} catch (NoSessionException e) {
-			// never happens because session is set before
+			return UseCaseTestUtil.downloadFile(networkManager, file.getFileKey());
+		} catch (NoSessionException | GetFailedException e) {
+			return null;
 		}
-
-		return fileManager.getPath(file).toFile();
 	}
 
 	@Deprecated
