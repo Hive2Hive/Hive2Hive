@@ -18,7 +18,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
 
 	private final IDataManager dataManager;
-	private boolean putPerformed;
+	protected boolean putPerformed;
 
 	private String locationKey;
 	private String contentKey;

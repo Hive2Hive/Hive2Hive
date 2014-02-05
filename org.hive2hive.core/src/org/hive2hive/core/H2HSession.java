@@ -15,7 +15,7 @@ public class H2HSession {
 	private final FileManager fileManager;
 
 	public H2HSession(SessionParameters sessionParameters) {
-		this.keyPair = sessionParameters.getProtectionKeys();
+		this.keyPair = sessionParameters.getKeyPair();
 		this.profileManager = sessionParameters.getProfileManager();
 		this.fileConfiguration = sessionParameters.getFileConfig();
 		this.fileManager = sessionParameters.getFileManager();

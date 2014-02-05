@@ -85,7 +85,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 
 		// set session
 		SessionParameters params = new SessionParameters();
-		params.setProtectionKeys(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS));
+		params.setKeyPair(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS));
 		params.setProfileManager(profileManager);
 		params.setFileConfig(fileConfig);
 		params.setFileManager(fileManager);

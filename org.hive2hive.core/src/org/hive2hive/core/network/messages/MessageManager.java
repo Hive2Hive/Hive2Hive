@@ -189,14 +189,16 @@ public final class MessageManager implements IMessageManager {
 				byte[] signature = EncryptionUtil.sign(messageBytes, networkManager.getPrivateKey());
 				encryptedMessage.setSignature(userId, signature);
 			} catch (InvalidKeyException | SignatureException e1) {
-				logger.error("An exception occured while signing the message. The message will not be sent.");
+				logger.error("An exception occured while signing the message. The message will not be sent.",
+						e1);
 				return null;
 			}
 
 			return encryptedMessage;
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | IOException e) {
-			logger.error("An exception occured while encrypting the message. The message will not be sent.");
+			logger.error("An exception occured while encrypting the message. The message will not be sent.",
+					e);
 			return null;
 		}
 	}

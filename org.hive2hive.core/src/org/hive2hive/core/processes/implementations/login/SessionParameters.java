@@ -13,7 +13,7 @@ public class SessionParameters {
 	private IFileConfiguration fileConfig;
 	private FileManager fileManager;
 
-	public KeyPair getProtectionKeys() {
+	public KeyPair getKeyPair() {
 		return keyPair;
 	}
 
@@ -29,7 +29,7 @@ public class SessionParameters {
 		return fileManager;
 	}
 
-	public void setProtectionKeys(KeyPair keyPair) {
+	public void setKeyPair(KeyPair keyPair) {
 		this.keyPair = keyPair;
 	}
 
