@@ -19,7 +19,6 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -79,7 +78,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException, ProcessExecutionException {
+	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException {
 
 		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 		UserProfileManager profileManager = new UserProfileManager(client, credentials);

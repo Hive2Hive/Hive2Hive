@@ -20,7 +20,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -116,7 +115,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException,
 			NoSessionException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException, ProcessExecutionException {
+			NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, uploader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();

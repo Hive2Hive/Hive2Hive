@@ -24,7 +24,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	private boolean isRollbacking;
 
-
 	private final List<IProcessComponentListener> listener;
 
 	protected ProcessComponent() {
@@ -36,7 +35,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public void start() throws InvalidProcessStateException, ProcessExecutionException {
+	public void start() throws InvalidProcessStateException {
 		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 
 		if (state != ProcessState.READY) {
@@ -47,15 +46,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 		try {
 			doExecute();
+			succeed();
 		} catch (ProcessExecutionException e) {
-			// TODO initiate rollback
 			cancel(new RollbackReason(e));
-			
-			// TODO return the exception
-			throw e;
 		}
-
-		succeed();
 	}
 
 	@Override
@@ -84,7 +78,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
 		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(),
-				reason.getException().getMessage()));
+				reason.getException().getHint()));
 
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED && state != ProcessState.SUCCEEDED) {
 			throw new InvalidProcessStateException(state);
@@ -98,7 +92,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
 			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
-					reason.getException().getMessage()));
+					reason.getException().getHint()));
 
 			// TODO wait for doExecute() to complete
 			doRollback(reason);

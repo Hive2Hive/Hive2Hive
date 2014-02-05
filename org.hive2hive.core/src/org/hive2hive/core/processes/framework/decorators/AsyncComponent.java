@@ -1,40 +1,44 @@
 package org.hive2hive.core.processes.framework.decorators;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.abstracts.Process;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
 public class AsyncComponent extends ProcessDecorator implements Callable<Boolean> {
-	
+
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AsyncComponent.class);
-	
-	private final ExecutorService executor;
-	private Future<Boolean> handle;
+
+	private final ExecutorService asyncExecutor;
+
+	private boolean componentSucceeded = false;
+	private boolean componentFailed = false;
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
-
-		executor = Executors.newSingleThreadExecutor();
+		
+		asyncExecutor = Executors.newSingleThreadExecutor();
 	}
 
 	@Override
-	public void start() throws InvalidProcessStateException, ProcessExecutionException {
-		super.start();
+	protected void doExecute() throws InvalidProcessStateException {
 
-		handle = executor.submit(this);
+		asyncExecutor.submit(this);
+		// immediate return, since execution is async
+
 	}
 
 	@Override
@@ -49,74 +53,118 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 		;
 
 		logger.debug("Starting async component...");
+
+		// starts and rollbacks itself if needed (component knows nothing about composite the AsyncComponent
+		// is part of)
+
+		decoratedComponent.attachListener(new IProcessComponentListener() {
+
+			@Override
+			public void onSucceeded() {
+				componentSucceeded = true;
+				componentFailed = false;
+				succeed();
+			}
+
+			@Override
+			public void onFailed(RollbackReason reason) {
+				componentSucceeded = false;
+				componentFailed = true;
+				fail(reason);
+			}
+
+			@Override
+			public void onFinished() {
+				// ignore
+			}
+		});
+
+		// sync execution
 		decoratedComponent.start();
+
 		return true;
-	}
 
-	@Override
-	public void pause() throws InvalidProcessStateException {
-		super.pause();
-		
-		decoratedComponent.pause();
-	}
-
-	@Override
-	public void resume() throws InvalidProcessStateException {
-		super.resume();
-
-		decoratedComponent.resume();
-	}
-
-	@Override
-	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
-		
-		// only called from outside (this is the AsyncComponent, not the decorated component)
-		// decorated component handles itself
-		// TODO but who tells AsyncComponents parent that failed?
-
-		logger.debug(Thread.currentThread().getName());
-		
-		// cancel async thread
-		if (!handle.isDone()) {
-			logger.debug("Cancelling async thread.");
-			handle.cancel(true); // TODO does the thread really need to be killed? or just awaited?
-		}
-		try {
-			executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			logger.error(e);
-		}
-		
-		// sync again
-		decoratedComponent.cancel(reason);
-
-		super.cancel(reason);
-	}
-
-	@Override
-	protected void doExecute() throws InvalidProcessStateException {
-		// ignore, handled in component
 	}
 
 	@Override
 	protected void doPause() {
-		// ignore, handled in component
+		// attention: component might be in any state!!!
 	}
 
 	@Override
 	protected void doResumeExecution() throws InvalidProcessStateException {
-		// ignore, handled in component
+		// attention: component might be in any state!!!
 	}
 
 	@Override
 	protected void doResumeRollback() {
-		// ignore, handled in component
+		// attention: component might be in any state!!!
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) {
-		// ignore, handled in component
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+
+		// called due to fail in other component (sibling of AsyncComponent)
+
+		decoratedComponent.cancel(reason); // attention: component might be in any state!!! (when RB comes
+											// from sibling component)
+	}
+
+	@Override
+	protected void succeed() {
+		// AsyncComponent does not succeed until component does
+		if (componentSucceeded) {
+			super.succeed();
+		}
+	}
+
+	@Override
+	protected void fail(RollbackReason reason) {
+		// AsyncComponent does not fail until component does
+		if (componentFailed) {
+			super.fail(reason);
+		}
+	}
+
+	@Override
+	public void attachListener(IProcessComponentListener listener) {
+		decoratedComponent.attachListener(listener);
+	}
+
+	@Override
+	public void detachListener(IProcessComponentListener listener) {
+		decoratedComponent.attachListener(listener);
+	}
+
+	@Override
+	public List<IProcessComponentListener> getListener() {
+		return decoratedComponent.getListener();
+	}
+
+	@Override
+	public String getID() {
+		return decoratedComponent.getID();
+	}
+
+	@Override
+	public double getProgress() {
+		return decoratedComponent.getProgress();
+	}
+
+	@Override
+	public ProcessState getState() {
+		// return state of AsyncComponent, not of decorated component
+		return super.getState();
+	}
+
+	@Override
+	public void setParent(Process parent) {
+		super.setParent(parent);
+	}
+
+	@Override
+	public Process getParent() {
+		return super.getParent();
 	}
 
 }

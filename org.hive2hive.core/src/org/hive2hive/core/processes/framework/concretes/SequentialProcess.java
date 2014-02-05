@@ -33,6 +33,7 @@ public class SequentialProcess extends Process {
 		// execute all child components
 		while (!components.isEmpty() && executionIndex < components.size()
 				&& getState() == ProcessState.RUNNING) {
+			checkExecutedComponents();
 			rollbackIndex = executionIndex;
 			ProcessComponent next = components.get(executionIndex);
 			next.start();
@@ -44,7 +45,17 @@ public class SequentialProcess extends Process {
 			waitForAllAsync("Waiting for all async components to finish execution.");
 		}
 	}
-
+	
+	private void checkExecutedComponents() throws ProcessExecutionException {
+		
+		// an asychronous component might have failed meanwhile
+		for (int i = 0; i < executionIndex; i++) {
+			if (components.get(i).getState() == ProcessState.FAILED) {
+				throw new ProcessExecutionException("An (async) executed component failed."); 
+			}
+		}
+	}
+	
 	@Override
 	protected void doPause() {
 		// TODO Auto-generated method stub
@@ -101,7 +112,7 @@ public class SequentialProcess extends Process {
 		logger.debug("Starting " + message);
 		
 		// if all child sync, then already completed
-		if (checkIfAllFinished())
+		if (allFinished())
 			return;
 
 		// wait for async components
@@ -111,11 +122,11 @@ public class SequentialProcess extends Process {
 			@Override
 			public void run() {
 				logger.debug(message);
-				if (checkIfAllFinished() || getState() != ProcessState.RUNNING) {
+				if (allFinished() || getState() != ProcessState.RUNNING) { // TODO correct state check also for rollbacking
 					latch.countDown();
 				}
 			}
-		}, 500, 500, TimeUnit.MILLISECONDS);
+		}, 1, 1, TimeUnit.SECONDS);
 
 		try {
 			latch.await();
@@ -125,7 +136,7 @@ public class SequentialProcess extends Process {
 		handle.cancel(true);
 	}
 
-	private boolean checkIfAllFinished() {
+	private boolean allFinished() {
 		for (ProcessComponent component : components) {
 			if (component.getState() == ProcessState.RUNNING)
 				return false;

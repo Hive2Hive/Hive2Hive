@@ -104,7 +104,7 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials)
-			throws InvalidProcessStateException, NoSessionException, NoPeerConnectionException, ProcessExecutionException {
+			throws InvalidProcessStateException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setProfileManager(new UserProfileManager(client, wrongCredentials));

@@ -21,7 +21,6 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -135,7 +134,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testUploadNoSession() throws IOException, IllegalFileLocation, NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
+			InvalidProcessStateException, NoPeerConnectionException {
 		// skip the login and continue with the newfile process
 		NetworkManager client = network.get(2);
 

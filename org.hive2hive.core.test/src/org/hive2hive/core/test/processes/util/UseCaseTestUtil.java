@@ -19,7 +19,6 @@ import org.hive2hive.core.process.login.SessionParameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.common.GetMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
@@ -71,8 +70,8 @@ public class UseCaseTestUtil {
 		try {
 			process.start();
 			waitTillSucceded(listener, MAX_PROCESS_WAIT_TIME);
-		} catch (InvalidProcessStateException | ProcessExecutionException e) {
-			System.out.println("ERROR: Cannot wait until process is done or error during process occured.");
+		} catch (InvalidProcessStateException e) {
+			System.out.println("ERROR: Cannot wait until process is done.");
 		}
 	}
 

@@ -4,11 +4,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.hive2hive.core.processes.framework.ProcessState;
+import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.processes.util.BusyFailingStep;
 import org.hive2hive.core.test.processes.util.BusySucceedingStep;
@@ -38,7 +38,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void syncSuccessTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void syncSuccessTest() throws InvalidProcessStateException {
 
 		// empty
 		SequentialProcess process = new SequentialProcess();
@@ -47,20 +47,23 @@ public class SequentialProcessTest extends H2HJUnitTest {
 
 		// sync components
 		process = new SequentialProcess();
-		process.add(new SucceedingProcessStep());
+		ProcessStep step = new SucceedingProcessStep();
+		process.add(step);
 		process.start();
 		assertTrue(process.getState() == ProcessState.SUCCEEDED);
+		assertTrue(step.getState() == ProcessState.SUCCEEDED);
 
 		// async components
 		process = new SequentialProcess();
-		process.add(new AsyncComponent(new BusySucceedingStep()));
+		ProcessComponent asyncStep = new AsyncComponent(new BusySucceedingStep());
+		process.add(asyncStep);
 		process.start();
 		assertTrue(process.getState() == ProcessState.SUCCEEDED);
-
+		assertTrue(asyncStep.getState() == ProcessState.SUCCEEDED);
 	}
 
 	@Test
-	public void syncFailTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void syncFailTest() throws InvalidProcessStateException {
 
 		// empty
 		SequentialProcess process = new FailingSequentialProcess();
@@ -69,19 +72,23 @@ public class SequentialProcessTest extends H2HJUnitTest {
 
 		// sync components
 		process = new SequentialProcess();
-		process.add(new FailingProcessStep());
+		ProcessStep step = new FailingProcessStep();
+		process.add(step);
 		process.start();
 		assertTrue(process.getState() == ProcessState.FAILED);
+		assertTrue(step.getState() == ProcessState.FAILED);
 
 		// async components
 		process = new SequentialProcess();
-		process.add(new AsyncComponent(new BusyFailingStep()));
+		ProcessComponent asyncStep = new AsyncComponent(new BusyFailingStep());
+		process.add(asyncStep);
 		process.start();
 		assertTrue(process.getState() == ProcessState.FAILED);
+		assertTrue(asyncStep.getState() == ProcessState.FAILED);
 	}
 
 	@Test
-	public void asyncSuccessTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void asyncSuccessTest() throws InvalidProcessStateException {
 
 		// empty
 		SequentialProcess process = new SequentialProcess();
@@ -113,7 +120,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void asyncFailTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void asyncFailTest() throws InvalidProcessStateException {
 
 		// empty
 		SequentialProcess process = new FailingSequentialProcess();
@@ -145,7 +152,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void syncListenerSuccessTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void syncListenerSuccessTest() throws InvalidProcessStateException {
 
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 
@@ -205,7 +212,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void syncListenerFailTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void syncListenerFailTest() throws InvalidProcessStateException {
 
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 
@@ -298,7 +305,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void asyncListenerSuccessTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void asyncListenerSuccessTest() throws InvalidProcessStateException {
 
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 
@@ -371,7 +378,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void asyncListenerFailTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void asyncListenerFailTest() throws InvalidProcessStateException {
 
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 
@@ -486,7 +493,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void syncRollbackTest() throws InvalidProcessStateException, ProcessExecutionException {
+	public void syncRollbackTest() throws InvalidProcessStateException {
 
 		// sync components (level-1 fail)
 		SequentialProcess subProcess = new SequentialProcess();

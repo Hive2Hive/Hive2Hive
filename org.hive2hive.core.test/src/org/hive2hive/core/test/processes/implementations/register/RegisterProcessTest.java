@@ -21,7 +21,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -100,7 +99,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testFailOnExistingLocations() throws InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
+	public void testFailOnExistingLocations() throws InvalidProcessStateException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();

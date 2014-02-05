@@ -90,7 +90,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 	}
 
 	private void synchronizeFiles(FileSynchronizer synchronizer) throws NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
+			InvalidProcessStateException, NoPeerConnectionException {
 		/*
 		 * count up to 4:
 		 * - until the uploadProcessNewFiles is done

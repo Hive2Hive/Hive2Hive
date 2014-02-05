@@ -15,7 +15,6 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -99,7 +98,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
-			InvalidProcessStateException, ProcessExecutionException {
+			InvalidProcessStateException {
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
@@ -135,7 +134,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	@Test
 	// should NOT overwrite the existing file
 	public void testDownloadFileAlreadyExistingSameContent() throws IOException, NoSessionException,
-			InvalidProcessStateException, ProcessExecutionException {
+			InvalidProcessStateException {
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, testContent);
