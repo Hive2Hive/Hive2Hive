@@ -14,7 +14,6 @@ import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.listener.ProcessListener;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
@@ -161,7 +160,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				System.out.println("Destination path needed: ");
 				File destination = askForFile(false);
 
-				ProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
 						.move(source, destination);
 				executeBlocking(process);
 			}

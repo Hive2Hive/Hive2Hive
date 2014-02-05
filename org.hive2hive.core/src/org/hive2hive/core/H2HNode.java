@@ -8,15 +8,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
-import org.hive2hive.core.exceptions.IllegalProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.IProcess;
 import org.hive2hive.core.process.ProcessManager;
-import org.hive2hive.core.process.share.ShareFolderProcess;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -84,15 +81,6 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 			networkManager.connect();
 		} else {
 			networkManager.connect(bootstrapAddress);
-		}
-	}
-
-	private void autoStartProcess(IProcess process) {
-		try {
-			if (autostartProcesses)
-				process.start();
-		} catch (IllegalProcessStateException e) {
-			// ignore
 		}
 	}
 
@@ -234,7 +222,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public ProcessComponent move(File source, File destination) throws NoSessionException,
+	public IProcessComponent move(File source, File destination) throws NoSessionException,
 			IllegalArgumentException, NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination,
 				networkManager);
@@ -268,7 +256,7 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public ProcessComponent recover(File file, IVersionSelector versionSelector) throws NoSessionException,
+	public IProcessComponent recover(File file, IVersionSelector versionSelector) throws NoSessionException,
 			FileNotFoundException, IllegalArgumentException, NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createRecoverFileProcess(file, versionSelector,
 				networkManager);
@@ -297,9 +285,10 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	}
 
 	@Override
-	public IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
-			IllegalFileLocation {
-		ShareFolderProcess process = new ShareFolderProcess(folder, userId, networkManager);
+	public IProcessComponent share(File folder, String userId) throws IllegalArgumentException,
+			NoSessionException, IllegalFileLocation, NoPeerConnectionException {
+		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder, userId,
+				networkManager);
 		autoStartProcess(process);
 		return process;
 	}

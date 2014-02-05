@@ -8,8 +8,6 @@ import java.util.List;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
@@ -51,8 +49,8 @@ public interface IFileManagement {
 	 * @return an observable move process
 	 * @throws NoPeerConnectionException
 	 */
-	ProcessComponent move(File source, File destination) throws NoSessionException, IllegalArgumentException,
-			NoPeerConnectionException;
+	IProcessComponent move(File source, File destination) throws NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException;
 
 	/**
 	 * Delete the file or the folder in the network. Note that when a whole file tree should be deleted, the
@@ -89,7 +87,7 @@ public interface IFileManagement {
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
 	 */
-	ProcessComponent recover(File file, IVersionSelector versionSelector) throws NoSessionException,
+	IProcessComponent recover(File file, IVersionSelector versionSelector) throws NoSessionException,
 			FileNotFoundException, IllegalArgumentException, NoPeerConnectionException;
 
 	/**
@@ -98,9 +96,8 @@ public interface IFileManagement {
 	 * @param folder the folder to share
 	 * @param userId the id of the user which will get access to the folder
 	 * @return an observable share process
+	 * @throws NoPeerConnectionException
 	 */
-	@Deprecated
-	// this method is not tested yet, use with precaution!
-	IProcess share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
-			IllegalFileLocation;
+	IProcessComponent share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
+			IllegalFileLocation, NoPeerConnectionException;
 }
