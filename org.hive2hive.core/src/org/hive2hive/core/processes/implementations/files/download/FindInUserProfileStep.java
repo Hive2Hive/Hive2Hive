@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.implementations.files.download;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -13,7 +14,6 @@ import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.GetMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 

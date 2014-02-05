@@ -12,8 +12,6 @@ import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.IH2HNodeStatus;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.process.IProcess;
-import org.hive2hive.core.process.listener.ProcessListener;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
@@ -231,22 +229,6 @@ public final class TopLevelMenu extends ConsoleMenu {
 				notImplemented();
 			}
 		});
-	}
-
-	/**
-	 * Executes the given process (autostart anyhow) and blocks until it is done
-	 */
-	private void executeBlocking(IProcess process) {
-		ProcessListener processListener = new ProcessListener();
-		process.addListener(processListener);
-
-		while (!processListener.hasFinished()) {
-			// busy waiting
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-			}
-		}
 	}
 
 	/**

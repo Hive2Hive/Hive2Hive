@@ -2,10 +2,10 @@ package org.hive2hive.core.test.processes.implementations.userprofiletask;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.PutUserProfileTaskStep;
 
 public class TestPutUserProfileTaskStep extends PutUserProfileTaskStep {

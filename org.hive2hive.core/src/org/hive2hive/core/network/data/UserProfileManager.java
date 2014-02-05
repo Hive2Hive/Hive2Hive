@@ -71,16 +71,6 @@ public class UserProfileManager {
 		return credentials;
 	}
 
-	@Deprecated
-	public UserProfile getUserProfile(int pid, boolean intendsToPut) throws GetFailedException {
-		return getUserProfile(String.valueOf(pid), intendsToPut);
-	}
-
-	@Deprecated
-	public void readyToPut(UserProfile profile, int pid) throws PutFailedException {
-		readyToPut(profile, String.valueOf(pid));
-	}
-
 	/**
 	 * Gets the user profile. The call blocks until the most recent profile is here.
 	 * 

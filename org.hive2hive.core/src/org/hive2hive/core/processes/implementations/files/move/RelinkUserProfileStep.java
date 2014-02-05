@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -15,7 +16,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;

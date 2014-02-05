@@ -1,6 +1,5 @@
-package org.hive2hive.core.processes.framework.exceptions;
+package org.hive2hive.core.exceptions;
 
-import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.processes.framework.ProcessState;
 
 public class InvalidProcessStateException extends Hive2HiveException {

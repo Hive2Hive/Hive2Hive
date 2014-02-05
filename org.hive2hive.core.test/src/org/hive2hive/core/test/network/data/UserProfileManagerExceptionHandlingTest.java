@@ -3,6 +3,7 @@ package org.hive2hive.core.test.network.data;
 import java.io.IOException;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -11,7 +12,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -46,7 +47,7 @@ public class UserProfileManagerExceptionHandlingTest extends H2HJUnitTest {
 	public void testGetException() {
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
 		try {
-			profileManager.getUserProfile(-1, false);
+			profileManager.getUserProfile("abc", false);
 			Assert.fail();
 		} catch (GetFailedException e) {
 			// has to be thrown
@@ -54,18 +55,18 @@ public class UserProfileManagerExceptionHandlingTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutException() throws GetFailedException, IOException {
-		ProcessTestUtil.register(userCredentials, client);
+	public void testPutException() throws GetFailedException, IOException, NoPeerConnectionException {
+		UseCaseTestUtil.register(userCredentials, client);
 		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
-		UserProfile userProfile = profileManager.getUserProfile(-1, true);
-		
+		UserProfile userProfile = profileManager.getUserProfile("abc", true);
+
 		// modify the version key to trigger a version conflict (wrong based on key)
 		userProfile.generateVersionKey();
 
 		new FileTreeNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
 
 		try {
-			profileManager.readyToPut(userProfile, -1);
+			profileManager.readyToPut(userProfile, "abc");
 			Assert.fail();
 		} catch (PutFailedException e) {
 			// has to be thrown

@@ -3,11 +3,11 @@ package org.hive2hive.core.test.processes.framework;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.processes.util.BusyFailingStep;
 import org.hive2hive.core.test.processes.util.BusySucceedingStep;

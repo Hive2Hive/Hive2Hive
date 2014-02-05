@@ -3,11 +3,11 @@ package org.hive2hive.core.processes.implementations.common;
 import java.io.IOException;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;

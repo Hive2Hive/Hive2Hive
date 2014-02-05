@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.ProcessManager;
 import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.ProcessManager;
 import org.hive2hive.core.processes.framework.ProcessState;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;

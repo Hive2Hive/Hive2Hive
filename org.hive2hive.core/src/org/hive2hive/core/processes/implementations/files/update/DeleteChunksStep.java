@@ -4,13 +4,13 @@ import java.security.KeyPair;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BaseRemoveProcessStep;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 

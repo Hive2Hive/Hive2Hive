@@ -1,12 +1,12 @@
 package org.hive2hive.core.processes.implementations.register;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 
 public class PutPublicKeyStep extends BasePutProcessStep {

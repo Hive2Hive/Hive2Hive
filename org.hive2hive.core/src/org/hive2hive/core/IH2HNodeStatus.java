@@ -2,7 +2,7 @@ package org.hive2hive.core;
 
 import java.io.File;
 
-import org.hive2hive.core.process.IProcess;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
  * A status object that helps the developer to retrieve the node state. Who is logged in, where is the given
@@ -45,7 +45,7 @@ public interface IH2HNodeStatus {
 	/**
 	 * Returns the number of currently running processes (all asynchronous). Note that if you have multiple
 	 * nodes in the same JVM, the number of processes are added. A process is a implementation of
-	 * {@link IProcess}.
+	 * {@link IProcessComponent}.
 	 * 
 	 * @return the number of currently running processes (asynchronous)
 	 */

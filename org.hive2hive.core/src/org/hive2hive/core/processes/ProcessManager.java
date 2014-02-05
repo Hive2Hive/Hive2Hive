@@ -1,10 +1,14 @@
-package org.hive2hive.core.process;
+package org.hive2hive.core.processes;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
  * This class monitors all running processes and is able to pause or stop them.
@@ -12,32 +16,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Christian, Nico
  * 
  */
+@Deprecated
+// Nico: Still used?
 public class ProcessManager {
-	private int pidCounter;
-	private Map<Integer, IProcess> attachedProcesses;
+	private Map<String, IProcessComponent> attachedProcesses;
 
 	private static class SingletonHolder {
 		private static final ProcessManager INSTANCE = new ProcessManager();
 	}
 
 	private ProcessManager() {
-		attachedProcesses = new ConcurrentHashMap<Integer, IProcess>();
-		pidCounter = 0;
+		attachedProcesses = new ConcurrentHashMap<String, IProcessComponent>();
 	}
 
 	public static ProcessManager getInstance() {
 		return SingletonHolder.INSTANCE;
-	}
-
-	/**
-	 * Creates a random PID which is not really valid (it's negative). This is used because some code parts
-	 * rely on a PID
-	 * 
-	 * @return
-	 */
-	public static int createRandomPseudoPID() {
-		// create simulated PID
-		return new Random().nextInt(Integer.MAX_VALUE) * -1;
 	}
 
 	/**
@@ -46,26 +39,22 @@ public class ProcessManager {
 	 * @param reason The reason why all processes get stopped.
 	 */
 	public void stopAll(String reason) {
-		for (IProcess process : getAllProcesses()) {
-			process.stop(reason);
+		for (IProcessComponent process : getAllProcesses()) {
+			try {
+				process.cancel(new RollbackReason((ProcessComponent) process,
+						"Forced shutdown through ProcessManager"));
+			} catch (InvalidProcessStateException e) {
+				// ignore
+			}
 		}
 	}
 
-	/**
-	 * Returns a unique PID (process ID) for this {@link ProcessManager}.
-	 * 
-	 * @return A unique PID.
-	 */
-	public synchronized int getNewPID() {
-		return pidCounter++ % Integer.MAX_VALUE;
-	}
-
-	public IProcess getProcess(int processID) {
+	public IProcessComponent getProcess(String processID) {
 		return attachedProcesses.get(processID);
 	}
 
-	public List<IProcess> getAllProcesses() {
-		return new ArrayList<IProcess>(attachedProcesses.values());
+	public List<IProcessComponent> getAllProcesses() {
+		return new ArrayList<IProcessComponent>(attachedProcesses.values());
 	}
 
 	/**
@@ -73,7 +62,7 @@ public class ProcessManager {
 	 * 
 	 * @param process
 	 */
-	public void attachProcess(IProcess process) throws IllegalArgumentException {
+	public void attachProcess(IProcessComponent process) throws IllegalArgumentException {
 		if (!isProcessAttached(process.getID())) {
 			attachedProcesses.put(process.getID(), process);
 		} else {
@@ -86,11 +75,11 @@ public class ProcessManager {
 	 * 
 	 * @param process
 	 */
-	public void detachProcess(IProcess process) {
+	public void detachProcess(IProcessComponent process) {
 		attachedProcesses.remove(process.getID());
 	}
 
-	private boolean isProcessAttached(int processID) {
+	private boolean isProcessAttached(String processID) {
 		return attachedProcesses.containsKey(processID);
 	}
 }

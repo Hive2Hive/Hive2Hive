@@ -4,12 +4,12 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
 // TODO this class should be merged with org.hive2hive.processes.implementations.files.update.DeleteChunksStep

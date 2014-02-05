@@ -6,12 +6,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public class AsyncComponent extends ProcessDecorator implements Callable<Boolean> {
 	

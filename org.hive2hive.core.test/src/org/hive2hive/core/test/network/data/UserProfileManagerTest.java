@@ -5,19 +5,23 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.ProcessStep;
+import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
+import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -50,39 +54,42 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void setup() {
+	public void setup() throws NoPeerConnectionException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		client = NetworkTestUtil.createNetwork(1).get(0);
-		ProcessTestUtil.register(userCredentials, client);
+		UseCaseTestUtil.register(userCredentials, client);
 	}
 
 	@Test
-	public void testGetOnly() throws GetFailedException, InterruptedException {
+	public void testGetOnly() throws GetFailedException, InterruptedException, InvalidProcessStateException {
 		executeProcesses(Operation.GET, Operation.GET, Operation.GET, Operation.GET);
 	}
 
 	@Test
-	public void testPutSingle() throws GetFailedException, InterruptedException {
+	public void testPutSingle() throws GetFailedException, InterruptedException, InvalidProcessStateException {
 		executeProcesses(Operation.GET, Operation.PUT, Operation.GET);
 	}
 
 	@Test
-	public void testPutMultiple() throws GetFailedException, InterruptedException {
+	public void testPutMultiple() throws GetFailedException, InterruptedException,
+			InvalidProcessStateException {
 		executeProcesses(Operation.PUT, Operation.PUT, Operation.PUT);
 	}
 
 	@Test
-	public void testModifySingle() throws GetFailedException, InterruptedException {
+	public void testModifySingle() throws GetFailedException, InterruptedException,
+			InvalidProcessStateException {
 		executeProcesses(Operation.PUT, Operation.MODIFY, Operation.PUT);
 	}
 
 	@Test
-	public void testModifyMultiple() throws GetFailedException, InterruptedException {
+	public void testModifyMultiple() throws GetFailedException, InterruptedException,
+			InvalidProcessStateException {
 		executeProcesses(Operation.MODIFY, Operation.MODIFY, Operation.MODIFY);
 	}
 
 	@Test
-	public void testAllMixed() throws GetFailedException, InterruptedException {
+	public void testAllMixed() throws GetFailedException, InterruptedException, InvalidProcessStateException {
 		executeProcesses(Operation.PUT, Operation.GET, Operation.MODIFY, Operation.GET, Operation.PUT,
 				Operation.MODIFY, Operation.MODIFY, Operation.GET, Operation.GET, Operation.PUT,
 				Operation.PUT, Operation.GET);
@@ -91,24 +98,28 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	/**
 	 * Transforms the operations into a set of processes and starts them all. The processes are started with a
 	 * small delay, but in the same order as the parameters. The method blocks until all processes are done.
+	 * 
+	 * @throws InvalidProcessStateException
 	 */
-	private void executeProcesses(Operation... operations) throws GetFailedException, InterruptedException {
+	private void executeProcesses(Operation... operations) throws GetFailedException, InterruptedException,
+			InvalidProcessStateException {
 		UserProfileManager manager = new UserProfileManager(client, userCredentials);
 
-		List<TestUserProfileProcess> processes = new ArrayList<TestUserProfileProcess>(operations.length);
-		List<TestProcessListener> listeners = new ArrayList<TestProcessListener>(operations.length);
+		List<IProcessComponent> processes = new ArrayList<IProcessComponent>(operations.length);
+		List<TestProcessComponentListener> listeners = new ArrayList<TestProcessComponentListener>(
+				operations.length);
 
 		for (int i = 0; i < operations.length; i++) {
-			TestUserProfileProcess proc = new TestUserProfileProcess(manager, client, operations[i]);
-			TestProcessListener listener = new TestProcessListener();
-			proc.addListener(listener);
+			TestUserProfileStep proc = new TestUserProfileStep(manager, operations[i]);
+			TestProcessComponentListener listener = new TestProcessComponentListener();
+			proc.attachListener(listener);
 
-			processes.add(proc);
+			processes.add(new AsyncComponent(proc));
 			listeners.add(listener);
 		}
 
 		// start, but not all at the same time
-		for (TestUserProfileProcess process : processes) {
+		for (IProcessComponent process : processes) {
 			process.start();
 			// sleep for random time
 			Thread.sleep(Math.abs(new Random().nextLong() % 100));
@@ -120,7 +131,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 			waiter.tickASecond();
 			allFinished = true;
 
-			for (TestProcessListener listener : listeners) {
+			for (TestProcessComponentListener listener : listeners) {
 				allFinished &= listener.hasSucceeded();
 			}
 		} while (!allFinished);
@@ -137,34 +148,6 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * Test class that executes a single step getting the user profile
-	 * 
-	 * @author Nico
-	 * 
-	 */
-	private class TestUserProfileProcess extends Process {
-
-		public TestUserProfileProcess(UserProfileManager profileManager, NetworkManager networkManager,
-				Operation operation) {
-			super(networkManager);
-			switch (operation) {
-				case PUT:
-					setNextStep(new TestUserProfileStep(profileManager, true, false));
-					break;
-				case GET:
-					setNextStep(new TestUserProfileStep(profileManager, false, false));
-					break;
-				case MODIFY:
-					setNextStep(new TestUserProfileStep(profileManager, true, true));
-					break;
-				default:
-					Assert.fail();
-					break;
-			}
-		}
-	}
-
-	/**
 	 * Gets the user profile using the {@link UserProfileManager}.
 	 * 
 	 * @author Nico
@@ -173,8 +156,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	private class TestUserProfileStep extends ProcessStep {
 
 		private final UserProfileManager profileManager;
-		private final boolean modify;
-		private final boolean put;
+		private final Operation operation;
 
 		/**
 		 * 
@@ -182,35 +164,28 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		 * @param put if true, it performs a put operation
 		 * @param modify if true, it does a modification
 		 */
-		public TestUserProfileStep(UserProfileManager profileManager, boolean put, boolean modify) {
+		public TestUserProfileStep(UserProfileManager profileManager, Operation operation) {
 			this.profileManager = profileManager;
-			this.put = put;
-			this.modify = modify;
+			this.operation = operation;
 		}
 
 		@Override
-		public void start() {
+		protected void doExecute() throws InvalidProcessStateException {
 			try {
-				UserProfile userProfile = profileManager.getUserProfile(getProcess().getID(), put);
+				UserProfile userProfile = profileManager.getUserProfile(getID(), operation == Operation.PUT);
 
-				if (modify) {
+				if (operation == Operation.MODIFY) {
 					new FileTreeNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
 				}
 
-				if (put) {
-					profileManager.readyToPut(userProfile, getProcess().getID());
+				if (operation == Operation.PUT) {
+					profileManager.readyToPut(userProfile, getID());
 				}
 
-				getProcess().setNextStep(null);
 			} catch (GetFailedException | PutFailedException e) {
-				getProcess().stop(e);
+				cancel(new RollbackReason(this, e.getMessage()));
 				Assert.fail();
 			}
-		}
-
-		@Override
-		public void rollBack() {
-			Assert.fail();
 		}
 	}
 }

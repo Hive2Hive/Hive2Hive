@@ -1,13 +1,13 @@
 package org.hive2hive.core.processes.implementations.share;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 

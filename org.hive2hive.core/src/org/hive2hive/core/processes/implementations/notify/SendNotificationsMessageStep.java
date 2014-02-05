@@ -7,6 +7,7 @@ import java.util.Map;
 import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -14,7 +15,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
 

@@ -11,8 +11,8 @@ import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.network.messages.BaseMessageTest;
 import org.hive2hive.core.test.network.messages.BaseRequestMessageTest;
 import org.hive2hive.core.test.network.messages.direct.BaseDirectRequestMessageTest;
-import org.hive2hive.core.test.process.ProcessTest;
-import org.hive2hive.core.test.process.manager.ProcessManagerTest;
+import org.hive2hive.core.test.processes.framework.ProcessListenerTest;
+import org.hive2hive.core.test.processes.framework.SequentialProcessTest;
 import org.hive2hive.core.test.processes.implementations.common.GetLocationStepTest;
 import org.hive2hive.core.test.processes.implementations.common.PutLocationStepTest;
 import org.hive2hive.core.test.processes.implementations.common.base.BaseDirectMessageProcessStepTest;
@@ -59,7 +59,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		BaseDirectRequestMessageTest.class,
 
 		// Processes
-		ProcessTest.class, ProcessManagerTest.class,
+		ProcessListenerTest.class, SequentialProcessTest.class,
 
 		// ProcessStep, Common, Get
 		BaseGetProcessStepTest.class, GetLocationStepTest.class, GetUserProfileStepTest.class,

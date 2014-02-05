@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.framework.interfaces;
 
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public interface IControllable {
 

@@ -13,7 +13,7 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.process.ProcessManager;
+import org.hive2hive.core.processes.ProcessManager;
 
 /**
  * Is pushed in a user profile queue of a user (A) when another user (B) has moved a file. The file has been

@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
@@ -11,7 +12,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.ResultProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public class GetFileListStep extends ResultProcessStep<List<Path>> {
 
