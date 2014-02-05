@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -36,7 +37,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
-		asyncExecutor.submit(this);
+		Future<Boolean> submit = asyncExecutor.submit(this);
 		// immediate return, since execution is async
 
 	}

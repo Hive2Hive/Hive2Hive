@@ -1,5 +1,7 @@
 package org.hive2hive.core.processes.framework.abstracts;
 
+import io.netty.util.concurrent.Future;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public void start() throws InvalidProcessStateException {
+	public Future<Boolean> start() throws InvalidProcessStateException {
 		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 
 		if (state != ProcessState.READY) {
@@ -43,13 +45,16 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
-
+		
+		Future<Boolean> asyncHandle = null;
 		try {
-			doExecute();
+			asyncHandle = doExecute();
 			succeed();
 		} catch (ProcessExecutionException e) {
 			cancel(new RollbackReason(e));
 		}
+		
+		return asyncHandle;
 	}
 
 	@Override
@@ -101,7 +106,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		fail(reason);
 	}
 
-	protected abstract void doExecute() throws InvalidProcessStateException, ProcessExecutionException;
+	protected abstract Future<Boolean> doExecute() throws InvalidProcessStateException, ProcessExecutionException;
 
 	protected abstract void doPause();
 

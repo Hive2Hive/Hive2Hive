@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -23,6 +24,7 @@ public class SequentialProcess extends Process {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SequentialProcess.class);
 	
 	List<ProcessComponent> components = new ArrayList<ProcessComponent>();
+	List<Future<Boolean>> asyncFutures = new ArrayList<Future<Boolean>>();
 
 	private int executionIndex = 0;
 	private int rollbackIndex = 0;
@@ -36,7 +38,7 @@ public class SequentialProcess extends Process {
 			checkExecutedComponents();
 			rollbackIndex = executionIndex;
 			ProcessComponent next = components.get(executionIndex);
-			next.start();
+			asyncFutures = next.start();
 			executionIndex++;
 		}
 
