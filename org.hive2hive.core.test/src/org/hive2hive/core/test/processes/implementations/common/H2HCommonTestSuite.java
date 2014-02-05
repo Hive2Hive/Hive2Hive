@@ -1,11 +1,10 @@
-package org.hive2hive.core.test.process.common;
+package org.hive2hive.core.test.processes.implementations.common;
 
 import org.hive2hive.core.test.process.common.get.BaseGetProcessStepTest;
 import org.hive2hive.core.test.process.common.get.GetLocationStepTest;
-import org.hive2hive.core.test.process.common.put.BasePutProcessStepTest;
-import org.hive2hive.core.test.process.common.put.PutLocationStepTest;
 import org.hive2hive.core.test.processes.implementations.common.base.BaseDirectMessageProcessStepTest;
 import org.hive2hive.core.test.processes.implementations.common.base.BaseMessageProcessStepTest;
+import org.hive2hive.core.test.processes.implementations.common.base.BasePutProcessStepTest;
 import org.hive2hive.core.test.processes.implementations.common.base.BaseRemoveProcessStepTest;
 import org.hive2hive.core.test.processes.implementations.login.GetUserProfileStepTest;
 import org.hive2hive.core.test.processes.implementations.register.PutUserProfileStepTest;

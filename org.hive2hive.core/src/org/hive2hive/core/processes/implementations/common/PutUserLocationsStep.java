@@ -10,18 +10,18 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 
 public class PutUserLocationsStep extends BasePutProcessStep {
 
 	private final IConsumeLocations locationsContext;
-	private final IConsumeUserProfile profileContext;
+	private final IConsumeProtectionKeys protectionKeyContext;
 
-	public PutUserLocationsStep(IConsumeLocations locationsContext, IConsumeUserProfile profileContext,
-			IDataManager dataManager) {
+	public PutUserLocationsStep(IConsumeLocations locationsContext,
+			IConsumeProtectionKeys protectionKeyContext, IDataManager dataManager) {
 		super(dataManager);
 		this.locationsContext = locationsContext;
-		this.profileContext = profileContext;
+		this.protectionKeyContext = protectionKeyContext;
 	}
 
 	@Override
@@ -37,8 +37,8 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 		}
 
 		try {
-			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, profileContext
-					.consumeUserProfile().getProtectionKeys());
+			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations,
+					protectionKeyContext.consumeProtectionKeys());
 		} catch (PutFailedException e) {
 			cancel(new RollbackReason(this, "Put failed."));
 		}

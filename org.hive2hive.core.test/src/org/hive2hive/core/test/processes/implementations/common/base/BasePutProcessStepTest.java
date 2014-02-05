@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common.put;
+package org.hive2hive.core.test.processes.implementations.common.base;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -14,13 +14,16 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.put.BasePutProcessStep;
+import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
+import org.hive2hive.core.test.process.common.put.DenyingPutTestStorage;
+import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,16 +58,9 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		String data = NetworkTestUtil.randomString();
 
 		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data));
-		process.setNextStep(putStep);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		// wait for the process to finish
-		ProcessTestUtil.waitTillSucceded(listener, 10);
+		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
+				putter.getDataManager());
+		UseCaseTestUtil.executeProcess(putStep);
 
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
@@ -73,7 +69,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutProcessFailure() throws NoPeerConnectionException {
+	public void testPutProcessFailure() throws NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0);
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1);
@@ -84,16 +80,14 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		String data = NetworkTestUtil.randomString();
 
 		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data));
-		process.setNextStep(putStep);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
+		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
+				putter.getDataManager());
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		putStep.attachListener(listener);
+		putStep.start();
 
 		// wait for the process to finish
-		ProcessTestUtil.waitTillFailed(listener, 10);
+		UseCaseTestUtil.waitTillFailed(listener, 10);
 
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
 				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
@@ -118,22 +112,22 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		private final String contentKey;
 		private final H2HTestData data;
 
-		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data) {
+		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data,
+				IDataManager dataManager) {
+			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 			this.data = data;
 		}
 
 		@Override
-		public void start() {
+		protected void doExecute() throws InvalidProcessStateException {
 			try {
 				put(locationKey, contentKey, data, null);
-				getProcess().setNextStep(null);
 			} catch (PutFailedException e) {
-				getProcess().stop(e);
+				cancel(new RollbackReason(this, e.getMessage()));
 			}
 		}
-
 	}
 
 }

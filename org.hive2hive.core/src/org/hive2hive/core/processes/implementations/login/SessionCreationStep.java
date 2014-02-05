@@ -23,7 +23,7 @@ public class SessionCreationStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		// create session
-		params.setKeyPair(context.consumeUserProfile().getEncryptionKeys());
+		params.setProtectionKeys(context.consumeProtectionKeys());
 		H2HSession session = new H2HSession(params);
 
 		// set session

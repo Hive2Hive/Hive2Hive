@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common.put;
+package org.hive2hive.core.test.processes.implementations.common;
 
 import static org.junit.Assert.assertNull;
 
@@ -16,13 +16,16 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.process.Process;
-import org.hive2hive.core.process.common.put.PutLocationStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.common.PutUserLocationsStep;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.process.ProcessTestUtil;
-import org.hive2hive.core.test.process.TestProcessListener;
+import org.hive2hive.core.test.process.common.put.DenyingPutTestStorage;
+import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
+import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -69,16 +72,9 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
 
 		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		PutLocationStep step = new PutLocationStep(newLocations, protectionKeys, null);
-		process.setNextStep(step);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
-
-		// wait for the process to finish
-		ProcessTestUtil.waitTillSucceded(listener, 10);
+		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);
+		PutUserLocationsStep step = new PutUserLocationsStep(context, context, putter.getDataManager());
+		UseCaseTestUtil.executeProcess(step);
 
 		// get the locations
 		FutureGet future = proxy.getDataManager().get(Number160.createHash(userId),
@@ -95,7 +91,8 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException, NoPeerConnectionException {
+	public void testStepRollback() throws InterruptedException, NoPeerConnectionException,
+			InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
@@ -108,16 +105,14 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
 
 		// initialize the process and the one and only step to test
-		Process process = new Process(putter) {
-		};
-		PutLocationStep step = new PutLocationStep(newLocations, protectionKeys, null);
-		process.setNextStep(step);
-		TestProcessListener listener = new TestProcessListener();
-		process.addListener(listener);
-		process.start();
+		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);
+		PutUserLocationsStep step = new PutUserLocationsStep(context, context, putter.getDataManager());
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		step.attachListener(listener);
+		step.start();
 
 		// wait for the process to finish
-		ProcessTestUtil.waitTillFailed(listener, 10);
+		UseCaseTestUtil.waitTillFailed(listener, 10);
 
 		// get the locations which should be stored at the proxy --> they should be null
 		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(userId),
@@ -136,5 +131,27 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() {
 		afterClass();
+	}
+
+	private class PutLocationContext implements IConsumeProtectionKeys, IConsumeLocations {
+
+		private final KeyPair protectionKeys;
+		private final Locations locations;
+
+		public PutLocationContext(Locations locations, KeyPair protectionKeys) {
+			this.locations = locations;
+			this.protectionKeys = protectionKeys;
+		}
+
+		@Override
+		public Locations consumeLocations() {
+			return locations;
+		}
+
+		@Override
+		public KeyPair consumeProtectionKeys() {
+			return protectionKeys;
+		}
+
 	}
 }

@@ -1,14 +1,16 @@
 package org.hive2hive.core.processes.implementations.context;
 
+import java.security.KeyPair;
+
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfile;
 
-public class LoginProcessContext implements IProvideUserProfile, IConsumeUserProfile, IProvideLocations,
-		IConsumeLocations {
+public class LoginProcessContext implements IProvideUserProfile, IProvideLocations, IConsumeLocations,
+		IConsumeProtectionKeys {
 
 	private UserProfile profile;
 	private Locations locations;
@@ -17,11 +19,6 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 	@Override
 	public void provideUserProfile(UserProfile profile) {
 		this.profile = profile;
-	}
-
-	@Override
-	public UserProfile consumeUserProfile() {
-		return profile;
 	}
 
 	@Override
@@ -40,6 +37,11 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 
 	public boolean getIsMaster() {
 		return isMaster;
+	}
+
+	@Override
+	public KeyPair consumeProtectionKeys() {
+		return profile.getProtectionKeys();
 	}
 
 }
