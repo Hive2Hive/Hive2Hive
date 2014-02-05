@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.security.KeyPair;
 import java.util.List;
 import java.util.Random;
 
@@ -15,10 +16,12 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -259,6 +262,87 @@ public class DataManagerTest extends H2HJUnitTest {
 		futureGet = nodeB.getDataManager().get(lKey, domainKey, cKey3);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
+	}
+
+	/**
+	 * Change the protection key after the first few versions have been put
+	 */
+	@Test
+	public void testChangeProtectionKey() throws NoPeerConnectionException, IOException {
+		KeyPair keypair1 = EncryptionUtil.generateProtectionKey();
+		KeyPair keypair2 = EncryptionUtil.generateProtectionKey();
+
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
+
+		NetworkManager node = network.get(random.nextInt(networkSize));
+
+		// put some initial data with keypair1
+		H2HTestData data1v0 = new H2HTestData(NetworkTestUtil.randomString());
+		data1v0.generateVersionKey();
+		data1v0.setBasedOnKey(Number160.ZERO);
+		FuturePut putFuture1 = node.getDataManager().put(locationKey, domainKey, contentKey, data1v0,
+				keypair1);
+		putFuture1.awaitUninterruptibly();
+		Assert.assertTrue(putFuture1.isSuccess());
+
+		// put 1st version with keypair 1
+		H2HTestData data1v1 = new H2HTestData(NetworkTestUtil.randomString());
+		data1v1.generateVersionKey();
+		data1v1.setBasedOnKey(data1v0.getVersionKey());
+		FuturePut putFuture2 = node.getDataManager().put(locationKey, domainKey, contentKey, data1v1,
+				keypair1);
+		putFuture2.awaitUninterruptibly();
+		Assert.assertTrue(putFuture2.isSuccess());
+
+		// change protection key (during putting a new version)
+		H2HTestData data1v2 = new H2HTestData(NetworkTestUtil.randomString());
+		data1v2.generateVersionKey();
+		data1v2.setBasedOnKey(data1v1.getVersionKey());
+		FuturePut changeFuture1 = node.getDataManager().put(locationKey, domainKey, contentKey, data1v2,
+				keypair1, keypair2);
+		changeFuture1.awaitUninterruptibly();
+		Assert.assertTrue(changeFuture1.isSuccess());
+
+		// try to put a new version with the old protection key
+		H2HTestData data1v3 = new H2HTestData(NetworkTestUtil.randomString());
+		data1v3.generateVersionKey();
+		data1v3.setBasedOnKey(data1v2.getVersionKey());
+		FuturePut changeFuture2 = node.getDataManager().put(locationKey, domainKey, contentKey, data1v3,
+				keypair1);
+		changeFuture2.awaitUninterruptibly();
+		Assert.assertFalse(changeFuture2.isSuccess());
+	}
+
+	/**
+	 * Add the protection key at a later point in time (not from the first version)
+	 */
+	@Test
+	public void testAddProtectionKey() throws NoPeerConnectionException, IOException {
+		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
+		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
+
+		NetworkManager node = network.get(random.nextInt(networkSize));
+
+		// put some initial data without protection key
+		H2HTestData data1v0 = new H2HTestData(NetworkTestUtil.randomString());
+		data1v0.generateVersionKey();
+		data1v0.setBasedOnKey(Number160.ZERO);
+		FuturePut putFuture1 = node.getDataManager().put(locationKey, domainKey, contentKey, data1v0, null);
+		putFuture1.awaitUninterruptibly();
+		Assert.assertTrue(putFuture1.isSuccess());
+
+		// put 1st version with keypair 1
+		KeyPair keypair = EncryptionUtil.generateProtectionKey();
+		H2HTestData data1v1 = new H2HTestData(NetworkTestUtil.randomString());
+		data1v1.generateVersionKey();
+		data1v1.setBasedOnKey(data1v0.getVersionKey());
+		FuturePut putFuture2 = node.getDataManager()
+				.put(locationKey, domainKey, contentKey, data1v1, keypair);
+		putFuture2.awaitUninterruptibly();
+		Assert.assertTrue(putFuture2.isSuccess());
 	}
 
 	@AfterClass

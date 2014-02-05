@@ -103,7 +103,7 @@ public class H2HStorageMemory extends StorageLayer {
 				logger.trace("First version of a content is added");
 				return PutStatusH2H.OK;
 			} else {
-				logger.warn("History is not empty and no based on key given.");
+				logger.warn("History is not empty and not based on key given.");
 				return PutStatusH2H.VERSION_CONFLICT_NO_BASED_ON;
 			}
 		} else if (history.isEmpty()) {
@@ -135,18 +135,18 @@ public class H2HStorageMemory extends StorageLayer {
 	private void cleanupVersions(Number640 key, PublicKey publicKey) {
 		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
 
-//		long now = System.currentTimeMillis();
+		// long now = System.currentTimeMillis();
 		while (history.size() > H2HConstants.MAX_VERSIONS_HISTORY) {
 			Number640 toRemove = history.firstKey();
-//			if (toRemove.getVersionKey().timestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS > now) {
-//				// stop removal because oldest version is too 'young'
-//				break;
-//			} else {
-				logger.trace(String.format("Removing an older version. version key = '%s'",
-						key.getVersionKey()));
-				history.remove(toRemove);
-				super.remove(toRemove, publicKey);
-//			}
+			// if (toRemove.getVersionKey().timestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS >
+			// now) {
+			// // stop removal because oldest version is too 'young'
+			// break;
+			// } else {
+			logger.trace(String.format("Removing an older version. version key = '%s'", key.getVersionKey()));
+			history.remove(toRemove);
+			super.remove(toRemove, publicKey);
+			// }
 		}
 	}
 
