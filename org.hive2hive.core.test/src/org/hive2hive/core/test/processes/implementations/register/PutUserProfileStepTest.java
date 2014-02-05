@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common.put;
+package org.hive2hive.core.test.processes.implementations.register;
 
 import static org.junit.Assert.assertNull;
 
@@ -25,6 +25,7 @@ import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.process.common.put.DenyingPutTestStorage;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;

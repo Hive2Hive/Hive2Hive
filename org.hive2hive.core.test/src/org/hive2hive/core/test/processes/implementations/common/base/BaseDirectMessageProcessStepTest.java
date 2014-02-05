@@ -1,6 +1,7 @@
-package org.hive2hive.core.test.processes.implementations.common;
+package org.hive2hive.core.test.processes.implementations.common.base;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -19,13 +20,11 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.implementations.common.base.BaseMessageProcessStep;
+import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.network.messages.TestMessage;
-import org.hive2hive.core.test.network.messages.TestMessageWithReply;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -34,12 +33,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests for the {@link BaseMessageProcessStep} class. Checks if the process step successes when message
+ * Tests for the {@link BaseDirectMessageProcessStep} class. Checks if the process step successes when message
  * successfully arrives and if the process step fails (triggers rollback) when the sending of a message fails.
  * 
- * @author Seppi, Nico
+ * @author Seppi
  */
-public class BaseMessageProcessStepTest extends H2HJUnitTest {
+public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
@@ -47,15 +46,16 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = BaseMessageProcessStepTest.class;
+		testClass = BaseDirectMessageProcessStepTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkTestUtil.createSameKeyPair(network);
 	}
 
 	/**
-	 * Sends an asynchronous message through a process step. This test checks if the process step successes
-	 * when the message arrives at the right target node (node which is responsible for the given key). This
+	 * Sends a direct asynchronous message through a process step. This test checks if the process step
+	 * successes
+	 * when the message arrives at the right target node (given through {@link PeerAddress}). This
 	 * is verified by locally storing and looking for the sent test data at the receiving node.
 	 * 
 	 * @throws IOException
@@ -63,7 +63,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void baseMessageProcessStepTestOnSuccess() throws ClassNotFoundException, IOException,
+	public void baseDirectMessageProcessStepTestOnSuccess() throws ClassNotFoundException, IOException,
 			NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
@@ -71,7 +71,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// generate random data and content key
 		String data = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
-
 		Number160 lKey = Number160.createHash(nodeB.getNodeId());
 		Number160 dKey = Number160.ZERO;
 		Number160 cKey = Number160.createHash(contentKey);
@@ -82,23 +81,23 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
+				contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
-		BaseMessageProcessStep step = new BaseMessageProcessStep(nodeA.getMessageManager()) {
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
+			@Override
+			public void handleResponseMessage(ResponseMessage responseMessage) {
+				Assert.fail("Should be not used.");
+			}
 
 			@Override
 			protected void doExecute() throws InvalidProcessStateException {
 				try {
-					send(message, nodeB.getPublicKey());
+					sendDirect(message, nodeB.getPublicKey());
 				} catch (SendFailedException e) {
-					Assert.fail(e.getMessage());
+					Assert.fail();
 				}
-			}
-
-			@Override
-			public void handleResponseMessage(ResponseMessage responseMessage) {
-				Assert.fail("Should be not used.");
 			}
 		};
 		UseCaseTestUtil.executeProcess(step);
@@ -107,12 +106,13 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		H2HWaiter w = new H2HWaiter(10);
 		do {
 			w.tickASecond();
-			futureGet = nodeA.getDataManager().get(lKey, dKey, cKey);
+			futureGet = nodeB.getDataManager().get(lKey, dKey, cKey);
 			futureGet.awaitUninterruptibly();
 		} while (futureGet.getData() == null);
 
 		// verify that data arrived
 		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		assertNotNull(result);
 		assertEquals(data, result);
 	}
 
@@ -124,7 +124,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 */
 	@Test
-	public void baseMessageProcessStepTestOnFailure() throws NoPeerConnectionException,
+	public void baseDirectMessageProcessStepTestOnFailure() throws NoPeerConnectionException,
 			InvalidProcessStateException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
@@ -132,7 +132,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// generate random data and content key
 		String data = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
-
 		Number160 lKey = Number160.createHash(nodeB.getNodeId());
 		Number160 dKey = Number160.ZERO;
 		Number160 cKey = Number160.createHash(contentKey);
@@ -146,25 +145,24 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		final TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
+				contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
-		BaseMessageProcessStep step = new BaseMessageProcessStep(nodeA.getMessageManager()) {
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
+			@Override
+			public void handleResponseMessage(ResponseMessage responseMessage) {
+				Assert.fail("Should be not used.");
+			}
 
 			@Override
 			protected void doExecute() throws InvalidProcessStateException {
 				try {
-					send(message, nodeB.getPublicKey());
+					sendDirect(message, nodeB.getPublicKey());
 					Assert.fail();
 				} catch (SendFailedException e) {
-					// expected
 					cancel(new RollbackReason(this, "Expected behavior"));
 				}
-			}
-
-			@Override
-			public void handleResponseMessage(ResponseMessage responseMessage) {
-				Assert.fail("Should be not used.");
 			}
 		};
 		TestProcessComponentListener listener = new TestProcessComponentListener();
@@ -174,7 +172,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 10);
 
 		// check if selected location is still empty
-		futureGet = nodeA.getDataManager().get(lKey, dKey, cKey);
+		futureGet = nodeB.getDataManager().get(lKey, dKey, cKey);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
@@ -188,8 +186,8 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void baseMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException, IOException,
-			NoPeerConnectionException {
+	public void baseDirectMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException,
+			IOException, NoPeerConnectionException {
 		// select two random nodes
 		final NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
@@ -201,28 +199,19 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		final Number160 cKey = Number160.createHash(contentKey);
 
 		// check if selected locations are empty
-		FutureGet futureGet = nodeA.getDataManager().get(lKeyB, dKey, cKey);
+		FutureGet futureGet = nodeB.getDataManager().get(lKeyA, dKey, cKey);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
-		futureGet = nodeB.getDataManager().get(lKeyA, dKey, cKey);
+		futureGet = nodeA.getDataManager().get(lKeyB, dKey, cKey);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), contentKey);
+		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getPeerAddress(),
+				contentKey);
 
 		// initialize the process and the one and only step to test
-		BaseMessageProcessStep step = new BaseMessageProcessStep(nodeA.getMessageManager()) {
-
-			@Override
-			protected void doExecute() throws InvalidProcessStateException {
-				try {
-					send(message, nodeB.getPublicKey());
-				} catch (SendFailedException e) {
-					Assert.fail(e.getMessage());
-				}
-			}
-
+		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
 			@Override
 			public void handleResponseMessage(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
@@ -231,7 +220,16 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 					nodeA.getDataManager().put(lKeyA, dKey, cKey, new H2HTestData(receivedSecret), null)
 							.awaitUninterruptibly();
 				} catch (NoPeerConnectionException e) {
-					Assert.fail(e.getMessage());
+					Assert.fail();
+				}
+			}
+
+			@Override
+			protected void doExecute() throws InvalidProcessStateException {
+				try {
+					sendDirect(message, nodeB.getPublicKey());
+				} catch (SendFailedException e) {
+					Assert.fail();
 				}
 			}
 		};
@@ -247,10 +245,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
-		futureGet = nodeA.getDataManager().get(lKeyB, dKey, cKey);
+		futureGet = nodeB.getDataManager().get(lKeyB, dKey, cKey);
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
-
 		assertEquals(originalSecret, receivedSecret);
 	}
 

@@ -2,13 +2,13 @@ package org.hive2hive.core.test.process.common;
 
 import org.hive2hive.core.test.process.common.get.BaseGetProcessStepTest;
 import org.hive2hive.core.test.process.common.get.GetLocationStepTest;
-import org.hive2hive.core.test.process.common.get.GetUserProfileStepTest;
 import org.hive2hive.core.test.process.common.put.BasePutProcessStepTest;
 import org.hive2hive.core.test.process.common.put.PutLocationStepTest;
-import org.hive2hive.core.test.process.common.put.PutUserProfileStepTest;
 import org.hive2hive.core.test.process.common.remove.BaseRemoveProcessStepTest;
-import org.hive2hive.core.test.processes.implementations.common.BaseDirectMessageProcessStepTest;
-import org.hive2hive.core.test.processes.implementations.common.BaseMessageProcessStepTest;
+import org.hive2hive.core.test.processes.implementations.common.base.BaseDirectMessageProcessStepTest;
+import org.hive2hive.core.test.processes.implementations.common.base.BaseMessageProcessStepTest;
+import org.hive2hive.core.test.processes.implementations.login.GetUserProfileStepTest;
+import org.hive2hive.core.test.processes.implementations.register.PutUserProfileStepTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;

@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.process.common.get;
+package org.hive2hive.core.test.processes.implementations.login;
 
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
