@@ -15,6 +15,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.implementations.common.base.BaseRemoveProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -57,8 +58,8 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 						Number160.createHash(contentKey), testData, null).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, testData,
-				network.get(0));
+		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, testData, network
+				.get(0).getDataManager());
 		UseCaseTestUtil.executeProcess(putStep);
 
 		FutureGet futureGet = network
@@ -90,7 +91,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 		// initialize the process and the one and only step to test
 		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, testData,
-				network.get(0));
+				network.get(0).getDataManager());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		removeStep.attachListener(listener);
 		removeStep.start();
@@ -133,8 +134,8 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		private final H2HTestData data;
 
 		public TestRemoveProcessStep(String locationKey, String contentKey, H2HTestData data,
-				NetworkManager networkManager) {
-			super(networkManager);
+				IDataManager dataManager) {
+			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 			this.data = data;

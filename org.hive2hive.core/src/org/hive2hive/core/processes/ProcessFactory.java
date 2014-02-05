@@ -209,7 +209,7 @@ public final class ProcessFactory {
 		process.add(new UpdateMD5inUserProfileStep(context));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
-		process.add(new DeleteChunksStep(context, networkManager));
+		process.add(new DeleteChunksStep(context, dataManager));
 		if (!inRoot) {
 			process.add(new GetParentMetaStep(context, networkManager.getDataManager()));
 		}
@@ -258,8 +258,8 @@ public final class ProcessFactory {
 
 		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		process.add(new DeleteChunksProcess(context, networkManager));
-		process.add(new DeleteMetaDocumentStep(context, networkManager));
+		process.add(new DeleteChunksProcess(context, dataManager));
+		process.add(new DeleteMetaDocumentStep(context, dataManager));
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
 
 		if (!fileInRoot) {

@@ -7,7 +7,7 @@ import java.util.List;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
@@ -17,11 +17,11 @@ import org.hive2hive.core.processes.implementations.context.DeleteFileProcessCon
 public class DeleteChunksProcess extends SequentialProcess {
 
 	private final DeleteFileProcessContext context;
-	private final NetworkManager networkManager;
+	private final IDataManager dataManager;
 
-	public DeleteChunksProcess(DeleteFileProcessContext context, NetworkManager networkManager) {
+	public DeleteChunksProcess(DeleteFileProcessContext context, IDataManager dataManager) {
 		this.context = context;
-		this.networkManager = networkManager;
+		this.dataManager = dataManager;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class DeleteChunksProcess extends SequentialProcess {
 			for (KeyPair keyPair : chunkKeys) {
 				// TODO at a later stage, this steps could be async (parallelized)
 				add(new DeleteSingleChunkStep(keyPair.getPublic(), context.consumeProtectionKeys(),
-						networkManager));
+						dataManager));
 			}
 		}
 

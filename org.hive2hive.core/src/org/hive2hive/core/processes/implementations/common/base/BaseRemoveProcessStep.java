@@ -6,12 +6,10 @@ import java.security.PublicKey;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -33,15 +31,15 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
-	private final NetworkManager networkManager;
+	private final IDataManager dataManager;
 	protected String locationKey;
 	protected String contentKey;
 	protected NetworkContent contentToRemove;
 	protected KeyPair protectionKey;
 	private boolean removePerformed = false;
 
-	public BaseRemoveProcessStep(NetworkManager networkManager) {
-		this.networkManager = networkManager;
+	public BaseRemoveProcessStep(IDataManager dataManager) {
+		this.dataManager = dataManager;
 	}
 
 	protected void remove(PublicKey locationKey, String contentKey, NetworkContent contentToRemove,
@@ -55,13 +53,6 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		this.contentKey = contentKey;
 		this.contentToRemove = contentToRemove;
 		this.protectionKey = protectionKey;
-
-		DataManager dataManager;
-		try {
-			dataManager = networkManager.getDataManager();
-		} catch (NoPeerConnectionException e) {
-			throw new RemoveFailedException("Node is not connected.");
-		}
 
 		boolean success = false;
 		if (this.contentToRemove == null || this.contentToRemove.getVersionKey() == Number160.ZERO) {
@@ -91,16 +82,6 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 			logger.warn(String
 					.format("Roll back of remove failed. No content to re-put. location key = '%s' content key = '%s'",
 							locationKey, contentKey));
-			return;
-		}
-
-		DataManager dataManager;
-		try {
-			dataManager = networkManager.getDataManager();
-		} catch (NoPeerConnectionException e) {
-			logger.warn(String.format(
-					"Roll back of remove failed. No connection. location key = '%s' content key = '%s'",
-					locationKey, contentKey));
 			return;
 		}
 
