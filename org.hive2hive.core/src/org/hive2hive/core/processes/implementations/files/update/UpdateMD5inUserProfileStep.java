@@ -62,6 +62,9 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 			fileNode.setMD5(newMD5);
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getID());
+
+			// store for notification
+			context.setNewFileTreeNode(fileNode);
 		} catch (GetFailedException | PutFailedException e) {
 			cancel(new RollbackReason(this, e.getMessage()));
 		}

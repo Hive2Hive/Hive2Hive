@@ -79,10 +79,15 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getH2HSession()
 					.getFileManager());
+
 			if (parentNode == null) {
 				cancel(new RollbackReason(this, "Parent file is not in user profile"));
 				return;
+			} else if (parentNode.getProtectionKeys() == null) {
+				cancel(new RollbackReason(this, "This directory is write protected"));
+				return;
 			}
+
 			context.provideProtectionKeys(parentNode.getProtectionKeys());
 			parentsKeyPair = parentNode.getKeyPair();
 			NetworkContent content = get(parentNode.getKeyPair().getPublic(), H2HConstants.META_DOCUMENT);

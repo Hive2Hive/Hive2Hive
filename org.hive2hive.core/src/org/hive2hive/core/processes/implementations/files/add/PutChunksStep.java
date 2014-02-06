@@ -61,6 +61,9 @@ public class PutChunksStep extends BasePutProcessStep {
 		if (file.isDirectory()) {
 			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
 			return;
+		} else if (context.consumeProtectionKeys() == null) {
+			cancel(new RollbackReason(this, "This directory is write protected (and we don't have the keys)"));
+			return;
 		}
 
 		// first, validate the file size
