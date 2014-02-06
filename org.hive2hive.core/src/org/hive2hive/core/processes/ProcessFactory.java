@@ -80,6 +80,7 @@ import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
 import org.hive2hive.core.processes.implementations.share.PrepareNotificationsStep;
 import org.hive2hive.core.processes.implementations.share.UpdateMetaFolderStep;
 import org.hive2hive.core.processes.implementations.share.UpdateUserProfileStep;
+import org.hive2hive.core.processes.implementations.share.VerifyFriendId;
 import org.hive2hive.core.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -392,6 +393,7 @@ public final class ProcessFactory {
 		ShareProcessContext context = new ShareProcessContext(folder, friendId);
 
 		SequentialProcess process = new SequentialProcess();
+		process.add(new VerifyFriendId(networkManager, friendId));
 		process.add(new File2MetaFileComponent(folder, context, context, networkManager));
 		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
