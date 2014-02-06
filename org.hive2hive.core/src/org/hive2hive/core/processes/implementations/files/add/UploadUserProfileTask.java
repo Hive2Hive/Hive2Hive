@@ -57,7 +57,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 			// then we're ready to download the file
 			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
 					fileTreeNode.getFileKey(), networkManager);
-			logger.debug("Start downloading a file");
+			logger.debug("Start downloading the file '" + fileTreeNode.getFullPath() + "'.");
 			process.start();
 		} catch (NoSessionException | InvalidProcessStateException e) {
 			logger.error("Could not start the download of the newly shared file");

@@ -11,6 +11,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -76,7 +77,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		folderToShare.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
 
-		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId());
+		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId(), PermissionType.WRITE);
 
 		// TODO wait for userB to process the user profile task
 		Thread.sleep(10000);
@@ -104,7 +105,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(network.get(0), subfolder);
 
 		// share the filled folder
-		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId());
+		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId(), PermissionType.WRITE);
 
 		// TODO wait for userB to process the user profile task
 		Thread.sleep(20000);
@@ -138,7 +139,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderAtA);
 
 		// share the empty folder
-		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId());
+		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId(), PermissionType.WRITE);
 
 		// TODO wait for userB to process the user profile task
 		Thread.sleep(10000);
@@ -186,7 +187,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1AtA);
 
 		// share the empty folder
-		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId());
+		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId(), PermissionType.WRITE);
 
 		// TODO wait for userB to process the user profile task
 		Thread.sleep(10000);
@@ -213,14 +214,14 @@ public class ShareFolderTest extends H2HJUnitTest {
 	public void shareFileTest() throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
 			NoPeerConnectionException {
 		File file = new File(rootA, NetworkTestUtil.randomString());
-		UseCaseTestUtil.shareFolder(network.get(0), file, "any");
+		UseCaseTestUtil.shareFolder(network.get(0), file, "any", PermissionType.WRITE);
 	}
 
 	@Test(expected = IllegalFileLocation.class)
 	public void wrongFolderLocationTest() throws IllegalFileLocation, IllegalArgumentException,
 			NoSessionException, NoPeerConnectionException {
 		// share root of B through client A
-		UseCaseTestUtil.shareFolder(network.get(0), rootB, "any");
+		UseCaseTestUtil.shareFolder(network.get(0), rootB, "any", PermissionType.WRITE);
 	}
 
 	@After

@@ -10,7 +10,6 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
-import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -53,9 +52,10 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 					context.getFriendId())));
 			return;
 		}
-		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), PermissionType.WRITE));
+		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), context.getPermission()));
 
-		logger.debug("Putting the modified meta folder (containing the new user permission)");
+		logger.debug("Putting the modified meta folder (containing the new user permission '"
+				+ context.getPermission().name() + "')");
 		super.doExecute();
 	}
 

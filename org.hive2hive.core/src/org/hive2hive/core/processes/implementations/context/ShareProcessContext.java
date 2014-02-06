@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -22,6 +23,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	private final File folder;
 	private final String friendId;
 	private final KeyPair newProtectionKeys;
+	private final PermissionType permission;
 
 	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
@@ -29,9 +31,10 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 
-	public ShareProcessContext(File folder, String friendId) {
+	public ShareProcessContext(File folder, String friendId, PermissionType permission) {
 		this.folder = folder;
 		this.friendId = friendId;
+		this.permission = permission;
 		this.newProtectionKeys = EncryptionUtil.generateProtectionKey();
 	}
 
@@ -41,6 +44,10 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	public String getFriendId() {
 		return friendId;
+	}
+
+	public PermissionType getPermission() {
+		return permission;
 	}
 
 	public KeyPair consumeNewProtectionKeys() {

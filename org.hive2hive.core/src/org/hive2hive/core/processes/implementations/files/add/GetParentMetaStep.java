@@ -54,11 +54,11 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 
 		if (context.isInRoot()) {
 			// no parent to update since the file is in root
-			logger.debug("File '" + file.getName() + "' is in root.");
+			logger.debug("File '" + file.getAbsolutePath() + "' is in root.");
 			provideDefaultProtectionKeys();
 		} else {
 			// when file is not in root, the parent meta folder must be found
-			logger.debug("File '" + file.getName() + "' is not in root.");
+			logger.debug("File '" + file.getAbsolutePath() + "' is not in root.");
 			getParentMetaFolder(parent);
 		}
 	}

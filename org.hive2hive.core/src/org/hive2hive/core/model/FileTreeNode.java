@@ -186,7 +186,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	}
 
 	public KeyPair getProtectionKeys() {
-		if (protectionKeys == null || !isFolder()) {
+		if (!isFolder()) {
 			return parent.getProtectionKeys();
 		} else {
 			return protectionKeys;

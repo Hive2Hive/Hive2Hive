@@ -53,7 +53,7 @@ public class FindInUserProfileStep extends ProcessStep {
 			logger.info("No download of the file needed since '" + fileNode.getFullPath() + "' is a folder");
 			getParent().add(new CreateFolderStep(context, networkManager));
 		} else {
-			logger.info("Initalize the process for downloading file " + fileNode.getFullPath());
+			logger.info("Initalize the process for downloading file '" + fileNode.getFullPath() + "'.");
 			try {
 				FileManager fileManager = networkManager.getSession().getFileManager();
 				IDataManager dataManager = networkManager.getDataManager();

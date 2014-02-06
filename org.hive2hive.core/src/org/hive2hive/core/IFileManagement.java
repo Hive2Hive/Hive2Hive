@@ -8,6 +8,7 @@ import java.util.List;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
@@ -95,9 +96,11 @@ public interface IFileManagement {
 	 * 
 	 * @param folder the folder to share
 	 * @param userId the id of the user which will get access to the folder
+	 * @param permission if the other user get read-only or write access
 	 * @return an observable share process
 	 * @throws NoPeerConnectionException
 	 */
-	IProcessComponent share(File folder, String userId) throws IllegalArgumentException, NoSessionException,
-			IllegalFileLocation, NoPeerConnectionException;
+	IProcessComponent share(File folder, String userId, PermissionType permission)
+			throws IllegalArgumentException, NoSessionException, IllegalFileLocation,
+			NoPeerConnectionException;
 }

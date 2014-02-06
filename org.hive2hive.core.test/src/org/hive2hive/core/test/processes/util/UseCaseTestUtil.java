@@ -13,6 +13,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -145,10 +146,10 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
-	public static void shareFolder(NetworkManager networkManager, File folder, String friendId)
-			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
-		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder, friendId,
+	public static void shareFolder(NetworkManager networkManager, File folder, String friendId,
+			PermissionType permission) throws IllegalFileLocation, IllegalArgumentException,
+			NoSessionException, NoPeerConnectionException {
+		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder, friendId, permission,
 				networkManager);
 		executeProcess(process);
 	}

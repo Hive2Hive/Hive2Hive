@@ -12,6 +12,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
@@ -370,9 +371,9 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createShareProcess(File folder, String friendId, NetworkManager networkManager)
-			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
+	public ProcessComponent createShareProcess(File folder, String friendId, PermissionType permission,
+			NetworkManager networkManager) throws IllegalFileLocation, IllegalArgumentException,
+			NoSessionException, NoPeerConnectionException {
 		// verify
 		if (!folder.isDirectory())
 			throw new IllegalArgumentException("File has to be a folder.");
@@ -390,7 +391,7 @@ public final class ProcessFactory {
 		if (folder.toPath().toString().equals(root.toString()))
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
 
-		ShareProcessContext context = new ShareProcessContext(folder, friendId);
+		ShareProcessContext context = new ShareProcessContext(folder, friendId, permission);
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new VerifyFriendId(networkManager, friendId));

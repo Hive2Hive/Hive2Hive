@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.implementations.share;
 
 import java.security.KeyPair;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -48,9 +49,14 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 			// store for backup
 			originalDomainKey = fileNode.getProtectionKeys();
-			// modify
-			fileNode.setProtectionKeys(context.consumeNewProtectionKeys());
 			context.setFileTreeNode(fileNode);
+
+			// modify the protection keys of the node and all children
+			List<FileTreeNode> fileNodeList = FileTreeNode.getFileNodeList(fileNode);
+			for (FileTreeNode node : fileNodeList) {
+				if (node.isFolder())
+					node.setProtectionKeys(context.consumeNewProtectionKeys());
+			}
 
 			// upload modified profile
 			logger.debug("Updating the domain key in the user profile");
