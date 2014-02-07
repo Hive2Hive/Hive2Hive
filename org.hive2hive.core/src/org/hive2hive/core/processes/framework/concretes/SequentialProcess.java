@@ -42,13 +42,12 @@ public class SequentialProcess extends Process {
 			checkAsyncComponentsForFail(asyncHandles);
 			rollbackIndex = executionIndex;
 			ProcessComponent next = components.get(executionIndex);
+			next.start();
+			executionIndex++;
 
 			if (next instanceof AsyncComponent) {
 				asyncHandles.add(((AsyncComponent) next).getHandle());
 			}
-
-			next.start();
-			executionIndex++;
 		}
 
 		// wait for async child components
@@ -117,8 +116,10 @@ public class SequentialProcess extends Process {
 			public void run() {
 
 				// assure still in running state
-				if (getState() != ProcessState.RUNNING)
+				if (getState() != ProcessState.RUNNING) {
 					latch.countDown();
+					return;
+				}
 
 				// check for potential fails
 				try {
@@ -154,6 +155,11 @@ public class SequentialProcess extends Process {
 
 	private static void checkAsyncComponentsForFail(List<Future<RollbackReason>> handles)
 			throws ProcessExecutionException {
+		
+		if (handles.isEmpty())
+			return;
+		
+		logger.debug("Checking async components for fails.");
 
 		for (Future<RollbackReason> handle : handles) {
 
