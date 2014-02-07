@@ -102,7 +102,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		// start and cancel immediately
 		component.start();
-		putStep.cancel(new RollbackReason(new ProcessExecutionException("Testing whether rollback works")));
+		putStep.cancel(new RollbackReason("Testing whether rollback works."));
 		UseCaseTestUtil.waitTillFailed(listener, 10);
 
 		Number160 lKey = Number160.createHash(userId);

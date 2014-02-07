@@ -16,7 +16,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
-public class AsyncComponent extends ProcessDecorator implements Callable<Boolean> {
+public class AsyncComponent extends ProcessDecorator implements Callable<RollbackReason> {
 
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
@@ -24,9 +24,11 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AsyncComponent.class);
 
 	private final ExecutorService asyncExecutor;
+	private Future<RollbackReason> handle;
 
 	private boolean componentSucceeded = false;
 	private boolean componentFailed = false;
+	private RollbackReason result = null;
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
@@ -37,13 +39,13 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 
-		Future<Boolean> submit = asyncExecutor.submit(this);
+		handle = asyncExecutor.submit(this);
 		// immediate return, since execution is async
 
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public RollbackReason call() throws Exception {
 
 		try {
 			Thread.currentThread().checkAccess();
@@ -64,6 +66,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 			public void onSucceeded() {
 				componentSucceeded = true;
 				componentFailed = false;
+				result = null;
 				succeed();
 			}
 
@@ -71,6 +74,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 			public void onFailed(RollbackReason reason) {
 				componentSucceeded = false;
 				componentFailed = true;
+				result = reason;
 				fail(reason);
 			}
 
@@ -83,8 +87,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 		// sync execution
 		decoratedComponent.start();
 
-		return true;
-
+		return result;
 	}
 
 	@Override
@@ -166,6 +169,10 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Boolean
 	@Override
 	public Process getParent() {
 		return super.getParent();
+	}
+
+	public Future<RollbackReason> getHandle() {
+		return handle;
 	}
 
 }

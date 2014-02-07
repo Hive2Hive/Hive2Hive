@@ -1,19 +1,24 @@
 package org.hive2hive.core.processes.framework;
 
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-
-// TODO atm only a wrapper class, might be removed in a later stage
-
 public class RollbackReason {
 
-	private final ProcessExecutionException exception;
+	private final String hint;
+	private final Throwable cause;
 	
-	public RollbackReason(ProcessExecutionException exception) {
-		this.exception = exception;
+	public RollbackReason(String hint) {
+		this(hint, null);
+	}
+	
+	public RollbackReason(String hint, Throwable cause) {
+		this.hint = hint;
+		this.cause = cause;
+	}
+	
+	public String getHint() {
+		return hint;
 	}
 
-	public ProcessExecutionException getException() {
-		return exception;
+	public Throwable getCause() {
+		return cause;
 	}
-
 }

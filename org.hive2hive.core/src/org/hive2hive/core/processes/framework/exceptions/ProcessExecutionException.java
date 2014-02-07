@@ -1,30 +1,30 @@
 package org.hive2hive.core.processes.framework.exceptions;
 
+import org.hive2hive.core.processes.framework.RollbackReason;
+
 public class ProcessExecutionException extends Exception {
 
 	private static final long serialVersionUID = -107686918145129011L;
 
-	private final String hint;
-	private final Throwable cause;
-
+	private final RollbackReason reason;
+	
 	public ProcessExecutionException(Throwable cause) {
-		this(cause.getMessage(), cause);
+		this(new RollbackReason(cause.getMessage(), cause));
 	}
 	
 	public ProcessExecutionException(String hint) {
-		this(hint, null);
+		this(new RollbackReason(hint, null));
 	}
 	
 	public ProcessExecutionException(String hint, Throwable cause) {
-		this.hint = hint;
-		this.cause = cause;
+		this(new RollbackReason(hint, cause));
 	}
 	
-	public String getHint() {
-		return hint;
+	public ProcessExecutionException(RollbackReason reason) {
+		this.reason = reason;
 	}
-
-	public Throwable getCause() {
-		return cause;
+	
+	public RollbackReason getRollbackReason() {
+		return reason;
 	}
 }

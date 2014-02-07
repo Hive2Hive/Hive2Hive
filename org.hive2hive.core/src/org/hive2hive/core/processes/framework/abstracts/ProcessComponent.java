@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.framework.abstracts;
 
-import io.netty.util.concurrent.Future;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +35,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
-	public Future<Boolean> start() throws InvalidProcessStateException {
+	public void start() throws InvalidProcessStateException {
 		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
 
 		if (state != ProcessState.READY) {
@@ -45,16 +43,13 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 		state = ProcessState.RUNNING;
 		isRollbacking = false;
-		
-		Future<Boolean> asyncHandle = null;
+
 		try {
-			asyncHandle = doExecute();
+			doExecute();
 			succeed();
 		} catch (ProcessExecutionException e) {
-			cancel(new RollbackReason(e));
+			cancel(e.getRollbackReason());
 		}
-		
-		return asyncHandle;
 	}
 
 	@Override
@@ -83,7 +78,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
 		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(),
-				reason.getException().getHint()));
+				reason.getHint()));
 
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED && state != ProcessState.SUCCEEDED) {
 			throw new InvalidProcessStateException(state);
@@ -97,7 +92,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
 			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
-					reason.getException().getHint()));
+					reason.getHint()));
 
 			// TODO wait for doExecute() to complete
 			doRollback(reason);
@@ -106,7 +101,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		fail(reason);
 	}
 
-	protected abstract Future<Boolean> doExecute() throws InvalidProcessStateException, ProcessExecutionException;
+	protected abstract void doExecute() throws InvalidProcessStateException, ProcessExecutionException;
 
 	protected abstract void doPause();
 
