@@ -76,11 +76,13 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 				componentFailed = true;
 				result = reason;
 				
-				try {
-					cancel(reason);
-				} catch (InvalidProcessStateException e) {
-					logger.error(e);
-					e.printStackTrace();
+				if (getParent() == null) {
+					try {
+						cancel(reason);
+					} catch (InvalidProcessStateException e) {
+						logger.error(e);
+						e.printStackTrace();
+					}
 				}
 			}
 
@@ -114,8 +116,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		// attention: component might be in any state!!!
-		// called due to fail in other component (sibling of AsyncComponent)
-		// RB initiated from here are executed in a sync manner
 
 		try {
 			decoratedComponent.cancel(reason);

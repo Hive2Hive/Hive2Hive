@@ -8,7 +8,7 @@ public class BusySucceedingStep extends SucceedingProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		
 		// super busy
-		TestUtil.wait(3000);
+		TestUtil.waitDefault();
 		
 		super.doExecute();
 	}
