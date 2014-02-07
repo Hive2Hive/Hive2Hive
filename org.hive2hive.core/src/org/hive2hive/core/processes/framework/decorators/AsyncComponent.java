@@ -32,7 +32,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 
 	public AsyncComponent(ProcessComponent decoratedComponent) {
 		super(decoratedComponent);
-		
+
 		asyncExecutor = Executors.newSingleThreadExecutor();
 	}
 
@@ -41,7 +41,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 
 		handle = asyncExecutor.submit(this);
 		// immediate return, since execution is async
-
 	}
 
 	@Override
@@ -57,8 +56,8 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 
 		logger.debug("Starting async component...");
 
-		// starts and rollbacks itself if needed (component knows nothing about composite the AsyncComponent
-		// is part of)
+		// starts and rollbacks itself if needed (component knows nothing about the composite of which the
+		// AsyncComponent is part of)
 
 		decoratedComponent.attachListener(new IProcessComponentListener() {
 
@@ -107,11 +106,21 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-
+		// attention: component might be in any state!!!
 		// called due to fail in other component (sibling of AsyncComponent)
+		// RB initiated from here are executed in a sync manner
 
-		decoratedComponent.cancel(reason); // attention: component might be in any state!!! (when RB comes
-											// from sibling component)
+		try {
+			decoratedComponent.cancel(reason);
+		} catch (InvalidProcessStateException e) {
+			if (e.getCurrentState() == ProcessState.FAILED){
+				// async componend rolled itself back already
+				return;
+			}
+			else {
+				throw e;
+			}
+		}
 	}
 
 	@Override

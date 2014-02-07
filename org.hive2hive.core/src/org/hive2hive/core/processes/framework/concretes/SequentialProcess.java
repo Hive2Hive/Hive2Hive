@@ -25,8 +25,9 @@ public class SequentialProcess extends Process {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SequentialProcess.class);
 
-	List<ProcessComponent> components = new ArrayList<ProcessComponent>();
-	List<Future<RollbackReason>> asyncHandles = new ArrayList<Future<RollbackReason>>();
+	private List<ProcessComponent> components = new ArrayList<ProcessComponent>();
+	private List<Future<RollbackReason>> asyncHandles = new ArrayList<Future<RollbackReason>>();
+	private ProcessExecutionException exception = null;
 
 	private int executionIndex = 0;
 	private int rollbackIndex = 0;
@@ -38,7 +39,7 @@ public class SequentialProcess extends Process {
 		while (!components.isEmpty() && executionIndex < components.size()
 				&& getState() == ProcessState.RUNNING) {
 
-			checkForAsyncFails();
+			checkAsyncComponentsForFail(asyncHandles);
 			rollbackIndex = executionIndex;
 			ProcessComponent next = components.get(executionIndex);
 
@@ -50,10 +51,8 @@ public class SequentialProcess extends Process {
 			executionIndex++;
 		}
 
-		// wait for all child components
-		if (getState() == ProcessState.RUNNING) {
-			awaitAsync();
-		}
+		// wait for async child components
+		awaitAsync();
 	}
 
 	@Override
@@ -79,11 +78,6 @@ public class SequentialProcess extends Process {
 			last.cancel(reason);
 			rollbackIndex--;
 		}
-
-		// // wait for all child components
-		// if (getState() == ProcessState.ROLLBACKING) {
-		// waitForAllAsync("Waiting for all async components to finish rollback.");
-		// }
 	}
 
 	@Override
@@ -106,71 +100,81 @@ public class SequentialProcess extends Process {
 		return Collections.unmodifiableList(components);
 	}
 
-	private void checkForAsyncFails() throws ProcessExecutionException {
-
-		logger.debug("Checking async components for fails.");
-
-		for (Future<RollbackReason> handle : asyncHandles) {
-			if (handle.isDone()) {
-				getResult(handle);
-			}
-		}
-	}
-
 	private void awaitAsync() throws ProcessExecutionException {
 
-		logger.debug(String.format("Awaiting async components for completion."));
+		if (asyncHandles.isEmpty())
+			return;
 
 		if (getState() != ProcessState.RUNNING)
 			return;
-		
+
+		logger.debug(String.format("Awaiting async components for completion."));
+
 		final CountDownLatch latch = new CountDownLatch(1);
 		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 		ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				
+
+				// assure still in running state
 				if (getState() != ProcessState.RUNNING)
 					latch.countDown();
-				
-				
+
+				// check for potential fails
+				try {
+					checkAsyncComponentsForFail(asyncHandles);
+				} catch (ProcessExecutionException e) {
+					exception = e;
+					latch.countDown();
+					return;
+				}
+
+				// check for completion
+				for (Future<RollbackReason> handle : asyncHandles) {
+					if (!handle.isDone())
+						return;
+				}
+				latch.countDown();
 			}
 		}, 1, 1, TimeUnit.SECONDS);
-		
+
+		// blocking wait for completion or potential fail
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
+			logger.error(e);
 			e.printStackTrace();
 		}
 		handle.cancel(true);
-		
-	}
 
-	private void getResult(Future<RollbackReason> handle) throws ProcessExecutionException {
-		RollbackReason result = null;
-		try {
-			result = handle.get();
-		} catch (InterruptedException e) {
-			logger.error(e);
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
-		}
-
-		// initiate rollback if necessary
-		if (result != null) {
-			throw new ProcessExecutionException(result);
+		if (exception != null) {
+			throw exception;
 		}
 	}
 
-	// private boolean allFinished() {
-	// for (ProcessComponent component : components) {
-	// if (component.getState() == ProcessState.RUNNING)
-	// return false;
-	// if (component.getState() == ProcessState.ROLLBACKING)
-	// return false;
-	// }
-	// return true;
-	// }
+	private static void checkAsyncComponentsForFail(List<Future<RollbackReason>> handles)
+			throws ProcessExecutionException {
+
+		for (Future<RollbackReason> handle : handles) {
+
+			if (!handle.isDone())
+				continue;
+
+			RollbackReason result = null;
+			try {
+				result = handle.get();
+			} catch (InterruptedException e) {
+				logger.error(e);
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
+			}
+
+			// initiate rollback if necessary
+			if (result != null) {
+				throw new ProcessExecutionException(result);
+			}
+		}
+	}
 
 }
