@@ -16,7 +16,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -45,7 +45,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 			H2HSession session = networkManager.getSession();
 
 			// remove dead link from user profile
-			FileTreeNode toDelete = updateUserProfile(session.getProfileManager());
+			IndexNode toDelete = updateUserProfile(session.getProfileManager());
 
 			if (toDelete == null)
 				return;
@@ -61,23 +61,23 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	}
 
 	/**
-	 * Removes the {@link FileTreeNode} in the user profile
+	 * Removes the {@link IndexNode} in the user profile
 	 * 
 	 * @param profileManager
 	 * @return the removed node
 	 */
-	private FileTreeNode updateUserProfile(UserProfileManager profileManager) throws GetFailedException,
+	private IndexNode updateUserProfile(UserProfileManager profileManager) throws GetFailedException,
 			PutFailedException {
 		String randomPID = UUID.randomUUID().toString();
 
 		UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
-		FileTreeNode toDelete = userProfile.getFileById(fileKey);
+		IndexNode toDelete = userProfile.getFileById(fileKey);
 		if (toDelete == null) {
 			logger.warn("Could not delete the file because it does not exist anymore");
 			return null;
 		}
 
-		FileTreeNode parent = toDelete.getParent();
+		IndexNode parent = toDelete.getParent();
 		if (parent == null) {
 			logger.error("Got task to delete the root, which is invalid");
 			return null;
@@ -93,9 +93,9 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * Removes the file from the disk
 	 * 
 	 * @param fileManager
-	 * @param toDelete the {@link FileTreeNode} to remove
+	 * @param toDelete the {@link IndexNode} to remove
 	 */
-	private void removeFileOnDisk(FileManager fileManager, FileTreeNode toDelete) {
+	private void removeFileOnDisk(FileManager fileManager, IndexNode toDelete) {
 		Path path = fileManager.getPath(toDelete);
 		if (path == null) {
 			logger.error("Could not find the file to delete");
@@ -116,12 +116,12 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * Starts a notification process to all other clients of this very same user that received the
 	 * {@link UserProfileTask}
 	 * 
-	 * @param toDelete the {@link FileTreeNode} that has been deleted
+	 * @param toDelete the {@link IndexNode} that has been deleted
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
 	 */
-	private void startNotification(FileTreeNode toDelete) throws IllegalArgumentException,
+	private void startNotification(IndexNode toDelete) throws IllegalArgumentException,
 			NoPeerConnectionException, InvalidProcessStateException {
 		PublicKey parentFileKey = toDelete.getParent().getKeyPair().getPublic();
 		String fileName = toDelete.getName();

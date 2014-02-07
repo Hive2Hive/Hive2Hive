@@ -11,7 +11,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -43,7 +43,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	private static List<NetworkManager> network;
 
 	private File uploadedFile;
-	private FileTreeNode fileNode;
+	private IndexNode fileNode;
 	private UserCredentials userCredentials;
 	private File downloaderRoot;
 	private NetworkManager downloader;

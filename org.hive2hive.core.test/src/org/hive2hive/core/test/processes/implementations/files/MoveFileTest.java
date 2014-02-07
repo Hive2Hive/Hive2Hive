@@ -11,7 +11,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
@@ -84,7 +84,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
+		IndexNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(folder.getName(), fileNode.getParent().getName());
 
@@ -120,7 +120,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
+		IndexNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(userProfile.getRoot(), fileNode.getParent());
 
@@ -160,7 +160,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		// check that the user profile has a correct entry
 		FileManager fileManager = new FileManager(root.toPath());
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, fileManager);
+		IndexNode fileNode = userProfile.getFileByPath(destination, fileManager);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(destFolder.getName(), fileNode.getParent().getName());
 
@@ -199,7 +199,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
+		IndexNode fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(fileNode.getName(), destination.getName());
 	}

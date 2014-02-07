@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
@@ -40,7 +40,7 @@ public class FindInUserProfileStep extends ProcessStep {
 			return;
 		}
 
-		FileTreeNode fileNode = userProfile.getFileById(context.getFileKey());
+		IndexNode fileNode = userProfile.getFileById(context.getFileKey());
 		if (fileNode == null) {
 			cancel(new RollbackReason(this, "File key not found in user profile"));
 			return;

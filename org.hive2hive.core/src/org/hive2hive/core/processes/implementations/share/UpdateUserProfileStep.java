@@ -8,7 +8,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -36,7 +36,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FileTreeNode fileNode = userProfile.getFileById(context.consumeMetaDocument().getId());
+			IndexNode fileNode = userProfile.getFileById(context.consumeMetaDocument().getId());
 
 			if (fileNode.isShared()) {
 				// TODO this is to restrictive, what about several users sharing one single folder?
@@ -52,8 +52,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 			context.setFileTreeNode(fileNode);
 
 			// modify the protection keys of the node and all children
-			List<FileTreeNode> fileNodeList = FileTreeNode.getFileNodeList(fileNode);
-			for (FileTreeNode node : fileNodeList) {
+			List<IndexNode> fileNodeList = IndexNode.getFileNodeList(fileNode);
+			for (IndexNode node : fileNodeList) {
 				if (node.isFolder())
 					node.setProtectionKeys(context.consumeNewProtectionKeys());
 			}
@@ -75,7 +75,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// return to original domain key and put the userProfile
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FileTreeNode fileNode = userProfile.getFileById(context.consumeMetaDocument().getId());
+				IndexNode fileNode = userProfile.getFileById(context.consumeMetaDocument().getId());
 				fileNode.setProtectionKeys(originalDomainKey);
 				profileManager.readyToPut(userProfile, getID());
 			} catch (Exception e) {

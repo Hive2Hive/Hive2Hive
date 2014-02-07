@@ -12,7 +12,7 @@ import java.util.Map;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -116,7 +116,7 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * This is a workaround to delete files when a {@link FileTreeNode} is already existent. Since the node is
+	 * This is a workaround to delete files when a {@link IndexNode} is already existent. Since the node is
 	 * already here, the deletion could be speed up because it must not be looked up in the user profile.
 	 * 
 	 * @param files
@@ -126,12 +126,12 @@ public class FileRecursionUtil {
 	 * @throws NoPeerConnectionException
 	 */
 	@Deprecated
-	public static ProcessComponent buildDeletionProcessFromNodelist(List<FileTreeNode> files,
+	public static ProcessComponent buildDeletionProcessFromNodelist(List<IndexNode> files,
 			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		List<Path> filesToDelete = new ArrayList<Path>();
 		FileManager fileManager = networkManager.getSession().getFileManager();
-		for (FileTreeNode fileTreeNode : files) {
-			filesToDelete.add(fileManager.getPath(fileTreeNode));
+		for (IndexNode indexNode : files) {
+			filesToDelete.add(fileManager.getPath(indexNode));
 		}
 
 		return buildDeletionProcess(filesToDelete, networkManager);
@@ -145,16 +145,16 @@ public class FileRecursionUtil {
 	 * @return the root process component containing all sub-processes (and sub-tasks)
 	 * @throws NoSessionException
 	 */
-	public static ProcessComponent buildDownloadProcess(List<FileTreeNode> files,
+	public static ProcessComponent buildDownloadProcess(List<IndexNode> files,
 			NetworkManager networkManager) throws NoSessionException {
 		// the root process, where everything runs in parallel (only async children are added)
 		SequentialProcess rootProcess = new SequentialProcess();
 
 		// build a flat map of the folders to download (such that O(1) for each lookup)
-		Map<FileTreeNode, SequentialProcess> folderMap = new HashMap<FileTreeNode, SequentialProcess>();
-		Map<FileTreeNode, AsyncComponent> fileMap = new HashMap<FileTreeNode, AsyncComponent>();
+		Map<IndexNode, SequentialProcess> folderMap = new HashMap<IndexNode, SequentialProcess>();
+		Map<IndexNode, AsyncComponent> fileMap = new HashMap<IndexNode, AsyncComponent>();
 
-		for (FileTreeNode file : files) {
+		for (IndexNode file : files) {
 			PublicKey fileKey = file.getFileKey();
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey,
 					networkManager);
@@ -172,9 +172,9 @@ public class FileRecursionUtil {
 		// find children with same parents and make them run in parallel
 		// idea: iterate through all children and search for parent in other map. If not there, they can be
 		// added to the root process anyway
-		for (FileTreeNode file : fileMap.keySet()) {
+		for (IndexNode file : fileMap.keySet()) {
 			AsyncComponent fileProcess = fileMap.get(file);
-			FileTreeNode parent = file.getParent();
+			IndexNode parent = file.getParent();
 			if (parent == null) {
 				// file is in root, thus we can add it to the root process
 				rootProcess.add(fileProcess);
@@ -189,11 +189,11 @@ public class FileRecursionUtil {
 		}
 
 		// files and folder are linked. We now link the folders with other folders
-		for (FileTreeNode folder : folderMap.keySet()) {
+		for (IndexNode folder : folderMap.keySet()) {
 			SequentialProcess folderProcess = folderMap.get(folder);
 			// In addition, we can make this process run asynchronous because it does not affect the siblings
 			AsyncComponent asyncFolderProcess = new AsyncComponent(folderProcess);
-			FileTreeNode parent = folder.getParent();
+			IndexNode parent = folder.getParent();
 			if (parent == null) {
 				// file is in root, thus we can add it to the root process.
 				rootProcess.add(asyncFolderProcess);

@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -49,7 +49,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 		try {
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
+			IndexNode fileNode = userProfile.getFileById(metaFile.getId());
 
 			// store for backup
 			originalMD5 = fileNode.getMD5();
@@ -78,7 +78,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FileTreeNode fileNode = userProfile.getFileById(metaFile.getId());
+				IndexNode fileNode = userProfile.getFileById(metaFile.getId());
 				fileNode.setMD5(originalMD5);
 				profileManager.readyToPut(userProfile, getID());
 			} catch (Exception e) {

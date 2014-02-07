@@ -2,7 +2,7 @@ package org.hive2hive.core.test.model;
 
 import java.security.KeyPair;
 
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -36,16 +36,16 @@ public class UserProfileTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetFileById() {
-		FileTreeNode root = userProfile.getRoot();
+		IndexNode root = userProfile.getRoot();
 
 		KeyPair child1Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
-		FileTreeNode child1Folder = new FileTreeNode(root, child1Key, NetworkTestUtil.randomString());
+		IndexNode child1Folder = new IndexNode(root, child1Key, NetworkTestUtil.randomString());
 
 		KeyPair child2Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024);
-		new FileTreeNode(root, child2Key, NetworkTestUtil.randomString(), "bla".getBytes());
+		new IndexNode(root, child2Key, NetworkTestUtil.randomString(), "bla".getBytes());
 
 		KeyPair child3Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		new FileTreeNode(child1Folder, child3Key, NetworkTestUtil.randomString(), "blubb".getBytes());
+		new IndexNode(child1Folder, child3Key, NetworkTestUtil.randomString(), "blubb".getBytes());
 
 		Assert.assertNotNull(userProfile.getFileById(child1Key.getPublic()));
 		Assert.assertNotNull(userProfile.getFileById(child2Key.getPublic()));

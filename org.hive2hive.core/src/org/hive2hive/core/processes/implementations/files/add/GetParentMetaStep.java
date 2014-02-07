@@ -15,7 +15,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
@@ -77,7 +77,7 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 		try {
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
-			FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getH2HSession()
+			IndexNode parentNode = userProfile.getFileByPath(parent, context.getH2HSession()
 					.getFileManager());
 
 			if (parentNode == null) {

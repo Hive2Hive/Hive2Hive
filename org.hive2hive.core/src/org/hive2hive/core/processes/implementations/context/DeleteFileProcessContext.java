@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.implementations.context;
 import java.security.KeyPair;
 import java.util.Set;
 
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
@@ -24,8 +24,8 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 	private MetaDocument metaDocument;
 	private KeyPair protectionKeys;
 	private HybridEncryptedContent encryptedMetaDocument;
-	private FileTreeNode deletedFileNode;
-	private FileTreeNode parentNode;
+	private IndexNode deletedFileNode;
+	private IndexNode parentNode;
 	private Set<String> users;
 	private BaseNotificationMessageFactory messageFactory;
 
@@ -71,19 +71,19 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 		return fileInRoot;
 	}
 
-	public void setDeletedNode(FileTreeNode deletedFileNode) {
+	public void setDeletedNode(IndexNode deletedFileNode) {
 		this.deletedFileNode = deletedFileNode;
 	}
 
-	public FileTreeNode getDeletedNode() {
+	public IndexNode getDeletedNode() {
 		return deletedFileNode;
 	}
 
-	public void setParentNode(FileTreeNode parentNode) {
+	public void setParentNode(IndexNode parentNode) {
 		this.parentNode = parentNode;
 	}
 
-	public FileTreeNode getParentNode() {
+	public IndexNode getParentNode() {
 		return parentNode;
 	}
 

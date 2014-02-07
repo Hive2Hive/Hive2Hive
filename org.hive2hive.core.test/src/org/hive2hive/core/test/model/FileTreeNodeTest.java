@@ -4,7 +4,7 @@ import java.nio.file.Paths;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
@@ -20,12 +20,12 @@ import org.junit.Test;
  */
 public class FileTreeNodeTest extends H2HJUnitTest {
 
-	private FileTreeNode root;
-	private FileTreeNode child1;
-	private FileTreeNode child2;
-	private FileTreeNode dir1;
-	private FileTreeNode child3;
-	private FileTreeNode dir2;
+	private IndexNode root;
+	private IndexNode child1;
+	private IndexNode child2;
+	private IndexNode dir1;
+	private IndexNode child3;
+	private IndexNode dir2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -43,7 +43,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		// create a tree
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		root = new FileTreeNode(keys, domainKey);
+		root = new IndexNode(keys, domainKey);
 
 		// naming convention:
 		// [number][type][index] where number is the level and type is either 'f' for file or 'd' for
@@ -56,11 +56,11 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		// - 1d:
 		// - - 2f
 		// - - 2d (empty folder)
-		child1 = new FileTreeNode(root, keys, "1f1", null);
-		child2 = new FileTreeNode(root, keys, "1f2", null);
-		dir1 = new FileTreeNode(root, keys, "1d");
-		child3 = new FileTreeNode(dir1, keys, "2f", null);
-		dir2 = new FileTreeNode(dir1, keys, "2d");
+		child1 = new IndexNode(root, keys, "1f1", null);
+		child2 = new IndexNode(root, keys, "1f2", null);
+		dir1 = new IndexNode(root, keys, "1d");
+		child3 = new IndexNode(dir1, keys, "2f", null);
+		dir2 = new IndexNode(dir1, keys, "2d");
 	}
 
 	@Test

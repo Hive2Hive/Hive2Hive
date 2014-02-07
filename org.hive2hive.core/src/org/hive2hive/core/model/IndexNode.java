@@ -19,16 +19,16 @@ import org.hive2hive.core.file.FileManager;
  * @author Nico
  * 
  */
-public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
+public class IndexNode implements Comparable<IndexNode>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private final KeyPair keyPair;
 	private final boolean isFolder;
-	private FileTreeNode parent;
+	private IndexNode parent;
 	private String name;
 	private byte[] md5LatestVersion;
 	private KeyPair protectionKeys = null;
-	private final Set<FileTreeNode> children;
+	private final Set<IndexNode> children;
 	private boolean isShared = false;
 
 	/**
@@ -39,7 +39,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * @param name
 	 * @param isFolder
 	 */
-	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name) {
+	public IndexNode(IndexNode parent, KeyPair keyPair, String name) {
 		this(parent, keyPair, name, true, null);
 	}
 
@@ -51,11 +51,11 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * @param name
 	 * @param isFolder
 	 */
-	public FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, byte[] md5LatestVersion) {
+	public IndexNode(IndexNode parent, KeyPair keyPair, String name, byte[] md5LatestVersion) {
 		this(parent, keyPair, name, false, md5LatestVersion);
 	}
 
-	private FileTreeNode(FileTreeNode parent, KeyPair keyPair, String name, boolean isFolder,
+	private IndexNode(IndexNode parent, KeyPair keyPair, String name, boolean isFolder,
 			byte[] md5LatestVersion) {
 		this.parent = parent;
 		this.protectionKeys = parent.getProtectionKeys();
@@ -64,7 +64,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		this.isFolder = isFolder;
 		this.md5LatestVersion = md5LatestVersion;
 		parent.addChild(this);
-		children = new HashSet<FileTreeNode>();
+		children = new HashSet<IndexNode>();
 	}
 
 	/**
@@ -72,12 +72,12 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * 
 	 * @param keyPair
 	 */
-	public FileTreeNode(KeyPair keyPair, KeyPair protectionKeys) {
+	public IndexNode(KeyPair keyPair, KeyPair protectionKeys) {
 		this.keyPair = keyPair;
 		this.protectionKeys = protectionKeys;
 		this.isFolder = true;
 		this.parent = null;
-		children = new HashSet<FileTreeNode>();
+		children = new HashSet<IndexNode>();
 	}
 
 	/**
@@ -86,14 +86,14 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * @param node The root node from which the digest is started.
 	 * @return The digest in sorted order.
 	 */
-	public static List<Path> getFilePathList(FileTreeNode node) {
+	public static List<Path> getFilePathList(IndexNode node) {
 		List<Path> digest = new ArrayList<Path>();
 
 		// add self
 		digest.add(node.getFullPath());
 
 		// add children
-		for (FileTreeNode child : node.getChildren()) {
+		for (IndexNode child : node.getChildren()) {
 			digest.addAll(getFilePathList(child));
 		}
 
@@ -109,13 +109,13 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * @param node The root node from which the digest is started.
 	 * @return The digest in preorder
 	 */
-	public static List<FileTreeNode> getFileNodeList(FileTreeNode node) {
-		List<FileTreeNode> digest = new ArrayList<FileTreeNode>();
+	public static List<IndexNode> getFileNodeList(IndexNode node) {
+		List<IndexNode> digest = new ArrayList<IndexNode>();
 		// add self
 		digest.add(node);
 
 		// add children
-		for (FileTreeNode child : node.getChildren()) {
+		for (IndexNode child : node.getChildren()) {
 			digest.addAll(getFileNodeList(child));
 		}
 
@@ -142,25 +142,25 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 		this.name = name;
 	}
 
-	public FileTreeNode getParent() {
+	public IndexNode getParent() {
 		return parent;
 	}
 
-	public void setParent(FileTreeNode parent) {
+	public void setParent(IndexNode parent) {
 		this.parent = parent;
 	}
 
-	public Set<FileTreeNode> getChildren() {
+	public Set<IndexNode> getChildren() {
 		return children;
 	}
 
-	public void addChild(FileTreeNode child) {
+	public void addChild(IndexNode child) {
 		// only add once
 		if (getChildByName(child.getName()) == null)
 			children.add(child);
 	}
 
-	public void removeChild(FileTreeNode child) {
+	public void removeChild(IndexNode child) {
 		if (!children.remove(child)) {
 			// remove by name
 			children.remove(getChildByName(child.getName()));
@@ -173,10 +173,10 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * @param name
 	 * @return
 	 */
-	public FileTreeNode getChildByName(String name) {
+	public IndexNode getChildByName(String name) {
 		if (name != null) {
 			String withoutSeparator = name.replaceAll(FileManager.getFileSep(), "");
-			for (FileTreeNode child : children) {
+			for (IndexNode child : children) {
 				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
 					return child;
 				}
@@ -228,7 +228,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	 * 
 	 * @return
 	 */
-	public FileTreeNode getSharedTopFolder() {
+	public IndexNode getSharedTopFolder() {
 		if (isShared) {
 			return this;
 		} else {
@@ -257,7 +257,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 			return true;
 
 		// check for shared children
-		for (FileTreeNode child : children)
+		for (IndexNode child : children)
 			if (child.isSharedOrHasSharedChildren())
 				return true;
 
@@ -297,7 +297,7 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	}
 
 	@Override
-	public int compareTo(FileTreeNode other) {
+	public int compareTo(IndexNode other) {
 		return this.getFullPath().compareTo(other.getFullPath());
 	}
 
@@ -305,8 +305,8 @@ public class FileTreeNode implements Comparable<FileTreeNode>, Serializable {
 	public boolean equals(Object obj) {
 		if (obj == null) {
 			return false;
-		} else if (obj instanceof FileTreeNode) {
-			FileTreeNode other = (FileTreeNode) obj;
+		} else if (obj instanceof IndexNode) {
+			IndexNode other = (IndexNode) obj;
 			return getFileKey().equals(other.getFileKey()) && getName().equalsIgnoreCase(other.getName());
 		} else if (obj instanceof PublicKey) {
 			PublicKey publicKey = (PublicKey) obj;

@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -21,8 +21,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	private final DeleteFileProcessContext context;
 	private final NetworkManager networkManager;
 
-	private FileTreeNode fileNode;
-	private FileTreeNode parentNode;
+	private IndexNode fileNode;
+	private IndexNode parentNode;
 
 	public DeleteFromUserProfileStep(DeleteFileProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
@@ -82,7 +82,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 			// TODO this is buggy! rather use list to check for containment instead of above if-statement
 			// re-add file to user profile
-			FileTreeNode parent = profile.getFileById(parentNode.getFileKey());
+			IndexNode parent = profile.getFileById(parentNode.getFileKey());
 			parent.addChild(fileNode);
 			fileNode.setParent(parent);
 

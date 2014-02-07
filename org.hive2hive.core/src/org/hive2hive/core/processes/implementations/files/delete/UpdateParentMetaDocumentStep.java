@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.implementations.files.delete;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -37,7 +37,7 @@ public class UpdateParentMetaDocumentStep extends ProcessStep {
 			return;
 		}
 		
-		FileTreeNode fileNode = profile.getFileById(context.consumeMetaDocument().getId());
+		IndexNode fileNode = profile.getFileById(context.consumeMetaDocument().getId());
 		fileNode.getParent();
 		
 		// check preconditions

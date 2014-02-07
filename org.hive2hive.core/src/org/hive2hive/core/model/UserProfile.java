@@ -23,7 +23,7 @@ public class UserProfile extends NetworkContent {
 
 	private final String userId;
 	private final KeyPair encryptionKeys;
-	private final FileTreeNode root;
+	private final IndexNode root;
 
 	public UserProfile(String userId) {
 		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
@@ -49,7 +49,7 @@ public class UserProfile extends NetworkContent {
 			throw new IllegalArgumentException("Protection keys can't be null.");
 		this.userId = userId;
 		this.encryptionKeys = encryptionKeys;
-		root = new FileTreeNode(encryptionKeys, protectionKeys);
+		root = new IndexNode(encryptionKeys, protectionKeys);
 	}
 
 	public String getUserId() {
@@ -64,7 +64,7 @@ public class UserProfile extends NetworkContent {
 		return root.getProtectionKeys();
 	}
 
-	public FileTreeNode getRoot() {
+	public IndexNode getRoot() {
 		return root;
 	}
 
@@ -73,17 +73,17 @@ public class UserProfile extends NetworkContent {
 		return TimeToLiveStore.getInstance().getUserProfile();
 	}
 
-	public FileTreeNode getFileById(PublicKey fileId) {
+	public IndexNode getFileById(PublicKey fileId) {
 		return findById(root, fileId);
 	}
 
-	private FileTreeNode findById(FileTreeNode current, PublicKey fileId) {
+	private IndexNode findById(IndexNode current, PublicKey fileId) {
 		if (current.getFileKey().equals(fileId)) {
 			return current;
 		}
 
-		FileTreeNode found = null;
-		for (FileTreeNode child : current.getChildren()) {
+		IndexNode found = null;
+		for (IndexNode child : current.getChildren()) {
 			found = findById(child, fileId);
 			if (found != null) {
 				return found;
@@ -92,24 +92,24 @@ public class UserProfile extends NetworkContent {
 		return found;
 	}
 
-	public FileTreeNode getFileByPath(File file, FileManager fileManager) {
+	public IndexNode getFileByPath(File file, FileManager fileManager) {
 		Path relativePath = fileManager.getRoot().relativize(file.toPath());
 		return getFileByPath(relativePath);
 	}
 
-	public FileTreeNode getFileByPath(File file, File root) {
+	public IndexNode getFileByPath(File file, File root) {
 		Path relativePath = root.toPath().relativize(file.toPath());
 		return getFileByPath(relativePath);
 	}
 
-	public FileTreeNode getFileByPath(Path relativePath) {
+	public IndexNode getFileByPath(Path relativePath) {
 		String[] split = relativePath.toString().split(FileManager.getFileSep());
-		FileTreeNode current = root;
+		IndexNode current = root;
 		for (int i = 0; i < split.length; i++) {
 			if (split[i].isEmpty()) {
 				continue;
 			}
-			FileTreeNode child = current.getChildByName(split[i]);
+			IndexNode child = current.getChildByName(split[i]);
 			if (child == null) {
 				return null;
 			} else {

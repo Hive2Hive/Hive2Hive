@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -100,7 +100,7 @@ public class SelectVersionStep extends ProcessStep {
 			// find the node at the user profile
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
-			FileTreeNode selectedNode = userProfile.getFileById(metaFile.getId());
+			IndexNode selectedNode = userProfile.getFileById(metaFile.getId());
 			if (selectedNode == null) {
 				throw new Hive2HiveException("File node not found");
 			}

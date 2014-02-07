@@ -9,7 +9,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -50,19 +50,19 @@ public class MoveUserProfileTask extends UserProfileTask {
 			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
 
 			// get and check the file nodes to be rearranged
-			FileTreeNode oldParent = userProfile.getFileById(oldParentKey);
+			IndexNode oldParent = userProfile.getFileById(oldParentKey);
 			if (oldParent == null) {
 				logger.error("Could not find the old parent");
 				return;
 			}
 
-			FileTreeNode child = oldParent.getChildByName(sourceFileName);
+			IndexNode child = oldParent.getChildByName(sourceFileName);
 			if (child == null) {
 				logger.error("File node that should be moved not found");
 				return;
 			}
 
-			FileTreeNode newParent = userProfile.getFileById(newParentKey);
+			IndexNode newParent = userProfile.getFileById(newParentKey);
 			if (newParent == null) {
 				logger.error("Could not find the new parent");
 				return;

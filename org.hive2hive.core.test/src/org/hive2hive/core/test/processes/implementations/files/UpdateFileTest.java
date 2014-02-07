@@ -14,7 +14,7 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -101,7 +101,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// download the file and check if version is newer
 		UseCaseTestUtil.login(userCredentials, downloader, FileUtils.getTempDirectory());
-		FileTreeNode fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(
+		IndexNode fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(
 				file, fileManagerUploader);
 		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getFileKey());
 
@@ -129,7 +129,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify if the md5 hash did not change
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		IndexNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
 
 		// verify that only one version was created
@@ -195,7 +195,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		IndexNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
@@ -245,7 +245,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		FileTreeNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		IndexNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}

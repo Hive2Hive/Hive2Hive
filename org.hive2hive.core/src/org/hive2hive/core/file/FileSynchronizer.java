@@ -14,7 +14,7 @@ import java.util.Stack;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.IndexNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
@@ -32,7 +32,7 @@ public class FileSynchronizer {
 	private final FileManager fileManager;
 	private final UserProfile userProfile;
 
-	private final FileTreeNode profileRootNode;
+	private final IndexNode profileRootNode;
 	private final Map<String, byte[]> before;
 	private Map<String, byte[]> now;
 
@@ -59,8 +59,8 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<FileTreeNode> getDeletedLocally() {
-		List<FileTreeNode> deletedLocally = new ArrayList<FileTreeNode>();
+	public List<IndexNode> getDeletedLocally() {
+		List<IndexNode> deletedLocally = new ArrayList<IndexNode>();
 
 		for (String path : before.keySet()) {
 			if (now.containsKey(path)) {
@@ -68,7 +68,7 @@ public class FileSynchronizer {
 				continue;
 			} else {
 				// test whether it is in the user profile
-				FileTreeNode node = userProfile.getFileByPath(Paths.get(path));
+				IndexNode node = userProfile.getFileByPath(Paths.get(path));
 				if (node != null) {
 					// file is still in user profile
 					if (H2HEncryptionUtil.compareMD5(node.getMD5(), before.get(path))) {
@@ -125,7 +125,7 @@ public class FileSynchronizer {
 		for (String p : now.keySet()) {
 			Path path = Paths.get(p);
 			// test whether it is in the user profile
-			FileTreeNode node = userProfile.getFileByPath(path);
+			IndexNode node = userProfile.getFileByPath(path);
 			if (node == null) {
 				// not in profile --> it has been added locally
 				logger.debug("File '" + p + "' has been added locally during absence");
@@ -144,14 +144,14 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<FileTreeNode> getAddedRemotely() {
-		List<FileTreeNode> addedRemotely = new ArrayList<FileTreeNode>();
+	public List<IndexNode> getAddedRemotely() {
+		List<IndexNode> addedRemotely = new ArrayList<IndexNode>();
 
 		// visit all files in the tree and compare to disk
-		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
+		Stack<IndexNode> fileStack = new Stack<IndexNode>();
 		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
-			FileTreeNode top = fileStack.pop();
+			IndexNode top = fileStack.pop();
 			if (now.containsKey(top.getFullPath().toString())) {
 				// was here before and is still here --> nothing to add
 				logger.trace("File '" + top.getFullPath() + "' was already here");
@@ -161,7 +161,7 @@ public class FileSynchronizer {
 			}
 
 			// add children to stack
-			for (FileTreeNode child : top.getChildren()) {
+			for (IndexNode child : top.getChildren()) {
 				fileStack.push(child);
 			}
 		}
@@ -191,7 +191,7 @@ public class FileSynchronizer {
 				continue;
 			}
 
-			FileTreeNode fileNode = userProfile.getFileByPath(Paths.get(path));
+			IndexNode fileNode = userProfile.getFileByPath(Paths.get(path));
 			if (fileNode == null) {
 				// file not found --> skip, this is not the task of this method
 				continue;
@@ -217,14 +217,14 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<FileTreeNode> getUpdatedRemotely() {
-		List<FileTreeNode> updatedRemotely = new ArrayList<FileTreeNode>();
+	public List<IndexNode> getUpdatedRemotely() {
+		List<IndexNode> updatedRemotely = new ArrayList<IndexNode>();
 
 		// visit all files in the tree and compare to disk
-		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
+		Stack<IndexNode> fileStack = new Stack<IndexNode>();
 		fileStack.addAll(profileRootNode.getChildren());
 		while (!fileStack.isEmpty()) {
-			FileTreeNode top = fileStack.pop();
+			IndexNode top = fileStack.pop();
 			if (before.containsKey(top.getFullPath().toString())
 					&& now.containsKey(top.getFullPath().toString())) {
 				// was here before and is still here
@@ -238,7 +238,7 @@ public class FileSynchronizer {
 			}
 
 			// add children to stack
-			for (FileTreeNode child : top.getChildren()) {
+			for (IndexNode child : top.getChildren()) {
 				fileStack.push(child);
 			}
 		}
@@ -249,15 +249,15 @@ public class FileSynchronizer {
 	}
 
 	/**
-	 * Sorts a list of {@link FileTreeNode} in pre-order style
+	 * Sorts a list of {@link IndexNode} in pre-order style
 	 * 
 	 * @param deletedLocally
 	 */
-	private void sortNodesPreorder(List<FileTreeNode> fileList) {
-		Collections.sort(fileList, new Comparator<FileTreeNode>() {
+	private void sortNodesPreorder(List<IndexNode> fileList) {
+		Collections.sort(fileList, new Comparator<IndexNode>() {
 
 			@Override
-			public int compare(FileTreeNode node1, FileTreeNode node2) {
+			public int compare(IndexNode node1, IndexNode node2) {
 				return node1.getFullPath().toString().compareTo(node2.getFullPath().toString());
 			}
 		});
