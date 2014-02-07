@@ -66,6 +66,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 				componentSucceeded = true;
 				componentFailed = false;
 				result = null;
+				
 				succeed();
 			}
 
@@ -74,7 +75,13 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 				componentSucceeded = false;
 				componentFailed = true;
 				result = reason;
-				fail(reason);
+				
+				try {
+					cancel(reason);
+				} catch (InvalidProcessStateException e) {
+					logger.error(e);
+					e.printStackTrace();
+				}
 			}
 
 			@Override
@@ -115,6 +122,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 		} catch (InvalidProcessStateException e) {
 			if (e.getCurrentState() == ProcessState.FAILED){
 				// async componend rolled itself back already
+//				logger.debug("AsyncComponent already rolled back.");
 				return;
 			}
 			else {

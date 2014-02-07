@@ -122,20 +122,19 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	@Test
 	public void asyncFailTest() throws InvalidProcessStateException {
 
-		// empty
-		SequentialProcess process = new FailingSequentialProcess();
-		AsyncComponent asyncProcess = new AsyncComponent(process);
-		asyncProcess.start();
-
-		TestUtil.wait(500);
-		assertTrue(process.getState() == ProcessState.FAILED);
+//		// empty
+//		SequentialProcess process = new FailingSequentialProcess();
+//		AsyncComponent asyncProcess = new AsyncComponent(process);
+//		asyncProcess.start();
+//
+//		TestUtil.wait(500);
+//		assertTrue(process.getState() == ProcessState.FAILED);
 
 		// sync components
-		process = new SequentialProcess();
+		SequentialProcess process = new SequentialProcess();
 		process.add(new BusyFailingStep());
-		asyncProcess = new AsyncComponent(process);
+		AsyncComponent asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
-		assertFalse(asyncProcess.getState() == ProcessState.FAILED);
 
 		TestUtil.wait(3500);
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
