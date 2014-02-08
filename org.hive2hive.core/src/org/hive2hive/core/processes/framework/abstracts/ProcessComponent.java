@@ -77,9 +77,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public void cancel(RollbackReason reason) throws InvalidProcessStateException {
-		logger.warn(String.format("Cancelling '%s'. Reason: %s", this.getClass().getSimpleName(),
-				reason.getHint()));
-
 		if (state != ProcessState.RUNNING && state != ProcessState.PAUSED && state != ProcessState.SUCCEEDED) {
 			throw new InvalidProcessStateException(state);
 		}
@@ -94,7 +91,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
 					reason.getHint()));
 
-			// TODO wait for doExecute() to complete
 			doRollback(reason);
 		}
 
