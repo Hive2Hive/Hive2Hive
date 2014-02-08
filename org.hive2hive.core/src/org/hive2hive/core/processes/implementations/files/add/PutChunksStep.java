@@ -16,13 +16,13 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.IFileConfiguration;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -53,7 +53,7 @@ public class PutChunksStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		List<KeyPair> chunkKeys = new ArrayList<KeyPair>();
 		File file = context.getFile();
 
@@ -62,8 +62,7 @@ public class PutChunksStep extends BasePutProcessStep {
 			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
 			return;
 		} else if (context.consumeProtectionKeys() == null) {
-			cancel(new RollbackReason(this, "This directory is write protected (and we don't have the keys)"));
-			return;
+			throw new ProcessExecutionException("This directory is write protected (and we don't have the keys).");
 		}
 
 		// first, validate the file size
@@ -71,8 +70,7 @@ public class PutChunksStep extends BasePutProcessStep {
 		long fileSize = FileUtil.getFileSize(file);
 
 		if (fileSize > config.getMaxFileSize()) {
-			cancel(new RollbackReason(this, "File is too large"));
-			return;
+			throw new ProcessExecutionException("File is too large.");
 		}
 
 		long offset = 0;
@@ -89,8 +87,7 @@ public class PutChunksStep extends BasePutProcessStep {
 				rndAccessFile.close();
 			} catch (IOException e) {
 				logger.error("File " + file.getAbsolutePath() + ": Could not read the file", e);
-				cancel(new RollbackReason(this, e.getMessage()));
-				return;
+				throw new ProcessExecutionException("File " + file.getAbsolutePath() + ": Could not read the file", e);
 			}
 
 			if (read > 0) {
@@ -119,7 +116,7 @@ public class PutChunksStep extends BasePutProcessStep {
 						| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException
 						| PutFailedException e) {
 					logger.error("Could not encrypt and put the chunk", e);
-					cancel(new RollbackReason(this, e.getMessage()));
+					throw new ProcessExecutionException("Could not encrypt and put the chunk", e);
 				}
 			}
 		} while (read > 0);

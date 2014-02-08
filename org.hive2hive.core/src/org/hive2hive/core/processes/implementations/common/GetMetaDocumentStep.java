@@ -10,7 +10,6 @@ import javax.crypto.IllegalBlockSizeException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
@@ -18,7 +17,8 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
@@ -46,13 +46,13 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		KeyPair keyPair = keyContext.consumeKeyPair();
 		NetworkContent loadedContent = get(keyPair.getPublic(), H2HConstants.META_DOCUMENT);
 
 		if (loadedContent == null) {
 			logger.warn("Meta document not found.");
-			cancel(new RollbackReason(this, "Meta document not found."));
+			throw new ProcessExecutionException("Meta document not found.");
 		} else {
 
 			// decrypt meta document
@@ -64,9 +64,7 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException
 					| ClassNotFoundException | IOException e) {
-				cancel(new RollbackReason(this, "Meta document could not be decrypted. Reason: "
-						+ e.getMessage()));
-				return;
+				throw new ProcessExecutionException("Meta document could not be decrypted.", e);
 			}
 
 			MetaDocument metaDocument = (MetaDocument) decryptedContent;

@@ -6,13 +6,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.IFileConfiguration;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 
 /**
@@ -36,10 +37,9 @@ public class CreateNewVersionStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.consumeMetaDocument() == null) {
-			cancel(new RollbackReason(this, "Meta document is null."));
-			return;
+			throw new ProcessExecutionException("Meta document is null.");
 		}
 
 		logger.debug("Adding a new version to the meta file.");

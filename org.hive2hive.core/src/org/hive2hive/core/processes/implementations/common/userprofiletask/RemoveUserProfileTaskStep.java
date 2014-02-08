@@ -8,7 +8,6 @@ import javax.crypto.IllegalBlockSizeException;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -17,6 +16,8 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -40,20 +41,18 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		String userId = networkManager.getUserId();
 
 		DataManager dataManager;
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
-			cancel(new RollbackReason(this, "Node is not connected."));
-			return;
+			throw new ProcessExecutionException(e);
 		}
 
 		if (context.consumeUserProfileTask() == null) {
-			cancel(new RollbackReason(this, "User profile task in context is null."));
-			return;
+			throw new ProcessExecutionException("User profile task in context is null.");
 		}
 
 		boolean success = dataManager.removeUserProfileTask(userId, context.consumeUserProfileTask()
@@ -61,7 +60,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		removePerformed = true;
 
 		if (!success) {
-			cancel(new RollbackReason(this, "Could not remove the user profile task"));
+			throw new ProcessExecutionException("Could not remove the user profile task.");
 		}
 	}
 

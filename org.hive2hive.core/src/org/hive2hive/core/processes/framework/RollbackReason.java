@@ -1,23 +1,24 @@
 package org.hive2hive.core.processes.framework;
 
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-
 public class RollbackReason {
 
-	private final ProcessComponent component;
-	private final String message;
-
-	public RollbackReason(ProcessComponent component, String message) {
-		this.component = component;
-		this.message = message;
+	private final String hint;
+	private final Throwable cause;
+	
+	public RollbackReason(String hint) {
+		this(hint, null);
+	}
+	
+	public RollbackReason(String hint, Throwable cause) {
+		this.hint = hint;
+		this.cause = cause;
+	}
+	
+	public String getHint() {
+		return hint;
 	}
 
-	public ProcessComponent getComponent() {
-		return component;
+	public Throwable getCause() {
+		return cause;
 	}
-
-	public String getMessage() {
-		return message;
-	}
-
 }

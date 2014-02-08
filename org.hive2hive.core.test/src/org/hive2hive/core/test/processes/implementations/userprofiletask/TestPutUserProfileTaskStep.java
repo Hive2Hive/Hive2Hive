@@ -2,10 +2,10 @@ package org.hive2hive.core.test.processes.implementations.userprofiletask;
 
 import java.security.PublicKey;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.PutUserProfileTaskStep;
 
 public class TestPutUserProfileTaskStep extends PutUserProfileTaskStep {
@@ -23,11 +23,11 @@ public class TestPutUserProfileTaskStep extends PutUserProfileTaskStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			put(userId, userProfileTask, publicKey);
 		} catch (PutFailedException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 	}
 }

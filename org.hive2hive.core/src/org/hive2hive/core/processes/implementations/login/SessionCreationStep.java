@@ -1,10 +1,10 @@
 package org.hive2hive.core.processes.implementations.login;
 
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 
 public class SessionCreationStep extends ProcessStep {

@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileManager;
@@ -20,6 +19,7 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 /**
  * {@link UserProfileTask} that is pushed into the queue when a shared file is deleted. It removes the dead

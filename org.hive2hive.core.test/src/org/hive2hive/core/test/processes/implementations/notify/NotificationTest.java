@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
@@ -14,6 +13,8 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.ProcessManager;
 import org.hive2hive.core.processes.framework.ProcessState;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -85,6 +86,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyNobody() throws ClassNotFoundException, IOException, InvalidProcessStateException,
@@ -107,6 +109,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException, InvalidProcessStateException,
@@ -136,6 +139,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException,
@@ -164,6 +168,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException,
@@ -196,6 +201,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
@@ -234,6 +240,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
@@ -273,6 +280,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws ProcessExecutionException 
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,

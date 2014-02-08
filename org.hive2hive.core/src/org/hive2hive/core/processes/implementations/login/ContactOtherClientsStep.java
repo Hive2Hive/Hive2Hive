@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -22,6 +21,7 @@ import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 
 // TODO this class should be split up into multiple steps

@@ -3,12 +3,12 @@ package org.hive2hive.core.processes.implementations.files.move;
 import java.security.KeyPair;
 
 import org.apache.log4j.Logger;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 
@@ -28,19 +28,16 @@ public class UpdateDestinationParentStep extends PutMetaDocumentStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Start adding the file to the new parent meta folder.");
 		MetaDocument destinationParent = context.consumeMetaDocument();
 		if (destinationParent == null) {
-			cancel(new RollbackReason(this, "Parent meta folder of destination not found."));
-			return;
+			throw new ProcessExecutionException("Parent meta folder of destination not found.");
 		}
 
 		KeyPair parentProtectionKeys = context.consumeProtectionKeys();
 		if (parentProtectionKeys == null) {
-			cancel(new RollbackReason(this,
-					"Parent meta folder of destination content protection keys not found."));
-			return;
+			throw new ProcessExecutionException("Parent meta folder of destination content protection keys not found.");
 		}
 
 		MetaFolder parent = (MetaFolder) destinationParent;

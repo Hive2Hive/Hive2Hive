@@ -13,7 +13,6 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
@@ -21,6 +20,7 @@ import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;

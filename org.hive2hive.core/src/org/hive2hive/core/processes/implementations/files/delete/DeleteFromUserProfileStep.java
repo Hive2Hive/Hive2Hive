@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.implementations.files.delete;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
@@ -11,6 +10,8 @@ import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
@@ -32,10 +33,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.consumeMetaDocument() == null) {
-			cancel(new RollbackReason(this, "No meta document given."));
-			return;
+			throw new ProcessExecutionException("No meta document given.");
 		}
 
 		// get user profile
@@ -43,8 +43,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		try {
 			profile = networkManager.getSession().getProfileManager().getUserProfile(getID(), true);
 		} catch (GetFailedException | NoSessionException e) {
-			cancel(new RollbackReason(this, "Could not get user profile."));
-			return;
+			throw new ProcessExecutionException("Could not get user profile.", e);
 		}
 
 		fileNode = profile.getFileById(context.consumeMetaDocument().getId());
@@ -52,8 +51,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 		// check preconditions
 		if (!fileNode.getChildren().isEmpty()) {
-			cancel(new RollbackReason(this, "Cannot delete a directory that is not empty."));
-			return;
+			throw new ProcessExecutionException("Cannot delete a directory that is not empty.");
 		}
 
 		parentNode = fileNode.getParent();
@@ -62,7 +60,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		try {
 			networkManager.getSession().getProfileManager().readyToPut(profile, getID());
 		} catch (PutFailedException | NoSessionException e) {
-			cancel(new RollbackReason(this, "Could not put user profile."));
+			throw new ProcessExecutionException("Could not put user profile.");
 		}
 	}
 

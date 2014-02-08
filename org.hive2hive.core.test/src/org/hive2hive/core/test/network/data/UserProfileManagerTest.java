@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FileTreeNode;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -24,7 +24,6 @@ import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -170,7 +169,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException {
+		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), operation == Operation.PUT);
 
@@ -183,8 +182,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 				}
 
 			} catch (GetFailedException | PutFailedException e) {
-				cancel(new RollbackReason(this, e.getMessage()));
-				Assert.fail();
+				throw new ProcessExecutionException(e);
 			}
 		}
 	}

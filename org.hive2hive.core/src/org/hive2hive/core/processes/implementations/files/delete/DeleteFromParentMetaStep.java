@@ -1,9 +1,9 @@
 package org.hive2hive.core.processes.implementations.files.delete;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.PutMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
@@ -19,30 +19,25 @@ public class DeleteFromParentMetaStep extends PutMetaDocumentStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// check preconditions
 		if (context.isFileInRoot()) {
 			return;
 		}
 		if (context.consumeMetaDocument() == null) {
-			cancel(new RollbackReason(this, "Parent meta folder not found."));
-			return;
+			throw new ProcessExecutionException("Parent meta folder not found.");
 		}
 		if (context.getDeletedNode() == null) {
-			cancel(new RollbackReason(this, "Child node is not given."));
-			return;
+			throw new ProcessExecutionException("Child node is not given.");
 		}
 		if (context.getParentNode() == null) {
-			cancel(new RollbackReason(this, "Parent node is not given."));
-			return;
+			throw new ProcessExecutionException("Parent node is not given.");
 		}
 		if (context.getParentNode().getProtectionKeys() == null) {
-			cancel(new RollbackReason(this, "Parent protection keys are null."));
-			return;
+			throw new ProcessExecutionException("Parent protection keys are null.");
 		}
 		if (context.consumeMetaDocument() == null) {
-			cancel(new RollbackReason(this, "Meta document is null."));
-			return;
+			throw new ProcessExecutionException("Meta document is null.");
 		}
 
 		// update parent meta folder (delete child)

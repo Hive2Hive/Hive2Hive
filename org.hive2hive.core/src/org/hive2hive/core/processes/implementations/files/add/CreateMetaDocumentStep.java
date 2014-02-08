@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -15,6 +14,7 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 

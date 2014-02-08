@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
@@ -41,8 +40,7 @@ public class ProcessManager {
 	public void stopAll(String reason) {
 		for (IProcessComponent process : getAllProcesses()) {
 			try {
-				process.cancel(new RollbackReason((ProcessComponent) process,
-						"Forced shutdown through ProcessManager"));
+				process.cancel(new RollbackReason("Forced shutdown through ProcessManager"));
 			} catch (InvalidProcessStateException e) {
 				// ignore
 			}

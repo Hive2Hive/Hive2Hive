@@ -9,13 +9,13 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 

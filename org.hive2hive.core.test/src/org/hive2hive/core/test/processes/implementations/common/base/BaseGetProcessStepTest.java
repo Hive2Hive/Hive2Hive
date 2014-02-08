@@ -4,12 +4,12 @@ import java.util.List;
 
 import net.tomp2p.peers.Number160;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -126,11 +126,11 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException {
+		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			NetworkContent content = get(locationKey, contentKey);
 			this.content = content;
 			if (content == null)
-				cancel(new RollbackReason(this, "Content is null."));
+				throw new ProcessExecutionException("Content is null.");
 		}
 
 		public NetworkContent getContent() {

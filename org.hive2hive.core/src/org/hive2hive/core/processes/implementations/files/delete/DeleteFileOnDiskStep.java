@@ -5,11 +5,11 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public class DeleteFileOnDiskStep extends ProcessStep {
 
@@ -30,7 +30,7 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 				FileUtils.moveFileToDirectory(file, H2HConstants.TRASH_DIRECTORY, true);
 			} catch (IOException e) {
 				logger.warn(String.format(
-						"File '%s' could not be moved to the trash directory and gets deleted.",
+						"File '%s' could not be moved to the tras<h directory and gets deleted.",
 						file.getAbsolutePath()));
 				FileUtils.deleteQuietly(file);
 			}

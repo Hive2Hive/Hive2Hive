@@ -10,13 +10,13 @@ import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -120,11 +120,11 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException {
+		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
 				put(locationKey, contentKey, data, null);
 			} catch (PutFailedException e) {
-				cancel(new RollbackReason(this, e.getMessage()));
+				throw new ProcessExecutionException(e);
 			}
 		}
 	}

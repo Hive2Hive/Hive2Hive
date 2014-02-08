@@ -53,7 +53,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			logger.debug("Start to download " + fileList.size() + " files that have been shared with me");
 			downloadProcess.start();
 		} catch (Hive2HiveException e) {
-			logger.error("Cannot execute the task", e);
+			logger.error("Cannot execute the task.", e);
 		}
 	}
 }

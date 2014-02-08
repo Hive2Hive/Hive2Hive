@@ -10,7 +10,6 @@ import javax.crypto.IllegalBlockSizeException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -18,7 +17,8 @@ import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -46,7 +46,7 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			MetaDocument metaDocument = metaDocumentContext.consumeMetaDocument();
 			KeyPair protectionKeys = protectionKeyContext.consumeProtectionKeys();
@@ -60,9 +60,9 @@ public class PutMetaDocumentStep extends BasePutProcessStep {
 					protectionKeys);
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			cancel(new RollbackReason(this, "Meta document could not be encrypted"));
+			throw new ProcessExecutionException("Meta document could not be encrypted.", e);
 		} catch (PutFailedException e) {
-			cancel(new RollbackReason(this, e.getMessage()));
+			throw new ProcessExecutionException(e);
 		}
 	}
 }

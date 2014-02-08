@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.framework.abstracts;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public abstract class ProcessStep extends ProcessComponent {
 

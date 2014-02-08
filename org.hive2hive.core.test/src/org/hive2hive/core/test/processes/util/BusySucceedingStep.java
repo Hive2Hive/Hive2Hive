@@ -1,6 +1,6 @@
 package org.hive2hive.core.test.processes.util;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public class BusySucceedingStep extends SucceedingProcessStep {
 
@@ -8,7 +8,7 @@ public class BusySucceedingStep extends SucceedingProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		
 		// super busy
-		TestUtil.wait(3000);
+		TestUtil.waitDefault();
 		
 		super.doExecute();
 	}

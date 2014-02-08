@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -15,6 +14,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
 public class UploadUserProfileTask extends UserProfileTask {
 
@@ -60,7 +60,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 			logger.debug("Start downloading the file '" + fileTreeNode.getFullPath() + "'.");
 			process.start();
 		} catch (NoSessionException | InvalidProcessStateException e) {
-			logger.error("Could not start the download of the newly shared file");
+			logger.error("Could not start the download of the newly shared file.");
 		}
 
 		try {

@@ -10,13 +10,13 @@ import javax.crypto.IllegalBlockSizeException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -33,21 +33,19 @@ public class UpdateParentMetaStep extends BasePutProcessStep {
 	}
 
 	@Override
-	public void doExecute() throws InvalidProcessStateException {
+	public void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug(String.format("Start updating the parent meta folder of file: %s", context.getFile()
 				.getName()));
 
 		// add child to the parent meta data
 		MetaFolder parentMeta = (MetaFolder) context.consumeParentMetaDocument();
 		if (parentMeta == null) {
-			cancel(new RollbackReason(this, "Could not find the parent meta data."));
-			return;
+			throw new ProcessExecutionException("Could not find the parent meta data.");
 		}
 
 		KeyPair protectionKeys = (KeyPair) context.consumeProtectionKeys();
 		if (protectionKeys == null) {
-			cancel(new RollbackReason(this, "No protection keys are set."));
-			return;
+			throw new ProcessExecutionException("No protection keys are set.");
 		}
 
 		parentMeta.addChildKeyPair(context.getNewMetaKeyPair());
@@ -63,9 +61,9 @@ public class UpdateParentMetaStep extends BasePutProcessStep {
 			put(parentMeta.getId(), H2HConstants.META_DOCUMENT, encrypted, protectionKeys);
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			cancel(new RollbackReason(this, "Parent meta document could not be encrypted"));
+			throw new ProcessExecutionException("Parent meta document could not be encrypted.", e);
 		} catch (PutFailedException e) {
-			cancel(new RollbackReason(this, "Parent meta document could not be put"));
+			throw new ProcessExecutionException("Parent meta document could not be put.", e);
 		}
 	}
 }

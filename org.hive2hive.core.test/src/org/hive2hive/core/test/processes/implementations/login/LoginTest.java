@@ -11,13 +11,14 @@ import net.tomp2p.peers.Number160;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
@@ -77,7 +78,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
 				NetworkTestUtil.randomString(), userCredentials.getPin());
 
@@ -86,7 +87,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
 				userCredentials.getPassword(), NetworkTestUtil.randomString());
 
@@ -95,7 +96,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(),
 				userCredentials.getPassword(), userCredentials.getPin());
 

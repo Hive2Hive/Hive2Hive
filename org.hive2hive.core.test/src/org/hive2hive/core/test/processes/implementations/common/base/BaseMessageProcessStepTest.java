@@ -12,13 +12,13 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
-import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseMessageProcessStep;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -152,13 +152,13 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		BaseMessageProcessStep step = new BaseMessageProcessStep(nodeA.getMessageManager()) {
 
 			@Override
-			protected void doExecute() throws InvalidProcessStateException {
+			protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 				try {
 					send(message, nodeB.getPublicKey());
 					Assert.fail();
 				} catch (SendFailedException e) {
 					// expected
-					cancel(new RollbackReason(this, "Expected behavior"));
+					throw new ProcessExecutionException("Expected behavior.", e);
 				}
 			}
 
