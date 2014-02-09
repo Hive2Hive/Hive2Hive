@@ -9,11 +9,11 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.ProcessManager;
 
 /**
  * Is pushed in a user profile queue of a user (A) when another user (B) has moved a file. The file has been
@@ -50,19 +50,19 @@ public class MoveUserProfileTask extends UserProfileTask {
 			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
 
 			// get and check the file nodes to be rearranged
-			IndexNode oldParent = userProfile.getFileById(oldParentKey);
+			FolderIndex oldParent = (FolderIndex) userProfile.getFileById(oldParentKey);
 			if (oldParent == null) {
 				logger.error("Could not find the old parent");
 				return;
 			}
 
-			IndexNode child = oldParent.getChildByName(sourceFileName);
+			Index child = oldParent.getChildByName(sourceFileName);
 			if (child == null) {
 				logger.error("File node that should be moved not found");
 				return;
 			}
 
-			IndexNode newParent = userProfile.getFileById(newParentKey);
+			FolderIndex newParent = (FolderIndex) userProfile.getFileById(newParentKey);
 			if (newParent == null) {
 				logger.error("Could not find the new parent");
 				return;
@@ -72,7 +72,6 @@ public class MoveUserProfileTask extends UserProfileTask {
 			oldParent.removeChild(child);
 			newParent.addChild(child);
 			child.setParent(newParent);
-			child.setProtectionKeys(newParent.getProtectionKeys());
 			profileManager.readyToPut(userProfile, randomPID);
 
 			// move the file on disk

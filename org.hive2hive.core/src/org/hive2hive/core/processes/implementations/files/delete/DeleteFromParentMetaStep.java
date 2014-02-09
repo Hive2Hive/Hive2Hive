@@ -28,7 +28,7 @@ public class DeleteFromParentMetaStep extends PutMetaDocumentStep {
 			cancel(new RollbackReason(this, "Parent meta folder not found."));
 			return;
 		}
-		if (context.getDeletedNode() == null) {
+		if (context.getDeletedIndex() == null) {
 			cancel(new RollbackReason(this, "Child node is not given."));
 			return;
 		}
@@ -47,7 +47,7 @@ public class DeleteFromParentMetaStep extends PutMetaDocumentStep {
 
 		// update parent meta folder (delete child)
 		MetaFolder parentMetaFolder = (MetaFolder) context.consumeMetaDocument();
-		parentMetaFolder.removeChildKey(context.getDeletedNode().getFileKey());
+		parentMetaFolder.removeChildKey(context.getDeletedIndex().getFilePublicKey());
 
 		// put the meta folder
 		super.doExecute();

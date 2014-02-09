@@ -10,7 +10,8 @@ import java.nio.file.StandardCopyOption;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.FolderIndex;
 
 public class FileUtil {
 
@@ -50,13 +51,13 @@ public class FileUtil {
 	 * 
 	 * @param sourceName the name of the file at the source
 	 * @param destName the name of the file at the destination
-	 * @param oldParent the old parent {@link IndexNode}
-	 * @param newParent the new parent {@link IndexNode}
+	 * @param oldParent the old parent {@link FolderIndex}
+	 * @param newParent the new parent {@link FolderIndex}
 	 * @param fileManager the {@link FileManager} of the user
 	 * @throws IOException when moving went wrong
 	 */
-	public static void moveFile(String sourceName, String destName, IndexNode oldParent,
-			IndexNode newParent, FileManager fileManager) throws IOException {
+	public static void moveFile(String sourceName, String destName, Index oldParent,
+			Index newParent, FileManager fileManager) throws IOException {
 		// find the file of this user on the disc
 		File oldParentFile = fileManager.getPath(oldParent).toFile();
 		File toMoveSource = new File(oldParentFile, sourceName);

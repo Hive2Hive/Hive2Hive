@@ -4,7 +4,9 @@ import java.nio.file.Paths;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
@@ -18,18 +20,18 @@ import org.junit.Test;
  * 
  * @author Nico, Seppi
  */
-public class FileTreeNodeTest extends H2HJUnitTest {
+public class FileIndexTest extends H2HJUnitTest {
 
-	private IndexNode root;
-	private IndexNode child1;
-	private IndexNode child2;
-	private IndexNode dir1;
-	private IndexNode child3;
-	private IndexNode dir2;
+	private FolderIndex root;
+	private Index child1;
+	private Index child2;
+	private FolderIndex dir1;
+	private Index child3;
+	private FolderIndex dir2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = FileTreeNodeTest.class;
+		testClass = FileIndexTest.class;
 		beforeClass();
 	}
 
@@ -42,8 +44,9 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	public void createTreeNode() {
 		// create a tree
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		KeyPair domainKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		root = new IndexNode(keys, domainKey);
+		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		root = new FolderIndex(null, keys, null);
+		root.setProtectionKeys(protectionKeys);
 
 		// naming convention:
 		// [number][type][index] where number is the level and type is either 'f' for file or 'd' for
@@ -56,11 +59,11 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		// - 1d:
 		// - - 2f
 		// - - 2d (empty folder)
-		child1 = new IndexNode(root, keys, "1f1", null);
-		child2 = new IndexNode(root, keys, "1f2", null);
-		dir1 = new IndexNode(root, keys, "1d");
-		child3 = new IndexNode(dir1, keys, "2f", null);
-		dir2 = new IndexNode(dir1, keys, "2d");
+		child1 = new FileIndex(root, keys, "1f1", null);
+		child2 = new FileIndex(root, keys, "1f2", null);
+		dir1 = new FolderIndex(root, keys, "1d");
+		child3 = new FileIndex(dir1, keys, "2f", null);
+		dir2 = new FolderIndex(dir1, keys, "2d");
 	}
 
 	@Test
@@ -74,9 +77,9 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testShared1() {
+	public void testShare() {
 		// set 1d to be shared
-		dir1.setIsShared(true);
+		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
 
 		// 1d, 2f and 2d should return to be shared, others not
 		Assert.assertTrue(dir1.isShared());
@@ -88,7 +91,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(child2.isShared());
 
 		// set 1d to be not shared
-		dir1.setIsShared(false);
+		dir1.unshare();
 
 		// root, 1f1, 1f2, 1d, 2f and 2d should return to be not shared
 		Assert.assertFalse(root.isShared());
@@ -101,14 +104,14 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testShared2() {
-		root.setIsShared(true);
+	public void testShareRoot() {
+		root.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
 	}
 
 	@Test
 	public void testHasShared() {
 		// set 2d to be shared
-		dir2.setIsShared(true);
+		dir2.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
 
 		// root, 1d and 2d should show that they contain a shared folder
 		Assert.assertTrue(root.isSharedOrHasSharedChildren());
@@ -120,7 +123,7 @@ public class FileTreeNodeTest extends H2HJUnitTest {
 		Assert.assertFalse(child3.isSharedOrHasSharedChildren());
 
 		// set 2d to be not shared
-		dir2.setIsShared(false);
+		dir2.unshare();
 
 		// root, 1f1, 1f2, 1d, 2f and 2d should not contain a shared folder
 		Assert.assertFalse(root.isSharedOrHasSharedChildren());

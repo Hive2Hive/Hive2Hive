@@ -9,7 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.security.EncryptionUtil;
 
 public class FileManager {
@@ -89,7 +89,7 @@ public class FileManager {
 	 * @param fileToFind
 	 * @return the path to the file or null if the parameter is null
 	 */
-	public Path getPath(IndexNode fileToFind) {
+	public Path getPath(Index fileToFind) {
 		if (fileToFind == null)
 			return null;
 		return Paths.get(root.toString(), fileToFind.getFullPath().toString());

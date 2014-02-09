@@ -4,7 +4,7 @@ import java.security.PublicKey;
 import java.util.HashSet;
 
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
@@ -28,11 +28,11 @@ public class PrepareNotificationStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		// prepare the file tree node for sending to other users
-		IndexNode fileNode = context.getDeletedNode();
-		PublicKey parentKey = fileNode.getParent().getFileKey();
+		Index fileNode = context.getDeletedIndex();
+		PublicKey parentKey = fileNode.getParent().getFilePublicKey();
 
 		// provide the message factory
-		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFileKey(), parentKey,
+		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), parentKey,
 				fileNode.getName()));
 
 		HashSet<String> users = new HashSet<String>();

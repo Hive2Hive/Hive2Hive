@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.MetaDocument;
@@ -100,7 +100,7 @@ public class SelectVersionStep extends ProcessStep {
 			// find the node at the user profile
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
-			IndexNode selectedNode = userProfile.getFileById(metaFile.getId());
+			Index selectedNode = userProfile.getFileById(metaFile.getId());
 			if (selectedNode == null) {
 				throw new Hive2HiveException("File node not found");
 			}
@@ -115,7 +115,7 @@ public class SelectVersionStep extends ProcessStep {
 
 			// add the process to download the file
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(
-					selectedNode.getFileKey(), selected.getIndex(), destination, networkManager);
+					selectedNode.getFilePublicKey(), selected.getIndex(), destination, networkManager);
 			getParent().add(downloadProcess);
 
 			// add the process to upload the file

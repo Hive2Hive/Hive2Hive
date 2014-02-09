@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
@@ -40,20 +40,20 @@ public class FindInUserProfileStep extends ProcessStep {
 			return;
 		}
 
-		IndexNode fileNode = userProfile.getFileById(context.getFileKey());
-		if (fileNode == null) {
+		Index index = userProfile.getFileById(context.getFileKey());
+		if (index == null) {
 			cancel(new RollbackReason(this, "File key not found in user profile"));
 			return;
 		}
 
-		context.setFileNode(fileNode);
+		context.setIndex(index);
 
 		// add the next steps here
-		if (fileNode.isFolder()) {
-			logger.info("No download of the file needed since '" + fileNode.getFullPath() + "' is a folder");
+		if (index.isFolder()) {
+			logger.info("No download of the file needed since '" + index.getFullPath() + "' is a folder");
 			getParent().add(new CreateFolderStep(context, networkManager));
 		} else {
-			logger.info("Initalize the process for downloading file '" + fileNode.getFullPath() + "'.");
+			logger.info("Initalize the process for downloading file '" + index.getFullPath() + "'.");
 			try {
 				FileManager fileManager = networkManager.getSession().getFileManager();
 				IDataManager dataManager = networkManager.getDataManager();

@@ -72,7 +72,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		// store the keys of the meta file to verify them later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, root).getKeyPair();
+		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
 		MetaDocument metaDocumentBeforeDeletion = UseCaseTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
@@ -111,7 +111,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		// store some keys before deletion
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, root).getKeyPair();
+		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		MetaDocument metaDocumentBeforeDeletion = UseCaseTestUtil.getMetaDocument(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
@@ -141,8 +141,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		// store some things to be able to test later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getKeyPair();
-		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, root).getKeyPair();
+		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
+		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
 		MetaFolder metaFolderBeforeDeletion = (MetaFolder) UseCaseTestUtil.getMetaDocument(client,
 				metaKeyPairFolder);
 		MetaFile metaFileBeforeDeletion = (MetaFile) UseCaseTestUtil.getMetaDocument(client, metaKeyPairFile);
@@ -185,9 +185,9 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		// store some things to be able to test later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getKeyPair();
+		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		KeyPair metaKeyPairInnerFolder = userProfileBeforeDeletion.getFileByPath(innerFolder, root)
-				.getKeyPair();
+				.getFileKeys();
 		MetaFolder metaFolderBeforeDeletion = (MetaFolder) UseCaseTestUtil.getMetaDocument(client,
 				metaKeyPairFolder);
 		MetaFolder metaInnerFolderBeforeDeletion = (MetaFolder) UseCaseTestUtil.getMetaDocument(client,

@@ -6,7 +6,8 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -18,9 +19,9 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 	private static final long serialVersionUID = -2476009828696898562L;
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(ShareFolderUserProfileTask.class);
-	private final IndexNode fileTree;
+	private final FolderIndex fileTree;
 
-	public ShareFolderUserProfileTask(IndexNode fileTree) {
+	public ShareFolderUserProfileTask(FolderIndex fileTree) {
 		this.fileTree = fileTree;
 	}
 
@@ -46,7 +47,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			logger.debug("Added the newly shared folder to the own user profile");
 
 			/** 2. download the files that are now available */
-			List<IndexNode> fileList = IndexNode.getFileNodeList(fileTree);
+			List<Index> fileList = FolderIndex.getIndexList(fileTree);
 			// the folder itself is also contained, so remove it
 			ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,
 					networkManager);

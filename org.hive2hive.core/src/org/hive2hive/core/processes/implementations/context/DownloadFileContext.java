@@ -4,7 +4,7 @@ import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
@@ -20,7 +20,7 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 	private final File destination; // set null for default
 	private final int versionToDownload;
 
-	private IndexNode fileNode;
+	private Index index;
 	private MetaDocument metaDocument;
 
 	public DownloadFileContext(PublicKey fileKey, File destination, int versionToDownload) {
@@ -34,15 +34,15 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 	}
 
 	public boolean isFolder() {
-		return fileNode.isFolder();
+		return index.isFolder();
 	}
 
-	public void setFileNode(IndexNode fileNode) {
-		this.fileNode = fileNode;
+	public void setIndex(Index index) {
+		this.index = index;
 	}
 
-	public IndexNode getFileNode() {
-		return fileNode;
+	public Index getIndex() {
+		return index;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 
 	@Override
 	public KeyPair consumeKeyPair() {
-		return fileNode.getKeyPair();
+		return index.getFileKeys();
 	}
 
 	@Override

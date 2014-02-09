@@ -6,7 +6,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
@@ -28,14 +28,15 @@ public class PrepareNotificationsStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		IndexNode fileNode = context.getFileTreeNode();
+		FolderIndex fileNode = context.getFileTreeNode();
 
 		// create a subtree containing all children
-		IndexNode sharedNode;
+		FolderIndex sharedNode;
 		if (context.getPermission() == PermissionType.READ) {
-			sharedNode = new IndexNode(fileNode.getKeyPair(), null);
+			sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());
 		} else {
-			sharedNode = new IndexNode(fileNode.getKeyPair(), context.consumeNewProtectionKeys());
+			sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());
+			sharedNode.setProtectionKeys(context.consumeNewProtectionKeys());
 		}
 
 		sharedNode.setName(fileNode.getName());

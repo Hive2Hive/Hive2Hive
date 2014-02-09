@@ -12,7 +12,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -54,8 +54,8 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 			UserProfileManager profileManager = session.getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(UUID.randomUUID().toString(), false);
 
-			IndexNode oldParent = userProfile.getFileById(oldParentKey);
-			IndexNode newParent = userProfile.getFileById(newParentKey);
+			Index oldParent = userProfile.getFileById(oldParentKey);
+			Index newParent = userProfile.getFileById(newParentKey);
 			FileUtil.moveFile(sourceFileName, destFileName, oldParent, newParent, session.getFileManager());
 		} catch (NoSessionException | GetFailedException | IOException e) {
 			logger.error("Could not process the notification message", e);

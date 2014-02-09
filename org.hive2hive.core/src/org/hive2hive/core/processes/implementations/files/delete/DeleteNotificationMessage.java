@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 
@@ -48,7 +48,7 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 
 			FileManager fileManager = session.getFileManager();
 			UserProfile userProfile = session.getProfileManager().getUserProfile(pid, false);
-			IndexNode parentNode = userProfile.getFileById(parentFileKey);
+			Index parentNode = userProfile.getFileById(parentFileKey);
 
 			if (parentNode == null) {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent");

@@ -14,7 +14,8 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -101,9 +102,9 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// download the file and check if version is newer
 		UseCaseTestUtil.login(userCredentials, downloader, FileUtils.getTempDirectory());
-		IndexNode fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(
-				file, fileManagerUploader);
-		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getFileKey());
+		Index fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(file,
+				fileManagerUploader);
+		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
 
 		// new content should be latest one
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
@@ -129,11 +130,12 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify if the md5 hash did not change
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		IndexNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		FileIndex fileNode = (FileIndex) userProfile.getFileByPath(file, fileManagerUploader);
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
 
 		// verify that only one version was created
-		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
+		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
+				.getMetaDocument(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -195,8 +197,9 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		IndexNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
-		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
+		Index fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
+				.getMetaDocument(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -245,8 +248,9 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		IndexNode fileNode = userProfile.getFileByPath(file, fileManagerUploader);
-		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaDocument(downloader, fileNode.getKeyPair());
+		Index fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
+				.getMetaDocument(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 

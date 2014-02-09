@@ -11,7 +11,9 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -57,7 +59,7 @@ public class AddToUserProfileStep extends ProcessStep {
 	}
 
 	/**
-	 * Generates a {@link IndexNode} that can be added to the DHT
+	 * Generates a {@link FolderIndex} that can be added to the DHT
 	 * 
 	 * @param userProfile
 	 * 
@@ -76,20 +78,20 @@ public class AddToUserProfileStep extends ProcessStep {
 
 		// find the parent node using the relative path to navigate there
 		Path relativePath = fileRoot.relativize(parent);
-		IndexNode parentNode = userProfile.getFileByPath(relativePath);
-		parentKey = parentNode.getFileKey();
+		FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(relativePath);
+		parentKey = parentNode.getFilePublicKey();
 
 		// use the file keys generated in a previous step where the meta document is stored
-		IndexNode newNode;
+		Index newNode;
 		if (file.isDirectory()) {
-			newNode = new IndexNode(parentNode, metaKeyPair, file.getName());
+			newNode = new FolderIndex(parentNode, metaKeyPair, file.getName());
 		} else {
 			byte[] md5 = EncryptionUtil.generateMD5Hash(file);
-			newNode = new IndexNode(parentNode, metaKeyPair, file.getName(), md5);
+			newNode = new FileIndex(parentNode, metaKeyPair, file.getName(), md5);
 		}
 
 		// for later usage
-		context.setNewFileTreeNode(newNode);
+		context.setNewIndex(newNode);
 	}
 
 	@Override
@@ -99,8 +101,8 @@ public class AddToUserProfileStep extends ProcessStep {
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			IndexNode parentNode = userProfile.getFileById(parentKey);
-			IndexNode childNode = parentNode.getChildByName(context.getFile().getName());
+			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
+			Index childNode = parentNode.getChildByName(context.getFile().getName());
 			parentNode.removeChild(childNode);
 			profileManager.readyToPut(userProfile, getID());
 		} catch (Exception e) {

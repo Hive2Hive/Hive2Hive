@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -49,22 +49,22 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 		try {
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			IndexNode fileNode = userProfile.getFileById(metaFile.getId());
+			FileIndex index = (FileIndex) userProfile.getFileById(metaFile.getId());
 
 			// store for backup
-			originalMD5 = fileNode.getMD5();
+			originalMD5 = index.getMD5();
 			if (H2HEncryptionUtil.compareMD5(originalMD5, newMD5)) {
 				cancel(new RollbackReason(this, "Try to create new version with same content."));
 				return;
 			}
 
 			// make and put modifications
-			fileNode.setMD5(newMD5);
+			index.setMD5(newMD5);
 			logger.debug("Updating the md5 hash in the user profile");
 			profileManager.readyToPut(userProfile, getID());
 
 			// store for notification
-			context.setNewFileTreeNode(fileNode);
+			context.setNewIndex(index);
 		} catch (GetFailedException | PutFailedException e) {
 			cancel(new RollbackReason(this, e.getMessage()));
 		}
@@ -78,7 +78,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				IndexNode fileNode = userProfile.getFileById(metaFile.getId());
+				FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
 				fileNode.setMD5(originalMD5);
 				profileManager.readyToPut(userProfile, getID());
 			} catch (Exception e) {

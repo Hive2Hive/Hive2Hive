@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
@@ -29,7 +29,7 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IProvidePr
 	private MetaDocument newMetaDocument;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
-	private IndexNode newFileTreeNode;
+	private Index newIndexNode;
 
 	public AddFileProcessContext(File file, boolean inRoot, H2HSession session) {
 		this.file = file;
@@ -113,11 +113,11 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IProvidePr
 		return users;
 	}
 
-	public void setNewFileTreeNode(IndexNode newFileTreeNode) {
-		this.newFileTreeNode = newFileTreeNode;
+	public void setNewIndex(Index newIndexNode) {
+		this.newIndexNode = newIndexNode;
 	}
 
-	public IndexNode getNewFileTreeNode() {
-		return newFileTreeNode;
+	public Index getNewIndex() {
+		return newIndexNode;
 	}
 }

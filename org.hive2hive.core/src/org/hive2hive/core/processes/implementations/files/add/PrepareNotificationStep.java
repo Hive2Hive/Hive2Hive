@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
@@ -27,8 +27,8 @@ public class PrepareNotificationStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		// prepare the file tree node for sending to other users
-		IndexNode fileNode = context.getNewFileTreeNode();
-		PublicKey parentKey = fileNode.getParent().getFileKey();
+		Index fileNode = context.getNewIndex();
+		PublicKey parentKey = fileNode.getParent().getFilePublicKey();
 		fileNode.setParent(null);
 
 		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(fileNode,

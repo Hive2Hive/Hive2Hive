@@ -15,7 +15,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
@@ -77,7 +77,7 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 		try {
 			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
-			IndexNode parentNode = userProfile.getFileByPath(parent, context.getH2HSession()
+			Index parentNode = userProfile.getFileByPath(parent, context.getH2HSession()
 					.getFileManager());
 
 			if (parentNode == null) {
@@ -89,8 +89,8 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 			}
 
 			context.provideProtectionKeys(parentNode.getProtectionKeys());
-			parentsKeyPair = parentNode.getKeyPair();
-			NetworkContent content = get(parentNode.getKeyPair().getPublic(), H2HConstants.META_DOCUMENT);
+			parentsKeyPair = parentNode.getFileKeys();
+			NetworkContent content = get(parentNode.getFileKeys().getPublic(), H2HConstants.META_DOCUMENT);
 			evaluateResult(content);
 		} catch (Exception e) {
 			cancel(new RollbackReason(this, e.getMessage()));

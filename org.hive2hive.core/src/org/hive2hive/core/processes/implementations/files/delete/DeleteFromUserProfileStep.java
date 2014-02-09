@@ -1,5 +1,7 @@
 package org.hive2hive.core.processes.implementations.files.delete;
 
+import java.security.PublicKey;
+
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -7,7 +9,8 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -21,8 +24,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	private final DeleteFileProcessContext context;
 	private final NetworkManager networkManager;
 
-	private IndexNode fileNode;
-	private IndexNode parentNode;
+	private Index index;
+	private PublicKey parentIndexKey;
 
 	public DeleteFromUserProfileStep(DeleteFileProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
@@ -47,18 +50,25 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			return;
 		}
 
-		fileNode = profile.getFileById(context.consumeMetaDocument().getId());
-		context.setDeletedNode(fileNode);
+		index = profile.getFileById(context.consumeMetaDocument().getId());
+		context.setDeletedIndex(index);
 
 		// check preconditions
-		if (!fileNode.getChildren().isEmpty()) {
-			cancel(new RollbackReason(this, "Cannot delete a directory that is not empty."));
-			return;
+		if (index.isFolder()) {
+			FolderIndex folder = (FolderIndex) index;
+			if (!folder.getChildren().isEmpty()) {
+				cancel(new RollbackReason(this, "Cannot delete a directory that is not empty."));
+				return;
+			}
 		}
 
-		parentNode = fileNode.getParent();
-		parentNode.removeChild(fileNode);
-		context.setParentNode(parentNode);
+		FolderIndex parentIndex = index.getParent();
+		parentIndex.removeChild(index);
+		context.setParentNode(parentIndex);
+
+		// for rollback
+		this.parentIndexKey = parentIndex.getFilePublicKey();
+
 		try {
 			networkManager.getSession().getProfileManager().readyToPut(profile, getID());
 		} catch (PutFailedException | NoSessionException e) {
@@ -68,8 +78,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-
-		if (fileNode != null && parentNode != null) {
+		if (index != null && parentIndexKey != null) {
 
 			// get user profile
 			UserProfile profile = null;
@@ -82,9 +91,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 			// TODO this is buggy! rather use list to check for containment instead of above if-statement
 			// re-add file to user profile
-			IndexNode parent = profile.getFileById(parentNode.getFileKey());
-			parent.addChild(fileNode);
-			fileNode.setParent(parent);
+			FolderIndex parent = (FolderIndex) profile.getFileById(parentIndexKey);
+			parent.addChild(index);
+			index.setParent(parent);
 
 			try {
 				networkManager.getSession().getProfileManager().readyToPut(profile, getID());

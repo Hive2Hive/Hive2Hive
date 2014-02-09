@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -63,7 +63,7 @@ public class UserProfileManagerExceptionHandlingTest extends H2HJUnitTest {
 		// modify the version key to trigger a version conflict (wrong based on key)
 		userProfile.generateVersionKey();
 
-		new IndexNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
+		new FolderIndex(userProfile.getRoot(), null, NetworkTestUtil.randomString());
 
 		try {
 			profileManager.readyToPut(userProfile, "abc");

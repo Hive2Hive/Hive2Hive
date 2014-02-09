@@ -8,7 +8,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -61,7 +61,7 @@ public class GetFileKeysStep extends ProcessStep {
 			return;
 		}
 
-		IndexNode fileNode = profile.getFileByPath(file, session.getFileManager());
+		Index fileNode = profile.getFileByPath(file, session.getFileManager());
 		if (fileNode == null) {
 			cancel(new RollbackReason(this,
 					"File does not exist in user profile. Consider uploading a new file."));
@@ -70,6 +70,6 @@ public class GetFileKeysStep extends ProcessStep {
 
 		// set the corresponding content protection keys
 		protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
-		keyPairContext.provideKeyPair(fileNode.getKeyPair());
+		keyPairContext.provideKeyPair(fileNode.getFileKeys());
 	}
 }

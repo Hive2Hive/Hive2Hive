@@ -10,7 +10,8 @@ import org.hive2hive.core.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -51,13 +52,13 @@ public class RelinkUserProfileStep extends ProcessStep {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 
 			logger.debug("Start relinking the moved file in the user profile.");
-			IndexNode movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
+			Index movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
 
 			// consider renaming
 			movedNode.setName(context.getDestination().getName());
 
-			IndexNode oldParent = movedNode.getParent();
-			oldParentKey = oldParent.getKeyPair().getPublic();
+			FolderIndex oldParent = movedNode.getParent();
+			oldParentKey = oldParent.getFileKeys().getPublic();
 
 			// source's parent needs to be updated, no matter if it's root or not
 			oldParent.removeChild(movedNode);
@@ -68,8 +69,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 				userProfile.getRoot().addChild(movedNode);
 			} else {
 				// moved to non-root
-				IndexNode newParent = userProfile.getFileByPath(context.getDestination().getParentFile(),
-						networkManager.getSession().getFileManager());
+				FolderIndex newParent = (FolderIndex) userProfile.getFileByPath(context.getDestination()
+						.getParentFile(), networkManager.getSession().getFileManager());
 				movedNode.setParent(newParent);
 				newParent.addChild(movedNode);
 			}
@@ -95,8 +96,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 	 * 2. users that don't have access to the file anymore
 	 * 3. users that now have access to the file but didn't have prior movement
 	 */
-	private void initNotificationParameters(Set<String> source, Set<String> destination,
-			IndexNode movedNode, String sourceName, String destName) {
+	private void initNotificationParameters(Set<String> source, Set<String> destination, Index movedNode,
+			String sourceName, String destName) {
 		// add all common users to a list
 		Set<String> common = new HashSet<String>();
 		for (String user : source) {
@@ -109,11 +110,11 @@ public class RelinkUserProfileStep extends ProcessStep {
 				common.add(user);
 		}
 
-		PublicKey fileKey = movedNode.getFileKey();
+		PublicKey fileKey = movedNode.getFilePublicKey();
 
 		// inform common users
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
-		PublicKey newParentKey = movedNode.getParent().getFileKey();
+		PublicKey newParentKey = movedNode.getParent().getFilePublicKey();
 		MoveNotificationContext moveContext = context.getMoveNotificationContext();
 		moveContext.provideMessageFactory(new MoveNotificationMessageFactory(sourceName, destName,
 				oldParentKey, newParentKey));
@@ -132,7 +133,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		destination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
 		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode
-				.getParent().getFileKey()));
+				.getParent().getFilePublicKey()));
 		addContext.provideUsersToNotify(destination);
 	}
 
@@ -145,9 +146,9 @@ public class RelinkUserProfileStep extends ProcessStep {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 
 				// relink them
-				IndexNode movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
+				Index movedNode = userProfile.getFileById(context.getFileNodeKeys().getPublic());
 				userProfile.getRoot().removeChild(movedNode);
-				IndexNode oldParent = userProfile.getFileById(oldParentKey);
+				FolderIndex oldParent = (FolderIndex) userProfile.getFileById(oldParentKey);
 				movedNode.setParent(oldParent);
 				oldParent.addChild(movedNode);
 

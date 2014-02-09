@@ -5,7 +5,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
@@ -28,13 +28,13 @@ public class File2MetaFileComponent extends SequentialProcess {
 		this(file, null, metaContext, protectionContext, networkManager);
 	}
 
-	public File2MetaFileComponent(IndexNode fileNode, IProvideMetaDocument metaContext,
+	public File2MetaFileComponent(Index fileNode, IProvideMetaDocument metaContext,
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		this(null, fileNode, metaContext, protectionContext, networkManager);
 	}
 
-	private File2MetaFileComponent(File file, IndexNode fileNode, IProvideMetaDocument metaContext,
+	private File2MetaFileComponent(File file, Index fileNode, IProvideMetaDocument metaContext,
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		File2MetaContext file2MetaContext = new File2MetaContext();
@@ -44,7 +44,7 @@ public class File2MetaFileComponent extends SequentialProcess {
 			add(new GetFileKeysStep(file, protectionContext, file2MetaContext, networkManager));
 		} else {
 			protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
-			file2MetaContext.provideKeyPair(fileNode.getKeyPair());
+			file2MetaContext.provideKeyPair(fileNode.getFileKeys());
 		}
 
 		add(new GetMetaDocumentStep(file2MetaContext, metaContext, networkManager.getDataManager()));

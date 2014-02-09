@@ -9,7 +9,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.IndexNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -30,7 +30,7 @@ public class CreateFolderStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		IndexNode file = context.getFileNode();
+		Index file = context.getIndex();
 		logger.debug("Try creating a new folder on disk: " + file.getName());
 		try {
 			// create the folder on disk
@@ -55,7 +55,7 @@ public class CreateFolderStep extends ProcessStep {
 		try {
 			if (!existedBefore) {
 				FileManager fileManager = networkManager.getSession().getFileManager();
-				File folder = fileManager.getPath(context.getFileNode()).toFile();
+				File folder = fileManager.getPath(context.getIndex()).toFile();
 				folder.delete();
 			}
 		} catch (Exception e) {
