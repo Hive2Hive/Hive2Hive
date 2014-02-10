@@ -2,7 +2,7 @@ package org.hive2hive.core.test;
 
 import org.hive2hive.core.test.file.FileManagerTest;
 import org.hive2hive.core.test.file.FileSynchronizerTest;
-import org.hive2hive.core.test.model.FileIndexTest;
+import org.hive2hive.core.test.model.IndexTest;
 import org.hive2hive.core.test.model.MetaFileTest;
 import org.hive2hive.core.test.model.UserCredentialsTest;
 import org.hive2hive.core.test.network.ConnectionTest;
@@ -95,7 +95,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		FileManagerTest.class, FileSynchronizerTest.class,
 
 		// Model
-		FileIndexTest.class, UserCredentialsTest.class, MetaFileTest.class
+		IndexTest.class, UserCredentialsTest.class, MetaFileTest.class
 
 })
 public class H2HTestSuite {

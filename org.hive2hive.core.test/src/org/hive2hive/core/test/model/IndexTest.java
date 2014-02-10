@@ -20,7 +20,7 @@ import org.junit.Test;
  * 
  * @author Nico, Seppi
  */
-public class FileIndexTest extends H2HJUnitTest {
+public class IndexTest extends H2HJUnitTest {
 
 	private FolderIndex root;
 	private Index child1;
@@ -31,7 +31,7 @@ public class FileIndexTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = FileIndexTest.class;
+		testClass = IndexTest.class;
 		beforeClass();
 	}
 
