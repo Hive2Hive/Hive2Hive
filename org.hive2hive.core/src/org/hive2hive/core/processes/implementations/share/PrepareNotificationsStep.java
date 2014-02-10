@@ -31,16 +31,13 @@ public class PrepareNotificationsStep extends ProcessStep {
 		FolderIndex fileNode = context.getFileTreeNode();
 
 		// create a subtree containing all children
-		FolderIndex sharedNode;
-		if (context.getPermissionType() == PermissionType.READ) {
-			sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());
-		} else {
-			sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());
+		FolderIndex sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());
+		sharedNode.getChildren().addAll(fileNode.getChildren());
+
+		// if the friend receives write access, he gets the protection key
+		if (context.getPermissionType() == PermissionType.WRITE) {
 			sharedNode.setProtectionKeys(context.consumeNewProtectionKeys());
 		}
-
-		sharedNode.setName(fileNode.getName());
-		sharedNode.getChildren().addAll(fileNode.getChildren());
 
 		// notify only the new user
 		Set<String> friend = new HashSet<String>(1);
