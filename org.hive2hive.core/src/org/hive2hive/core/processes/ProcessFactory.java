@@ -161,11 +161,8 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		Path root = networkManager.getSession().getFileManager().getRoot();
-		boolean inRoot = root.equals(file.toPath().getParent());
-
 		DataManager dataManager = networkManager.getDataManager();
-		AddFileProcessContext context = new AddFileProcessContext(file, inRoot);
+		AddFileProcessContext context = new AddFileProcessContext(file);
 
 		H2HSession session = networkManager.getSession();
 
@@ -187,11 +184,8 @@ public final class ProcessFactory {
 			throw new IllegalArgumentException("A folder can have one version only");
 		}
 
-		Path root = networkManager.getSession().getFileManager().getRoot();
-		boolean inRoot = root.equals(file.toPath().getParent());
-
 		DataManager dataManager = networkManager.getDataManager();
-		UpdateFileProcessContext context = new UpdateFileProcessContext(file, inRoot);
+		UpdateFileProcessContext context = new UpdateFileProcessContext(file);
 
 		H2HSession session = networkManager.getSession();
 
@@ -238,11 +232,8 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		File root = networkManager.getSession().getFileManager().getRoot().toFile();
-		boolean fileInRoot = root.equals(file.getParentFile());
-
 		DataManager dataManager = networkManager.getDataManager();
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory(), fileInRoot);
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();

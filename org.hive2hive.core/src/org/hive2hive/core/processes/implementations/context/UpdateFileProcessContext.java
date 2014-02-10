@@ -20,8 +20,8 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 	private KeyPair chunksToDeleteProtectionKeys;
 	private KeyPair parentFileKey;
 
-	public UpdateFileProcessContext(File file, boolean inRoot) {
-		super(file, inRoot);
+	public UpdateFileProcessContext(File file) {
+		super(file);
 	}
 
 	@Override
