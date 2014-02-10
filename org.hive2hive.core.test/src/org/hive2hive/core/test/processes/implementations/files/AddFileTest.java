@@ -16,7 +16,6 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -162,25 +161,16 @@ public class AddFileTest extends H2HJUnitTest {
 		// verify the meta document
 		KeyPair metaFileKeys = node.getFileKeys();
 		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaFileKeys);
+		Assert.assertNotNull(metaDocument);
 		if (originalFile.isFile()) {
 			// get the meta file with the keys (decrypt it)
 			MetaFile metaFile = (MetaFile) metaDocument;
-			Assert.assertNotNull(metaFile);
 			Assert.assertEquals(1, metaFile.getVersions().size());
 			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkKeys().size());
-		} else {
-			// get meta folder
-			MetaFolder metaFolder = (MetaFolder) metaDocument;
-			Assert.assertNotNull(metaFolder);
-			Assert.assertEquals(originalFile.list().length, metaFolder.getChildKeys().size());
 		}
 
-		// TODO wait for the download to finish
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// ignore
-		}
+		// download the file
+		UseCaseTestUtil.downloadFile(network.get(1), node.getFilePublicKey());
 
 		// verify the file after downloadig it
 		Path relative = uploaderRoot.toPath().relativize(originalFile.toPath());

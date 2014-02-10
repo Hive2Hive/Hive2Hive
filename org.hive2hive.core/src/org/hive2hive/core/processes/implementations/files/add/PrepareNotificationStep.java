@@ -45,7 +45,7 @@ public class PrepareNotificationStep extends ProcessStep {
 			// TODO: add the user's list to the index as well
 			// MetaFolder metaFolder = (MetaFolder) context.consumeParentMetaDocument();
 			// Set<String> userList = metaFolder.getUserList();
-			// context.provideUsersToNotify(userList);
+			context.provideUsersToNotify(new HashSet<String>(0));
 		}
 	}
 }

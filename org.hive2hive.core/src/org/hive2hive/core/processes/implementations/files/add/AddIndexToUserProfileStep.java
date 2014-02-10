@@ -48,22 +48,16 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		logger.debug("Start updating the user profile where adding the file: " + context.getFile().getName());
-
-		// update the user profile by adding the new file
-		UserProfile userProfile = null;
-		try {
-			userProfile = profileManager.getUserProfile(getID(), true);
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException(e);
-		}
-
 		// first generate the new key pair for the meta file (which are stored to the context)
+		logger.debug("Create file keys for the new file: " + context.getFile().getName());
 		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		context.setNewMetaKeyPair(metaKeyPair);
 
 		File file = context.getFile();
+		logger.debug("Start updating the user profile where adding the file: " + file.getName());
 		try {
+			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
+
 			// create a file tree node in the user profile
 			// find the parent node using the relative path to navigate there
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(),
@@ -71,23 +65,18 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			parentKey = parentNode.getFilePublicKey();
 
 			// use the file keys generated above is stored
-			Index newNode;
 			if (file.isDirectory()) {
-				newNode = new FolderIndex(parentNode, metaKeyPair, file.getName());
+				context.setNewIndex(new FolderIndex(parentNode, metaKeyPair, file.getName()));
 			} else {
 				byte[] md5 = EncryptionUtil.generateMD5Hash(file);
-				newNode = new FileIndex(parentNode, metaKeyPair, file.getName(), md5);
+				context.setNewIndex(new FileIndex(parentNode, metaKeyPair, file.getName(), md5));
 			}
 
-			// for later usage
-			context.setNewIndex(newNode);
+			// put the updated user profile
+			profileManager.readyToPut(userProfile, getID());
 		} catch (IOException e) {
 			throw new ProcessExecutionException("Could not add file to the user profile.", e);
-		}
-
-		try {
-			profileManager.readyToPut(userProfile, getID());
-		} catch (PutFailedException e) {
+		} catch (PutFailedException | GetFailedException e) {
 			throw new ProcessExecutionException(e);
 		}
 	}

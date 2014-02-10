@@ -12,8 +12,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
@@ -87,11 +85,6 @@ public class MoveFileTest extends H2HJUnitTest {
 		Index fileNode = userProfile.getFileByPath(destination, new FileManager(root.toPath()));
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(folder.getName(), fileNode.getParent().getName());
-
-		MetaDocument parentMetaDocument = UseCaseTestUtil.getMetaDocument(client, fileNode.getParent()
-				.getFileKeys());
-		MetaFolder parentFolder = (MetaFolder) parentMetaDocument;
-		Assert.assertEquals(1, parentFolder.getChildKeys().size());
 	}
 
 	@Test
@@ -163,18 +156,6 @@ public class MoveFileTest extends H2HJUnitTest {
 		Index fileNode = userProfile.getFileByPath(destination, fileManager);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(destFolder.getName(), fileNode.getParent().getName());
-
-		// check that the new meta document has the file
-		MetaDocument destParentMetaDocument = UseCaseTestUtil.getMetaDocument(client, fileNode.getParent()
-				.getFileKeys());
-		MetaFolder parentFolder = (MetaFolder) destParentMetaDocument;
-		Assert.assertEquals(1, parentFolder.getChildKeys().size());
-
-		// check that the old meta document does not contain the file anymore
-		MetaDocument sourceParentMetaDocument = UseCaseTestUtil.getMetaDocument(client, userProfile
-				.getFileByPath(sourceFolder, fileManager).getFileKeys());
-		parentFolder = (MetaFolder) sourceParentMetaDocument;
-		Assert.assertEquals(0, parentFolder.getChildKeys().size());
 	}
 
 	@Test
