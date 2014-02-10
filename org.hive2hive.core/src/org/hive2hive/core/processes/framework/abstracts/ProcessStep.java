@@ -3,6 +3,13 @@ package org.hive2hive.core.processes.framework.abstracts;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
+/**
+ * Abstract base class for all (leaf) process components that represent a specific operation and do not
+ * contain further components.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class ProcessStep extends ProcessComponent {
 
 	@Override

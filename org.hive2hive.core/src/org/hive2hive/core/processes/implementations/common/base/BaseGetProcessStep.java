@@ -8,6 +8,12 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
+/**
+ * Abstract class for {@link ProcessStep}s that intend to GET content from the DHT.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class BaseGetProcessStep extends ProcessStep {
 
 	protected final IDataManager dataManager;

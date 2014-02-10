@@ -16,7 +16,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
  * 
  */
 @Deprecated
-// Nico: Still used?
+// TODO Nico: Still used?
 public class ProcessManager {
 	private Map<String, IProcessComponent> attachedProcesses;
 

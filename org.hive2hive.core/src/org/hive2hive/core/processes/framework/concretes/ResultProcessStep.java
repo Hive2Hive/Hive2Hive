@@ -7,14 +7,21 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 
+/**
+ * A process step that intends to return a result.
+ * 
+ * @author Christian
+ * 
+ * @param <T> The type of the result object.
+ */
 public abstract class ResultProcessStep<T> extends ProcessStep implements IResultProcessComponent<T> {
 
 	private final List<IProcessResultListener<T>> listener = new ArrayList<IProcessResultListener<T>>();
-	
+
 	protected void notifyResultComputed(T result) {
 		for (IProcessResultListener<T> listener : this.listener) {
 			listener.onResultReady(result);
-		}		
+		}
 	}
 
 	@Override

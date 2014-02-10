@@ -13,9 +13,27 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.Process;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
+import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
+/**
+ * A process component decorator that executes, and if necessary rollbacks, the wrapped component in an
+ * asynchronous manner.</br>
+ * <b>Note:</b></br>
+ * An asynchronous component is executed in an own thread and therefore independent of all other
+ * components in a process composite. </br>
+ * If existing, the parent container component of an {@link AsyncComponent} is responsible to await the result
+ * of the asynchronous component. Therefore, the usage of {@link SequentialProcess} is highly recommended.
+ * </br>
+ * In case of a failure within the asynchronous component, it rollbacks
+ * itself in its own thread and returns the resulting {@link RollbackReason}. In case the
+ * {@link AsyncComponent} needs to be cancelled due to a failure in another place in the whole composite, the
+ * wrapped component (if necessary) is rolled back in the detecting thread.
+ * 
+ * @author Christian
+ * 
+ */
 public class AsyncComponent extends ProcessDecorator implements Callable<RollbackReason> {
 
 	// TODO this class could hold a static thread pool to limit and manage all
@@ -66,7 +84,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 				componentSucceeded = true;
 				componentFailed = false;
 				result = null;
-				
+
 				succeed();
 			}
 
@@ -75,7 +93,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 				componentSucceeded = false;
 				componentFailed = true;
 				result = reason;
-				
+
 				if (getParent() == null) {
 					try {
 						cancel(reason);
@@ -120,12 +138,11 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 		try {
 			decoratedComponent.cancel(reason);
 		} catch (InvalidProcessStateException e) {
-			if (e.getCurrentState() == ProcessState.FAILED){
+			if (e.getCurrentState() == ProcessState.FAILED) {
 				// async componend rolled itself back already
-//				logger.debug("AsyncComponent already rolled back.");
+				// logger.debug("AsyncComponent already rolled back.");
 				return;
-			}
-			else {
+			} else {
 				throw e;
 			}
 		}

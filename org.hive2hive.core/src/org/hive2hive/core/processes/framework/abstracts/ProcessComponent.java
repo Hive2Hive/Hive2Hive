@@ -13,6 +13,13 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
+/**
+ * Abstract base class for all process components. Keeps track of a components most essential properties and
+ * functionalities, such as state, progess and listeners.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class ProcessComponent implements IProcessComponent {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ProcessComponent.class);
@@ -97,16 +104,45 @@ public abstract class ProcessComponent implements IProcessComponent {
 		fail(reason);
 	}
 
+	/**
+	 * Template method responsible for the {@link ProcessComponent} execution.</br>
+	 * If a failure is detected, a {@link ProcessExecutionException} is thrown and the component and its
+	 * enclosing process component composite, if any, get cancelled and rolled back.
+	 * 
+	 * @throws InvalidProcessStateException If the component is in an invalid state for this operation.
+	 * @throws ProcessExecutionException If a failure is detected during the execution.
+	 */
 	protected abstract void doExecute() throws InvalidProcessStateException, ProcessExecutionException;
 
+	/**
+	 * Template method responsible for the {@link ProcessComponent} pausing.
+	 */
 	protected abstract void doPause();
 
+	/**
+	 * Template method responsible for the {@link ProcessComponent} execution resume.
+	 * 
+	 * @throws InvalidProcessStateException If the component is in an invalid state for this operation.
+	 */
 	protected abstract void doResumeExecution() throws InvalidProcessStateException;
 
+	/**
+	 * Template method responsible for the {@link ProcessComponent} rollback resume.
+	 */
 	protected abstract void doResumeRollback();
 
+	/**
+	 * Template method responsible for the {@link ProcessComponent} rollback.
+	 * 
+	 * @param reason The reason of the cancellation or fail.
+	 * @throws InvalidProcessStateException If the component is in an invalid state for this operation.
+	 */
 	protected abstract void doRollback(RollbackReason reason) throws InvalidProcessStateException;
 
+	/**
+	 * If in {@link ProcessState#RUNNING}, this {@link ProcessComponent} succeeds, changes its state to
+	 * {@link ProcessState#SUCCEEDED} and notifies all interested listeners.
+	 */
 	protected void succeed() {
 		if (state == ProcessState.RUNNING) {
 			state = ProcessState.SUCCEEDED;
@@ -114,6 +150,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 	}
 
+	/**
+	 * If in {@link ProcessState#ROLLBACKING}, this {@link ProcessComponent} succeeds, changes its state to
+	 * {@link ProcessState#FAILED} and notifies all interested listeners.
+	 */
 	protected void fail(RollbackReason reason) {
 		if (state == ProcessState.ROLLBACKING) {
 			state = ProcessState.FAILED;
@@ -152,6 +192,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 		this.listener.remove(listener);
 	}
 
+	/**
+	 * Getter for the {@link ProcessComponent}'s {@link IProcessComponentListener}s.
+	 * @return The {@link IProcessComponentListener} attached to this {@link ProcessComponent}.
+	 */
 	public List<IProcessComponentListener> getListener() {
 		return listener; // TODO copy before return?
 	}

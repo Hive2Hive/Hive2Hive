@@ -2,6 +2,12 @@ package org.hive2hive.core.processes.framework.abstracts;
 
 import java.util.List;
 
+/**
+ * Abstract base class for all composite (container) process components that contain other process components.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class Process extends ProcessComponent {
 
 	public final void add(ProcessComponent component) {

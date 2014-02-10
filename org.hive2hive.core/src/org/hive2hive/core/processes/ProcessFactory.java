@@ -80,6 +80,13 @@ import org.hive2hive.core.processes.implementations.share.VerifyFriendId;
 import org.hive2hive.core.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
 
+/**
+ * Factory class for the creation of specific process components and composites that represent basic
+ * operations of the Hive2Hive project.
+ * 
+ * @author Christian, Nico
+ * 
+ */
 public final class ProcessFactory {
 
 	private static ProcessFactory instance;
@@ -94,6 +101,15 @@ public final class ProcessFactory {
 		// singleton
 	}
 
+	/**
+	 * Creates and returns a registration process.
+	 * 
+	 * @param credentials The credentials of the user to be registered.
+	 * @param networkManager The network manager / node on which the registration operations should be
+	 *            executed.
+	 * @return A registration process.
+	 * @throws NoPeerConnectionException
+	 */
 	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		UserProfile profile = new UserProfile(credentials.getUserId());
@@ -111,6 +127,15 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	/**
+	 * Creates and returns a login process.
+	 * 
+	 * @param credentials The credentials of the user to be logged in.
+	 * @param params The session parameters that shall be used.
+	 * @param networkManager The network manager / node on which the login operations should be executed.
+	 * @return A login process.
+	 * @throws NoPeerConnectionException
+	 */
 	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
@@ -140,6 +165,14 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	/**
+	 * Creates and returns a logout process.
+	 * 
+	 * @param networkManager The network manager / node on which the logout operations should be executed.
+	 * @return A logout process.
+	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException
+	 */
 	public IProcessComponent createLogoutProcess(NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
 		DataManager dataManager = networkManager.getDataManager();
@@ -294,6 +327,12 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	/**
+	 * Creates and returns a file list process.
+	 * 
+	 * @param networkManager The network manager / node on which the file list operations should be executed.
+	 * @return A file list process.
+	 */
 	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
 		GetFileListStep listStep = new GetFileListStep(networkManager);
 		return new AsyncResultComponent<List<Path>>(listStep);

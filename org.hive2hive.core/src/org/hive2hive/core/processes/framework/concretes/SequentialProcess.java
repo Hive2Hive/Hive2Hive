@@ -21,6 +21,14 @@ import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
+/**
+ * A process component container that executes and rollbacks its process components in a sequential manner. In presence
+ * of asynchronous child components, this container waits for all asynchronous operations to complete before
+ * continuing.
+ * 
+ * @author Christian
+ * 
+ */
 public class SequentialProcess extends Process {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SequentialProcess.class);
@@ -155,10 +163,10 @@ public class SequentialProcess extends Process {
 
 	private static void checkAsyncComponentsForFail(List<Future<RollbackReason>> handles)
 			throws ProcessExecutionException {
-		
+
 		if (handles.isEmpty())
 			return;
-		
+
 		logger.debug("Checking async components for fails.");
 
 		for (Future<RollbackReason> handle : handles) {

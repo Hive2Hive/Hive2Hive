@@ -4,6 +4,13 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 
+/**
+ * Decorator for asynchronous components that intend to return a result.
+ * 
+ * @author Christian
+ * 
+ * @param <T>
+ */
 public class AsyncResultComponent<T> extends AsyncComponent implements IResultProcessComponent<T> {
 
 	public AsyncResultComponent(ProcessComponent decoratedComponent) {
@@ -18,7 +25,7 @@ public class AsyncResultComponent<T> extends AsyncComponent implements IResultPr
 
 	@Override
 	public void attachListener(IProcessResultListener<T> listener) {
-		
+
 		((IResultProcessComponent<T>) decoratedComponent).attachListener(listener);
 	}
 

@@ -13,6 +13,12 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
+/**
+ * Abstract class for {@link ProcessStep}s that intend to PUT content to the DHT.
+ * 
+ * @author Christian
+ * 
+ */
 public abstract class BasePutProcessStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
