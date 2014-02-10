@@ -12,7 +12,9 @@ import java.util.Map;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -116,7 +118,7 @@ public class FileRecursionUtil {
 	}
 
 	/**
-	 * This is a workaround to delete files when a {@link FileTreeNode} is already existent. Since the node is
+	 * This is a workaround to delete files when a {@link FolderIndex} is already existent. Since the node is
 	 * already here, the deletion could be speed up because it must not be looked up in the user profile.
 	 * 
 	 * @param files
@@ -126,12 +128,12 @@ public class FileRecursionUtil {
 	 * @throws NoPeerConnectionException
 	 */
 	@Deprecated
-	public static ProcessComponent buildDeletionProcessFromNodelist(List<FileTreeNode> files,
+	public static ProcessComponent buildDeletionProcessFromNodelist(List<Index> files,
 			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		List<Path> filesToDelete = new ArrayList<Path>();
 		FileManager fileManager = networkManager.getSession().getFileManager();
-		for (FileTreeNode fileTreeNode : files) {
-			filesToDelete.add(fileManager.getPath(fileTreeNode));
+		for (Index documentIndex : files) {
+			filesToDelete.add(fileManager.getPath(documentIndex));
 		}
 
 		return buildDeletionProcess(filesToDelete, networkManager);
@@ -145,36 +147,36 @@ public class FileRecursionUtil {
 	 * @return the root process component containing all sub-processes (and sub-tasks)
 	 * @throws NoSessionException
 	 */
-	public static ProcessComponent buildDownloadProcess(List<FileTreeNode> files,
-			NetworkManager networkManager) throws NoSessionException {
+	public static ProcessComponent buildDownloadProcess(List<Index> files, NetworkManager networkManager)
+			throws NoSessionException {
 		// the root process, where everything runs in parallel (only async children are added)
 		SequentialProcess rootProcess = new SequentialProcess();
 
 		// build a flat map of the folders to download (such that O(1) for each lookup)
-		Map<FileTreeNode, SequentialProcess> folderMap = new HashMap<FileTreeNode, SequentialProcess>();
-		Map<FileTreeNode, AsyncComponent> fileMap = new HashMap<FileTreeNode, AsyncComponent>();
+		Map<FolderIndex, SequentialProcess> folderMap = new HashMap<FolderIndex, SequentialProcess>();
+		Map<FileIndex, AsyncComponent> fileMap = new HashMap<FileIndex, AsyncComponent>();
 
-		for (FileTreeNode file : files) {
-			PublicKey fileKey = file.getFileKey();
+		for (Index file : files) {
+			PublicKey fileKey = file.getFilePublicKey();
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey,
 					networkManager);
 			if (file.isFolder()) {
 				// when a directory, the process may have multiple children, thus we need a sequential process
 				SequentialProcess folderProcess = new SequentialProcess();
 				folderProcess.add(downloadProcess);
-				folderMap.put(file, folderProcess);
+				folderMap.put((FolderIndex) file, folderProcess);
 			} else {
 				// when a file, the process can run in parallel with all siblings (done in next step)
-				fileMap.put(file, new AsyncComponent(downloadProcess));
+				fileMap.put((FileIndex) file, new AsyncComponent(downloadProcess));
 			}
 		}
 
 		// find children with same parents and make them run in parallel
 		// idea: iterate through all children and search for parent in other map. If not there, they can be
 		// added to the root process anyway
-		for (FileTreeNode file : fileMap.keySet()) {
+		for (FileIndex file : fileMap.keySet()) {
 			AsyncComponent fileProcess = fileMap.get(file);
-			FileTreeNode parent = file.getParent();
+			Index parent = file.getParent();
 			if (parent == null) {
 				// file is in root, thus we can add it to the root process
 				rootProcess.add(fileProcess);
@@ -189,11 +191,11 @@ public class FileRecursionUtil {
 		}
 
 		// files and folder are linked. We now link the folders with other folders
-		for (FileTreeNode folder : folderMap.keySet()) {
+		for (FolderIndex folder : folderMap.keySet()) {
 			SequentialProcess folderProcess = folderMap.get(folder);
 			// In addition, we can make this process run asynchronous because it does not affect the siblings
 			AsyncComponent asyncFolderProcess = new AsyncComponent(folderProcess);
-			FileTreeNode parent = folder.getParent();
+			Index parent = folder.getParent();
 			if (parent == null) {
 				// file is in root, thus we can add it to the root process.
 				rootProcess.add(asyncFolderProcess);

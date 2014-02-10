@@ -18,6 +18,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -58,7 +59,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		}
 
 		// support to store the file on another location than default (used for recover)
-		destination = fileManager.getPath(context.getFileNode()).toFile();
+		destination = fileManager.getPath(context.getIndex()).toFile();
 		if (context.getDestination() != null) {
 			destination = context.getDestination();
 		}
@@ -107,7 +108,9 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		// verify before downloading
 		if (destination != null && destination.exists()) {
 			try {
-				if (H2HEncryptionUtil.compareMD5(destination, context.getFileNode().getMD5())) {
+				// can be cast because only files are downloaded
+				FileIndex fileIndex = (FileIndex) context.getIndex();
+				if (H2HEncryptionUtil.compareMD5(destination, fileIndex.getMD5())) {
 					return false;
 				} else {
 					logger.warn("File already exists on disk, it will be overwritten");

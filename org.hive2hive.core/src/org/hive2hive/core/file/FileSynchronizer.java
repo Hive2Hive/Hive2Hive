@@ -10,11 +10,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
@@ -32,7 +33,7 @@ public class FileSynchronizer {
 	private final FileManager fileManager;
 	private final UserProfile userProfile;
 
-	private final FileTreeNode profileRootNode;
+	private final FolderIndex profileRootNode;
 	private final Map<String, byte[]> before;
 	private Map<String, byte[]> now;
 
@@ -59,8 +60,8 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<FileTreeNode> getDeletedLocally() {
-		List<FileTreeNode> deletedLocally = new ArrayList<FileTreeNode>();
+	public List<Index> getDeletedLocally() {
+		List<Index> deletedLocally = new ArrayList<Index>();
 
 		for (String path : before.keySet()) {
 			if (now.containsKey(path)) {
@@ -68,13 +69,19 @@ public class FileSynchronizer {
 				continue;
 			} else {
 				// test whether it is in the user profile
-				FileTreeNode node = userProfile.getFileByPath(Paths.get(path));
+				Index node = userProfile.getFileByPath(Paths.get(path));
 				if (node != null) {
 					// file is still in user profile
-					if (H2HEncryptionUtil.compareMD5(node.getMD5(), before.get(path))) {
-						// file has not been modified remotely, delete it
-						logger.debug("File '" + path + "' has been deleted locally during absence");
+					if (node.isFolder()) {
 						deletedLocally.add(node);
+					} else {
+						// check the MD5 value to not delete a modified file
+						FileIndex fileNode = (FileIndex) node;
+						if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))) {
+							// file has not been modified remotely, delete it
+							logger.debug("File '" + path + "' has been deleted locally during absence");
+							deletedLocally.add(node);
+						}
 					}
 				}
 			}
@@ -125,7 +132,7 @@ public class FileSynchronizer {
 		for (String p : now.keySet()) {
 			Path path = Paths.get(p);
 			// test whether it is in the user profile
-			FileTreeNode node = userProfile.getFileByPath(path);
+			Index node = userProfile.getFileByPath(path);
 			if (node == null) {
 				// not in profile --> it has been added locally
 				logger.debug("File '" + p + "' has been added locally during absence");
@@ -144,25 +151,20 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<FileTreeNode> getAddedRemotely() {
-		List<FileTreeNode> addedRemotely = new ArrayList<FileTreeNode>();
+	public List<Index> getAddedRemotely() {
+		List<Index> addedRemotely = new ArrayList<Index>();
 
 		// visit all files in the tree and compare to disk
-		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
-		fileStack.addAll(profileRootNode.getChildren());
-		while (!fileStack.isEmpty()) {
-			FileTreeNode top = fileStack.pop();
-			if (now.containsKey(top.getFullPath().toString())) {
-				// was here before and is still here --> nothing to add
-				logger.trace("File '" + top.getFullPath() + "' was already here");
-			} else {
-				logger.debug("File '" + top.getFullPath() + "' has been added remotely during absence");
-				addedRemotely.add(top);
-			}
+		List<Index> indexList = Index.getIndexList(profileRootNode);
+		indexList.remove(profileRootNode);
 
-			// add children to stack
-			for (FileTreeNode child : top.getChildren()) {
-				fileStack.push(child);
+		for (Index index : indexList) {
+			if (now.containsKey(index.getFullPath().toString())) {
+				// was here before and is still here --> nothing to add
+				logger.trace("File '" + index.getFullPath() + "' was already here");
+			} else {
+				logger.debug("File '" + index.getFullPath() + "' has been added remotely during absence");
+				addedRemotely.add(index);
 			}
 		}
 
@@ -173,7 +175,7 @@ public class FileSynchronizer {
 	}
 
 	/**
-	 * Returns a list of files that already exist but have been modified by the client while he was offline.
+	 * Returns a list of files that already existed but have been modified by the client while he was offline.
 	 * 
 	 * @return
 	 */
@@ -191,11 +193,14 @@ public class FileSynchronizer {
 				continue;
 			}
 
-			FileTreeNode fileNode = userProfile.getFileByPath(Paths.get(path));
-			if (fileNode == null) {
+			Index index = userProfile.getFileByPath(Paths.get(path));
+			if (index == null || index.isFolder()) {
 				// file not found --> skip, this is not the task of this method
+				// file node is a folder --> cannot compare the modification
 				continue;
 			}
+
+			FileIndex fileNode = (FileIndex) index;
 
 			// has been modified --> check if profile has same md5 as 'before'. If not, there are three
 			// different versions. Thus, the profile wins.
@@ -217,29 +222,29 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<FileTreeNode> getUpdatedRemotely() {
-		List<FileTreeNode> updatedRemotely = new ArrayList<FileTreeNode>();
+	public List<FileIndex> getUpdatedRemotely() {
+		List<FileIndex> updatedRemotely = new ArrayList<FileIndex>();
 
 		// visit all files in the tree and compare to disk
-		Stack<FileTreeNode> fileStack = new Stack<FileTreeNode>();
-		fileStack.addAll(profileRootNode.getChildren());
-		while (!fileStack.isEmpty()) {
-			FileTreeNode top = fileStack.pop();
-			if (before.containsKey(top.getFullPath().toString())
-					&& now.containsKey(top.getFullPath().toString())) {
-				// was here before and is still here
-				if (!H2HEncryptionUtil.compareMD5(top.getMD5(), now.get(top.getFullPath().toString()))
-						&& !H2HEncryptionUtil.compareMD5(top.getMD5(),
-								before.get(top.getFullPath().toString()))) {
-					// different md5 hashes than 'before' and 'now'
-					logger.debug("File '" + top.getFullPath() + "' has been updated remotely during absence");
-					updatedRemotely.add(top);
-				}
+		List<Index> indexList = Index.getIndexList(profileRootNode);
+		for (Index index : indexList) {
+			if (index.isFolder()) {
+				// folder cannot be modified
+				continue;
 			}
 
-			// add children to stack
-			for (FileTreeNode child : top.getChildren()) {
-				fileStack.push(child);
+			FileIndex fileIndex = (FileIndex) index;
+			if (before.containsKey(fileIndex.getFullPath().toString())
+					&& now.containsKey(fileIndex.getFullPath().toString())) {
+				if (!H2HEncryptionUtil.compareMD5(fileIndex.getMD5(),
+						now.get(fileIndex.getFullPath().toString()))
+						&& !H2HEncryptionUtil.compareMD5(fileIndex.getMD5(),
+								before.get(fileIndex.getFullPath().toString()))) {
+					// different md5 hashes than 'before' and 'now'
+					logger.debug("File '" + fileIndex.getFullPath()
+							+ "' has been updated remotely during absence");
+					updatedRemotely.add(fileIndex);
+				}
 			}
 		}
 
@@ -249,15 +254,15 @@ public class FileSynchronizer {
 	}
 
 	/**
-	 * Sorts a list of {@link FileTreeNode} in pre-order style
+	 * Sorts a list of {@link FolderIndex} in pre-order style
 	 * 
 	 * @param deletedLocally
 	 */
-	private void sortNodesPreorder(List<FileTreeNode> fileList) {
-		Collections.sort(fileList, new Comparator<FileTreeNode>() {
+	private void sortNodesPreorder(List<Index> fileList) {
+		Collections.sort(fileList, new Comparator<Index>() {
 
 			@Override
-			public int compare(FileTreeNode node1, FileTreeNode node2) {
+			public int compare(Index node1, Index node2) {
 				return node1.getFullPath().toString().compareTo(node2.getFullPath().toString());
 			}
 		});

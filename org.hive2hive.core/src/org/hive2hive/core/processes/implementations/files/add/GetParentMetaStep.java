@@ -14,7 +14,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
@@ -84,8 +84,8 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 		} catch (GetFailedException e) {
 			throw new ProcessExecutionException("Could not get the user profile.", e);
 		}
-		FileTreeNode parentNode = userProfile.getFileByPath(parent, context.getH2HSession().getFileManager());
 
+		Index parentNode = userProfile.getFileByPath(parent, context.getH2HSession().getFileManager());
 		if (parentNode == null) {
 			throw new ProcessExecutionException("Parent file is not in the user profile.");
 		} else if (parentNode.getProtectionKeys() == null) {
@@ -93,8 +93,8 @@ public class GetParentMetaStep extends BaseGetProcessStep {
 		}
 
 		context.provideProtectionKeys(parentNode.getProtectionKeys());
-		parentsKeyPair = parentNode.getKeyPair();
-		NetworkContent content = get(parentNode.getKeyPair().getPublic(), H2HConstants.META_DOCUMENT);
+		parentsKeyPair = parentNode.getFileKeys();
+		NetworkContent content = get(parentNode.getFilePublicKey(), H2HConstants.META_DOCUMENT);
 		evaluateResult(content);
 	}
 

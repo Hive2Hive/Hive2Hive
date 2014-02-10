@@ -106,7 +106,8 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasResultArrived());
 
-		assertEquals(1, listener.getResult().size());
+		// root does not count as a file
+		assertEquals(0, listener.getResult().size());
 
 		// TODO get sure about what a digest should actually deliver and adapt asserts below
 		// // add child1 to the network

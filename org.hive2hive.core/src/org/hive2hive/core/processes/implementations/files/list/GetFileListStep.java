@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -40,8 +40,8 @@ public class GetFileListStep extends ResultProcessStep<List<Path>> {
 		}
 
 		// build the digest recursively
-		FileTreeNode root = profile.getRoot();
-		List<Path> digest = FileTreeNode.getFilePathList(root);
+		FolderIndex root = profile.getRoot();
+		List<Path> digest = FolderIndex.getFilePathList(root);
 
 		// remove the root
 		digest.remove(root.getFullPath());

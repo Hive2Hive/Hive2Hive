@@ -7,7 +7,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -59,13 +59,13 @@ public class GetFileKeysStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		FileTreeNode fileNode = profile.getFileByPath(file, session.getFileManager());
+		Index fileNode = profile.getFileByPath(file, session.getFileManager());
 		if (fileNode == null) {
 			throw new ProcessExecutionException("File does not exist in user profile. Consider uploading a new file.");
 		}
 
 		// set the corresponding content protection keys
 		protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
-		keyPairContext.provideKeyPair(fileNode.getKeyPair());
+		keyPairContext.provideKeyPair(fileNode.getFileKeys());
 	}
 }

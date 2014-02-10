@@ -4,7 +4,7 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.Set;
 
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
@@ -27,7 +27,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
-	private FileTreeNode fileTreeNode;
+	private FolderIndex folderIndex;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 
@@ -54,12 +54,12 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		return newProtectionKeys;
 	}
 
-	public void setFileTreeNode(FileTreeNode fileTreeNode) {
-		this.fileTreeNode = fileTreeNode;
+	public void setFileTreeNode(FolderIndex folderIndex) {
+		this.folderIndex = folderIndex;
 	}
 
-	public FileTreeNode getFileTreeNode() {
-		return fileTreeNode;
+	public FolderIndex getFileTreeNode() {
+		return folderIndex;
 	}
 
 	public KeyPair consumeOldProtectionKeys() {

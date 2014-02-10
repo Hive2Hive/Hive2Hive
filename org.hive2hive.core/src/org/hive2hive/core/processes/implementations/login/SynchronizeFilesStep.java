@@ -12,7 +12,7 @@ import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -102,7 +102,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		CountDownListener latchListener = new CountDownListener(latch);
 
 		// download remotely added/updated files
-		List<FileTreeNode> toDownload = new ArrayList<FileTreeNode>(synchronizer.getAddedRemotely());
+		List<Index> toDownload = new ArrayList<Index>(synchronizer.getAddedRemotely());
 		toDownload.addAll(synchronizer.getUpdatedRemotely());
 		ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(toDownload, networkManager);
 		downloadProcess.attachListener(latchListener);
@@ -123,7 +123,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		updateProcess.start();
 
 		// remove files from the DHT that have been deleted locally
-		List<FileTreeNode> toDeleteInDHT = synchronizer.getDeletedLocally();
+		List<Index> toDeleteInDHT = synchronizer.getDeletedLocally();
 		ProcessComponent deletionProcess = FileRecursionUtil.buildDeletionProcessFromNodelist(toDeleteInDHT,
 				networkManager);
 		deletionProcess.attachListener(latchListener);

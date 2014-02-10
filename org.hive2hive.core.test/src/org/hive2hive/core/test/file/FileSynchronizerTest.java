@@ -11,7 +11,9 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -26,12 +28,12 @@ import org.junit.Test;
 public class FileSynchronizerTest extends H2HJUnitTest {
 
 	private FileManager fileManager;
-	private FileTreeNode root;
-	private FileTreeNode node1f1;
-	private FileTreeNode node1f2;
-	private FileTreeNode node1d;
-	private FileTreeNode node2f;
-	private FileTreeNode node2d;
+	private FolderIndex root;
+	private FileIndex node1f1;
+	private FileIndex node1f2;
+	private FolderIndex node1d;
+	private FileIndex node2f;
+	private Index node2d;
 	private File fileRoot;
 	private File file1f1;
 	private File file1f2;
@@ -82,11 +84,11 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		userProfile = new UserProfile("test-user");
 		root = userProfile.getRoot();
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		node1f1 = new FileTreeNode(root, keys, "1f1", EncryptionUtil.generateMD5Hash(file1f1));
-		node1f2 = new FileTreeNode(root, keys, "1f2", EncryptionUtil.generateMD5Hash(file1f2));
-		node1d = new FileTreeNode(root, keys, "1d");
-		node2f = new FileTreeNode(node1d, keys, "2f", EncryptionUtil.generateMD5Hash(file2f));
-		node2d = new FileTreeNode(node1d, keys, "2d");
+		node1f1 = new FileIndex(root, keys, "1f1", EncryptionUtil.generateMD5Hash(file1f1));
+		node1f2 = new FileIndex(root, keys, "1f2", EncryptionUtil.generateMD5Hash(file1f2));
+		node1d = new FolderIndex(root, keys, "1d");
+		node2f = new FileIndex(node1d, keys, "2f", EncryptionUtil.generateMD5Hash(file2f));
+		node2d = new FolderIndex(node1d, keys, "2d");
 
 		// write the meta data now. Before creating the synchronizer, modify the file system as desired first.
 		fileManager.writePersistentMetaData();
@@ -103,7 +105,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Files.delete(file2d.toPath());
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		List<FileTreeNode> deletedLocally = fileSynchronizer.getDeletedLocally();
+		List<Index> deletedLocally = fileSynchronizer.getDeletedLocally();
 		Assert.assertEquals(2, deletedLocally.size());
 		Assert.assertTrue(deletedLocally.contains(node1f1));
 		Assert.assertTrue(deletedLocally.contains(node2d));
@@ -143,11 +145,11 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testAddedRemotely() throws IOException {
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		FileTreeNode node1f3 = new FileTreeNode(root, keys, "1f3", null);
-		FileTreeNode node2d2 = new FileTreeNode(node1d, keys, "2d2");
+		Index node1f3 = new FileIndex(root, keys, "1f3", null);
+		Index node2d2 = new FolderIndex(node1d, keys, "2d2");
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		List<FileTreeNode> addedRemotely = fileSynchronizer.getAddedRemotely();
+		List<Index> addedRemotely = fileSynchronizer.getAddedRemotely();
 		Assert.assertEquals(2, addedRemotely.size());
 		Assert.assertTrue(addedRemotely.contains(node1f3));
 		Assert.assertTrue(addedRemotely.contains(node2d2));
@@ -181,7 +183,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node2f.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		List<FileTreeNode> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
+		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
 		Assert.assertEquals(2, updatedRemotely.size());
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
 		Assert.assertTrue(updatedRemotely.contains(node2f));
@@ -225,14 +227,14 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		List<FileTreeNode> addedRemotely = fileSynchronizer.getAddedRemotely();
+		List<Index> addedRemotely = fileSynchronizer.getAddedRemotely();
 		Assert.assertEquals(1, addedRemotely.size());
 		Assert.assertTrue(addedRemotely.contains(node1f2));
 
-		List<FileTreeNode> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
+		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
 		Assert.assertTrue(updatedRemotely.isEmpty());
 
-		List<FileTreeNode> deletedLocally = fileSynchronizer.getDeletedLocally();
+		List<Index> deletedLocally = fileSynchronizer.getDeletedLocally();
 		Assert.assertTrue(deletedLocally.isEmpty());
 	}
 
@@ -246,7 +248,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		List<FileTreeNode> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
+		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
 		Assert.assertEquals(1, updatedRemotely.size());
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
 
@@ -261,7 +263,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		file1f2.delete();
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(fileManager, userProfile);
-		List<FileTreeNode> deletedRemotely = fileSynchronizer.getDeletedLocally();
+		List<Index> deletedRemotely = fileSynchronizer.getDeletedLocally();
 		Assert.assertTrue(deletedRemotely.isEmpty());
 
 		List<Path> updatedLocally = fileSynchronizer.getDeletedRemotely();

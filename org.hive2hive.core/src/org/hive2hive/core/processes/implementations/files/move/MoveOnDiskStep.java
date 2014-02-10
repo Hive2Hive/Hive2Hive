@@ -10,7 +10,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -90,11 +90,11 @@ public class MoveOnDiskStep extends ProcessStep {
 		UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 
 		// get the keys for the file to move
-		FileTreeNode fileNode = userProfile.getFileByPath(context.getSource(), fileManager);
+		Index fileNode = userProfile.getFileByPath(context.getSource(), fileManager);
 		if (fileNode == null) {
 			throw new IllegalStateException("File to move is not in user profile");
 		}
-		context.setFileNodeKeys(fileNode.getKeyPair());
+		context.setFileNodeKeys(fileNode.getFileKeys());
 
 		logger.debug("Successfully fetched file keys for the file to move, its old parent and its new parent");
 	}

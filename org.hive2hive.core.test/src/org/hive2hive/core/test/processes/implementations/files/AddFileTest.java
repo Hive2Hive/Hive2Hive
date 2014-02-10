@@ -13,7 +13,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFolder;
@@ -156,11 +156,11 @@ public class AddFileTest extends H2HJUnitTest {
 		UserProfile gotProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
-		FileTreeNode node = gotProfile.getFileByPath(originalFile, new FileManager(uploaderRoot.toPath()));
+		Index node = gotProfile.getFileByPath(originalFile, new FileManager(uploaderRoot.toPath()));
 		Assert.assertNotNull(node);
 
 		// verify the meta document
-		KeyPair metaFileKeys = node.getKeyPair();
+		KeyPair metaFileKeys = node.getFileKeys();
 		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaFileKeys);
 		if (originalFile.isFile()) {
 			// get the meta file with the keys (decrypt it)

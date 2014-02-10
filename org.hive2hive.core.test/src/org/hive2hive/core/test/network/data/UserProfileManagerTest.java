@@ -7,7 +7,7 @@ import java.util.Random;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.model.FileTreeNode;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -174,7 +174,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), operation == Operation.PUT);
 
 				if (operation == Operation.MODIFY) {
-					new FileTreeNode(userProfile.getRoot(), null, NetworkTestUtil.randomString());
+					new FolderIndex(userProfile.getRoot(), null, NetworkTestUtil.randomString());
 				}
 
 				if (operation == Operation.PUT) {
