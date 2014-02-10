@@ -8,6 +8,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Index implements Comparable<Index>, Serializable {
 
@@ -150,6 +151,13 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * @return if the index is shared
 	 */
 	public abstract boolean isShared();
+
+	/**
+	 * Returns a list of users that can at least read the file
+	 * 
+	 * @return
+	 */
+	public abstract Set<String> getCalculatedUserList();
 
 	/**
 	 * Returns the responsible protection keys (depends of the shared state). The {@link MetaDocument} and all

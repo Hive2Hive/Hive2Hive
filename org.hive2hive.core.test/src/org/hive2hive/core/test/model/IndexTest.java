@@ -7,6 +7,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
@@ -22,6 +24,7 @@ import org.junit.Test;
  */
 public class IndexTest extends H2HJUnitTest {
 
+	private final String userId = "UserA";
 	private FolderIndex root;
 	private Index child1;
 	private Index child2;
@@ -46,6 +49,7 @@ public class IndexTest extends H2HJUnitTest {
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		root = new FolderIndex(null, keys, null);
+		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 		root.setProtectionKeys(protectionKeys);
 
 		// naming convention:
@@ -54,10 +58,10 @@ public class IndexTest extends H2HJUnitTest {
 
 		// setup is like
 		// root:
-		// - 1f1
-		// - 1f2
+		// - child1
+		// - child2
 		// - 1d:
-		// - - 2f
+		// - - child3
 		// - - 2d (empty folder)
 		child1 = new FileIndex(root, keys, "1f1", null);
 		child2 = new FileIndex(root, keys, "1f2", null);
@@ -142,6 +146,32 @@ public class IndexTest extends H2HJUnitTest {
 		Assert.assertEquals(null, root.getChildByName("2f"));
 		Assert.assertEquals(null, root.getChildByName(null));
 		Assert.assertEquals(null, root.getChildByName(""));
+	}
 
+	@Test
+	public void testPermissions() {
+		Assert.assertTrue(root.getCalculatedUserList().contains(userId));
+		Assert.assertEquals(1, root.getCalculatedUserList().size());
+
+		// add permission to sub-folder
+		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT),
+				new UserPermission("UserB", PermissionType.READ));
+
+		// check the sub-folder and the sub-files permission
+		Assert.assertEquals(2, dir1.getCalculatedUserList().size());
+		Assert.assertEquals(2, child3.getCalculatedUserList().size());
+		Assert.assertEquals(2, dir2.getCalculatedUserList().size());
+
+		// validate that the root still has only one user
+		Assert.assertTrue(root.getCalculatedUserList().contains(userId));
+		Assert.assertEquals(1, root.getCalculatedUserList().size());
+
+		// add a third permission to the dir1
+		dir1.addUserPermissions(new UserPermission("UserC", PermissionType.READ));
+
+		// check again
+		Assert.assertEquals(3, dir1.getCalculatedUserList().size());
+		Assert.assertEquals(3, child3.getCalculatedUserList().size());
+		Assert.assertEquals(3, dir2.getCalculatedUserList().size());
 	}
 }

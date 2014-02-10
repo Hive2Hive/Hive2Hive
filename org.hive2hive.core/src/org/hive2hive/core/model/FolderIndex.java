@@ -157,11 +157,7 @@ public class FolderIndex extends Index {
 		userPermissions.remove(toDelete);
 	}
 
-	/**
-	 * Returns a list of users that can at least read the file
-	 * 
-	 * @return
-	 */
+	@Override
 	public Set<String> getCalculatedUserList() {
 		// gather the own user list
 		Set<String> users = new HashSet<String>(userPermissions.size());

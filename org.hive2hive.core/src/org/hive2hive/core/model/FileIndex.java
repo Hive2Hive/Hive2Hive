@@ -2,6 +2,7 @@ package org.hive2hive.core.model;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Set;
 
 /**
  * An index stored in the user profile that represents a file in the directory
@@ -71,5 +72,10 @@ public class FileIndex extends Index {
 	@Override
 	public KeyPair getProtectionKeys() {
 		return parent.getProtectionKeys();
+	}
+
+	@Override
+	public Set<String> getCalculatedUserList() {
+		return parent.getCalculatedUserList();
 	}
 }
