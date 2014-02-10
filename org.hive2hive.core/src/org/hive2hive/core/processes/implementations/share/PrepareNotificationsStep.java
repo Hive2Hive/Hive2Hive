@@ -32,7 +32,7 @@ public class PrepareNotificationsStep extends ProcessStep {
 
 		// create a subtree containing all children
 		FolderIndex sharedNode;
-		if (context.getPermission() == PermissionType.READ) {
+		if (context.getPermissionType() == PermissionType.READ) {
 			sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());
 		} else {
 			sharedNode = new FolderIndex(null, fileNode.getFileKeys(), fileNode.getName());

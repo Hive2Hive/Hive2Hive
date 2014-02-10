@@ -2,7 +2,9 @@ package org.hive2hive.core.model;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.file.FileManager;
@@ -18,6 +20,7 @@ public class FolderIndex extends Index {
 
 	private static final long serialVersionUID = 3798065400562165454L;
 	private final Set<Index> children;
+	private final List<UserPermission> userPermissions;
 	private KeyPair protectionKeys = null;
 	private boolean isShared = false;
 
@@ -32,6 +35,7 @@ public class FolderIndex extends Index {
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
 		children = new HashSet<Index>();
+		userPermissions = new ArrayList<UserPermission>();
 	}
 
 	/**
@@ -100,7 +104,7 @@ public class FolderIndex extends Index {
 	 * @param protectionKeys if the user has write access, the protection keys are != null, else, they can be
 	 *            null.
 	 */
-	public void share(KeyPair protectionKeys) throws IllegalStateException {
+	public void share(KeyPair protectionKeys, UserPermission... userPermission) throws IllegalStateException {
 		if (isRoot())
 			throw new IllegalStateException("Root node can't be shared.");
 		else if (isSharedOrHasSharedChildren()) {
@@ -109,6 +113,10 @@ public class FolderIndex extends Index {
 
 		this.isShared = true;
 		this.protectionKeys = protectionKeys;
+
+		for (UserPermission permission : userPermission) {
+			userPermissions.add(permission);
+		}
 	}
 
 	/**
@@ -117,6 +125,55 @@ public class FolderIndex extends Index {
 	public void unshare() {
 		this.isShared = false;
 		this.protectionKeys = null;
+
+		userPermissions.clear();
+	}
+
+	/**
+	 * Add a permission for a user to read / write that directory (all sub-directories inherit this
+	 * permission)
+	 * 
+	 * @param userPermission
+	 */
+	public void addUserPermissions(UserPermission userPermission) {
+		if (userPermission != null)
+			userPermissions.add(userPermission);
+	}
+
+	/**
+	 * Remove a user's permission. Note that you never should remove your own permission of your root!
+	 * 
+	 * @param userId
+	 */
+	public void removeUserPermissions(String userId) {
+		UserPermission toDelete = null;
+		for (UserPermission permission : userPermissions) {
+			if (permission.getUserId().equalsIgnoreCase(userId)) {
+				toDelete = permission;
+				break;
+			}
+		}
+
+		userPermissions.remove(toDelete);
+	}
+
+	/**
+	 * Returns a list of users that can at least read the file
+	 * 
+	 * @return
+	 */
+	public Set<String> getCalculatedUserList() {
+		// gather the own user list
+		Set<String> users = new HashSet<String>(userPermissions.size());
+		for (UserPermission permission : userPermissions) {
+			users.add(permission.getUserId());
+		}
+
+		// combine with parent user list (recursion)
+		if (parent != null)
+			users.addAll(parent.getCalculatedUserList());
+
+		return users;
 	}
 
 	/**

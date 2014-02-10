@@ -12,6 +12,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -289,8 +290,8 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 	public IProcessComponent share(File folder, String userId, PermissionType permission)
 			throws IllegalArgumentException, NoSessionException, IllegalFileLocation,
 			NoPeerConnectionException {
-		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder, userId, permission,
-				networkManager);
+		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder,
+				new UserPermission(userId, permission), networkManager);
 		autoStartProcess(process);
 		return process;
 	}

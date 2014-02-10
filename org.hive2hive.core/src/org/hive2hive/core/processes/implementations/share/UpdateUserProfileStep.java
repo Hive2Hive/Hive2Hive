@@ -33,21 +33,19 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FolderIndex fileNode = (FolderIndex) userProfile.getFileById(context.consumeMetaDocument()
+			FolderIndex folderIndex = (FolderIndex) userProfile.getFileById(context.consumeMetaDocument()
 					.getId());
 
-			if (fileNode.isShared()) {
+			if (folderIndex.isSharedOrHasSharedChildren()) {
 				// TODO this is to restrictive, what about several users sharing one single folder?
-				throw new ProcessExecutionException("Folder is already shared.");
-			} else if (fileNode.isSharedOrHasSharedChildren()) {
-				throw new ProcessExecutionException("Folder already contains an shared folder.");
+				throw new ProcessExecutionException("Folder is already shared or contains an shared folder.");
 			}
 
 			// store for backup
-			context.setFileTreeNode(fileNode);
+			context.setFolderIndex(folderIndex);
 
 			// make the node shared with the new protection keys
-			fileNode.share(context.consumeNewProtectionKeys());
+			folderIndex.share(context.consumeNewProtectionKeys(), context.getUserPermission());
 
 			// upload modified profile
 			logger.debug("Updating the domain key in the user profile");

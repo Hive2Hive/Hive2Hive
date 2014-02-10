@@ -50,10 +50,10 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 			throw new ProcessExecutionException(String.format("The folder is already shared with the user '%s'",
 					context.getFriendId()));
 		}
-		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), context.getPermission()));
+		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), context.getPermissionType()));
 
 		logger.debug("Putting the modified meta folder (containing the new user permission '"
-				+ context.getPermission().name() + "')");
+				+ context.getPermissionType().name() + "')");
 		super.doExecute();
 	}
 

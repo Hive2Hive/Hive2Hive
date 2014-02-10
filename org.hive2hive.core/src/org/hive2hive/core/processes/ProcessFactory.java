@@ -11,7 +11,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
@@ -336,7 +336,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createShareProcess(File folder, String friendId, PermissionType permission,
+	public ProcessComponent createShareProcess(File folder, UserPermission permission,
 			NetworkManager networkManager) throws IllegalFileLocation, IllegalArgumentException,
 			NoSessionException, NoPeerConnectionException {
 		// verify
@@ -356,10 +356,10 @@ public final class ProcessFactory {
 		if (folder.toPath().toString().equals(root.toString()))
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
 
-		ShareProcessContext context = new ShareProcessContext(folder, friendId, permission);
+		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new VerifyFriendId(networkManager, friendId));
+		process.add(new VerifyFriendId(networkManager, permission.getUserId()));
 		process.add(new File2MetaFileComponent(folder, context, context, networkManager));
 		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));

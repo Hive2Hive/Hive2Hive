@@ -49,8 +49,11 @@ public class UserProfile extends NetworkContent {
 			throw new IllegalArgumentException("Protection keys can't be null.");
 		this.userId = userId;
 		this.encryptionKeys = encryptionKeys;
+
+		// create the root node
 		root = new FolderIndex(null, encryptionKeys, null);
 		root.setProtectionKeys(protectionKeys);
+		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
 
 	public String getUserId() {

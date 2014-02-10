@@ -7,6 +7,7 @@ import java.util.Set;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -21,9 +22,8 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		IProvideMetaDocument, IConsumeMetaDocument, IConsumeNotificationFactory, IProvideNotificationFactory {
 
 	private final File folder;
-	private final String friendId;
 	private final KeyPair newProtectionKeys;
-	private final PermissionType permission;
+	private final UserPermission permission;
 
 	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
@@ -31,9 +31,8 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 
-	public ShareProcessContext(File folder, String friendId, PermissionType permission) {
+	public ShareProcessContext(File folder, UserPermission permission) {
 		this.folder = folder;
-		this.friendId = friendId;
 		this.permission = permission;
 		this.newProtectionKeys = EncryptionUtil.generateProtectionKey();
 	}
@@ -43,10 +42,14 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	}
 
 	public String getFriendId() {
-		return friendId;
+		return permission.getUserId();
 	}
 
-	public PermissionType getPermission() {
+	public PermissionType getPermissionType() {
+		return permission.getPermission();
+	}
+
+	public UserPermission getUserPermission() {
 		return permission;
 	}
 
@@ -54,7 +57,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		return newProtectionKeys;
 	}
 
-	public void setFileTreeNode(FolderIndex folderIndex) {
+	public void setFolderIndex(FolderIndex folderIndex) {
 		this.folderIndex = folderIndex;
 	}
 
