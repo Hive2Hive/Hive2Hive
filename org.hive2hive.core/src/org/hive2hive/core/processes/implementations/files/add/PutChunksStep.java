@@ -45,11 +45,13 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class PutChunksStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutChunksStep.class);
-	private AddFileProcessContext context;
+	private final AddFileProcessContext context;
+	private final IFileConfiguration config;
 
-	public PutChunksStep(AddFileProcessContext context, IDataManager dataManager) {
+	public PutChunksStep(AddFileProcessContext context, IDataManager dataManager, IFileConfiguration config) {
 		super(dataManager);
 		this.context = context;
+		this.config = config;
 	}
 
 	@Override
@@ -62,20 +64,19 @@ public class PutChunksStep extends BasePutProcessStep {
 			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
 			return;
 		} else if (context.consumeProtectionKeys() == null) {
-			throw new ProcessExecutionException("This directory is write protected (and we don't have the keys).");
+			throw new ProcessExecutionException(
+					"This directory is write protected (and we don't have the keys).");
 		}
 
 		// first, validate the file size
-		IFileConfiguration config = context.getH2HSession().getFileConfiguration();
 		long fileSize = FileUtil.getFileSize(file);
-
 		if (fileSize > config.getMaxFileSize()) {
 			throw new ProcessExecutionException("File is too large.");
 		}
 
 		long offset = 0;
 		// TODO check if the cast is ok!
-		byte[] data = new byte[(int) context.getH2HSession().getFileConfiguration().getChunkSize()];
+		byte[] data = new byte[(int) config.getChunkSize()];
 		int read = 1;
 
 		do {
@@ -87,7 +88,8 @@ public class PutChunksStep extends BasePutProcessStep {
 				rndAccessFile.close();
 			} catch (IOException e) {
 				logger.error("File " + file.getAbsolutePath() + ": Could not read the file", e);
-				throw new ProcessExecutionException("File " + file.getAbsolutePath() + ": Could not read the file", e);
+				throw new ProcessExecutionException("File " + file.getAbsolutePath()
+						+ ": Could not read the file", e);
 			}
 
 			if (read > 0) {

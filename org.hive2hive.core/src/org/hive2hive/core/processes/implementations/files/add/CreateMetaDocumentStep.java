@@ -5,7 +5,6 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -16,7 +15,6 @@ import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
-import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * Create a new {@link MetaDocument}.
@@ -27,24 +25,22 @@ public class CreateMetaDocumentStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CreateMetaDocumentStep.class);
 	private final AddFileProcessContext context;
+	private final String userId;
 
-	public CreateMetaDocumentStep(AddFileProcessContext context) {
+	public CreateMetaDocumentStep(AddFileProcessContext context, String userId) {
 		this.context = context;
+		this.userId = userId;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		File file = context.getFile();
-
-		// generate the new key pair for the meta file (which are later stored in the user profile)
-		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		context.setNewMetaKeyPair(metaKeyPair);
+		KeyPair metaKeyPair = context.getNewMetaKeyPair();
 
 		MetaDocument metaDocument = null;
 		if (file.isDirectory()) {
 			// create a new meta folder
-			metaDocument = new MetaFolder(metaKeyPair.getPublic(), file.getName(), context.getH2HSession()
-					.getCredentials().getUserId());
+			metaDocument = new MetaFolder(metaKeyPair.getPublic(), file.getName(), userId);
 			logger.debug(String.format("New meta folder created. folder = '%s'", file.getName()));
 		} else {
 			// create new meta file with new version

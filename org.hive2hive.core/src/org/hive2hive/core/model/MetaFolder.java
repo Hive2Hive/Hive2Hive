@@ -62,25 +62,4 @@ public class MetaFolder extends MetaDocument {
 		}
 		return users;
 	}
-
-	public List<KeyPair> getChildKeys() {
-		return childKeys;
-	}
-
-	public void addChildKeyPair(KeyPair keyPair) {
-		if (keyPair != null)
-			childKeys.add(keyPair);
-	}
-
-	public void removeChildKey(PublicKey childKey) {
-		KeyPair toRemove = null;
-		for (KeyPair child : childKeys) {
-			if (child.getPublic().equals(childKey)) {
-				toRemove = child;
-				break;
-			}
-		}
-
-		childKeys.remove(toRemove);
-	}
 }

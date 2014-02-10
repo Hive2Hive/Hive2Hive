@@ -40,12 +40,10 @@ import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
-import org.hive2hive.core.processes.implementations.files.add.AddToUserProfileStep;
+import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaDocumentStep;
-import org.hive2hive.core.processes.implementations.files.add.GetParentMetaStep;
 import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.core.processes.implementations.files.add.PutChunksStep;
-import org.hive2hive.core.processes.implementations.files.add.UpdateParentMetaStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromParentMetaStep;
@@ -170,20 +168,16 @@ public final class ProcessFactory {
 		boolean inRoot = root.equals(file.toPath().getParent());
 
 		DataManager dataManager = networkManager.getDataManager();
-		AddFileProcessContext context = new AddFileProcessContext(file, inRoot, networkManager.getSession());
+		AddFileProcessContext context = new AddFileProcessContext(file, inRoot);
+
+		H2HSession session = networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new GetParentMetaStep(context, dataManager));
-		process.add(new PutChunksStep(context, dataManager));
+		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session
+				.getFileManager()));
+		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateMetaDocumentStep(context));
 		process.add(new PutMetaDocumentStep(context, context, dataManager));
-
-		if (!inRoot) {
-			// need to update the parent if necessary
-			process.add(new UpdateParentMetaStep(context, dataManager));
-		}
-
-		process.add(new AddToUserProfileStep(context));
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
@@ -213,7 +207,7 @@ public final class ProcessFactory {
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new DeleteChunksStep(context, dataManager));
 		if (!inRoot) {
-			process.add(new GetParentMetaStep(context, networkManager.getDataManager()));
+			process.add(new GetParentFolderIndexStep(context, networkManager.getDataManager()));
 		}
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));

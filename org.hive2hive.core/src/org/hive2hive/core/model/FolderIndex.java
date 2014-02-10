@@ -147,12 +147,17 @@ public class FolderIndex extends Index {
 
 	@Override
 	public KeyPair getProtectionKeys() {
+		if (isShared) {
+			// the shared flag is on, return the protection keys (can be null)
+			return protectionKeys;
+		}
+
 		if (protectionKeys == null) {
-			// root should always have protection keys
+			// inherit parent's protection keys
 			return parent.getProtectionKeys();
 		}
 
-		// has own protection keys because it is a shared folder
+		// is root
 		return protectionKeys;
 	}
 

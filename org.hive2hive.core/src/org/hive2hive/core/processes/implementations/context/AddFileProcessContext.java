@@ -5,44 +5,38 @@ import java.security.KeyPair;
 import java.util.List;
 import java.util.Set;
 
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
-public class AddFileProcessContext implements IConsumeProtectionKeys, IProvideProtectionKeys,
-		IConsumeMetaDocument, IConsumeNotificationFactory, IProvideNotificationFactory {
+public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMetaDocument,
+		IConsumeNotificationFactory, IProvideNotificationFactory {
 
 	private final File file;
-	private final H2HSession session;
 	private final boolean inRoot;
 
 	private List<KeyPair> chunkKeys;
 	private KeyPair metaKeyPair;
-	private MetaDocument parentMetaDocument;
-	private KeyPair protectionKeys;
 	private MetaDocument newMetaDocument;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index newIndexNode;
 
-	public AddFileProcessContext(File file, boolean inRoot, H2HSession session) {
+	public AddFileProcessContext(File file, boolean inRoot) {
 		this.file = file;
 		this.inRoot = inRoot;
-		this.session = session;
 	}
 
 	public File getFile() {
 		return file;
 	}
 
-	public H2HSession getH2HSession() {
-		return session;
+	public boolean isInRoot() {
+		return inRoot;
 	}
 
 	public void setChunkKeys(List<KeyPair> chunkKeys) {
@@ -71,26 +65,9 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IProvidePr
 		this.newMetaDocument = newMetaDocument;
 	}
 
-	public MetaDocument consumeParentMetaDocument() {
-		return parentMetaDocument;
-	}
-
-	public void provideParentMetaDocument(MetaDocument metaDocument) {
-		this.parentMetaDocument = metaDocument;
-	}
-
-	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
-	}
-
 	@Override
 	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
-	}
-
-	public boolean isInRoot() {
-		return inRoot;
+		return newIndexNode.getProtectionKeys();
 	}
 
 	@Override
