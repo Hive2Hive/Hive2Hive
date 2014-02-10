@@ -54,7 +54,8 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 						trashFile.getAbsolutePath()));
 			}
 		} else {
-			logger.warn(String.format("File '%s' cannot be recovered from trash as it does not exist."));
+			logger.warn(String.format("File '%s' cannot be recovered from trash as it does not exist.",
+					trashFile.getAbsolutePath()));
 		}
 	}
 
