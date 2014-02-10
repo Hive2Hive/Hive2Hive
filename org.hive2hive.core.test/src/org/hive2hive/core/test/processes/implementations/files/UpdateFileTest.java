@@ -73,7 +73,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
-		// create the roots and the filemanagers
+		// create the roots and the file manager
 		File rootUploader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 		fileManagerUploader = new FileManager(rootUploader.toPath());
 		File rootDownloader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());

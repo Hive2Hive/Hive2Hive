@@ -11,7 +11,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.ProcessManager;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -86,7 +85,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyNobody() throws ClassNotFoundException, IOException, InvalidProcessStateException,
@@ -109,7 +108,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException, InvalidProcessStateException,
@@ -139,7 +138,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException,
@@ -168,7 +167,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException,
@@ -201,7 +200,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
@@ -240,7 +239,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
@@ -280,7 +279,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
-	 * @throws ProcessExecutionException 
+	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
@@ -303,12 +302,6 @@ public class NotificationTest extends H2HJUnitTest {
 
 		// wait until all messages are sent
 		UseCaseTestUtil.waitTillSucceded(listener, 20);
-
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-			// wait until all processes (inclusive cleanup) are done
-		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
 
 		// check the locations map; should have 2 entries only
 		Locations locations = UseCaseTestUtil.getLocations(network.get(0), userACredentials.getUserId());
