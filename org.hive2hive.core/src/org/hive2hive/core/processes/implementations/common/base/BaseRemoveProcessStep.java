@@ -32,10 +32,10 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
 	private final IDataManager dataManager;
-	protected String locationKey;
-	protected String contentKey;
-	protected NetworkContent contentToRemove;
-	protected KeyPair protectionKey;
+	private String locationKey;
+	private String contentKey;
+	private NetworkContent contentToRemove;
+	private KeyPair protectionKey;
 	private boolean removePerformed = false;
 
 	public BaseRemoveProcessStep(IDataManager dataManager) {

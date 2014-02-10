@@ -10,7 +10,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public abstract class BaseGetProcessStep extends ProcessStep {
 
-	protected final IDataManager dataManager;
+	private final IDataManager dataManager;
 
 	public BaseGetProcessStep(IDataManager dataManager) {
 		this.dataManager = dataManager;

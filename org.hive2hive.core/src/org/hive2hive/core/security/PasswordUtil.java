@@ -27,7 +27,7 @@ public final class PasswordUtil {
 
 	public static final int HASH_BIT_SIZE = 192;
 	public static final int SALT_BIT_SIZE = HASH_BIT_SIZE;
-	public static final int PBKDF2_ITERATIONS = 65536; // slowing factor
+	private static final int PBKDF2_ITERATIONS = 65536; // slowing factor
 
 	private PasswordUtil() {
 	}

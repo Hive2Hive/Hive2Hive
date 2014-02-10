@@ -26,33 +26,14 @@ public class UserProfile extends NetworkContent {
 	private final FolderIndex root;
 
 	public UserProfile(String userId) {
-		this(userId, EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), EncryptionUtil
-				.generateProtectionKey());
-	}
-
-	/**
-	 * Constructor for the user profile.
-	 * 
-	 * @param userId
-	 *            the user id of the owner of the user profile
-	 * @param encryptionKeys
-	 *            the encryption keys for encrypting the user profile
-	 * @param protectionKeys
-	 *            the default keys for content protection
-	 */
-	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair protectionKeys) {
 		if (userId == null)
 			throw new IllegalArgumentException("User id can't be null.");
-		if (encryptionKeys == null)
-			throw new IllegalArgumentException("Encryption keys can't be null.");
-		if (protectionKeys == null)
-			throw new IllegalArgumentException("Protection keys can't be null.");
 		this.userId = userId;
-		this.encryptionKeys = encryptionKeys;
+		this.encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		// create the root node
 		root = new FolderIndex(null, encryptionKeys, null);
-		root.setProtectionKeys(protectionKeys);
+		root.setProtectionKeys(EncryptionUtil.generateProtectionKey());
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
 

@@ -27,10 +27,6 @@ public class FileManager {
 	// holds persistent meta data
 	private final Path h2hMetaFile;
 
-	public FileManager(String rootDirectory) {
-		this(Paths.get(rootDirectory));
-	}
-
 	public FileManager(Path rootDirectory) {
 		root = rootDirectory;
 		if (!root.toFile().exists()) {
