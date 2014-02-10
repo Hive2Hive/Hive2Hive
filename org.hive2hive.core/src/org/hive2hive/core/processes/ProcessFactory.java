@@ -63,6 +63,7 @@ import org.hive2hive.core.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.processes.implementations.login.SynchronizeFilesStep;
 import org.hive2hive.core.processes.implementations.logout.RemoveOwnLocationsStep;
+import org.hive2hive.core.processes.implementations.logout.WritePersistentStep;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.notify.GetAllLocationsStep;
 import org.hive2hive.core.processes.implementations.notify.GetPublicKeysStep;
@@ -184,6 +185,7 @@ public final class ProcessFactory {
 
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
+		process.add(new WritePersistentStep(session.getFileManager()));
 
 		return process;
 	}

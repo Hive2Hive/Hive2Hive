@@ -186,15 +186,8 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 		// stop all running processes
 		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
-		// write the current state to a meta file
-		try {
-			networkManager.getSession().getFileManager().writePersistentMetaData();
-
-			// quit the session
-			networkManager.setSession(null);
-		} catch (NoSessionException e) {
-			// ignore
-		}
+		// quit the session
+		networkManager.setSession(null);
 	}
 
 	@Override
