@@ -48,6 +48,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		// - file moved from root to other destination
 		// - file moved from other source to root
 		// - file moved from other source to other destination
+		// Additionally, the file can be renamed (within any directory)
 		try {
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
@@ -64,17 +65,11 @@ public class RelinkUserProfileStep extends ProcessStep {
 			// source's parent needs to be updated, no matter if it's root or not
 			oldParent.removeChild(movedNode);
 
-			if (context.isDestinationInRoot()) {
-				// moved to root
-				movedNode.setParent(userProfile.getRoot());
-				userProfile.getRoot().addChild(movedNode);
-			} else {
-				// moved to non-root
-				FolderIndex newParent = (FolderIndex) userProfile.getFileByPath(context.getDestination()
-						.getParentFile(), networkManager.getSession().getFileManager());
-				movedNode.setParent(newParent);
-				newParent.addChild(movedNode);
-			}
+			// add to the new parent
+			FolderIndex newParent = (FolderIndex) userProfile.getFileByPath(context.getDestination()
+					.getParentFile(), networkManager.getSession().getFileManager());
+			movedNode.setParent(newParent);
+			newParent.addChild(movedNode);
 
 			// update in DHT
 			profileManager.readyToPut(userProfile, getID());

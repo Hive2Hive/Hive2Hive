@@ -4,7 +4,6 @@ import java.security.PublicKey;
 import java.util.HashSet;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
@@ -15,12 +14,12 @@ import org.hive2hive.core.processes.implementations.context.DeleteFileProcessCon
  * @author Nico
  * 
  */
-public class PrepareNotificationStep extends ProcessStep {
+public class PrepareDeleteNotificationStep extends ProcessStep {
 
 	private final DeleteFileProcessContext context;
 	private final String ownUserId;
 
-	public PrepareNotificationStep(DeleteFileProcessContext context, String ownUserId) {
+	public PrepareDeleteNotificationStep(DeleteFileProcessContext context, String ownUserId) {
 		this.context = context;
 		this.ownUserId = ownUserId;
 	}
@@ -39,11 +38,7 @@ public class PrepareNotificationStep extends ProcessStep {
 		if (context.isFileInRoot()) {
 			users.add(ownUserId);
 		} else {
-			// the parent meta document has been fetched
-			if (context.consumeMetaDocument() instanceof MetaFolder) {
-				MetaFolder metaFolder = (MetaFolder) context.consumeMetaDocument();
-				users.addAll(metaFolder.getUserList());
-			}
+			// TODO: get the users from the index
 		}
 		// provide the user list
 		context.provideUsersToNotify(users);

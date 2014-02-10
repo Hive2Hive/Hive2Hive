@@ -11,7 +11,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -46,15 +45,13 @@ import org.hive2hive.core.processes.implementations.files.add.PrepareNotificatio
 import org.hive2hive.core.processes.implementations.files.add.PutChunksStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
-import org.hive2hive.core.processes.implementations.files.delete.DeleteFromParentMetaStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteMetaDocumentStep;
+import org.hive2hive.core.processes.implementations.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.core.processes.implementations.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.move.RelinkUserProfileStep;
-import org.hive2hive.core.processes.implementations.files.move.UpdateDestinationParentStep;
-import org.hive2hive.core.processes.implementations.files.move.UpdateSourceParentStep;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.recover.SelectVersionStep;
 import org.hive2hive.core.processes.implementations.files.update.CreateNewVersionStep;
@@ -256,14 +253,7 @@ public final class ProcessFactory {
 		process.add(new DeleteMetaDocumentStep(context, dataManager));
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
 
-		if (!fileInRoot) {
-			// file is not in root, thus change the parent meta folder
-			process.add(new File2MetaFileComponent(file.getParentFile(), context, context, networkManager));
-			process.add(new DeleteFromParentMetaStep(context, dataManager));
-		}
-
-		process.add(new org.hive2hive.core.processes.implementations.files.delete.PrepareNotificationStep(
-				context, networkManager.getUserId()));
+		process.add(new PrepareDeleteNotificationStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -272,28 +262,11 @@ public final class ProcessFactory {
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		// make some checks here, thus it's easier in the steps
-		FileManager fileManager = networkManager.getSession().getFileManager();
-		File root = fileManager.getRoot().toFile();
-		boolean sourceInRoot = root.equals(source.getParentFile());
-		boolean destinationInRoot = root.equals(destination.getParentFile());
-		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, sourceInRoot,
-				destinationInRoot, networkManager.getUserId());
+		MoveFileProcessContext context = new MoveFileProcessContext(source, destination,
+				networkManager.getUserId());
 
-		DataManager dataManager = networkManager.getDataManager();
 		SequentialProcess process = new SequentialProcess();
 		process.add(new MoveOnDiskStep(context, networkManager));
-
-		if (!sourceInRoot) {
-			process.add(new File2MetaFileComponent(source.getParentFile(), context, context, networkManager));
-			process.add(new UpdateSourceParentStep(context, dataManager));
-		}
-
-		if (!destinationInRoot) {
-			process.add(new File2MetaFileComponent(destination.getParentFile(), context, context,
-					networkManager));
-			process.add(new UpdateDestinationParentStep(context, dataManager));
-		}
-
 		process.add(new RelinkUserProfileStep(context, networkManager));
 		process.add(createNotificationProcess(context.getMoveNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));

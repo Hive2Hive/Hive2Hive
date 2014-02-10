@@ -20,8 +20,6 @@ public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMet
 
 	private final File source;
 	private final File destination;
-	private final boolean sourceInRoot;
-	private final boolean destinationInRoot;
 
 	private KeyPair protectionKeys;
 	private MetaDocument metaDocument;
@@ -38,12 +36,9 @@ public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMet
 	private final DeleteNotificationContext deleteNotificationContext;
 	private final AddNotificationContext addNotificationContext;
 
-	public MoveFileProcessContext(File source, File destination, boolean sourceInRoot,
-			boolean destinationInRoot, String userId) {
+	public MoveFileProcessContext(File source, File destination, String userId) {
 		this.source = source;
 		this.destination = destination;
-		this.sourceInRoot = sourceInRoot;
-		this.destinationInRoot = destinationInRoot;
 		this.usersToNotifySource = new HashSet<String>();
 		usersToNotifySource.add(userId);
 		this.usersToNotifyDestination = new HashSet<String>();
@@ -60,14 +55,6 @@ public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMet
 
 	public File getDestination() {
 		return destination;
-	}
-
-	public boolean isSourceInRoot() {
-		return sourceInRoot;
-	}
-
-	public boolean isDestinationInRoot() {
-		return destinationInRoot;
 	}
 
 	@Override
