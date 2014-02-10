@@ -72,7 +72,7 @@ public class PublicKeyManager {
 		}
 	}
 
-	public void evaluateResult(NetworkContent content) {
+	private void evaluateResult(NetworkContent content) {
 		if (content == null) {
 			logger.warn(String.format("Did not find the public key of user '%s'.", requestingUserId));
 			exception = new GetFailedException("No public key found.");

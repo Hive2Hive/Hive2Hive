@@ -17,7 +17,6 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 		IConsumeNotificationFactory, IProvideNotificationFactory {
 
 	private final File file;
-	private final boolean inRoot;
 
 	private List<KeyPair> chunkKeys;
 	private KeyPair metaKeyPair;
@@ -26,17 +25,12 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 	private Set<String> users;
 	private Index newIndexNode;
 
-	public AddFileProcessContext(File file, boolean inRoot) {
+	public AddFileProcessContext(File file) {
 		this.file = file;
-		this.inRoot = inRoot;
 	}
 
 	public File getFile() {
 		return file;
-	}
-
-	public boolean isInRoot() {
-		return inRoot;
 	}
 
 	public void setChunkKeys(List<KeyPair> chunkKeys) {

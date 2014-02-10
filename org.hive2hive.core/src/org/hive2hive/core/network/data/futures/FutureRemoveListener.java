@@ -29,12 +29,12 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	// used to count remove retries
 	private int removeTries = 0;
 
-	protected final Number160 locationKey;
-	protected final Number160 domainKey;
-	protected final Number160 contentKey;
-	protected final Number160 versionKey;
-	protected final KeyPair protectionKey;
-	protected final DataManager dataManager;
+	private final Number160 locationKey;
+	private final Number160 domainKey;
+	private final Number160 contentKey;
+	private final Number160 versionKey;
+	private final KeyPair protectionKey;
+	private final DataManager dataManager;
 	private final CountDownLatch latch;
 	private boolean success = false;
 

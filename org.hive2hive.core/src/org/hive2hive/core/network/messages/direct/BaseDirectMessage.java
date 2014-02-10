@@ -29,7 +29,7 @@ import org.hive2hive.core.network.messages.MessageManager;
  * Direct messages are sent by the {@link MessageManager}. For more details please have
  * a look at {@link MessageManager#sendDirect(BaseDirectMessage)}.</br></br>
  * 
- * @author Nendor, Seppi
+ * @author Nendor, Seppi, Nico
  */
 public abstract class BaseDirectMessage extends BaseMessage {
 
@@ -37,7 +37,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	private static final long serialVersionUID = 5080812282190501445L;
 
-	protected PeerAddress targetAddress;
+	private final PeerAddress targetAddress;
 	private final boolean needsRedirectedSend;
 
 	private int directSendingCounter = 0;
@@ -112,10 +112,6 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		return directSendingCounter;
 	}
 
-	public void setTargetAddress(PeerAddress targetAddress) {
-		this.targetAddress = targetAddress;
-	}
-
 	/**
 	 * Increases the internal sending counter of this direct message.
 	 */
@@ -155,9 +151,9 @@ public abstract class BaseDirectMessage extends BaseMessage {
 								getTargetAddress()));
 				return false;
 			case FAILURE_SIGNATURE:
-				logger.warn(String
-						.format("Message not accepted by the target. Signature is wrong. peer address = '%s'",
-								getTargetAddress()));
+				logger.warn(String.format(
+						"Message not accepted by the target. Signature is wrong. peer address = '%s'",
+						getTargetAddress()));
 				return false;
 			case OK:
 				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");

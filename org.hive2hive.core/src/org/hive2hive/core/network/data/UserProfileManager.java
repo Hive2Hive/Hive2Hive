@@ -34,7 +34,7 @@ import org.hive2hive.core.security.UserCredentials;
 public class UserProfileManager {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileManager.class);
-	public static final long MAX_MODIFICATION_TIME = 1000;
+	private static final long MAX_MODIFICATION_TIME = 1000;
 
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;

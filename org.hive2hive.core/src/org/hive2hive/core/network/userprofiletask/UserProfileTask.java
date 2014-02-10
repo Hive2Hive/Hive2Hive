@@ -44,9 +44,9 @@ public abstract class UserProfileTask extends NetworkContent {
 
 	private static final long serialVersionUID = -773794512479641000L;
 
+	private final KeyPair protectionKey;
+	private Number160 contentKey;
 	protected NetworkManager networkManager;
-	protected Number160 contentKey;
-	protected KeyPair protectionKey;
 
 	public UserProfileTask() {
 		this.protectionKey = EncryptionUtil.generateProtectionKey();

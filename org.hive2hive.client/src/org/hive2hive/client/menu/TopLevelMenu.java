@@ -11,8 +11,10 @@ import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.IH2HNodeStatus;
 import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
+import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
@@ -184,6 +186,28 @@ public final class TopLevelMenu extends ConsoleMenu {
 			}
 		});
 
+		add(new H2HConsoleMenuItem("Share") {
+			protected void execute() throws IllegalArgumentException, NoSessionException,
+					IllegalFileLocation, NoPeerConnectionException {
+				System.out.println("Specify the folder to share:");
+				File folder = askForFile(true);
+
+				System.out.println("Who do you want to share with?");
+				String friendId = awaitStringParameter();
+
+				System.out.println("Read or write permissions? Enter 1 for 'READ-ONLY', 2 for WRITE");
+				int permission = awaitIntParameter();
+				PermissionType perm = PermissionType.WRITE;
+				if (permission == 1) {
+					perm = PermissionType.READ;
+				}
+
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
+						.share(folder, friendId, perm);
+				executeBlocking(process);
+			}
+		});
+
 		add(new H2HConsoleMenuItem("File Observer") {
 			protected void checkPreconditions() {
 				if (root == null) {
@@ -224,27 +248,22 @@ public final class TopLevelMenu extends ConsoleMenu {
 				executeBlocking(process);
 			}
 		});
-		add(new H2HConsoleMenuItem("Unregister") {
-			protected void execute() {
-				notImplemented();
-			}
-		});
 	}
 
 	/**
 	 * Executes the given process (autostart anyhow) and blocks until it is done
 	 */
 	private void executeBlocking(IProcessComponent process) {
-		ProcessComponentListener processListener = new ProcessComponentListener();
-		process.attachListener(processListener);
-
-		while (!processListener.hasFinished()) {
-			// busy waiting
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-			}
-		}
+		// ProcessComponentListener processListener = new ProcessComponentListener();
+		// process.attachListener(processListener);
+		//
+		// while (!processListener.hasFinished()) {
+		// // busy waiting
+		// try {
+		// Thread.sleep(500);
+		// } catch (InterruptedException e) {
+		// }
+		// }
 	}
 
 	/**

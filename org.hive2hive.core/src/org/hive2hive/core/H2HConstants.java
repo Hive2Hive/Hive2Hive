@@ -49,12 +49,8 @@ public interface H2HConstants {
 	public static final String USER_PROFILE = "USER_PROFILE";
 	public static final String USER_LOCATIONS = "USER_LOCATIONS";
 	public static final String USER_PUBLIC_KEY = "USER_PUBLIC_KEY";
-	public static final String USER_MESSAGE_QUEUE_KEY = "USER_MESSAGE_QUEUE_KEY";
 	public static final String FILE_CHUNK = "FILE_CHUNK";
 	public static final String META_DOCUMENT = "META_DOCUMENT";
-
-	// waiting time (in ms) after a put operation to verify if put succeeded
-	public static final long PUT_VERIFICATION_WAITING_TIME_MS = 2000;
 
 	public static final int PUT_RETRIES = 3; // number of allowed tries to retry a put
 	public static final int REMOVE_RETRIES = 3; // number of allowed tries to retry a remove

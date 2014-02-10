@@ -46,9 +46,9 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	protected final String messageID;
 	protected final String targetKey;
+	private final SendingBehavior sendingBehavior;
 
 	protected PeerAddress senderAddress;
-	private final SendingBehavior sendingBehavior;
 
 	private int routedSendingCounter = 0;
 

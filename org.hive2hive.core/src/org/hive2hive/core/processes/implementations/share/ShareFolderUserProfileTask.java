@@ -19,10 +19,10 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 	private static final long serialVersionUID = -2476009828696898562L;
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(ShareFolderUserProfileTask.class);
-	private final FolderIndex fileTree;
+	private final FolderIndex sharedIndex;
 
-	public ShareFolderUserProfileTask(FolderIndex fileTree) {
-		this.fileTree = fileTree;
+	public ShareFolderUserProfileTask(FolderIndex sharedIndex) {
+		this.sharedIndex = sharedIndex;
 	}
 
 	@Override
@@ -41,13 +41,13 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			UserProfile userProfile = profileManager.getUserProfile(pid, true);
 
 			// add it to the root (by definition)
-			userProfile.getRoot().addChild(fileTree);
-			fileTree.setParent(userProfile.getRoot());
+			userProfile.getRoot().addChild(sharedIndex);
+			sharedIndex.setParent(userProfile.getRoot());
 			profileManager.readyToPut(userProfile, pid);
 			logger.debug("Added the newly shared folder to the own user profile");
 
 			/** 2. download the files that are now available */
-			List<Index> fileList = FolderIndex.getIndexList(fileTree);
+			List<Index> fileList = FolderIndex.getIndexList(sharedIndex);
 			// the folder itself is also contained, so remove it
 			ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,
 					networkManager);

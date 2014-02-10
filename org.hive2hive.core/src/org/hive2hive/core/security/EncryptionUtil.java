@@ -44,7 +44,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
-import org.bouncycastle.util.encoders.Base64;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
@@ -60,8 +59,8 @@ public final class EncryptionUtil {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
 
-	public static final String SINGATURE_ALGORITHM = "SHA1withRSA";
-	public static final int IV_LENGTH = 16;
+	private static final String SINGATURE_ALGORITHM = "SHA1withRSA";
+	private static final int IV_LENGTH = 16;
 
 	public enum AES_KEYLENGTH {
 		BIT_128(128),
@@ -163,7 +162,7 @@ public final class EncryptionUtil {
 		// AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
 		// return keyPair;
 	}
-	
+
 	public static KeyPair generateProtectionKey() {
 		KeyPairGenerator gen = null;
 		try {
@@ -469,7 +468,7 @@ public final class EncryptionUtil {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = null;
 		Object result = null;
-	
+
 		try {
 			ois = new ObjectInputStream(bais);
 			result = ois.readObject();
@@ -487,18 +486,8 @@ public final class EncryptionUtil {
 				throw e;
 			}
 		}
-	
+
 		return result;
-	}
-
-	public static String toBase64(Serializable object) throws IOException {
-		
-		return new String(Base64.encode(serializeObject(object)));
-	}
-
-	public static Object toBytes(String string) throws IOException, ClassNotFoundException {
-
-		return deserializeObject(Base64.decode(string));
 	}
 
 	/**
@@ -522,7 +511,7 @@ public final class EncryptionUtil {
 		return buf.toString();
 	}
 
-	public static void installBCProvider() {
+	private static void installBCProvider() {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}

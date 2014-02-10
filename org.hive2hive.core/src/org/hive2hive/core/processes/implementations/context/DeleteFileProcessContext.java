@@ -19,7 +19,6 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 		IConsumeNotificationFactory {
 
 	private final boolean isDirectory;
-	private final boolean fileInRoot;
 
 	private MetaDocument metaDocument;
 	private KeyPair protectionKeys;
@@ -29,9 +28,8 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 	private Set<String> users;
 	private BaseNotificationMessageFactory messageFactory;
 
-	public DeleteFileProcessContext(boolean isDirectory, boolean fileInRoot) {
+	public DeleteFileProcessContext(boolean isDirectory) {
 		this.isDirectory = isDirectory;
-		this.fileInRoot = fileInRoot;
 	}
 
 	@Override
@@ -65,10 +63,6 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 
 	public boolean isDirectory() {
 		return isDirectory;
-	}
-
-	public boolean isFileInRoot() {
-		return fileInRoot;
 	}
 
 	public void setDeletedIndex(Index deletedIndex) {
