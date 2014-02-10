@@ -4,9 +4,14 @@ import org.hive2hive.core.processes.ProcessManager;
 
 public interface INewH2HNode {
 
+	INetworkConfiguration getNetworkConfiguration();
+	
+	ProcessManager getProcessManager();
+
 	IUserManager getUserManager();
 	
 	IFileManager getFileManager();
 	
-	ProcessManager getProcessManager();
+	IFileConfiguration getFileConfiguration();
+	
 }

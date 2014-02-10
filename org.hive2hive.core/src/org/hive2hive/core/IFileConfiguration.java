@@ -1,5 +1,6 @@
 package org.hive2hive.core;
 
+@Deprecated
 public interface IFileConfiguration {
 
 	long getMaxFileSize();
