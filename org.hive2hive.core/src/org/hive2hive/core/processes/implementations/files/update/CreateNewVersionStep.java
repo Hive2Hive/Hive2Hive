@@ -26,13 +26,15 @@ public class CreateNewVersionStep extends ProcessStep {
 	private final static Logger logger = H2HLoggerFactory.getLogger(CreateNewVersionStep.class);
 
 	private final UpdateFileProcessContext context;
+	private final IFileConfiguration config;
 
 	// used for rollback
 	private FileVersion newVersion;
 	private final List<FileVersion> deletedFileVersions;
 
-	public CreateNewVersionStep(UpdateFileProcessContext context) {
+	public CreateNewVersionStep(UpdateFileProcessContext context, IFileConfiguration config) {
 		this.context = context;
+		this.config = config;
 		this.deletedFileVersions = new ArrayList<FileVersion>();
 	}
 
@@ -53,13 +55,12 @@ public class CreateNewVersionStep extends ProcessStep {
 	}
 
 	private void initiateCleanup() {
-		IFileConfiguration fileConfiguration = context.getH2HSession().getFileConfiguration();
 		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
 
 		// remove files when the number of allowed versions is exceeded or when the total file size (sum
 		// of all versions) exceeds the allowed file size
-		while (metaFile.getVersions().size() > fileConfiguration.getMaxNumOfVersions()
-				|| metaFile.getTotalSize() > fileConfiguration.getMaxSizeAllVersions()) {
+		while (metaFile.getVersions().size() > config.getMaxNumOfVersions()
+				|| metaFile.getTotalSize() > config.getMaxSizeAllVersions()) {
 			// keep at least one version
 			if (metaFile.getVersions().size() == 1)
 				break;

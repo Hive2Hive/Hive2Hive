@@ -4,20 +4,24 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.List;
 
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class UpdateFileProcessContext extends AddFileProcessContext implements IProvideMetaDocument {
+public class UpdateFileProcessContext extends AddFileProcessContext implements IProvideMetaDocument,
+		IProvideProtectionKeys {
+
+	// protection keys of the existing meta file
+	private KeyPair protectionKeys;
 
 	// the chunk keys to delete (if the configuration does not allow as many or as big chunks as existent)
 	private List<KeyPair> chunksToDelete;
-	private KeyPair protectionsKeys;
+	private KeyPair chunksToDeleteProtectionKeys;
 	private KeyPair parentFileKey;
 
-	public UpdateFileProcessContext(File file, boolean inRoot, H2HSession session) {
-		super(file, inRoot, session);
+	public UpdateFileProcessContext(File file, boolean inRoot) {
+		super(file, inRoot);
 	}
 
 	@Override
@@ -38,12 +42,12 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 		this.chunksToDelete = chunksToDelete;
 	}
 
-	public void setChunksToDeleteProtectionKeys(KeyPair protectionsKeys) {
-		this.protectionsKeys = protectionsKeys;
+	public void setChunksToDeleteProtectionKeys(KeyPair protectionKeys) {
+		this.chunksToDeleteProtectionKeys = protectionKeys;
 	}
 
 	public KeyPair getChunksToDeleteProtectionKeys() {
-		return protectionsKeys;
+		return chunksToDeleteProtectionKeys;
 	}
 
 	public void setParentFileKey(KeyPair parentFileKey) {
@@ -53,4 +57,15 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 	public KeyPair getParentFileKey() {
 		return parentFileKey;
 	}
+
+	@Override
+	public void provideProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+
+	@Override
+	public KeyPair consumeProtectionKeys() {
+		return protectionKeys;
+	}
+
 }

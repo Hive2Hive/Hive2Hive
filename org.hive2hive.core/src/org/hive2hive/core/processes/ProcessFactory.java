@@ -176,9 +176,9 @@ public final class ProcessFactory {
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session
 				.getFileManager()));
 		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
-		process.add(new CreateMetaDocumentStep(context));
+		process.add(new CreateMetaDocumentStep(context, networkManager.getUserId()));
 		process.add(new PutMetaDocumentStep(context, context, dataManager));
-		process.add(new PrepareNotificationStep(context));
+		process.add(new PrepareNotificationStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -194,22 +194,20 @@ public final class ProcessFactory {
 		boolean inRoot = root.equals(file.toPath().getParent());
 
 		DataManager dataManager = networkManager.getDataManager();
-		UpdateFileProcessContext context = new UpdateFileProcessContext(file, inRoot,
-				networkManager.getSession());
+		UpdateFileProcessContext context = new UpdateFileProcessContext(file, inRoot);
+
+		H2HSession session = networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		process.add(new PutChunksStep(context, dataManager));
-		process.add(new CreateNewVersionStep(context));
+		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
+		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
 		process.add(new PutMetaDocumentStep(context, context, dataManager));
-		process.add(new UpdateMD5inUserProfileStep(context));
+		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new DeleteChunksStep(context, dataManager));
-		if (!inRoot) {
-			process.add(new GetParentFolderIndexStep(context, networkManager.getDataManager()));
-		}
-		process.add(new PrepareNotificationStep(context));
+		process.add(new PrepareNotificationStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;

@@ -29,11 +29,13 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(UpdateMD5inUserProfileStep.class);
 
 	private final UpdateFileProcessContext context;
+	private final UserProfileManager profileManager;
 
 	private byte[] originalMD5;
 
-	public UpdateMD5inUserProfileStep(UpdateFileProcessContext context) {
+	public UpdateMD5inUserProfileStep(UpdateFileProcessContext context, UserProfileManager profileManager) {
 		this.context = context;
+		this.profileManager = profileManager;
 	}
 
 	@Override
@@ -48,7 +50,6 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 		}
 
 		try {
-			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 			FileIndex index = (FileIndex) userProfile.getFileById(metaFile.getId());
 
@@ -74,9 +75,8 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
 		if (metaFile != null) {
-			// return to original MD5 and put the userProfile
-			UserProfileManager profileManager = context.getH2HSession().getProfileManager();
 			try {
+				// return to original MD5 and put the userProfile
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 				FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
 				fileNode.setMD5(originalMD5);
