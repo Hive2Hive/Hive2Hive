@@ -23,6 +23,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -169,12 +170,16 @@ public class AddFileTest extends H2HJUnitTest {
 			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkKeys().size());
 		}
 
-		// download the file
-		UseCaseTestUtil.downloadFile(network.get(1), node.getFilePublicKey());
-
-		// verify the file after downloadig it
+		// verify the file (should have been downloaded automatically during the notification)
 		Path relative = uploaderRoot.toPath().relativize(originalFile.toPath());
 		File file = new File(downloaderRoot, relative.toString());
+
+		// give some seconds for the file to download
+		H2HWaiter waiter = new H2HWaiter(10);
+		do {
+			waiter.tickASecond();
+		} while (!file.exists());
+
 		Assert.assertTrue(file.exists());
 		if (originalFile.isFile()) {
 			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));

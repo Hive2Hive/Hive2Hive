@@ -24,18 +24,20 @@ public class PrepareNotificationStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		// prepare the file tree node for sending to other users
-		Index fileNode = context.getNewIndex();
-		PublicKey parentKey = fileNode.getParent().getFilePublicKey();
-		fileNode.setParent(null);
-
-		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(fileNode,
-				parentKey);
-		context.provideMessageFactory(messageFactory);
-
+		// get the recently added index
 		Index index = context.getNewIndex();
-		HashSet<String> users = new HashSet<String>(0);
+
+		// get the users belonging to that index
+		HashSet<String> users = new HashSet<String>();
 		users.addAll(index.getCalculatedUserList());
 		context.provideUsersToNotify(users);
+
+		// prepare the file tree node for sending to other users
+		PublicKey parentKey = index.getParent().getFilePublicKey();
+		index.setParent(null);
+
+		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(index,
+				parentKey);
+		context.provideMessageFactory(messageFactory);
 	}
 }

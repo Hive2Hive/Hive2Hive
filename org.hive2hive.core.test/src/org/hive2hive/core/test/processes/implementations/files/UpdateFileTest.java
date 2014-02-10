@@ -19,7 +19,6 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.ProcessManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -101,10 +100,15 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
 
 		// download the file and check if version is newer
-		UseCaseTestUtil.login(userCredentials, downloader, FileUtils.getTempDirectory());
-		Index fileNode = UseCaseTestUtil.getUserProfile(downloader, userCredentials).getFileByPath(file,
-				fileManagerUploader);
-		File downloaded = UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
+		File downloaderRoot = FileUtils.getTempDirectory();
+		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);
+		File downloaded = new File(downloaderRoot, file.getName());
+
+		// give some time to synchronize
+		H2HWaiter waiter = new H2HWaiter(10);
+		while (!downloaded.exists()) {
+			waiter.tickASecond();
+		}
 
 		// new content should be latest one
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
@@ -189,12 +193,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 		FileUtils.write(file, "bla", false);
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
 
-		// TODO wait for other processes
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
-
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, fileManagerUploader);
@@ -241,10 +239,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 		FileUtils.write(file, NetworkTestUtil.randomString(), true);
 
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!ProcessManager.getInstance().getAllProcesses().isEmpty());
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
