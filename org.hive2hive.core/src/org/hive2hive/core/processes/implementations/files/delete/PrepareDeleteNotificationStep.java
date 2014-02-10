@@ -17,11 +17,9 @@ import org.hive2hive.core.processes.implementations.context.DeleteFileProcessCon
 public class PrepareDeleteNotificationStep extends ProcessStep {
 
 	private final DeleteFileProcessContext context;
-	private final String ownUserId;
 
-	public PrepareDeleteNotificationStep(DeleteFileProcessContext context, String ownUserId) {
+	public PrepareDeleteNotificationStep(DeleteFileProcessContext context) {
 		this.context = context;
-		this.ownUserId = ownUserId;
 	}
 
 	@Override
@@ -35,11 +33,8 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 				fileNode.getName()));
 
 		HashSet<String> users = new HashSet<String>();
-		if (context.isFileInRoot()) {
-			users.add(ownUserId);
-		} else {
-			// TODO: get the users from the index
-		}
+		users.addAll(context.getDeletedIndex().getCalculatedUserList());
+
 		// provide the user list
 		context.provideUsersToNotify(users);
 	}

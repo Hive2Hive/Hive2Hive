@@ -175,7 +175,7 @@ public final class ProcessFactory {
 		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateMetaDocumentStep(context, networkManager.getUserId()));
 		process.add(new PutMetaDocumentStep(context, context, dataManager));
-		process.add(new PrepareNotificationStep(context, networkManager.getUserId()));
+		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -204,7 +204,7 @@ public final class ProcessFactory {
 
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new DeleteChunksStep(context, dataManager));
-		process.add(new PrepareNotificationStep(context, networkManager.getUserId()));
+		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -253,7 +253,7 @@ public final class ProcessFactory {
 		process.add(new DeleteMetaDocumentStep(context, dataManager));
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
 
-		process.add(new PrepareDeleteNotificationStep(context, networkManager.getUserId()));
+		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;

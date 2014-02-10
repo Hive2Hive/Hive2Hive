@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.implementations.files.add;
 
 import java.security.PublicKey;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -18,11 +17,9 @@ import org.hive2hive.core.processes.implementations.context.AddFileProcessContex
 public class PrepareNotificationStep extends ProcessStep {
 
 	private final AddFileProcessContext context;
-	private final String userId;
 
-	public PrepareNotificationStep(AddFileProcessContext context, String userId) {
+	public PrepareNotificationStep(AddFileProcessContext context) {
 		this.context = context;
-		this.userId = userId;
 	}
 
 	@Override
@@ -36,16 +33,9 @@ public class PrepareNotificationStep extends ProcessStep {
 				parentKey);
 		context.provideMessageFactory(messageFactory);
 
-		if (context.isInRoot()) {
-			// file is in root; notify only own client
-			Set<String> onlyMe = new HashSet<String>(1);
-			onlyMe.add(userId);
-			context.provideUsersToNotify(onlyMe);
-		} else {
-			// TODO: add the user's list to the index as well
-			// MetaFolder metaFolder = (MetaFolder) context.consumeParentMetaDocument();
-			// Set<String> userList = metaFolder.getUserList();
-			context.provideUsersToNotify(new HashSet<String>(0));
-		}
+		Index index = context.getNewIndex();
+		HashSet<String> users = new HashSet<String>(0);
+		users.addAll(index.getCalculatedUserList());
+		context.provideUsersToNotify(users);
 	}
 }
