@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;

@@ -1,26 +1,23 @@
 package org.hive2hive.core.api;
 
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileManager;
+import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.api.interfaces.INewH2HNode;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.network.NetworkManager;
 
-public class NewH2HNode implements INewH2HNode {
+public class H2HNode implements IH2HNode {
 
 	private final INetworkConfiguration networkConfiguration;
 	private final NetworkManager networkManager;
 	private final ProcessManager processManager; // TODO submit via builder, ProcessManager interface
 	private final IUserManager userManager;
 	private final IFileManager fileManager;
-	private final IFileConfiguration fileConfiguration;
 
-	private NewH2HNode(H2HNodeBuilder builder) {
+	private H2HNode(H2HNodeBuilder builder) {
 		this.networkConfiguration = builder.networkConfiguration;
 		this.userManager = builder.userManager;
 		this.fileManager = builder.fileManager;
-		this.fileConfiguration = builder.fileConfiguration;
 
 		this.networkManager = new NetworkManager(networkConfiguration.getNodeID());
 		this.processManager = new ProcessManager(true);
@@ -60,11 +57,6 @@ public class NewH2HNode implements INewH2HNode {
 		return fileManager;
 	}
 
-	@Override
-	public IFileConfiguration getFileConfiguration() {
-		return fileConfiguration;
-	}
-
 	public static class H2HNodeBuilder {
 
 		// required
@@ -73,7 +65,6 @@ public class NewH2HNode implements INewH2HNode {
 		// optional
 		private IUserManager userManager;
 		private IFileManager fileManager;
-		private IFileConfiguration fileConfiguration;
 
 		public H2HNodeBuilder(INetworkConfiguration networkConfiguration) {
 			this.networkConfiguration = networkConfiguration;
@@ -84,14 +75,13 @@ public class NewH2HNode implements INewH2HNode {
 			return this;
 		}
 
-		public H2HNodeBuilder setFileManager(IFileManager fileManager, IFileConfiguration fileConfiguration) {
+		public H2HNodeBuilder setFileManager(IFileManager fileManager) {
 			this.fileManager = fileManager;
-			this.fileConfiguration = fileConfiguration;
 			return this;
 		}
 
-		public NewH2HNode build() {
-			return new NewH2HNode(this);
+		public H2HNode build() {
+			return new H2HNode(this);
 		}
 	}
 

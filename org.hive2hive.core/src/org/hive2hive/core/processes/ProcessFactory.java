@@ -187,6 +187,12 @@ public final class ProcessFactory {
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 		process.add(new WritePersistentStep(session.getFileManager()));
 
+		// TODO to be implemented:
+//		// stop all running processes
+//		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
+//		// quit the session
+//		networkManager.setSession(null);
+		
 		return process;
 	}
 

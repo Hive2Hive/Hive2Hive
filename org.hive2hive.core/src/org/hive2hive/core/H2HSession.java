@@ -2,6 +2,7 @@ package org.hive2hive.core;
 
 import java.security.KeyPair;
 
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;

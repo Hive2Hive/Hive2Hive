@@ -9,4 +9,6 @@ package org.hive2hive.core.api.interfaces;
 public interface IFileManager {
 
 	// TODO add methods
+	
+	IFileConfiguration getFileConfiguration();
 }

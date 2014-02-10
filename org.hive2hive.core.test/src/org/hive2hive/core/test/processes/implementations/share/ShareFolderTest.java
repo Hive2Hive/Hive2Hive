@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.IFileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;

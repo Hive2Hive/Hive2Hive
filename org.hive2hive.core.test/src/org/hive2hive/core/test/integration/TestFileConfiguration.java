@@ -1,6 +1,6 @@
 package org.hive2hive.core.test.integration;
 
-import org.hive2hive.core.IFileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 
 public class TestFileConfiguration implements IFileConfiguration {
 
