@@ -1,9 +1,13 @@
 package org.hive2hive.core.api.interfaces;
 
-import org.hive2hive.core.processes.ProcessManager;
+import org.hive2hive.core.api.ProcessManager;
 
 public interface INewH2HNode {
 
+	void connect();
+	
+	void disconnect();
+	
 	INetworkConfiguration getNetworkConfiguration();
 	
 	ProcessManager getProcessManager();
@@ -13,5 +17,7 @@ public interface INewH2HNode {
 	IFileManager getFileManager();
 	
 	IFileConfiguration getFileConfiguration();
+	
+	// TODO getStatus();
 	
 }
