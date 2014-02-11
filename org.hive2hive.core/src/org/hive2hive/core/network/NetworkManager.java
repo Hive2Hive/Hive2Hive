@@ -7,6 +7,7 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -41,7 +42,7 @@ public class NetworkManager {
 		this.messageManager = new MessageManager(this);
 		this.dataManager = new DataManager(this);
 	}
-
+	
 	public String getNodeId() {
 		return nodeId;
 	}
@@ -118,12 +119,23 @@ public class NetworkManager {
 		return session.getCredentials().getUserId();
 	}
 
+	public void connect(INetworkConfiguration netConfig) {
+		if (netConfig.isMasterPeer()) {
+			connect();
+		} else if (netConfig.getBootstrapPort() == -1) {
+			connect(netConfig.getBootstrapAddress());
+		} else {
+			connect(netConfig.getBootstrapAddress(),
+					netConfig.getBootstrapPort());
+		}
+	}
+
 	/**
 	 * Create a peer which will be the first node in the network (master).
 	 * 
 	 * @return <code>true</code> if creating master peer was successful, <code>false</code> if not
 	 */
-	public boolean connect() {
+	private boolean connect() {
 		return connection.connect();
 	}
 
@@ -134,7 +146,7 @@ public class NetworkManager {
 	 *            IP address to given bootstrapping peer
 	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
 	 */
-	public boolean connect(InetAddress bootstrapInetAddress) {
+	private boolean connect(InetAddress bootstrapInetAddress) {
 		return connection.connect(bootstrapInetAddress);
 	}
 
@@ -148,7 +160,7 @@ public class NetworkManager {
 	 *            port number to given bootstrapping peer
 	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
 	 */
-	public boolean connect(InetAddress bootstrapInetAddress, int port) {
+	private boolean connect(InetAddress bootstrapInetAddress, int port) {
 		return connection.connect(bootstrapInetAddress, port);
 	}
 

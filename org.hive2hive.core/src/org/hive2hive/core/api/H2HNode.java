@@ -4,42 +4,37 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.network.NetworkManager;
 
-public class H2HNode implements IH2HNode {
+public class H2HNode extends NetworkNode implements IH2HNode {
 
-	private final INetworkConfiguration networkConfiguration;
-	private final NetworkManager networkManager;
 	private final ProcessManager processManager; // TODO submit via builder, ProcessManager interface
 	private final IUserManager userManager;
 	private final IFileManager fileManager;
 
 	private H2HNode(H2HNodeBuilder builder) {
-		this.networkConfiguration = builder.networkConfiguration;
+		super(builder.networkConfiguration);
 		this.userManager = builder.userManager;
 		this.fileManager = builder.fileManager;
 
-		this.networkManager = new NetworkManager(networkConfiguration.getNodeID());
 		this.processManager = new ProcessManager(true);
 	}
-
+	
 	@Override
 	public void connect() {
-		if (networkConfiguration.isMasterPeer()) {
-			networkManager.connect();
-		} else {
-			networkManager.connect(networkConfiguration.getBootstrapAddress());
-		}
+		super.connect();
+		if (userManager != null)
+			userManager.connect();
+		if (fileManager != null)
+			fileManager.connect();
 	}
-
+	
 	@Override
 	public void disconnect() {
-		networkManager.disconnect();
-	}
-
-	@Override
-	public INetworkConfiguration getNetworkConfiguration() {
-		return networkConfiguration;
+		super.disconnect();
+		if (userManager != null)
+			userManager.disconnect();
+		if (fileManager != null)
+			fileManager.disconnect();
 	}
 
 	@Override

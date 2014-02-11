@@ -9,4 +9,6 @@ public interface INetworkConfiguration {
 	boolean isMasterPeer();
 
 	InetAddress getBootstrapAddress();
+	
+	int getBootstrapPort();
 }

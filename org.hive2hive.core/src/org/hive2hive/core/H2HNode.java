@@ -81,9 +81,9 @@ public class H2HNode implements IH2HNode, IFileConfiguration, IFileManagement, I
 
 		networkManager = new NetworkManager(UUID.randomUUID().toString());
 		if (isMasterPeer) {
-			networkManager.connect();
+//			networkManager.connect();
 		} else {
-			networkManager.connect(bootstrapAddress);
+//			networkManager.connect(bootstrapAddress);
 		}
 	}
 

@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 
-public interface IUserManager {
+public interface IUserManager extends INetworkNode {
 
 	IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException;
 	

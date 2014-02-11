@@ -3,25 +3,24 @@ package org.hive2hive.core.api;
 import java.nio.file.Path;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileManager;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
-public class UserManager implements IUserManager {
+public class UserManager extends NetworkNode implements IUserManager {
 
 	private final ProcessManager processManager;
-	private final NetworkManager networkManager;
 
-	public UserManager(ProcessManager processManager, NetworkManager networkManager) {
+	public UserManager(INetworkConfiguration networkConfiguration, ProcessManager processManager) {
+		super(networkConfiguration);
 		this.processManager = processManager;
-		this.networkManager = networkManager;
 	}
 
 	@Override

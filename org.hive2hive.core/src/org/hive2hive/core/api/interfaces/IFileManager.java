@@ -6,7 +6,7 @@ package org.hive2hive.core.api.interfaces;
  * @author Christian
  * 
  */
-public interface IFileManager {
+public interface IFileManager extends INetworkNode {
 
 	// TODO add methods
 	
