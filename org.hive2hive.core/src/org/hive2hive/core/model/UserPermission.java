@@ -31,4 +31,27 @@ public class UserPermission implements Serializable {
 	public String getUserId() {
 		return userId;
 	}
+
+	@Override
+	public int hashCode() {
+		return userId.hashCode() + permission.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof UserPermission) {
+			UserPermission other = (UserPermission) obj;
+			return userId.equals(other.getUserId()) && permission == other.permission;
+		}
+
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("UserPermission [");
+		sb.append("userId: ").append(userId);
+		sb.append(", permission: ").append(permission.name()).append("]");
+		return sb.toString();
+	}
 }

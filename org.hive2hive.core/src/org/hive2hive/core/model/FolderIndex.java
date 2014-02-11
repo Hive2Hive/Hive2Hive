@@ -157,6 +157,16 @@ public class FolderIndex extends Index {
 		userPermissions.remove(toDelete);
 	}
 
+	/**
+	 * Returns a list of the permissions for this node. Note that the returned permissions are not inherited
+	 * from nodes above; Only the assigned permissions for this node are returned.
+	 * 
+	 * @return the user permissions of this index.
+	 */
+	public List<UserPermission> getUserPermissions() {
+		return userPermissions;
+	}
+
 	@Override
 	public Set<String> getCalculatedUserList() {
 		// gather the own user list

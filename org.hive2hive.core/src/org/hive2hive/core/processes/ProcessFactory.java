@@ -395,7 +395,7 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(folder, context, context, networkManager));
 		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
-		process.add(new PrepareNotificationsStep(context));
+		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;

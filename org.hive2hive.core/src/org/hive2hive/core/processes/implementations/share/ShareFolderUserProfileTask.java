@@ -32,9 +32,14 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			return;
 		}
 
+		// TODO distinct if the receiver was the newly shared user or a user that has already this shared
+		// folder and just needs to add the new user permissions
 		logger.debug("Executing a shared folder user profile task.");
 
 		try {
+			/** Preparation: remove the own permission of the index because it's already in root */
+			sharedIndex.removeUserPermissions(networkManager.getUserId());
+
 			/** 1. add the tree to the root node in the user profile */
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			String pid = UUID.randomUUID().toString();
