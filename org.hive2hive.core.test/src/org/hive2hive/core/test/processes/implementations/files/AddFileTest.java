@@ -147,6 +147,16 @@ public class AddFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 40);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddRoot() throws NoSessionException, NoPeerConnectionException {
+		ProcessFactory.instance().createNewFileProcess(uploaderRoot, network.get(0));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddNull() throws NoSessionException, NoPeerConnectionException {
+		ProcessFactory.instance().createNewFileProcess(null, network.get(0));
+	}
+
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,
 			NoSessionException, NoPeerConnectionException {
 		// pick new client to test
