@@ -12,6 +12,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 
 public class ShareFolderUserProfileTask extends UserProfileTask {
@@ -37,10 +38,10 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		logger.debug("Executing a shared folder user profile task.");
 
 		try {
-			/** Preparation: remove the own permission of the index because it's already in root */
+			/** 1. Preparation: remove the own permission of the index because it's already in root */
 			sharedIndex.removeUserPermissions(networkManager.getUserId());
 
-			/** 1. add the tree to the root node in the user profile */
+			/** 2. add the tree to the root node in the user profile */
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			String pid = UUID.randomUUID().toString();
 			UserProfile userProfile = profileManager.getUserProfile(pid, true);
@@ -51,7 +52,11 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 			profileManager.readyToPut(userProfile, pid);
 			logger.debug("Added the newly shared folder to the own user profile");
 
-			/** 2. download the files that are now available */
+			/** 3. Notify others that files are available */
+			notifyOtherClients(new UploadNotificationMessageFactory(sharedIndex, null));
+			logger.debug("Notified other client that new (shared) files are available for download");
+
+			/** 4. download the files that are now available */
 			List<Index> fileList = FolderIndex.getIndexList(sharedIndex);
 			// the folder itself is also contained, so remove it
 			ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,

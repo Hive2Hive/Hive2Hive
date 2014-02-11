@@ -15,7 +15,7 @@ public class UploadNotificationMessageFactory extends BaseNotificationMessageFac
 	private final PublicKey parentKey;
 
 	/**
-	 * @param index the file that has been added
+	 * @param index the file that has been added (may contain sub-files)
 	 * @param parentKey the new parent's public key
 	 */
 	public UploadNotificationMessageFactory(Index index, PublicKey parentKey) {
@@ -25,7 +25,7 @@ public class UploadNotificationMessageFactory extends BaseNotificationMessageFac
 
 	@Override
 	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
-		return new UploadNotificationMessage(receiver, index.getFilePublicKey());
+		return new UploadNotificationMessage(receiver, index);
 	}
 
 	@Override
