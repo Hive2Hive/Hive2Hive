@@ -91,34 +91,6 @@ public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMet
 		return fileNodeKeys;
 	}
 
-	/**
-	 * Users that have access to the source folder (can overlap with destinations folder)s
-	 */
-	public void addUsersToNotifySource(Set<String> userIds) {
-		usersToNotifySource.addAll(userIds);
-	}
-
-	/**
-	 * Users to be notified that the file has been removed from the source folder
-	 */
-	public Set<String> getUsersToNotifySource() {
-		return usersToNotifySource;
-	}
-
-	/**
-	 * Users that have access to the destination folder (can overlap with source folder)
-	 */
-	public void addUsersToNotifyDestination(Set<String> userIds) {
-		usersToNotifyDestination.addAll(userIds);
-	}
-
-	/**
-	 * Users to be notified that the file has been added to the destination folder
-	 */
-	public Set<String> getUsersToNotifyDestination() {
-		return usersToNotifyDestination;
-	}
-
 	public MoveNotificationContext getMoveNotificationContext() {
 		return moveNotificationContext;
 	}

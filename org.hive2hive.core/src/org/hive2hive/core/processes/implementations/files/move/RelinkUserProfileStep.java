@@ -77,9 +77,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 			logger.debug("Successfully relinked the moved file in the user profile.");
 
 			// notify other users
-			initNotificationParameters(context.getUsersToNotifySource(),
-					context.getUsersToNotifyDestination(), movedNode, context.getSource().getName(), context
-							.getDestination().getName());
+			initNotificationParameters(oldParent.getCalculatedUserList(), movedNode);
 
 		} catch (NoSessionException | GetFailedException | PutFailedException e) {
 			throw new ProcessExecutionException(e);
@@ -92,21 +90,27 @@ public class RelinkUserProfileStep extends ProcessStep {
 	 * 2. users that don't have access to the file anymore
 	 * 3. users that now have access to the file but didn't have prior movement
 	 */
-	private void initNotificationParameters(Set<String> source, Set<String> destination, Index movedNode,
-			String sourceName, String destName) {
+	private void initNotificationParameters(Set<String> usersAtSource, Index movedNode) {
+		// the users at the destination
+		Set<String> usersAtDestination = movedNode.getCalculatedUserList();
+
 		// add all common users to a list
 		Set<String> common = new HashSet<String>();
-		for (String user : source) {
-			if (destination.contains(user))
+
+		for (String user : usersAtSource) {
+			if (usersAtDestination.contains(user))
 				common.add(user);
 		}
 
-		for (String user : destination) {
-			if (source.contains(user))
+		for (String user : usersAtDestination) {
+			if (usersAtSource.contains(user))
 				common.add(user);
 		}
 
+		// convenience fields
 		PublicKey fileKey = movedNode.getFilePublicKey();
+		String sourceName = context.getSource().getName();
+		String destName = context.getDestination().getName();
 
 		// inform common users
 		logger.debug("Inform " + common.size() + " users that a file has been moved");
@@ -117,20 +121,22 @@ public class RelinkUserProfileStep extends ProcessStep {
 		moveContext.provideUsersToNotify(common);
 
 		// inform users that don't have access to the new destination anymore
-		logger.debug("Inform " + source.size() + " users that a file has been removed (after movement)");
-		source.removeAll(common);
+		logger.debug("Inform " + usersAtSource.size()
+				+ " users that a file has been removed (after movement)");
+		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
 		deleteContext
 				.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, oldParentKey, sourceName));
-		deleteContext.provideUsersToNotify(source);
+		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file
-		logger.debug("Inform " + destination.size() + " users that a file has been added (after movement)");
-		destination.removeAll(common);
+		logger.debug("Inform " + usersAtDestination.size()
+				+ " users that a file has been added (after movement)");
+		usersAtDestination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
 		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode
 				.getParent().getFilePublicKey()));
-		addContext.provideUsersToNotify(destination);
+		addContext.provideUsersToNotify(usersAtDestination);
 	}
 
 	@Override
