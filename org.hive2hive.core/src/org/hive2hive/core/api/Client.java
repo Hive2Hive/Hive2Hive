@@ -45,5 +45,7 @@ public class Client {
 			e.printStackTrace();
 		}
 	
+		
+		node.disconnect();
 	}
 }

@@ -59,7 +59,7 @@ public class GetFileKeysStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		Index fileNode = profile.getFileByPath(file, session.getFileManager());
+		Index fileNode = profile.getFileByPath(file, session.getRoot());
 		if (fileNode == null) {
 			throw new ProcessExecutionException("File does not exist in user profile. Consider uploading a new file.");
 		}

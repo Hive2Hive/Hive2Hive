@@ -10,7 +10,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -89,8 +89,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		FileUtils.copyDirectory(root0, root1);
 
 		// write both versions to disc
-		uploader.getSession().getFileManager().writePersistentMetaData();
-		new FileManager(root1.toPath()).writePersistentMetaData();
+		FileUtil.writePersistentMetaData(uploader.getSession().getRoot());
+		FileUtil.writePersistentMetaData(root1.toPath());
 	}
 
 	@Test

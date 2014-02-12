@@ -8,7 +8,6 @@ import java.nio.file.StandardCopyOption;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -75,10 +74,9 @@ public class MoveOnDiskStep extends ProcessStep {
 			throw new IllegalArgumentException("Destination file already exists");
 		}
 
-		FileManager fileManager = networkManager.getSession().getFileManager();
-		if (!source.getAbsolutePath().startsWith(fileManager.getRoot().toString())) {
+		if (!source.getAbsolutePath().startsWith(networkManager.getSession().getRoot().toString())) {
 			throw new IllegalArgumentException("Source file is not in Hive2Hive directory. Use 'add'.");
-		} else if (!destination.getAbsolutePath().startsWith(fileManager.getRoot().toString())) {
+		} else if (!destination.getAbsolutePath().startsWith(networkManager.getSession().getRoot().toString())) {
 			throw new IllegalArgumentException("Destination file is not in Hive2Hive directory.");
 		}
 	}
@@ -86,11 +84,10 @@ public class MoveOnDiskStep extends ProcessStep {
 	private void getFileKeys() throws GetFailedException, InvalidProcessStateException, NoSessionException,
 			IllegalStateException {
 		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-		FileManager fileManager = networkManager.getSession().getFileManager();
 		UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 
 		// get the keys for the file to move
-		Index fileNode = userProfile.getFileByPath(context.getSource(), fileManager);
+		Index fileNode = userProfile.getFileByPath(context.getSource(), networkManager.getSession().getRoot());
 		if (fileNode == null) {
 			throw new IllegalStateException("File to move is not in user profile");
 		}

@@ -13,7 +13,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -52,7 +52,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 				return;
 
 			// remove the file on disk
-			removeFileOnDisk(session.getFileManager(), toDelete);
+			removeFileOnDisk(session.getRoot(), toDelete);
 
 			// notify others
 			startNotification(toDelete);
@@ -96,8 +96,8 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * @param fileManager
 	 * @param toDelete the {@link FolderIndex} to remove
 	 */
-	private void removeFileOnDisk(FileManager fileManager, Index toDelete) {
-		Path path = fileManager.getPath(toDelete);
+	private void removeFileOnDisk(Path root, Index toDelete) {
+		Path path = FileUtil.getPath(root, toDelete);
 		if (path == null) {
 			logger.error("Could not find the file to delete");
 		}

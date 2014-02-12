@@ -7,7 +7,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
 
@@ -81,8 +81,8 @@ public class UserProfile extends NetworkContent {
 		return found;
 	}
 
-	public Index getFileByPath(File file, FileManager fileManager) {
-		Path relativePath = fileManager.getRoot().relativize(file.toPath());
+	public Index getFileByPath(File file, Path root) {
+		Path relativePath = root.relativize(file.toPath());
 		return getFileByPath(relativePath);
 	}
 
@@ -92,7 +92,7 @@ public class UserProfile extends NetworkContent {
 	}
 
 	public Index getFileByPath(Path relativePath) {
-		String[] split = relativePath.toString().split(FileManager.getFileSep());
+		String[] split = relativePath.toString().split(FileUtil.getFileSep());
 		FolderIndex current = root;
 		for (int i = 0; i < split.length; i++) {
 			if (split[i].isEmpty()) {

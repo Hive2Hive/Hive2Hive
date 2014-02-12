@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.implementations.files.delete;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -46,14 +47,14 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 			H2HSession session = networkManager.getSession();
 			String pid = UUID.randomUUID().toString();
 
-			FileManager fileManager = session.getFileManager();
+			Path root = session.getRoot();
 			UserProfile userProfile = session.getProfileManager().getUserProfile(pid, false);
 			Index parentNode = userProfile.getFileById(parentFileKey);
 
 			if (parentNode == null) {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent");
 			} else {
-				boolean deleted = new File(fileManager.getPath(parentNode).toFile(), fileName).delete();
+				boolean deleted = new File(FileUtil.getPath(root, parentNode).toFile(), fileName).delete();
 				if (!deleted) {
 					throw new IOException("Could not delete the file");
 				}

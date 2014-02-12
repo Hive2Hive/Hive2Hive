@@ -12,7 +12,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
@@ -156,7 +155,7 @@ public class AddFileTest extends H2HJUnitTest {
 		UserProfile gotProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
-		Index node = gotProfile.getFileByPath(originalFile, new FileManager(uploaderRoot.toPath()));
+		Index node = gotProfile.getFileByPath(originalFile, uploaderRoot.toPath());
 		Assert.assertNotNull(node);
 
 		// verify the meta document

@@ -30,24 +30,25 @@ public class FileSynchronizer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileSynchronizer.class);
 
-	private final FileManager fileManager;
+	private final Path root;
 	private final UserProfile userProfile;
 
 	private final FolderIndex profileRootNode;
 	private final Map<String, byte[]> before;
 	private Map<String, byte[]> now;
 
-	public FileSynchronizer(FileManager fileManager, UserProfile userProfile) {
-		this.fileManager = fileManager;
+
+	public FileSynchronizer(Path rootDirectory, UserProfile userProfile) throws ClassNotFoundException, IOException {
+		this.root = rootDirectory;
 		this.userProfile = userProfile;
 		this.profileRootNode = userProfile.getRoot();
 
 		// load the two file trees
-		before = fileManager.getPersistentMetaData().getFileTree();
+		before = FileUtil.readPersistentMetaData(root).getFileTree();
 
-		PersistenceFileVisitor visitor = new PersistenceFileVisitor(fileManager.getRoot());
+		PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
 		try {
-			Files.walkFileTree(fileManager.getRoot(), visitor);
+			Files.walkFileTree(root, visitor);
 			now = visitor.getFileTree();
 		} catch (IOException e) {
 			logger.error("Cannot walk the current tree");
@@ -110,7 +111,7 @@ public class FileSynchronizer {
 				// is on disk but deleted in the user profile
 				if (H2HEncryptionUtil.compareMD5(before.get(p), now.get(p))) {
 					// only delete the file, if it was not modified locally
-					deletedRemotely.add(Paths.get(fileManager.getRoot().toString(), path.toString()));
+					deletedRemotely.add(Paths.get(root.toString(), path.toString()));
 				}
 			}
 		}
@@ -136,7 +137,7 @@ public class FileSynchronizer {
 			if (node == null) {
 				// not in profile --> it has been added locally
 				logger.debug("File '" + p + "' has been added locally during absence");
-				addedLocally.add(Paths.get(fileManager.getRoot().toString(), path.toString()));
+				addedLocally.add(Paths.get(root.toString(), path.toString()));
 			}
 		}
 
@@ -207,7 +208,7 @@ public class FileSynchronizer {
 			if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))
 					&& !H2HEncryptionUtil.compareMD5(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File '" + path + "' has been updated locally during absence");
-				updatedLocally.add(fileManager.getPath(fileNode));
+				updatedLocally.add(FileUtil.getPath(root, fileNode));
 			}
 		}
 

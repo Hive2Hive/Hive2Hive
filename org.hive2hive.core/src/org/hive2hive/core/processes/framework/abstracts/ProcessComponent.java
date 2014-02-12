@@ -2,11 +2,11 @@ package org.hive2hive.core.processes.framework.abstracts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
-import org.hive2hive.core.processes.framework.ProcessUtil;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -34,7 +34,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private final List<IProcessComponentListener> listener;
 
 	protected ProcessComponent() {
-		this.id = ProcessUtil.generateID();
+		this.id = UUID.randomUUID().toString();
 		this.progress = 0.0;
 		this.state = ProcessState.READY;
 

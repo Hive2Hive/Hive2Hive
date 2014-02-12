@@ -12,6 +12,7 @@ public class H2HNodeStatus implements IH2HNodeStatus {
 	private final boolean connected;
 	private final int numberOfProcesses;
 
+	// TODO needed anymore?
 	public H2HNodeStatus(File root, String userId, boolean connected, int numberOfProcesses) {
 		this.root = root;
 		this.userId = userId;

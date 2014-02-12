@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.file.PersistentMetaData;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -24,8 +24,8 @@ import org.junit.Test;
  */
 public class FileManagerTest extends H2HJUnitTest {
 
-	private FileManager fileManager;
-
+	private File root;
+	
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = FileManagerTest.class;
@@ -38,25 +38,24 @@ public class FileManagerTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void createFileManager() {
+	public void createRoot() {
 		String randomName = NetworkTestUtil.randomString();
-		File root = new File(System.getProperty("java.io.tmpdir"), randomName);
-		fileManager = new FileManager(root.toPath());
+		root = new File(System.getProperty("java.io.tmpdir"), randomName);
 	}
 
 	@After
 	public void cleanup() throws IOException {
-		FileUtils.deleteDirectory(fileManager.getRoot().toFile());
+		FileUtils.deleteDirectory(root);
 	}
 
 	@Test
-	public void testReadWriteMetaData() throws IOException {
+	public void testReadWriteMetaData() throws IOException, ClassNotFoundException {
 		String fileName = "test-file";
-		File file = new File(fileManager.getRoot().toFile(), fileName);
+		File file = new File(root, fileName);
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
 
-		fileManager.writePersistentMetaData();
-		PersistentMetaData persistentMetaData = fileManager.getPersistentMetaData();
+		FileUtil.writePersistentMetaData(root.toPath());
+		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());
 		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
 		Assert.assertTrue(fileTree.containsKey(fileName));
 	}

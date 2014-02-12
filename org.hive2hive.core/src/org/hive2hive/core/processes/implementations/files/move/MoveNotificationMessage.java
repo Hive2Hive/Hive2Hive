@@ -56,7 +56,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 
 			Index oldParent = userProfile.getFileById(oldParentKey);
 			Index newParent = userProfile.getFileById(newParentKey);
-			FileUtil.moveFile(sourceFileName, destFileName, oldParent, newParent, session.getFileManager());
+			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (NoSessionException | GetFailedException | IOException e) {
 			logger.error("Could not process the notification message", e);
 		}

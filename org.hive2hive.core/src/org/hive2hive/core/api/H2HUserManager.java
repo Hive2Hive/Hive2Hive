@@ -7,7 +7,6 @@ import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoNetworkException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
@@ -32,7 +31,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		// TODO refactor
 		SessionParameters params = new SessionParameters();
 		params.setProfileManager(new UserProfileManager(getNetworkManager(), credentials));
-		params.setFileManager(new FileManager(rootPath));
+		params.setRoot(rootPath);
 		params.setFileConfig(fileConfig);
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params,

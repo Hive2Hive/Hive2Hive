@@ -67,7 +67,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 			// add to the new parent
 			FolderIndex newParent = (FolderIndex) userProfile.getFileByPath(context.getDestination()
-					.getParentFile(), networkManager.getSession().getFileManager());
+					.getParentFile(), networkManager.getSession().getRoot());
 			movedNode.setParent(newParent);
 			newParent.addChild(movedNode);
 

@@ -114,7 +114,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGet() {
+	public void testPutGet() throws IOException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -138,7 +138,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	// TODO how to test this?
 	@Ignore
 	@Test
-	public void testPutGetRollback() {
+	public void testPutGetRollback() throws IOException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -155,7 +155,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGetRemove() throws NoPeerConnectionException {
+	public void testPutGetRemove() throws NoPeerConnectionException, IOException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -234,7 +234,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testCorrectOrder() throws DataLengthException, InvalidKeyException, IllegalStateException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException {
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException, IOException {
 		String userId = NetworkTestUtil.randomString();
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);

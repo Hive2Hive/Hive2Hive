@@ -2,6 +2,7 @@ package org.hive2hive.core.test.processes.implementations.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -12,7 +13,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
@@ -50,7 +50,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	private final IFileConfiguration config = new TestFileConfiguration();
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;
-	private FileManager fileManagerUploader;
+	private Path root;
 	private File file;
 
 	private NetworkManager uploader;
@@ -75,7 +75,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// create the roots and the file manager
 		File rootUploader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		fileManagerUploader = new FileManager(rootUploader.toPath());
+		root = rootUploader.toPath();
 		File rootDownloader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 
 		// register a user
@@ -134,7 +134,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify if the md5 hash did not change
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		FileIndex fileNode = (FileIndex) userProfile.getFileByPath(file, fileManagerUploader);
+		FileIndex fileNode = (FileIndex) userProfile.getFileByPath(file, root);
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
 
 		// verify that only one version was created
@@ -147,7 +147,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	public void testNewFolderVersion() throws IllegalFileLocation, NoSessionException,
 			NoPeerConnectionException {
 		// new folder version is illegal
-		File folder = new File(fileManagerUploader.getRoot().toFile(), "test-folder");
+		File folder = new File(root.toFile(), "test-folder");
 		folder.mkdir();
 
 		// upload the file
@@ -186,7 +186,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		H2HSession session = uploader.getSession();
 		H2HSession newSession = new H2HSession(session.getKeyPair(), session.getProfileManager(),
-				limitingConfig, session.getFileManager());
+				limitingConfig, session.getRoot());
 		uploader.setSession(newSession);
 
 		// update the file
@@ -195,7 +195,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		Index fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		Index fileNode = userProfile.getFileByPath(file, root);
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
 				.getMetaDocument(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
@@ -231,7 +231,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		H2HSession session = uploader.getSession();
 		H2HSession newSession = new H2HSession(session.getKeyPair(), session.getProfileManager(),
-				limitingConfig, session.getFileManager());
+				limitingConfig, session.getRoot());
 		uploader.setSession(newSession);
 
 		// update the file (append some data)
@@ -242,7 +242,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
-		Index fileNode = userProfile.getFileByPath(file, fileManagerUploader);
+		Index fileNode = userProfile.getFileByPath(file, root);
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
 				.getMetaDocument(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
@@ -251,7 +251,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	@After
 	public void deleteAndShutdown() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(fileManagerUploader.getRoot().toFile());
+		FileUtils.deleteDirectory(root.toFile());
 	}
 
 	@AfterClass

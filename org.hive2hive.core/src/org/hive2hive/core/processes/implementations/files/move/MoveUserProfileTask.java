@@ -75,7 +75,7 @@ public class MoveUserProfileTask extends UserProfileTask {
 			profileManager.readyToPut(userProfile, randomPID);
 
 			// move the file on disk
-			FileUtil.moveFile(sourceFileName, destFileName, oldParent, newParent, session.getFileManager());
+			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (Hive2HiveException | IOException e) {
 			logger.error("Could not process the user profile task", e);
 		}

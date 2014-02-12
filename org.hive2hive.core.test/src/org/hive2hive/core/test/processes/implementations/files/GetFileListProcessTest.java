@@ -13,7 +13,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -39,7 +38,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 	private static List<NetworkManager> network;
 	private static UserCredentials credentials;
 	private static File root;
-	private static FileManager fileManager;
+	private static Path rootPath;
 	private static IFileConfiguration fileConfig;
 
 	@BeforeClass
@@ -60,7 +59,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 
 		// files
 		root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		fileManager = new FileManager(root.toPath());
+		rootPath = root.toPath();
 		fileConfig = new TestFileConfiguration();
 	}
 
@@ -69,7 +68,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		super.afterMethod();
 
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(fileManager.getRoot().toFile());
+		FileUtils.deleteDirectory(rootPath.toFile());
 	}
 
 	@AfterClass
@@ -88,7 +87,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		params.setKeyPair(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS));
 		params.setProfileManager(profileManager);
 		params.setFileConfig(fileConfig);
-		params.setFileManager(fileManager);
+		params.setRoot(rootPath);
 
 		H2HSession session = new H2HSession(params);
 		client.setSession(session);

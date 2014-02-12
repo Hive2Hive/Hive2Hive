@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 
 /**
  * An index stored in the user profile that represents a folder in the directory. It has some additional
@@ -88,7 +88,7 @@ public class FolderIndex extends Index {
 	// TODO get child by full path??
 	public Index getChildByName(String name) {
 		if (name != null) {
-			String withoutSeparator = name.replaceAll(FileManager.getFileSep(), "");
+			String withoutSeparator = name.replaceAll(FileUtil.getFileSep(), "");
 			for (Index child : children) {
 				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
 					return child;

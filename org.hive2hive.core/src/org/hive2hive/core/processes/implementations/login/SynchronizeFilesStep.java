@@ -1,5 +1,6 @@
 package org.hive2hive.core.processes.implementations.login;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.concurrent.CountDownLatch;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.file.FileSynchronizer;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -58,10 +58,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		UserProfileManager profileManager;
-		FileManager fileManager;
 		try {
 			profileManager = networkManager.getSession().getProfileManager();
-			fileManager = networkManager.getSession().getFileManager();
 		} catch (NoSessionException e) {
 			throw new ProcessExecutionException(e);
 		}
@@ -73,7 +71,12 @@ public class SynchronizeFilesStep extends ProcessStep {
 			throw new ProcessExecutionException("User profile could not be loaded.");
 		}
 
-		FileSynchronizer synchronizer = new FileSynchronizer(fileManager, profile);
+		FileSynchronizer synchronizer;
+		try {
+			synchronizer = new FileSynchronizer(networkManager.getSession().getRoot(), profile);
+		} catch (ClassNotFoundException | NoSessionException | IOException e) {
+			throw new ProcessExecutionException("FileSynchronizer could not be instantiated.", e);
+		}
 		try {
 			synchronizeFiles(synchronizer);
 		} catch (NoSessionException e) {
