@@ -20,7 +20,7 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 
-public class H2HFileManager extends NetworkComponent implements IFileManager {
+public class H2HFileManager extends H2HManager implements IFileManager {
 
 	private final IFileConfiguration fileConfiguration;
 
@@ -41,7 +41,7 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 			addProcess = ProcessFactory.instance().createNewFileProcess(file, getNetworkManager());
 		}
 
-//		node.getProcessManager().submit(addProcess);
+		submitProcess(addProcess);
 		return addProcess;
 	}
 
@@ -51,8 +51,8 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 
 		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file,
 				getNetworkManager());
-
-//		node.getProcessManager().submit(updateProcess);
+		
+		submitProcess(updateProcess);
 		return updateProcess;
 
 	}
@@ -64,7 +64,7 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
 				getNetworkManager());
 
-//		node.getProcessManager().submit(moveProcess);
+		submitProcess(moveProcess);
 		return moveProcess;
 	}
 
@@ -81,7 +81,7 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 			deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, getNetworkManager());
 		}
 
-//		node.getProcessManager().submit(deleteProcess);
+		submitProcess(deleteProcess);
 		return deleteProcess;
 	}
 
@@ -93,7 +93,7 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file,
 				versionSelector, getNetworkManager());
 
-//		node.getProcessManager().submit(recoverProcess);
+		submitProcess(recoverProcess);
 		return recoverProcess;
 	}
 
@@ -105,7 +105,7 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 		IProcessComponent shareProcess = ProcessFactory.instance().createShareProcess(folder,
 				new UserPermission(userId, permission), getNetworkManager());
 
-//		node.getProcessManager().submit(shareProcess);
+		submitProcess(shareProcess);
 		return shareProcess;
 	}
 
@@ -114,8 +114,8 @@ public class H2HFileManager extends NetworkComponent implements IFileManager {
 
 		IResultProcessComponent<List<Path>> fileListProcess = ProcessFactory.instance()
 				.createFileListProcess(getNetworkManager());
-		
-//		node.getProcessManager().submit(fileListProcess);
+
+		submitProcess(fileListProcess);
 		return fileListProcess;
 	}
 

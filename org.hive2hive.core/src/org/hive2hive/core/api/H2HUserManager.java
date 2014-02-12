@@ -14,7 +14,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
-public class H2HUserManager extends NetworkComponent implements IUserManager {
+public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public IProcessComponent register(UserCredentials credentials) throws NoNetworkException,
@@ -22,7 +22,7 @@ public class H2HUserManager extends NetworkComponent implements IUserManager {
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
 				getNetworkManager());
 
-		// node.getProcessManager().submit(registerProcess);
+		submitProcess(registerProcess);
 		return registerProcess;
 	}
 
@@ -38,7 +38,7 @@ public class H2HUserManager extends NetworkComponent implements IUserManager {
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params,
 				getNetworkManager());
 
-		// node.getProcessManager().submit(loginProcess);
+		submitProcess(loginProcess);
 		return loginProcess;
 	}
 
@@ -47,7 +47,7 @@ public class H2HUserManager extends NetworkComponent implements IUserManager {
 			NoSessionException {
 		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(getNetworkManager());
 
-		// node.getProcessManager().submit(logoutProcess);
+		submitProcess(logoutProcess);
 		return logoutProcess;
 	}
 

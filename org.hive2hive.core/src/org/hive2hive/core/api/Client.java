@@ -20,11 +20,12 @@ public class Client {
 				InetAddress.getLocalHost());
 		IFileConfiguration fileConfig = FileConfiguration.createDefault();
 
-		ProcessManager processManager = new ProcessManager(true);
-		
 		// components
-		H2HFileManager fileManager = new H2HFileManager(fileConfig);
 		H2HUserManager userManager = new H2HUserManager();
+		userManager.configureAutostart(true);
+
+		H2HFileManager fileManager = new H2HFileManager(fileConfig);
+		fileManager.configureAutostart(false);
 		
 		// node
 		H2HNode node = new H2HNode(networkConfig);

@@ -8,11 +8,9 @@ public class H2HNode {
 
 	// TODO atm, this class is just a wrapper for the NetworkManager
 	private final NetworkManager networkManager;
-	private final ProcessManager processManager;
 	
 	public H2HNode(INetworkConfiguration networkConfiguration) {
 		networkManager = new NetworkManager(networkConfiguration);
-		processManager = new ProcessManager(true);
 	}
 	
 	public void attach(INetworkComponent component) {
