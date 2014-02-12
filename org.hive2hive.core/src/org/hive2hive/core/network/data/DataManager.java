@@ -93,7 +93,8 @@ public class DataManager implements IDataManager {
 						content.getVersionKey(), newProtectionKey != null));
 		try {
 			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
+			data.ttlSeconds(content.getTimeToLive());
+			data.basedOn(content.getBasedOnKey());
 			if (newProtectionKey == null) {
 				// the content won't be protected after this put
 				if (oldProtectionKey == null) {
@@ -126,54 +127,6 @@ public class DataManager implements IDataManager {
 			return null;
 		}
 	}
-
-	// public boolean changeProtectionKey(String locationKey, String contentKey, NetworkContent content,
-	// KeyPair oldProtectionKey, KeyPair newProtectionKey) {
-	// Number160 lKey = Number160.createHash(locationKey);
-	// Number160 cKey = Number160.createHash(contentKey);
-	// Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
-	// FuturePut changeFuture = changeProtectionKey(lKey, cKey, dKey, content, oldProtectionKey,
-	// newProtectionKey);
-	// if (changeFuture == null) {
-	// return false;
-	// }
-	//
-	// FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, content, newProtectionKey, this);
-	// changeFuture.addListener(listener);
-	// return listener.await();
-	// }
-
-	// public FuturePut changeProtectionKey(Number160 locationKey, Number160 contentKey, Number160 domainKey,
-	// NetworkContent content, KeyPair oldProtectionKey, KeyPair newProtectionKey) {
-	// if (oldProtectionKey == null) {
-	// logger.error("Cannot change the protection key when the original key is not given");
-	// return null;
-	// }
-	//
-	// logger.debug(String
-	// .format("change protection key content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-	// content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
-	// content.getVersionKey()));
-	//
-	// try {
-	// Data data = new Data(content);
-	// data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
-	// if (newProtectionKey == null) {
-	// return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-	// .setVersionKey(content.getVersionKey()).start();
-	// } else {
-	// data.setProtectedEntry().sign(newProtectionKey);
-	// return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-	// .setVersionKey(content.getVersionKey()).keyPair(oldProtectionKey).start();
-	// }
-	// } catch (IOException | InvalidKeyException | SignatureException e) {
-	// logger.error(String
-	// .format("Chanign protection key failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s' exception = '%s'",
-	// locationKey, domainKey, contentKey, content.getVersionKey(), e.getMessage()));
-	// return null;
-	// }
-	//
-	// }
 
 	@Override
 	public NetworkContent get(String locationKey, String contentKey) {
