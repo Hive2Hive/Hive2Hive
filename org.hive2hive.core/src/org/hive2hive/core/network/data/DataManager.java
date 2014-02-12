@@ -103,9 +103,6 @@ public class DataManager implements IDataManager {
 				} else {
 					// previous content was protected, now it should be unprotected.
 					// TODO TomP2P does not support this yet
-					// data.setProtectedEntry().sign(oldProtectionKey);
-					// return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-					// .setVersionKey(content.getVersionKey()).start();
 					return null;
 				}
 			} else {

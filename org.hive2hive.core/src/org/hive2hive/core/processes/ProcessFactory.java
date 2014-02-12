@@ -19,7 +19,6 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
@@ -111,7 +110,7 @@ public final class ProcessFactory {
 	 * @return A registration process.
 	 * @throws NoPeerConnectionException
 	 */
-	public IProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
+	public ProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		UserProfile profile = new UserProfile(credentials.getUserId());
 		DataManager dataManager = networkManager.getDataManager();
@@ -174,7 +173,7 @@ public final class ProcessFactory {
 	 * @throws NoPeerConnectionException
 	 * @throws NoSessionException
 	 */
-	public IProcessComponent createLogoutProcess(NetworkManager networkManager)
+	public ProcessComponent createLogoutProcess(NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();

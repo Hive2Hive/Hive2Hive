@@ -116,14 +116,17 @@ public abstract class Index implements Comparable<Index>, Serializable {
 		}
 
 		if (this instanceof FileIndex) {
-			// is not shared and is of type files (this has no children)
+			// is not shared and is of type 'file'
 			return false;
 		} else {
-			// is of type 'folder', check all children
+			// is of type 'folder', check all subfolders
 			List<Index> children = getIndexList(this);
 			for (Index child : children) {
-				if (child.isShared()) {
-					return true;
+				if (child.isFolder()) {
+					FolderIndex subfolder = (FolderIndex) child;
+					if (subfolder.getSharedFlag()) {
+						return true;
+					}
 				}
 			}
 		}
