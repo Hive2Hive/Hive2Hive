@@ -1,83 +1,29 @@
 package org.hive2hive.core.api;
 
-import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.api.interfaces.IH2HNode;
-import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.api.interfaces.IUserManager;
+import org.hive2hive.core.api.configs.INetworkConfiguration;
+import org.hive2hive.core.api.interfaces.INetworkComponent;
+import org.hive2hive.core.network.NetworkManager;
 
-public class H2HNode extends NetworkNode implements IH2HNode {
+public class H2HNode {
 
-	private final ProcessManager processManager; // TODO submit via builder, ProcessManager interface
-	private final IUserManager userManager;
-	private final IFileManager fileManager;
-
-	private H2HNode(H2HNodeBuilder builder) {
-		super(builder.networkConfiguration);
-		this.userManager = builder.userManager;
-		this.fileManager = builder.fileManager;
-
-		this.processManager = new ProcessManager(true);
-	}
+	//TODO atm, this class is just a wrapper for the NetworkManager
+	private NetworkManager networkManager;
+	private final ProcessManager processManager;
 	
-	@Override
-	public void connect() {
-		super.connect();
-		if (userManager != null)
-			userManager.connect();
-		if (fileManager != null)
-			fileManager.connect();
+	public H2HNode() {
+		processManager = new ProcessManager(true);
 	}
-	
-	@Override
+
+	public void connect(INetworkConfiguration networkConfiguration) {
+		networkManager = new NetworkManager(networkConfiguration);
+	}
+
 	public void disconnect() {
-		super.disconnect();
-		if (userManager != null)
-			userManager.disconnect();
-		if (fileManager != null)
-			fileManager.disconnect();
+		networkManager.disconnect();
 	}
 
-	@Override
-	public ProcessManager getProcessManager() {
-		return processManager;
-	}
-
-	@Override
-	public IUserManager getUserManager() {
-		return userManager;
-	}
-
-	@Override
-	public IFileManager getFileManager() {
-		return fileManager;
-	}
-
-	public static class H2HNodeBuilder {
-
-		// required
-		private final INetworkConfiguration networkConfiguration;
-
-		// optional
-		private IUserManager userManager;
-		private IFileManager fileManager;
-
-		public H2HNodeBuilder(INetworkConfiguration networkConfiguration) {
-			this.networkConfiguration = networkConfiguration;
-		}
-
-		public H2HNodeBuilder setUserManager(IUserManager userManager) {
-			this.userManager = userManager;
-			return this;
-		}
-
-		public H2HNodeBuilder setFileManager(IFileManager fileManager) {
-			this.fileManager = fileManager;
-			return this;
-		}
-
-		public H2HNode build() {
-			return new H2HNode(this);
-		}
+	public void attach(INetworkComponent component) {
+		component.setNetworkManager(networkManager);
 	}
 
 }

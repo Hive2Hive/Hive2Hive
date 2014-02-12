@@ -121,7 +121,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	@Override
 	public AcceptanceReply accept() {
-		if (networkManager.getPeerAddress().equals(targetAddress)) {
+		if (networkManager.getConnection().getPeer().getPeerAddress().equals(targetAddress)) {
 			return AcceptanceReply.OK;
 		}
 		return AcceptanceReply.WRONG_TARGET;

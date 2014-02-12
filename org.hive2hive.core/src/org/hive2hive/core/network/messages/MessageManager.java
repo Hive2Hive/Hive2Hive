@@ -141,7 +141,7 @@ public final class MessageManager implements IMessageManager {
 	}
 
 	private void prepareMessage(BaseMessage message) {
-		message.setSenderAddress(networkManager.getPeerAddress());
+		message.setSenderAddress(networkManager.getConnection().getPeer().getPeerAddress());
 		configureCallbackHandlerIfNeeded(message);
 		setSenderPublicKeyIfNeeded(message);
 	}

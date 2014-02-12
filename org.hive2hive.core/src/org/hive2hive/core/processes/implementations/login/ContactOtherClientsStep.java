@@ -52,7 +52,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		if (!locations.getPeerAddresses().isEmpty()) {
 			for (PeerAddress address : locations.getPeerAddresses()) {
 				// contact all other clients (exclude self)
-				if (!address.equals(networkManager.getPeerAddress())) {
+				if (!address.equals(networkManager.getConnection().getPeer().getPeerAddress())) {
 					String evidence = UUID.randomUUID().toString();
 					evidences.put(address, evidence);
 
@@ -111,13 +111,13 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 				updatedLocations.addPeerAddress(address);
 			}
 		}
-		updatedLocations.addPeerAddress(networkManager.getPeerAddress());
+		updatedLocations.addPeerAddress(networkManager.getConnection().getPeer().getPeerAddress());
 		context.provideLocations(updatedLocations);
 
 		// evaluate if master
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
 
-		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(networkManager.getPeerAddress())) {
+		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(networkManager.getConnection().getPeer().getPeerAddress())) {
 			context.setIsMaster(true);
 		} else {
 			context.setIsMaster(false);

@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;

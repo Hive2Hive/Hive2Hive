@@ -68,7 +68,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		newLocations.addPeerAddress(putter.getPeerAddress());
+		newLocations.addPeerAddress(putter.getConnection().getPeer().getPeerAddress());
 		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
 
 		// initialize the process and the one and only step to test
@@ -87,7 +87,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		Assert.assertEquals(userId, found.getUserId());
 
 		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(found.getPeerAddresses());
-		Assert.assertEquals(putter.getPeerAddress(), onlinePeers.get(0));
+		Assert.assertEquals(putter.getConnection().getPeer().getPeerAddress(), onlinePeers.get(0));
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		newLocations.addPeerAddress(putter.getPeerAddress());
+		newLocations.addPeerAddress(putter.getConnection().getPeer().getPeerAddress());
 		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
 
 		// initialize the process and the one and only step to test

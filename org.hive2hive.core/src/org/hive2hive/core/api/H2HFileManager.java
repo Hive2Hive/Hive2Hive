@@ -5,10 +5,10 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoNetworkException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
@@ -20,107 +20,102 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 
-public class FileManager extends NetworkNode implements IFileManager {
+public class H2HFileManager extends NetworkComponent implements IFileManager {
 
 	private final IFileConfiguration fileConfiguration;
-	private final ProcessManager processManager;
 
-	public FileManager(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			ProcessManager processManager) {
-		super(networkConfiguration);
+	public H2HFileManager(IFileConfiguration fileConfiguration) {
 		this.fileConfiguration = fileConfiguration;
-		this.processManager = processManager;
 	}
 
 	@Override
-	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException, NoNetworkException {
 
 		IProcessComponent addProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE,
-					networkManager);
+			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE, getNetworkManager());
 		} else {
 			// add single file
-			addProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
+			addProcess = ProcessFactory.instance().createNewFileProcess(file, getNetworkManager());
 		}
 
-		processManager.submit(addProcess);
+//		node.getProcessManager().submit(addProcess);
 		return addProcess;
 	}
 
 	@Override
 	public IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoNetworkException {
 
 		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file,
-				networkManager);
+				getNetworkManager());
 
-		processManager.submit(updateProcess);
+//		node.getProcessManager().submit(updateProcess);
 		return updateProcess;
 
 	}
 
 	@Override
 	public IProcessComponent move(File source, File destination) throws NoSessionException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoNetworkException {
 
 		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
-				networkManager);
+				getNetworkManager());
 
-		processManager.submit(moveProcess);
+//		node.getProcessManager().submit(moveProcess);
 		return moveProcess;
 	}
 
 	@Override
-	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException, NoNetworkException {
 
 		IProcessComponent deleteProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			deleteProcess = FileRecursionUtil.buildDeletionProcess(preorderList, networkManager);
+			deleteProcess = FileRecursionUtil.buildDeletionProcess(preorderList, getNetworkManager());
 		} else {
 			// delete a single file
-			deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
+			deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, getNetworkManager());
 		}
 
-		processManager.submit(deleteProcess);
+//		node.getProcessManager().submit(deleteProcess);
 		return deleteProcess;
 	}
 
 	@Override
 	public IProcessComponent recover(File file, IVersionSelector versionSelector)
 			throws FileNotFoundException, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoNetworkException {
 
 		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file,
-				versionSelector, networkManager);
+				versionSelector, getNetworkManager());
 
-		processManager.submit(recoverProcess);
+//		node.getProcessManager().submit(recoverProcess);
 		return recoverProcess;
 	}
 
 	@Override
 	public IProcessComponent share(File folder, String userId, PermissionType permission)
 			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoNetworkException {
 
 		IProcessComponent shareProcess = ProcessFactory.instance().createShareProcess(folder,
-				new UserPermission(userId, permission), networkManager);
+				new UserPermission(userId, permission), getNetworkManager());
 
-		processManager.submit(shareProcess);
+//		node.getProcessManager().submit(shareProcess);
 		return shareProcess;
 	}
 
 	@Override
-	public IResultProcessComponent<List<Path>> getFileList() {
+	public IResultProcessComponent<List<Path>> getFileList() throws NoNetworkException {
 
 		IResultProcessComponent<List<Path>> fileListProcess = ProcessFactory.instance()
-				.createFileListProcess(networkManager);
+				.createFileListProcess(getNetworkManager());
 		
-		processManager.submit(fileListProcess);
+//		node.getProcessManager().submit(fileListProcess);
 		return fileListProcess;
 	}
 

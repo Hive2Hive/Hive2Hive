@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;

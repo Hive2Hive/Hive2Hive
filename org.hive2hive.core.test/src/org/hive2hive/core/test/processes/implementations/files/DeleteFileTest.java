@@ -11,7 +11,7 @@ import net.tomp2p.peers.Number160;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
