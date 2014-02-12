@@ -17,9 +17,8 @@ import org.hive2hive.core.security.UserCredentials;
 public class H2HUserManager extends NetworkComponent implements IUserManager {
 
 	@Override
-	public IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException,
-			NoNetworkException {
-
+	public IProcessComponent register(UserCredentials credentials) throws NoNetworkException,
+			NoPeerConnectionException {
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
 				getNetworkManager());
 
@@ -29,8 +28,7 @@ public class H2HUserManager extends NetworkComponent implements IUserManager {
 
 	@Override
 	public IProcessComponent login(UserCredentials credentials, IFileConfiguration fileConfig, Path rootPath)
-			throws NoPeerConnectionException, NoNetworkException {
-
+			throws NoNetworkException, NoPeerConnectionException {
 		// TODO refactor
 		SessionParameters params = new SessionParameters();
 		params.setProfileManager(new UserProfileManager(getNetworkManager(), credentials));
@@ -45,9 +43,8 @@ public class H2HUserManager extends NetworkComponent implements IUserManager {
 	}
 
 	@Override
-	public IProcessComponent logout() throws NoPeerConnectionException, NoSessionException,
-			NoNetworkException {
-
+	public IProcessComponent logout() throws NoNetworkException, NoPeerConnectionException,
+			NoSessionException {
 		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(getNetworkManager());
 
 		// node.getProcessManager().submit(logoutProcess);

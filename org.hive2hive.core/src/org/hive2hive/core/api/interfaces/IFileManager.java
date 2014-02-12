@@ -16,7 +16,7 @@ import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 
 /**
- * Basic interface for all file operations of the Hive2Hive core project.
+ * Basic interface for all file operations.
  * 
  * @author Christian
  * 

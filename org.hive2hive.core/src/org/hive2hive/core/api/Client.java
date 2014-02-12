@@ -7,31 +7,42 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.api.configs.INetworkConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
+import org.hive2hive.core.exceptions.NoNetworkException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.security.UserCredentials;
 
 public class Client {
 
 	public Client() throws UnknownHostException {
 
+		// configs
 		INetworkConfiguration networkConfig = NetworkConfiguration.create("nodeID",
 				InetAddress.getLocalHost());
 		IFileConfiguration fileConfig = FileConfiguration.createDefault();
 
 		ProcessManager processManager = new ProcessManager(true);
-
-//		INetworkNode node = new H2HNode(networkConfig);
-//
-//		IUserManager userManager = new H2HUserManager();
-//		node.attach(userManager);
-//
-//		IFileManager fileManager = new H2HFileManager(fileConfig);
 		
+		// components
+		H2HFileManager fileManager = new H2HFileManager(fileConfig);
+		H2HUserManager userManager = new H2HUserManager();
 		
+		// node
+		H2HNode node = new H2HNode(networkConfig);
+		node.attach(userManager);
+		node.attach(fileManager);
+		node.connect();
 		
-
-		// IH2HNode node = new H2HNode.H2HNodeBuilder(networkConfig).setUserManager(userManager)
-		// .setFileManager(fileManager).build();
-		// node.connect();
-		// node.disconnect();
-
+		// operations
+		UserCredentials credentials = new UserCredentials("biocoder", "pw", "123456");
+		
+		// TODO avoid multi-try-catch blocks, e.g. throw only a H2HException wrapper
+		try {
+			userManager.register(credentials);
+		} catch (NoNetworkException e) {
+			e.printStackTrace();
+		} catch (NoPeerConnectionException e) {
+			e.printStackTrace();
+		}
+	
 	}
 }

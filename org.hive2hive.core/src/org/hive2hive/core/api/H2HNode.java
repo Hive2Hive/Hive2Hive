@@ -6,24 +6,25 @@ import org.hive2hive.core.network.NetworkManager;
 
 public class H2HNode {
 
-	//TODO atm, this class is just a wrapper for the NetworkManager
-	private NetworkManager networkManager;
+	// TODO atm, this class is just a wrapper for the NetworkManager
+	private final NetworkManager networkManager;
 	private final ProcessManager processManager;
 	
-	public H2HNode() {
+	public H2HNode(INetworkConfiguration networkConfiguration) {
+		networkManager = new NetworkManager(networkConfiguration);
 		processManager = new ProcessManager(true);
 	}
+	
+	public void attach(INetworkComponent component) {
+		component.setNetworkManager(networkManager);
+	}
 
-	public void connect(INetworkConfiguration networkConfiguration) {
-		networkManager = new NetworkManager(networkConfiguration);
+	public void connect() {
+		networkManager.connect();
 	}
 
 	public void disconnect() {
 		networkManager.disconnect();
-	}
-
-	public void attach(INetworkComponent component) {
-		component.setNetworkManager(networkManager);
 	}
 
 }

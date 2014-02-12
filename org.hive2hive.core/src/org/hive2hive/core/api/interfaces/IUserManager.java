@@ -9,14 +9,20 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 
-public interface IUserManager extends INetworkComponent {
+/**
+ * Basic interface for all user operations.
+ * 
+ * @author Christian
+ * 
+ */
+public interface IUserManager {
 
-	IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException, NoNetworkException;
+	IProcessComponent register(UserCredentials credentials) throws NoNetworkException, NoPeerConnectionException;
 	
 	// TODO the file root path should not be part of this interface, but be placed in IFileManagement
-	IProcessComponent login(UserCredentials credentials, IFileConfiguration fileConfig, Path rootPath) throws NoPeerConnectionException, NoNetworkException;
+	IProcessComponent login(UserCredentials credentials, IFileConfiguration fileConfig, Path rootPath) throws NoNetworkException, NoPeerConnectionException;
 	
 	// TODO why not logout with credentials as well?
-	IProcessComponent logout() throws NoPeerConnectionException, NoSessionException, NoNetworkException;
+	IProcessComponent logout() throws NoNetworkException, NoPeerConnectionException, NoSessionException;
 
 }
