@@ -192,12 +192,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 		this.listener.remove(listener);
 	}
 
-	/**
-	 * Getter for the {@link ProcessComponent}'s {@link IProcessComponentListener}s.
-	 * @return The {@link IProcessComponentListener} attached to this {@link ProcessComponent}.
-	 */
+	@Override
 	public List<IProcessComponentListener> getListener() {
-		return listener; // TODO copy before return?
+		return listener;
 	}
 
 	@Override

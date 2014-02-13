@@ -11,10 +11,10 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.Process;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
 /**
@@ -48,7 +48,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 	private boolean componentFailed = false;
 	private RollbackReason result = null;
 
-	public AsyncComponent(ProcessComponent decoratedComponent) {
+	public AsyncComponent(IProcessComponent decoratedComponent) {
 		super(decoratedComponent);
 
 		asyncExecutor = Executors.newSingleThreadExecutor();

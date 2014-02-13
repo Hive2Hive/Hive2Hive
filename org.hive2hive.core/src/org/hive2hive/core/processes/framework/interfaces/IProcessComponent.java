@@ -1,5 +1,7 @@
 package org.hive2hive.core.processes.framework.interfaces;
 
+import java.util.List;
+
 import org.hive2hive.core.processes.framework.ProcessState;
 
 /**
@@ -25,6 +27,12 @@ public interface IProcessComponent extends IControllable {
 	 */
 	void detachListener(IProcessComponentListener listener);
 
+	/**
+	 * Getter for the {@link IProcessComponent}'s {@link IProcessComponentListener}s.
+	 * @return The {@link IProcessComponentListener}s attached to this {@link IProcessComponent}.
+	 */
+	List<IProcessComponentListener> getListener();
+	
 	/**
 	 * Getter for the process component's ID.
 	 * 
