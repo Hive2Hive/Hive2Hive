@@ -208,7 +208,7 @@ public final class ProcessFactory {
 			throw new IllegalArgumentException("File cannot be null.");
 		} else if (!file.exists()) {
 			throw new IllegalArgumentException("File does not exist.");
-		} else if (session.getFileManager().getRoot().toFile().equals(file)) {
+		} else if (session.getRoot().toFile().equals(file)) {
 			throw new IllegalArgumentException("Root cannot be added.");
 		}
 
