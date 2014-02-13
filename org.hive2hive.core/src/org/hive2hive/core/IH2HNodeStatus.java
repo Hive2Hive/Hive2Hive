@@ -14,6 +14,9 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
  */
 public interface IH2HNodeStatus {
 
+	// TODO this interface should optimally not exist anymore after the API refactoring, rather should the
+	// developer receive the informations from the different managers or from the H2HNode directly
+
 	/**
 	 * Get the file root that was given at the login call.
 	 * 

@@ -1,9 +1,9 @@
 package org.hive2hive.core.processes.implementations.login;
 
+import java.nio.file.Path;
 import java.security.KeyPair;
 
-import org.hive2hive.core.IFileConfiguration;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.api.configs.IFileConfiguration;
 import org.hive2hive.core.network.data.UserProfileManager;
 
 public class SessionParameters {
@@ -11,7 +11,7 @@ public class SessionParameters {
 	private KeyPair keyPair;
 	private UserProfileManager profileManager;
 	private IFileConfiguration fileConfig;
-	private FileManager fileManager;
+	private Path root;
 
 	public KeyPair getKeyPair() {
 		return keyPair;
@@ -23,10 +23,6 @@ public class SessionParameters {
 
 	public IFileConfiguration getFileConfig() {
 		return fileConfig;
-	}
-
-	public FileManager getFileManager() {
-		return fileManager;
 	}
 
 	public void setKeyPair(KeyPair keyPair) {
@@ -41,8 +37,12 @@ public class SessionParameters {
 		this.fileConfig = fileConfig;
 	}
 
-	public void setFileManager(FileManager fileManager) {
-		this.fileManager = fileManager;
+	public void setRoot(Path root) {
+		this.root = root;
+	}
+	
+	public Path getRoot() {
+		return root;
 	}
 
 }

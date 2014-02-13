@@ -1,8 +1,11 @@
 package org.hive2hive.core;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.security.KeyPair;
 
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.api.configs.IFileConfiguration;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
@@ -12,21 +15,24 @@ public class H2HSession {
 	private final UserProfileManager profileManager;
 	private final IFileConfiguration fileConfiguration;
 	private final KeyPair keyPair;
-	private final FileManager fileManager;
+	private final Path root;
 
-	public H2HSession(SessionParameters sessionParameters) {
-		this.keyPair = sessionParameters.getKeyPair();
-		this.profileManager = sessionParameters.getProfileManager();
-		this.fileConfiguration = sessionParameters.getFileConfig();
-		this.fileManager = sessionParameters.getFileManager();
+	public H2HSession(SessionParameters params) throws IOException {
+		this(params.getKeyPair(), params.getProfileManager(), params.getFileConfig(), params.getRoot());
 	}
 
+	// TODO remove constructor
 	public H2HSession(KeyPair keyPair, UserProfileManager profileManager,
-			IFileConfiguration fileConfiguration, FileManager fileManager) {
+			IFileConfiguration fileConfiguration, Path root) throws IOException {
 		this.keyPair = keyPair;
 		this.profileManager = profileManager;
 		this.fileConfiguration = fileConfiguration;
-		this.fileManager = fileManager;
+		this.root = root;
+		if (!root.toFile().exists()) {
+			root.toFile().mkdirs();
+		}
+
+		FileUtil.writePersistentMetaData(root);
 	}
 
 	public UserProfileManager getProfileManager() {
@@ -45,7 +51,7 @@ public class H2HSession {
 		return keyPair;
 	}
 
-	public FileManager getFileManager() {
-		return fileManager;
+	public Path getRoot() {
+		return root;
 	}
 }

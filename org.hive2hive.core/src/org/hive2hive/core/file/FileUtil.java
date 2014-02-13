@@ -6,12 +6,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
+import org.hive2hive.core.security.EncryptionUtil;
 
 public class FileUtil {
 
@@ -21,6 +26,53 @@ public class FileUtil {
 		// only static methods
 	}
 
+	/**
+	 * Writes the meta data (used to synchronize) to the disk
+	 * @throws IOException 
+	 */
+	public static void writePersistentMetaData(Path root) throws IOException {
+		// generate the new persistent meta data
+		PersistentMetaData metaData = new PersistentMetaData();
+		PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
+		Files.walkFileTree(root, visitor);
+		metaData.setFileTree(visitor.getFileTree());
+
+		byte[] encoded = EncryptionUtil.serializeObject(metaData);
+		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(), encoded);
+	}
+
+	/**
+	 * Reads the meta data (used to synchronize) from the disk
+	 * 
+	 * @return the read meta data (never null)
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 */
+	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException, ClassNotFoundException {
+			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
+			PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
+			return metaData;
+	}
+	
+	public static String getFileSep() {
+		String fileSep = System.getProperty("file.separator");
+		if (fileSep.equals("\\"))
+			fileSep = "\\\\";
+		return fileSep;
+	}
+
+	/**
+	 * Returns the file on disk from a file node of the user profile
+	 * 
+	 * @param fileToFind
+	 * @return the path to the file or null if the parameter is null
+	 */
+	public static Path getPath(Path root, Index fileToFind) {
+		if (fileToFind == null)
+			return null;
+		return Paths.get(root.toString(), fileToFind.getFullPath().toString());
+	}
+	
 	/**
 	 * Note that file.length can be very slowly (see
 	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
@@ -56,10 +108,9 @@ public class FileUtil {
 	 * @param fileManager the {@link FileManager} of the user
 	 * @throws IOException when moving went wrong
 	 */
-	public static void moveFile(String sourceName, String destName, Index oldParent,
-			Index newParent, FileManager fileManager) throws IOException {
+	public static void moveFile(Path root, String sourceName, String destName, Index oldParent, Index newParent) throws IOException {
 		// find the file of this user on the disc
-		File oldParentFile = fileManager.getPath(oldParent).toFile();
+		File oldParentFile = FileUtil.getPath(root, oldParent).toFile();
 		File toMoveSource = new File(oldParentFile, sourceName);
 
 		if (!toMoveSource.exists()) {
@@ -67,7 +118,7 @@ public class FileUtil {
 					+ "' because it's not at the source location anymore");
 		}
 
-		File newParentFile = fileManager.getPath(newParent).toFile();
+		File newParentFile = FileUtil.getPath(root, newParent).toFile();
 		File toMoveDest = new File(newParentFile, destName);
 
 		if (toMoveDest.exists()) {

@@ -73,19 +73,19 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void allClientsAreAlive() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
 		// responding nodes
-		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(2).getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(3).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(2).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(3).getConnection().getPeer().getPeerAddress());
 
 		Locations result = runProcessStep(fakedLocations,
-				isMasterClient(fakedLocations, network.get(0).getPeerAddress()));
+				isMasterClient(fakedLocations, network.get(0).getConnection().getPeer().getPeerAddress()));
 
 		assertEquals(4, result.getPeerAddresses().size());
 		PeerAddress newClientsEntry = null;
 		for (PeerAddress address : result.getPeerAddresses()) {
-			if (address.equals(network.get(0).getPeerAddress())) {
+			if (address.equals(network.get(0).getConnection().getPeer().getPeerAddress())) {
 				newClientsEntry = address;
 				break;
 			}
@@ -102,19 +102,19 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void notAllClientsAreAlive() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().getPeerAddress());
 		// not responding nodes
-		fakedLocations.addPeerAddress(network.get(4).getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(5).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(4).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(5).getConnection().getPeer().getPeerAddress());
 
 		Locations result = runProcessStep(fakedLocations,
-				isMasterClient(fakedLocations, network.get(0).getPeerAddress()));
+				isMasterClient(fakedLocations, network.get(0).getConnection().getPeer().getPeerAddress()));
 
 		assertEquals(2, result.getPeerAddresses().size());
 		PeerAddress newClientsEntry = null;
 		for (PeerAddress address : result.getPeerAddresses()) {
-			if (address.equals(network.get(0).getPeerAddress())) {
+			if (address.equals(network.get(0).getConnection().getPeer().getPeerAddress())) {
 				newClientsEntry = address;
 				break;
 			}
@@ -131,12 +131,12 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void noOtherClientsOrDeadClients() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
 
 		Locations result = runProcessStep(fakedLocations, true);
 
 		assertEquals(1, result.getPeerAddresses().size());
-		assertEquals(network.get(0).getPeerAddress(), result.getPeerAddresses().iterator().next());
+		assertEquals(network.get(0).getConnection().getPeer().getPeerAddress(), result.getPeerAddresses().iterator().next());
 	}
 
 	/**
@@ -148,15 +148,15 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void allOtherClientsAreDead() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
 		// not responding nodes
-		fakedLocations.addPeerAddress(network.get(4).getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(5).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(4).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(5).getConnection().getPeer().getPeerAddress());
 
 		Locations result = runProcessStep(fakedLocations, true);
 
 		assertEquals(1, result.getPeerAddresses().size());
-		assertEquals(network.get(0).getPeerAddress(), result.getPeerAddresses().iterator().next());
+		assertEquals(network.get(0).getConnection().getPeer().getPeerAddress(), result.getPeerAddresses().iterator().next());
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		Locations result = runProcessStep(fakedLocations, true);
 
 		assertEquals(1, result.getPeerAddresses().size());
-		assertEquals(network.get(0).getPeerAddress(), result.getPeerAddresses().iterator().next());
+		assertEquals(network.get(0).getConnection().getPeer().getPeerAddress(), result.getPeerAddresses().iterator().next());
 	}
 
 	/**
@@ -184,15 +184,15 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void notCompleteLocations() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(1).getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().getPeerAddress());
 
 		Locations result = runProcessStep(fakedLocations,
-				isMasterClient(fakedLocations, network.get(0).getPeerAddress()));
+				isMasterClient(fakedLocations, network.get(0).getConnection().getPeer().getPeerAddress()));
 
 		assertEquals(2, result.getPeerAddresses().size());
 		PeerAddress newClientsEntry = null;
 		for (PeerAddress address : result.getPeerAddresses()) {
-			if (address.equals(network.get(0).getPeerAddress())) {
+			if (address.equals(network.get(0).getConnection().getPeer().getPeerAddress())) {
 				newClientsEntry = address;
 				break;
 			}

@@ -46,7 +46,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		newLocations.addPeerAddress(getter.getPeerAddress());
+		newLocations.addPeerAddress(getter.getConnection().getPeer().getPeerAddress());
 
 		Number160 lKey = Number160.createHash(userId);
 		Number160 dKey = Number160.ZERO;
@@ -63,7 +63,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		Assert.assertEquals(userId, context.locations.getUserId());
 
 		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(context.locations.getPeerAddresses());
-		Assert.assertEquals(getter.getPeerAddress(), onlinePeers.get(0));
+		Assert.assertEquals(getter.getConnection().getPeer().getPeerAddress(), onlinePeers.get(0));
 	}
 
 	@Test

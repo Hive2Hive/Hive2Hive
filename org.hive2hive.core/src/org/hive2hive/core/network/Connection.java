@@ -19,166 +19,152 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 
-/**
- * This class creates a TomP2P peer and establishes a connection.
- * 
- * @author Seppi
- */
 public class Connection {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Connection.class);
+
+	private final String nodeID;
+	private final NetworkManager networkManager;
+
+	private boolean isConnected;
+	private Peer peer;
 	private DefaultEventExecutorGroup eventExecutorGroup;
 
-	private Peer peer = null;
-	private boolean isConnected = false;
+	public Connection(String nodeID, NetworkManager networkManager) {
+		this.nodeID = nodeID;
+		this.networkManager = networkManager;
+	}
 
-	public Peer getPeer() {
-		return peer;
+	/**
+	 * Creates a peer and connects it to the network.
+	 * @return True, if the peer creation and connection was successful, false otherwise
+	 */
+	public boolean connect() {
+		if (isConnected) {
+			logger.warn("Peer is already connected.");
+			return false;
+		}
+
+		if (createPeer()) {
+			isConnected = true;
+			logger.debug("Peer successfully created and connected.");
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Creates a peer and connects it to the network.
+	 * @param bootstrapAddress Bootstrap IP address.
+	 * @return true, if peer creation and bootstrapping was successful, false otherwise.
+	 */
+	public boolean connect(InetAddress bootstrapAddress) {
+		return connect(bootstrapAddress, H2HConstants.H2H_PORT);
+	}
+
+	/**
+	 * Creates a peer and connects it to the network.
+	 * @param bootstrapAddress Bootstrap IP address.
+	 * @param port Bootstrap port.
+	 * @return True, if peer creation and bootstrapping was successful, false otherwise.
+	 */
+	public boolean connect(InetAddress bootstrapAddress, int port) {
+		if (!connect())
+			return false;
+
+		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapAddress).ports(port).start();
+		futureDiscover.awaitUninterruptibly();
+
+		if (futureDiscover.isSuccess()) {
+			logger.debug(String.format("Discovery successful: Outside address is: %s.",
+					futureDiscover.getPeerAddress()));
+		} else {
+			logger.warn(String.format("Discovery failed: %s.", futureDiscover.getFailedReason()));
+			peer.shutdown();
+			isConnected = false;
+			return false;
+		}
+
+		FutureBootstrap futureBootstrap = peer.bootstrap().setInetAddress(bootstrapAddress).setPorts(port)
+				.start();
+		futureBootstrap.awaitUninterruptibly();
+
+		if (futureBootstrap.isSuccess()) {
+			logger.debug(String.format("Bootstrapping successful: Bootstrapped to %s.",
+					bootstrapAddress.getHostAddress()));
+			return true;
+		} else {
+			logger.warn(String.format("Bootstrapping failed: %s.", futureBootstrap.getFailedReason()));
+			peer.shutdown();
+			isConnected = false;
+			return false;
+		}
+	}
+
+	/**
+	 * Disconnects a peer from the network.
+	 * @return True, if disconnection was successful, false otherwise.
+	 */
+	public boolean disconnect() {
+		boolean isDisconnected = true;
+		if (isConnected) {
+			isDisconnected = peer.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
+			isConnected = !isDisconnected;
+			
+			if (isDisconnected)
+				logger.debug("Peer successfully disconnected.");
+			else
+				logger.warn("Peer disconnection failed.");
+		} else {
+			logger.warn("Peer disconnection failed: Peer is not connected.");
+		}
+
+		if (eventExecutorGroup != null) {
+			Future<?> shutdownGracefully = eventExecutorGroup.shutdownGracefully();
+			shutdownGracefully.awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
+			eventExecutorGroup = null;
+		}
+
+		return isDisconnected;
 	}
 
 	public boolean isConnected() {
 		return isConnected;
 	}
-
-	private final String nodeId;
-	private final NetworkManager networkManager;
-
-	/**
-	 * The constructor for a connection.
-	 * 
-	 * @param nodeId
-	 *            the id of the node
-	 * @param networkManager
-	 */
-	public Connection(String nodeId, NetworkManager networkManager) {
-		this.nodeId = nodeId;
-		this.networkManager = networkManager;
-	}
-
-	/**
-	 * Create a peer which will be the first node in the network (master).
-	 * 
-	 * @return <code>true</code> if creating master peer was successful, <code>false</code> if not
-	 */
-	public boolean connect() {
-		if (isConnected) {
-			logger.warn("Peer is already connected!");
-			return false;
-		}
-		if (createPeer()) {
-			isConnected = true;
-			logger.debug("Master peer successfully created.");
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Create a peer and bootstrap to a given peer through IP address
-	 * 
-	 * @param bootstrapInetAddress
-	 *            IP address to given bootstrapping peer
-	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
-	 */
-	public boolean connect(InetAddress bootstrapInetAddress) {
-		return connect(bootstrapInetAddress, H2HConstants.H2H_PORT);
-	}
-
-	/**
-	 * Create a peer and bootstrap to a given peer through IP address and port
-	 * number
-	 * 
-	 * @param bootstrapInetAddress
-	 *            IP address to given bootstrapping peer
-	 * @param port
-	 *            port number to given bootstrapping peer
-	 * @return <code>true</code> if bootstrapping was successful, <code>false</code> if not
-	 */
-	public boolean connect(InetAddress bootstrapInetAddress, int port) {
-		if (isConnected) {
-			logger.warn("Peer is already connected.");
-			return false;
-		} else {
-			logger.debug("Connecting...");
-		}
-
-		if (!createPeer())
-			return false;
-
-		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapInetAddress).ports(port).start();
-		futureDiscover.awaitUninterruptibly();
-
-		if (futureDiscover.isSuccess()) {
-			logger.debug(String.format("Successfully discovered, found that my outside address is: %s",
-					futureDiscover.getPeerAddress()));
-		} else {
-			logger.warn(String.format("Failed discovering: %s", futureDiscover.getFailedReason()));
-			peer.shutdown();
-			isConnected = false;
-			return false;
-		}
-
-		FutureBootstrap futureBootstrap = peer.bootstrap().setInetAddress(bootstrapInetAddress)
-				.setPorts(port).start();
-		futureBootstrap.awaitUninterruptibly();
-
-		if (futureBootstrap.isSuccess()) {
-			logger.debug(String.format("Successfully bootstraped to: %s",
-					bootstrapInetAddress.getHostAddress()));
-			isConnected = true;
-			return true;
-		} else {
-			logger.warn(String.format("Failed bootstraping: %s", futureBootstrap.getFailedReason()));
-			peer.shutdown();
-			isConnected = false;
-			return false;
-		}
-	}
-
-	public void disconnect() {
-		if (isConnected) {
-			peer.shutdown().awaitUninterruptibly(10000);
-			isConnected = false;
-		} else {
-			logger.warn("Peer is not connected. No disconnect.");
-		}
-
-		if (eventExecutorGroup != null) {
-			Future<?> shutdownGracefully = eventExecutorGroup.shutdownGracefully();
-			shutdownGracefully.awaitUninterruptibly(10000);
-			eventExecutorGroup = null;
-		}
+	
+	public Peer getPeer() {
+		return peer;
 	}
 
 	private boolean createPeer() {
+
+		int port = H2HConstants.H2H_PORT;
+		while (NetworkUtils.isPortAvailable(port) == false)
+			port++;
+
+		// configure the thread handling internally, callback can be blocking
+		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
+
+		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
+		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
+		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
+		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
 		try {
-			int port = H2HConstants.H2H_PORT;
-			// check if given port is available, if not increment it till
-			// available
-			while (NetworkUtils.isPortAvailable(port) == false)
-				port++;
-
-			eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
-			// configure the thread handling internally. Callback can be blocking.
-			ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
-			clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
-
-			ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
-			serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
-
-			peer = new PeerMaker(Number160.createHash(nodeId)).ports(port).setEnableIndirectReplication(true)
+			peer = new PeerMaker(Number160.createHash(nodeID)).ports(port).setEnableIndirectReplication(true)
 					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
 					.makeAndListen();
-
-			// override the put method for validation tasks
-			peer.getPeerBean().storage(new H2HStorageMemory());
-			// attach a reply handler for messages
-			peer.setObjectDataReply(new MessageReplyHandler(networkManager));
-			return true;
 		} catch (IOException e) {
-			logger.error(String.format("Exception during the creation of a peer: %s", e.getMessage()));
+			logger.error(String.format("Exception while creating a peer: ", e));
 			return false;
 		}
+
+		// override the put method for validation tasks
+		peer.getPeerBean().storage(new H2HStorageMemory());
+		// attach a reply handler for messages
+		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
+
+		return true;
 	}
 }

@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -131,9 +131,8 @@ public class FileRecursionUtil {
 	public static ProcessComponent buildDeletionProcessFromNodelist(List<Index> files,
 			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		List<Path> filesToDelete = new ArrayList<Path>();
-		FileManager fileManager = networkManager.getSession().getFileManager();
 		for (Index documentIndex : files) {
-			filesToDelete.add(fileManager.getPath(documentIndex));
+			filesToDelete.add(FileUtil.getPath(networkManager.getSession().getRoot(), documentIndex));
 		}
 
 		return buildDeletionProcess(filesToDelete, networkManager);

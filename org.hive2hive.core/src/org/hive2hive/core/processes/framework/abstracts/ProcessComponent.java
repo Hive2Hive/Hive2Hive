@@ -2,11 +2,11 @@ package org.hive2hive.core.processes.framework.abstracts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
-import org.hive2hive.core.processes.framework.ProcessUtil;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -30,11 +30,12 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private Process parent;
 
 	private boolean isRollbacking;
+	private RollbackReason reason;
 
 	private final List<IProcessComponentListener> listener;
 
 	protected ProcessComponent() {
-		this.id = ProcessUtil.generateID();
+		this.id = UUID.randomUUID().toString();
 		this.progress = 0.0;
 		this.state = ProcessState.READY;
 
@@ -157,6 +158,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	protected void fail(RollbackReason reason) {
 		if (state == ProcessState.ROLLBACKING) {
 			state = ProcessState.FAILED;
+			this.reason = reason;
 			notifyFailed(reason);
 		}
 	}
@@ -186,18 +188,26 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
+		
+		// TODO check if correct
+		// if process component completed already
+		if (state == ProcessState.SUCCEEDED) {
+			listener.onSucceeded();
+			listener.onFinished();
+		}
+		if (state == ProcessState.FAILED) {
+			listener.onFailed(reason);
+			listener.onFinished();
+		}
 	}
 
 	public void detachListener(IProcessComponentListener listener) {
 		this.listener.remove(listener);
 	}
 
-	/**
-	 * Getter for the {@link ProcessComponent}'s {@link IProcessComponentListener}s.
-	 * @return The {@link IProcessComponentListener} attached to this {@link ProcessComponent}.
-	 */
+	@Override
 	public List<IProcessComponentListener> getListener() {
-		return listener; // TODO copy before return?
+		return listener;
 	}
 
 	@Override

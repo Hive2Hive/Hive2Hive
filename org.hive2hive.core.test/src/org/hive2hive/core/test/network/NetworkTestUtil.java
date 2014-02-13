@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.network;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
@@ -12,6 +13,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.IH2HNode;
+import org.hive2hive.core.api.configs.INetworkConfiguration;
+import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -30,7 +33,8 @@ public class NetworkTestUtil {
 	 * @return a node
 	 */
 	public static NetworkManager createSingleNode() {
-		NetworkManager node = new NetworkManager("Node A");
+		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
+		NetworkManager node = new NetworkManager(netConfig);
 		node.connect();
 		return node;
 	}
@@ -50,20 +54,22 @@ public class NetworkTestUtil {
 		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (master)
-		NetworkManager master = new NetworkManager("Node A");
+		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
+		NetworkManager master = new NetworkManager(netConfig);
 		master.connect();
 		nodes.add(master);
 
 		// create the other nodes and bootstrap them to the master peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(String.format("Node %s", ++letter));
 			try {
-				node.connect(InetAddress.getLocalHost());
+				INetworkConfiguration otherNetConfig = NetworkConfiguration.create(String.format("Node %s", ++letter), InetAddress.getLocalHost());
+				NetworkManager node = new NetworkManager(otherNetConfig);
+				node.connect();
+				nodes.add(node);
 			} catch (UnknownHostException e) {
 				// should not happen
 			}
-			nodes.add(node);
 		}
 
 		return nodes;
@@ -80,8 +86,13 @@ public class NetworkTestUtil {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = generateRandomCredentials();
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
-			H2HSession session = new H2HSession(keyPair, profileManager, null, null);
-			node.setSession(session);
+			H2HSession session;
+			try {
+				session = new H2HSession(keyPair, profileManager, null, null);
+				node.setSession(session);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -96,8 +107,13 @@ public class NetworkTestUtil {
 		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
-			H2HSession session = new H2HSession(keyPair, profileManager, null, null);
-			node.setSession(session);
+			H2HSession session;
+			try {
+				session = new H2HSession(keyPair, profileManager, null, null);
+				node.setSession(session);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

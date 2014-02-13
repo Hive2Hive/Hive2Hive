@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.hive2hive.core.api.configs.INetworkConfiguration;
+import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
@@ -21,17 +23,24 @@ public class ConnectionTest extends H2HJUnitTest{
 	
 	@Test
 	public void testConnectAsMaster(){
-		NetworkManager masterNode = new NetworkManager("master node");
+		
+		INetworkConfiguration netConfig = NetworkConfiguration.create("master node");
+		
+		NetworkManager masterNode = new NetworkManager(netConfig);
 		assertTrue(masterNode.connect());
 		masterNode.disconnect();
 	}
 	
 	@Test
 	public void testConnectToOtherPeer() throws UnknownHostException{
-		NetworkManager nodeA = new NetworkManager("nodeA");
-		NetworkManager nodeB = new NetworkManager("nodeB");
+		
+		INetworkConfiguration netConfigA = NetworkConfiguration.create("nodeA");
+		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());
+		
+		NetworkManager nodeA = new NetworkManager(netConfigA);
+		NetworkManager nodeB = new NetworkManager(netConfigB);
 		assertTrue(nodeA.connect());
-		assertTrue(nodeB.connect(InetAddress.getLocalHost()));
+		assertTrue(nodeB.connect());
 		nodeA.disconnect();
 		nodeB.disconnect();
 	}

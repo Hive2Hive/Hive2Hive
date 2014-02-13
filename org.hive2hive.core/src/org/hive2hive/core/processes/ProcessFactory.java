@@ -184,8 +184,14 @@ public final class ProcessFactory {
 
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
-		process.add(new WritePersistentStep(session.getFileManager()));
+		process.add(new WritePersistentStep(session.getRoot()));
 
+		// TODO to be implemented:
+//		// stop all running processes
+//		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
+//		// quit the session
+//		networkManager.setSession(null);
+		
 		return process;
 	}
 
@@ -210,8 +216,7 @@ public final class ProcessFactory {
 		AddFileProcessContext context = new AddFileProcessContext(file);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session
-				.getFileManager()));
+		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateMetaDocumentStep(context, networkManager.getUserId()));
 		process.add(new PutMetaDocumentStep(context, context, dataManager));
@@ -386,7 +391,7 @@ public final class ProcessFactory {
 			throw new IllegalFileLocation("Folder does not exist.");
 
 		H2HSession session = networkManager.getSession();
-		Path root = session.getFileManager().getRoot();
+		Path root = session.getRoot();
 
 		// folder must be in the given root directory
 		if (!folder.toPath().toString().startsWith(root.toString()))

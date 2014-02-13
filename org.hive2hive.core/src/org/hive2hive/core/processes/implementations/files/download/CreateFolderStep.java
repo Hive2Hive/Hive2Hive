@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
@@ -35,7 +35,7 @@ public class CreateFolderStep extends ProcessStep {
 		logger.debug("Try creating a new folder on disk: " + file.getName());
 		try {
 			// create the folder on disk
-			File folder = networkManager.getSession().getFileManager().getPath(file).toFile();
+			File folder = FileUtil.getPath(networkManager.getSession().getRoot(), file).toFile();
 			if (folder.exists()) {
 				throw new FileAlreadyExistsException("Folder already exists");
 			} else if (!folder.mkdir()) {
@@ -54,8 +54,7 @@ public class CreateFolderStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		try {
 			if (!existedBefore) {
-				FileManager fileManager = networkManager.getSession().getFileManager();
-				File folder = fileManager.getPath(context.getIndex()).toFile();
+				File folder = FileUtil.getPath(networkManager.getSession().getRoot(), context.getIndex()).toFile();
 				folder.delete();
 			}
 		} catch (Exception e) {

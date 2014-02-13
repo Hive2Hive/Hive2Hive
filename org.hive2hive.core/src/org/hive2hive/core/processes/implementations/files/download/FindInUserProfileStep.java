@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -53,10 +52,9 @@ public class FindInUserProfileStep extends ProcessStep {
 		} else {
 			logger.info("Initalize the process for downloading file '" + index.getFullPath() + "'.");
 			try {
-				FileManager fileManager = networkManager.getSession().getFileManager();
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaDocumentStep(context, context, dataManager));
-				getParent().add(new DownloadChunksStep(context, dataManager, fileManager));
+				getParent().add(new DownloadChunksStep(context, dataManager, networkManager.getSession().getRoot()));
 			} catch (Hive2HiveException e) {
 				throw new ProcessExecutionException(e);
 			}

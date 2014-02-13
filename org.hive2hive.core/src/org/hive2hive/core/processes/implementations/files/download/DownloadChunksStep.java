@@ -2,6 +2,7 @@ package org.hive2hive.core.processes.implementations.files.download;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
@@ -35,14 +36,14 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 	private final DownloadFileContext context;
 	private final List<Chunk> chunkBuffer;
-	private final FileManager fileManager;
+	private final Path root;
 	private int currentChunkOrder;
 	private File destination;
 
-	public DownloadChunksStep(DownloadFileContext context, IDataManager dataManager, FileManager fileManager) {
+	public DownloadChunksStep(DownloadFileContext context, IDataManager dataManager, Path root) {
 		super(dataManager);
 		this.context = context;
-		this.fileManager = fileManager;
+		this.root = root;
 		this.currentChunkOrder = 0;
 		this.chunkBuffer = new ArrayList<Chunk>();
 	}
@@ -59,7 +60,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		}
 
 		// support to store the file on another location than default (used for recover)
-		destination = fileManager.getPath(context.getIndex()).toFile();
+		destination = FileUtil.getPath(root, context.getIndex()).toFile();
 		if (context.getDestination() != null) {
 			destination = context.getDestination();
 		}

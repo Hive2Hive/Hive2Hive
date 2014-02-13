@@ -2,13 +2,13 @@ package org.hive2hive.core.processes.implementations.files.add;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.file.FileManager;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
@@ -35,15 +35,15 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
-	private final FileManager fileManager;
+	private final Path root;
 
 	private PublicKey parentKey; // used for rollback
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager,
-			FileManager fileManager) {
+			Path root) {
 		this.context = context;
 		this.profileManager = profileManager;
-		this.fileManager = fileManager;
+		this.root = root;
 	}
 
 	@Override
@@ -60,8 +60,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 			// create a file tree node in the user profile
 			// find the parent node using the relative path to navigate there
-			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(),
-					fileManager);
+			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
 			parentKey = parentNode.getFilePublicKey();
 
 			// use the file keys generated above is stored

@@ -9,7 +9,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileManager;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.PermissionType;
@@ -88,7 +88,7 @@ public class UseCaseTestUtil {
 			throws NoPeerConnectionException {
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setFileConfig(new TestFileConfiguration());
-		sessionParameters.setFileManager(new FileManager(root.toPath()));
+		sessionParameters.setRoot(root.toPath());
 		sessionParameters.setProfileManager(new UserProfileManager(networkManager, credentials));
 		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials,
 				sessionParameters, networkManager);
@@ -130,8 +130,7 @@ public class UseCaseTestUtil {
 				networkManager);
 		executeProcess(process);
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
-		return networkManager.getSession().getFileManager().getPath(userProfile.getFileById(fileKey))
-				.toFile();
+		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey)).toFile();
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,

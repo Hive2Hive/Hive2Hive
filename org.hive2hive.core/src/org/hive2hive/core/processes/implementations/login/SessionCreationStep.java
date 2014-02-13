@@ -1,10 +1,13 @@
 package org.hive2hive.core.processes.implementations.login;
 
+import java.io.IOException;
+
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 
 public class SessionCreationStep extends ProcessStep {
@@ -21,10 +24,15 @@ public class SessionCreationStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// create session
 		params.setKeyPair(context.consumeUserProfile().getEncryptionKeys());
-		H2HSession session = new H2HSession(params);
+		H2HSession session;
+		try {
+			session = new H2HSession(params);
+		} catch (IOException e) {
+			throw new ProcessExecutionException("Session could not be created.", e);
+		}
 
 		// set session
 		networkManager.setSession(session);

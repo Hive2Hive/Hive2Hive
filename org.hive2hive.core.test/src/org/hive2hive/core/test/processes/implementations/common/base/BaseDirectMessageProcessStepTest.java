@@ -81,7 +81,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer().getPeerAddress(),
 				contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
@@ -145,7 +145,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getPeerAddress(),
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer().getPeerAddress(),
 				contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
@@ -207,7 +207,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getPeerAddress(),
+		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer().getPeerAddress(),
 				contentKey);
 
 		// initialize the process and the one and only step to test
