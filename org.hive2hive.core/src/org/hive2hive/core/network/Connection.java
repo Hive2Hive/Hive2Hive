@@ -13,13 +13,10 @@ import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.H2HStorageMemory;
-import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 
 public class Connection {
@@ -50,8 +47,7 @@ public class Connection {
 
 		if (createPeer()) {
 			isConnected = true;
-			logger.debug("Peer successfully created.");
-			logger.debug("Peer successfully connected.");
+			logger.debug("Peer successfully created and connected.");
 			return true;
 		}
 		return false;

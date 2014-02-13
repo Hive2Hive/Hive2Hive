@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.hive2hive.core.IH2HNode;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.api.interfaces.IFileManager;
+import org.hive2hive.core.exceptions.NoNetworkException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
@@ -15,10 +15,10 @@ public class H2HFileListener implements FileAlterationListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HFileListener.class);
 
-	private final IH2HNode node;
+	private final IFileManager fileManager;
 
-	public H2HFileListener(IH2HNode node) {
-		this.node = node;
+	public H2HFileListener(IFileManager fileManager) {
+		this.fileManager = fileManager;
 	}
 
 	@Override
@@ -67,24 +67,24 @@ public class H2HFileListener implements FileAlterationListener {
 
 	private void addFile(File file) {
 		try {
-			node.getFileManagement().add(file);
-		} catch (IllegalFileLocation | NoSessionException | NoPeerConnectionException e) {
+			fileManager.add(file);
+		} catch (NoSessionException | NoPeerConnectionException | NoNetworkException e) {
 			logger.error(e.getMessage());
 		}
 	}
 
 	private void removeFile(File file) {
 		try {
-			node.getFileManagement().delete(file);
-		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
+			fileManager.delete(file);
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException | NoNetworkException e) {
 			logger.error(e.getMessage());
 		}
 	}
 
 	private void modifyFile(File file) {
 		try {
-			node.getFileManagement().update(file);
-		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
+			fileManager.update(file);
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException | NoNetworkException e) {
 			logger.error(e.getMessage());
 		}
 	}

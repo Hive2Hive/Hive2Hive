@@ -3,8 +3,6 @@ package org.hive2hive.core.network;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import net.tomp2p.peers.PeerAddress;
-
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.configs.INetworkConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;

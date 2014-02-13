@@ -9,6 +9,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
@@ -21,8 +22,10 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
 				getNetworkManager());
 
-		submitProcess(registerProcess);
-		return registerProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(registerProcess);
+		
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override

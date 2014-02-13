@@ -17,15 +17,15 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	}
 
 	public static NetworkConfiguration create(String nodeID) {
-		return new NetworkConfiguration(nodeID, false, null, -1);
+		return new NetworkConfiguration(nodeID, true, null, -1);
 	}
 
 	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
-		return new NetworkConfiguration(nodeID, true, bootstrapAddress, -1);
+		return new NetworkConfiguration(nodeID, false, bootstrapAddress, -1);
 	}
 	
 	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
-		return new NetworkConfiguration(nodeID, true, bootstrapAddress, bootstrapPort);
+		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort);
 	}
 
 	@Override
