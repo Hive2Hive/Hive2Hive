@@ -30,6 +30,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	private Process parent;
 
 	private boolean isRollbacking;
+	private RollbackReason reason;
 
 	private final List<IProcessComponentListener> listener;
 
@@ -157,6 +158,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	protected void fail(RollbackReason reason) {
 		if (state == ProcessState.ROLLBACKING) {
 			state = ProcessState.FAILED;
+			this.reason = reason;
 			notifyFailed(reason);
 		}
 	}
@@ -186,6 +188,17 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
+		
+		// TODO check if correct
+		// if process component completed already
+		if (state == ProcessState.SUCCEEDED) {
+			listener.onSucceeded();
+			listener.onFinished();
+		}
+		if (state == ProcessState.FAILED) {
+			listener.onFailed(reason);
+			listener.onFinished();
+		}
 	}
 
 	public void detachListener(IProcessComponentListener listener) {
