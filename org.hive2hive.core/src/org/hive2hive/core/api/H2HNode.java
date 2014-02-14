@@ -31,10 +31,12 @@ public class H2HNode implements IH2HNode {
 		return new H2HNode(networkConfiguration, fileConfiguration);
 	}
 
+	@Override
 	public boolean connect() {
 		return networkManager.connect();
 	}
 
+	@Override
 	public boolean disconnect() {
 		return networkManager.disconnect();
 	}

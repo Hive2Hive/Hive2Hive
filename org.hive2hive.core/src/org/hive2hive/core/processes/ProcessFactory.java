@@ -12,7 +12,6 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -73,6 +72,7 @@ import org.hive2hive.core.processes.implementations.notify.VerifyNotificationFac
 import org.hive2hive.core.processes.implementations.register.AssureUserInexistentStep;
 import org.hive2hive.core.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
+import org.hive2hive.core.processes.implementations.register.UserProfileCreationStep;
 import org.hive2hive.core.processes.implementations.share.PrepareNotificationsStep;
 import org.hive2hive.core.processes.implementations.share.UpdateMetaFolderStep;
 import org.hive2hive.core.processes.implementations.share.UpdateUserProfileStep;
@@ -112,17 +112,17 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
-		UserProfile profile = new UserProfile(credentials.getUserId());
 		DataManager dataManager = networkManager.getDataManager();
-		RegisterProcessContext context = new RegisterProcessContext(profile);
+		RegisterProcessContext context = new RegisterProcessContext();
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
 		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, dataManager));
-		process.add(new AsyncComponent(new PutUserProfileStep(credentials, profile, dataManager)));
+		process.add(new UserProfileCreationStep(credentials.getUserId(), context));
+		process.add(new AsyncComponent(new PutUserProfileStep(credentials, context, dataManager)));
 		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, dataManager)));
-		process.add(new AsyncComponent(new PutPublicKeyStep(profile, dataManager)));
+		process.add(new AsyncComponent(new PutPublicKeyStep(context, dataManager)));
 
 		return process;
 	}
@@ -187,11 +187,11 @@ public final class ProcessFactory {
 		process.add(new WritePersistentStep(session.getRoot()));
 
 		// TODO to be implemented:
-//		// stop all running processes
-//		ProcessManager.getInstance().stopAll("Logout stopped all processes.");
-//		// quit the session
-//		networkManager.setSession(null);
-		
+		// // stop all running processes
+		// ProcessManager.getInstance().stopAll("Logout stopped all processes.");
+		// // quit the session
+		// networkManager.setSession(null);
+
 		return process;
 	}
 

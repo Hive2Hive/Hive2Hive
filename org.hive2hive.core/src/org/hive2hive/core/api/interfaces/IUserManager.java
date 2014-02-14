@@ -13,16 +13,16 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Christian
  * 
  */
-public interface IUserManager {
+public interface IUserManager extends IManager {
 
 	IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException;
-	
+
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
 	IProcessComponent login(UserCredentials credentials, Path rootPath) throws NoPeerConnectionException;
-	
+
 	// TODO why not logout with credentials as well?
 	IProcessComponent logout() throws NoPeerConnectionException, NoSessionException;
-	
+
 	IFileConfiguration getFileConfiguration();
 
 }

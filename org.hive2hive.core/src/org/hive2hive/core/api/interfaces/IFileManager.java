@@ -19,20 +19,25 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
  * @author Christian
  * 
  */
-public interface IFileManager {
+public interface IFileManager extends IManager {
 
 	IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException;
-	
-	IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException, NoPeerConnectionException;
-	
-	IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
-	
+
+	IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
+			NoPeerConnectionException;
+
+	IProcessComponent move(File source, File destination) throws NoSessionException,
+			NoPeerConnectionException;
+
 	IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException;
-	
-	IProcessComponent recover(File file, IVersionSelector versionSelector) throws FileNotFoundException, IllegalArgumentException, NoSessionException, NoPeerConnectionException;
-	
-	IProcessComponent share(File folder, String userId, PermissionType permission) throws IllegalFileLocation, IllegalArgumentException, NoSessionException, NoPeerConnectionException;
-	
+
+	IProcessComponent recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
+			IllegalArgumentException, NoSessionException, NoPeerConnectionException;
+
+	IProcessComponent share(File folder, String userId, PermissionType permission)
+			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
+			NoPeerConnectionException;
+
 	IResultProcessComponent<List<Path>> getFileList();
-		
+
 }

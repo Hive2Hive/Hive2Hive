@@ -88,13 +88,12 @@ public class DataManager implements IDataManager {
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			NetworkContent content, KeyPair oldProtectionKey, KeyPair newProtectionKey) {
 		logger.debug(String
-				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s' protected = '%b'",
+				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s' protected = '%b' ttl = '%s'",
 						content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
-						content.getVersionKey(), newProtectionKey != null));
+						content.getVersionKey(), newProtectionKey != null, content.getTimeToLive()));
 		try {
 			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive());
-			data.basedOn(content.getBasedOnKey());
+			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
 			if (newProtectionKey == null) {
 				// the content won't be protected after this put
 				if (oldProtectionKey == null) {
