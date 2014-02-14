@@ -3,7 +3,7 @@ package org.hive2hive.client.menu;
 import java.io.File;
 
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
-import org.hive2hive.core.IH2HNode;
+import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.file.watcher.H2HFileListener;
 import org.hive2hive.core.file.watcher.H2HFileWatcher;
 import org.hive2hive.core.file.watcher.H2HFileWatcher.H2HFileWatcherBuilder;
@@ -12,11 +12,11 @@ public class FileObserverMenu extends ConsoleMenu {
 
 	private final H2HFileWatcherBuilder watcherBuilder;
 	private H2HFileWatcher watcher;
-	private IH2HNode node;
+	private IFileManager fileManager;
 	
-	public FileObserverMenu(File rootDirectory, IH2HNode node) {
+	public FileObserverMenu(File rootDirectory, IFileManager fileManager) {
 		watcherBuilder = new H2HFileWatcherBuilder(rootDirectory);
-		this.node = node;
+		this.fileManager = fileManager;
 	}
 	
 	@Override
@@ -40,7 +40,7 @@ public class FileObserverMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Start File Observer") {
 			protected void execute() throws Exception {
 				watcher = watcherBuilder.build();
-				watcher.addFileListener(new H2HFileListener(node));
+				watcher.addFileListener(new H2HFileListener(fileManager));
 				watcher.start();
 			}
 		});

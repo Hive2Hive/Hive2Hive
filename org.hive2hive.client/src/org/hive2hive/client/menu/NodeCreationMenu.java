@@ -5,8 +5,12 @@ import java.net.UnknownHostException;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
-import org.hive2hive.core.H2HNodeBuilder;
-import org.hive2hive.core.IH2HNode;
+import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.api.H2HNode;
+import org.hive2hive.core.api.configs.FileConfiguration;
+import org.hive2hive.core.api.configs.NetworkConfiguration;
+import org.hive2hive.core.api.interfaces.IH2HNode;
+import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 
 /**
  * The network configuration menu of the {@link ConsoleClient}.
@@ -16,44 +20,49 @@ import org.hive2hive.core.IH2HNode;
  */
 public final class NodeCreationMenu extends ConsoleMenu {
 
+	private IH2HNode node;
+
+	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
+	private long maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
+	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
+	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
+
 	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
 
-	private IH2HNode h2hNode;
-	private final H2HNodeBuilder nodeBuilder;
-
-	public NodeCreationMenu() {
-		// super(console);
-		nodeBuilder = new H2HNodeBuilder();
-
-		// config that cannot be changed
-		nodeBuilder.setAutostartProcesses(true);
-	}
-
 	@Override
 	protected void createItems() {
-		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to existing network") {
+		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
-				System.out.println("Specify BootstrapAddress:\n");
+				System.out.println("Specify Node ID:\n");
+				String nodeID = awaitStringParameter();
+
+				System.out.println("Specify Bootstrap Address:\n");
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
-				nodeBuilder.setBootstrapAddress(bootstrapAddress);
-				nodeBuilder.setIsMaster(false);
-				createNode();
+
+				System.out.println("Specify Bootstrap Port or enter 'default':\n");
+				String port = awaitStringParameter();
+				if ("default".equalsIgnoreCase(port)) {
+					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
+				} else {
+					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
+				}
 			}
 		};
 
-		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create new network") {
+		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
-				nodeBuilder.setIsMaster(true);
-				createNode();
+				System.out.println("Specify Node ID:\n");
+				String nodeID = awaitStringParameter();
+				createNode(NetworkConfiguration.create(nodeID));
 			}
 		};
 	}
 
-	private void createNode() {
-		// creates the node
-		h2hNode = nodeBuilder.build();
-		// console.setH2HNode(h2hNode);
+	private void createNode(INetworkConfiguration networkConfig) {
+		node = H2HNode.createNode(networkConfig,
+				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
+		node.connect();
 	}
 
 	@Override
@@ -65,30 +74,31 @@ public final class NodeCreationMenu extends ConsoleMenu {
 			}
 		});
 		add(new H2HConsoleMenuItem("Set MaxFileSize") {
+
 			protected void execute() {
 				System.out.println("Specify MaxFileSize:\n");
-				nodeBuilder.setMaxFileSize(awaitIntParameter());
+				maxFileSize = Long.parseLong(awaitStringParameter());
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxNumOfVersions:\n");
-				nodeBuilder.setMaxNumOfVersions(awaitIntParameter());
+				maxNumOfVersions = Long.parseLong(awaitStringParameter());
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxSizeAllVersions:\n");
-				nodeBuilder.setMaxSizeAllVersions(awaitIntParameter());
+				maxSizeAllVersions = Long.parseLong(awaitStringParameter());
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Set ChunkSize") {
 			protected void execute() {
 				System.out.println("Specify ChunkSize:\n");
-				nodeBuilder.setChunkSize(awaitIntParameter());
+				chunkSize = Long.parseLong(awaitStringParameter());
 			}
 		});
 
@@ -102,6 +112,6 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	}
 
 	public IH2HNode getH2HNode() {
-		return h2hNode;
+		return node;
 	}
 }

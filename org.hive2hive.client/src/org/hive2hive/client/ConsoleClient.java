@@ -37,9 +37,6 @@ public class ConsoleClient {
 		System.out.println("*         `-´ `-´                                                          `-´ `-´         *");
 		System.out.println("********************************************************************************************");
 		System.out.println("\nConfigure your H2H network and nodes by browsing through the menus and follow the guides.\n");
-		
-		
-		
 	}
 	
 	private static void printFooter() {

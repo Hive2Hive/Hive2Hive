@@ -5,16 +5,21 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
-import org.hive2hive.core.IH2HNodeStatus;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
@@ -35,7 +40,6 @@ public final class TopLevelMenu extends ConsoleMenu {
 	protected File root;
 
 	public TopLevelMenu() {
-		// super(console);
 		userMenu = new UserMenu();
 		nodeMenu = new NodeCreationMenu();
 	}
@@ -62,7 +66,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			@Override
 			protected void checkPreconditions() {
 				if (nodeMenu.getH2HNode() == null) {
-					printPreconditionError("Cannot login: Please create a H2HNode first.");
+					printPreconditionError("Cannot login: Please connect to a network first.");
 					nodeMenu.open();
 				}
 				if (userMenu.getUserCredentials() == null) {
@@ -87,8 +91,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() throws NoPeerConnectionException {
-				IProcessComponent process = nodeMenu.getH2HNode().getUserManagement()
+			protected void execute() throws NoPeerConnectionException, InterruptedException {
+				IProcessComponent process = nodeMenu.getH2HNode().getUserManager()
 						.login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
 			}
@@ -121,8 +125,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() throws NoPeerConnectionException {
-				IProcessComponent process = nodeMenu.getH2HNode().getUserManagement()
+			protected void execute() throws NoPeerConnectionException, InterruptedException {
+				IProcessComponent process = nodeMenu.getH2HNode().getUserManager()
 						.register(userMenu.getUserCredentials());
 				executeBlocking(process);
 			}
@@ -132,63 +136,45 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Add File") {
 			@Override
-			protected void execute() throws Hive2HiveException {
-				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement().add(askForFile(true));
+			protected void execute() throws Hive2HiveException, InterruptedException {
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().add(askForFile(true));
 				executeBlocking(process);
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Update File") {
-			protected void execute() throws Hive2HiveException {
-				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
-						.update(askForFile(true));
-				executeBlocking(process);
-			}
-		});
-		add(new H2HConsoleMenuItem("Delete File") {
-			protected void execute() throws Hive2HiveException {
-				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
-						.delete(askForFile(true));
+			protected void execute() throws Hive2HiveException, InterruptedException {
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().update(askForFile(true));
 				executeBlocking(process);
 			}
 		});
 		add(new H2HConsoleMenuItem("Move File") {
-			protected void execute() throws Hive2HiveException {
+			protected void execute() throws Hive2HiveException, InterruptedException {
 				System.out.println("Source path needed: ");
 				File source = askForFile(true);
 
 				System.out.println("Destination path needed: ");
 				File destination = askForFile(false);
 
-				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
-						.move(source, destination);
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().move(source, destination);
 				executeBlocking(process);
 			}
 		});
-
-		add(new H2HConsoleMenuItem("Get File list") {
+		add(new H2HConsoleMenuItem("Delete File") {
+			protected void execute() throws Hive2HiveException, InterruptedException {
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().delete(askForFile(true));
+				executeBlocking(process);
+			}
+		});
+		add(new H2HConsoleMenuItem("Recover File") {
 			protected void execute() throws Hive2HiveException {
-				IResultProcessComponent<List<Path>> process = nodeMenu.getH2HNode().getFileManagement()
-						.getFileList();
-				IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
-					@Override
-					public void onResultReady(List<Path> result) {
-						// print the digest
-						System.out.println("Digest request resulted:");
-						for (Path path : result) {
-							System.out.println("* " + path.toString());
-						}
-					}
-				};
-
-				process.attachListener(resultListener);
-				executeBlocking(process);
+				// TODO implement recover process
+				notImplemented();
 			}
 		});
-
 		add(new H2HConsoleMenuItem("Share") {
 			protected void execute() throws IllegalArgumentException, NoSessionException,
-					IllegalFileLocation, NoPeerConnectionException {
+					IllegalFileLocation, NoPeerConnectionException, InterruptedException {
 				System.out.println("Specify the folder to share:");
 				File folder = askForFile(true);
 
@@ -202,8 +188,27 @@ public final class TopLevelMenu extends ConsoleMenu {
 					perm = PermissionType.READ;
 				}
 
-				IProcessComponent process = nodeMenu.getH2HNode().getFileManagement()
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManager()
 						.share(folder, friendId, perm);
+				executeBlocking(process);
+			}
+		});
+		add(new H2HConsoleMenuItem("Get File list") {
+			protected void execute() throws Hive2HiveException, InterruptedException {
+				IResultProcessComponent<List<Path>> process = nodeMenu.getH2HNode().getFileManager()
+						.getFileList();
+				IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
+					@Override
+					public void onResultReady(List<Path> result) {
+						// print the digest
+						System.out.println("File List:");
+						for (Path path : result) {
+							System.out.println("* " + path.toString());
+						}
+					}
+				};
+
+				process.attachListener(resultListener);
 				executeBlocking(process);
 			}
 		});
@@ -211,7 +216,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("File Observer") {
 			protected void checkPreconditions() {
 				if (root == null) {
-					printPreconditionError("Cannot configure file observer: Root Path not defined yet. Please login first.");
+					printPreconditionError("Cannot configure file observer: Root path not defined yet. Please login first.");
 					Login.invoke();
 				}
 				if (nodeMenu.getH2HNode() == null) {
@@ -223,47 +228,55 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 			@Override
 			protected void execute() throws Exception {
-				fileObserverMenu = new FileObserverMenu(root, nodeMenu.getH2HNode());
+				fileObserverMenu = new FileObserverMenu(root, nodeMenu.getH2HNode().getFileManager());
 				fileObserverMenu.open();
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Get Status") {
-			protected void execute() throws Hive2HiveException {
-				IH2HNodeStatus status = nodeMenu.getH2HNode().getStatus();
-				System.out.println("Connected: " + status.isConnected());
-				if (status.isLoggedIn()) {
-					System.out.println("User ID: " + status.getUserId());
-					System.out.println("Root path: " + status.getRoot().getAbsolutePath());
-				} else {
-					System.out.println("Currently, nobody is logged in");
-				}
-				System.out.println("Number of processes: " + status.getNumberOfProcesses());
-			}
-		});
-
 		add(new H2HConsoleMenuItem("Logout") {
-			protected void execute() throws Hive2HiveException {
-				IProcessComponent process = nodeMenu.getH2HNode().getUserManagement().logout();
+			protected void execute() throws Hive2HiveException, InterruptedException {
+				IProcessComponent process = nodeMenu.getH2HNode().getUserManager().logout();
 				executeBlocking(process);
 			}
 		});
+
+		// add(new H2HConsoleMenuItem("Get Status") {
+		// protected void execute() throws Hive2HiveException {
+		// IH2HNodeStatus status = nodeMenu.getH2HNode().getStatus();
+		// System.out.println("Connected: " + status.isConnected());
+		// if (status.isLoggedIn()) {
+		// System.out.println("User ID: " + status.getUserId());
+		// System.out.println("Root path: " + status.getRoot().getAbsolutePath());
+		// } else {
+		// System.out.println("Currently, nobody is logged in");
+		// }
+		// System.out.println("Number of processes: " + status.getNumberOfProcesses());
+		// }
+		// });
 	}
 
 	/**
-	 * Executes the given process (autostart anyhow) and blocks until it is done
+	 * Executes the given (already autostarted) process and blocks until it is done
+	 * @throws InterruptedException 
 	 */
-	private void executeBlocking(IProcessComponent process) {
-		// ProcessComponentListener processListener = new ProcessComponentListener();
-		// process.attachListener(processListener);
-		//
-		// while (!processListener.hasFinished()) {
-		// // busy waiting
-		// try {
-		// Thread.sleep(500);
-		// } catch (InterruptedException e) {
-		// }
-		// }
+	private void executeBlocking(IProcessComponent process) throws InterruptedException {
+		final ProcessComponentListener processListener = new ProcessComponentListener();
+		process.attachListener(processListener);
+
+		final CountDownLatch latch = new CountDownLatch(1);
+		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+		ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				// check for completion
+				if (processListener.hasFinished()) 
+					latch.countDown();
+			}
+		}, 0, 500, TimeUnit.MILLISECONDS);
+
+		// blocking wait for completion
+		latch.await();
+		handle.cancel(true);
 	}
 
 	/**
@@ -276,7 +289,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 			String path = awaitStringParameter();
 			file = new File(root, path);
 			if (expectExistence && !file.exists())
-				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again");
+				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again.");
 		} while (expectExistence && (file == null || !file.exists()));
 		return file;
 	}
