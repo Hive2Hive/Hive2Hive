@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -17,12 +16,10 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
@@ -95,85 +92,40 @@ public class SynchronizeFilesStep extends ProcessStep {
 	private void synchronizeFiles(FileSynchronizer synchronizer) throws NoSessionException,
 			InvalidProcessStateException, NoPeerConnectionException {
 		/*
-		 * count up to 4:
-		 * - until the uploadProcessNewFiles is done
-		 * - until the uploadProcessNewVersions is done
-		 * - until the deleteProess is done
-		 * - until the downloadProcess is done
+		 * - add the uploadProcessNewFiles
+		 * - add the uploadProcessNewVersions
+		 * - add the deleteProess
+		 * - add the downloadProcess
 		 */
-		CountDownLatch latch = new CountDownLatch(4);
-		CountDownListener latchListener = new CountDownListener(latch);
 
 		// download remotely added/updated files
 		List<Index> toDownload = new ArrayList<Index>(synchronizer.getAddedRemotely());
 		toDownload.addAll(synchronizer.getUpdatedRemotely());
 		ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(toDownload, networkManager);
-		downloadProcess.attachListener(latchListener);
-		downloadProcess.start();
+		getParent().add(downloadProcess);
 
 		// upload the locally added files
 		List<Path> toUploadNewFiles = synchronizer.getAddedLocally();
 		ProcessComponent addProcess = FileRecursionUtil.buildUploadProcess(toUploadNewFiles,
 				FileProcessAction.NEW_FILE, networkManager);
-		addProcess.attachListener(latchListener);
-		addProcess.start();
+		getParent().add(addProcess);
 
 		// upload the locally updated files
 		List<Path> toUploadModifiedFiles = synchronizer.getUpdatedLocally();
 		ProcessComponent updateProcess = FileRecursionUtil.buildUploadProcess(toUploadModifiedFiles,
 				FileProcessAction.MODIFY_FILE, networkManager);
-		updateProcess.attachListener(latchListener);
-		updateProcess.start();
+		getParent().add(updateProcess);
 
 		// remove files from the DHT that have been deleted locally
 		List<Index> toDeleteInDHT = synchronizer.getDeletedLocally();
 		ProcessComponent deletionProcess = FileRecursionUtil.buildDeletionProcessFromNodelist(toDeleteInDHT,
 				networkManager);
-		deletionProcess.attachListener(latchListener);
-		deletionProcess.start();
+		getParent().add(deletionProcess);
 
 		// delete the remotely deleted files (is done directly here)
 		List<Path> toDeleteOnDisk = synchronizer.getDeletedRemotely();
 		for (Path path : toDeleteOnDisk) {
 			path.toFile().delete();
 		}
-
-		// TODO check process state and if it does not change for a while, don't wait anymore (else, it may
-		// cause an endless loop)
-		while (latch.getCount() > 0) {
-			try {
-				logger.debug("Waiting until uploads and downloads finish...");
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
-		}
-
-		logger.debug("All uploads / downloads are done");
 	}
-
-	private class CountDownListener implements IProcessComponentListener {
-
-		private final CountDownLatch latch;
-
-		public CountDownListener(CountDownLatch latch) {
-			this.latch = latch;
-		}
-
-		@Override
-		public void onSucceeded() {
-			latch.countDown();
-		}
-
-		@Override
-		public void onFailed(RollbackReason reason) {
-			latch.countDown();
-		}
-
-		@Override
-		public void onFinished() {
-			// ignore
-		}
-
-	}
-
 }

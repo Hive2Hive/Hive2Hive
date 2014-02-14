@@ -100,6 +100,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	public void testAddFileTree() throws IOException, IllegalFileLocation, NoSessionException,
 			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
 			NoPeerConnectionException {
+		// /folder1/
 		// /folder1/test1.txt
 		// /folder1/folder2/test2.txt
 		File folder1 = new File(rootDirectory, "folder1");
@@ -123,6 +124,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, rootUser2.toPath());
 		UseCaseTestUtil.executeProcess(loginProcess);
+
+		// TODO wait for login process to download all files
 
 		// verfiy that all files are here
 		folder1 = new File(rootUser2, "folder1");

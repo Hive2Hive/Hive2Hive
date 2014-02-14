@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -28,7 +29,19 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException,
+			IllegalFileLocation {
+		// verify the argument
+		H2HSession session = networkManager.getSession();
+		if (file == null) {
+			throw new IllegalArgumentException("File cannot be null.");
+		} else if (!file.exists()) {
+			throw new IllegalArgumentException("File does not exist.");
+		} else if (session.getRoot().toFile().equals(file)) {
+			throw new IllegalArgumentException("Root cannot be added.");
+		} else if (!file.getAbsolutePath().toString().startsWith(session.getRootFile().getAbsolutePath())) {
+			throw new IllegalFileLocation();
+		}
 
 		IProcessComponent addProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {

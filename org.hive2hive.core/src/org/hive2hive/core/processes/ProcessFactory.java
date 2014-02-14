@@ -202,16 +202,6 @@ public final class ProcessFactory {
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		H2HSession session = networkManager.getSession();
-
-		// verify the argument
-		if (file == null) {
-			throw new IllegalArgumentException("File cannot be null.");
-		} else if (!file.exists()) {
-			throw new IllegalArgumentException("File does not exist.");
-		} else if (session.getRoot().toFile().equals(file)) {
-			throw new IllegalArgumentException("Root cannot be added.");
-		}
-
 		DataManager dataManager = networkManager.getDataManager();
 		AddFileProcessContext context = new AddFileProcessContext(file);
 

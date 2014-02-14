@@ -1,5 +1,6 @@
 package org.hive2hive.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
@@ -53,5 +54,9 @@ public class H2HSession {
 
 	public Path getRoot() {
 		return root;
+	}
+
+	public File getRootFile() {
+		return root.toFile();
 	}
 }

@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.api.interfaces.IFileManager;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
@@ -67,7 +68,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void addFile(File file) {
 		try {
 			fileManager.add(file);
-		} catch (NoSessionException | NoPeerConnectionException e) {
+		} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation e) {
 			logger.error(e.getMessage());
 		}
 	}

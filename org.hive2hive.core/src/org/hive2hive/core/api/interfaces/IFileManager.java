@@ -21,7 +21,8 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
  */
 public interface IFileManager extends IManager {
 
-	IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException,
+			IllegalFileLocation;
 
 	IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
 			NoPeerConnectionException;
