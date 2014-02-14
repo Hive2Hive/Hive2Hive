@@ -1,8 +1,6 @@
-package org.hive2hive.core.api;
+package org.hive2hive.core.api.managers;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.interfaces.INetworkComponent;
-import org.hive2hive.core.exceptions.NoNetworkException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
@@ -13,10 +11,15 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
  * @author Christian
  * 
  */
-public abstract class H2HManager implements INetworkComponent {
+public abstract class H2HManager {
 
-	private NetworkManager networkManager;
+	protected final NetworkManager networkManager;
+	
 	private boolean isAutostart = H2HConstants.DEFAULT_AUTOSTART_PROCESSES;
+
+	protected H2HManager(NetworkManager networkManager) {
+		this.networkManager = networkManager;
+	}
 
 	protected void submitProcess(IProcessComponent processComponent) {
 		if (isAutostart)
@@ -26,17 +29,6 @@ public abstract class H2HManager implements INetworkComponent {
 				// should not happen
 				e.printStackTrace();
 			}
-	}
-
-	@Override
-	public void setNetworkManager(NetworkManager networkManager) {
-		this.networkManager = networkManager;
-	}
-
-	protected NetworkManager getNetworkManager() throws NoNetworkException {
-		if (networkManager == null)
-			throw new NoNetworkException();
-		return networkManager;
 	}
 
 	/**

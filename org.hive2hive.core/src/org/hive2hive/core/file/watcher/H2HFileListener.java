@@ -5,7 +5,6 @@ import java.io.File;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.exceptions.NoNetworkException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
@@ -68,7 +67,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void addFile(File file) {
 		try {
 			fileManager.add(file);
-		} catch (NoSessionException | NoPeerConnectionException | NoNetworkException e) {
+		} catch (NoSessionException | NoPeerConnectionException e) {
 			logger.error(e.getMessage());
 		}
 	}
@@ -76,7 +75,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void removeFile(File file) {
 		try {
 			fileManager.delete(file);
-		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException | NoNetworkException e) {
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
 			logger.error(e.getMessage());
 		}
 	}
@@ -84,7 +83,7 @@ public class H2HFileListener implements FileAlterationListener {
 	private void modifyFile(File file) {
 		try {
 			fileManager.update(file);
-		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException | NoNetworkException e) {
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
 			logger.error(e.getMessage());
 		}
 	}

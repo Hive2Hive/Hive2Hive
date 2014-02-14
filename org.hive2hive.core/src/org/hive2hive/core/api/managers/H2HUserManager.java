@@ -1,12 +1,12 @@
-package org.hive2hive.core.api;
+package org.hive2hive.core.api.managers;
 
 import java.nio.file.Path;
 
-import org.hive2hive.core.api.configs.IFileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.exceptions.NoNetworkException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
@@ -16,30 +16,37 @@ import org.hive2hive.core.security.UserCredentials;
 
 public class H2HUserManager extends H2HManager implements IUserManager {
 
+	private final IFileConfiguration fileConfiguration;
+
+	// TODO remove IFileConfiguration
+	public H2HUserManager(NetworkManager networkManager, IFileConfiguration fileConfiguration) {
+		super(networkManager);
+		this.fileConfiguration = fileConfiguration;
+	}
+
 	@Override
-	public IProcessComponent register(UserCredentials credentials) throws NoNetworkException,
-			NoPeerConnectionException {
+	public IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException {
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
-				getNetworkManager());
+				networkManager);
 
 		AsyncComponent asyncProcess = new AsyncComponent(registerProcess);
-		
+
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
 
 	@Override
-	public IProcessComponent login(UserCredentials credentials, IFileConfiguration fileConfig, Path rootPath)
-			throws NoNetworkException, NoPeerConnectionException {
+	public IProcessComponent login(UserCredentials credentials, Path rootPath)
+			throws NoPeerConnectionException {
 		// TODO refactor
 		SessionParameters params = new SessionParameters();
-		params.setProfileManager(new UserProfileManager(getNetworkManager(), credentials));
+		params.setProfileManager(new UserProfileManager(networkManager, credentials));
 		params.setRoot(rootPath);
-		params.setFileConfig(fileConfig);
+		params.setFileConfig(fileConfiguration);
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params,
-				getNetworkManager());
-		
+				networkManager);
+
 		AsyncComponent asyncProcess = new AsyncComponent(loginProcess);
 
 		submitProcess(asyncProcess);
@@ -47,9 +54,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	@Override
-	public IProcessComponent logout() throws NoNetworkException, NoPeerConnectionException,
-			NoSessionException {
-		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(getNetworkManager());
+	public IProcessComponent logout() throws NoPeerConnectionException, NoSessionException {
+		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
 
 		AsyncComponent asyncProcess = new AsyncComponent(logoutProcess);
 
@@ -57,4 +63,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		return asyncProcess;
 	}
 
+	@Override
+	public IFileConfiguration getFileConfiguration() {
+		return fileConfiguration;
+	}
 }

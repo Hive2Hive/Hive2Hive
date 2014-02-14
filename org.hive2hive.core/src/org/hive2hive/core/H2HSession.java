@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
 
-import org.hive2hive.core.api.configs.IFileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;

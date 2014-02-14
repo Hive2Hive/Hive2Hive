@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.implementations.login;
 import java.nio.file.Path;
 import java.security.KeyPair;
 
-import org.hive2hive.core.api.configs.IFileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.network.data.UserProfileManager;
 
 public class SessionParameters {

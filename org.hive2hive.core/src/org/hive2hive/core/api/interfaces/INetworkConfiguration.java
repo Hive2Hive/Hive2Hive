@@ -1,4 +1,4 @@
-package org.hive2hive.core.api.configs;
+package org.hive2hive.core.api.interfaces;
 
 import java.net.InetAddress;
 

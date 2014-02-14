@@ -2,6 +2,8 @@ package org.hive2hive.core.api.configs;
 
 import java.net.InetAddress;
 
+import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+
 public class NetworkConfiguration implements INetworkConfiguration {
 
 	private final String nodeID;
@@ -16,15 +18,15 @@ public class NetworkConfiguration implements INetworkConfiguration {
 		this.bootstrapPort = bootstrapPort;
 	}
 
-	public static NetworkConfiguration create(String nodeID) {
+	public static INetworkConfiguration create(String nodeID) {
 		return new NetworkConfiguration(nodeID, true, null, -1);
 	}
 
-	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
+	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
 		return new NetworkConfiguration(nodeID, false, bootstrapAddress, -1);
 	}
 	
-	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
+	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
 		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort);
 	}
 

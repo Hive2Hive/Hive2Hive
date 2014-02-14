@@ -1,6 +1,7 @@
 package org.hive2hive.core.api.configs;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 
 public class FileConfiguration implements IFileConfiguration {
 
@@ -16,13 +17,13 @@ public class FileConfiguration implements IFileConfiguration {
 		this.chunkSize = chunkSize;
 	}
 
-	public static FileConfiguration createDefault() {
+	public static IFileConfiguration createDefault() {
 		return new FileConfiguration(H2HConstants.DEFAULT_MAX_FILE_SIZE,
 				H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS, H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS,
 				H2HConstants.DEFAULT_CHUNK_SIZE);
 	}
 
-	public static FileConfiguration createCustom(long maxFileSize, long maxNumOfVersions,
+	public static IFileConfiguration createCustom(long maxFileSize, long maxNumOfVersions,
 			long maxSizeAllVersions, long chunkSize) {
 		return new FileConfiguration(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize);
 	}
