@@ -39,9 +39,11 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params,
 				getNetworkManager());
+		
+		AsyncComponent asyncProcess = new AsyncComponent(loginProcess);
 
-		submitProcess(loginProcess);
-		return loginProcess;
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
@@ -49,8 +51,10 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 			NoSessionException {
 		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(getNetworkManager());
 
-		submitProcess(logoutProcess);
-		return logoutProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(logoutProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 }

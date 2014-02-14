@@ -163,6 +163,14 @@ public abstract class ProcessComponent implements IProcessComponent {
 		}
 	}
 
+	protected void setParent(Process parent) {
+		this.parent = parent;
+	}
+
+	protected Process getParent() {
+		return parent;
+	}
+
 	@Override
 	public String getID() {
 		return id;
@@ -176,14 +184,6 @@ public abstract class ProcessComponent implements IProcessComponent {
 	@Override
 	public ProcessState getState() {
 		return state;
-	}
-
-	public void setParent(Process parent) {
-		this.parent = parent;
-	}
-
-	public Process getParent() {
-		return parent;
 	}
 
 	public void attachListener(IProcessComponentListener listener) {

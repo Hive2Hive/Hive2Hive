@@ -14,6 +14,8 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
+import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
@@ -41,8 +43,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			addProcess = ProcessFactory.instance().createNewFileProcess(file, getNetworkManager());
 		}
 
-		submitProcess(addProcess);
-		return addProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(addProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
@@ -52,8 +56,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file,
 				getNetworkManager());
 		
-		submitProcess(updateProcess);
-		return updateProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(updateProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 
 	}
 
@@ -64,8 +70,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
 				getNetworkManager());
 
-		submitProcess(moveProcess);
-		return moveProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(moveProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
@@ -81,8 +89,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, getNetworkManager());
 		}
 
-		submitProcess(deleteProcess);
-		return deleteProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(deleteProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
@@ -93,8 +103,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file,
 				versionSelector, getNetworkManager());
 
-		submitProcess(recoverProcess);
-		return recoverProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(recoverProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
@@ -105,8 +117,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IProcessComponent shareProcess = ProcessFactory.instance().createShareProcess(folder,
 				new UserPermission(userId, permission), getNetworkManager());
 
-		submitProcess(shareProcess);
-		return shareProcess;
+		AsyncComponent asyncProcess = new AsyncComponent(shareProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
@@ -115,8 +129,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IResultProcessComponent<List<Path>> fileListProcess = ProcessFactory.instance()
 				.createFileListProcess(getNetworkManager());
 
-		submitProcess(fileListProcess);
-		return fileListProcess;
+		AsyncResultComponent<List<Path>> asyncProcess = new AsyncResultComponent<List<Path>>(fileListProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
 	}
 
 	@Override
