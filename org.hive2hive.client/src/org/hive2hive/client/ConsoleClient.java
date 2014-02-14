@@ -36,7 +36,7 @@ public class ConsoleClient {
 		System.out.println("*        |   |   |                                                        |   |   |        *");
 		System.out.println("*         `-´ `-´                                                          `-´ `-´         *");
 		System.out.println("********************************************************************************************");
-		System.out.println("\nConfigure your H2H network and nodes by browsing through the menus and follow the guides.\n");
+		System.out.println("\nConfigure and operate on you H2H network by following the guides.\n");
 	}
 	
 	private static void printFooter() {
@@ -44,7 +44,7 @@ public class ConsoleClient {
 		System.out.println("*          .´'`.                                                            .´'`.          *");
 		System.out.println("*          |   |                                                            |   |          *");
 		System.out.println("*        .´ `-´ `.                        Goodbye!                        .´ `-´ `.        *");
-		System.out.println("*        |   |   |                                                        |   |   |        *");
+		System.out.println("*        |   |   |                    (hive2hive.com)                     |   |   |        *");
 		System.out.println("*         `-´ `-´                                                          `-´ `-´         *");
 		System.out.println("********************************************************************************************");
 	}
