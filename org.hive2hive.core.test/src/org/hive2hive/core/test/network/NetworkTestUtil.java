@@ -10,9 +10,8 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HNodeBuilder;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.IH2HNode;
+import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.INetworkConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.network.NetworkManager;
@@ -139,19 +138,21 @@ public class NetworkTestUtil {
 	 *            size of the network (has to be larger than one)
 	 * @return list containing all Hive2Hive nodes where the first one is the bootstrapping node (master)
 	 */
-	public static List<IH2HNode> createH2HNetwork(int numberOfNodes) {
+	public static List<H2HNode> createH2HNetwork(int numberOfNodes) {
 		if (numberOfNodes < 1)
 			throw new IllegalArgumentException("invalid size of network");
-		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
+		List<H2HNode> nodes = new ArrayList<H2HNode>(numberOfNodes);
 
 		// create a master
-		IH2HNode master = new H2HNodeBuilder().setIsMaster(true).build();
+		H2HNode master = new H2HNode(NetworkConfiguration.create("master"));
+		master.connect();
 		nodes.add(master);
 
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = new H2HNodeBuilder().setBootstrapAddress(bootstrapAddress).build();
+				H2HNode node = new H2HNode(NetworkConfiguration.create("node " + i, bootstrapAddress));
+				node.connect();
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {
@@ -167,8 +168,8 @@ public class NetworkTestUtil {
 	 * @param network
 	 *            list containing all nodes which has to be disconnected.
 	 */
-	public static void shutdownH2HNetwork(List<IH2HNode> network) {
-		for (IH2HNode node : network) {
+	public static void shutdownH2HNetwork(List<H2HNode> network) {
+		for (H2HNode node : network) {
 			node.disconnect();
 		}
 	}
