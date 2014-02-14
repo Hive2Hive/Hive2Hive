@@ -18,6 +18,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
 import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -62,9 +63,10 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
+		IConsumeUserProfile context = new ConsumeProfileContext(testProfile);
 
 		// initialize the process and the one and only step to test
-		PutUserProfileStep step = new PutUserProfileStep(credentials, testProfile, putter.getDataManager());
+		PutUserProfileStep step = new PutUserProfileStep(credentials, context, putter.getDataManager());
 		UseCaseTestUtil.executeProcess(step);
 
 		// get the user profile which should be stored at the proxy
@@ -96,9 +98,10 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
+		IConsumeUserProfile context = new ConsumeProfileContext(testProfile);
 
 		// initialize the process and the one and only step to test
-		PutUserProfileStep step = new PutUserProfileStep(credentials, testProfile, putter.getDataManager());
+		PutUserProfileStep step = new PutUserProfileStep(credentials, context, putter.getDataManager());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		step.attachListener(listener);
 		step.start();
@@ -117,5 +120,20 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	public static void endTest() {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
+	}
+
+	private class ConsumeProfileContext implements IConsumeUserProfile {
+
+		private final UserProfile profile;
+
+		public ConsumeProfileContext(UserProfile profile) {
+			this.profile = profile;
+		}
+
+		@Override
+		public UserProfile consumeUserProfile() {
+			return profile;
+		}
+
 	}
 }

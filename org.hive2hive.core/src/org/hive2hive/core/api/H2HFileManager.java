@@ -31,13 +31,14 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException, NoNetworkException {
-
+	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException,
+			NoNetworkException {
 		IProcessComponent addProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE, getNetworkManager());
+			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE,
+					getNetworkManager());
 		} else {
 			// add single file
 			addProcess = ProcessFactory.instance().createNewFileProcess(file, getNetworkManager());
@@ -55,7 +56,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file,
 				getNetworkManager());
-		
+
 		AsyncComponent asyncProcess = new AsyncComponent(updateProcess);
 
 		submitProcess(asyncProcess);
@@ -77,7 +78,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException, NoNetworkException {
+	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException,
+			NoNetworkException {
 
 		IProcessComponent deleteProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {
