@@ -1,4 +1,4 @@
-package org.hive2hive.core.file.watcher;
+package org.hive2hive.core.api.watcher;
 
 import java.io.File;
 
@@ -33,8 +33,7 @@ public class H2HFileListener implements FileAlterationListener {
 
 	@Override
 	public void onDirectoryChange(File directory) {
-		printFileDetails("changed", directory);
-		// TODO implement onDirectoryChange
+		// ignore
 	}
 
 	@Override
@@ -51,8 +50,10 @@ public class H2HFileListener implements FileAlterationListener {
 
 	@Override
 	public void onFileChange(File file) {
-		printFileDetails("changed", file);
-		// modifyFile(file);
+		if (file.isFile()) {
+			printFileDetails("changed", file);
+			modifyFile(file);
+		}
 	}
 
 	@Override

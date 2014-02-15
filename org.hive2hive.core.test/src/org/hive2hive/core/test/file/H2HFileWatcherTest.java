@@ -16,8 +16,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.hive2hive.core.file.watcher.H2HFileWatcher;
-import org.hive2hive.core.file.watcher.H2HFileWatcher.H2HFileWatcherBuilder;
+import org.hive2hive.core.api.watcher.H2HFileWatcher;
+import org.hive2hive.core.api.watcher.H2HFileWatcher.H2HFileWatcherBuilder;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +28,7 @@ import org.junit.Test;
 public class H2HFileWatcherTest extends H2HJUnitTest {
 
 	// TODO the missing event order tests should be implemented
-	
+
 	enum Event {
 		FILE_CREATED,
 		FILE_DELETED,
@@ -361,7 +361,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 	@Ignore
 	@Test
 	public void directoryDeletedRootTest() throws Exception {
-		
+
 		// on root level
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.FILE_DELETED, Relation.CHILD));
@@ -374,7 +374,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		childFile.createNewFile();
 		File childDirectory = new File(directoryToDelete, "ChildDirectory");
 		FileUtils.forceMkdir(childDirectory);
-		
+
 		FileEventOrderListener orderListener = new FileEventOrderListener(directoryToDelete);
 		testWatcher.addFileListener(orderListener);
 		testWatcher.start();
@@ -388,7 +388,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 		testWatcher.removeFileListener(orderListener);
 		testWatcher.stop();
 	}
-	
+
 	private static boolean validateOrder(List<EventCheck> expected, List<EventCheck> real) {
 		if (expected.size() != real.size())
 			return false;
@@ -409,7 +409,7 @@ public class H2HFileWatcherTest extends H2HJUnitTest {
 	}
 
 	private static File getTestDirectoryRoot() {
-		return Paths.get(FileUtils.getUserDirectoryPath(), "Hive2Hive Test").toFile();
+		return Paths.get(FileUtils.getTempDirectoryPath(), "Hive2Hive Test").toFile();
 	}
 
 	private class EventCheck {
