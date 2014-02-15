@@ -22,7 +22,6 @@ public abstract class ConsoleMenu {
 
 	public ConsoleMenu() {
 		this.items = new ArrayList<ConsoleMenuItem>();
-		this.exited = false;
 
 		createItems();
 		addMenuItems();
@@ -54,6 +53,7 @@ public abstract class ConsoleMenu {
 	}
 
 	public final void open() {
+		this.exited = false;
 		while (!exited) {
 			show();
 		}

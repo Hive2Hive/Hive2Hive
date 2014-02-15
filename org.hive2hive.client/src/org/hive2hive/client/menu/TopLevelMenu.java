@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
+import org.hive2hive.client.Formatter;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -20,6 +21,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
@@ -42,6 +44,9 @@ public final class TopLevelMenu extends ConsoleMenu {
 	public TopLevelMenu() {
 		userMenu = new UserMenu();
 		nodeMenu = new NodeCreationMenu();
+		
+		nodeMenu.getH2HNode().getUserManager().configureAutostart(false);
+		nodeMenu.getH2HNode().getFileManager().configureAutostart(false);
 	}
 
 	@Override
@@ -91,7 +96,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() throws NoPeerConnectionException, InterruptedException {
+			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
 				IProcessComponent process = nodeMenu.getH2HNode().getUserManager()
 						.login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
@@ -125,7 +130,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() throws NoPeerConnectionException, InterruptedException {
+			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
 				IProcessComponent process = nodeMenu.getH2HNode().getUserManager()
 						.register(userMenu.getUserCredentials());
 				executeBlocking(process);
@@ -174,7 +179,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Share") {
 			protected void execute() throws IllegalArgumentException, NoSessionException,
-					IllegalFileLocation, NoPeerConnectionException, InterruptedException {
+					IllegalFileLocation, NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
 				System.out.println("Specify the folder to share:");
 				File folder = askForFile(true);
 
@@ -258,10 +263,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 	/**
 	 * Executes the given (already autostarted) process and blocks until it is done
 	 * @throws InterruptedException 
+	 * @throws InvalidProcessStateException 
 	 */
-	private void executeBlocking(IProcessComponent process) throws InterruptedException {
+	private void executeBlocking(IProcessComponent process) throws InterruptedException, InvalidProcessStateException {
 		final ProcessComponentListener processListener = new ProcessComponentListener();
 		process.attachListener(processListener);
+		process.start();
+
+		System.out.println("Executing...");
+		Formatter.setExecutionForeground();
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
@@ -273,10 +283,13 @@ public final class TopLevelMenu extends ConsoleMenu {
 					latch.countDown();
 			}
 		}, 0, 500, TimeUnit.MILLISECONDS);
+		
 
 		// blocking wait for completion
 		latch.await();
 		handle.cancel(true);
+		
+		Formatter.setDefaultForeground();
 	}
 
 	/**

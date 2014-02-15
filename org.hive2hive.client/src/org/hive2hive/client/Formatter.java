@@ -29,6 +29,14 @@ public class Formatter {
 		}
 	}
 
+	public static void setExecutionForeground() {
+		if (isWindows()) {
+			System.out.println(ansi().fg(Color.WHITE));
+		} else {
+			System.out.println(ansi().fgBright(Color.WHITE));
+		}
+	}
+
 	public static void setSuccessForeground() {
 		if (isWindows()) {
 			System.out.println(ansi().fg(Color.GREEN));
