@@ -33,4 +33,9 @@ public class AsyncResultComponent<T> extends AsyncComponent implements IResultPr
 	public void detachListener(IProcessResultListener<T> listener) {
 		((IResultProcessComponent<T>) decoratedComponent).detachListener(listener);
 	}
+
+	@Override
+	public void notifyResultComputed(T result) {
+		((IResultProcessComponent<T>) decoratedComponent).notifyResultComputed(result);
+	}
 }

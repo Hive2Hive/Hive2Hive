@@ -9,6 +9,9 @@ package org.hive2hive.core.processes.framework.interfaces;
  */
 public interface IResultProcessComponent<T> extends IProcessComponent {
 
+	
+	void notifyResultComputed(T result);
+	
 	/**
 	 * Attaches an {@link IProcessResultListener} to the process component.
 	 * 

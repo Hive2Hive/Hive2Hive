@@ -18,7 +18,8 @@ public abstract class ResultProcessStep<T> extends ProcessStep implements IResul
 
 	private final List<IProcessResultListener<T>> listener = new ArrayList<IProcessResultListener<T>>();
 
-	protected void notifyResultComputed(T result) {
+	@Override
+	public void notifyResultComputed(T result) {
 		for (IProcessResultListener<T> listener : this.listener) {
 			listener.onResultReady(result);
 		}
