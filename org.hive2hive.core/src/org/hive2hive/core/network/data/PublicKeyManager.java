@@ -23,13 +23,13 @@ public class PublicKeyManager {
 	private final String userId;
 	private final KeyPair usersKeyPair;
 	private final IDataManager dataManager;
-	private final Map<String, PublicKey> publicKeys;
+	private final Map<String, PublicKey> publicKeyCache;
 
 	public PublicKeyManager(String userId, KeyPair usersKeyPair, IDataManager dataManager) {
 		this.userId = userId;
 		this.usersKeyPair = usersKeyPair;
 		this.dataManager = dataManager;
-		this.publicKeys = new ConcurrentHashMap<String, PublicKey>();
+		this.publicKeyCache = new ConcurrentHashMap<String, PublicKey>();
 	}
 
 	/**
@@ -45,17 +45,12 @@ public class PublicKeyManager {
 		if (this.userId.equals(userId))
 			// get the own public key
 			return usersKeyPair.getPublic();
-		if (publicKeys.containsKey(userId))
+		if (publicKeyCache.containsKey(userId))
 			// check the cache
-			return publicKeys.get(userId);
+			return publicKeyCache.get(userId);
 
 		NetworkContent content = dataManager.get(userId, H2HConstants.USER_PUBLIC_KEY);
-		try {
-			return evaluateResult(content, userId);
-		} catch (GetFailedException e) {
-			logger.error("Could not get the public key of user '" + userId + "'.", e);
-			throw e;
-		}
+		return evaluateResult(content, userId);
 	}
 
 	private PublicKey evaluateResult(NetworkContent content, String requestingUserId)
@@ -76,7 +71,9 @@ public class PublicKeyManager {
 				throw new GetFailedException("Received corrupted public key.");
 			} else {
 				logger.debug("Successfully got the public key of user '" + userId + "'.");
-				publicKeys.put(requestingUserId, userPublicKey.getPublicKey());
+				// store it in the cache
+				publicKeyCache.put(requestingUserId, userPublicKey.getPublicKey());
+				// return it
 				return userPublicKey.getPublicKey();
 			}
 		}
