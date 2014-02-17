@@ -1,10 +1,9 @@
 package org.hive2hive.core.network.data;
 
 import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
@@ -15,7 +14,7 @@ import org.hive2hive.core.model.UserPublicKey;
 /**
  * A caching public key manager, which if necessary gets the desired public key of an user from the network.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class PublicKeyManager {
 
@@ -23,25 +22,14 @@ public class PublicKeyManager {
 
 	private final String userId;
 	private final KeyPair usersKeyPair;
-	private final DataManager dataManager;
+	private final IDataManager dataManager;
+	private final Map<String, PublicKey> publicKeys;
 
-	private final Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
-
-	private volatile String requestingUserId;
-	private volatile GetFailedException exception;
-
-	public PublicKeyManager(String userId, KeyPair usersKeyPair, DataManager dataManager) {
+	public PublicKeyManager(String userId, KeyPair usersKeyPair, IDataManager dataManager) {
 		this.userId = userId;
 		this.usersKeyPair = usersKeyPair;
 		this.dataManager = dataManager;
-	}
-
-	public PublicKey getUsersPublicKey() {
-		return usersKeyPair.getPublic();
-	}
-
-	public PrivateKey getUsersPrivateKey() {
-		return usersKeyPair.getPrivate();
+		this.publicKeys = new ConcurrentHashMap<String, PublicKey>();
 	}
 
 	/**
@@ -52,43 +40,44 @@ public class PublicKeyManager {
 	 * @return the public key of the user
 	 * @throws GetFailedException if the public key can't be fetched
 	 */
-	public synchronized PublicKey getPublicKey(String userId) throws GetFailedException {
+	public PublicKey getPublicKey(String userId) throws GetFailedException {
+		logger.debug("Requested to get the public key of user '" + userId + "'.");
 		if (this.userId.equals(userId))
+			// get the own public key
 			return usersKeyPair.getPublic();
-		if (publicKeys.containsKey(userId)) {
+		if (publicKeys.containsKey(userId))
+			// check the cache
 			return publicKeys.get(userId);
-		} else {
-			exception = null;
-			requestingUserId = userId;
 
-			NetworkContent content = dataManager.get(requestingUserId, H2HConstants.USER_PUBLIC_KEY);
-			evaluateResult(content);
-
-			if (this.exception != null) {
-				throw exception;
-			} else {
-				return publicKeys.get(requestingUserId);
-			}
+		NetworkContent content = dataManager.get(userId, H2HConstants.USER_PUBLIC_KEY);
+		try {
+			return evaluateResult(content, userId);
+		} catch (GetFailedException e) {
+			logger.error("Could not get the public key of user '" + userId + "'.", e);
+			throw e;
 		}
 	}
 
-	private void evaluateResult(NetworkContent content) {
+	private PublicKey evaluateResult(NetworkContent content, String requestingUserId)
+			throws GetFailedException {
 		if (content == null) {
 			logger.warn(String.format("Did not find the public key of user '%s'.", requestingUserId));
-			exception = new GetFailedException("No public key found.");
+			throw new GetFailedException("No public key found.");
 		} else if (!(content instanceof UserPublicKey)) {
 			logger.error(String
 					.format("The received content is not an user public key. Did not find the public key of user '%s'.",
 							requestingUserId));
-			exception = new GetFailedException("Received unkown content.");
+			throw new GetFailedException("Received unkown content.");
 		} else {
 			logger.trace(String.format("Received sucessfully the public key of user '%s'.", requestingUserId));
 			UserPublicKey userPublicKey = (UserPublicKey) content;
 			if (userPublicKey.getPublicKey() == null) {
 				logger.error(String.format("User public key of user '%s' is corrupted.", requestingUserId));
-				exception = new GetFailedException("Received corrupted public key.");
+				throw new GetFailedException("Received corrupted public key.");
 			} else {
+				logger.debug("Successfully got the public key of user '" + userId + "'.");
 				publicKeys.put(requestingUserId, userPublicKey.getPublicKey());
+				return userPublicKey.getPublicKey();
 			}
 		}
 	}

@@ -62,6 +62,8 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	private void createNode(INetworkConfiguration networkConfig) {
 		node = H2HNode.createNode(networkConfig,
 				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
+		node.getUserManager().configureAutostart(false);
+		node.getFileManager().configureAutostart(false);
 		node.connect();
 	}
 

@@ -44,9 +44,6 @@ public final class TopLevelMenu extends ConsoleMenu {
 	public TopLevelMenu() {
 		userMenu = new UserMenu();
 		nodeMenu = new NodeCreationMenu();
-		
-		nodeMenu.getH2HNode().getUserManager().configureAutostart(false);
-		nodeMenu.getH2HNode().getFileManager().configureAutostart(false);
 	}
 
 	@Override
@@ -96,7 +93,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
+			protected void execute() throws NoPeerConnectionException, InterruptedException,
+					InvalidProcessStateException {
 				IProcessComponent process = nodeMenu.getH2HNode().getUserManager()
 						.login(userMenu.getUserCredentials(), root.toPath());
 				executeBlocking(process);
@@ -130,7 +128,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 				}
 			}
 
-			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
+			protected void execute() throws NoPeerConnectionException, InterruptedException,
+					InvalidProcessStateException {
 				IProcessComponent process = nodeMenu.getH2HNode().getUserManager()
 						.register(userMenu.getUserCredentials());
 				executeBlocking(process);
@@ -179,7 +178,8 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Share") {
 			protected void execute() throws IllegalArgumentException, NoSessionException,
-					IllegalFileLocation, NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
+					IllegalFileLocation, NoPeerConnectionException, InterruptedException,
+					InvalidProcessStateException {
 				System.out.println("Specify the folder to share:");
 				File folder = askForFile(true);
 
@@ -262,15 +262,17 @@ public final class TopLevelMenu extends ConsoleMenu {
 
 	/**
 	 * Executes the given (already autostarted) process and blocks until it is done
-	 * @throws InterruptedException 
-	 * @throws InvalidProcessStateException 
+	 * 
+	 * @throws InterruptedException
+	 * @throws InvalidProcessStateException
 	 */
-	private void executeBlocking(IProcessComponent process) throws InterruptedException, InvalidProcessStateException {
+	private void executeBlocking(IProcessComponent process) throws InterruptedException,
+			InvalidProcessStateException {
 		final ProcessComponentListener processListener = new ProcessComponentListener();
 		process.attachListener(processListener);
 		process.start();
 
-		System.out.println("Executing...");
+		System.out.println("Executing... " + process.getClass().getSimpleName());
 		Formatter.setExecutionForeground();
 
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -279,16 +281,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 			@Override
 			public void run() {
 				// check for completion
-				if (processListener.hasFinished()) 
+				if (processListener.hasFinished())
 					latch.countDown();
 			}
 		}, 0, 500, TimeUnit.MILLISECONDS);
-		
 
 		// blocking wait for completion
 		latch.await();
 		handle.cancel(true);
-		
+
 		Formatter.setDefaultForeground();
 	}
 

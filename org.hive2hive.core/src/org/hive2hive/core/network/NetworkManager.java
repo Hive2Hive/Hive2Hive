@@ -52,10 +52,10 @@ public class NetworkManager {
 
 	/**
 	 * Disconnects from the network.
+	 * 
 	 * @return True, if the disconnection was successful, false otherwise.
 	 */
 	public boolean disconnect() {
-
 		if (session != null && session.getProfileManager() != null)
 			session.getProfileManager().stopQueueWorker();
 
@@ -90,11 +90,9 @@ public class NetworkManager {
 	 * Helper method that returns the public key of the currently logged in user.
 	 */
 	public PublicKey getPublicKey() {
-		try {
-			return getPublicKey(getUserId());
-		} catch (GetFailedException e) {
+		if (session == null)
 			return null;
-		}
+		return session.getKeyPair().getPublic();
 	}
 
 	/**
@@ -117,8 +115,7 @@ public class NetworkManager {
 	public PrivateKey getPrivateKey() {
 		if (session == null)
 			return null;
-		createKeyManager();
-		return keyManager.getUsersPrivateKey();
+		return session.getKeyPair().getPrivate();
 	}
 
 	public String getUserId() {

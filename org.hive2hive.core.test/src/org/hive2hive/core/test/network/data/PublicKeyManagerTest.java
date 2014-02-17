@@ -55,8 +55,6 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 				node.getDataManager());
 
 		// check if the public key manager returns correctly the key of the logged in user
-		assertEquals(loggedInUserKeys.getPrivate(), publicKeyManager.getUsersPrivateKey());
-		assertEquals(loggedInUserKeys.getPublic(), publicKeyManager.getUsersPublicKey());
 		assertEquals(loggedInUserKeys.getPublic(), publicKeyManager.getPublicKey(loggedInUserId));
 	}
 
