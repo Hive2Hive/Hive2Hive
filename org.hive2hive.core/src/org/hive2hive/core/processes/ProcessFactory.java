@@ -41,6 +41,7 @@ import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProf
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaDocumentStep;
 import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.core.processes.implementations.files.add.PutChunksStep;
+import org.hive2hive.core.processes.implementations.files.add.ValidateFileSizeStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
@@ -206,8 +207,11 @@ public final class ProcessFactory {
 		AddFileProcessContext context = new AddFileProcessContext(file);
 
 		SequentialProcess process = new SequentialProcess();
+		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
-		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
+		if (file.isFile())
+			// file needs to upload the chunks
+			process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateMetaDocumentStep(context, networkManager.getUserId()));
 		process.add(new PutMetaDocumentStep(context, context, dataManager));
 		process.add(new PrepareNotificationStep(context));
@@ -228,6 +232,7 @@ public final class ProcessFactory {
 		H2HSession session = networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
+		// TODO validate if the user has write permission
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
