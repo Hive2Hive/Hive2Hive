@@ -34,6 +34,7 @@ import org.hive2hive.core.processes.implementations.context.RegisterProcessConte
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaDocumentStep;
@@ -372,7 +373,24 @@ public final class ProcessFactory {
 		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
+		process.add(createChangeProtectionKeyProcess(context, networkManager)); // TODO: can be async
 		process.add(createNotificationProcess(context, networkManager));
+
+		return process;
+	}
+
+	/**
+	 * Changes all protection keys of this meta document and the sub-meta document
+	 * 
+	 * @param context
+	 * @param networkManager
+	 * @return
+	 */
+	private ProcessComponent createChangeProtectionKeyProcess(IConsumeIndex context,
+			NetworkManager networkManager) {
+		SequentialProcess process = new SequentialProcess();
+
+		// TODO
 
 		return process;
 	}

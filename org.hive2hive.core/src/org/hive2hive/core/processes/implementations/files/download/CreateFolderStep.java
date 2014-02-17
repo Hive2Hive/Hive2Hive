@@ -31,7 +31,7 @@ public class CreateFolderStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		Index file = context.getIndex();
+		Index file = context.consumeIndex();
 		logger.debug("Try creating a new folder on disk: " + file.getName());
 		try {
 			// create the folder on disk
@@ -54,7 +54,8 @@ public class CreateFolderStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		try {
 			if (!existedBefore) {
-				File folder = FileUtil.getPath(networkManager.getSession().getRoot(), context.getIndex()).toFile();
+				File folder = FileUtil.getPath(networkManager.getSession().getRoot(), context.consumeIndex())
+						.toFile();
 				folder.delete();
 			}
 		} catch (Exception e) {

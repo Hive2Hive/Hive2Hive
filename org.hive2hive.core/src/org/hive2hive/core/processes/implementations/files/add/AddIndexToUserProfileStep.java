@@ -71,10 +71,10 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			parentKey = parentNode.getFilePublicKey();
 			// use the file keys generated above is stored
 			if (file.isDirectory()) {
-				context.setNewIndex(new FolderIndex(parentNode, metaKeyPair, file.getName()));
+				context.provideIndex(new FolderIndex(parentNode, metaKeyPair, file.getName()));
 			} else {
 				byte[] md5 = EncryptionUtil.generateMD5Hash(file);
-				context.setNewIndex(new FileIndex(parentNode, metaKeyPair, file.getName(), md5));
+				context.provideIndex(new FileIndex(parentNode, metaKeyPair, file.getName(), md5));
 			}
 
 			// put the updated user profile
