@@ -1,14 +1,12 @@
 package org.hive2hive.core.processes;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
@@ -222,10 +220,6 @@ public final class ProcessFactory {
 
 	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, IllegalArgumentException, NoPeerConnectionException {
-		if (!file.isFile()) {
-			throw new IllegalArgumentException("A folder can have one version only");
-		}
-
 		DataManager dataManager = networkManager.getDataManager();
 		UpdateFileProcessContext context = new UpdateFileProcessContext(file);
 
@@ -233,6 +227,7 @@ public final class ProcessFactory {
 
 		SequentialProcess process = new SequentialProcess();
 		// TODO validate if the user has write permission
+		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
@@ -310,21 +305,12 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector,
-			NetworkManager networkManager) throws FileNotFoundException, IllegalArgumentException,
-			NoSessionException, NoPeerConnectionException {
-		// do some verifications
-		if (file.isDirectory()) {
-			throw new IllegalArgumentException("A foler has only one version");
-		} else if (!file.exists()) {
-			throw new FileNotFoundException("File does not exist");
-		}
-
+			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
-		// return new AsyncComponent(process);
 		return process;
 	}
 
@@ -377,25 +363,7 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createShareProcess(File folder, UserPermission permission,
-			NetworkManager networkManager) throws IllegalFileLocation, IllegalArgumentException,
-			NoSessionException, NoPeerConnectionException {
-		// verify
-		if (!folder.isDirectory())
-			throw new IllegalArgumentException("File has to be a folder.");
-		if (!folder.exists())
-			throw new IllegalFileLocation("Folder does not exist.");
-
-		H2HSession session = networkManager.getSession();
-		Path root = session.getRoot();
-
-		// folder must be in the given root directory
-		if (!folder.toPath().toString().startsWith(root.toString()))
-			throw new IllegalFileLocation("Folder must be in root of the H2H directory.");
-
-		// sharing root folder is not allowed
-		if (folder.toPath().toString().equals(root.toString()))
-			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
-
+			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
 		SequentialProcess process = new SequentialProcess();
