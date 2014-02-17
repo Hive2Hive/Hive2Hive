@@ -29,26 +29,23 @@ public class ConsoleClient {
 	}
 
 	private static void printHeader() {		
-		System.out.println("\n********************************************************************************************");
-		System.out.println("*          .´'`.                                                            .´'`.          *");
-		System.out.println("*          |   |                                                            |   |          *");
-		System.out.println("*        .´ `-´ `.        Welcome to the Hive2Hive console client!        .´ `-´ `.        *");
-		System.out.println("*        |   |   |                                                        |   |   |        *");
-		System.out.println("*         `-´ `-´                                                          `-´ `-´         *");
-		System.out.println("********************************************************************************************");
-		System.out.println("\nConfigure your H2H network and nodes by browsing through the menus and follow the guides.\n");
-		
-		
-		
+		System.out.println("\n**********************************************************************************");
+		System.out.println("*      .´'`.                                                            .´'`.      *");
+		System.out.println("*      |   |                                                            |   |      *");
+		System.out.println("*    .´ `-´ `.        Welcome to the Hive2Hive console client!        .´ `-´ `.    *");
+		System.out.println("*    |   |   |                                                        |   |   |    *");
+		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
+		System.out.println("************************************************************************************");
+		System.out.println("\nConfigure and operate on you H2H network by following the guides.\n");
 	}
 	
 	private static void printFooter() {
-		System.out.println("\n********************************************************************************************");
-		System.out.println("*          .´'`.                                                            .´'`.          *");
-		System.out.println("*          |   |                                                            |   |          *");
-		System.out.println("*        .´ `-´ `.                        Goodbye!                        .´ `-´ `.        *");
-		System.out.println("*        |   |   |                                                        |   |   |        *");
-		System.out.println("*         `-´ `-´                                                          `-´ `-´         *");
-		System.out.println("********************************************************************************************");
+		System.out.println("\n**********************************************************************************");
+		System.out.println("*      .´'`.                                                            .´'`.      *");
+		System.out.println("*      |   |                                                            |   |      *");
+		System.out.println("     .´ `-´ `.                        Goodbye!                        .´ `-´ `.    *");
+		System.out.println("*    |   |   |                    (hive2hive.com)                     |   |   |    *");
+		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
+		System.out.println("************************************************************************************");
 	}
 }

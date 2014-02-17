@@ -3,7 +3,7 @@ package org.hive2hive.client.menuitem;
 import org.hive2hive.client.Formatter;
 
 /**
- * A specified console menu item. Allows to check preconditions before execution the operation.
+ * A specified console menu item. Allows to check preconditions before executing the operation.
  * 
  * @author Christian
  * 

@@ -1,35 +1,40 @@
 package org.hive2hive.core.api.configs;
 
 import java.net.InetAddress;
+import java.util.UUID;
 
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 
 public class NetworkConfiguration implements INetworkConfiguration {
 
-	private final String nodeID;
-	private final boolean isMasterPeer;
-	private final InetAddress bootstrapAddress;
-	private final int bootstrapPort;
+	private String nodeID;
+	private boolean isMasterPeer;
+	private InetAddress bootstrapAddress;
+	private int bootstrapPort;
 
 	private NetworkConfiguration(String nodeID, boolean isMasterPeer, InetAddress bootstrapAddress, int bootstrapPort) {
-		this.bootstrapAddress = bootstrapAddress;
-		this.isMasterPeer = isMasterPeer;
 		this.nodeID = nodeID;
+		this.isMasterPeer = isMasterPeer;
+		this.bootstrapAddress = bootstrapAddress;
 		this.bootstrapPort = bootstrapPort;
 	}
 
+	public static INetworkConfiguration create() {
+		return create(UUID.randomUUID().toString());
+	}
+	
 	public static INetworkConfiguration create(String nodeID) {
 		return new NetworkConfiguration(nodeID, true, null, -1);
 	}
 
 	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
-		return new NetworkConfiguration(nodeID, false, bootstrapAddress, -1);
+		return create(nodeID, bootstrapAddress, -1);
 	}
 	
 	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
 		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort);
 	}
-
+	
 	@Override
 	public String getNodeID() {
 		return nodeID;
