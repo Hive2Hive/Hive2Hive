@@ -34,7 +34,6 @@ import org.hive2hive.core.processes.implementations.context.RegisterProcessConte
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaDocumentStep;
@@ -77,6 +76,7 @@ import org.hive2hive.core.processes.implementations.share.PrepareNotificationsSt
 import org.hive2hive.core.processes.implementations.share.UpdateMetaFolderStep;
 import org.hive2hive.core.processes.implementations.share.UpdateUserProfileStep;
 import org.hive2hive.core.processes.implementations.share.VerifyFriendId;
+import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -373,7 +373,7 @@ public final class ProcessFactory {
 		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
-		process.add(createChangeProtectionKeyProcess(context, networkManager)); // TODO: can be async
+		process.add(createChangeProtectionKeyProcess(context, networkManager));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -385,13 +385,13 @@ public final class ProcessFactory {
 	 * @param context
 	 * @param networkManager
 	 * @return
+	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException
 	 */
-	private ProcessComponent createChangeProtectionKeyProcess(IConsumeIndex context,
-			NetworkManager networkManager) {
+	private ProcessComponent createChangeProtectionKeyProcess(ShareProcessContext shareContext,
+			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		SequentialProcess process = new SequentialProcess();
-
-		// TODO
-
+		process.add(new InitializeMetaUpdateStep(shareContext, networkManager));
 		return process;
 	}
 }

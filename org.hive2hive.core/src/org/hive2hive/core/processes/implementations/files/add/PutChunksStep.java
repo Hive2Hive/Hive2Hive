@@ -136,4 +136,6 @@ public class PutChunksStep extends BasePutProcessStep {
 			return truncated;
 		}
 	}
+
+	// TODO support rollback: remove all chunks, not only the last one!
 }
