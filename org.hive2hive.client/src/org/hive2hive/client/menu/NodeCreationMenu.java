@@ -2,6 +2,7 @@ package org.hive2hive.client.menu;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
@@ -34,8 +35,9 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	protected void createItems() {
 		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
-				System.out.println("Specify Node ID:\n");
-				String nodeID = awaitStringParameter();
+				// System.out.println("Specify Node ID:\n");
+				// String nodeID = awaitStringParameter();
+				String nodeID = UUID.randomUUID().toString();
 
 				System.out.println("Specify Bootstrap Address:\n");
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
@@ -52,8 +54,9 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
-				System.out.println("Specify Node ID:\n");
-				String nodeID = awaitStringParameter();
+				// System.out.println("Specify Node ID:\n");
+				// String nodeID = awaitStringParameter();
+				String nodeID = UUID.randomUUID().toString();
 				createNode(NetworkConfiguration.create(nodeID));
 			}
 		};
