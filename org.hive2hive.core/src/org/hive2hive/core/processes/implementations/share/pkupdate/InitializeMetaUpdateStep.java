@@ -3,9 +3,11 @@ package org.hive2hive.core.processes.implementations.share.pkupdate;
 import java.security.KeyPair;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
@@ -33,6 +35,8 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public class InitializeMetaUpdateStep extends ProcessStep {
 
+	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeMetaUpdateStep.class);
+
 	private ShareProcessContext context;
 	private NetworkManager networkManager;
 
@@ -48,6 +52,8 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		List<Index> indexList = Index.getIndexList(folderIndex);
 		try {
 			for (Index index : indexList) {
+				logger.debug("Initialize to change the protection key of meta document of index '"
+						+ index.getName() + "'.");
 				// create the process and make wrap it to make it asynchronous
 				getParent().add(new AsyncComponent(buildProcess(index)));
 			}

@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.Set;
 
-import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.PermissionType;
@@ -31,7 +30,6 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
-	private FolderIndex folderIndex;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
@@ -68,8 +66,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	@Override
 	public KeyPair consumeProtectionKeys() {
-		// returns the new protection keys to store the meta document, ...
-		return newProtectionKeys;
+		return oldProtectionKeys;
 	}
 
 	/**

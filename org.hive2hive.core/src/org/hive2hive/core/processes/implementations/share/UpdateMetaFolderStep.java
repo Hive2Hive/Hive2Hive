@@ -51,15 +51,13 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 		super.doExecute();
 	}
 
-	// TODO done in separate step
 	// @Override
 	// protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair
 	// protectionKey)
 	// throws PutFailedException {
 	// this.locationKey = locationKey;
 	// this.contentKey = contentKey;
-	// dataManager.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-	// Number160.createHash(contentKey), content, context.consumeOldProtectionKeys(),
+	// dataManager.changeProtectionKey(locationKey, contentKey, content, context.consumeOldProtectionKeys(),
 	// context.consumeNewProtectionKeys());
 	// }
 

@@ -373,25 +373,9 @@ public final class ProcessFactory {
 		process.add(new UpdateMetaFolderStep(context, networkManager.getDataManager()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession().getProfileManager()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
-		process.add(createChangeProtectionKeyProcess(context, networkManager));
+		process.add(new InitializeMetaUpdateStep(context, networkManager));
 		process.add(createNotificationProcess(context, networkManager));
 
-		return process;
-	}
-
-	/**
-	 * Changes all protection keys of this meta document and the sub-meta document
-	 * 
-	 * @param context
-	 * @param networkManager
-	 * @return
-	 * @throws NoPeerConnectionException
-	 * @throws NoSessionException
-	 */
-	private ProcessComponent createChangeProtectionKeyProcess(ShareProcessContext shareContext,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
-		SequentialProcess process = new SequentialProcess();
-		process.add(new InitializeMetaUpdateStep(shareContext, networkManager));
 		return process;
 	}
 }
