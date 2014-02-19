@@ -57,11 +57,12 @@ public class PrepareNotificationsStep extends ProcessStep {
 		sharedNode.setParent(null);
 
 		// notify all users of the shared node
-		Set<String> friend = new HashSet<String>(1);
+		Set<String> friend = new HashSet<String>();
 		friend.addAll(fileNode.getCalculatedUserList());
-		logger.debug("Sending a notification message to the friend.");
+		logger.debug("Sending a notification message to the friend and all other sharers.");
 
-		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode);
+		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode,
+				context.getUserPermission());
 		context.provideMessageFactory(messageFactory);
 		context.provideUsersToNotify(friend);
 	}
