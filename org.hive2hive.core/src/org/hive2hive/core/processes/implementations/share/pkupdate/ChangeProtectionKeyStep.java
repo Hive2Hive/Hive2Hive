@@ -32,7 +32,6 @@ public class ChangeProtectionKeyStep extends BasePutProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		// call 'special' put to change the protection key
 		boolean success = dataManager.changeProtectionKey(context.getLocationKey(), context.getContentKey(),
 				context.getTTL(), context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys());
 
