@@ -20,6 +20,7 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -64,7 +65,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoPeerConnectionException, NoSessionException {
+			InterruptedException, NoPeerConnectionException, NoSessionException, InvalidProcessStateException {
 		File file = FileTestUtil.createFileRandomContent(3, root, config);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
@@ -81,7 +82,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
 
-		MetaFile metaDocument = UseCaseTestUtil.getMetaFile(client, metaKeyPair);
+		MetaFile metaDocument = UseCaseTestUtil.getMetaFile(client, metaKeyPair, false);
 		Assert.assertNull(metaDocument);
 
 		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
@@ -120,7 +121,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException, NoPeerConnectionException {
+			InterruptedException, NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
 		// add a folder to the network
 		File folder = new File(root, NetworkTestUtil.randomString());
 		folder.mkdir();
@@ -149,7 +150,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
 
 		// check the meta file is still in the DHT
-		MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaKeyPairFile);
+		MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaKeyPairFile, false);
 		Assert.assertNull(metaFile);
 	}
 
