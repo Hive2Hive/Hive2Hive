@@ -43,7 +43,7 @@ public class GetPublicKeysStep extends BaseGetProcessStep {
 
 		for (String user : users) {
 			try {
-				PublicKey key = networkManager.getPublicKey(user);
+				PublicKey key = networkManager.getPublicKeyManager().getPublicKey(user);
 				keys.put(user, key);
 			} catch (GetFailedException e) {
 				logger.error("Could not get the key for user " + user);

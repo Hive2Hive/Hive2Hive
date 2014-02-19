@@ -88,47 +88,101 @@ public class MessageReplyHandler implements ObjectDataReply {
 			BaseMessage receivedMessage = (BaseMessage) message;
 
 			// verify the signature
-			try {
-				PublicKey publicKey = networkManager.getPublicKey(senderId);
-				if (EncryptionUtil.verify(decryptedMessage, signature, publicKey)) {
-					logger.debug(String.format("Message's signature from user '%s' verified. node id = '%s'",
-							senderId, networkManager.getNodeId()));
-				} else {
-					logger.error(String.format("Message from user '%s' has wrong signature. node id = '%s'",
-							senderId, networkManager.getNodeId()));
+			if (networkManager.getPublicKeyManager().containsPublicKey(senderId)) {
+				if (!verifySignature(senderId, decryptedMessage, signature))
 					return AcceptanceReply.FAILURE_SIGNATURE;
+
+				// give a network manager reference to work (verify, handle)
+				try {
+					receivedMessage.setNetworkManager(networkManager);
+				} catch (NoPeerConnectionException e) {
+					logger.error("Cannot process the message because the peer is not connected");
+					return AcceptanceReply.FAILURE;
 				}
-			} catch (GetFailedException | InvalidKeyException | SignatureException e) {
-				logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'",
-						senderId, e.getMessage()));
-				return AcceptanceReply.FAILURE_SIGNATURE;
+
+				// check if message gets accepted
+				AcceptanceReply reply = receivedMessage.accept();
+				if (AcceptanceReply.OK == reply) {
+					// handle message in own thread
+					logger.debug(String.format("Received and accepted the message. node id = '%s'",
+							networkManager.getNodeId()));
+					new Thread(receivedMessage).start();
+				} else {
+					logger.warn(String.format(
+							"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
+							networkManager.getNodeId()));
+				}
+
+				return reply;
+			} else {
+				new Thread(new VerifyMessage(senderId, decryptedMessage, signature, receivedMessage)).start();
+				return AcceptanceReply.OK_PROVISIONAL;
 			}
+		} else {
+			logger.error("Received unknown object.");
+			return null;
+		}
+	}
+
+	private boolean verifySignature(String senderId, byte[] decryptedMessage, byte[] signature) {
+		try {
+			PublicKey publicKey = networkManager.getPublicKeyManager().getPublicKey(senderId);
+			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey)) {
+				logger.debug(String.format("Message's signature from user '%s' verified. node id = '%s'",
+						senderId, networkManager.getNodeId()));
+				return true;
+			} else {
+				logger.error(String.format("Message from user '%s' has wrong signature. node id = '%s'",
+						senderId, networkManager.getNodeId()));
+				return false;
+			}
+		} catch (GetFailedException | InvalidKeyException | SignatureException e) {
+			logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'", senderId,
+					e.getMessage()));
+			return false;
+		}
+	}
+
+	private class VerifyMessage implements Runnable {
+
+		private final String senderId;
+		private final byte[] decryptedMessage;
+		private final byte[] signature;
+		private final BaseMessage message;
+
+		public VerifyMessage(String senderId, byte[] decryptedMessage, byte[] signature, BaseMessage message) {
+			this.senderId = senderId;
+			this.decryptedMessage = decryptedMessage;
+			this.signature = signature;
+			this.message = message;
+		}
+
+		@Override
+		public void run() {
+			if (!verifySignature(senderId, decryptedMessage, signature))
+				return;
 
 			// give a network manager reference to work (verify, handle)
 			try {
-				receivedMessage.setNetworkManager(networkManager);
+				message.setNetworkManager(networkManager);
 			} catch (NoPeerConnectionException e) {
 				logger.error("Cannot process the message because the peer is not connected");
-				return AcceptanceReply.FAILURE;
+				return;
 			}
 
 			// check if message gets accepted
-			AcceptanceReply reply = receivedMessage.accept();
+			AcceptanceReply reply = message.accept();
 			if (AcceptanceReply.OK == reply) {
 				// handle message in own thread
 				logger.debug(String.format("Received and accepted the message. node id = '%s'",
 						networkManager.getNodeId()));
-				new Thread(receivedMessage).start();
+				new Thread(message).start();
 			} else {
 				logger.warn(String.format(
 						"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
 						networkManager.getNodeId()));
 			}
-
-			return reply;
-		} else {
-			logger.error("Received unknown object.");
-			return null;
 		}
+
 	}
 }

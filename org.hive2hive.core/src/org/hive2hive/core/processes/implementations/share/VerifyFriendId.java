@@ -23,7 +23,7 @@ public class VerifyFriendId extends ProcessStep {
 		try {
 			// just get the public key. It does not produce any overhead since this call is cached or (if the
 			// first time), the result will be cached, making the notification faster.
-			PublicKey publicKey = networkManager.getPublicKey(friendId);
+			PublicKey publicKey = networkManager.getPublicKeyManager().getPublicKey(friendId);
 			if (publicKey == null)
 				throw new GetFailedException("The friend does not seem to exist.");
 		} catch (GetFailedException e) {

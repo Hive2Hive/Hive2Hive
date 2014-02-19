@@ -65,7 +65,10 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);	
+		// receiver nodes should already know the public key of the senders
+		nodeA.getPublicKeyManager().putPublicKey(nodeB.getUserId(), nodeB.getPublicKey());
+		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
@@ -112,6 +115,9 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		// receiver nodes should already know the public key of the senders
+		nodeA.getPublicKeyManager().putPublicKey(nodeB.getUserId(), nodeB.getPublicKey());
+		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();

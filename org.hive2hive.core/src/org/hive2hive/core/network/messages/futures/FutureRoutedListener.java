@@ -92,7 +92,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	@Override
 	public void operationComplete(FutureSend future) throws Exception {
 		AcceptanceReply reply = extractAcceptanceReply(future);
-		if (reply == AcceptanceReply.OK) {
+		if (reply == AcceptanceReply.OK  || reply == AcceptanceReply.OK_PROVISIONAL) {
 			// notify the listener about the success of sending the message
 			state = DeliveryState.SUCCESS;
 			latch.countDown();

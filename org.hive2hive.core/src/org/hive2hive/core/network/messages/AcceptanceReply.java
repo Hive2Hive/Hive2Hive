@@ -5,11 +5,13 @@ package org.hive2hive.core.network.messages;
  * the sender of the message as quickly as possible (synchronously) if the sent message will be handled by the
  * target node or not.
  * 
- * @author Nendor
+ * @author Nendor, Seppi
  */
 public enum AcceptanceReply {
 	/** Default for 'everything is OK - I will handle this message' */
 	OK,
+	/** Provisional ok, e.g. when the signature of the message couldn't be checked.*/
+	OK_PROVISIONAL,
 	/** Default for 'something went wrong, I won't handle this message' */
 	FAILURE,
 	/** When decryption of message failed */

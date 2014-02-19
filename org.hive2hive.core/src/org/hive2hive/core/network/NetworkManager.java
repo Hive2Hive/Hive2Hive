@@ -5,7 +5,6 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
@@ -96,20 +95,6 @@ public class NetworkManager {
 	}
 
 	/**
-	 * Get the public key of the given user. The call may block.
-	 * 
-	 * @param userId the unique id of the user
-	 * @return a public key
-	 * @throws GetFailedException if a failure occurs or no public key found
-	 */
-	public PublicKey getPublicKey(String userId) throws GetFailedException {
-		if (session == null)
-			return null;
-		createKeyManager();
-		return keyManager.getPublicKey(userId);
-	}
-
-	/**
 	 * Helper method that returns the private key of the currently logged in user
 	 */
 	public PrivateKey getPrivateKey() {
@@ -142,10 +127,19 @@ public class NetworkManager {
 		return messageManager;
 	}
 
-	private void createKeyManager() {
+	/**
+	 * Get the public key manger to get public keys from other users. A get call may block (if public key not
+	 * cached).
+	 * 
+	 * @return a public key manager
+	 */
+	public PublicKeyManager getPublicKeyManager() {
+		if (session == null)
+			return null;
 		if (keyManager == null)
 			keyManager = new PublicKeyManager(session.getCredentials().getUserId(), session.getKeyPair(),
 					dataManager);
+		return keyManager;
 	}
 
 }

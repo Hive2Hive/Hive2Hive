@@ -93,6 +93,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		// receiver node should already know the public key of the sender
+		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
 
 		// generate random data and content key
 		String contentKey = NetworkTestUtil.randomString();

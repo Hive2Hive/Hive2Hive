@@ -1,5 +1,6 @@
 package org.hive2hive.core.test.network;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -87,9 +88,10 @@ public class NetworkTestUtil {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = generateRandomCredentials();
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
+			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(keyPair, profileManager, null, null);
+				session = new H2HSession(keyPair, profileManager, null, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -108,9 +110,10 @@ public class NetworkTestUtil {
 		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
+			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(keyPair, profileManager, null, null);
+				session = new H2HSession(keyPair, profileManager, null, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();

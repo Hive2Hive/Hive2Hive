@@ -5,11 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import net.tomp2p.peers.Number160;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -64,11 +61,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 
-		// put the public key of the sender into the network
-		sender.getDataManager()
-				.put(Number160.createHash(sender.getUserId()), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(H2HConstants.USER_PUBLIC_KEY),
-						new UserPublicKey(sender.getPublicKey()), null).awaitUninterruptibly();
+		// put the public key of the sender into the cache
+		receiver.getPublicKeyManager().putPublicKey(sender.getUserId(), sender.getPublicKey());
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
@@ -81,36 +75,14 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithWrongSignature1() throws NoPeerConnectionException {
+	public void testMessageWithWrongSignature() throws NoPeerConnectionException {
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 
-		// don't upload the sender public key
-
-		// location key is target node id
-		String locationKey = receiver.getNodeId();
-
-		// create a message with target node B, assign random public key
-		TestSignedMessage message = new TestSignedMessage(locationKey);
-
-		// send message
-		assertFalse(sender.getMessageManager().send(message, receiver.getPublicKey()));
-	}
-
-	@Test
-	public void testMessageWithWrongSignature2() throws NoPeerConnectionException {
-		NetworkTestUtil.createKeyPairs(network);
-		NetworkManager sender = network.get(0);
-		NetworkManager receiver = network.get(1);
-
-		// put a wrong public key of the sender into the network
-		sender.getDataManager()
-				.put(Number160.createHash(sender.getUserId()),
-						H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(H2HConstants.USER_PUBLIC_KEY),
-						new UserPublicKey(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS)
-								.getPublic()), null).awaitUninterruptibly();
+		// put a wrong public key of the sender into the cache
+		receiver.getPublicKeyManager().putPublicKey(sender.getUserId(), EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS)
+				.getPublic());
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();

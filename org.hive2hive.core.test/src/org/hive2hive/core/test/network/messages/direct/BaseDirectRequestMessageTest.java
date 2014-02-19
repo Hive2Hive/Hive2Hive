@@ -83,6 +83,9 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 			IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
+		// receiver nodes should already know the public key of the senders
+		nodeA.getPublicKeyManager().putPublicKey(nodeB.getUserId(), nodeB.getPublicKey());
+		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();

@@ -32,6 +32,15 @@ public class PublicKeyManager {
 		this.publicKeyCache = new ConcurrentHashMap<String, PublicKey>();
 	}
 
+	public void putPublicKey(String userId, PublicKey publicKey) {
+		if (!publicKeyCache.containsKey(userId))
+			publicKeyCache.put(userId, publicKey);
+	}
+
+	public boolean containsPublicKey(String userId) {
+		return publicKeyCache.containsKey(userId);
+	}
+
 	/**
 	 * Gets the public key. If not in cache the method fetches the desired public key from network. In this
 	 * case the call blocks.
