@@ -19,7 +19,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -143,10 +142,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaFolder metaFolderBeforeDeletion = (MetaFolder) UseCaseTestUtil.getMetaDocument(client,
-				metaKeyPairFolder);
 		MetaFile metaFileBeforeDeletion = (MetaFile) UseCaseTestUtil.getMetaDocument(client, metaKeyPairFile);
-		Assert.assertNotNull(metaFolderBeforeDeletion);
 		Assert.assertNotNull(metaFileBeforeDeletion);
 
 		// delete the file
@@ -182,12 +178,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		KeyPair metaKeyPairInnerFolder = userProfileBeforeDeletion.getFileByPath(innerFolder, root)
 				.getFileKeys();
-		MetaFolder metaFolderBeforeDeletion = (MetaFolder) UseCaseTestUtil.getMetaDocument(client,
-				metaKeyPairFolder);
-		MetaFolder metaInnerFolderBeforeDeletion = (MetaFolder) UseCaseTestUtil.getMetaDocument(client,
-				metaKeyPairInnerFolder);
-		Assert.assertNotNull(metaFolderBeforeDeletion);
-		Assert.assertNotNull(metaInnerFolderBeforeDeletion);
 
 		// delete the inner folder
 		UseCaseTestUtil.deleteFile(client, innerFolder);

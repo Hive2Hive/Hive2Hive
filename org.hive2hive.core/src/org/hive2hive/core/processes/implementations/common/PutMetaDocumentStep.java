@@ -14,8 +14,6 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -26,7 +24,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Puts a {@link MetaFile} or a {@link MetaFolder} object into the DHT after encrypting it with the given key.
+ * Puts a {@link MetaDocument} object into the DHT after encrypting it with the given key.
  * 
  * @author Nico
  * 

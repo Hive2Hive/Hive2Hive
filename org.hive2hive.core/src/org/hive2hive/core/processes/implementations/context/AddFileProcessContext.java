@@ -22,7 +22,7 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 
 	private List<KeyPair> chunkKeys;
 	private KeyPair metaKeyPair;
-	private MetaDocument newMetaDocument;
+	private MetaDocument newMetaFile;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
@@ -53,12 +53,12 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 
 	@Override
 	public MetaDocument consumeMetaDocument() {
-		// return the new meta document
-		return newMetaDocument;
+		// return the new meta file
+		return newMetaFile;
 	}
 
-	public void provideNewMetaDocument(MetaDocument newMetaDocument) {
-		this.newMetaDocument = newMetaDocument;
+	public void provideNewMetaFile(MetaDocument newMetaFile) {
+		this.newMetaFile = newMetaFile;
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
@@ -49,20 +50,24 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		FolderIndex folderIndex = (FolderIndex) context.consumeIndex();
 
-		List<Index> indexList = Index.getIndexList(folderIndex);
 		try {
+			List<Index> indexList = Index.getIndexList(folderIndex);
 			for (Index index : indexList) {
-				logger.debug("Initialize to change the protection key of meta document of index '"
-						+ index.getName() + "'.");
-				// create the process and make wrap it to make it asynchronous
-				getParent().add(new AsyncComponent(buildProcess(index)));
+				if (index.isFile()) {
+					FileIndex fileIndex = (FileIndex) index;
+					logger.debug("Initialize to change the protection key of meta document of index '"
+							+ fileIndex.getName() + "'.");
+					// create the process and make wrap it to make it asynchronous
+					getParent().add(new AsyncComponent(buildProcess(fileIndex)));
+				}
 			}
 		} catch (NoSessionException | NoPeerConnectionException e) {
 			throw new ProcessExecutionException(e);
 		}
 	}
 
-	private ProcessComponent buildProcess(Index index) throws NoSessionException, NoPeerConnectionException {
+	private ProcessComponent buildProcess(FileIndex index) throws NoSessionException,
+			NoPeerConnectionException {
 		// create a new sub-process
 		SequentialProcess sequential = new SequentialProcess();
 
@@ -72,7 +77,7 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, networkManager));
 		sequential.add(new ChangeProtectionKeyStep(metaContext, networkManager.getDataManager()));
 
-		// TODO: if the index is a file, also initialize the PK update of all chunks. This is not done yet
+		// TODO: Also initialize the PK update of all chunks. This is not done yet
 		// because we need to wait for a TomP2P feature to update the PK's without uploading the content
 		// again.
 		return sequential;

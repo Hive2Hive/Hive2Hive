@@ -1,7 +1,11 @@
 package org.hive2hive.core.processes.implementations.share;
 
+import java.nio.file.Path;
+
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
@@ -19,12 +23,14 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	private final ShareProcessContext context;
 	private final UserProfileManager profileManager;
+	private final Path root;
 
 	private boolean modified = false;
 
-	public UpdateUserProfileStep(ShareProcessContext context, UserProfileManager profileManager) {
+	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
 		this.context = context;
-		this.profileManager = profileManager;
+		this.profileManager = session.getProfileManager();
+		this.root = session.getRoot();
 	}
 
 	@Override
@@ -33,8 +39,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FolderIndex folderIndex = (FolderIndex) userProfile.getFileById(context.consumeMetaDocument()
-					.getId());
+			FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
 			if (folderIndex.isSharedOrHasSharedChildren()) {
 				// TODO this is to restrictive, what about several users sharing one single folder?

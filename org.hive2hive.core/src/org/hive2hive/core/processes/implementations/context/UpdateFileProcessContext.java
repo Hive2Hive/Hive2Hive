@@ -26,7 +26,7 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 
 	@Override
 	public void provideMetaDocument(MetaDocument metaDocument) {
-		provideNewMetaDocument(metaDocument);
+		provideNewMetaFile(metaDocument);
 	}
 
 	@Override
