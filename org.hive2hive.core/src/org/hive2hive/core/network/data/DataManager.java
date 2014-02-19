@@ -18,6 +18,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
@@ -67,7 +68,7 @@ public class DataManager implements IDataManager {
 			return false;
 		}
 
-		FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, null, newKey, this);
+		FutureChangeProtectionListener listener = new FutureChangeProtectionListener(lKey, dKey, cKey);
 		putFuture.addListener(listener);
 		return listener.await();
 	}

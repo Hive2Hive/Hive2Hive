@@ -69,10 +69,7 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 				index.getFilePublicKey());
 		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, networkManager));
 		sequential.add(new ChangeProtectionKeyStep(metaContext, networkManager.getDataManager()));
-
-		// TODO: Also initialize the PK update of all chunks. This is not done yet
-		// because we need to wait for a TomP2P feature to update the PK's without uploading the content
-		// again.
+		sequential.add(new InitializeChunkUpdateStep(metaContext, networkManager.getDataManager()));
 		return sequential;
 	}
 }

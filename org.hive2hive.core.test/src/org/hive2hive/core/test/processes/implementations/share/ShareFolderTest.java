@@ -210,20 +210,6 @@ public class ShareFolderTest extends H2HJUnitTest {
 		Assert.assertFalse(file1AtA.exists());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shareFileTest() throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
-		File file = new File(rootA, NetworkTestUtil.randomString());
-		UseCaseTestUtil.shareFolder(network.get(0), file, "any", PermissionType.WRITE);
-	}
-
-	@Test(expected = IllegalFileLocation.class)
-	public void wrongFolderLocationTest() throws IllegalFileLocation, IllegalArgumentException,
-			NoSessionException, NoPeerConnectionException {
-		// share root of B through client A
-		UseCaseTestUtil.shareFolder(network.get(0), rootB, "any", PermissionType.WRITE);
-	}
-
 	@After
 	public void deleteRoots() throws IOException {
 		FileUtils.deleteDirectory(rootA);
