@@ -67,30 +67,33 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		SequentialProcess sequential = new SequentialProcess();
 
 		// each meta document gets own context
-		MetaDocumentUpdateContext metaContext = new MetaDocumentUpdateContext(
+		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(
 				context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys());
 		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, networkManager));
 		sequential.add(new ChangeProtectionKeyStep(metaContext, networkManager.getDataManager()));
 
+		// TODO: if the index is a file, also initialize the PK update of all chunks. This is not done yet
+		// because we need to wait for a TomP2P feature to update the PK's without uploading the content
+		// again.
 		return sequential;
 	}
 
 	/**
 	 * Inner class to provide the required context to update the meta document
 	 */
-	private class MetaDocumentUpdateContext extends BasePKUpdateContext implements IProvideProtectionKeys,
+	private class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements IProvideProtectionKeys,
 			IProvideMetaDocument {
 
 		private MetaDocument metaDocument;
 		private HybridEncryptedContent encryptedMetaDocument;
 
-		public MetaDocumentUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
+		public MetaDocumentPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
 			super(oldProtectionKeys, newProtectionKeys);
 		}
 
 		@Override
 		public void provideProtectionKeys(KeyPair protectionKeys) {
-			// ignore because this is the old protection key
+			// ignore because this is the old protection key which we have already
 		}
 
 		@Override

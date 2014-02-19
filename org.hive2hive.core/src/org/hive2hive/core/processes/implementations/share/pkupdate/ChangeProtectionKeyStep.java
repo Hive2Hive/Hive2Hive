@@ -13,7 +13,8 @@ import org.hive2hive.core.processes.implementations.common.base.BasePutProcessSt
 import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
 
 /**
- * Changes the protection key for any data of type {@link NetworkContent}
+ * Changes the protection key for any data of type {@link NetworkContent}. Use the {@link BasePKUpdateContext}
+ * to hand over the required data.
  * 
  * @author Nico
  * 
@@ -46,7 +47,6 @@ public class ChangeProtectionKeyStep extends BasePutProcessStep {
 		// call 'special' put to change the protection key
 		boolean success = dataManager.changeProtectionKey(context.getLocationKey(), context.getContentKey(),
 				content, context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys());
-
 		putPerformed = true;
 
 		if (!success) {
