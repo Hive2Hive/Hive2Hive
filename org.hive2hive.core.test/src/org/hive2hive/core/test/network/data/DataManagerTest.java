@@ -300,8 +300,8 @@ public class DataManagerTest extends H2HJUnitTest {
 		H2HTestData data1v2 = new H2HTestData(NetworkTestUtil.randomString());
 		data1v2.generateVersionKey();
 		data1v2.setBasedOnKey(data1v1.getVersionKey());
-		FuturePut changeFuture1 = node.getDataManager().put(locationKey, domainKey, contentKey, data1v2,
-				keypair1, keypair2);
+		FuturePut changeFuture1 = node.getDataManager().changeProtectionKey(locationKey, domainKey,
+				contentKey, data1v2.getTimeToLive(), keypair1, keypair2);
 		changeFuture1.awaitUninterruptibly();
 		Assert.assertTrue(changeFuture1.isSuccess());
 

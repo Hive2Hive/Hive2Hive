@@ -81,6 +81,6 @@ public class MetaFile extends NetworkContent {
 
 	@Override
 	public int getTimeToLive() {
-		return TimeToLiveStore.getInstance().getMetaDocument();
+		return TimeToLiveStore.getInstance().getMetaFile();
 	}
 }

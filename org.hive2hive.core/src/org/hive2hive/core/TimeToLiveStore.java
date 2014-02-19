@@ -32,7 +32,7 @@ public class TimeToLiveStore {
 		this.chunk = chunk;
 	}
 
-	public int getMetaDocument() {
+	public int getMetaFile() {
 		return metaDocument;
 	}
 

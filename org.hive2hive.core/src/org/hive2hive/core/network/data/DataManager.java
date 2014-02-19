@@ -57,17 +57,17 @@ public class DataManager implements IDataManager {
 	}
 
 	@Override
-	public boolean changeProtectionKey(String locationKey, String contentKey, NetworkContent content,
-			KeyPair oldKey, KeyPair newKey) {
+	public boolean changeProtectionKey(String locationKey, String contentKey, int ttl, KeyPair oldKey,
+			KeyPair newKey) {
 		Number160 lKey = Number160.createHash(locationKey);
 		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 cKey = Number160.createHash(contentKey);
-		FuturePut putFuture = put(lKey, dKey, cKey, content, oldKey, newKey);
+		FuturePut putFuture = changeProtectionKey(lKey, dKey, cKey, ttl, oldKey, newKey);
 		if (putFuture == null) {
 			return false;
 		}
 
-		FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, content, newKey, this);
+		FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, null, newKey, this);
 		putFuture.addListener(listener);
 		return listener.await();
 	}
@@ -88,57 +88,68 @@ public class DataManager implements IDataManager {
 		return listener.await();
 	}
 
-	/**
-	 * Putting without changing the protection key (normal case)
-	 */
 	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
 			NetworkContent content, KeyPair protectionKey) {
-		// hand over the same protection key twice
-		return put(locationKey, domainKey, contentKey, content, protectionKey, protectionKey);
+		logger.debug(String
+				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s' protected = '%b'",
+						content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
+						content.getVersionKey(), protectionKey != null));
+		try {
+			Data data = new Data(content);
+			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
+			if (protectionKey != null) {
+				data.setProtectedEntry().sign(protectionKey);
+				return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
+						.setVersionKey(content.getVersionKey()).keyPair(protectionKey).start();
+			} else {
+				return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
+						.setVersionKey(content.getVersionKey()).start();
+			}
+		} catch (IOException | InvalidKeyException | SignatureException e) {
+			logger.error(String
+					.format("Put failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s' exception = '%s'",
+							locationKey, domainKey, contentKey, content.getVersionKey(), e.getMessage()));
+			return null;
+		}
 	}
 
 	/**
 	 * Putting and changing the protection key (only used for sharing, ...). The old and the new protection
 	 * keys can be the same, meaning that the key is not changed
 	 */
-	public FuturePut put(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			NetworkContent content, KeyPair oldProtectionKey, KeyPair newProtectionKey) {
-		logger.debug(String
-				.format("put content = '%s' location key = '%s' domain key = '%s' content key = '%s' version key = '%s' protected = '%b' ttl = '%s'",
-						content.getClass().getSimpleName(), locationKey, domainKey, contentKey,
-						content.getVersionKey(), newProtectionKey != null, content.getTimeToLive()));
+	public FuturePut changeProtectionKey(Number160 locationKey, Number160 domainKey, Number160 contentKey,
+			int ttl, KeyPair oldProtectionKey, KeyPair newProtectionKey) {
+		logger.debug(String.format(
+				"change protection key; location key = '%s' domain key = '%s' content key = '%s'",
+				locationKey, domainKey, contentKey));
 		try {
-			Data data = new Data(content);
-			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
+
 			if (newProtectionKey == null) {
-				// the content won't be protected after this put
-				if (oldProtectionKey == null) {
-					// previous content was not protected either
-					return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-							.setVersionKey(content.getVersionKey()).start();
-				} else {
-					// previous content was protected, now it should be unprotected.
-					// TODO TomP2P does not support this yet
-					return null;
-				}
+				logger.error("Cannot change the protection key to null value");
+				return null;
 			} else {
+				// create dummy object to change the protection key
+				Data data = new Data("dummy");
+				data.ttlSeconds(ttl);
+
+				// create a meta duplicate
+				data = data.setProtectedEntry().sign(newProtectionKey).duplicateMeta();
+
 				// the content will be protected after this put
 				if (oldProtectionKey == null) {
 					// the content is protected for the first time
-					data.setProtectedEntry().sign(newProtectionKey);
 					return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-							.setVersionKey(content.getVersionKey()).keyPair(newProtectionKey).start();
+							.keyPair(newProtectionKey).start();
 				} else {
 					// change the protection keys
-					data.setProtectedEntry().sign(newProtectionKey);
 					return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
-							.setVersionKey(content.getVersionKey()).keyPair(oldProtectionKey).start();
+							.keyPair(oldProtectionKey).start();
 				}
 			}
 		} catch (IOException | InvalidKeyException | SignatureException e) {
 			logger.error(String
-					.format("Put failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s' exception = '%s'",
-							locationKey, domainKey, contentKey, content.getVersionKey(), e.getMessage()));
+					.format("Change the protection key failed. location key = '%s' domain key = '%s' content key = '%s' exception = '%s'",
+							locationKey, domainKey, contentKey, e.getMessage()));
 			return null;
 		}
 	}
