@@ -9,10 +9,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.IFileVersion;
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -46,14 +45,12 @@ public class SelectVersionStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaDocument metaDocument = context.consumeMetaDocument();
-		if (metaDocument == null) {
+		MetaFile metaFile = context.consumeMetaFile();
+		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta document not found.");
-		} else if (!(metaDocument instanceof MetaFile)) {
+		} else if (!(metaFile instanceof MetaFile)) {
 			throw new ProcessExecutionException("Meta document is not a meta file.");
 		}
-
-		MetaFile metaFile = (MetaFile) metaDocument;
 
 		// cast the versions to the public interface
 		List<IFileVersion> versions = new ArrayList<IFileVersion>();

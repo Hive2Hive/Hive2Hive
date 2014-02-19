@@ -1,7 +1,11 @@
 package org.hive2hive.core.processes.implementations.share;
 
+import java.nio.file.Path;
+
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
@@ -19,12 +23,14 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	private final ShareProcessContext context;
 	private final UserProfileManager profileManager;
+	private final Path root;
 
 	private boolean modified = false;
 
-	public UpdateUserProfileStep(ShareProcessContext context, UserProfileManager profileManager) {
+	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
 		this.context = context;
-		this.profileManager = profileManager;
+		this.profileManager = session.getProfileManager();
+		this.root = session.getRoot();
 	}
 
 	@Override
@@ -33,16 +39,15 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FolderIndex folderIndex = (FolderIndex) userProfile.getFileById(context.consumeMetaDocument()
-					.getId());
+			FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
 			if (folderIndex.isSharedOrHasSharedChildren()) {
 				// TODO this is to restrictive, what about several users sharing one single folder?
 				throw new ProcessExecutionException("Folder is already shared or contains an shared folder.");
 			}
 
-			// store for backup
-			context.setFolderIndex(folderIndex);
+			// store for the notification
+			context.provideIndex(folderIndex);
 
 			// make the node shared with the new protection keys
 			folderIndex.share(context.consumeNewProtectionKeys(), context.getUserPermission());
@@ -64,7 +69,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// return to original domain key and put the userProfile
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FolderIndex fileNode = (FolderIndex) userProfile.getFileById(context.consumeMetaDocument()
+				FolderIndex fileNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile()
 						.getId());
 
 				// unshare the fileNode

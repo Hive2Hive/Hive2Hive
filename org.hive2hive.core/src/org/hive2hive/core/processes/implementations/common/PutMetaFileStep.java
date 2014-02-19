@@ -13,54 +13,51 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Puts a {@link MetaFile} or a {@link MetaFolder} object into the DHT after encrypting it with the given key.
+ * Puts a {@link MetaFile} object into the DHT after encrypting it with the given key.
  * 
  * @author Nico
  * 
  */
-public class PutMetaDocumentStep extends BasePutProcessStep {
+public class PutMetaFileStep extends BasePutProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutMetaDocumentStep.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutMetaFileStep.class);
 
-	private final IConsumeMetaDocument metaDocumentContext;
+	private final IConsumeMetaFile metaFileContext;
 	private final IConsumeProtectionKeys protectionKeyContext;
 
-	public PutMetaDocumentStep(IConsumeMetaDocument metaDocumentContext,
-			IConsumeProtectionKeys protectionKeyContext, IDataManager dataManager) {
+	public PutMetaFileStep(IConsumeMetaFile metaFileContext, IConsumeProtectionKeys protectionKeyContext,
+			IDataManager dataManager) {
 		super(dataManager);
-		this.metaDocumentContext = metaDocumentContext;
+		this.metaFileContext = metaFileContext;
 		this.protectionKeyContext = protectionKeyContext;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
-			MetaDocument metaDocument = metaDocumentContext.consumeMetaDocument();
+			MetaFile metaFile = metaFileContext.consumeMetaFile();
 			KeyPair protectionKeys = protectionKeyContext.consumeProtectionKeys();
 
-			logger.debug("Encrypting meta document in a hybrid manner");
-			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaDocument,
-					metaDocument.getId());
-			encrypted.setBasedOnKey(metaDocument.getVersionKey());
+			logger.debug("Encrypting meta file in a hybrid manner");
+			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaFile, metaFile.getId());
+			encrypted.setBasedOnKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();
-			put(H2HEncryptionUtil.key2String(metaDocument.getId()), H2HConstants.META_DOCUMENT, encrypted,
+			put(H2HEncryptionUtil.key2String(metaFile.getId()), H2HConstants.META_FILE, encrypted,
 					protectionKeys);
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new ProcessExecutionException("Meta document could not be encrypted.", e);
+			throw new ProcessExecutionException("Meta file could not be encrypted.", e);
 		} catch (PutFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

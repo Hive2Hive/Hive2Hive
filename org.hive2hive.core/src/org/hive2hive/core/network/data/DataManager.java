@@ -57,6 +57,22 @@ public class DataManager implements IDataManager {
 	}
 
 	@Override
+	public boolean changeProtectionKey(String locationKey, String contentKey, NetworkContent content,
+			KeyPair oldKey, KeyPair newKey) {
+		Number160 lKey = Number160.createHash(locationKey);
+		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+		Number160 cKey = Number160.createHash(contentKey);
+		FuturePut putFuture = put(lKey, dKey, cKey, content, oldKey, newKey);
+		if (putFuture == null) {
+			return false;
+		}
+
+		FuturePutListener listener = new FuturePutListener(lKey, dKey, cKey, content, newKey, this);
+		putFuture.addListener(listener);
+		return listener.await();
+	}
+
+	@Override
 	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
 			KeyPair protectionKey) {
 		Number160 lKey = Number160.createHash(userId);
@@ -240,5 +256,4 @@ public class DataManager implements IDataManager {
 	public DigestBuilder getDigest(Number160 locationKey) {
 		return getPeer().digest(locationKey);
 	}
-
 }

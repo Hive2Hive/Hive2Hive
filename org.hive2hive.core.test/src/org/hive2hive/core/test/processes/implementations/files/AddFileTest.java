@@ -13,7 +13,6 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -76,7 +75,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, NoPeerConnectionException {
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
 		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, config);
 
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
@@ -85,7 +84,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, NoPeerConnectionException {
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
 		// creates a file with length of at least 5 chunks
 		File file = FileTestUtil.createFileRandomContent(5, uploaderRoot, config);
 
@@ -95,7 +94,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolder() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, NoPeerConnectionException {
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
 		File folder = new File(uploaderRoot, "folder1");
 		folder.mkdirs();
 
@@ -105,7 +104,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, NoPeerConnectionException {
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
 		// create a container
 		File folder = new File(uploaderRoot, "folder-with-file");
 		folder.mkdirs();
@@ -119,7 +118,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, NoPeerConnectionException {
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
 		File folder = new File(uploaderRoot, "folder-with-folder");
 		folder.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folder);
@@ -146,18 +145,13 @@ public class AddFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 40);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testAddRoot() throws NoSessionException, NoPeerConnectionException {
-		ProcessFactory.instance().createNewFileProcess(uploaderRoot, network.get(0));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = Exception.class)
 	public void testAddNull() throws NoSessionException, NoPeerConnectionException {
 		ProcessFactory.instance().createNewFileProcess(null, network.get(0));
 	}
 
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,
-			NoSessionException, NoPeerConnectionException {
+			NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
 		// pick new client to test
 		NetworkManager client = network.get(1);
 
@@ -170,11 +164,11 @@ public class AddFileTest extends H2HJUnitTest {
 
 		// verify the meta document
 		KeyPair metaFileKeys = node.getFileKeys();
-		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaFileKeys);
-		Assert.assertNotNull(metaDocument);
 		if (originalFile.isFile()) {
+			MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaFileKeys);
+			Assert.assertNotNull(metaFile);
+
 			// get the meta file with the keys (decrypt it)
-			MetaFile metaFile = (MetaFile) metaDocument;
 			Assert.assertEquals(1, metaFile.getVersions().size());
 			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkKeys().size());
 		}

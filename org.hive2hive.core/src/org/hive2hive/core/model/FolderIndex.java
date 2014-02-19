@@ -32,6 +32,7 @@ public class FolderIndex extends Index {
 	 * @param name
 	 * @param isFolder
 	 */
+	// TODO keypair can be generated here, no need to hand over as parameter
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
 		children = new HashSet<Index>();

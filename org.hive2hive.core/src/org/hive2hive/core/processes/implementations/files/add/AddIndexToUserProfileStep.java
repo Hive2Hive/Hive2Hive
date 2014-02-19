@@ -61,14 +61,20 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			// create a file tree node in the user profile
 			// find the parent node using the relative path to navigate there
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
-			parentKey = parentNode.getFilePublicKey();
 
+			// validate the write protection
+			if (!parentNode.canWrite()) {
+				throw new ProcessExecutionException(
+						"This directory is write protected (and we don't have the keys).");
+			}
+
+			parentKey = parentNode.getFilePublicKey();
 			// use the file keys generated above is stored
 			if (file.isDirectory()) {
-				context.setNewIndex(new FolderIndex(parentNode, metaKeyPair, file.getName()));
+				context.provideIndex(new FolderIndex(parentNode, metaKeyPair, file.getName()));
 			} else {
 				byte[] md5 = EncryptionUtil.generateMD5Hash(file);
-				context.setNewIndex(new FileIndex(parentNode, metaKeyPair, file.getName(), md5));
+				context.provideIndex(new FileIndex(parentNode, metaKeyPair, file.getName(), md5));
 			}
 
 			// put the updated user profile

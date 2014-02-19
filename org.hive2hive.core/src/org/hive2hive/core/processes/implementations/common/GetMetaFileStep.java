@@ -12,34 +12,31 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Gets a {@link MetaFile} or a {@link MetaFolder} from the DHT and decrypts it.
+ * Gets a {@link MetaFile} from the DHT and decrypts it.
  * 
  * @author Nico
  * 
  */
-public class GetMetaDocumentStep extends BaseGetProcessStep {
+public class GetMetaFileStep extends BaseGetProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaDocumentStep.class);
+	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaFileStep.class);
 
 	private final IConsumeKeyPair keyContext;
-	private final IProvideMetaDocument metaContext;
+	private final IProvideMetaFile metaContext;
 
-	public GetMetaDocumentStep(IConsumeKeyPair keyContext, IProvideMetaDocument metaContext,
-			IDataManager dataManager) {
+	public GetMetaFileStep(IConsumeKeyPair keyContext, IProvideMetaFile metaContext, IDataManager dataManager) {
 		super(dataManager);
 		this.keyContext = keyContext;
 		this.metaContext = metaContext;
@@ -48,11 +45,11 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		KeyPair keyPair = keyContext.consumeKeyPair();
-		NetworkContent loadedContent = get(keyPair.getPublic(), H2HConstants.META_DOCUMENT);
+		NetworkContent loadedContent = get(keyPair.getPublic(), H2HConstants.META_FILE);
 
 		if (loadedContent == null) {
-			logger.warn("Meta document not found.");
-			throw new ProcessExecutionException("Meta document not found.");
+			logger.warn("Meta file not found.");
+			throw new ProcessExecutionException("Meta file not found.");
 		} else {
 
 			// decrypt meta document
@@ -64,17 +61,16 @@ public class GetMetaDocumentStep extends BaseGetProcessStep {
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 					| BadPaddingException | IllegalStateException | InvalidCipherTextException
 					| ClassNotFoundException | IOException e) {
-				throw new ProcessExecutionException("Meta document could not be decrypted.", e);
+				throw new ProcessExecutionException("Meta file could not be decrypted.", e);
 			}
 
-			MetaDocument metaDocument = (MetaDocument) decryptedContent;
-			metaDocument.setVersionKey(loadedContent.getVersionKey());
-			metaDocument.setBasedOnKey(loadedContent.getBasedOnKey());
+			MetaFile metaFile = (MetaFile) decryptedContent;
+			metaFile.setVersionKey(loadedContent.getVersionKey());
+			metaFile.setBasedOnKey(loadedContent.getBasedOnKey());
 
-			metaContext.provideMetaDocument(metaDocument);
-			metaContext.provideEncryptedMetaDocument(encryptedContent);
-			logger.debug(String.format("Got and decrypted the meta document for file '%s'.",
-					metaDocument.getName()));
+			metaContext.provideMetaFile(metaFile);
+			metaContext.provideEncryptedMetaFile(encryptedContent);
+			logger.debug(String.format("Got and decrypted the meta file for file '%s'.", metaFile.getName()));
 		}
 	}
 }

@@ -13,7 +13,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.common.GetMetaDocumentStep;
+import org.hive2hive.core.processes.implementations.common.GetMetaFileStep;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 
 public class FindInUserProfileStep extends ProcessStep {
@@ -43,7 +43,7 @@ public class FindInUserProfileStep extends ProcessStep {
 			throw new ProcessExecutionException("File key not found in user profile.");
 		}
 
-		context.setIndex(index);
+		context.provideIndex(index);
 
 		// add the next steps here
 		if (index.isFolder()) {
@@ -53,8 +53,9 @@ public class FindInUserProfileStep extends ProcessStep {
 			logger.info("Initalize the process for downloading file '" + index.getFullPath() + "'.");
 			try {
 				IDataManager dataManager = networkManager.getDataManager();
-				getParent().add(new GetMetaDocumentStep(context, context, dataManager));
-				getParent().add(new DownloadChunksStep(context, dataManager, networkManager.getSession().getRoot()));
+				getParent().add(new GetMetaFileStep(context, context, dataManager));
+				getParent().add(
+						new DownloadChunksStep(context, dataManager, networkManager.getSession().getRoot()));
 			} catch (Hive2HiveException e) {
 				throw new ProcessExecutionException(e);
 			}

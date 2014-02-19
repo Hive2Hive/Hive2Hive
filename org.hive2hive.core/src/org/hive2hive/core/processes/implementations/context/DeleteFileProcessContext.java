@@ -4,25 +4,24 @@ import java.security.KeyPair;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeMetaDocument,
-		IProvideProtectionKeys, IConsumeProtectionKeys, IProvideNotificationFactory,
-		IConsumeNotificationFactory {
+public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaFile, IProvideProtectionKeys,
+		IConsumeProtectionKeys, IProvideNotificationFactory, IConsumeNotificationFactory {
 
 	private final boolean isDirectory;
 
-	private MetaDocument metaDocument;
+	private MetaFile metaFile;
 	private KeyPair protectionKeys;
-	private HybridEncryptedContent encryptedMetaDocument;
+	private HybridEncryptedContent encryptedMetaFile;
 	private Index deletedIndex;
 	private Index parentNode;
 	private Set<String> users;
@@ -33,22 +32,22 @@ public class DeleteFileProcessContext implements IProvideMetaDocument, IConsumeM
 	}
 
 	@Override
-	public void provideMetaDocument(MetaDocument metaDocument) {
-		this.metaDocument = metaDocument;
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
 	}
 
 	@Override
-	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
-		this.encryptedMetaDocument = encryptedMetaDocument;
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
+		this.encryptedMetaFile = encryptedMetaDocument;
 	}
 
-	public HybridEncryptedContent getEncryptedMetaDocument() {
-		return encryptedMetaDocument;
+	public HybridEncryptedContent consumeEncryptedMetaFile() {
+		return encryptedMetaFile;
 	}
 
 	@Override
-	public MetaDocument consumeMetaDocument() {
-		return metaDocument;
+	public MetaFile consumeMetaFile() {
+		return metaFile;
 	}
 
 	@Override

@@ -4,12 +4,12 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.List;
 
-import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class UpdateFileProcessContext extends AddFileProcessContext implements IProvideMetaDocument,
+public class UpdateFileProcessContext extends AddFileProcessContext implements IProvideMetaFile,
 		IProvideProtectionKeys {
 
 	// protection keys of the existing meta file
@@ -25,12 +25,12 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 	}
 
 	@Override
-	public void provideMetaDocument(MetaDocument metaDocument) {
-		provideNewMetaDocument(metaDocument);
+	public void provideMetaFile(MetaFile metaFile) {
+		provideNewMetaFile(metaFile);
 	}
 
 	@Override
-	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
 		// ignore because only used for deletion
 	}
 
