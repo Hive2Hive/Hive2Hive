@@ -4,13 +4,15 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.Set;
 
-import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
@@ -19,7 +21,8 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProtectionKeys,
-		IProvideMetaDocument, IConsumeMetaDocument, IConsumeNotificationFactory, IProvideNotificationFactory {
+		IProvideMetaDocument, IConsumeMetaDocument, IConsumeNotificationFactory, IProvideNotificationFactory,
+		IConsumeIndex, IProvideIndex {
 
 	private final File folder;
 	private final KeyPair newProtectionKeys;
@@ -27,9 +30,9 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 
 	private KeyPair oldProtectionKeys;
 	private MetaDocument metaDocument;
-	private FolderIndex folderIndex;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
+	private Index index;
 
 	public ShareProcessContext(File folder, UserPermission permission) {
 		this.folder = folder;
@@ -57,22 +60,13 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		return newProtectionKeys;
 	}
 
-	public void setFolderIndex(FolderIndex folderIndex) {
-		this.folderIndex = folderIndex;
-	}
-
-	public FolderIndex getFileTreeNode() {
-		return folderIndex;
-	}
-
 	public KeyPair consumeOldProtectionKeys() {
 		return oldProtectionKeys;
 	}
 
 	@Override
 	public KeyPair consumeProtectionKeys() {
-		// returns the new protection keys to store the meta document, ...
-		return newProtectionKeys;
+		return oldProtectionKeys;
 	}
 
 	/**
@@ -116,5 +110,15 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	@Override
 	public Set<String> consumeUsersToNotify() {
 		return users;
+	}
+
+	@Override
+	public void provideIndex(Index index) {
+		this.index = index;
+	}
+
+	@Override
+	public Index consumeIndex() {
+		return index;
 	}
 }

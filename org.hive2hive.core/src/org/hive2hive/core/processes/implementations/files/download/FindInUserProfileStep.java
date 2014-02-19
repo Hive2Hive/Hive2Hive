@@ -43,7 +43,7 @@ public class FindInUserProfileStep extends ProcessStep {
 			throw new ProcessExecutionException("File key not found in user profile.");
 		}
 
-		context.setIndex(index);
+		context.provideIndex(index);
 
 		// add the next steps here
 		if (index.isFolder()) {
@@ -54,7 +54,8 @@ public class FindInUserProfileStep extends ProcessStep {
 			try {
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaDocumentStep(context, context, dataManager));
-				getParent().add(new DownloadChunksStep(context, dataManager, networkManager.getSession().getRoot()));
+				getParent().add(
+						new DownloadChunksStep(context, dataManager, networkManager.getSession().getRoot()));
 			} catch (Hive2HiveException e) {
 				throw new ProcessExecutionException(e);
 			}

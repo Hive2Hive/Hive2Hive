@@ -24,6 +24,7 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.MoveNotificationContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public class RelinkUserProfileStep extends ProcessStep {
 
@@ -75,6 +76,11 @@ public class RelinkUserProfileStep extends ProcessStep {
 			profileManager.readyToPut(userProfile, getID());
 			profileUpdated = true;
 			logger.debug("Successfully relinked the moved file in the user profile.");
+
+			// check if the protection key needs to be updated
+			if (H2HEncryptionUtil.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
+				// TODO update the protection key of the meta document and eventually all chunks
+			}
 
 			// notify other users
 			initNotificationParameters(oldParent.getCalculatedUserList(), movedNode);

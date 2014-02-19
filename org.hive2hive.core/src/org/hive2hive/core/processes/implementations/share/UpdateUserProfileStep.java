@@ -41,8 +41,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 				throw new ProcessExecutionException("Folder is already shared or contains an shared folder.");
 			}
 
-			// store for backup
-			context.setFolderIndex(folderIndex);
+			// store for the notification
+			context.provideIndex(folderIndex);
 
 			// make the node shared with the new protection keys
 			folderIndex.share(context.consumeNewProtectionKeys(), context.getUserPermission());

@@ -6,12 +6,15 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocument, IConsumeMetaDocument {
+public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocument, IConsumeMetaDocument,
+		IConsumeIndex, IProvideIndex {
 
 	// set -1 for default
 	public static final int NEWEST_VERSION_INDEX = -1;
@@ -35,14 +38,6 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 
 	public boolean isFolder() {
 		return index.isFolder();
-	}
-
-	public void setIndex(Index index) {
-		this.index = index;
-	}
-
-	public Index getIndex() {
-		return index;
 	}
 
 	@Override
@@ -71,5 +66,15 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 
 	public int getVersionToDownload() {
 		return versionToDownload;
+	}
+
+	@Override
+	public void provideIndex(Index index) {
+		this.index = index;
+	}
+
+	@Override
+	public Index consumeIndex() {
+		return index;
 	}
 }

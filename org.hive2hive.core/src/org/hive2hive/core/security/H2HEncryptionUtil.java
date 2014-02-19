@@ -3,6 +3,7 @@ package org.hive2hive.core.security;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -32,7 +33,7 @@ public final class H2HEncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalStateException
 	 * @throws DataLengthException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey)
 			throws DataLengthException, IllegalStateException, InvalidCipherTextException, IOException {
@@ -56,11 +57,12 @@ public final class H2HEncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalStateException
 	 * @throws DataLengthException
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
 	public static NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException, ClassNotFoundException, IOException {
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException,
+			ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey,
 				content.getInitVector());
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
@@ -80,7 +82,7 @@ public final class H2HEncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey)
 			throws DataLengthException, InvalidKeyException, IllegalStateException,
@@ -105,8 +107,8 @@ public final class H2HEncryptionUtil {
 	 * @throws BadPaddingException
 	 * @throws IllegalStateException
 	 * @throws InvalidCipherTextException
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
 	public static NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
 			throws InvalidKeyException, DataLengthException, IllegalBlockSizeException, BadPaddingException,
@@ -155,8 +157,28 @@ public final class H2HEncryptionUtil {
 		// calculate the MD5 hash and compare it
 		return Arrays.equals(md5, expectedMD5);
 	}
-	
+
 	public static String key2String(PublicKey key) {
 		return EncryptionUtil.byteToHex(key.getEncoded());
+	}
+
+	/**
+	 * Compares two keypairs (either one can be null)
+	 * 
+	 * @param keypair1
+	 * @param keypair2
+	 * @return if keypair1 matches keypair2
+	 */
+	public static boolean compare(KeyPair keypair1, KeyPair keypair2) {
+		if (keypair1 == null && keypair2 == null) {
+			return true;
+		} else if (keypair1 == null && keypair2 != null) {
+			return false;
+		} else if (keypair2 == null && keypair1 != null) {
+			return false;
+		}
+
+		return keypair1.getPrivate().equals(keypair2.getPrivate())
+				&& keypair1.getPublic().equals(keypair2.getPublic());
 	}
 }

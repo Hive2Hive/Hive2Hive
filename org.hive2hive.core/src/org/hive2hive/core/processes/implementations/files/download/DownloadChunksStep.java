@@ -60,13 +60,14 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		}
 
 		// support to store the file on another location than default (used for recover)
-		destination = FileUtil.getPath(root, context.getIndex()).toFile();
+		destination = FileUtil.getPath(root, context.consumeIndex()).toFile();
 		if (context.getDestination() != null) {
 			destination = context.getDestination();
 		}
 
 		if (!verifyFile(destination)) {
-			throw new ProcessExecutionException("File already exists on disk. Content does match; no download needed.");
+			throw new ProcessExecutionException(
+					"File already exists on disk. Content does match; no download needed.");
 		}
 
 		// start the download
@@ -110,7 +111,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		if (destination != null && destination.exists()) {
 			try {
 				// can be cast because only files are downloaded
-				FileIndex fileIndex = (FileIndex) context.getIndex();
+				FileIndex fileIndex = (FileIndex) context.consumeIndex();
 				if (H2HEncryptionUtil.compareMD5(destination, fileIndex.getMD5())) {
 					return false;
 				} else {

@@ -32,7 +32,7 @@ public class PrepareNotificationsStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		FolderIndex fileNode = context.getFileTreeNode();
+		FolderIndex fileNode = (FolderIndex) context.consumeIndex();
 
 		// create a subtree containing all children
 		FolderIndex sharedNode = new FolderIndex(fileNode.getParent(), fileNode.getFileKeys(),

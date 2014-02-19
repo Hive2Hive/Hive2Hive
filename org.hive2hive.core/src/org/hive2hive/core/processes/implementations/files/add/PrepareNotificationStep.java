@@ -25,7 +25,7 @@ public class PrepareNotificationStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		// get the recently added index
-		Index index = context.getNewIndex();
+		Index index = context.consumeIndex();
 
 		// get the users belonging to that index
 		HashSet<String> users = new HashSet<String>();

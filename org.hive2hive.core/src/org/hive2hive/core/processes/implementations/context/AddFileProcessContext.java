@@ -7,14 +7,16 @@ import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMetaDocument,
-		IConsumeNotificationFactory, IProvideNotificationFactory {
+		IConsumeNotificationFactory, IProvideNotificationFactory, IConsumeIndex, IProvideIndex {
 
 	private final File file;
 
@@ -23,7 +25,7 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 	private MetaDocument newMetaDocument;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
-	private Index newIndexNode;
+	private Index index;
 
 	public AddFileProcessContext(File file) {
 		this.file = file;
@@ -61,7 +63,7 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 
 	@Override
 	public KeyPair consumeProtectionKeys() {
-		return newIndexNode.getProtectionKeys();
+		return index.getProtectionKeys();
 	}
 
 	@Override
@@ -84,11 +86,13 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 		return users;
 	}
 
-	public void setNewIndex(Index newIndexNode) {
-		this.newIndexNode = newIndexNode;
+	@Override
+	public void provideIndex(Index index) {
+		this.index = index;
 	}
 
-	public Index getNewIndex() {
-		return newIndexNode;
+	@Override
+	public Index consumeIndex() {
+		return index;
 	}
 }

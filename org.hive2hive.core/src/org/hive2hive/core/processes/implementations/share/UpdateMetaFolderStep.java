@@ -1,17 +1,10 @@
 package org.hive2hive.core.processes.implementations.share;
 
-import java.security.KeyPair;
-
-import net.tomp2p.peers.Number160;
-
 import org.apache.log4j.Logger;
-import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFolder;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -40,15 +33,16 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.consumeMetaDocument() == null) {
-			throw new ProcessExecutionException("Meta folder does not exist, but folder is in user profile. You are in an inconsistent state.");
+			throw new ProcessExecutionException(
+					"Meta folder does not exist, but folder is in user profile. You are in an inconsistent state.");
 		}
 
 		logger.debug("Updating meta folder for sharing.");
 
 		MetaFolder metaFolder = (MetaFolder) context.consumeMetaDocument();
 		if (metaFolder.getUserList().contains(context.getFriendId())) {
-			throw new ProcessExecutionException(String.format("The folder is already shared with the user '%s'",
-					context.getFriendId()));
+			throw new ProcessExecutionException(String.format(
+					"The folder is already shared with the user '%s'", context.getFriendId()));
 		}
 		metaFolder.addUserPermissions(new UserPermission(context.getFriendId(), context.getPermissionType()));
 
@@ -57,15 +51,15 @@ public class UpdateMetaFolderStep extends PutMetaDocumentStep {
 		super.doExecute();
 	}
 
-	@Override
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
-			throws PutFailedException {
-		this.locationKey = locationKey;
-		this.contentKey = contentKey;
-		dataManager.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(contentKey), content, context.consumeOldProtectionKeys(),
-				context.consumeNewProtectionKeys());
-	}
+	// @Override
+	// protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair
+	// protectionKey)
+	// throws PutFailedException {
+	// this.locationKey = locationKey;
+	// this.contentKey = contentKey;
+	// dataManager.changeProtectionKey(locationKey, contentKey, content, context.consumeOldProtectionKeys(),
+	// context.consumeNewProtectionKeys());
+	// }
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {

@@ -65,7 +65,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 			profileManager.readyToPut(userProfile, getID());
 
 			// store for notification
-			context.setNewIndex(index);
+			context.provideIndex(index);
 		} catch (GetFailedException | PutFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

@@ -17,7 +17,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.data.IDataManager;
@@ -63,15 +62,6 @@ public class PutChunksStep extends BasePutProcessStep {
 		if (file.isDirectory()) {
 			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
 			return;
-		} else if (context.consumeProtectionKeys() == null) {
-			throw new ProcessExecutionException(
-					"This directory is write protected (and we don't have the keys).");
-		}
-
-		// first, validate the file size
-		long fileSize = FileUtil.getFileSize(file);
-		if (fileSize > config.getMaxFileSize()) {
-			throw new ProcessExecutionException("File is too large.");
 		}
 
 		long offset = 0;
@@ -146,4 +136,6 @@ public class PutChunksStep extends BasePutProcessStep {
 			return truncated;
 		}
 	}
+
+	// TODO support rollback: remove all chunks, not only the last one!
 }

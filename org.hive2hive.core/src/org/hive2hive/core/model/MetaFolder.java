@@ -1,6 +1,5 @@
 package org.hive2hive.core.model;
 
-import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,12 +17,10 @@ public class MetaFolder extends MetaDocument {
 
 	private static final long serialVersionUID = 1L;
 	private final List<UserPermission> userPermissions;
-	private final List<KeyPair> childKeys;
 
 	public MetaFolder(PublicKey id, String folderName, String creatorName) {
 		super(id, folderName);
 		userPermissions = new ArrayList<UserPermission>();
-		childKeys = new ArrayList<KeyPair>();
 
 		// creator receives write permissions by default
 		userPermissions.add(new UserPermission(creatorName, PermissionType.WRITE));
