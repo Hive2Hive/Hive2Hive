@@ -139,7 +139,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// verify that only one version was created
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
-				.getMetaDocument(downloader, fileNode.getFileKeys());
+				.getMetaFile(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -197,7 +197,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, root);
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
-				.getMetaDocument(downloader, fileNode.getFileKeys());
+				.getMetaFile(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -244,7 +244,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, root);
 		MetaFile metaDocument = (MetaFile) UseCaseTestUtil
-				.getMetaDocument(downloader, fileNode.getFileKeys());
+				.getMetaFile(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 

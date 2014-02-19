@@ -10,7 +10,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideKeyPair;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 
 /**
@@ -22,19 +22,19 @@ public class File2MetaFileComponent extends SequentialProcess {
 
 	// TODO this class should not exist, but rather should a factory compose this component
 	// TODO this class needs some refactoring
-	public File2MetaFileComponent(File file, IProvideMetaDocument metaContext,
+	public File2MetaFileComponent(File file, IProvideMetaFile metaContext,
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		this(file, null, metaContext, protectionContext, networkManager);
 	}
 
-	public File2MetaFileComponent(Index fileNode, IProvideMetaDocument metaContext,
+	public File2MetaFileComponent(Index fileNode, IProvideMetaFile metaContext,
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		this(null, fileNode, metaContext, protectionContext, networkManager);
 	}
 
-	private File2MetaFileComponent(File file, Index fileNode, IProvideMetaDocument metaContext,
+	private File2MetaFileComponent(File file, Index fileNode, IProvideMetaFile metaContext,
 			IProvideProtectionKeys protectionContext, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		File2MetaContext file2MetaContext = new File2MetaContext();
@@ -47,7 +47,7 @@ public class File2MetaFileComponent extends SequentialProcess {
 			file2MetaContext.provideKeyPair(fileNode.getFileKeys());
 		}
 
-		add(new GetMetaDocumentStep(file2MetaContext, metaContext, networkManager.getDataManager()));
+		add(new GetMetaFileStep(file2MetaContext, metaContext, networkManager.getDataManager()));
 	}
 
 	private class File2MetaContext implements IProvideKeyPair, IConsumeKeyPair {

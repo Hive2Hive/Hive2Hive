@@ -40,13 +40,13 @@ public class CreateNewVersionStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		if (context.consumeMetaDocument() == null) {
+		if (context.consumeMetaFile() == null) {
 			throw new ProcessExecutionException("Meta document is null.");
 		}
 
 		logger.debug("Adding a new version to the meta file.");
 
-		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
 				System.currentTimeMillis(), context.getChunkKeys());
 		metaFile.getVersions().add(newVersion);
@@ -55,7 +55,7 @@ public class CreateNewVersionStep extends ProcessStep {
 	}
 
 	private void initiateCleanup() {
-		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 
 		// remove files when the number of allowed versions is exceeded or when the total file size (sum
 		// of all versions) exceeds the allowed file size
@@ -80,8 +80,8 @@ public class CreateNewVersionStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (context.consumeMetaDocument() != null) {
-			MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+		if (context.consumeMetaFile() != null) {
+			MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 			// remove the new version
 			metaFile.getVersions().remove(newVersion);
 

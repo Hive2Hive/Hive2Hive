@@ -40,7 +40,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws ProcessExecutionException {
-		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 		byte[] newMD5;
 		try {
 			newMD5 = EncryptionUtil.generateMD5Hash(context.getFile());
@@ -73,7 +73,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 		if (metaFile != null) {
 			try {
 				// return to original MD5 and put the userProfile

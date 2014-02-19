@@ -17,7 +17,6 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileVersion;
-import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -72,7 +71,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// store the keys of the meta file to verify them later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaDocument metaDocumentBeforeDeletion = UseCaseTestUtil.getMetaDocument(client, metaKeyPair);
+		MetaFile metaDocumentBeforeDeletion = UseCaseTestUtil.getMetaFile(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the file
@@ -82,11 +81,10 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
 
-		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaKeyPair);
+		MetaFile metaDocument = UseCaseTestUtil.getMetaFile(client, metaKeyPair);
 		Assert.assertNull(metaDocument);
 
-		MetaFile metaFileBeforeDeletion = (MetaFile) metaDocumentBeforeDeletion;
-		for (FileVersion version : metaFileBeforeDeletion.getVersions()) {
+		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
 			for (KeyPair key : version.getChunkKeys()) {
 				FutureGet get = client.getDataManager().get(
 						Number160.createHash(H2HEncryptionUtil.key2String(key.getPublic())),
@@ -111,8 +109,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// store some keys before deletion
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
-		MetaDocument metaDocumentBeforeDeletion = UseCaseTestUtil.getMetaDocument(client, metaKeyPair);
-		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the folder
 		UseCaseTestUtil.deleteFile(client, folder);
@@ -120,9 +116,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// check if the folder is still in the DHT
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
-
-		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaKeyPair);
-		Assert.assertNull(metaDocument);
 	}
 
 	@Test
@@ -142,7 +135,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaFile metaFileBeforeDeletion = (MetaFile) UseCaseTestUtil.getMetaDocument(client, metaKeyPairFile);
+		MetaFile metaFileBeforeDeletion = (MetaFile) UseCaseTestUtil.getMetaFile(client, metaKeyPairFile);
 		Assert.assertNotNull(metaFileBeforeDeletion);
 
 		// delete the file
@@ -156,7 +149,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
 
 		// check the meta file is still in the DHT
-		MetaDocument metaFile = UseCaseTestUtil.getMetaDocument(client, metaKeyPairFile);
+		MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaKeyPairFile);
 		Assert.assertNull(metaFile);
 	}
 
@@ -188,10 +181,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		// check if the outer folder is still in the DHT
 		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
-
-		// check the inner meta folder is still in the DHT
-		MetaDocument metaInnerFolder = UseCaseTestUtil.getMetaDocument(client, metaKeyPairInnerFolder);
-		Assert.assertNull(metaInnerFolder);
 	}
 
 	@AfterClass

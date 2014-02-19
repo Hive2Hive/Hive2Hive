@@ -26,7 +26,7 @@ public class DeleteChunksProcess extends SequentialProcess {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		if (context.consumeMetaDocument() == null) {
+		if (context.consumeMetaFile() == null) {
 			throw new ProcessExecutionException("No meta document given.");
 		}
 		if (context.consumeProtectionKeys() == null) {
@@ -37,7 +37,7 @@ public class DeleteChunksProcess extends SequentialProcess {
 		if (!context.isDirectory()) {
 
 			List<KeyPair> chunkKeys = new ArrayList<KeyPair>();
-			MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+			MetaFile metaFile = context.consumeMetaFile();
 
 			// TODO rather delete file by file than all chunks mixed
 			for (FileVersion version : metaFile.getVersions()) {

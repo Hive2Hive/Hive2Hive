@@ -5,31 +5,31 @@ import java.security.KeyPair;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProtectionKeys,
-		IProvideMetaDocument, IConsumeMetaDocument, IConsumeNotificationFactory, IProvideNotificationFactory,
-		IConsumeIndex, IProvideIndex {
+public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProtectionKeys, IProvideMetaFile,
+		IConsumeMetaFile, IConsumeNotificationFactory, IProvideNotificationFactory, IConsumeIndex,
+		IProvideIndex {
 
 	private final File folder;
 	private final KeyPair newProtectionKeys;
 	private final UserPermission permission;
 
 	private KeyPair oldProtectionKeys;
-	private MetaDocument metaDocument;
+	private MetaFile metaFile;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
@@ -78,18 +78,18 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	}
 
 	@Override
-	public void provideMetaDocument(MetaDocument metaDocument) {
-		this.metaDocument = metaDocument;
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
 	}
 
 	@Override
-	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
 		// ignore because only used for deletion
 	}
 
 	@Override
-	public MetaDocument consumeMetaDocument() {
-		return metaDocument;
+	public MetaFile consumeMetaFile() {
+		return metaFile;
 	}
 
 	@Override

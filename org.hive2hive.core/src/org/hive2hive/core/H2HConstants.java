@@ -29,7 +29,7 @@ public interface H2HConstants {
 
 	// standard timeout for peer disconnection
 	public static final long DISCONNECT_TIMEOUT_MS = 10000;
-	
+
 	// the configuration file name (lying in the root directory of the node)
 	public static final String META_FILE_NAME = "h2h.conf";
 
@@ -53,7 +53,7 @@ public interface H2HConstants {
 	public static final String USER_LOCATIONS = "USER_LOCATIONS";
 	public static final String USER_PUBLIC_KEY = "USER_PUBLIC_KEY";
 	public static final String FILE_CHUNK = "FILE_CHUNK";
-	public static final String META_DOCUMENT = "META_DOCUMENT";
+	public static final String META_FILE = "META_FILE";
 
 	public static final int PUT_RETRIES = 3; // number of allowed tries to retry a put
 	public static final int REMOVE_RETRIES = 3; // number of allowed tries to retry a remove

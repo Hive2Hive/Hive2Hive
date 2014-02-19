@@ -6,23 +6,23 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
-public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMetaDocument,
+public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMetaFile,
 		IConsumeNotificationFactory, IProvideNotificationFactory, IConsumeIndex, IProvideIndex {
 
 	private final File file;
 
 	private List<KeyPair> chunkKeys;
 	private KeyPair metaKeyPair;
-	private MetaDocument newMetaFile;
+	private MetaFile newMetaFile;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
@@ -52,12 +52,12 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 	}
 
 	@Override
-	public MetaDocument consumeMetaDocument() {
+	public MetaFile consumeMetaFile() {
 		// return the new meta file
 		return newMetaFile;
 	}
 
-	public void provideNewMetaFile(MetaDocument newMetaFile) {
+	public void provideNewMetaFile(MetaFile newMetaFile) {
 		this.newMetaFile = newMetaFile;
 	}
 

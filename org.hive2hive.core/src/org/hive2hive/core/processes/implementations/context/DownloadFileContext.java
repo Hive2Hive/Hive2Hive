@@ -5,15 +5,15 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocument, IConsumeMetaDocument,
+public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaFile, IConsumeMetaFile,
 		IConsumeIndex, IProvideIndex {
 
 	// set -1 for default
@@ -24,7 +24,7 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 	private final int versionToDownload;
 
 	private Index index;
-	private MetaDocument metaDocument;
+	private MetaFile metaFile;
 
 	public DownloadFileContext(PublicKey fileKey, File destination, int versionToDownload) {
 		this.fileKey = fileKey;
@@ -41,12 +41,12 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 	}
 
 	@Override
-	public void provideMetaDocument(MetaDocument metaDocument) {
-		this.metaDocument = metaDocument;
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
 	}
 
 	@Override
-	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
 		// ignore because only used for deletion
 	}
 
@@ -56,8 +56,8 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaDocumen
 	}
 
 	@Override
-	public MetaDocument consumeMetaDocument() {
-		return metaDocument;
+	public MetaFile consumeMetaFile() {
+		return metaFile;
 	}
 
 	public File getDestination() {

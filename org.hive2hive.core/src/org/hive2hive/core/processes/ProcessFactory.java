@@ -19,7 +19,7 @@ import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
-import org.hive2hive.core.processes.implementations.common.PutMetaDocumentStep;
+import org.hive2hive.core.processes.implementations.common.PutMetaFileStep;
 import org.hive2hive.core.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
@@ -43,7 +43,7 @@ import org.hive2hive.core.processes.implementations.files.add.ValidateFileSizeSt
 import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
-import org.hive2hive.core.processes.implementations.files.delete.DeleteMetaDocumentStep;
+import org.hive2hive.core.processes.implementations.files.delete.DeleteMetaFileStep;
 import org.hive2hive.core.processes.implementations.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.list.GetFileListStep;
@@ -208,10 +208,10 @@ public final class ProcessFactory {
 		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		if (file.isFile()) {
-			// file needs to upload the chunks
+			// file needs to upload the chunks and a meta file
 			process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 			process.add(new CreateMetaFileStep(context));
-			process.add(new PutMetaDocumentStep(context, context, dataManager));
+			process.add(new PutMetaFileStep(context, context, dataManager));
 		}
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
@@ -232,7 +232,7 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
-		process.add(new PutMetaDocumentStep(context, context, dataManager));
+		process.add(new PutMetaFileStep(context, context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
@@ -278,11 +278,12 @@ public final class ProcessFactory {
 		SequentialProcess process = new SequentialProcess();
 
 		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
-		process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		process.add(new DeleteChunksProcess(context, dataManager));
-		process.add(new DeleteMetaDocumentStep(context, dataManager));
-		process.add(new DeleteFromUserProfileStep(context, networkManager));
-
+		if (file.isFile()) {
+			process.add(new File2MetaFileComponent(file, context, context, networkManager));
+			process.add(new DeleteChunksProcess(context, dataManager));
+			process.add(new DeleteMetaFileStep(context, dataManager));
+		}
+		process.add(new DeleteFromUserProfileStep(file, context, networkManager));
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 

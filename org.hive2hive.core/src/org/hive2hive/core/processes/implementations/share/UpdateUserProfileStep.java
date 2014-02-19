@@ -69,7 +69,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// return to original domain key and put the userProfile
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FolderIndex fileNode = (FolderIndex) userProfile.getFileById(context.consumeMetaDocument()
+				FolderIndex fileNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile()
 						.getId());
 
 				// unshare the fileNode

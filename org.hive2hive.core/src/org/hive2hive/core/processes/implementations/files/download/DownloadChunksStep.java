@@ -50,7 +50,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaFile metaFile = (MetaFile) context.consumeMetaDocument();
+		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 
 		// support to download a specific version
 		int versionToDownload = context.getVersionToDownload();

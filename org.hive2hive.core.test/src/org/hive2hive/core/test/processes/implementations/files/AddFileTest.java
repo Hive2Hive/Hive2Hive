@@ -13,7 +13,6 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -146,12 +145,7 @@ public class AddFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 40);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testAddRoot() throws NoSessionException, NoPeerConnectionException {
-		ProcessFactory.instance().createNewFileProcess(uploaderRoot, network.get(0));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = Exception.class)
 	public void testAddNull() throws NoSessionException, NoPeerConnectionException {
 		ProcessFactory.instance().createNewFileProcess(null, network.get(0));
 	}
@@ -170,11 +164,11 @@ public class AddFileTest extends H2HJUnitTest {
 
 		// verify the meta document
 		KeyPair metaFileKeys = node.getFileKeys();
-		MetaDocument metaDocument = UseCaseTestUtil.getMetaDocument(client, metaFileKeys);
-		Assert.assertNotNull(metaDocument);
 		if (originalFile.isFile()) {
+			MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaFileKeys);
+			Assert.assertNotNull(metaFile);
+
 			// get the meta file with the keys (decrypt it)
-			MetaFile metaFile = (MetaFile) metaDocument;
 			Assert.assertEquals(1, metaFile.getVersions().size());
 			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkKeys().size());
 		}

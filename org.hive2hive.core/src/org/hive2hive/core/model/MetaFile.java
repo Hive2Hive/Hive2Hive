@@ -5,20 +5,34 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.network.data.NetworkContent;
+
 /**
  * Holds meta data of a file in the DHT
  * 
  * @author Nico
  * 
  */
-public class MetaFile extends MetaDocument {
+public class MetaFile extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -3385321499412137545L;
+	private final PublicKey id;
+	private final String name;
 	private final List<FileVersion> versions;
 
 	public MetaFile(PublicKey id, String fileName, List<FileVersion> versions) {
-		super(id, fileName);
+		this.id = id;
+		this.name = fileName;
 		this.versions = versions;
+	}
+
+	public PublicKey getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public List<FileVersion> getVersions() {
@@ -63,5 +77,10 @@ public class MetaFile extends MetaDocument {
 		}
 
 		return null;
+	}
+
+	@Override
+	public int getTimeToLive() {
+		return TimeToLiveStore.getInstance().getMetaDocument();
 	}
 }

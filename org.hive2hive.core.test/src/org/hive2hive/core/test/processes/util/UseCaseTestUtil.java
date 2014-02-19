@@ -11,7 +11,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
@@ -21,7 +21,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.implementations.common.GetMetaDocumentStep;
+import org.hive2hive.core.processes.implementations.common.GetMetaFileStep;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
@@ -130,7 +130,8 @@ public class UseCaseTestUtil {
 				networkManager);
 		executeProcess(process);
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
-		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey)).toFile();
+		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey))
+				.toFile();
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,
@@ -154,10 +155,10 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
-	public static MetaDocument getMetaDocument(NetworkManager networkManager, final KeyPair keys)
+	public static MetaFile getMetaFile(NetworkManager networkManager, final KeyPair keys)
 			throws NoPeerConnectionException {
-		GetMetaDocumentContext context = new GetMetaDocumentContext(keys);
-		GetMetaDocumentStep step = new GetMetaDocumentStep(context, context, networkManager.getDataManager());
+		GetMetaFileContext context = new GetMetaFileContext(keys);
+		GetMetaFileStep step = new GetMetaFileStep(context, context, networkManager.getDataManager());
 		executeProcess(step);
 		return context.metaDocument;
 	}

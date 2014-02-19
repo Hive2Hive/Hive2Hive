@@ -5,24 +5,24 @@ import java.security.KeyPair;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hive2hive.core.model.MetaDocument;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaDocument;
+import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMetaDocument,
-		IProvideProtectionKeys, IConsumeProtectionKeys {
+public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFile, IProvideProtectionKeys,
+		IConsumeProtectionKeys {
 
 	private final File source;
 	private final File destination;
 
 	private KeyPair protectionKeys;
-	private MetaDocument metaDocument;
+	private MetaFile metaFile;
 	private KeyPair fileNodeKeys;
 
 	private final HashSet<String> usersToNotifySource;
@@ -69,17 +69,17 @@ public class MoveFileProcessContext implements IProvideMetaDocument, IConsumeMet
 	}
 
 	@Override
-	public MetaDocument consumeMetaDocument() {
-		return metaDocument;
+	public MetaFile consumeMetaFile() {
+		return metaFile;
 	}
 
 	@Override
-	public void provideMetaDocument(MetaDocument metaDocument) {
-		this.metaDocument = metaDocument;
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
 	}
 
 	@Override
-	public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
 		// ignore because only used for deletion
 	}
 

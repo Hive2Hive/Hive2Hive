@@ -11,7 +11,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaDocument;
+import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaDocument;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -87,9 +87,9 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 	 * Inner class to provide the required context to update the meta document
 	 */
 	private class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements IProvideProtectionKeys,
-			IProvideMetaDocument {
+			IProvideMetaFile {
 
-		private MetaDocument metaDocument;
+		private MetaFile metaFile;
 		private HybridEncryptedContent encryptedMetaDocument;
 
 		public MetaDocumentPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
@@ -102,12 +102,12 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		}
 
 		@Override
-		public void provideMetaDocument(MetaDocument metaDocument) {
-			this.metaDocument = metaDocument;
+		public void provideMetaFile(MetaFile metaFile) {
+			this.metaFile = metaFile;
 		}
 
 		@Override
-		public void provideEncryptedMetaDocument(HybridEncryptedContent encryptedMetaDocument) {
+		public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
 			this.encryptedMetaDocument = encryptedMetaDocument;
 		}
 
@@ -118,12 +118,12 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 
 		@Override
 		public String getLocationKey() {
-			return H2HEncryptionUtil.key2String(metaDocument.getId());
+			return H2HEncryptionUtil.key2String(metaFile.getId());
 		}
 
 		@Override
 		public String getContentKey() {
-			return H2HConstants.META_DOCUMENT;
+			return H2HConstants.META_FILE;
 		}
 	}
 }
