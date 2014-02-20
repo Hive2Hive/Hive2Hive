@@ -32,6 +32,7 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 		}
 
 		logger.debug("Initialize updating all chunks for a file in a shared folder...");
+		int counter = 0;
 		for (FileVersion version : metaFile.getVersions()) {
 			for (String chunkId : version.getChunkIds()) {
 				// each chunk gets an own context
@@ -41,7 +42,10 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 				// create the step and wrap it to run asynchronous, attach it to the parent process
 				ChangeProtectionKeyStep changeStep = new ChangeProtectionKeyStep(chunkContext, dataManager);
 				getParent().add(new AsyncComponent(changeStep));
+				counter++;
 			}
 		}
+
+		logger.debug(counter + " chunks need to update their protection key");
 	}
 }
