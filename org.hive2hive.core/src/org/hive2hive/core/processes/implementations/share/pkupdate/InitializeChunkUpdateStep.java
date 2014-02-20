@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.implementations.share.pkupdate;
 
-import java.security.KeyPair;
-
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
@@ -35,11 +33,10 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 
 		logger.debug("Initialize updating all chunks for a file in a shared folder...");
 		for (FileVersion version : metaFile.getVersions()) {
-			for (KeyPair chunkKey : version.getChunkKeys()) {
+			for (String chunkId : version.getChunkIds()) {
 				// each chunk gets an own context
 				ChunkPKUpdateContext chunkContext = new ChunkPKUpdateContext(
-						context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys(),
-						chunkKey.getPublic());
+						context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys(), chunkId);
 
 				// create the step and wrap it to run asynchronous, attach it to the parent process
 				ChangeProtectionKeyStep changeStep = new ChangeProtectionKeyStep(chunkContext, dataManager);

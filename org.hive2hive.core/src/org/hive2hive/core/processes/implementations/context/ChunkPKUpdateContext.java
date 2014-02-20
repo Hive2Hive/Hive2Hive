@@ -1,24 +1,22 @@
 package org.hive2hive.core.processes.implementations.context;
 
 import java.security.KeyPair;
-import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public class ChunkPKUpdateContext extends BasePKUpdateContext {
 
-	private final PublicKey chunkKey;
+	private final String chunkId;
 
-	public ChunkPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys, PublicKey chunkKey) {
+	public ChunkPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys, String chunkId) {
 		super(oldProtectionKeys, newProtectionKeys);
-		this.chunkKey = chunkKey;
+		this.chunkId = chunkId;
 	}
 
 	@Override
 	public String getLocationKey() {
-		return H2HEncryptionUtil.key2String(chunkKey);
+		return chunkId;
 	}
 
 	@Override

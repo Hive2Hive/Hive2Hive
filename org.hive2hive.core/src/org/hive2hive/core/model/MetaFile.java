@@ -1,5 +1,6 @@
 package org.hive2hive.core.model;
 
+import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,11 +21,13 @@ public class MetaFile extends NetworkContent {
 	private final PublicKey id;
 	private final String name;
 	private final List<FileVersion> versions;
+	private final KeyPair chunkKey;
 
-	public MetaFile(PublicKey id, String fileName, List<FileVersion> versions) {
+	public MetaFile(PublicKey id, String fileName, List<FileVersion> versions, KeyPair chunkKey) {
 		this.id = id;
 		this.name = fileName;
 		this.versions = versions;
+		this.chunkKey = chunkKey;
 	}
 
 	public PublicKey getId() {
@@ -37,6 +40,10 @@ public class MetaFile extends NetworkContent {
 
 	public List<FileVersion> getVersions() {
 		return versions;
+	}
+
+	public KeyPair getChunkKey() {
+		return chunkKey;
 	}
 
 	public int getTotalSize() {

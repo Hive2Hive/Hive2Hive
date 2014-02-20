@@ -38,7 +38,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeN
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
 import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
-import org.hive2hive.core.processes.implementations.files.add.PutChunksStep;
+import org.hive2hive.core.processes.implementations.files.add.InitializeChunksStep;
 import org.hive2hive.core.processes.implementations.files.add.ValidateFileSizeStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
@@ -52,7 +52,7 @@ import org.hive2hive.core.processes.implementations.files.move.RelinkUserProfile
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.recover.SelectVersionStep;
 import org.hive2hive.core.processes.implementations.files.update.CreateNewVersionStep;
-import org.hive2hive.core.processes.implementations.files.update.DeleteChunksStep;
+import org.hive2hive.core.processes.implementations.files.update.CleanupChunksStep;
 import org.hive2hive.core.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.core.processes.implementations.login.GetUserProfileStep;
@@ -209,7 +209,7 @@ public final class ProcessFactory {
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
-			process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
+			process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 			process.add(new CreateMetaFileStep(context));
 			process.add(new PutMetaFileStep(context, context, dataManager));
 		}
@@ -230,13 +230,13 @@ public final class ProcessFactory {
 		// TODO validate if the user has write permission
 		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		process.add(new PutChunksStep(context, dataManager, session.getFileConfiguration()));
+		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
 		process.add(new PutMetaFileStep(context, context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
-		process.add(new DeleteChunksStep(context, dataManager));
+		process.add(new CleanupChunksStep(context, dataManager));
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 

@@ -20,12 +20,13 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 
 	private final File file;
 
-	private List<KeyPair> chunkKeys;
+	private KeyPair chunkKeys;
 	private KeyPair metaKeyPair;
 	private MetaFile newMetaFile;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
+	private List<String> chunkIds;
 
 	public AddFileProcessContext(File file) {
 		this.file = file;
@@ -35,11 +36,17 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 		return file;
 	}
 
-	public void setChunkKeys(List<KeyPair> chunkKeys) {
+	/**
+	 * The keypair for the encryption of all chunks
+	 */
+	public void setChunkKeys(KeyPair chunkKeys) {
 		this.chunkKeys = chunkKeys;
 	}
 
-	public List<KeyPair> getChunkKeys() {
+	/**
+	 * The keypair for the encryption of all chunks
+	 */
+	public KeyPair getChunkKeys() {
 		return chunkKeys;
 	}
 
@@ -94,5 +101,19 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 	@Override
 	public Index consumeIndex() {
 		return index;
+	}
+
+	/**
+	 * The ids of all chunks of this upload
+	 */
+	public List<String> getChunkIds() {
+		return chunkIds;
+	}
+
+	/**
+	 * The ids of all chunks of this upload
+	 */
+	public void setChunkIds(List<String> chunkIds) {
+		this.chunkIds = chunkIds;
 	}
 }

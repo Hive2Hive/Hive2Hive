@@ -20,6 +20,19 @@ public abstract class Process extends ProcessComponent {
 		doInsert(index, component);
 	}
 
+	public final void insertNext(ProcessComponent toInsert, ProcessComponent after) {
+		List<ProcessComponent> components = getComponents();
+		int index = components.size();
+		for (int i = 0; i < components.size(); i++) {
+			if (components.get(i).equals(after)) {
+				index = i + 1;
+				break;
+			}
+		}
+
+		insert(index, toInsert);
+	}
+
 	public final void remove(ProcessComponent component) {
 		component.setParent(null);
 		doRemove(component);

@@ -170,7 +170,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 			// get the meta file with the keys (decrypt it)
 			Assert.assertEquals(1, metaFile.getVersions().size());
-			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkKeys().size());
+			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getChunkIds().size());
 		}
 
 		// verify the file (should have been downloaded automatically during the notification)

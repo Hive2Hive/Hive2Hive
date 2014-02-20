@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.implementations.files.update;
 
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
-				System.currentTimeMillis(), context.getChunkKeys());
+				System.currentTimeMillis(), context.getChunkIds());
 		metaFile.getVersions().add(newVersion);
 
 		initiateCleanup();
@@ -70,9 +69,9 @@ public class CreateNewVersionStep extends ProcessStep {
 		}
 
 		logger.debug(String.format("Need to remove %s old versions", deletedFileVersions.size()));
-		List<KeyPair> chunksToDelete = new ArrayList<KeyPair>();
+		List<String> chunksToDelete = new ArrayList<String>();
 		for (FileVersion fileVersion : deletedFileVersions) {
-			chunksToDelete.addAll(fileVersion.getChunkKeys());
+			chunksToDelete.addAll(fileVersion.getChunkIds());
 		}
 
 		context.setChunksToDelete(chunksToDelete);

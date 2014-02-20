@@ -28,7 +28,8 @@ public class FileUtil {
 
 	/**
 	 * Writes the meta data (used to synchronize) to the disk
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
 	public static void writePersistentMetaData(Path root) throws IOException {
 		// generate the new persistent meta data
@@ -38,22 +39,25 @@ public class FileUtil {
 		metaData.setFileTree(visitor.getFileTree());
 
 		byte[] encoded = EncryptionUtil.serializeObject(metaData);
-		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(), encoded);
+		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(),
+				encoded);
 	}
 
 	/**
 	 * Reads the meta data (used to synchronize) from the disk
 	 * 
 	 * @return the read meta data (never null)
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
-	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException, ClassNotFoundException {
-			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
-			PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
-			return metaData;
+	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException,
+			ClassNotFoundException {
+		byte[] content = FileUtils.readFileToByteArray(Paths
+				.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
+		PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
+		return metaData;
 	}
-	
+
 	public static String getFileSep() {
 		String fileSep = System.getProperty("file.separator");
 		if (fileSep.equals("\\"))
@@ -72,7 +76,7 @@ public class FileUtil {
 			return null;
 		return Paths.get(root.toString(), fileToFind.getFullPath().toString());
 	}
-	
+
 	/**
 	 * Note that file.length can be very slowly (see
 	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
@@ -98,6 +102,11 @@ public class FileUtil {
 		}
 	}
 
+	public static int getNumberOfChunks(File file, long chunkSize) {
+		long fileSize = getFileSize(file);
+		return (int) Math.ceil((double) fileSize / (double) chunkSize);
+	}
+
 	/**
 	 * Move a file according to their nodes. This operation also support renaming and moving in the same step.
 	 * 
@@ -108,7 +117,8 @@ public class FileUtil {
 	 * @param fileManager the {@link FileManager} of the user
 	 * @throws IOException when moving went wrong
 	 */
-	public static void moveFile(Path root, String sourceName, String destName, Index oldParent, Index newParent) throws IOException {
+	public static void moveFile(Path root, String sourceName, String destName, Index oldParent,
+			Index newParent) throws IOException {
 		// find the file of this user on the disc
 		File oldParentFile = FileUtil.getPath(root, oldParent).toFile();
 		File toMoveSource = new File(oldParentFile, sourceName);

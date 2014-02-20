@@ -21,7 +21,6 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
@@ -86,9 +85,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNull(metaDocument);
 
 		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
-			for (KeyPair key : version.getChunkKeys()) {
-				FutureGet get = client.getDataManager().get(
-						Number160.createHash(H2HEncryptionUtil.key2String(key.getPublic())),
+			for (String key : version.getChunkIds()) {
+				FutureGet get = client.getDataManager().get(Number160.createHash(key),
 						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.FILE_CHUNK));
 				get.awaitUninterruptibly();
 				get.getFutureRequests().awaitUninterruptibly();

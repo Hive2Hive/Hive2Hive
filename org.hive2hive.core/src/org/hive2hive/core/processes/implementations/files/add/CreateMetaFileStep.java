@@ -35,11 +35,12 @@ public class CreateMetaFileStep extends ProcessStep {
 
 		// create new meta file with new version
 		FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis(),
-				context.getChunkKeys());
+				context.getChunkIds());
 		List<FileVersion> versions = new ArrayList<FileVersion>(1);
 		versions.add(version);
 
-		MetaFile metaFile = new MetaFile(metaKeyPair.getPublic(), file.getName(), versions);
+		MetaFile metaFile = new MetaFile(metaKeyPair.getPublic(), file.getName(), versions,
+				context.getChunkKeys());
 		logger.debug(String.format("New meta file created. file = '%s'", file.getName()));
 
 		context.provideNewMetaFile(metaFile);

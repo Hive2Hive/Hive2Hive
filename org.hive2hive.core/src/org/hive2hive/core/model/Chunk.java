@@ -1,7 +1,5 @@
 package org.hive2hive.core.model;
 
-import java.security.PublicKey;
-
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.network.data.NetworkContent;
 
@@ -15,12 +13,12 @@ public class Chunk extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 
+	private final String id;
 	private final int size;
-	private final PublicKey id;
 	private final byte[] data;
 	private final int order;
 
-	public Chunk(PublicKey id, byte[] data, int order, int size) {
+	public Chunk(String id, byte[] data, int order, int size) {
 		this.id = id;
 		this.data = data;
 		this.order = order;
@@ -31,7 +29,7 @@ public class Chunk extends NetworkContent {
 		return size;
 	}
 
-	public PublicKey getId() {
+	public String getId() {
 		return id;
 	}
 

@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.implementations.files.delete;
 
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +11,6 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
-// TODO this class should be merged with org.hive2hive.processes.implementations.files.update.DeleteChunksStep
-// TODO this step is only needed for files, context.isDirectory is therefore not needed
 public class DeleteChunksProcess extends SequentialProcess {
 
 	private final DeleteFileProcessContext context;
@@ -33,23 +30,18 @@ public class DeleteChunksProcess extends SequentialProcess {
 			throw new ProcessExecutionException("No protection keys given.");
 		}
 
-		// if file, enlist all chunks to delete
-		if (!context.isDirectory()) {
+		List<String> chunkIds = new ArrayList<String>();
+		MetaFile metaFile = context.consumeMetaFile();
 
-			List<KeyPair> chunkKeys = new ArrayList<KeyPair>();
-			MetaFile metaFile = context.consumeMetaFile();
+		// TODO rather delete file by file than all chunks mixed
+		for (FileVersion version : metaFile.getVersions()) {
+			chunkIds.addAll(version.getChunkIds());
+		}
 
-			// TODO rather delete file by file than all chunks mixed
-			for (FileVersion version : metaFile.getVersions()) {
-				chunkKeys.addAll(version.getChunkKeys());
-			}
-
-			// process composition
-			for (KeyPair keyPair : chunkKeys) {
-				// TODO at a later stage, this steps could be async (parallelized)
-				add(new DeleteSingleChunkStep(keyPair.getPublic(), context.consumeProtectionKeys(),
-						dataManager));
-			}
+		// process composition
+		for (String chunkId : chunkIds) {
+			// TODO at a later stage, this steps could be async (parallelized)
+			insertNext(new DeleteSingleChunkStep(chunkId, context.consumeProtectionKeys(), dataManager), this);
 		}
 
 		super.doExecute();

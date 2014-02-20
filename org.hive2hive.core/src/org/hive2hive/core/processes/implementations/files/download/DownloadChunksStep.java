@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,9 +53,9 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 		// support to download a specific version
 		int versionToDownload = context.getVersionToDownload();
-		List<KeyPair> chunkKeys = metaFile.getNewestVersion().getChunkKeys();
+		List<String> chunkIds = metaFile.getNewestVersion().getChunkIds();
 		if (versionToDownload != DownloadFileContext.NEWEST_VERSION_INDEX) {
-			chunkKeys = metaFile.getVersionByIndex(versionToDownload).getChunkKeys();
+			chunkIds = metaFile.getVersionByIndex(versionToDownload).getChunkIds();
 		}
 
 		// support to store the file on another location than default (used for recover)
@@ -72,13 +71,13 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 		// start the download
 		int counter = 0;
-		for (KeyPair chunkKey : chunkKeys) {
-			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + chunkKeys.size());
-			NetworkContent content = get(H2HEncryptionUtil.key2String(chunkKey.getPublic()),
-					H2HConstants.FILE_CHUNK);
+		for (String chunkId : chunkIds) {
+			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + chunkIds.size());
+			NetworkContent content = get(chunkId, H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
-				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, chunkKey.getPrivate());
+				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFile.getChunkKey()
+						.getPrivate());
 				chunkBuffer.add((Chunk) decrypted);
 				writeBufferToDisk();
 			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
