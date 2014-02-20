@@ -71,10 +71,6 @@ public interface H2HConstants {
 	// times, too many threads can exceed the available memory
 	public static final int NUM_OF_NETWORK_THREADS = 32;
 
-	// changing the protection key needs to put a 'dummy' data object. This is it's content. Using this
-	// content makes sure that the storage verification is skipped
-	public static final String CHANGE_PROTECTION_KEY_DATA = "CHANGE_PROTECTION_KEY";
-
 	/**
 	 * Encryption Key Management
 	 */
