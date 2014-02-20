@@ -7,6 +7,7 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -40,10 +41,15 @@ public class CleanupChunksStep extends ProcessStep {
 
 		logger.debug("Cleaning " + chunksToDelete.size() + " old file chunks");
 		int counter = 0;
+		ProcessComponent prev = this;
 		for (String chunkId : chunksToDelete) {
 			logger.debug("Delete chunk " + counter++ + "/" + chunksToDelete.size());
 			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(chunkId, protectionKeys, dataManager);
-			getParent().add(new AsyncComponent(deleteStep));
+
+			// make async, insert it as next step
+			AsyncComponent asyncDeletion = new AsyncComponent(deleteStep);
+			getParent().insertNext(asyncDeletion, prev);
+			prev = asyncDeletion;
 		}
 	}
 }

@@ -68,4 +68,8 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 		return protectionKeys;
 	}
 
+	@Override
+	public KeyPair getChunkEncryptionKeys() {
+		return consumeMetaFile().getChunkKey();
+	}
 }

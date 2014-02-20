@@ -82,7 +82,7 @@ public class PutSingleChunkStep extends ProcessStep {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
 				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptHybrid(chunk, context
-						.getChunkKeys().getPublic());
+						.getChunkEncryptionKeys().getPublic());
 
 				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getName());
 				boolean success = dataManager.put(chunk.getId(), H2HConstants.FILE_CHUNK, encryptedContent,

@@ -40,7 +40,7 @@ public class CreateMetaFileStep extends ProcessStep {
 		versions.add(version);
 
 		MetaFile metaFile = new MetaFile(metaKeyPair.getPublic(), file.getName(), versions,
-				context.getChunkKeys());
+				context.getChunkEncryptionKeys());
 		logger.debug(String.format("New meta file created. file = '%s'", file.getName()));
 
 		context.provideNewMetaFile(metaFile);

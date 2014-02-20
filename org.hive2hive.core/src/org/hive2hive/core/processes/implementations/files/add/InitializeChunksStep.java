@@ -1,11 +1,13 @@
 package org.hive2hive.core.processes.implementations.files.add;
 
 import java.io.File;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -15,6 +17,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * Initializes all {@link PutSingleChunkStep} for the file to upload.
@@ -39,6 +42,10 @@ public class InitializeChunksStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
+
+		logger.debug("Create chunk keys for the file: " + context.getFile().getName());
+		KeyPair chunkKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
+		context.setChunkEncryptionKeys(chunkKeyPair);
 
 		// only continue if the file has content
 		if (file.isDirectory()) {

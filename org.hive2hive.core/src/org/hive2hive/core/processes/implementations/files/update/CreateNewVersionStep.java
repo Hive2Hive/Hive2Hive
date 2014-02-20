@@ -45,7 +45,7 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		logger.debug("Adding a new version to the meta file.");
 
-		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
+		MetaFile metaFile = context.consumeMetaFile();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
 				System.currentTimeMillis(), context.getChunkIds());
 		metaFile.getVersions().add(newVersion);

@@ -49,12 +49,9 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// first generate the new key pair for the meta file (which are stored to the context)
-		logger.debug("Create meta file and chunk keys for the new file: " + context.getFile().getName());
-
+		logger.debug("Create meta file keys for the new file: " + context.getFile().getName());
 		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
 		context.setNewMetaKeyPair(metaKeyPair);
-		KeyPair chunkKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-		context.setChunkKeys(chunkKeyPair);
 
 		File file = context.getFile();
 		logger.debug("Start updating the user profile where adding the file: " + file.getName());

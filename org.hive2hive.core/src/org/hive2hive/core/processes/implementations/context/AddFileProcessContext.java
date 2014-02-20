@@ -39,14 +39,14 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 	/**
 	 * The keypair for the encryption of all chunks
 	 */
-	public void setChunkKeys(KeyPair chunkKeys) {
+	public void setChunkEncryptionKeys(KeyPair chunkKeys) {
 		this.chunkKeys = chunkKeys;
 	}
 
 	/**
 	 * The keypair for the encryption of all chunks
 	 */
-	public KeyPair getChunkKeys() {
+	public KeyPair getChunkEncryptionKeys() {
 		return chunkKeys;
 	}
 
