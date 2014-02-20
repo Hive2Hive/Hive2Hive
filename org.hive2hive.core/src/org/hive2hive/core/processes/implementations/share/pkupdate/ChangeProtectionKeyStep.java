@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.implementations.share.pkupdate;
 
-import java.io.IOException;
-
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
@@ -34,39 +32,18 @@ public class ChangeProtectionKeyStep extends BasePutProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		NetworkContent content = context.getContent();
-		content.setBasedOnKey(content.getVersionKey());
-
-		try {
-			content.generateVersionKey();
-		} catch (IOException e) {
-			logger.error("Could not generate the newest version key");
-			throw new ProcessExecutionException(e);
-		}
-
-		// call 'special' put to change the protection key
 		boolean success = dataManager.changeProtectionKey(context.getLocationKey(), context.getContentKey(),
-				content, context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys());
-		putPerformed = true;
+				context.getTTL(), context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys());
 
 		if (!success) {
 			throw new ProcessExecutionException("Could not change the meta file's protection key");
 		}
 
-		logger.debug("Successfully changed the protection key for '" + content.getClass().getSimpleName()
-				+ "'");
+		logger.debug("Successfully changed the protection key");
 	}
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (putPerformed) {
-			boolean success = dataManager.remove(context.getLocationKey(), context.getContentKey(), context
-					.getContent().getVersionKey(), context.consumeNewProtectionKeys());
-			if (success) {
-				logger.debug("Successfully removed the meta folder version during rollback");
-			} else {
-				logger.error("Could not remove the meta folder version during rollback");
-			}
-		}
+		// do nothing because chaning the protection key failed
 	}
 }

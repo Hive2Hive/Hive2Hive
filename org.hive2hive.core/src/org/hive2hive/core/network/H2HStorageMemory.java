@@ -47,6 +47,12 @@ public class H2HStorageMemory extends StorageLayer {
 			logger.trace(String.format(
 					"Start put verification. location key = '%s' content key = '%s' version key = '%s' ",
 					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
+
+			if (isProtectionKeyChange(newData)) {
+				logger.trace("Only chaning the protection key, no need to verify the versions");
+				return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+			}
+
 			Enum<?> status = validateVersion(key, newData);
 			if (status == PutStatusH2H.OK) {
 				status = super.put(key, newData, publicKey, putIfAbsent, domainProtection);
@@ -64,6 +70,17 @@ public class H2HStorageMemory extends StorageLayer {
 			logger.trace("Disabled the put verification strategy on the remote peer");
 			return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
 		}
+	}
+
+	/**
+	 * Returns whether the put data is to change the protection key
+	 * 
+	 * @param newData
+	 * @return
+	 */
+	private boolean isProtectionKeyChange(Data newData) {
+		// TODO how to check this?
+		return false;
 	}
 
 	/**

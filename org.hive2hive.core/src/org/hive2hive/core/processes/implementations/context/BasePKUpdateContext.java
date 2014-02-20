@@ -2,8 +2,6 @@ package org.hive2hive.core.processes.implementations.context;
 
 import java.security.KeyPair;
 
-import org.hive2hive.core.network.data.NetworkContent;
-
 /**
  * Abstract context to update a protection key (used for sharing / unsharing)
  * 
@@ -28,9 +26,9 @@ public abstract class BasePKUpdateContext {
 		return oldProtectionKeys;
 	}
 
-	public abstract NetworkContent getContent();
-
 	public abstract String getLocationKey();
 
 	public abstract String getContentKey();
+
+	public abstract int getTTL();
 }
