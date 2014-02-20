@@ -79,8 +79,8 @@ public class H2HStorageMemory extends StorageLayer {
 	 * @return
 	 */
 	private boolean isProtectionKeyChange(Data newData) {
-		// TODO how to check this?
-		return false;
+		// TODO: more checks here to enable additionaly security!
+		return newData.isMeta();
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class H2HStorageMemory extends StorageLayer {
 			// } else {
 			logger.trace(String.format("Removing an older version. version key = '%s'", key.getVersionKey()));
 			history.remove(toRemove);
-			super.remove(toRemove, publicKey);
+			super.remove(toRemove, publicKey, false);
 			// }
 		}
 	}

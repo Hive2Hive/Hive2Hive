@@ -17,8 +17,6 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 
 	// the chunk keys to delete (if the configuration does not allow as many or as big chunks as existent)
 	private List<String> chunksToDelete;
-	private KeyPair chunksToDeleteProtectionKeys;
-	private KeyPair parentFileKey;
 
 	public UpdateFileProcessContext(File file) {
 		super(file);
@@ -40,22 +38,6 @@ public class UpdateFileProcessContext extends AddFileProcessContext implements I
 
 	public void setChunksToDelete(List<String> chunksToDelete) {
 		this.chunksToDelete = chunksToDelete;
-	}
-
-	public void setChunksToDeleteProtectionKeys(KeyPair protectionKeys) {
-		this.chunksToDeleteProtectionKeys = protectionKeys;
-	}
-
-	public KeyPair getChunksToDeleteProtectionKeys() {
-		return chunksToDeleteProtectionKeys;
-	}
-
-	public void setParentFileKey(KeyPair parentFileKey) {
-		this.parentFileKey = parentFileKey;
-	}
-
-	public KeyPair getParentFileKey() {
-		return parentFileKey;
 	}
 
 	@Override
