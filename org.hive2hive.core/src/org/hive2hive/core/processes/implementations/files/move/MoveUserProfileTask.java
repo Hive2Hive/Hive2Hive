@@ -72,6 +72,10 @@ public class MoveUserProfileTask extends UserProfileTask {
 			oldParent.removeChild(child);
 			newParent.addChild(child);
 			child.setParent(newParent);
+
+			// change the child's name
+			child.setName(destFileName);
+
 			profileManager.readyToPut(userProfile, randomPID);
 
 			// move the file on disk
