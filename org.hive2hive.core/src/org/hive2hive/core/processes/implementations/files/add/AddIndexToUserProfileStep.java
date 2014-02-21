@@ -80,6 +80,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			// put the updated user profile
 			profileManager.readyToPut(userProfile, getID());
 		} catch (IOException e) {
+			logger.error("Creating MD5 hash of file " + file.getName() + " was not possible. Reason: "
+					+ e.getMessage());
 			throw new ProcessExecutionException("Could not add file to the user profile.", e);
 		} catch (PutFailedException | GetFailedException e) {
 			throw new ProcessExecutionException(e);
