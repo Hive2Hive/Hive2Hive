@@ -76,9 +76,9 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
 		futureDigest.awaitUninterruptibly();
 
-		assertEquals(versions.size(), futureDigest.getDigest().getKeyDigest().size());
+		assertEquals(versions.size(), futureDigest.getDigest().keyDigest().size());
 		int i = 0;
-		for (Number160 storedVersion : futureDigest.getDigest().getKeyDigest().values()) {
+		for (Number160 storedVersion : futureDigest.getDigest().keyDigest().values()) {
 			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
 		}
 	}
@@ -126,9 +126,9 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).ascending().start();
 		futureDigest.awaitUninterruptibly();
 
-		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().getKeyDigest().size());
+		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().keyDigest().size());
 		int i = 0;
-		for (Number160 storedVersion : futureDigest.getDigest().getKeyDigest().values()) {
+		for (Number160 storedVersion : futureDigest.getDigest().keyDigest().values()) {
 			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
 		}
 	}

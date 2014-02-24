@@ -231,13 +231,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 */
 	private void checkVersionKey(Map<PeerAddress, DigestResult> rawDigest) {
 		for (PeerAddress peerAddress : rawDigest.keySet()) {
-			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).getKeyDigest() == null
-					|| rawDigest.get(peerAddress).getKeyDigest().isEmpty()) {
+			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).keyDigest() == null
+					|| rawDigest.get(peerAddress).keyDigest().isEmpty()) {
 				logger.warn(String.format("Put verification: Received from peer '%s' no digest."
 						+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
 						peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
 			} else {
-				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).getKeyDigest();
+				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).keyDigest();
 
 				if (keyDigest.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
 					logger.trace(String.format("Put verification: On peer '%s' entry is newest."

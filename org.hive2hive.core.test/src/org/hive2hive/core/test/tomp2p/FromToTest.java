@@ -236,7 +236,7 @@ public class FromToTest extends H2HJUnitTest {
 						.createHash(contentKey), Number160.MAX_VALUE)).start();
 		futureDigest.awaitUninterruptibly();
 
-		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+		assertTrue(futureDigest.getDigest().keyDigest().isEmpty());
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
@@ -268,7 +268,7 @@ public class FromToTest extends H2HJUnitTest {
 				.setContentKey(Number160.createHash(contentKey)).setVersionKey(data.getVersionKey()).start();
 		futureDigest.awaitUninterruptibly();
 
-		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+		assertTrue(futureDigest.getDigest().keyDigest().isEmpty());
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
@@ -298,13 +298,13 @@ public class FromToTest extends H2HJUnitTest {
 		// check with a normal digest
 		FutureDigest futureDigest = p1.digest(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureDigest.awaitUninterruptibly();
-		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+		assertTrue(futureDigest.getDigest().keyDigest().isEmpty());
 
 		// check with a from/to digest
 		futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
 				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
 		futureDigest.awaitUninterruptibly();
-		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+		assertTrue(futureDigest.getDigest().keyDigest().isEmpty());
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
@@ -337,7 +337,7 @@ public class FromToTest extends H2HJUnitTest {
 		futureDigest.awaitUninterruptibly();
 
 		// should be empty
-		assertTrue(futureDigest.getDigest().getKeyDigest().isEmpty());
+		assertTrue(futureDigest.getDigest().keyDigest().isEmpty());
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
@@ -378,12 +378,12 @@ public class FromToTest extends H2HJUnitTest {
 						.createHash(contentKey), Number160.MAX_VALUE)).start();
 		futureDigest.awaitUninterruptibly();
 
-		assertEquals(numberOfContent, futureDigest.getDigest().getKeyDigest().size());
+		assertEquals(numberOfContent, futureDigest.getDigest().keyDigest().size());
 
 		for (H2HTestData data : content) {
 			assertTrue(futureDigest
 					.getDigest()
-					.getKeyDigest()
+					.keyDigest()
 					.containsKey(
 							new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160
 									.createHash(contentKey), data.getVersionKey())));
@@ -426,11 +426,11 @@ public class FromToTest extends H2HJUnitTest {
 					.start();
 			future.awaitUninterruptibly();
 
-			assertEquals(1, future.getDigest().getKeyDigest().size());
+			assertEquals(1, future.getDigest().keyDigest().size());
 			assertEquals(
 					new Number640(Number160.createHash(locationKey), Number160.ZERO,
 							Number160.createHash(contentKey), data.getVersionKey()), future.getDigest()
-							.getKeyDigest().firstKey());
+							.keyDigest().firstKey());
 		}
 
 		p1.shutdown().awaitUninterruptibly();

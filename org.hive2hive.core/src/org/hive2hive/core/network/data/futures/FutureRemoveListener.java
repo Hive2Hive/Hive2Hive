@@ -88,7 +88,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 			public void operationComplete(FutureDigest future) throws Exception {
 				if (future.getDigest() == null) {
 					retryRemove();
-				} else if (!future.getDigest().getKeyDigest().isEmpty()) {
+				} else if (!future.getDigest().keyDigest().isEmpty()) {
 					retryRemove();
 				} else {
 					logger.debug(String.format("Verification for remove completed."
