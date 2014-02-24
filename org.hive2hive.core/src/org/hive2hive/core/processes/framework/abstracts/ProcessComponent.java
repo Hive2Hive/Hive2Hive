@@ -96,7 +96,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
-			logger.debug(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
+			logger.warn(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
 					reason.getHint()));
 
 			doRollback(reason);
