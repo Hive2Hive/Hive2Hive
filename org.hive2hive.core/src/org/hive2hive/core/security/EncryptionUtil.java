@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -412,15 +413,26 @@ public final class EncryptionUtil {
 	 * @throws IOException
 	 */
 	public static byte[] generateMD5Hash(File file) throws IOException {
-		if (file.isDirectory()) {
+		if (file == null) {
+			return null;
+		} else if (file.isDirectory()) {
+			return null;
+		} else if (!file.exists()) {
+			return null;
+		}
+
+		byte[] buffer = new byte[1024];
+		int numRead;
+		FileInputStream fis;
+
+		try {
+			// open the stream
+			fis = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
 			return null;
 		}
 
 		MD5Digest digest = new MD5Digest();
-
-		byte[] buffer = new byte[1024];
-		int numRead;
-		FileInputStream fis = new FileInputStream(file);
 		DigestInputStream dis = new DigestInputStream(fis, digest);
 		do {
 			numRead = dis.read(buffer);
