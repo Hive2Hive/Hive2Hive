@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.PutUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
@@ -24,7 +25,8 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 
-		if (messageFactory.createUserProfileTask() == null) {
+		UserProfileTask userProfileTask = messageFactory.createUserProfileTask();
+		if (userProfileTask == null) {
 			// skip that step
 			return;
 		}
@@ -38,7 +40,7 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 
 			try {
 				// put the profile task to the queue
-				put(user, messageFactory.createUserProfileTask(), userPublicKeys.get(user));
+				put(user, userProfileTask, userPublicKeys.get(user));
 			} catch (Exception e) {
 				logger.error("Could not put the UserProfileTask to the queue of " + user, e);
 			}
