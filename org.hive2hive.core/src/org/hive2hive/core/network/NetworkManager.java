@@ -79,6 +79,11 @@ public class NetworkManager {
 		return session;
 	}
 
+	/**
+	 * Convenience method to get the user id of the currently logged in user
+	 * 
+	 * @return the user id or null in case no session exists
+	 */
 	public String getUserId() {
 		if (session == null)
 			return null;
