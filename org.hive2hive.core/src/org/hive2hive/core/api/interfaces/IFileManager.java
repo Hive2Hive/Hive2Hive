@@ -16,7 +16,7 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 /**
  * Basic interface for all file operations.
  * 
- * @author Christian
+ * @author Christian, Nico, Seppi
  * 
  */
 public interface IFileManager extends IManager {

@@ -5,7 +5,7 @@ package org.hive2hive.core.api.interfaces;
  * developer can adapt the parameters. Hive2Hive automatically changes its behavior for example while cleaning
  * old versions, depending on the configured version numbers.
  * 
- * @author Nico
+ * @author Christian, Nico, Seppi
  * 
  */
 public interface IFileConfiguration {

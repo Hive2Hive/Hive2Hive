@@ -62,9 +62,4 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
-
-	@Override
-	public IFileConfiguration getFileConfiguration() {
-		return fileConfiguration;
-	}
 }
