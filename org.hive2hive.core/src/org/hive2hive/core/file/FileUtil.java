@@ -16,6 +16,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.security.EncryptionUtil;
 
 public class FileUtil {
@@ -31,12 +32,21 @@ public class FileUtil {
 	 * 
 	 * @throws IOException
 	 */
-	public static void writePersistentMetaData(Path root) throws IOException {
+	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager) throws IOException {
 		// generate the new persistent meta data
 		PersistentMetaData metaData = new PersistentMetaData();
-		PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
-		Files.walkFileTree(root, visitor);
-		metaData.setFileTree(visitor.getFileTree());
+
+		// add the files
+		if (root != null) {
+			PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
+			Files.walkFileTree(root, visitor);
+			metaData.setFileTree(visitor.getFileTree());
+		}
+
+		// add the public keys
+		if (keyManager != null) {
+			metaData.setPublicKeyCache(keyManager.getCachedPublicKeys());
+		}
 
 		byte[] encoded = EncryptionUtil.serializeObject(metaData);
 		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(),

@@ -17,18 +17,18 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Test the file manager used for the H2H node.
+ * Test the file util used for the H2H node.
  * 
  * @author Nico
  * 
  */
-public class FileManagerTest extends H2HJUnitTest {
+public class FileUtilTest extends H2HJUnitTest {
 
 	private File root;
-	
+
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = FileManagerTest.class;
+		testClass = FileUtilTest.class;
 		beforeClass();
 	}
 
@@ -54,7 +54,7 @@ public class FileManagerTest extends H2HJUnitTest {
 		File file = new File(root, fileName);
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
 
-		FileUtil.writePersistentMetaData(root.toPath());
+		FileUtil.writePersistentMetaData(root.toPath(), null);
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());
 		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
 		Assert.assertTrue(fileTree.containsKey(fileName));

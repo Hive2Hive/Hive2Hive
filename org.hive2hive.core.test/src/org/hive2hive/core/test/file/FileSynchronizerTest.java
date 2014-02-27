@@ -91,7 +91,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node2d = new FolderIndex(node1d, keys, "2d");
 
 		// write the meta data now. Before creating the synchronizer, modify the file system as desired first.
-		FileUtil.writePersistentMetaData(rootPath);
+		FileUtil.writePersistentMetaData(rootPath, null);
 	}
 
 	@After

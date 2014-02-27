@@ -183,7 +183,7 @@ public final class ProcessFactory {
 
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
-		process.add(new WritePersistentStep(session.getRoot()));
+		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager()));
 
 		// TODO to be implemented:
 		// // stop all running processes
