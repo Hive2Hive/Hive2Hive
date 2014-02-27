@@ -60,12 +60,15 @@ public class FileUtil {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException,
-			ClassNotFoundException {
+	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException {
 		byte[] content = FileUtils.readFileToByteArray(Paths
 				.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
-		PersistentMetaData metaData = (PersistentMetaData) EncryptionUtil.deserializeObject(content);
-		return metaData;
+
+		try {
+			return (PersistentMetaData) EncryptionUtil.deserializeObject(content);
+		} catch (ClassNotFoundException e) {
+			return new PersistentMetaData();
+		}
 	}
 
 	public static String getFileSep() {

@@ -1,9 +1,13 @@
 package org.hive2hive.core.processes.implementations.login;
 
 import java.io.IOException;
+import java.security.PublicKey;
+import java.util.Map;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.file.PersistentMetaData;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -32,10 +36,20 @@ public class SessionCreationStep extends ProcessStep {
 
 		H2HSession session;
 		try {
-			// create session
-			params.setKeyManager(new PublicKeyManager(userProfile.getUserId(), userProfile
-					.getEncryptionKeys(), networkManager.getDataManager()));
+			// create the key manager
+			PublicKeyManager keyManager = new PublicKeyManager(userProfile.getUserId(),
+					userProfile.getEncryptionKeys(), networkManager.getDataManager());
 
+			// read eventually cached keys and add them to the key manager
+			PersistentMetaData metaData = FileUtil.readPersistentMetaData(params.getRoot());
+			Map<String, PublicKey> publicKeyCache = metaData.getPublicKeyCache();
+			for (String userId : publicKeyCache.keySet()) {
+				keyManager.putPublicKey(userId, publicKeyCache.get(userId));
+			}
+
+			params.setKeyManager(keyManager);
+
+			// create session
 			session = new H2HSession(params);
 		} catch (IOException | NoPeerConnectionException e) {
 			throw new ProcessExecutionException("Session could not be created.", e);
@@ -47,7 +61,6 @@ public class SessionCreationStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-
 		// invalidate the session
 		networkManager.setSession(null);
 	}
