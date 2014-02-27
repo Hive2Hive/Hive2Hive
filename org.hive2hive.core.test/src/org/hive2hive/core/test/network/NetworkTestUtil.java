@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.H2HNode;
@@ -207,6 +208,10 @@ public class NetworkTestUtil {
 
 	public static NetworkManager getRandomNode(List<NetworkManager> network) {
 		return network.get(new Random().nextInt(network.size()));
+	}
+
+	public static File getTempDirectory() {
+		return new File(FileUtils.getTempDirectory(), randomString());
 	}
 
 }

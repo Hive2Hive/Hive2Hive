@@ -64,7 +64,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		downloader = network.get(new Random().nextInt(networkSize - 2));
 
 		// register and login both users
-		File uploaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		File uploaderRoot = NetworkTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
 		downloaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);

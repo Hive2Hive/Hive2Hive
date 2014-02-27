@@ -63,7 +63,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		registerProcess.attachListener(listener);
 		UseCaseTestUtil.waitTillSucceded(listener, 20);
 
-		rootDirectory = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		rootDirectory = NetworkTestUtil.getTempDirectory();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
 		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials,
 				rootDirectory.toPath());
@@ -90,7 +90,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test(expected = IllegalFileLocation.class)
 	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation,
 			NoPeerConnectionException {
-		File testFile = new File(FileUtils.getTempDirectory(), "test-file");
+		File testFile = new File(NetworkTestUtil.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
 		loggedInNode.getFileManager().add(testFile);
@@ -119,7 +119,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// TODO wait for all async process to upload
 
 		// then start 2nd client and login
-		File rootUser2 = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		File rootUser2 = NetworkTestUtil.getTempDirectory();
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
 
 		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, rootUser2.toPath());

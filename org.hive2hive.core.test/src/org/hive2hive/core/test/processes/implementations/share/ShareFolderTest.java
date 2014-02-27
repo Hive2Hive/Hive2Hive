@@ -59,11 +59,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 	 */
 	@Before
 	public void setup() throws NoSessionException, NoPeerConnectionException {
-		rootA = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		rootA = NetworkTestUtil.getTempDirectory();
 		userA = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
-		rootB = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		rootB = NetworkTestUtil.getTempDirectory();
 		userB = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 

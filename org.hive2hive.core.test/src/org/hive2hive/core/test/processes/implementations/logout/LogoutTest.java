@@ -6,7 +6,6 @@ import java.util.List;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -43,7 +42,7 @@ public class LogoutTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
-		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), FileUtils.getTempDirectory());
+		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), NetworkTestUtil.getTempDirectory());
 	}
 
 	@Test

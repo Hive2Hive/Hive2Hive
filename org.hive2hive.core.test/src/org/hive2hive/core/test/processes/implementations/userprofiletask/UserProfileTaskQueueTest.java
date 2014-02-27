@@ -18,7 +18,6 @@ import javax.crypto.IllegalBlockSizeException;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
-import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
@@ -123,7 +122,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
 				.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -148,7 +147,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
 				.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -167,7 +166,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
 				.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -198,7 +197,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
 				.getTempDirectory().toPath()));
 
 		// IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -249,7 +248,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
 				.getTempDirectory().toPath()));
 
 		// create some tasks

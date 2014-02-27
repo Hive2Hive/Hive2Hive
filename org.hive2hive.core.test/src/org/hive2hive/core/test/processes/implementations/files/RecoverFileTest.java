@@ -60,7 +60,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		client = network.get(new Random().nextInt(networkSize));
 
 		// register a user
-		root = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		root = NetworkTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, client, root);
 
 		// add an intial file to the network
