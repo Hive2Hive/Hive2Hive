@@ -61,12 +61,11 @@ public class FileUtil {
 	 * @throws ClassNotFoundException
 	 */
 	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException {
-		byte[] content = FileUtils.readFileToByteArray(Paths
-				.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
-
 		try {
+			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(),
+					H2HConstants.META_FILE_NAME).toFile());
 			return (PersistentMetaData) EncryptionUtil.deserializeObject(content);
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			return new PersistentMetaData();
 		}
 	}
