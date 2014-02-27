@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
@@ -71,12 +70,12 @@ public class NotificationTest extends H2HJUnitTest {
 		UseCaseTestUtil.register(userCCredentials, network.get(5));
 
 		// login all nodes
-		UseCaseTestUtil.login(userACredentials, network.get(0), FileUtils.getTempDirectory());
-		UseCaseTestUtil.login(userACredentials, network.get(1), FileUtils.getTempDirectory());
-		UseCaseTestUtil.login(userACredentials, network.get(2), FileUtils.getTempDirectory());
-		UseCaseTestUtil.login(userBCredentials, network.get(3), FileUtils.getTempDirectory());
-		UseCaseTestUtil.login(userBCredentials, network.get(4), FileUtils.getTempDirectory());
-		UseCaseTestUtil.login(userCCredentials, network.get(5), FileUtils.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(0), NetworkTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(1), NetworkTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(2), NetworkTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userBCredentials, network.get(3), NetworkTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userBCredentials, network.get(4), NetworkTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userCCredentials, network.get(5), NetworkTestUtil.getTempDirectory());
 	}
 
 	/**
@@ -85,11 +84,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyNobody() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException {
+			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
 		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory,
@@ -108,11 +108,12 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException {
+			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -167,11 +168,13 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException,
+			NoSessionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(3);
@@ -200,12 +203,13 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -239,12 +243,13 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -279,12 +284,13 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
+	 * @throws NoSessionException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers

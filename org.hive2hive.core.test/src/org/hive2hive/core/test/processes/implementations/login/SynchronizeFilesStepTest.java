@@ -89,8 +89,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		FileUtils.copyDirectory(root0, root1);
 
 		// write both versions to disc
-		FileUtil.writePersistentMetaData(uploader.getSession().getRoot());
-		FileUtil.writePersistentMetaData(root1.toPath());
+		FileUtil.writePersistentMetaData(uploader.getSession().getRoot(), null);
+		FileUtil.writePersistentMetaData(root1.toPath(), null);
 	}
 
 	@Test

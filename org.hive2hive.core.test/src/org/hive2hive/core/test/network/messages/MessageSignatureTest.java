@@ -3,10 +3,12 @@ package org.hive2hive.core.test.network.messages;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.security.PublicKey;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -38,7 +40,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException {
+	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.createSameKeyPair(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -52,17 +54,17 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertTrue(sender.getMessageManager().send(message, receiver.getPublicKey()));
+		assertTrue(sender.getMessageManager().send(message, receiver.getSession().getKeyPair().getPublic()));
 	}
 
 	@Test
-	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException {
+	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 
 		// put the public key of the sender into the cache
-		receiver.getPublicKeyManager().putPublicKey(sender.getUserId(), sender.getPublicKey());
+		receiver.getSession().getKeyManager().putPublicKey(sender.getUserId(), getPublicKey(sender));
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
@@ -71,18 +73,20 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertTrue(sender.getMessageManager().send(message, receiver.getPublicKey()));
+		assertTrue(sender.getMessageManager().send(message, getPublicKey(receiver)));
 	}
 
 	@Test
-	public void testMessageWithWrongSignature() throws NoPeerConnectionException {
+	public void testMessageWithWrongSignature() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.createKeyPairs(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 
 		// put a wrong public key of the sender into the cache
-		receiver.getPublicKeyManager().putPublicKey(sender.getUserId(), EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS)
-				.getPublic());
+		receiver.getSession()
+				.getKeyManager()
+				.putPublicKey(sender.getUserId(),
+						EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS).getPublic());
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();
@@ -91,7 +95,15 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		TestSignedMessage message = new TestSignedMessage(locationKey);
 
 		// send message
-		assertFalse(sender.getMessageManager().send(message, receiver.getPublicKey()));
+		assertFalse(sender.getMessageManager().send(message, getPublicKey(receiver)));
+	}
+
+	private PublicKey getPublicKey(NetworkManager networkManager) {
+		try {
+			return networkManager.getSession().getKeyPair().getPublic();
+		} catch (NoSessionException e) {
+			return null;
+		}
 	}
 
 	@After

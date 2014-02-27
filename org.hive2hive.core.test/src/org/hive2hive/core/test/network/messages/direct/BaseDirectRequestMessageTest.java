@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
@@ -11,6 +12,7 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -50,14 +52,14 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
-		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer().getPeerAddress(),
-				contentKey);
+		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer()
+				.getPeerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.getMessageManager().sendDirect(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().sendDirect(message, getPublicKey(nodeB)));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -80,24 +82,24 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 
 	@Test
 	public void testSendingDirectMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException,
-			IOException, NoPeerConnectionException {
+			IOException, NoPeerConnectionException, NoSessionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 		// receiver nodes should already know the public key of the senders
-		nodeA.getPublicKeyManager().putPublicKey(nodeB.getUserId(), nodeB.getPublicKey());
-		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
+		nodeA.getSession().getKeyManager().putPublicKey(nodeB.getUserId(), getPublicKey(nodeB));
+		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
-		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(
-				nodeB.getConnection().getPeer().getPeerAddress(), contentKey);
+		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(nodeB
+				.getConnection().getPeer().getPeerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.getMessageManager().sendDirect(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().sendDirect(message, getPublicKey(nodeB)));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -116,6 +118,14 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
+	}
+
+	private PublicKey getPublicKey(NetworkManager networkManager) {
+		try {
+			return networkManager.getSession().getKeyPair().getPublic();
+		} catch (NoSessionException e) {
+			return null;
+		}
 	}
 
 	@AfterClass

@@ -17,6 +17,8 @@ import net.tomp2p.peers.Number160;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -167,14 +169,21 @@ public final class MessageManager implements IMessageManager {
 	 */
 	private void setSenderPublicKeyIfNeeded(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
-			message.setSenderPublicKey(networkManager.getPublicKey());
+			try {
+				message.setSenderPublicKey(networkManager.getSession().getKeyPair().getPublic());
+			} catch (NoSessionException e) {
+				logger.error("Could not set the sender's public key");
+				message.setSenderPublicKey(null);
+			}
 		}
 	}
 
 	private HybridEncryptedContent signAndEncryptMessage(BaseMessage message, PublicKey targetPublicKey) {
-		String userId = networkManager.getUserId();
-		if (userId == null) {
-			logger.error("No user id given (no logged in user). The message will not be sent.");
+		H2HSession session;
+		try {
+			session = networkManager.getSession();
+		} catch (NoSessionException e2) {
+			logger.error("No logged in user / no session. The message will not be sent.");
 			return null;
 		}
 
@@ -186,8 +195,8 @@ public final class MessageManager implements IMessageManager {
 
 			// create signature
 			try {
-				byte[] signature = EncryptionUtil.sign(messageBytes, networkManager.getPrivateKey());
-				encryptedMessage.setSignature(userId, signature);
+				byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate());
+				encryptedMessage.setSignature(session.getUserId(), signature);
 			} catch (InvalidKeyException | SignatureException e1) {
 				logger.error("An exception occured while signing the message. The message will not be sent.",
 						e1);

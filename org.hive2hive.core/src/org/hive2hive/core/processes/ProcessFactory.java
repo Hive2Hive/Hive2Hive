@@ -37,8 +37,8 @@ import org.hive2hive.core.processes.implementations.context.UserProfileTaskConte
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
-import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.core.processes.implementations.files.add.InitializeChunksStep;
+import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.core.processes.implementations.files.add.ValidateFileSizeStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
@@ -51,8 +51,8 @@ import org.hive2hive.core.processes.implementations.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.move.RelinkUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.recover.SelectVersionStep;
-import org.hive2hive.core.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.core.processes.implementations.files.update.CleanupChunksStep;
+import org.hive2hive.core.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.core.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.core.processes.implementations.login.GetUserProfileStep;
@@ -183,7 +183,7 @@ public final class ProcessFactory {
 
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
-		process.add(new WritePersistentStep(session.getRoot()));
+		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager()));
 
 		// TODO to be implemented:
 		// // stop all running processes
@@ -329,7 +329,7 @@ public final class ProcessFactory {
 
 	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
 			final Set<String> usersToNotify, NetworkManager networkManager) throws IllegalArgumentException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoSessionException {
 		// create a context here to provide the necessary data
 		IConsumeNotificationFactory context = new IConsumeNotificationFactory() {
 
@@ -347,12 +347,13 @@ public final class ProcessFactory {
 	}
 
 	private ProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
-			NetworkManager networkManager) throws IllegalArgumentException, NoPeerConnectionException {
+			NetworkManager networkManager) throws IllegalArgumentException, NoPeerConnectionException,
+			NoSessionException {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));
-		process.add(new GetPublicKeysStep(context, networkManager));
+		process.add(new GetPublicKeysStep(context, networkManager.getSession().getKeyManager()));
 		process.add(new PutAllUserProfileTasksStep(context, networkManager));
 		process.add(new GetAllLocationsStep(context, networkManager.getDataManager()));
 		process.add(new SendNotificationsMessageStep(context, networkManager));
@@ -369,7 +370,7 @@ public final class ProcessFactory {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new VerifyFriendId(networkManager, permission.getUserId()));
+		process.add(new VerifyFriendId(networkManager.getSession().getKeyManager(), permission.getUserId()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
 		process.add(new InitializeMetaUpdateStep(context, networkManager));

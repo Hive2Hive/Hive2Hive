@@ -10,6 +10,7 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -98,9 +99,11 @@ public abstract class UserProfileTask extends NetworkContent {
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
 	 * @throws InvalidProcessStateException
+	 * @throws NoSessionException
 	 */
 	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory)
-			throws IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException {
+			throws IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException,
+			NoSessionException {
 		Set<String> onlyMe = new HashSet<String>(1);
 		onlyMe.add(networkManager.getUserId());
 		ProcessComponent notificationProcess = ProcessFactory.instance().createNotificationProcess(

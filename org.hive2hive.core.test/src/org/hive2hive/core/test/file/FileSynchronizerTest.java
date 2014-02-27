@@ -83,7 +83,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 		userProfile = new UserProfile("test-user");
 		root = userProfile.getRoot();
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		node1f1 = new FileIndex(root, keys, "1f1", EncryptionUtil.generateMD5Hash(file1f1));
 		node1f2 = new FileIndex(root, keys, "1f2", EncryptionUtil.generateMD5Hash(file1f2));
 		node1d = new FolderIndex(root, keys, "1d");
@@ -91,7 +91,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node2d = new FolderIndex(node1d, keys, "2d");
 
 		// write the meta data now. Before creating the synchronizer, modify the file system as desired first.
-		FileUtil.writePersistentMetaData(rootPath);
+		FileUtil.writePersistentMetaData(rootPath, null);
 	}
 
 	@After
@@ -144,7 +144,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddedRemotely() throws IOException, ClassNotFoundException {
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		Index node1f3 = new FileIndex(root, keys, "1f3", null);
 		Index node2d2 = new FolderIndex(node1d, keys, "2d2");
 

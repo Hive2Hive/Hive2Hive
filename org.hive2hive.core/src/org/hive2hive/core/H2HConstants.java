@@ -78,7 +78,7 @@ public interface H2HConstants {
 	public static final RSA_KEYLENGTH KEYLENGTH_USER_KEYS = RSA_KEYLENGTH.BIT_2048;
 
 	// key length for asymmetric meta document encryption
-	public static final RSA_KEYLENGTH KEYLENGTH_META_DOCUMENT = RSA_KEYLENGTH.BIT_2048;
+	public static final RSA_KEYLENGTH KEYLENGTH_META_FILE = RSA_KEYLENGTH.BIT_2048;
 
 	// key length for asymmetric chunk encryption
 	public static final RSA_KEYLENGTH KEYLENGTH_CHUNK = RSA_KEYLENGTH.BIT_2048;

@@ -50,7 +50,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// first generate the new key pair for the meta file (which are stored to the context)
 		logger.debug("Create meta file keys for the new file: " + context.getFile().getName());
-		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		context.setNewMetaKeyPair(metaKeyPair);
 
 		File file = context.getFile();

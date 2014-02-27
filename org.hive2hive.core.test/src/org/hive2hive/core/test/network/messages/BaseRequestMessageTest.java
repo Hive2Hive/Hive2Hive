@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
@@ -12,6 +13,7 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -59,16 +61,17 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithReply() throws ClassNotFoundException, IOException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoSessionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);	
+		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		// receiver nodes should already know the public key of the senders
-		nodeA.getPublicKeyManager().putPublicKey(nodeB.getUserId(), nodeB.getPublicKey());
-		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
+		nodeA.getSession().getKeyManager().putPublicKey(nodeB.getUserId(), getPublicKey(nodeB));
+		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
@@ -79,7 +82,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, getPublicKey(nodeB)));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -108,16 +111,17 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode()
-			throws ClassNotFoundException, IOException, NoPeerConnectionException {
+			throws ClassNotFoundException, IOException, NoPeerConnectionException, NoSessionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		// receiver nodes should already know the public key of the senders
-		nodeA.getPublicKeyManager().putPublicKey(nodeB.getUserId(), nodeB.getPublicKey());
-		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
+		nodeA.getSession().getKeyManager().putPublicKey(nodeB.getUserId(), getPublicKey(nodeB));
+		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
@@ -129,7 +133,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		message.setCallBackHandler(callBackHandler);
 
 		// send message
-		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, getPublicKey(nodeB)));
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
@@ -148,6 +152,14 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
+	}
+
+	private PublicKey getPublicKey(NetworkManager networkManager) {
+		try {
+			return networkManager.getSession().getKeyPair().getPublic();
+		} catch (NoSessionException e) {
+			return null;
+		}
 	}
 
 	@AfterClass

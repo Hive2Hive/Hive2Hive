@@ -62,14 +62,13 @@ public class AddFileTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
-		String randomName = NetworkTestUtil.randomString();
-		uploaderRoot = new File(System.getProperty("java.io.tmpdir"), randomName);
+		uploaderRoot = NetworkTestUtil.getTempDirectory();
 
 		// register and login a user (peer 0)
 		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), uploaderRoot);
 
 		// other client to verify this
-		downloaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		downloaderRoot = NetworkTestUtil.getTempDirectory();
 		UseCaseTestUtil.login(userCredentials, network.get(1), downloaderRoot);
 	}
 

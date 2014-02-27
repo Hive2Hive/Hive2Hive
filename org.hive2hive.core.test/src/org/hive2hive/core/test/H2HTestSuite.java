@@ -1,6 +1,6 @@
 package org.hive2hive.core.test;
 
-import org.hive2hive.core.test.file.FileManagerTest;
+import org.hive2hive.core.test.file.FileUtilTest;
 import org.hive2hive.core.test.file.FileSynchronizerTest;
 import org.hive2hive.core.test.model.IndexTest;
 import org.hive2hive.core.test.model.MetaFileTest;
@@ -92,7 +92,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		NotificationTest.class, TestUserProfileTask.class,
 
 		// Files
-		FileManagerTest.class, FileSynchronizerTest.class,
+		FileUtilTest.class, FileSynchronizerTest.class,
 
 		// Model
 		IndexTest.class, UserCredentialsTest.class, MetaFileTest.class

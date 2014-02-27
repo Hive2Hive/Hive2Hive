@@ -64,7 +64,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		downloader = network.get(new Random().nextInt(networkSize - 2));
 
 		// register and login both users
-		File uploaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		File uploaderRoot = NetworkTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
 		downloaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
 		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);
@@ -99,7 +99,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
 			InvalidProcessStateException {
-		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
 				wrongKeys.getPublic(), downloader);

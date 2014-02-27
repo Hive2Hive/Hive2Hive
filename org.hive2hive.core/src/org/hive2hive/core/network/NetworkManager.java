@@ -1,14 +1,10 @@
 package org.hive2hive.core.network;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.MessageManager;
 
 public class NetworkManager {
@@ -21,9 +17,7 @@ public class NetworkManager {
 	private final Connection connection;
 	private final DataManager dataManager;
 	private final MessageManager messageManager;
-
 	private H2HSession session;
-	private PublicKeyManager keyManager;
 
 	public NetworkManager(INetworkConfiguration networkConfiguration) {
 		this.networkConfiguration = networkConfiguration;
@@ -86,23 +80,10 @@ public class NetworkManager {
 	}
 
 	/**
-	 * Helper method that returns the public key of the currently logged in user.
+	 * Convenience method to get the user id of the currently logged in user
+	 * 
+	 * @return the user id or null in case no session exists
 	 */
-	public PublicKey getPublicKey() {
-		if (session == null)
-			return null;
-		return session.getKeyPair().getPublic();
-	}
-
-	/**
-	 * Helper method that returns the private key of the currently logged in user
-	 */
-	public PrivateKey getPrivateKey() {
-		if (session == null)
-			return null;
-		return session.getKeyPair().getPrivate();
-	}
-
 	public String getUserId() {
 		if (session == null)
 			return null;
@@ -126,20 +107,4 @@ public class NetworkManager {
 		}
 		return messageManager;
 	}
-
-	/**
-	 * Get the public key manger to get public keys from other users. A get call may block (if public key not
-	 * cached).
-	 * 
-	 * @return a public key manager
-	 */
-	public PublicKeyManager getPublicKeyManager() {
-		if (session == null)
-			return null;
-		if (keyManager == null)
-			keyManager = new PublicKeyManager(session.getCredentials().getUserId(), session.getKeyPair(),
-					dataManager);
-		return keyManager;
-	}
-
 }

@@ -8,7 +8,6 @@ import java.util.Random;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -53,7 +52,7 @@ public class LoginTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		UseCaseTestUtil.register(userCredentials, network.get(0));
-		root = FileUtils.getTempDirectory();
+		root = NetworkTestUtil.getTempDirectory();
 	}
 
 	@Test

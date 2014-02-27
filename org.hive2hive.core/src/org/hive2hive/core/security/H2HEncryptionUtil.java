@@ -170,12 +170,10 @@ public final class H2HEncryptionUtil {
 	 * @return if keypair1 matches keypair2
 	 */
 	public static boolean compare(KeyPair keypair1, KeyPair keypair2) {
-		if (keypair1 == null && keypair2 == null) {
-			return true;
-		} else if (keypair1 == null && keypair2 != null) {
-			return false;
-		} else if (keypair2 == null && keypair1 != null) {
-			return false;
+		if (keypair1 == null) {
+			return keypair2 == null;
+		} else if (keypair2 == null) {
+			return keypair1 == null;
 		}
 
 		return keypair1.getPrivate().equals(keypair2.getPrivate())
