@@ -46,8 +46,8 @@ public class IndexTest extends H2HJUnitTest {
 	@Before
 	public void createTreeNode() {
 		// create a tree
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
-		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		root = new FolderIndex(null, keys, null);
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 		root.setProtectionKeys(protectionKeys);
@@ -83,7 +83,7 @@ public class IndexTest extends H2HJUnitTest {
 	@Test
 	public void testShare() {
 		// set 1d to be shared
-		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
+		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE));
 
 		// 1d, 2f and 2d should return to be shared, others not
 		Assert.assertTrue(dir1.isShared());
@@ -109,13 +109,13 @@ public class IndexTest extends H2HJUnitTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void testShareRoot() {
-		root.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
+		root.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE));
 	}
 
 	@Test
 	public void testHasShared() {
 		// set 2d to be shared
-		dir2.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT));
+		dir2.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE));
 
 		// root, 1d and 2d should show that they contain a shared folder
 		Assert.assertTrue(root.isSharedOrHasSharedChildren());
@@ -154,7 +154,7 @@ public class IndexTest extends H2HJUnitTest {
 		Assert.assertEquals(1, root.getCalculatedUserList().size());
 
 		// add permission to sub-folder
-		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT),
+		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE),
 				new UserPermission("UserB", PermissionType.READ));
 
 		// check the sub-folder and the sub-files permission

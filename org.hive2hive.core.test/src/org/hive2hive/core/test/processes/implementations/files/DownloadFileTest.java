@@ -99,7 +99,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
 			InvalidProcessStateException {
-		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
 				wrongKeys.getPublic(), downloader);

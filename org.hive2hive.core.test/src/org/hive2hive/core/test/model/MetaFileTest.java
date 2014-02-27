@@ -24,7 +24,7 @@ public class MetaFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetNewestVersion() {
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_DOCUMENT);
+		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		List<FileVersion> versions = new ArrayList<FileVersion>();
 		versions.add(new FileVersion(0, 123, System.currentTimeMillis(), new ArrayList<String>()));
 		versions.add(new FileVersion(1, 123, System.currentTimeMillis(), new ArrayList<String>()));
