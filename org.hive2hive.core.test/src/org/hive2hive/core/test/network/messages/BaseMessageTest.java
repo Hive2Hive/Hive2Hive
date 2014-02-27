@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
@@ -13,6 +14,7 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -60,7 +62,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
 		// send message
-		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, getPublicKey(nodeB)));
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
@@ -86,15 +88,16 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException
 	 */
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode()
-			throws ClassNotFoundException, IOException, NoPeerConnectionException {
+			throws ClassNotFoundException, IOException, NoPeerConnectionException, NoSessionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		// receiver node should already know the public key of the sender
-		nodeB.getPublicKeyManager().putPublicKey(nodeA.getUserId(), nodeA.getPublicKey());
+		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate random data and content key
 		String contentKey = NetworkTestUtil.randomString();
@@ -104,7 +107,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 				new H2HTestData(data));
 
 		// send message
-		assertTrue(nodeA.getMessageManager().send(message, nodeB.getPublicKey()));
+		assertTrue(nodeA.getMessageManager().send(message, getPublicKey(nodeB)));
 
 		// wait till message gets handled
 		// this might need some time
@@ -121,6 +124,14 @@ public class BaseMessageTest extends H2HJUnitTest {
 		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
+	}
+
+	private PublicKey getPublicKey(NetworkManager networkManager) {
+		try {
+			return networkManager.getSession().getKeyPair().getPublic();
+		} catch (NoSessionException e) {
+			return null;
+		}
 	}
 
 	@AfterClass

@@ -18,12 +18,14 @@ import javax.crypto.IllegalBlockSizeException;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -87,7 +89,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	// TODO: how to test this?
 	@Ignore
 	@Test
-	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
+	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException,
+			ProcessExecutionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -114,13 +117,14 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGet() throws IOException {
+	public void testPutGet() throws IOException, NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
-		node.setSession(new H2HSession(key, new UserProfileManager(node, new UserCredentials(userId,
-				"password", "pin")), null, null));
+		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
@@ -138,13 +142,15 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	// TODO how to test this?
 	@Ignore
 	@Test
-	public void testPutGetRollback() throws IOException {
+	public void testPutGetRollback() throws IOException, NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
-		node.setSession(new H2HSession(key, new UserProfileManager(node, new UserCredentials(userId,
-				"password", "pin")), null, null));
+		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				.getTempDirectory().toPath()));
+
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		SequentialProcess process = new SequentialProcess();
@@ -160,8 +166,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
-		node.setSession(new H2HSession(key, new UserProfileManager(node, new UserCredentials(userId,
-				"password", "pin")), null, null));
+		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				.getTempDirectory().toPath()));
+
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		SequentialProcess process = new SequentialProcess();
@@ -184,13 +192,14 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	@Ignore
 	public void testRemoveRollback() throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException,
-			ClassNotFoundException, IOException {
+			ClassNotFoundException, IOException, NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
-		node.setSession(new H2HSession(key, new UserProfileManager(node, new UserCredentials(userId,
-				"password", "pin")), null, null));
+		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				.getTempDirectory().toPath()));
 
 		// IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 		// HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask,
@@ -234,12 +243,14 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testCorrectOrder() throws DataLengthException, InvalidKeyException, IllegalStateException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException, IOException {
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException,
+			IOException, NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		node.setSession(new H2HSession(key, new UserProfileManager(node, new UserCredentials(userId,
-				"password", "pin")), null, null));
+		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, FileUtils
+				.getTempDirectory().toPath()));
 
 		// create some tasks
 		List<TestUserProfileTask> tasks = new ArrayList<TestUserProfileTask>();

@@ -11,17 +11,20 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 
 // TODO this class should be split up into multiple steps
@@ -46,7 +49,14 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		PublicKeyManager keyManager;
+		try {
+			keyManager = networkManager.getSession().getKeyManager();
+		} catch (NoSessionException e) {
+			throw new ProcessExecutionException("No session yet");
+		}
+
 		Locations locations = context.consumeLocations();
 		waitForResponses = new CountDownLatch(locations.getPeerAddresses().size());
 		if (!locations.getPeerAddresses().isEmpty()) {
@@ -60,7 +70,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 					message.setCallBackHandler(this);
 
 					// TODO this is blocking, should be parallel (asynchronous)
-					boolean success = messageManager.sendDirect(message, networkManager.getPublicKey());
+					boolean success = messageManager.sendDirect(message, keyManager.getOwnPublicKey());
 					if (!success) {
 						responses.put(address, false);
 					}
@@ -117,7 +127,8 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		// evaluate if master
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
 
-		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(networkManager.getConnection().getPeer().getPeerAddress())) {
+		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
+				networkManager.getConnection().getPeer().getPeerAddress())) {
 			context.setIsMaster(true);
 		} else {
 			context.setIsMaster(false);

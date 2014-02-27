@@ -14,6 +14,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -77,17 +78,19 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException {
+	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException,
+			NoPeerConnectionException {
 
 		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 		UserProfileManager profileManager = new UserProfileManager(client, credentials);
 
 		// set session
 		SessionParameters params = new SessionParameters();
-		params.setKeyPair(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS));
 		params.setProfileManager(profileManager);
 		params.setFileConfig(fileConfig);
 		params.setRoot(rootPath);
+		params.setKeyManager(new PublicKeyManager(credentials.getUserId(), EncryptionUtil
+				.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), client.getDataManager()));
 
 		H2HSession session = new H2HSession(params);
 		client.setSession(session);

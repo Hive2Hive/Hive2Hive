@@ -9,9 +9,9 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
+import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
 
 /**
@@ -21,17 +21,16 @@ import org.hive2hive.core.processes.implementations.context.NotifyProcessContext
  * 
  */
 // TODO get the keys in parallel
-public class GetPublicKeysStep extends BaseGetProcessStep {
+public class GetPublicKeysStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(GetPublicKeysStep.class);
 	private final NotifyProcessContext context;
-	private final NetworkManager networkManager;
+	private final PublicKeyManager keyManager;
 
-	public GetPublicKeysStep(NotifyProcessContext context, NetworkManager networkManager)
+	public GetPublicKeysStep(NotifyProcessContext context, PublicKeyManager keyManager)
 			throws NoPeerConnectionException {
-		super(networkManager.getDataManager());
 		this.context = context;
-		this.networkManager = networkManager;
+		this.keyManager = keyManager;
 	}
 
 	@Override
@@ -43,7 +42,7 @@ public class GetPublicKeysStep extends BaseGetProcessStep {
 
 		for (String user : users) {
 			try {
-				PublicKey key = networkManager.getPublicKeyManager().getPublicKey(user);
+				PublicKey key = keyManager.getPublicKey(user);
 				keys.put(user, key);
 			} catch (GetFailedException e) {
 				logger.error("Could not get the key for user " + user);

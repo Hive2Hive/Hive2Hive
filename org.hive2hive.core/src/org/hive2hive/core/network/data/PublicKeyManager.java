@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data;
 
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,29 @@ public class PublicKeyManager {
 		this.usersKeyPair = usersKeyPair;
 		this.dataManager = dataManager;
 		this.publicKeyCache = new ConcurrentHashMap<String, PublicKey>();
+	}
+
+	/**
+	 * Helper method that returns the public key of the currently logged in user.
+	 */
+	public PublicKey getOwnPublicKey() {
+		return usersKeyPair.getPublic();
+	}
+
+	/**
+	 * Helper method that returns the private key of the currently logged in user
+	 */
+	public PrivateKey getOwnPrivateKey() {
+		return usersKeyPair.getPrivate();
+	}
+
+	/**
+	 * Helper method that returns the users key pair
+	 * 
+	 * @return
+	 */
+	public KeyPair getOwnKeyPair() {
+		return usersKeyPair;
 	}
 
 	public void putPublicKey(String userId, PublicKey publicKey) {

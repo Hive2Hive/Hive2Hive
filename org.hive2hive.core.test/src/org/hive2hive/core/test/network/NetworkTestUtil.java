@@ -17,7 +17,9 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -65,7 +67,8 @@ public class NetworkTestUtil {
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
 			try {
-				INetworkConfiguration otherNetConfig = NetworkConfiguration.create(String.format("Node %s", ++letter), InetAddress.getLocalHost());
+				INetworkConfiguration otherNetConfig = NetworkConfiguration.create(
+						String.format("Node %s", ++letter), InetAddress.getLocalHost());
 				NetworkManager node = new NetworkManager(otherNetConfig);
 				node.connect();
 				nodes.add(node);
@@ -76,22 +79,25 @@ public class NetworkTestUtil {
 
 		return nodes;
 	}
-	
+
 	/**
 	 * Generate and assign public/private key pairs to the nodes.
 	 * 
 	 * @param network
 	 *            list containing all nodes which have different key pairs
+	 * @throws NoPeerConnectionException
 	 */
-	public static void createKeyPairs(List<NetworkManager> network) {
+	public static void createKeyPairs(List<NetworkManager> network) throws NoPeerConnectionException {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = generateRandomCredentials();
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
+					node.getDataManager());
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(keyPair, profileManager, null, root.toPath());
+				session = new H2HSession(profileManager, keyManager, null, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -104,16 +110,19 @@ public class NetworkTestUtil {
 	 * 
 	 * @param network
 	 *            list containing all nodes which need to have the same key pair
+	 * @throws NoPeerConnectionException
 	 */
-	public static void createSameKeyPair(List<NetworkManager> network) {
+	public static void createSameKeyPair(List<NetworkManager> network) throws NoPeerConnectionException {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
+					node.getDataManager());
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(keyPair, profileManager, null, root.toPath());
+				session = new H2HSession(profileManager, keyManager, null, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -149,14 +158,17 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create a master
-		IH2HNode master = H2HNode.createNode(NetworkConfiguration.create("master"), FileConfiguration.createDefault());
+		IH2HNode master = H2HNode.createNode(NetworkConfiguration.create("master"),
+				FileConfiguration.createDefault());
 		master.connect();
 		nodes.add(master);
 
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(NetworkConfiguration.create("node " + i, bootstrapAddress), FileConfiguration.createDefault());
+				IH2HNode node = H2HNode.createNode(
+						NetworkConfiguration.create("node " + i, bootstrapAddress),
+						FileConfiguration.createDefault());
 				node.connect();
 				nodes.add(node);
 			}
@@ -192,8 +204,8 @@ public class NetworkTestUtil {
 		return new UserCredentials(NetworkTestUtil.randomString(), NetworkTestUtil.randomString(),
 				NetworkTestUtil.randomString());
 	}
-	
-	public static NetworkManager getRandomNode(List<NetworkManager> network){
+
+	public static NetworkManager getRandomNode(List<NetworkManager> network) {
 		return network.get(new Random().nextInt(network.size()));
 	}
 

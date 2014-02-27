@@ -9,6 +9,7 @@ import java.security.SignatureException;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -45,9 +46,12 @@ public class MessageReplyHandler implements ObjectDataReply {
 			return null;
 		}
 
+		H2HSession session;
 		try {
 			if (networkManager.getSession() == null) {
 				throw new NoSessionException();
+			} else {
+				session = networkManager.getSession();
 			}
 		} catch (NoSessionException e) {
 			logger.warn(String.format(
@@ -69,7 +73,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		// asymmetrically decrypt message
 		byte[] decryptedMessage = null;
 		try {
-			KeyPair keys = networkManager.getSession().getKeyPair();
+			KeyPair keys = session.getKeyPair();
 			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, keys.getPrivate());
 		} catch (Exception e) {
 			logger.warn("Decryption of message failed.");
@@ -88,7 +92,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			BaseMessage receivedMessage = (BaseMessage) message;
 
 			// verify the signature
-			if (networkManager.getPublicKeyManager().containsPublicKey(senderId)) {
+			if (session.getKeyManager().containsPublicKey(senderId)) {
 				if (!verifySignature(senderId, decryptedMessage, signature))
 					return AcceptanceReply.FAILURE_SIGNATURE;
 
@@ -126,7 +130,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 
 	private boolean verifySignature(String senderId, byte[] decryptedMessage, byte[] signature) {
 		try {
-			PublicKey publicKey = networkManager.getPublicKeyManager().getPublicKey(senderId);
+			PublicKey publicKey = networkManager.getSession().getKeyManager().getPublicKey(senderId);
 			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey)) {
 				logger.debug(String.format("Message's signature from user '%s' verified. node id = '%s'",
 						senderId, networkManager.getNodeId()));
@@ -136,7 +140,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 						senderId, networkManager.getNodeId()));
 				return false;
 			}
-		} catch (GetFailedException | InvalidKeyException | SignatureException e) {
+		} catch (GetFailedException | InvalidKeyException | SignatureException | NoSessionException e) {
 			logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'", senderId,
 					e.getMessage()));
 			return false;

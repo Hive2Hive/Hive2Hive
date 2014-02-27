@@ -8,7 +8,9 @@ import javax.crypto.IllegalBlockSizeException;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
@@ -32,6 +34,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(RemoveUserProfileTaskStep.class);
 
 	private final IConsumeUserProfileTask context;
+
 	private boolean removePerformed = false;
 	private NetworkManager networkManager;
 
@@ -71,10 +74,18 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
+		H2HSession session;
+		try {
+			session = networkManager.getSession();
+		} catch (NoSessionException e1) {
+			logger.error("Could not rollback because no session");
+			return;
+		}
+
 		UserProfileTask upTask = context.consumeUserProfileTask();
 		HybridEncryptedContent encrypted;
 		try {
-			encrypted = H2HEncryptionUtil.encryptHybrid(upTask, networkManager.getPublicKey());
+			encrypted = H2HEncryptionUtil.encryptHybrid(upTask, session.getKeyPair().getPublic());
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | IOException e) {
 			logger.error("Could not encrypt the user profile task while rollback");

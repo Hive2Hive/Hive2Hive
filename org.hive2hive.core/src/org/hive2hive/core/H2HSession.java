@@ -7,6 +7,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
@@ -14,19 +15,19 @@ import org.hive2hive.core.security.UserCredentials;
 public class H2HSession {
 
 	private final UserProfileManager profileManager;
+	private final PublicKeyManager keyManager;
 	private final IFileConfiguration fileConfiguration;
-	private final KeyPair keyPair;
 	private final Path root;
 
 	public H2HSession(SessionParameters params) throws IOException {
-		this(params.getKeyPair(), params.getProfileManager(), params.getFileConfig(), params.getRoot());
+		this(params.getProfileManager(), params.getKeyManager(), params.getFileConfig(), params.getRoot());
 	}
 
 	// TODO remove constructor
-	public H2HSession(KeyPair keyPair, UserProfileManager profileManager,
+	public H2HSession(UserProfileManager profileManager, PublicKeyManager keyManager,
 			IFileConfiguration fileConfiguration, Path root) throws IOException {
-		this.keyPair = keyPair;
 		this.profileManager = profileManager;
+		this.keyManager = keyManager;
 		this.fileConfiguration = fileConfiguration;
 		this.root = root;
 		if (!root.toFile().exists()) {
@@ -48,8 +49,11 @@ public class H2HSession {
 		return fileConfiguration;
 	}
 
+	/**
+	 * Returns the own encryption key pair
+	 */
 	public KeyPair getKeyPair() {
-		return keyPair;
+		return keyManager.getOwnKeyPair();
 	}
 
 	public Path getRoot() {
@@ -58,5 +62,19 @@ public class H2HSession {
 
 	public File getRootFile() {
 		return root.toFile();
+	}
+
+	public String getUserId() {
+		return getCredentials().getUserId();
+	}
+
+	/**
+	 * Get the public key manger to get public keys from other users. A get call may block (if public key not
+	 * cached).
+	 * 
+	 * @return a public key manager
+	 */
+	public PublicKeyManager getKeyManager() {
+		return keyManager;
 	}
 }

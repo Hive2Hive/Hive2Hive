@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
@@ -13,6 +14,7 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
@@ -90,7 +92,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			protected void doExecute() throws InvalidProcessStateException {
 				try {
-					send(message, nodeB.getPublicKey());
+					send(message, getPublicKey(nodeB));
 				} catch (SendFailedException e) {
 					Assert.fail(e.getMessage());
 				}
@@ -154,7 +156,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 				try {
-					send(message, nodeB.getPublicKey());
+					send(message, getPublicKey(nodeB));
 					Assert.fail();
 				} catch (SendFailedException e) {
 					// expected
@@ -217,7 +219,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			protected void doExecute() throws InvalidProcessStateException {
 				try {
-					send(message, nodeB.getPublicKey());
+					send(message, getPublicKey(nodeB));
 				} catch (SendFailedException e) {
 					Assert.fail(e.getMessage());
 				}
@@ -252,6 +254,14 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
+	}
+
+	private PublicKey getPublicKey(NetworkManager networkManager) {
+		try {
+			return networkManager.getSession().getKeyPair().getPublic();
+		} catch (NoSessionException e) {
+			return null;
+		}
 	}
 
 	@AfterClass

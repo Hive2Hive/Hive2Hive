@@ -3,7 +3,10 @@ package org.hive2hive.core.processes.implementations.login;
 import java.io.IOException;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -25,12 +28,16 @@ public class SessionCreationStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		// create session
-		params.setKeyPair(context.consumeUserProfile().getEncryptionKeys());
+		UserProfile userProfile = context.consumeUserProfile();
+
 		H2HSession session;
 		try {
+			// create session
+			params.setKeyManager(new PublicKeyManager(userProfile.getUserId(), userProfile
+					.getEncryptionKeys(), networkManager.getDataManager()));
+
 			session = new H2HSession(params);
-		} catch (IOException e) {
+		} catch (IOException | NoPeerConnectionException e) {
 			throw new ProcessExecutionException("Session could not be created.", e);
 		}
 

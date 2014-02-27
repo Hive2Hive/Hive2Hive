@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +15,7 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.AcceptanceReply;
@@ -81,8 +83,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer().getPeerAddress(),
-				contentKey, new H2HTestData(data), false);
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection()
+				.getPeer().getPeerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -94,7 +96,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			protected void doExecute() throws InvalidProcessStateException {
 				try {
-					sendDirect(message, nodeB.getPublicKey());
+					sendDirect(message, getPublicKey(nodeB));
 				} catch (SendFailedException e) {
 					Assert.fail();
 				}
@@ -145,8 +147,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer().getPeerAddress(),
-				contentKey, new H2HTestData(data), false);
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection()
+				.getPeer().getPeerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -158,7 +160,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 				try {
-					sendDirect(message, nodeB.getPublicKey());
+					sendDirect(message, getPublicKey(nodeB));
 					Assert.fail();
 				} catch (SendFailedException e) {
 					throw new ProcessExecutionException("Expected behavior.", e);
@@ -207,8 +209,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer().getPeerAddress(),
-				contentKey);
+		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection()
+				.getPeer().getPeerAddress(), contentKey);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -227,7 +229,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			@Override
 			protected void doExecute() throws InvalidProcessStateException {
 				try {
-					sendDirect(message, nodeB.getPublicKey());
+					sendDirect(message, getPublicKey(nodeB));
 				} catch (SendFailedException e) {
 					Assert.fail();
 				}
@@ -249,6 +251,14 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
+	}
+
+	private PublicKey getPublicKey(NetworkManager networkManager) {
+		try {
+			return networkManager.getSession().getKeyPair().getPublic();
+		} catch (NoSessionException e) {
+			return null;
+		}
 	}
 
 	@AfterClass

@@ -83,7 +83,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 		try {
 			notifyOtherClients(new UploadNotificationMessageFactory(index, parentKey));
 			logger.debug("Notified other clients that a file has been updated by another user");
-		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException e) {
+		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
+				| NoSessionException e) {
 			logger.error("Could not notify other clients of me about the new file", e);
 		}
 	}
