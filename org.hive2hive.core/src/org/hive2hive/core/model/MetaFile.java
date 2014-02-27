@@ -19,23 +19,17 @@ public class MetaFile extends NetworkContent {
 
 	private static final long serialVersionUID = -3385321499412137545L;
 	private final PublicKey id;
-	private final String name;
 	private final List<FileVersion> versions;
 	private final KeyPair chunkKey;
 
-	public MetaFile(PublicKey id, String fileName, List<FileVersion> versions, KeyPair chunkKey) {
+	public MetaFile(PublicKey id, List<FileVersion> versions, KeyPair chunkKey) {
 		this.id = id;
-		this.name = fileName;
 		this.versions = versions;
 		this.chunkKey = chunkKey;
 	}
 
 	public PublicKey getId() {
 		return id;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public List<FileVersion> getVersions() {

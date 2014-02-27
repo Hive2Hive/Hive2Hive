@@ -81,8 +81,9 @@ public class RelinkUserProfileStep extends ProcessStep {
 			logger.debug("Successfully relinked the moved file in the user profile.");
 
 			// check if the protection key needs to be updated
-			if (H2HEncryptionUtil.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
+			if (!H2HEncryptionUtil.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
 				// update the protection key of the meta file and eventually all chunks
+				logger.info("Required to update the protection key of the moved file(s) / folder(s).");
 				initPKUpdateStep(movedNode, oldParent.getProtectionKeys(), newParent.getProtectionKeys());
 			}
 

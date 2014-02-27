@@ -70,7 +70,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 			metaContext.provideMetaFile(metaFile);
 			metaContext.provideEncryptedMetaFile(encryptedContent);
-			logger.debug(String.format("Got and decrypted the meta file for file '%s'.", metaFile.getName()));
+			logger.debug("Got and decrypted the meta file.");
 		}
 	}
 }

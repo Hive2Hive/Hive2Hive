@@ -33,7 +33,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 	@Override
 	public void start() {
 		try {
-			// add the new node to the user profile first
+			// get the user profile first
 			String randomPID = UUID.randomUUID().toString();
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
