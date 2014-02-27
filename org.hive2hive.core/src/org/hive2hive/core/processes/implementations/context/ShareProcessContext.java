@@ -8,7 +8,6 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
@@ -16,12 +15,13 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IProvideI
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFileProtectionKey;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProtectionKeys, IProvideMetaFile,
-		IConsumeMetaFile, IConsumeNotificationFactory, IProvideNotificationFactory, IConsumeIndex,
+		IConsumeMetaFile, IConsumeNotificationFactory, IProvideNotificationFactory, IUpdateFileProtectionKey,
 		IProvideIndex {
 
 	private final File folder;
@@ -56,10 +56,12 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 		return permission;
 	}
 
+	@Override
 	public KeyPair consumeNewProtectionKeys() {
 		return newProtectionKeys;
 	}
 
+	@Override
 	public KeyPair consumeOldProtectionKeys() {
 		return oldProtectionKeys;
 	}

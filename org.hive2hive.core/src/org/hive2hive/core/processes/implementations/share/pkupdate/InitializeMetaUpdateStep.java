@@ -18,7 +18,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
-import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFileProtectionKey;
 
 /**
  * Takes the shared folder and iteratively changes the protection keys of all meta documents
@@ -30,32 +30,48 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeMetaUpdateStep.class);
 
-	private ShareProcessContext context;
+	private IUpdateFileProtectionKey context;
 	private NetworkManager networkManager;
 
-	public InitializeMetaUpdateStep(ShareProcessContext context, NetworkManager networkManager) {
+	public InitializeMetaUpdateStep(IUpdateFileProtectionKey context, NetworkManager networkManager) {
 		this.context = context;
 		this.networkManager = networkManager;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		FolderIndex folderIndex = (FolderIndex) context.consumeIndex();
+		Index index = context.consumeIndex();
 
 		try {
-			List<Index> indexList = Index.getIndexList(folderIndex);
-			for (Index index : indexList) {
-				if (index.isFile()) {
-					FileIndex fileIndex = (FileIndex) index;
-					logger.debug("Initialize to change the protection key of meta document of index '"
-							+ fileIndex.getName() + "'.");
-					// create the process and make wrap it to make it asynchronous
-					getParent().add(new AsyncComponent(buildProcess(fileIndex)));
-				}
+			if (index.isFolder()) {
+				FolderIndex folderIndex = (FolderIndex) index;
+				initForFolder(folderIndex);
+			} else {
+				FileIndex fileIndex = (FileIndex) index;
+				initForFile(fileIndex);
 			}
 		} catch (NoSessionException | NoPeerConnectionException e) {
 			throw new ProcessExecutionException(e);
 		}
+
+	}
+
+	private void initForFolder(FolderIndex folderIndex) throws ProcessExecutionException, NoSessionException,
+			NoPeerConnectionException {
+		List<Index> indexList = Index.getIndexList(folderIndex);
+		for (Index index : indexList) {
+			if (index.isFile()) {
+				FileIndex fileIndex = (FileIndex) index;
+				initForFile(fileIndex);
+			}
+		}
+	}
+
+	private void initForFile(FileIndex fileIndex) throws NoSessionException, NoPeerConnectionException {
+		logger.debug("Initialize to change the protection key of meta document of index '"
+				+ fileIndex.getName() + "'.");
+		// create the process and make wrap it to make it asynchronous
+		getParent().add(new AsyncComponent(buildProcess(fileIndex)));
 	}
 
 	private ProcessComponent buildProcess(FileIndex index) throws NoSessionException,

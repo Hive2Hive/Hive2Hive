@@ -1,5 +1,6 @@
 package org.hive2hive.core.processes.implementations.files.move;
 
+import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,8 +23,10 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.MoveNotificationContext;
+import org.hive2hive.core.processes.implementations.context.MoveUpdateProtectionKeyContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
+import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public class RelinkUserProfileStep extends ProcessStep {
@@ -79,7 +82,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 			// check if the protection key needs to be updated
 			if (H2HEncryptionUtil.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
-				// TODO update the protection key of the meta document and eventually all chunks
+				// update the protection key of the meta file and eventually all chunks
+				initPKUpdateStep(movedNode, oldParent.getProtectionKeys(), newParent.getProtectionKeys());
 			}
 
 			// notify other users
@@ -88,6 +92,12 @@ public class RelinkUserProfileStep extends ProcessStep {
 		} catch (NoSessionException | GetFailedException | PutFailedException e) {
 			throw new ProcessExecutionException(e);
 		}
+	}
+
+	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
+		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode,
+				oldProtectionKeys, newProtectionKeys);
+		getParent().insertNext(new InitializeMetaUpdateStep(pkUpdateContext, networkManager), this);
 	}
 
 	/**
