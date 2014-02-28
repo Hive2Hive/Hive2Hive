@@ -26,8 +26,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 /**
  * A step adding the new file (node) into the user profile (tree)
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class AddIndexToUserProfileStep extends ProcessStep {
 
@@ -38,6 +37,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	private final Path root;
 
 	private PublicKey parentKey; // used for rollback
+	private boolean modified = false;
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager,
 			Path root) {
@@ -79,6 +79,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 			// put the updated user profile
 			profileManager.readyToPut(userProfile, getID());
+			modified = true;
 		} catch (IOException e) {
 			logger.error("Creating MD5 hash of file " + file.getName() + " was not possible. Reason: "
 					+ e.getMessage());
@@ -90,15 +91,23 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		try {
+		if (modified) {
 			// remove the file from the user profile
-			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				return;
+			}
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
 			Index childNode = parentNode.getChildByName(context.getFile().getName());
 			parentNode.removeChild(childNode);
-			profileManager.readyToPut(userProfile, getID());
-		} catch (Exception e) {
-			// ignore
+			try {
+				profileManager.readyToPut(userProfile, getID());
+			} catch (PutFailedException e) {
+				return;
+			}
+			modified = false;
 		}
 	}
 }

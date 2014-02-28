@@ -43,7 +43,7 @@ public class UseCaseTestUtil {
 	private UseCaseTestUtil() {
 		// only static methods
 	}
-
+	
 	public static void waitTillSucceded(TestProcessComponentListener listener, int maxSeconds) {
 		H2HWaiter waiter = new H2HWaiter(maxSeconds);
 		do {
@@ -67,11 +67,27 @@ public class UseCaseTestUtil {
 	 * clones.
 	 */
 	public static void executeProcess(IProcessComponent process) {
+		executeProcessTillSucceded(process);
+	}
+	
+	public static void executeProcessTillSucceded(IProcessComponent process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		try {
 			process.start();
 			waitTillSucceded(listener, MAX_PROCESS_WAIT_TIME);
+		} catch (InvalidProcessStateException e) {
+			System.out.println("ERROR: Cannot wait until process is done.");
+			Assert.fail();
+		}
+	}
+	
+	public static void executeProcessTillFailed(IProcessComponent process) {
+		TestProcessComponentListener listener = new TestProcessComponentListener();
+		process.attachListener(listener);
+		try {
+			process.start();
+			waitTillFailed(listener, MAX_PROCESS_WAIT_TIME);
 		} catch (InvalidProcessStateException e) {
 			System.out.println("ERROR: Cannot wait until process is done.");
 		}
@@ -106,11 +122,6 @@ public class UseCaseTestUtil {
 		UserProfileManager manager = new UserProfileManager(networkManager, credentials);
 		return manager.getUserProfile(UUID.randomUUID().toString(), false);
 	}
-
-	// public static void putUserProfile(NetworkManager networkManager, UserProfile profile,
-	// UserCredentials credentials) throws NoPeerConnectionException {
-	// executeProcess(new PutUserProfileStep(credentials, profile, networkManager.getDataManager()));
-	// }
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
