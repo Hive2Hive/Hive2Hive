@@ -154,24 +154,28 @@ public class IndexTest extends H2HJUnitTest {
 		Assert.assertEquals(1, root.getCalculatedUserList().size());
 
 		// add permission to sub-folder
-		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE),
-				new UserPermission("UserB", PermissionType.READ));
+		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE), new UserPermission(
+				"UserB", PermissionType.READ));
 
 		// check the sub-folder and the sub-files permission
 		Assert.assertEquals(2, dir1.getCalculatedUserList().size());
 		Assert.assertEquals(2, child3.getCalculatedUserList().size());
 		Assert.assertEquals(2, dir2.getCalculatedUserList().size());
+		Assert.assertFalse(dir1.canWrite("UserB"));
+		Assert.assertFalse(dir2.canWrite("UserB"));
 
 		// validate that the root still has only one user
 		Assert.assertTrue(root.getCalculatedUserList().contains(userId));
 		Assert.assertEquals(1, root.getCalculatedUserList().size());
 
 		// add a third permission to the dir1
-		dir1.addUserPermissions(new UserPermission("UserC", PermissionType.READ));
+		dir1.addUserPermissions(new UserPermission("UserC", PermissionType.WRITE));
 
 		// check again
 		Assert.assertEquals(3, dir1.getCalculatedUserList().size());
 		Assert.assertEquals(3, child3.getCalculatedUserList().size());
 		Assert.assertEquals(3, dir2.getCalculatedUserList().size());
+		Assert.assertTrue(dir1.canWrite("UserC"));
+		Assert.assertTrue(dir2.canWrite("UserC"));
 	}
 }
