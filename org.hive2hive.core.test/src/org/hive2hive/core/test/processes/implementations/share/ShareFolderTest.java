@@ -15,6 +15,7 @@ import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -90,26 +91,28 @@ public class ShareFolderTest extends H2HJUnitTest {
 		// share the filled folder
 		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId(), PermissionType.WRITE);
 
-		// TODO wait for userB to process the user profile task
-		Thread.sleep(20000);
-
 		// check the files and the folders at user B
 		File sharedFolderAtB = new File(rootB, folderToShare.getName());
+		waitTillSynchronized(sharedFolderAtB, true);
 		Assert.assertTrue(sharedFolderAtB.exists());
 
 		File file1AtB = new File(sharedFolderAtB, file1.getName());
+		waitTillSynchronized(file1AtB, true);
 		Assert.assertTrue(file1AtB.exists());
 		Assert.assertEquals(file1.length(), file1AtB.length());
 
 		File file2AtB = new File(sharedFolderAtB, file2.getName());
+		waitTillSynchronized(file2AtB, true);
 		Assert.assertTrue(file2AtB.exists());
 		Assert.assertEquals(file2.length(), file2AtB.length());
 
 		File file3AtB = new File(sharedFolderAtB, file3.getName());
+		waitTillSynchronized(file3AtB, true);
 		Assert.assertTrue(file3AtB.exists());
 		Assert.assertEquals(file3.length(), file3AtB.length());
 
 		File subfolderAtB = new File(sharedFolderAtB, subfolder.getName());
+		waitTillSynchronized(subfolderAtB, true);
 		Assert.assertTrue(subfolderAtB.exists());
 	}
 
@@ -129,24 +132,37 @@ public class ShareFolderTest extends H2HJUnitTest {
 		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId(), PermissionType.WRITE);
 
 		// TODO wait for userB to process the user profile task
-		Thread.sleep(10000);
+		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
+		waitTillSynchronized(sharedFolderAtB, true);
+		Assert.assertTrue(sharedFolderAtB.exists());
 
 		// check the folder and the file at user B
-		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
 		File file1AtB = new File(sharedFolderAtB, file1AtA.getName());
-		Assert.assertTrue(sharedFolderAtB.exists());
+		waitTillSynchronized(file1AtB, true);
 		Assert.assertTrue(file1AtB.exists());
 		Assert.assertEquals(file1AtA.length(), file1AtB.length());
 
 		// delete the file at B
 		UseCaseTestUtil.deleteFile(network.get(1), file1AtB);
 
-		// TODO wait for user A to receive the file deletion
-		Thread.sleep(10000);
-
 		// verify that the file has been deleted at A and B
+		waitTillSynchronized(file1AtB, false);
 		Assert.assertFalse(file1AtB.exists());
+		waitTillSynchronized(file1AtA, false);
 		Assert.assertFalse(file1AtA.exists());
+	}
+
+	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
+		H2HWaiter waiter = new H2HWaiter(40);
+		if (appearing) {
+			do {
+				waiter.tickASecond();
+			} while (!synchronizingFile.exists());
+		} else {
+			do {
+				waiter.tickASecond();
+			} while (synchronizingFile.exists());
+		}
 	}
 
 	@After
