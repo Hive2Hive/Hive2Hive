@@ -25,7 +25,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 	private final Index index;
 	private final PublicKey parentKey;
 
-	public UploadUserProfileTask(Index index, PublicKey parentKey) {
+	public UploadUserProfileTask(String sender, Index index, PublicKey parentKey) {
+		super(sender);
 		this.index = index;
 		this.parentKey = parentKey;
 	}
@@ -42,6 +43,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 				logger.error("Could not process the task because the parent node has not been found.");
 				return;
 			}
+
+			// validate if the other sharer has the right to share
 
 			// this task is sent when the file has been added or updated, make the difference between them.
 			// When it's been added, add the index to the user profile, else, simply upldate it's md5 hash
@@ -70,8 +73,15 @@ public class UploadUserProfileTask extends UserProfileTask {
 			return;
 		}
 
+		// then we're ready to download the file
+		startDownload();
+
+		// notify own other clients
+		startNotification();
+	}
+
+	private void startDownload() {
 		try {
-			// then we're ready to download the file
 			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
 					index.getFilePublicKey(), networkManager);
 			logger.debug("Start downloading the file '" + index.getFullPath() + "'.");
@@ -79,7 +89,9 @@ public class UploadUserProfileTask extends UserProfileTask {
 		} catch (NoSessionException | InvalidProcessStateException e) {
 			logger.error("Could not start the download of the newly shared file.");
 		}
+	}
 
+	private void startNotification() {
 		try {
 			notifyOtherClients(new UploadNotificationMessageFactory(index, parentKey));
 			logger.debug("Notified other clients that a file has been updated by another user");

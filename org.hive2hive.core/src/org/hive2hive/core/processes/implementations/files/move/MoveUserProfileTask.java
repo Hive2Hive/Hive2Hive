@@ -33,8 +33,9 @@ public class MoveUserProfileTask extends UserProfileTask {
 	private final PublicKey oldParentKey;
 	private final PublicKey newParentKey;
 
-	public MoveUserProfileTask(String sourceFileName, String destFileName, PublicKey oldParentKey,
-			PublicKey newParentKey) {
+	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName,
+			PublicKey oldParentKey, PublicKey newParentKey) {
+		super(sender);
 		this.sourceFileName = sourceFileName;
 		this.destFileName = destFileName;
 		this.oldParentKey = oldParentKey;

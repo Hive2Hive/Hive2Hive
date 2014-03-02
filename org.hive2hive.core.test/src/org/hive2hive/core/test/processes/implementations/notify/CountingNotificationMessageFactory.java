@@ -82,7 +82,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 	}
 
 	@Override
-	public UserProfileTask createUserProfileTask() {
+	public UserProfileTask createUserProfileTask(String sender) {
 		return new TestUserProfileTask();
 	}
 

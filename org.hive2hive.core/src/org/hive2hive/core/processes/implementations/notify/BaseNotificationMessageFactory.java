@@ -28,7 +28,7 @@ public abstract class BaseNotificationMessageFactory {
 	 * 
 	 * @return
 	 */
-	public abstract UserProfileTask createUserProfileTask();
+	public abstract UserProfileTask createUserProfileTask(String sender);
 
 	/**
 	 * After putting the {@link UserProfileTask} in the queue of the other users, notify them with this

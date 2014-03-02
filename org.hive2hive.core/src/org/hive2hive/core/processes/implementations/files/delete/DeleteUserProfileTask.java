@@ -37,7 +37,8 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	private static final long serialVersionUID = 4580106953301162049L;
 	private final PublicKey fileKey;
 
-	public DeleteUserProfileTask(PublicKey fileKey) {
+	public DeleteUserProfileTask(String sender, PublicKey fileKey) {
+		super(sender);
 		this.fileKey = fileKey;
 	}
 

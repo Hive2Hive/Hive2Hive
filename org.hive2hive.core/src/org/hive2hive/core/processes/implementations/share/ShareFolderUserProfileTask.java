@@ -25,7 +25,8 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 	private final FolderIndex sharedIndex;
 	private final UserPermission addedFriend;
 
-	public ShareFolderUserProfileTask(FolderIndex sharedIndex, UserPermission addedFriend) {
+	public ShareFolderUserProfileTask(String sender, FolderIndex sharedIndex, UserPermission addedFriend) {
+		super(sender);
 		this.sharedIndex = sharedIndex;
 		this.addedFriend = addedFriend;
 	}

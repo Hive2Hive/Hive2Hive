@@ -30,7 +30,7 @@ public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 	}
 
 	@Override
-	public UserProfileTask createUserProfileTask() {
-		return new DeleteUserProfileTask(fileKey);
+	public UserProfileTask createUserProfileTask(String sender) {
+		return new DeleteUserProfileTask(sender, fileKey);
 	}
 }

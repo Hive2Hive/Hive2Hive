@@ -29,7 +29,7 @@ public class UploadNotificationMessageFactory extends BaseNotificationMessageFac
 	}
 
 	@Override
-	public UserProfileTask createUserProfileTask() {
-		return new UploadUserProfileTask(index, parentKey);
+	public UserProfileTask createUserProfileTask(String sender) {
+		return new UploadUserProfileTask(sender, index, parentKey);
 	}
 }
