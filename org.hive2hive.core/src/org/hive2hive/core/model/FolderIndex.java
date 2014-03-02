@@ -215,6 +215,22 @@ public class FolderIndex extends Index {
 	}
 
 	/**
+	 * Returns whether a specific user can write to this folder.
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	public boolean canWrite(String userId) {
+		for (UserPermission permission : getCalculatedUserPermissions()) {
+			if (permission.getUserId().equals(userId)) {
+				return permission.getPermission() == PermissionType.WRITE;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Set the protection keys. This method should only be used when creating a root node or when changing the
 	 * protection keys at shared folders!
 	 * 

@@ -55,6 +55,9 @@ public class MoveUserProfileTask extends UserProfileTask {
 			if (oldParent == null) {
 				logger.error("Could not find the old parent");
 				return;
+			} else if (!oldParent.canWrite(sender)) {
+				logger.error("User was not allowed to change the source directory");
+				return;
 			}
 
 			Index child = oldParent.getChildByName(sourceFileName);
@@ -66,6 +69,9 @@ public class MoveUserProfileTask extends UserProfileTask {
 			FolderIndex newParent = (FolderIndex) userProfile.getFileById(newParentKey);
 			if (newParent == null) {
 				logger.error("Could not find the new parent");
+				return;
+			} else if (!newParent.canWrite(sender)) {
+				logger.error("User was not allowed to change the destination directory");
 				return;
 			}
 

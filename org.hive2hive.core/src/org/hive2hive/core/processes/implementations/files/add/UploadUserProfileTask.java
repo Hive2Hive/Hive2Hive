@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.implementations.files.add;
 
 import java.security.PublicKey;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -12,8 +11,6 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -48,23 +45,9 @@ public class UploadUserProfileTask extends UserProfileTask {
 			}
 
 			// validate if the other sharer has the right to share
-			boolean valid = false;
-			Set<UserPermission> userPermission = parentNode.getCalculatedUserPermissions();
-			for (UserPermission permission : userPermission) {
-				if (permission.getUserId().equals(sender)) {
-					if (permission.getPermission() == PermissionType.READ) {
-						// not allowed to write here
-						logger.error("User " + sender + " tried to write in write-protected folder.");
-						return;
-					} else {
-						logger.debug("Rights of user " + sender + " checked; he's allowed to modify");
-						valid = true;
-						break;
-					}
-				}
-			}
-
-			if (!valid) {
+			if (parentNode.canWrite(sender)) {
+				logger.debug("Rights of user " + sender + " checked; he's allowed to modify");
+			} else {
 				logger.error("Permission of user " + sender + " not found; deny to apply his changes");
 				return;
 			}

@@ -86,6 +86,12 @@ public class DeleteUserProfileTask extends UserProfileTask {
 			return null;
 		}
 
+		// check write permision
+		if (!parent.canWrite(sender)) {
+			logger.error("User without WRITE permissions tried to delete a file");
+			return null;
+		}
+
 		parent.removeChild(toDelete);
 		profileManager.readyToPut(userProfile, randomPID);
 		logger.debug("Removed the dead link from the user profile");
