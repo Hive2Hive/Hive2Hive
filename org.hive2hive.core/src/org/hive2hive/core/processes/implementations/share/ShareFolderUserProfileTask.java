@@ -74,6 +74,20 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		String pid = UUID.randomUUID().toString();
 		UserProfile userProfile = profileManager.getUserProfile(pid, true);
 
+		// modify the user permission list (remove myself)
+		UserPermission removeMyself = null;
+		for (UserPermission permission : sharedIndex.getUserPermissions()) {
+			if (permission.getUserId().equals(networkManager.getUserId())) {
+				// found
+				removeMyself = permission;
+				break;
+			}
+		}
+
+		// remove it
+		if (removeMyself != null)
+			sharedIndex.getUserPermissions().remove(removeMyself);
+
 		// add it to the root (by definition)
 		userProfile.getRoot().addChild(sharedIndex);
 		sharedIndex.setParent(userProfile.getRoot());
