@@ -67,11 +67,11 @@ public class PermissionsTest extends H2HJUnitTest {
 	 */
 	@Before
 	public void setup() throws NoSessionException, NoPeerConnectionException {
-		rootA = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		rootA = NetworkTestUtil.getTempDirectory();
 		userA = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
-		rootB = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		rootB = NetworkTestUtil.getTempDirectory();
 		userB = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 	}
@@ -270,6 +270,30 @@ public class PermissionsTest extends H2HJUnitTest {
 		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(file2AtB,
 				nodeB));
 	}
+	
+	/*
+	 * TODO: following test cases has to be written
+	 *  
+	 * 	user A (write), user B (read)
+	 * 
+	 *  new file from A		done
+	 *  new file from B
+	 *  	check at A
+	 *  	check at B		done
+	 *  update file from A
+	 *  update file from B
+	 *  	check at A
+	 *  	check at B
+	 *  move file at A
+	 *  move file at B
+	 *  	check at A
+	 *  	check at B
+	 *  delete file at A
+	 *  delete file at B
+	 *  	check at A
+	 *  	check at B
+	 * 
+	 */
 
 	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
 		H2HWaiter waiter = new H2HWaiter(40);
