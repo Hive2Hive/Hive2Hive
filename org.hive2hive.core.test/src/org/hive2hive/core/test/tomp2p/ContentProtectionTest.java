@@ -25,7 +25,6 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -76,8 +75,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Data data = new Data(testData).setProtectedEntry().sign(keyPair);
 
 		// initial put with protection key
-		FuturePut futurePut1 = p1.put(lKey).setSign().setData(cKey, data).setDomainKey(dKey).keyPair(keyPair)
-				.start();
+		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).setDomainKey(dKey).keyPair(keyPair).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
@@ -142,8 +140,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// now we put a signed data object
 		String newTestData = "new data";
 		data = new Data(newTestData).setProtectedEntry().sign(keyPair);
-		FuturePut futurePut4 = p1.put(lKey).setSign().setData(cKey, data).keyPair(keyPair).setDomainKey(dKey)
-				.start();
+		FuturePut futurePut4 = p1.put(lKey).setData(cKey, data).keyPair(keyPair).setDomainKey(dKey).start();
 		futurePut4.awaitUninterruptibly();
 		Assert.assertTrue(futurePut4.isSuccess());
 
@@ -203,8 +200,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Data data = new Data(testData).setProtectedEntry().sign(keyPair);
 		data.ttlSeconds(10000).basedOn(bKey);
 
-		FuturePut futurePut1 = p1.put(lKey).setSign().setData(cKey, data).setDomainKey(dKey)
-				.setVersionKey(vKey).keyPair(keyPair).start();
+		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).setDomainKey(dKey).setVersionKey(vKey)
+				.keyPair(keyPair).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
@@ -262,8 +259,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// initial put using key pair 2
 		String testData1 = "data1";
 		Data data = new Data(testData1).setProtectedEntry().sign(keyPair1);
-		FuturePut futurePut1 = p1.put(lKey).setSign().setData(cKey, data).setDomainKey(dKey)
-				.keyPair(keyPair1).start();
+		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).setDomainKey(dKey).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
@@ -284,8 +280,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// put with wrong key
 		String testData2 = "data2";
 		Data data2 = new Data(testData2).setProtectedEntry().sign(keyPair2);
-		FuturePut futurePut2 = p2.put(lKey).setSign().setData(cKey, data2).setDomainKey(dKey)
-				.keyPair(keyPair2).start();
+		FuturePut futurePut2 = p2.put(lKey).setData(cKey, data2).setDomainKey(dKey).keyPair(keyPair2).start();
 		futurePut2.awaitUninterruptibly();
 		assertFalse(futurePut2.isSuccess());
 
@@ -473,7 +468,6 @@ public class ContentProtectionTest extends H2HJUnitTest {
 	}
 
 	@Test
-	@Ignore
 	public void testRemoveFromTo1() throws NoSuchAlgorithmException, IOException, InvalidKeyException,
 			SignatureException, ClassNotFoundException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
@@ -589,7 +583,6 @@ public class ContentProtectionTest extends H2HJUnitTest {
 	}
 
 	@Test
-	@Ignore
 	public void testRemoveFromTo2() throws NoSuchAlgorithmException, IOException, InvalidKeyException,
 			SignatureException, ClassNotFoundException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
@@ -678,21 +671,23 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		// put the first version of the content with key pair 1
 		Number160 vKey1 = Number160.createHash("version1");
-		Data data = new Data("data1v1").setProtectedEntry().sign(keyPair1);
+		String testDataV1 = "data1v1";
+		Data data = new Data(testDataV1).setProtectedEntry().sign(keyPair1);
 		data.basedOn(Number160.ZERO);
 
-		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setSign().setData(cKey, data)
-				.keyPair(keyPair1).setVersionKey(vKey1).start();
+		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(keyPair1)
+				.setVersionKey(vKey1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
 		// add another version with the correct key pair 1
 		Number160 vKey2 = Number160.createHash("version2");
-		data = new Data("data1v2").setProtectedEntry().sign(keyPair1);
+		String testDataV2 = "data1v2";
+		data = new Data(testDataV2).setProtectedEntry().sign(keyPair1);
 		data.basedOn(vKey1);
 
-		FuturePut futurePut2 = p1.put(lKey).setDomainKey(dKey).setSign().setData(cKey, data)
-				.keyPair(keyPair1).setVersionKey(vKey2).start();
+		FuturePut futurePut2 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(keyPair1)
+				.setVersionKey(vKey2).start();
 		futurePut2.awaitUninterruptibly();
 		assertTrue(futurePut2.isSuccess());
 
@@ -706,10 +701,11 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		futurePut3.awaitUninterruptibly();
 		assertFalse(futurePut3.isSuccess());
 
-		// change the key pair to the new one using an empty data object
-		data = new Data().setProtectedEntry().sign(keyPair2).duplicateMeta();
+		// sign the data with the new key pair, get only the meta data
+		data = new Data(testDataV2).setProtectedEntry().sign(keyPair2).duplicateMeta();
+		data.basedOn(vKey2);
 		// use the old protection key to sign the message
-		FuturePut futurePut4 = p1.put(lKey).setDomainKey(dKey).setSign().putMeta().setData(cKey, data)
+		FuturePut futurePut4 = p1.put(lKey).setDomainKey(dKey).putMeta().setData(cKey, data)
 				.keyPair(keyPair1).start();
 		futurePut4.awaitUninterruptibly();
 		assertTrue(futurePut4.isSuccess());
@@ -717,28 +713,43 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// verify if the two versions have the new protection key
 		Data retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey1).start()
 				.awaitUninterruptibly().getData();
-		assertEquals("data1v1", (String) retData.object());
+		assertEquals(testDataV1, (String) retData.object());
 		assertTrue(retData.verify(keyPair2.getPublic()));
 
 		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey2).start()
 				.awaitUninterruptibly().getData();
-		assertEquals("data1v2", (String) retData.object());
+		assertEquals(testDataV2, (String) retData.object());
 		assertTrue(retData.verify(keyPair2.getPublic()));
 
 		// add another version with the new protection key
 		Number160 vKey4 = Number160.createHash("version4");
-		data = new Data("data1v4").setProtectedEntry().sign(keyPair2);
+		String testDataV4 = "data1v4";
+		data = new Data(testDataV4).setProtectedEntry().sign(keyPair2);
 		data.basedOn(vKey2);
 
-		FuturePut futurePut5 = p1.put(lKey).setDomainKey(dKey).setSign().setData(cKey, data)
-				.keyPair(keyPair2).setVersionKey(vKey4).start();
+		FuturePut futurePut5 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(keyPair2)
+				.setVersionKey(vKey4).start();
 		futurePut5.awaitUninterruptibly();
 		assertTrue(futurePut5.isSuccess());
+		
+		retData = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey4).start()
+				.awaitUninterruptibly().getData();
+		assertEquals(testDataV4, (String) retData.object());
+		assertTrue(retData.verify(keyPair2.getPublic()));
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
 
+	/**
+	 * This test checks the changing of the content protection key of a signed entry in the network.
+	 * 
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
+	 * @throws ClassNotFoundException
+	 */
 	@Test
 	public void testChangeProtectionKey() throws NoSuchAlgorithmException, IOException, InvalidKeyException,
 			SignatureException, ClassNotFoundException {
@@ -764,8 +775,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// initial put
 		String testData = "data";
 		Data data = new Data(testData).setProtectedEntry().sign(keyPair1);
-		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setSign().setData(cKey, data)
-				.keyPair(keyPair1).start();
+		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
@@ -779,10 +789,10 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		assertEquals(testData, (String) retData.object());
 		assertTrue(retData.verify(keyPair1.getPublic()));
 
-		// change the key pair to the new one using an empty data object
-		data = new Data().setProtectedEntry().sign(keyPair2).duplicateMeta();
+		// sign the data with the new key pair, get only the meta data
+		data = new Data(testData).setProtectedEntry().sign(keyPair2).duplicateMeta();
 		// use the old protection key to sign the message
-		FuturePut futurePut2 = p1.put(lKey).setDomainKey(dKey).setSign().putMeta().setData(cKey, data)
+		FuturePut futurePut2 = p1.put(lKey).setDomainKey(dKey).putMeta().setData(cKey, data)
 				.keyPair(keyPair1).start();
 		futurePut2.awaitUninterruptibly();
 		assertTrue(futurePut2.isSuccess());
@@ -799,8 +809,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		// should be not possible to modify
 		data = new Data().setProtectedEntry().sign(keyPair1);
-		FuturePut futurePut3 = p1.put(lKey).setDomainKey(dKey).setSign().setData(cKey, data)
-				.keyPair(keyPair1).start();
+		FuturePut futurePut3 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(keyPair1).start();
 		futurePut3.awaitUninterruptibly();
 		assertFalse(futurePut3.isSuccess());
 
@@ -817,8 +826,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// modify with new protection key
 		String newTestData = "new data";
 		data = new Data(newTestData).setProtectedEntry().sign(keyPair2);
-		FuturePut futurePut4 = p1.put(lKey).setDomainKey(dKey).setSign().setData(cKey, data)
-				.keyPair(keyPair2).start();
+		FuturePut futurePut4 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(keyPair2).start();
 		futurePut4.awaitUninterruptibly();
 		assertTrue(futurePut4.isSuccess());
 
