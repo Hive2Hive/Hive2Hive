@@ -25,7 +25,7 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 
-		UserProfileTask userProfileTask = messageFactory.createUserProfileTask();
+		UserProfileTask userProfileTask = messageFactory.createUserProfileTask(networkManager.getUserId());
 		if (userProfileTask == null) {
 			// skip that step
 			return;

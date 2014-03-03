@@ -168,10 +168,26 @@ public class FolderIndex extends Index {
 		return userPermissions;
 	}
 
+	/**
+	 * Returns a list of the permissions of this node together with the inherited permissions from the parent
+	 * nodes.
+	 * 
+	 * @return
+	 */
+	public Set<UserPermission> getCalculatedUserPermissions() {
+		Set<UserPermission> permissions = new HashSet<UserPermission>();
+		permissions.addAll(getUserPermissions());
+
+		if (parent != null)
+			permissions.addAll(parent.getCalculatedUserPermissions());
+
+		return permissions;
+	}
+
 	@Override
 	public Set<String> getCalculatedUserList() {
 		// gather the own user list
-		Set<String> users = new HashSet<String>(userPermissions.size());
+		Set<String> users = new HashSet<String>();
 		for (UserPermission permission : userPermissions) {
 			users.add(permission.getUserId());
 		}
@@ -196,6 +212,22 @@ public class FolderIndex extends Index {
 			// can always write to a private folder
 			return true;
 		}
+	}
+
+	/**
+	 * Returns whether a specific user can write to this folder.
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	public boolean canWrite(String userId) {
+		for (UserPermission permission : getCalculatedUserPermissions()) {
+			if (permission.getUserId().equals(userId)) {
+				return permission.getPermission() == PermissionType.WRITE;
+			}
+		}
+
+		return false;
 	}
 
 	/**

@@ -15,19 +15,20 @@ public class VerifyNotificationFactoryStep extends ProcessStep {
 
 	public VerifyNotificationFactoryStep(IConsumeNotificationFactory context, String userId) {
 		this.context = context;
-		this.userId = userId;
+		this.userId = userId; // own User id
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		Set<String> usersToNotify = context.consumeUsersToNotify();
-		if (context.consumeMessageFactory().createUserProfileTask() == null) {
+		if (context.consumeMessageFactory().createUserProfileTask(userId) == null) {
 			// only private notification (or none)
 			usersToNotify = new HashSet<>(1);
 			if (context.consumeUsersToNotify().contains(userId))
 				usersToNotify.add(userId);
 			else
-				throw new ProcessExecutionException("Users can't be notified because the UserProfileTask is null and no notification of the own user.");
+				throw new ProcessExecutionException(
+						"Users can't be notified because the UserProfileTask is null and no notification of the own user.");
 		}
 	}
 

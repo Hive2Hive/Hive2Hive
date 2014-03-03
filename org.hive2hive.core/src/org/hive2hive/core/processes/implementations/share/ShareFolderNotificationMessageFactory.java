@@ -25,7 +25,7 @@ public class ShareFolderNotificationMessageFactory extends BaseNotificationMessa
 	}
 
 	@Override
-	public UserProfileTask createUserProfileTask() {
-		return new ShareFolderUserProfileTask(fileNode, addedFriend);
+	public UserProfileTask createUserProfileTask(String sender) {
+		return new ShareFolderUserProfileTask(sender, fileNode, addedFriend);
 	}
 }

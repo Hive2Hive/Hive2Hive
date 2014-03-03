@@ -37,7 +37,8 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	private static final long serialVersionUID = 4580106953301162049L;
 	private final PublicKey fileKey;
 
-	public DeleteUserProfileTask(PublicKey fileKey) {
+	public DeleteUserProfileTask(String sender, PublicKey fileKey) {
+		super(sender);
 		this.fileKey = fileKey;
 	}
 
@@ -82,6 +83,12 @@ public class DeleteUserProfileTask extends UserProfileTask {
 		FolderIndex parent = toDelete.getParent();
 		if (parent == null) {
 			logger.error("Got task to delete the root, which is invalid");
+			return null;
+		}
+
+		// check write permision
+		if (!parent.canWrite(sender)) {
+			logger.error("User without WRITE permissions tried to delete a file");
 			return null;
 		}
 

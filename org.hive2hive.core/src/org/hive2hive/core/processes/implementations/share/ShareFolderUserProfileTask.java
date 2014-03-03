@@ -25,7 +25,8 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 	private final FolderIndex sharedIndex;
 	private final UserPermission addedFriend;
 
-	public ShareFolderUserProfileTask(FolderIndex sharedIndex, UserPermission addedFriend) {
+	public ShareFolderUserProfileTask(String sender, FolderIndex sharedIndex, UserPermission addedFriend) {
+		super(sender);
 		this.sharedIndex = sharedIndex;
 		this.addedFriend = addedFriend;
 	}
@@ -73,6 +74,20 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 		String pid = UUID.randomUUID().toString();
 		UserProfile userProfile = profileManager.getUserProfile(pid, true);
+
+		// modify the user permission list (remove myself)
+		UserPermission removeMyself = null;
+		for (UserPermission permission : sharedIndex.getUserPermissions()) {
+			if (permission.getUserId().equals(networkManager.getUserId())) {
+				// found
+				removeMyself = permission;
+				break;
+			}
+		}
+
+		// remove it
+		if (removeMyself != null)
+			sharedIndex.getUserPermissions().remove(removeMyself);
 
 		// add it to the root (by definition)
 		userProfile.getRoot().addChild(sharedIndex);

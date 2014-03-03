@@ -75,6 +75,13 @@ public class RelinkUserProfileStep extends ProcessStep {
 			movedNode.setParent(newParent);
 			newParent.addChild(movedNode);
 
+			// validate
+			if (!oldParent.canWrite()) {
+				throw new ProcessExecutionException("No write access to the source directory");
+			} else if (!newParent.canWrite()) {
+				throw new ProcessExecutionException("No write access to the destination directory");
+			}
+
 			// update in DHT
 			profileManager.readyToPut(userProfile, getID());
 			profileUpdated = true;

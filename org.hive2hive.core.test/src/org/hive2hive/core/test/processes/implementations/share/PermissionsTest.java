@@ -96,8 +96,8 @@ public class PermissionsTest extends H2HJUnitTest {
 	 * @throws GetFailedException
 	 */
 	@Test
-	public void testShareWithWritePermission() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	public void testShareWithWritePermission() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		/**
 		 * 1. upload folder "folder1" from A
 		 */

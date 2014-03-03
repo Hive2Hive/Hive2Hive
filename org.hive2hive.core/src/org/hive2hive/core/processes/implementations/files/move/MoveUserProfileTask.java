@@ -33,8 +33,9 @@ public class MoveUserProfileTask extends UserProfileTask {
 	private final PublicKey oldParentKey;
 	private final PublicKey newParentKey;
 
-	public MoveUserProfileTask(String sourceFileName, String destFileName, PublicKey oldParentKey,
-			PublicKey newParentKey) {
+	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName,
+			PublicKey oldParentKey, PublicKey newParentKey) {
+		super(sender);
 		this.sourceFileName = sourceFileName;
 		this.destFileName = destFileName;
 		this.oldParentKey = oldParentKey;
@@ -54,6 +55,9 @@ public class MoveUserProfileTask extends UserProfileTask {
 			if (oldParent == null) {
 				logger.error("Could not find the old parent");
 				return;
+			} else if (!oldParent.canWrite(sender)) {
+				logger.error("User was not allowed to change the source directory");
+				return;
 			}
 
 			Index child = oldParent.getChildByName(sourceFileName);
@@ -65,6 +69,9 @@ public class MoveUserProfileTask extends UserProfileTask {
 			FolderIndex newParent = (FolderIndex) userProfile.getFileById(newParentKey);
 			if (newParent == null) {
 				logger.error("Could not find the new parent");
+				return;
+			} else if (!newParent.canWrite(sender)) {
+				logger.error("User was not allowed to change the destination directory");
 				return;
 			}
 

@@ -37,7 +37,7 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 	}
 
 	@Override
-	public UserProfileTask createUserProfileTask() {
-		return new MoveUserProfileTask(sourceFileName, destFileName, oldParent, newParent);
+	public UserProfileTask createUserProfileTask(String sender) {
+		return new MoveUserProfileTask(sender, sourceFileName, destFileName, oldParent, newParent);
 	}
 }

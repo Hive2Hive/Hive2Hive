@@ -10,7 +10,7 @@ public class TestUserProfileTask extends UserProfileTask {
 	private final String id;
 
 	public TestUserProfileTask() {
-		super();
+		super(NetworkTestUtil.randomString());
 		this.id = NetworkTestUtil.randomString();
 	}
 

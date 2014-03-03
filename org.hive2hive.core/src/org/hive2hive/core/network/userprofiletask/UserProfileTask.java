@@ -45,11 +45,13 @@ public abstract class UserProfileTask extends NetworkContent {
 
 	private static final long serialVersionUID = -773794512479641000L;
 
+	protected final String sender;
 	private final KeyPair protectionKey;
 	private Number160 contentKey;
 	protected NetworkManager networkManager;
 
-	public UserProfileTask() {
+	public UserProfileTask(String sender) {
+		this.sender = sender;
 		this.protectionKey = EncryptionUtil.generateProtectionKey();
 		generateContentKey();
 	}
