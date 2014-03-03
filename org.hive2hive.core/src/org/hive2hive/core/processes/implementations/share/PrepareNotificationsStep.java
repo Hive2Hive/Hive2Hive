@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -37,7 +38,10 @@ public class PrepareNotificationsStep extends ProcessStep {
 		// create a subtree containing all children
 		FolderIndex sharedNode = new FolderIndex(fileNode.getParent(), fileNode.getFileKeys(),
 				fileNode.getName());
-		sharedNode.getChildren().addAll(fileNode.getChildren());
+		for (Index child : fileNode.getChildren()) {
+			sharedNode.addChild(child);
+			child.setParent(sharedNode);
+		}
 
 		// copy all user permissions
 		List<UserPermission> userPermissions = fileNode.getUserPermissions();
@@ -57,13 +61,14 @@ public class PrepareNotificationsStep extends ProcessStep {
 		sharedNode.setParent(null);
 
 		// notify all users of the shared node
-		Set<String> friend = new HashSet<String>();
-		friend.addAll(fileNode.getCalculatedUserList());
+		Set<String> friends = new HashSet<String>();
+		friends.addAll(fileNode.getCalculatedUserList());
+		friends.remove(userId); // skip to notify myself
 		logger.debug("Sending a notification message to the friend and all other sharers.");
 
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode,
 				context.getUserPermission());
 		context.provideMessageFactory(messageFactory);
-		context.provideUsersToNotify(friend);
+		context.provideUsersToNotify(friends);
 	}
 }

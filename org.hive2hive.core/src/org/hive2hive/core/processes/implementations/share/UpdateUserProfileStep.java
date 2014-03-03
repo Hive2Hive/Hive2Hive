@@ -41,19 +41,32 @@ public class UpdateUserProfileStep extends ProcessStep {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 			FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
-			if (folderIndex.isSharedOrHasSharedChildren()) {
-				// TODO this is to restrictive, what about several users sharing one single folder?
+			if (!folderIndex.canWrite()) {
+				throw new ProcessExecutionException("Cannot share a folder that I have read-only access");
+			} else if (!folderIndex.getSharedFlag() && folderIndex.isSharedOrHasSharedChildren()) {
+				// restriction that diallows sharing folders within other shared folders
 				throw new ProcessExecutionException("Folder is already shared or contains an shared folder.");
+			}
+
+			// check if the folder is already shared with this user
+			if (folderIndex.getCalculatedUserList().contains(context.getFriendId())) {
+				throw new ProcessExecutionException("Friend '" + context.getFriendId()
+						+ "' already has access to this folder");
 			}
 
 			// store for the notification
 			context.provideIndex(folderIndex);
 
-			// make the node shared with the new protection keys
-			folderIndex.share(context.consumeNewProtectionKeys(), context.getUserPermission());
+			if (folderIndex.getSharedFlag()) {
+				// this if-clause allows sharing with multiple uses and omits the next if-clause
+				logger.debug("Sharing an already shared folder");
+				folderIndex.addUserPermissions(context.getUserPermission());
+			} else {
+				// make the node shared with the new protection keys
+				folderIndex.share(context.consumeNewProtectionKeys(), context.getUserPermission());
+			}
 
 			// upload modified profile
-			logger.debug("Updating the domain key in the user profile");
 			profileManager.readyToPut(userProfile, getID());
 
 			// set modification flag needed for roll backs
@@ -69,11 +82,11 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// return to original domain key and put the userProfile
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FolderIndex fileNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile()
+				FolderIndex folderNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile()
 						.getId());
 
 				// unshare the fileNode
-				fileNode.unshare();
+				folderNode.unshare();
 				profileManager.readyToPut(userProfile, getID());
 			} catch (Exception e) {
 				logger.warn(String.format(
