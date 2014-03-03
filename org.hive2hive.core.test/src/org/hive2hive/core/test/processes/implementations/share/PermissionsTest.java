@@ -54,7 +54,7 @@ public class PermissionsTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = ShareFolderTest.class;
+		testClass = PermissionsTest.class;
 		beforeClass();
 
 		network = NetworkTestUtil.createNetwork(networkSize);
@@ -98,23 +98,18 @@ public class PermissionsTest extends H2HJUnitTest {
 	@Test
 	public void testShareWithWritePermission() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		/**
-		 * 1. upload folder "folder1" from A
-		 */
+		
+		logger.debug("1. Upload folder 'folder1' from A.");
 		File folder1AtA = new File(rootA, "folder1");
 		folder1AtA.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folder1AtA);
 
-		/**
-		 * 2. share folder "folder1" with user B giving write permissions
-		 */
+		logger.debug("2. Share folder 'folder1' with user B giving write permission.");
 		UseCaseTestUtil.shareFolder(network.get(0), folder1AtA, userB.getUserId(), PermissionType.WRITE);
 		File folder1AtB = new File(rootB, folder1AtA.getName());
 		waitTillSynchronized(folder1AtB, true);
 
-		/**
-		 * 3. upload a new file "folder1/file1" from A
-		 */
+		logger.debug("3. Upload a new file 'folder1/file1' from A.");
 		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5), folder1AtA,
 				config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1AtA);
@@ -122,9 +117,7 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(file1AtB, true);
 		Assert.assertEquals(file1AtA.length(), file1AtB.length());
 
-		/**
-		 * 4. upload a new file "folder1/file2" from B
-		 */
+		logger.debug("4. Upload a new file 'folder1/file2' from B.");
 		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtB,
 				config);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file2AtB);
@@ -132,45 +125,35 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(file2AtA, true);
 		Assert.assertEquals(file2AtB.length(), file2AtA.length());
 
-		/**
-		 * 5. upload a sub folder "folder1/subfolder1" from A
-		 */
+		logger.debug("5. Upload a sub folder 'folder1/subfolder1' from A.");
 		File subFolder1AtA = new File(folder1AtA, "subfolder1");
 		subFolder1AtA.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFolder1AtA);
 		File subfolder1AtB = new File(folder1AtB, subFolder1AtA.getName());
 		waitTillSynchronized(subfolder1AtB, true);
 
-		/**
-		 * 6. upload a sub folder "folder1/subfolder2" from B
-		 */
+		logger.debug("6. Upload a sub folder 'folder1/subfolder2' from B.");
 		File subFolder2AtB = new File(folder1AtB, "subfolder2");
 		subFolder2AtB.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(1), subFolder2AtB);
 		File subFolder2AtA = new File(folder1AtA, subFolder2AtB.getName());
 		waitTillSynchronized(subFolder2AtA, true);
 
-		/**
-		 * 7. upload a file "folder1/subfolder2/file3" from A
-		 */
+		logger.debug("7. Upload a file 'folder1/subfolder2/file3' from A.");
 		File file3AtA = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5), subFolder2AtA,
 				config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3AtA);
 		File file3AtB = new File(subFolder2AtB, file3AtA.getName());
 		waitTillSynchronized(file3AtB, true);
 
-		/**
-		 * 8. upload a file "folder1/subfolder2/file4" from B
-		 */
+		logger.debug("8. Upload a file 'folder1/subfolder2/file4' from B.");
 		File file4AtB = FileTestUtil.createFileRandomContent("file4", new Random().nextInt(5), subFolder2AtB,
 				config);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file4AtB);
 		File file4AtA = new File(subFolder2AtA, file4AtB.getName());
 		waitTillSynchronized(file4AtA, true);
 
-		/**
-		 * 9. check user A's and user B's {@link UserProfile}
-		 */
+		logger.debug("9. Check user A's and user B's user profile.");
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
 		FolderIndex folder1AIndex = (FolderIndex) userProfileA.getFileByPath(Paths.get(folder1AtA.getName()));
@@ -189,44 +172,31 @@ public class PermissionsTest extends H2HJUnitTest {
 		checkIndex(folder1AIndex, folder1BIndex.getProtectionKeys());
 		checkIndex(folder1BIndex, folder1AIndex.getProtectionKeys());
 
-		/**
-		 * 10. delete "file4" at user A
-		 */
+		logger.debug("10. Delete 'file4' at user A.");
 		UseCaseTestUtil.deleteFile(network.get(0), file4AtA);
 		waitTillSynchronized(file4AtB, false);
 
-		/**
-		 * 11. delete "subfolder2" at user B
-		 */
+		logger.debug("11. Delete 'subfolder2' at user B.");
 		UseCaseTestUtil.deleteFile(network.get(1), subFolder2AtB);
 		waitTillSynchronized(subFolder2AtB, false);
 
-		/**
-		 * 12. move "file2" at user A to root folder
-		 */
+		logger.debug("12. Move 'file2' at user A to root folder.");
 		UseCaseTestUtil.moveFile(network.get(0), file2AtA, rootA);
 		waitTillSynchronized(file2AtB, false);
 
-		/**
-		 * 13. move "file1" at user B to "subfolder1"
-		 */
+		logger.debug("13. Move 'file1' at user B to 'folder1/subfolder1'.");
 		UseCaseTestUtil.moveFile(network.get(1), file1AtB, subfolder1AtB);
 		waitTillSynchronized(file1AtA, false);
 		file1AtA = new File(subFolder1AtA, "file1");
 		waitTillSynchronized(file1AtA, true);
 
-		/**
-		 * 14. move "subfolder1" at user A to root folder
-		 */
+		logger.debug("14. Move 'folder1/subfolder1' at user A to root folder.");
 		UseCaseTestUtil.moveFile(network.get(0), subFolder1AtA, rootA);
 		waitTillSynchronized(subfolder1AtB, false);
 
-		/**
-		 * 15. delete "folder1" at user B
-		 */
+		logger.debug("15. Delete 'folder1' at user B.");
 		UseCaseTestUtil.deleteFile(network.get(1), folder1AtB);
 		waitTillSynchronized(folder1AtA, false);
-
 	}
 
 	@Test
@@ -235,66 +205,102 @@ public class PermissionsTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
-		/**
-		 * 1. upload folder "folder1" from A
-		 */
+		logger.debug("1. Upload folder 'folder1' from A.");
 		File folder1AtA = new File(rootA, "folder1");
 		folder1AtA.mkdirs();
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(folder1AtA,
 				nodeA));
 
-		/**
-		 * 2. share folder "folder1" with user B giving only read permissions
-		 */
+		logger.debug("2. Share folder 'folder1' with user B giving only read permission.");
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createShareProcess(folder1AtA,
 				new UserPermission(userB.getUserId(), PermissionType.READ), nodeA));
 		File folder1AtB = new File(rootB, folder1AtA.getName());
 		waitTillSynchronized(folder1AtB, true);
 
-		/**
-		 * 3. upload a new file "folder1/file1" from A
-		 */
+		logger.debug("3. Upload a new file 'folder1/file1' from A.");
 		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5), folder1AtA,
 				config);
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(file1AtA,
 				nodeA));
-		UseCaseTestUtil.uploadNewFile(network.get(0), file1AtA);
 		File file1AtB = new File(folder1AtB, file1AtA.getName());
 		waitTillSynchronized(file1AtB, true);
 
-		/**
-		 * 4. try to upload a new file "folder1/file2" from B
-		 */
+		logger.debug("4. Try to upload a new file 'folder1/file2' from B.");
 		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtB,
 				config);
 		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(file2AtB,
 				nodeB));
+		file2AtB.delete();
+
+		logger.debug("5. Update file 'folder1/file1' at A.");
+		String newContent = NetworkTestUtil.randomString();
+		FileUtils.write(file1AtA, newContent, false);
+		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createUpdateFileProcess(
+				file1AtA, nodeA));
+		// wait till modification has been synchronized at B
+		H2HWaiter waiter = new H2HWaiter(20);
+		do {
+			waiter.tickASecond();
+		} while (newContent.equals(FileUtils.readFileToString(file1AtB)));
+
+		logger.debug("6. Try to update file 'folder1/file1' at B.");
+		newContent = NetworkTestUtil.randomString();
+		FileUtils.write(file1AtB, newContent, false);
+		// TODO test is correct, but the process should detect the read permission conflict earlier
+		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(file1AtB,
+				nodeB));
+
+		logger.debug("7. Try to move file 'folder1/file1' at B to root folder of B.");
+		File destination = new File(rootB, file1AtB.getName());
+		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(file1AtB,
+				destination, nodeB));
+
+		logger.debug("8. Move file 'folder1/file1' at A to root folder of A.");
+		destination = new File(rootA, file1AtA.getName());
+		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createMoveFileProcess(file1AtA,
+				destination, nodeA));
+		waitTillSynchronized(file1AtB, false);
+
+		logger.debug("9. Upload a new file 'folder1/file2' from A.");
+		File file2AtA = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtA,
+				config);
+		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(file2AtA,
+				nodeA));
+		file2AtB = new File(folder1AtB, file2AtA.getName());
+		waitTillSynchronized(file2AtB, true);
+
+		logger.debug("10. Try to delete file 'folder1/file2' from B.");
+		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(file2AtB,
+				nodeB));
+
+		logger.debug("11. Delete file 'folder1/file2' from A.");
+		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createDeleteFileProcess(
+				file2AtA, nodeA));
+		waitTillSynchronized(file2AtB, false);
+
+		logger.debug("12. Try to delete 'folder1' from B.");
+		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folder1AtB,
+				nodeB));
+		
+		logger.debug("13. Delete 'folder1' from A.");
+		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createDeleteFileProcess(
+				folder1AtA, nodeA));
+		waitTillSynchronized(folder1AtA, false);
 	}
-	
+
 	/*
-	 * TODO: following test cases has to be written
-	 *  
-	 * 	user A (write), user B (read)
-	 * 
-	 *  new file from A		done
-	 *  new file from B
-	 *  	check at A
-	 *  	check at B		done
-	 *  update file from A
-	 *  update file from B
-	 *  	check at A
-	 *  	check at B
-	 *  move file at A
-	 *  move file at B
-	 *  	check at A
-	 *  	check at B
-	 *  delete file at A
-	 *  delete file at B
-	 *  	check at A
-	 *  	check at B
-	 * 
+	 * TODO a further test is missing where the sharing partner (with read permissions) verifies the commands
+	 * sent by the other partner. This includes, add, update, move and delete commands.
 	 */
 
+	/**
+	 * Waits a certain amount of time till a file appears (add) or disappears (delete).
+	 * 
+	 * @param synchronizingFile
+	 *            the file to synchronize
+	 * @param appearing
+	 *            <code>true</code> if file should appear, <code>false</code> if file should disappear
+	 */
 	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
 		H2HWaiter waiter = new H2HWaiter(40);
 		if (appearing) {
