@@ -25,7 +25,7 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		// prepare the file tree node for sending to other users
-		Index fileNode = context.getDeletedIndex();
+		Index fileNode = context.consumeIndex();
 		PublicKey parentKey = fileNode.getParent().getFilePublicKey();
 
 		// provide the message factory
@@ -33,7 +33,7 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 				fileNode.getName()));
 
 		HashSet<String> users = new HashSet<String>();
-		users.addAll(context.getDeletedIndex().getCalculatedUserList());
+		users.addAll(fileNode.getCalculatedUserList());
 
 		// provide the user list
 		context.provideUsersToNotify(users);

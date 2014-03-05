@@ -199,11 +199,7 @@ public class FolderIndex extends Index {
 		return users;
 	}
 
-	/**
-	 * Returns whether the user can write and upload a file / sub-folder to this directory
-	 * 
-	 * @return
-	 */
+	@Override
 	public boolean canWrite() {
 		if (isShared()) {
 			// shared (sub) folder, write depends whether the parent has protection keys

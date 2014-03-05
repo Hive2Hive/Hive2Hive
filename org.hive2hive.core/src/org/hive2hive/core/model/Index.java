@@ -179,6 +179,13 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	public abstract boolean isFolder();
 
 	/**
+	 * Returns whether the user can write and upload a file / sub-folder to this directory
+	 * 
+	 * @return
+	 */
+	public abstract boolean canWrite();
+
+	/**
 	 * Convenience method to ask whether the index is a file
 	 * 
 	 * @return

@@ -28,8 +28,14 @@ public class FileIndex extends Index {
 		this.md5LatestVersion = md5LatestVersion;
 	}
 
+	@Override
 	public boolean isFolder() {
 		return false;
+	}
+
+	@Override
+	public boolean canWrite() {
+		return parent.canWrite();
 	}
 
 	public byte[] getMD5() {
@@ -78,4 +84,5 @@ public class FileIndex extends Index {
 	public Set<String> getCalculatedUserList() {
 		return parent.getCalculatedUserList();
 	}
+
 }

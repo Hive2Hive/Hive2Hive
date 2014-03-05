@@ -5,9 +5,11 @@ import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
@@ -15,7 +17,8 @@ import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessa
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaFile, IProvideProtectionKeys,
-		IConsumeProtectionKeys, IProvideNotificationFactory, IConsumeNotificationFactory {
+		IConsumeProtectionKeys, IProvideNotificationFactory, IConsumeNotificationFactory, IProvideIndex,
+		IConsumeIndex {
 
 	private final boolean isDirectory;
 
@@ -64,14 +67,6 @@ public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaF
 		return isDirectory;
 	}
 
-	public void setDeletedIndex(Index deletedIndex) {
-		this.deletedIndex = deletedIndex;
-	}
-
-	public Index getDeletedIndex() {
-		return deletedIndex;
-	}
-
 	public void setParentNode(Index parentNode) {
 		this.parentNode = parentNode;
 	}
@@ -98,5 +93,15 @@ public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaF
 	@Override
 	public void provideUsersToNotify(Set<String> users) {
 		this.users = users;
+	}
+
+	@Override
+	public Index consumeIndex() {
+		return deletedIndex;
+	}
+
+	@Override
+	public void provideIndex(Index deletedIndex) {
+		this.deletedIndex = deletedIndex;
 	}
 }

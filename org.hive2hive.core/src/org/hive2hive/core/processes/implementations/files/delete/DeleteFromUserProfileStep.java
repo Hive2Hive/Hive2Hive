@@ -21,6 +21,12 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
+/**
+ * Step that deletes a file from the index in the user profile after doing some verification.
+ * 
+ * @author Nico
+ * 
+ */
 public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFromUserProfileStep.class);
@@ -53,7 +59,13 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		}
 
 		index = profile.getFileByPath(file, root);
-		context.setDeletedIndex(index);
+
+		// validate
+		if (index == null) {
+			throw new ProcessExecutionException("File index not found in user profile");
+		} else if (!index.canWrite()) {
+			throw new ProcessExecutionException("Not allowed to delete this file (read-only permissions)");
+		}
 
 		// check preconditions
 		if (index.isFolder()) {
@@ -63,11 +75,15 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			}
 		}
 
+		// remove the node from the tree
 		FolderIndex parentIndex = index.getParent();
 		parentIndex.removeChild(index);
+
+		// store for later
+		context.provideIndex(index);
 		context.setParentNode(parentIndex);
 
-		// for rollback
+		// store for rollback
 		this.parentIndexKey = parentIndex.getFilePublicKey();
 
 		try {

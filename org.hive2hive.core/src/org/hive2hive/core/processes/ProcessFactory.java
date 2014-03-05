@@ -277,13 +277,16 @@ public final class ProcessFactory {
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
+		if (file.isFile()) {
+			// hint: must be executed before the deletion of the index from the user profile
+			process.add(new File2MetaFileComponent(file, context, context, networkManager));
+		}
+		process.add(new DeleteFromUserProfileStep(file, context, networkManager));
 		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
 		if (file.isFile()) {
-			process.add(new File2MetaFileComponent(file, context, context, networkManager));
 			process.add(new DeleteChunksProcess(context, dataManager));
 			process.add(new DeleteMetaFileStep(context, dataManager));
 		}
-		process.add(new DeleteFromUserProfileStep(file, context, networkManager));
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
