@@ -33,7 +33,6 @@ import org.junit.Test;
  * @author Nico
  * 
  */
-// TODO Test share with more than 1 user
 public class ShareFolderTest extends H2HJUnitTest {
 
 	private static final IFileConfiguration config = new TestFileConfiguration();
@@ -117,39 +116,21 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareFolderDeleteFile() throws IOException, IllegalFileLocation, NoSessionException,
+	public void shareEmptyFolder() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException, InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File sharedFolderAtA = new File(rootA, "folder1");
 		sharedFolderAtA.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderAtA);
 
-		File file1AtA = FileTestUtil
-				.createFileRandomContent(new Random().nextInt(5), sharedFolderAtA, config);
-		UseCaseTestUtil.uploadNewFile(network.get(0), file1AtA);
-
 		// share the empty folder
 		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId(), PermissionType.WRITE);
 
-		// TODO wait for userB to process the user profile task
+		// wait for userB to process the user profile task
 		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
 		waitTillSynchronized(sharedFolderAtB, true);
 		Assert.assertTrue(sharedFolderAtB.exists());
-
-		// check the folder and the file at user B
-		File file1AtB = new File(sharedFolderAtB, file1AtA.getName());
-		waitTillSynchronized(file1AtB, true);
-		Assert.assertTrue(file1AtB.exists());
-		Assert.assertEquals(file1AtA.length(), file1AtB.length());
-
-		// delete the file at B
-		UseCaseTestUtil.deleteFile(network.get(1), file1AtB);
-
-		// verify that the file has been deleted at A and B
-		waitTillSynchronized(file1AtB, false);
-		Assert.assertFalse(file1AtB.exists());
-		waitTillSynchronized(file1AtA, false);
-		Assert.assertFalse(file1AtA.exists());
+		Assert.assertTrue(sharedFolderAtB.isDirectory());
 	}
 
 	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
