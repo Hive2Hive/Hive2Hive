@@ -718,7 +718,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Data retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey1).start()
 				.awaitUninterruptibly().getData();
 		assertEquals(testDataV1, (String) retData.object());
-		// TODO shouldn't be that key pair 2?
+		// the protection key should be key pair 1
 		assertTrue(retData.verify(keyPair1.getPublic()));
 
 		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey2).start()
