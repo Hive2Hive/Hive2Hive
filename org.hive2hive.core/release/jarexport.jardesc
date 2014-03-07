@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="/Users/nicorutishauser/Desktop/org.hive2hive-1.0.0/org.hive2hive.core-1.0.0.jar"/>
+    <jar path="/Users/nicorutishauser/Desktop/org.hive2hive-1.1.0/org.hive2hive.core-1.1.0.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/org.hive2hive.core/release/jarexport.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="true"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
@@ -13,12 +13,8 @@
     <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
         <file path="/org.hive2hive.core/build.properties"/>
         <file path="/org.hive2hive.core/plugin.properties"/>
-        <folder path="/org.hive2hive.core/formatter"/>
         <file path="/org.hive2hive.core/.classpath"/>
         <folder path="/org.hive2hive.core/release"/>
         <javaElement handleIdentifier="=org.hive2hive.core/src"/>
-        <folder path="/org.hive2hive.core/model"/>
-        <folder path="/org.hive2hive.core/target"/>
-        <folder path="/org.hive2hive.core/bin"/>
     </selectedElements>
 </jardesc>

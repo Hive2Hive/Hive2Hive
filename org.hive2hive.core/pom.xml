@@ -39,7 +39,7 @@
 	</build>
 
 	<packaging>pom</packaging>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<dependencies>
 		<!-- <dependency> <groupId>net.tomp2p</groupId> <artifactId>TomP2P</artifactId> 
 			<version>4.4</version> </dependency> -->
