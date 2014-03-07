@@ -26,6 +26,15 @@ public class H2HNode implements IH2HNode {
 		networkManager = new NetworkManager(networkConfiguration);
 	}
 
+	/**
+	 * Create a Hive2Hive node instance. Before the node can be used, a {@link IH2HNode#connect()} must be
+	 * called.
+	 * 
+	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
+	 *            to listen to.
+	 * @param fileConfiguration the file configuration
+	 * @return
+	 */
 	public static IH2HNode createNode(INetworkConfiguration networkConfiguration,
 			IFileConfiguration fileConfiguration) {
 		return new H2HNode(networkConfiguration, fileConfiguration);
@@ -64,18 +73,4 @@ public class H2HNode implements IH2HNode {
 	public IFileConfiguration getFileConfiguration() {
 		return fileConfiguration;
 	}
-
-	// public IH2HNodeStatus getStatus() {
-	// boolean connected = networkManager.getConnection().isConnected();
-	// int numberOfProcs = ProcessManager.getInstance().getAllProcesses().size();
-	// try {
-	// H2HSession session = networkManager.getSession();
-	// Path root = session.getFileManager().getRoot();
-	// String userId = session.getCredentials().getUserId();
-	// return new H2HNodeStatus(root.toFile(), userId, connected, numberOfProcs);
-	// } catch (NoSessionException e) {
-	// return new H2HNodeStatus(null, null, connected, numberOfProcs);
-	// }
-	// }
-
 }
