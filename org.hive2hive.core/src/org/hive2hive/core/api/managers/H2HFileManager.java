@@ -10,6 +10,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
@@ -39,7 +40,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File does not exist.");
 		} else if (session.getRoot().toFile().equals(file)) {
 			throw new IllegalArgumentException("Root cannot be added.");
-		} else if (!file.getAbsolutePath().toString().startsWith(session.getRootFile().getAbsolutePath())) {
+		} else if (!FileUtil.isInH2HDirectory(file, session)) {
 			throw new IllegalFileLocation();
 		}
 
@@ -63,8 +64,12 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	@Override
 	public IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
 			NoPeerConnectionException {
-		if (!file.isFile()) {
+		if (file.isDirectory()) {
 			throw new IllegalArgumentException("A folder can have one version only");
+		} else if (!file.exists()) {
+			throw new IllegalArgumentException("File does not exist");
+		} else if (!FileUtil.isInH2HDirectory(file, networkManager.getSession())) {
+			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
 		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file,
@@ -79,6 +84,17 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	@Override
 	public IProcessComponent move(File source, File destination) throws NoSessionException,
 			NoPeerConnectionException {
+		// TODO support the file listener that already moved the file
+		if (!source.exists()) {
+			throw new IllegalArgumentException("Source file not found");
+		} else if (destination.exists()) {
+			throw new IllegalArgumentException("Destination already exists");
+		} else if (!FileUtil.isInH2HDirectory(source, networkManager.getSession())) {
+			throw new IllegalArgumentException("Source file not in the Hive2Hive directory");
+		} else if (!FileUtil.isInH2HDirectory(destination, networkManager.getSession())) {
+			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
+		}
+
 		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
 				networkManager);
 

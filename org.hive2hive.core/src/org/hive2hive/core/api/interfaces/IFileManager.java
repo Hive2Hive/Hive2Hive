@@ -22,7 +22,8 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 public interface IFileManager extends IManager {
 
 	/**
-	 * Add a file or a folder. Note that the file must already be in the predefined Hive2Hive folder.
+	 * Add a file or a folder. Note that the file must already be in the predefined Hive2Hive folder. If the
+	 * folder is not empty, all containing files are added to Hive2Hive as well.
 	 * 
 	 * @param file the file / folder to add
 	 * @return an observable process component
@@ -63,8 +64,8 @@ public interface IFileManager extends IManager {
 
 	/**
 	 * Delete a file / folder and all versions of that file from the network. This operation deletes also the
-	 * file on
-	 * disk. <strong>Note that this operation is irreversible.</strong>
+	 * file on disk. <strong>Note that this operation is irreversible.</strong> If the folder is not empty,
+	 * all sub-files are deleted as well.
 	 * 
 	 * @param file the file / folder to delete. The file must still be on disk
 	 * @return an observable process component

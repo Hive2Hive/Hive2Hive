@@ -13,6 +13,7 @@ import java.nio.file.StandardCopyOption;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -152,5 +153,13 @@ public class FileUtil {
 		Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
 		logger.debug("Successfully moved the file from " + toMoveSource.getAbsolutePath() + " to "
 				+ toMoveDest.getAbsolutePath());
+	}
+
+	public static boolean isInH2HDirectory(File file, H2HSession session) {
+		if (session == null || file == null) {
+			return false;
+		}
+
+		return file.getAbsolutePath().toString().startsWith(session.getRootFile().getAbsolutePath());
 	}
 }

@@ -295,7 +295,6 @@ public final class ProcessFactory {
 
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		// make some checks here, thus it's easier in the steps
 		MoveFileProcessContext context = new MoveFileProcessContext(source, destination,
 				networkManager.getUserId());
 
