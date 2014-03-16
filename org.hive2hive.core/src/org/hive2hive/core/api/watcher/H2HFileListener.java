@@ -1,6 +1,7 @@
 package org.hive2hive.core.api.watcher;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -10,15 +11,26 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
+/**
+ * Default implementation of a file listener. The file events are caught and the according process is
+ * automatically started. Note that the processes are started even though the autostart may be turned off.
+ * 
+ * @author Nico
+ * 
+ */
 public class H2HFileListener implements FileAlterationListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HFileListener.class);
 
 	private final IFileManager fileManager;
+	private FileEventBuffer addFileBuffer;
 
 	public H2HFileListener(IFileManager fileManager) {
 		this.fileManager = fileManager;
+		addFileBuffer = new AddFileBuffer();
 	}
 
 	@Override
@@ -28,7 +40,7 @@ public class H2HFileListener implements FileAlterationListener {
 	@Override
 	public void onDirectoryCreate(File directory) {
 		printFileDetails("created", directory);
-		addFile(directory);
+		addFileBuffer.addFileToBuffer(directory);
 	}
 
 	@Override
@@ -45,7 +57,7 @@ public class H2HFileListener implements FileAlterationListener {
 	@Override
 	public void onFileCreate(File file) {
 		printFileDetails("created", file);
-		addFile(file);
+		addFileBuffer.addFileToBuffer(file);
 	}
 
 	@Override
@@ -64,14 +76,7 @@ public class H2HFileListener implements FileAlterationListener {
 
 	@Override
 	public void onStop(FileAlterationObserver observer) {
-	}
-
-	private void addFile(File file) {
-		try {
-			fileManager.add(file);
-		} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation e) {
-			logger.error(e.getMessage());
-		}
+		// nothing to do
 	}
 
 	private void removeFile(File file) {
@@ -93,5 +98,22 @@ public class H2HFileListener implements FileAlterationListener {
 	private void printFileDetails(String reason, File file) {
 		logger.debug(String.format("%s %s: %s\n", file.isDirectory() ? "Directory" : "File", reason,
 				file.getAbsolutePath()));
+	}
+
+	private class AddFileBuffer extends FileEventBuffer {
+
+		@Override
+		protected void processBufferedFiles(List<File> bufferedFiles) {
+			for (File toAdd : bufferedFiles) {
+				try {
+					IProcessComponent process = fileManager.add(toAdd);
+					if (!fileManager.isAutostart())
+						process.start();
+				} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation
+						| InvalidProcessStateException e) {
+					logger.error(e.getMessage());
+				}
+			}
+		}
 	}
 }

@@ -32,6 +32,10 @@ public abstract class H2HManager implements IManager {
 			}
 	}
 
+	public NetworkManager getNetworkManager() {
+		return networkManager;
+	}
+
 	@Override
 	public void configureAutostart(boolean autostart) {
 		this.isAutostart = autostart;
