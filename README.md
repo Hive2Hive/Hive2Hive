@@ -1,32 +1,96 @@
 Hive2Hive
 =========
+Hive2Hive is an open-source library, written in Java, for distributed file synchronization and sharing.
 
-For the full documentation, please visit our website at http://www.hive2hive.com.
+Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
 
-What Is Hive2Hive?
-------------------
+**The Hive2Hive library addresses these issues by providing a free, distributed solution that focuses on maximum security and privacy of both users and data. It supports the whole feature set known from similar centralized approaches, such as Dropbox or Google Drive, all packed in a clean, extendable API.**
 
-The basic intention behind the Hive2Hive project is to provide a free and easy-to-use library that supports operations or tasks which shall be executed in a decentralized manner while focussing on maximal security. Although many well-known services run in centralized, server-based environments, it is a legitimate question for many applications to consider a decentralized implementation for certain services or operations. With Hive2Hive, such decentralization is achieved by building functionalities on top of an underlying peer-to-peer (P2P) network structure. The library takes full responsibility of the network interaction and thus provides the necessary level of abstraction.
-The main focus of the library’s current state lies on user and file management. Concretely, an extensive amount of fundamental operations is provided for applications that desire to store, backup, synchronize or share files in and over the network. However, the Hive2Hive library is designed to be easily extendable for other services that intend to profit from decentralized properties and, at the same time, enrich its set of supported operations.
+Demonstration
+-------------
+Configuring and setting up a P2P network is very easy.
+```java
+// define configuration objects
+INetworkConfiguration nodeConfig = NetworkConfiguration.create("nodeID", InetAddress.getByName("192.168.1.100"));
+IFileConfiguration fileConfig = FileConfiguration.createDefault();
 
-Why Using Hive2Hive?
---------------------
+// create peer
+IH2HNode node = H2HNode.createNode(nodeConfig, fileConfig);
+node.connect();
+```
+Users can then be announced to the created P2P network. Once announced, they can login/logout to/from the network whenever they want and with whatever client they use. For security reasons, each user has to provide his/her credentials for these operations.
+```java
+IUserManager userManager = node.getUserManager();
 
-The overall mission of Hive2Hive is to keep things decentralized and thus avoids any central elements. Such a system has many advantages over centralized client-server approaches. In contrast to other (distributed) solutions, Hive2Hive puts much effort on security so as to ensure not only the data in the network, but also the privacy of each and every user. Unlike many other closed-source services that claim to be secure, the Hive2Hive library fosters transparency and discloses its implementation details while profiting from open-source community feedback.
+UserCredentials credentials = new UserCredentials("userID", "password", "pin");
 
+// announce the user
+userManager.register(credentials);
+        
+// login the user and provide the local root directory path
+userManager.login(credentials, Paths.get("C:\User\XYZ\..."));
+```
+
+File synchronization and sharing operations can then be made us of for logged in users.
+```java
+IFileManager fileManager = node.getFileManager();
+        
+File folder = new File("demo-folder");
+File file = new File(folder, "demo-file");
+        
+// add a file
+fileManager.add(file);
+        
+// share a folder with another user (write permission)
+fileManager.share(folder, "otherUser", PermissionType.WRITE);
+        
+// update a file
+fileManager.update(file);
+        
+// recover a file's other version
+IVersionSelector versionSelector = new IVersionSelector() {
+    @Override
+    public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
+        return availableVersions.get(0);
+    }
+};
+fileManager.recover(file, versionSelector);
+ 
+// move a file in the file hierarchy
+File otherFolder = new File("other-demo-folder");
+fileManager.move(folder, otherFolder);
+ 
+// delete a file
+fileManager.delete(file);
+```
+
+See [here](http://hive2hive.com/?page_id=429) for more detailed information about the API.
+
+Advantages
+----------
+- Supports Whole Feature Set known from Centralized Solutions
+- Focus on Security & Anonymity
 - P2P Decentralization
   - Scalability
   - Heterogeneity
   - Reliability & Fault-Tolerance
-- Focus on Security & Anonymity
 - Platform Independent
+- Allows Headless Deployment
 - Free & Open-Source
 - Highly Extendable
 - Detailed Documentation
 
-The Role of Hive2Hive
----------------------
+Documentation
+-------------
+For the full project documentation, please visit http://www.hive2hive.com/.
+The source code itself is thoroughly documented using JavaDoc.
 
-As stated above, the required decentralization comes from the peer-to-peer approach on which Hive2Hive is built upon. Essentially, the library provides ways to quickly create peers/nodes that are connected to the network and represent handles by which specific operations can be triggered to interact with other peers in the network. Since the Hive2Hive library takes care of such network interaction, it exhibits itself as a layer between the application and the underlying peer-to-peer network.
+Contribute
+----------
+The library is intended to be improved and extended so that we all profit from its capabilities. Unlike many other “secure” services, Hive2Hive discloses its implementation and is open for any sort of contribution and constructive criticism.
 
-In order to deal with the peer-to-peer overlay internally, Hive2Hive makes use of TomP2P (http://www.tomp2p.net), one of the most advanced open-source implementations of a distributed hash table (DHT).
+We believe that everyone can contribute to make Hive2Hive even better! Do you have a suggestion for improvement or an idea for extension? Then you are entirely welcome! Just fork the project and send your pull requests!
+
+As a starting point, you might check the [open issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) or just open a new issue to start a discussion around a feature idea or bug.
+
+
