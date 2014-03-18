@@ -68,14 +68,14 @@ See [here](http://hive2hive.com/?page_id=429) for more detailed information abou
 
 Advantages
 ----------
-- Supports Whole Feature Set known from Centralized Solutions
+- Supports Whole Feature Set known from Centralized Solutions (e.g., [Dropbox](http://www.dropbox.com))
 - Focus on Security & Anonymity
 - P2P Decentralization
   - Scalability
   - Heterogeneity
   - Reliability & Fault-Tolerance
 - Platform Independent
-- Allows Headless Deployment
+- Allows Headless Deployment (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))
 - Free & Open-Source
 - Highly Extendable
 - Detailed Documentation
@@ -83,6 +83,7 @@ Advantages
 Documentation
 -------------
 For the full project documentation, please visit http://www.hive2hive.com/.
+
 The source code itself is thoroughly documented using JavaDoc.
 
 Contribute
