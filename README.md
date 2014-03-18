@@ -92,3 +92,9 @@ The library is intended to be improved and extended so that we all profit from i
 **We believe that everyone can contribute to make Hive2Hive even better!** Do you have a suggestion for improvement or an idea for extension? Then you are entirely welcome! Just fork the project and send your pull requests!
 
 As a starting point, you might check the [open issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) or just open a new issue to start a discussion around a feature idea or bug.
+
+Contact
+-------
+If you have any questions, feel uncomfortable or uncertain about an issue or your changes, feel free to reach us via email at [info@hive2hive.com](mailto:info@hive2hive.com).
+
+We provide you with all information you need and will happily help you via email, Skype, remote pairing or whatever you are comfortable with.
