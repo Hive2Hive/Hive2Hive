@@ -6,8 +6,8 @@ Although many well-known synchronization and sharing services exist, most of the
 
 **The Hive2Hive library addresses these issues by providing a free, distributed solution that focuses on maximum security and privacy of both users and data. It supports the whole feature set known from similar centralized approaches, such as Dropbox or Google Drive, all packed in a clean, extendable API.**
 
-Demonstration
--------------
+API Demonstration
+-----------------
 Configuring and setting up a P2P network is very easy.
 ```java
 // define configuration objects
@@ -31,7 +31,7 @@ userManager.register(credentials);
 userManager.login(credentials, Paths.get("C:\User\XYZ\..."));
 ```
 
-File synchronization and sharing operations can then be made us of for logged in users.
+File synchronization and sharing operations can then be made use of.
 ```java
 IFileManager fileManager = node.getFileManager();
         
@@ -87,10 +87,8 @@ The source code itself is thoroughly documented using JavaDoc.
 
 Contribute
 ----------
-The library is intended to be improved and extended so that we all profit from its capabilities. Unlike many other “secure” services, Hive2Hive discloses its implementation and is open for any sort of contribution and constructive criticism.
+The library is intended to be improved and extended so that we all profit from its capabilities. Unlike many other “*secure*” services, Hive2Hive discloses its implementation and is open for any sort of contribution and constructive criticism.
 
-We believe that everyone can contribute to make Hive2Hive even better! Do you have a suggestion for improvement or an idea for extension? Then you are entirely welcome! Just fork the project and send your pull requests!
+**We believe that everyone can contribute to make Hive2Hive even better!** Do you have a suggestion for improvement or an idea for extension? Then you are entirely welcome! Just fork the project and send your pull requests!
 
 As a starting point, you might check the [open issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) or just open a new issue to start a discussion around a feature idea or bug.
-
-
