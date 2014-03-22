@@ -1,13 +1,8 @@
 package org.hive2hive.core.api.watcher;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -22,42 +17,21 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
-public class DeleteFileBuffer implements IFileBuffer {
+public class DeleteFileBuffer extends BaseFileBuffer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileBuffer.class);
 	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000; // timeout to omit blocks
 
 	private final IFileManager fileManager;
-	private final Set<File> fileBuffer;
 
 	public DeleteFileBuffer(IFileManager fileManager) {
 		this.fileManager = fileManager;
-		this.fileBuffer = new CopyOnWriteArraySet<>();
 	}
 
 	@Override
-	public void addFileToBuffer(File file) {
-		if (fileBuffer.isEmpty()) {
-			// was the first event --> trigger the deletion
-			new Timer().schedule(new TimerTask() {
-				@Override
-				public void run() {
-					logger.debug("Finished buffering. " + fileBuffer.size() + " file(s) in buffer");
-
-					// clear the buffer for next trigger before processing because the method's implementation
-					// could be slow and / or blocking.
-					ArrayList<File> antiRaceCopy = new ArrayList<File>(fileBuffer);
-					fileBuffer.clear();
-
-					processBufferedFiles(antiRaceCopy);
-
-				}
-			}, BUFFER_WAIT_TIME_MS);
-
-			logger.debug("Start buffering succeeding delete file events (" + BUFFER_WAIT_TIME_MS + "ms)");
-		}
-
-		fileBuffer.add(file);
+	protected boolean needsBufferInsertion(File file) {
+		// add all files to the buffer
+		return true;
 	}
 
 	/**
@@ -65,7 +39,7 @@ public class DeleteFileBuffer implements IFileBuffer {
 	 * 
 	 * @param bufferedFiles
 	 */
-	private void processBufferedFiles(List<File> bufferedFiles) {
+	protected void processBufferedFiles(List<File> bufferedFiles) {
 		// sort first
 		FileUtil.sortPreorder(bufferedFiles);
 		// reverse the sorting
