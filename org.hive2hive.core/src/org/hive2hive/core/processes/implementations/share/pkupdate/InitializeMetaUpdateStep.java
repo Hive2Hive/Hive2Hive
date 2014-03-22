@@ -9,7 +9,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
@@ -30,12 +30,12 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeMetaUpdateStep.class);
 
-	private IUpdateFileProtectionKey context;
-	private NetworkManager networkManager;
+	private final IUpdateFileProtectionKey context;
+	private final IDataManager dataManager;
 
-	public InitializeMetaUpdateStep(IUpdateFileProtectionKey context, NetworkManager networkManager) {
+	public InitializeMetaUpdateStep(IUpdateFileProtectionKey context, IDataManager dataManager) {
 		this.context = context;
-		this.networkManager = networkManager;
+		this.dataManager = dataManager;
 	}
 
 	@Override
@@ -83,9 +83,9 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(
 				context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys(),
 				index.getFilePublicKey());
-		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, networkManager));
-		sequential.add(new ChangeProtectionKeyStep(metaContext, networkManager.getDataManager()));
-		sequential.add(new InitializeChunkUpdateStep(metaContext, networkManager.getDataManager()));
+		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, dataManager));
+		sequential.add(new ChangeProtectionKeyStep(metaContext, dataManager));
+		sequential.add(new InitializeChunkUpdateStep(metaContext, dataManager));
 		return sequential;
 	}
 }

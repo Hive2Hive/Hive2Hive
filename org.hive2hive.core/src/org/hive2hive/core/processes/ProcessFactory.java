@@ -375,7 +375,7 @@ public final class ProcessFactory {
 		process.add(new VerifyFriendId(networkManager.getSession().getKeyManager(), permission.getUserId()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
-		process.add(new InitializeMetaUpdateStep(context, networkManager));
+		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
