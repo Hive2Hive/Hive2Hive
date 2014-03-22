@@ -9,6 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -71,6 +74,11 @@ public class FileUtil {
 		}
 	}
 
+	/**
+	 * Returns the file separator of the operating system
+	 * 
+	 * @return
+	 */
 	public static String getFileSep() {
 		String fileSep = System.getProperty("file.separator");
 		if (fileSep.equals("\\"))
@@ -115,6 +123,13 @@ public class FileUtil {
 		}
 	}
 
+	/**
+	 * Calculates the number of chunks. This depends on the file size and the chunk size
+	 * 
+	 * @param file the file to chunk
+	 * @param chunkSize the size of an individual chunk
+	 * @return the number of chunks
+	 */
 	public static int getNumberOfChunks(File file, long chunkSize) {
 		long fileSize = getFileSize(file);
 		return (int) Math.ceil((double) fileSize / (double) chunkSize);
@@ -155,11 +170,32 @@ public class FileUtil {
 				+ toMoveDest.getAbsolutePath());
 	}
 
+	/**
+	 * Checks whether the given file is in the given H2H root folder (note, the user must be logged in).
+	 * 
+	 * @param file the file to test
+	 * @param session a valid session of any user
+	 * @return true when the file is within the H2H directory, otherwise false
+	 */
 	public static boolean isInH2HDirectory(File file, H2HSession session) {
 		if (session == null || file == null) {
 			return false;
 		}
 
 		return file.getAbsolutePath().toString().startsWith(session.getRootFile().getAbsolutePath());
+	}
+
+	/**
+	 * Sorts the given list in pre-order style
+	 * 
+	 * @param unsortedFiles
+	 */
+	public static void sortPreorder(List<File> unsortedFiles) {
+		Collections.sort(unsortedFiles, new Comparator<File>() {
+			@Override
+			public int compare(File o1, File o2) {
+				return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+			}
+		});
 	}
 }

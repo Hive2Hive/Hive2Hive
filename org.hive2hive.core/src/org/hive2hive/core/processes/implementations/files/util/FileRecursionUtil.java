@@ -20,6 +20,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 public class FileRecursionUtil {
 
@@ -208,6 +209,20 @@ public class FileRecursionUtil {
 			}
 		}
 
+		return rootProcess;
+	}
+
+	/**
+	 * Creates a process chain of the given processes in the same order
+	 * 
+	 * @param processes the processes to align to a center
+	 * @return the process chain
+	 */
+	public static IProcessComponent createProcessChain(List<ProcessComponent> processes) {
+		SequentialProcess rootProcess = new SequentialProcess();
+		for (ProcessComponent processComponent : processes) {
+			rootProcess.add(processComponent);
+		}
 		return rootProcess;
 	}
 

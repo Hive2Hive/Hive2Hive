@@ -40,10 +40,8 @@ import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep
 import org.hive2hive.core.processes.implementations.files.add.InitializeChunksStep;
 import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
 import org.hive2hive.core.processes.implementations.files.add.ValidateFileSizeStep;
-import org.hive2hive.core.processes.implementations.files.delete.DeleteChunksProcess;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
-import org.hive2hive.core.processes.implementations.files.delete.DeleteMetaFileStep;
 import org.hive2hive.core.processes.implementations.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.implementations.files.download.FindInUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.list.GetFileListStep;
@@ -271,22 +269,15 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		DataManager dataManager = networkManager.getDataManager();
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		if (file.isFile()) {
-			// hint: must be executed before the deletion of the index from the user profile
-			process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		}
+		// hint: this step automatically adds additional process steps when the meta file and the chunks need
+		// to be deleted
 		process.add(new DeleteFromUserProfileStep(file, context, networkManager));
 		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
-		if (file.isFile()) {
-			process.add(new DeleteChunksProcess(context, dataManager));
-			process.add(new DeleteMetaFileStep(context, dataManager));
-		}
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 

@@ -166,7 +166,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Delete File") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
-				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().delete(askForFile(true));
+				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().delete(askForFile(false));
 				executeBlocking(process);
 			}
 		});

@@ -106,6 +106,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException {
+		if (!FileUtil.isInH2HDirectory(file, networkManager.getSession())) {
+			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
+		}
+
 		IProcessComponent deleteProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
