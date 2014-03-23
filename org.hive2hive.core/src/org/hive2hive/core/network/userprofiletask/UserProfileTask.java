@@ -18,7 +18,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 
 /**
  * The base class of all {@link UserProfileTask}s.</br>
@@ -52,7 +52,7 @@ public abstract class UserProfileTask extends NetworkContent {
 
 	public UserProfileTask(String sender) {
 		this.sender = sender;
-		this.protectionKey = EncryptionUtil.generateProtectionKey();
+		this.protectionKey = H2HEncryptionUtil.generateProtectionKeys();
 		generateContentKey();
 	}
 
