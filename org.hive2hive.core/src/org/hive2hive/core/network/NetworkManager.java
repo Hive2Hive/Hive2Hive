@@ -33,7 +33,7 @@ public class NetworkManager {
 	 * @return True, if the connection was successful, false otherwise.
 	 */
 	public boolean connect() {
-		if (networkConfiguration.isMasterPeer()) {
+		if (networkConfiguration.isInitialPeer()) {
 			return connection.connect();
 		} else if (networkConfiguration.getBootstrapPort() == -1) {
 			return connection.connect(networkConfiguration.getBootstrapAddress());

@@ -33,7 +33,7 @@ import org.hive2hive.core.security.UserCredentials;
 public class NetworkTestUtil {
 
 	/**
-	 * Creates a single node which is master.
+	 * Creates a single node which is initial.
 	 * 
 	 * @return a node
 	 */
@@ -46,25 +46,25 @@ public class NetworkTestUtil {
 
 	/**
 	 * Creates a network with the given number of nodes. First node in the list is the
-	 * master node where all other nodes bootstrapped to him.</br>
+	 * initial node where all other nodes bootstrapped to him.</br>
 	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
 	 * 
 	 * @param numberOfNodes
 	 *            size of the network (has to be larger than one)
-	 * @return list containing all nodes where the first one is the bootstrapping node (master)
+	 * @return list containing all nodes where the first one is the bootstrapping node (initial)
 	 */
 	public static List<NetworkManager> createNetwork(int numberOfNodes) {
 		if (numberOfNodes < 1)
 			throw new IllegalArgumentException("invalid size of network");
 		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
-		// create the first node (master)
+		// create the first node (initial)
 		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
-		NetworkManager master = new NetworkManager(netConfig);
-		master.connect();
-		nodes.add(master);
+		NetworkManager initial = new NetworkManager(netConfig);
+		initial.connect();
+		nodes.add(initial);
 
-		// create the other nodes and bootstrap them to the master peer
+		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
 			try {
@@ -146,23 +146,23 @@ public class NetworkTestUtil {
 
 	/**
 	 * Creates a <code>Hive2Hive</code> network with the given number of nodes. First node in the list is the
-	 * master node where all other nodes bootstrapped to him.</br>
+	 * initial node where all other nodes bootstrapped to him.</br>
 	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
 	 * 
 	 * @param numberOfNodes
 	 *            size of the network (has to be larger than one)
-	 * @return list containing all Hive2Hive nodes where the first one is the bootstrapping node (master)
+	 * @return list containing all Hive2Hive nodes where the first one is the bootstrapping node (initial)
 	 */
 	public static List<IH2HNode> createH2HNetwork(int numberOfNodes) {
 		if (numberOfNodes < 1)
 			throw new IllegalArgumentException("invalid size of network");
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
-		// create a master
-		IH2HNode master = H2HNode.createNode(NetworkConfiguration.create("master"),
+		// create initial peer
+		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"),
 				FileConfiguration.createDefault());
-		master.connect();
-		nodes.add(master);
+		initial.connect();
+		nodes.add(initial);
 
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();

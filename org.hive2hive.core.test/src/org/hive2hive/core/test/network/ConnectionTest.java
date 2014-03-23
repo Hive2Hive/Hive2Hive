@@ -22,13 +22,13 @@ public class ConnectionTest extends H2HJUnitTest{
 	}
 	
 	@Test
-	public void testConnectAsMaster(){
+	public void testConnectAsInitial(){
 		
-		INetworkConfiguration netConfig = NetworkConfiguration.create("master node");
+		INetworkConfiguration netConfig = NetworkConfiguration.create("initial node");
 		
-		NetworkManager masterNode = new NetworkManager(netConfig);
-		assertTrue(masterNode.connect());
-		masterNode.disconnect();
+		NetworkManager initialNode = new NetworkManager(netConfig);
+		assertTrue(initialNode.connect());
+		initialNode.disconnect();
 	}
 	
 	@Test

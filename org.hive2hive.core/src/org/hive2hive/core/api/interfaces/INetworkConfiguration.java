@@ -20,16 +20,16 @@ public interface INetworkConfiguration {
 	String getNodeID();
 
 	/**
-	 * Returns whether this peer is master. When a peer is master, he's the first one in the network and does
-	 * not try to bootstrap anywhere. In each network, only one master peer needs to exist. When other peers
-	 * have joined, the master peer can also go offline.
+	 * Returns whether this peer is initial. When a peer is initial, it is the first one in the network and does
+	 * not try to bootstrap anywhere. In each network, only one initial peer needs to exist. When other peers
+	 * have joined, the initial peer can also go offline.
 	 * 
-	 * @return true when this peer is master.
+	 * @return true when this peer is initial.
 	 */
-	boolean isMasterPeer();
+	boolean isInitialPeer();
 
 	/**
-	 * If this peer is not master, it needs to boostrap anywhere to connect to the p2p network.
+	 * If this peer is not initial, it needs to boostrap anywhere to connect to the p2p network.
 	 * 
 	 * @return the internet address to boostrap to. Make sure the given address is reachable (firewalls).
 	 */

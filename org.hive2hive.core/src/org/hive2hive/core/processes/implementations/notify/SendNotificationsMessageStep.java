@@ -44,8 +44,8 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 				// send own peers a 'normal' notification message
 				notifyMyPeers(peerAddresses, messageFactory, publicKey);
 			} else {
-				// send to the master node of another client
-				notifyMasterPeer(peerAddresses, messageFactory, user, publicKey);
+				// send to the initial node of another client
+				notifyInitialPeer(peerAddresses, messageFactory, user, publicKey);
 			}
 		}
 	}
@@ -77,28 +77,28 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 		}
 	}
 
-	private void notifyMasterPeer(List<PeerAddress> peerList, BaseNotificationMessageFactory messageFactory,
+	private void notifyInitialPeer(List<PeerAddress> peerList, BaseNotificationMessageFactory messageFactory,
 			String userId, PublicKey publicKey) {
 		boolean success = false;
 		while (!success && !peerList.isEmpty()) {
-			PeerAddress master = NetworkUtils.choseFirstPeerAddress(peerList);
-			BaseDirectMessage msg = messageFactory.createHintNotificationMessage(master, userId);
+			PeerAddress initial = NetworkUtils.choseFirstPeerAddress(peerList);
+			BaseDirectMessage msg = messageFactory.createHintNotificationMessage(initial, userId);
 			try {
 				sendDirect(msg, publicKey);
 				success = true;
 			} catch (SendFailedException e) {
 				if (!peerList.isEmpty()) {
-					logger.error("Master of user " + userId + " was offline. Try next in line");
+					logger.error("Initial peer of user " + userId + " was offline. Try next in line.");
 					peerList.remove(0);
 				}
 			}
 		}
 
 		if (success == false) {
-			logger.info("All clients of user " + userId + " are currently offline or unreachable");
+			logger.info("All clients of user " + userId + " are currently offline or unreachable.");
 		} else {
-			logger.debug("Successfully notified the master peer of user " + userId
-					+ " that he should check his UP tasks");
+			logger.debug("Successfully notified the initial peer of user " + userId
+					+ " that it should check its UP tasks.");
 		}
 	}
 
