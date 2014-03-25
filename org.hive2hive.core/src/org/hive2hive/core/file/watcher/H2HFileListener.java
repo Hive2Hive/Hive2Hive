@@ -5,6 +5,10 @@ import java.io.File;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.api.interfaces.IFileManager;
+import org.hive2hive.core.file.watcher.buffer.AddFileBuffer;
+import org.hive2hive.core.file.watcher.buffer.DeleteFileBuffer;
+import org.hive2hive.core.file.watcher.buffer.IFileBuffer;
+import org.hive2hive.core.file.watcher.buffer.ModifyFileBuffer;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 
@@ -22,11 +26,13 @@ public class H2HFileListener implements FileAlterationListener {
 	private final IFileManager fileManager;
 	private final IFileBuffer addFileBuffer;
 	private final IFileBuffer deleteFileBuffer;
+	private final ModifyFileBuffer modifyFileBuffer;
 
 	public H2HFileListener(IFileManager fileManager, File root) {
 		this.fileManager = fileManager;
 		addFileBuffer = new AddFileBuffer(fileManager, root);
 		deleteFileBuffer = new DeleteFileBuffer(fileManager, root);
+		modifyFileBuffer = new ModifyFileBuffer(fileManager, root);
 	}
 
 	@Override
@@ -60,7 +66,7 @@ public class H2HFileListener implements FileAlterationListener {
 	public void onFileChange(File file) {
 		if (file.isFile()) {
 			printFileDetails("changed", file);
-			modifyFile(file);
+			modifyFileBuffer.addFileToBuffer(file);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package org.hive2hive.core.file.watcher;
+package org.hive2hive.core.file.watcher.buffer;
 
 import java.io.File;
 import java.util.Collections;
