@@ -839,7 +839,28 @@ public class SequentialProcessTest extends H2HJUnitTest {
 	}
 	
 	@Test
-	public void awaitAsyncTest() {
+	public void awaitAsyncTest() throws InvalidProcessStateException, InterruptedException {
 		
+		// succeeding process
+		SequentialProcess process = new SequentialProcess();
+		process.add(new BusySucceedingStep());
+		AsyncComponent asyncProcess = new AsyncComponent(process);
+		asyncProcess.start();
+		asyncProcess.await();
+		if (asyncProcess.getState() != ProcessState.SUCCEEDED)
+			fail("Busy process should have finished. Await() did not block.");
+		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
+		
+		// failing process
+		SequentialProcess process2 = new SequentialProcess();
+		process2.add(new BusyFailingStep());
+		AsyncComponent asyncProcess2 = new AsyncComponent(process2);
+		asyncProcess2.start();
+		asyncProcess2.await();
+		if (asyncProcess2.getState() != ProcessState.FAILED)
+			fail("Busy process should have finished. Await() did not block.");
+		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		assertTrue(asyncProcess2.getState() == ProcessState.FAILED);
 	}
 }
