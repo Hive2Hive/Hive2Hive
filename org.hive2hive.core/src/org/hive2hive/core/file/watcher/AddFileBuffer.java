@@ -1,7 +1,9 @@
 package org.hive2hive.core.file.watcher;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -15,40 +17,16 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 public class AddFileBuffer extends BaseFileBuffer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AddFileBuffer.class);
-	private final IFileManager fileManager;
 
-	public AddFileBuffer(IFileManager fileManager) {
-		this.fileManager = fileManager;
+	public AddFileBuffer(IFileManager fileManager, File root) {
+		super(fileManager, root);
 	}
 
 	@Override
-	protected boolean needsBufferInsertion(File file) {
-		// add it to the file buffer if there is not already a parent there; the parent event will trigger
-		// the upload of the file
-		for (File bufferedFile : fileBuffer) {
-			if (file.getAbsolutePath().startsWith(bufferedFile.getAbsolutePath())) {
-				logger.debug("Parent (" + bufferedFile.getAbsolutePath()
-						+ ") already in buffer, no need to add " + file.getAbsolutePath() + " too.");
-				return false;
-			}
-		}
+	protected void processBuffer(IFileBufferHolder buffer) {
+		Set<File> fileBuffer = filterBuffer(buffer.getFileBuffer(), buffer.getSyncFiles());
 
-		// remove all children of this file from the buffer
-		for (File bufferedFile : fileBuffer) {
-			if (bufferedFile.getAbsolutePath().startsWith(file.getAbsolutePath())) {
-				logger.debug("Remove child " + bufferedFile.getAbsolutePath()
-						+ " from buffer because parent is now added.");
-				fileBuffer.remove(bufferedFile);
-			}
-		}
-
-		// parent not in buffer --> add to buffer, first in buffer triggers the add file soon
-		return true;
-	}
-
-	@Override
-	protected void processBufferedFiles(List<File> bufferedFiles) {
-		for (File toAdd : bufferedFiles) {
+		for (File toAdd : fileBuffer) {
 			try {
 				IProcessComponent process = fileManager.add(toAdd);
 				if (!fileManager.isAutostart())
@@ -58,6 +36,30 @@ public class AddFileBuffer extends BaseFileBuffer {
 				logger.error(e.getMessage());
 			}
 		}
+	}
+
+	private Set<File> filterBuffer(List<File> fileBuffer, Set<File> syncFiles) {
+		// remove the files from the buffer which are already in the DHT
+		// the event has been triggered by Hive2Hive when downloading it.
+		fileBuffer.removeAll(syncFiles);
+
+		Set<File> filtered = new HashSet<File>(fileBuffer);
+
+		// only keep top-parent(s) to the buffer, filter out the rest
+		for (File bufferedFile : fileBuffer) {
+			// iterate through every file in buffer and check if there is a parent in the buffer
+			for (File possibleParent : fileBuffer) {
+				if (!bufferedFile.equals(possibleParent)
+						&& bufferedFile.getAbsolutePath().startsWith(possibleParent.getAbsolutePath())) {
+					logger.debug("Parent (" + possibleParent.getAbsolutePath()
+							+ ") already in buffer, no need to add " + bufferedFile.getAbsolutePath()
+							+ " too.");
+					filtered.remove(bufferedFile);
+				}
+			}
+		}
+
+		return filtered;
 	}
 
 }

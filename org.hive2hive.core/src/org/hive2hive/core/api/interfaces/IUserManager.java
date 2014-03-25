@@ -46,6 +46,5 @@ public interface IUserManager extends IManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 * @throws NoSessionException no user has logged in
 	 */
-	// TODO why not logout with credentials as well?
 	IProcessComponent logout() throws NoPeerConnectionException, NoSessionException;
 }

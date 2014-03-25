@@ -2,7 +2,9 @@ package org.hive2hive.core.file.watcher;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -22,16 +24,8 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileBuffer.class);
 	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000; // timeout to omit blocks
 
-	private final IFileManager fileManager;
-
-	public DeleteFileBuffer(IFileManager fileManager) {
-		this.fileManager = fileManager;
-	}
-
-	@Override
-	protected boolean needsBufferInsertion(File file) {
-		// add all files to the buffer
-		return true;
+	public DeleteFileBuffer(IFileManager fileManager, File root) {
+		super(fileManager, root);
 	}
 
 	/**
@@ -39,7 +33,19 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 	 * 
 	 * @param bufferedFiles
 	 */
-	protected void processBufferedFiles(List<File> bufferedFiles) {
+	protected void processBuffer(IFileBufferHolder buffer) {
+		List<File> bufferedFiles = buffer.getFileBuffer();
+		Set<File> syncFiles = buffer.getSyncFiles();
+
+		Set<File> toRemove = new HashSet<File>();
+		for (File file : bufferedFiles) {
+			if (!syncFiles.contains(file)) {
+				// has already been deleted
+				toRemove.add(file);
+			}
+		}
+		bufferedFiles.removeAll(toRemove);
+
 		// sort first
 		FileUtil.sortPreorder(bufferedFiles);
 		// reverse the sorting

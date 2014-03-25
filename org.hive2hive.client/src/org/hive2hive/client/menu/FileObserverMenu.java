@@ -13,8 +13,10 @@ public class FileObserverMenu extends ConsoleMenu {
 	private final H2HFileWatcherBuilder watcherBuilder;
 	private H2HFileWatcher watcher;
 	private IFileManager fileManager;
+	private File rootDirectory;
 
 	public FileObserverMenu(File rootDirectory, IFileManager fileManager) {
+		this.rootDirectory = rootDirectory;
 		watcherBuilder = new H2HFileWatcherBuilder(rootDirectory);
 		this.fileManager = fileManager;
 	}
@@ -40,7 +42,7 @@ public class FileObserverMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Start File Observer") {
 			protected void execute() throws Exception {
 				watcher = watcherBuilder.build();
-				watcher.addFileListener(new H2HFileListener(fileManager));
+				watcher.addFileListener(new H2HFileListener(fileManager, rootDirectory));
 				watcher.start();
 			}
 		});
