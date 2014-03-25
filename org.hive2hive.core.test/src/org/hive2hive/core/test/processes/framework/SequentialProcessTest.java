@@ -1,7 +1,6 @@
 package org.hive2hive.core.test.processes.framework;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -813,5 +812,34 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		assertTrue(subStep2.getState() == ProcessState.FAILED);
 		assertTrue(subStep3.getState() == ProcessState.READY);
 		assertTrue(step3.getState() == ProcessState.READY || step3.getState() == ProcessState.FAILED);
+	}
+	
+	@Test
+	public void awaitSyncTest() throws InvalidProcessStateException, InterruptedException {
+		
+		// succeeding process
+		SequentialProcess process = new SequentialProcess();
+		process.add(new BusySucceedingStep());
+		process.start();
+		process.await();
+		if (process.getState() != ProcessState.SUCCEEDED)
+			fail("Busy process should have finished. Await() did not block.");
+		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		assertTrue(process.getState() == ProcessState.SUCCEEDED);
+		
+		// failing process
+		SequentialProcess process2 = new SequentialProcess();
+		process2.add(new BusyFailingStep());
+		process2.start();
+		process2.await();
+		if (process2.getState() != ProcessState.FAILED)
+			fail("Busy process should have finished. Await() did not block.");
+		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		assertTrue(process2.getState() == ProcessState.FAILED);
+	}
+	
+	@Test
+	public void awaitAsyncTest() {
+		
 	}
 }
