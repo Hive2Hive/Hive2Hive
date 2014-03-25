@@ -14,6 +14,12 @@ import org.hive2hive.core.processes.framework.ProcessState;
 public interface IProcessComponent extends IControllable {
 
 	/**
+	 * Wait for the process component to terminate. Blocks execution until then.
+	 * @throws InterruptedException 
+	 */
+	void await() throws InterruptedException;
+
+	/**
 	 * Attaches an {@link IProcessComponentListener} to the process component.
 	 * 
 	 * @param listener The listener to be attached.
@@ -29,10 +35,11 @@ public interface IProcessComponent extends IControllable {
 
 	/**
 	 * Getter for the {@link IProcessComponent}'s {@link IProcessComponentListener}s.
+	 * 
 	 * @return The {@link IProcessComponentListener}s attached to this {@link IProcessComponent}.
 	 */
 	List<IProcessComponentListener> getListener();
-	
+
 	/**
 	 * Getter for the process component's ID.
 	 * 
