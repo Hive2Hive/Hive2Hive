@@ -88,5 +88,13 @@ public interface H2HConstants {
 
 	// key length for symmetric part of hybrid encryption
 	public static final AES_KEYLENGTH KEYLENGTH_HYBRID_AES = AES_KEYLENGTH.BIT_256;
-
+	
+	/**
+	 * TTL Refreshment Management
+	 */
+	// delay in milliseconds before first ttl refreshment task is to be executed
+	public static final int TTL_REFRESHMENT_DELAY = 500;
+	
+	// period in milliseconds between successive ttl refreshment task executions
+	public static final int TTL_REFRESHMENT_PERIOD = 1000;
 }
