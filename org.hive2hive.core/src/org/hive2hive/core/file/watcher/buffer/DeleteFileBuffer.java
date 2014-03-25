@@ -54,7 +54,7 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 				IProcessComponent delete = fileManager.delete(toDelete);
 				if (!fileManager.isAutostart())
 					delete.start();
-				delete.await();
+				delete.await(MAX_DELETION_PROCESS_DURATION_MS);
 			} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException
 					| InterruptedException e) {
 				logger.error(e.getMessage());

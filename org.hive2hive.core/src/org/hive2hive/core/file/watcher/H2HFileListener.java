@@ -23,13 +23,11 @@ public class H2HFileListener implements FileAlterationListener {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HFileListener.class);
 
-	private final IFileManager fileManager;
 	private final IFileBuffer addFileBuffer;
 	private final IFileBuffer deleteFileBuffer;
 	private final ModifyFileBuffer modifyFileBuffer;
 
 	public H2HFileListener(IFileManager fileManager, File root) {
-		this.fileManager = fileManager;
 		addFileBuffer = new AddFileBuffer(fileManager, root);
 		deleteFileBuffer = new DeleteFileBuffer(fileManager, root);
 		modifyFileBuffer = new ModifyFileBuffer(fileManager, root);
@@ -79,18 +77,6 @@ public class H2HFileListener implements FileAlterationListener {
 	@Override
 	public void onStop(FileAlterationObserver observer) {
 		// nothing to do
-	}
-
-	private void modifyFile(File file) {
-		// try {
-		// IProcessComponent process = fileManager.update(file);
-		// if (!fileManager.isAutostart()) {
-		// process.start();
-		// }
-		// } catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
-		// | InvalidProcessStateException e) {
-		// logger.error(e.getMessage());
-		// }
 	}
 
 	private void printFileDetails(String reason, File file) {
