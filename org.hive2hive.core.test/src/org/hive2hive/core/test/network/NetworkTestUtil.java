@@ -171,6 +171,8 @@ public class NetworkTestUtil {
 						NetworkConfiguration.create("node " + i, bootstrapAddress),
 						FileConfiguration.createDefault());
 				node.connect();
+				node.getFileManager().configureAutostart(false);
+				node.getUserManager().configureAutostart(false);
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {

@@ -1,5 +1,7 @@
 package org.hive2hive.core.api.interfaces;
 
+import net.tomp2p.p2p.Peer;
+
 /**
  * The starting point for the Hive2Hive node. From this class, you can perform user management (login, logout,
  * ...) and file management (add, remove, share, ...).<br>
@@ -54,4 +56,11 @@ public interface IH2HNode {
 	 * @return the file configuration
 	 */
 	IFileConfiguration getFileConfiguration();
+
+	/**
+	 * Returns the {@link Peer} which can be used to implement custom actions.
+	 * 
+	 * @return the TomP2P peer. Before calling {@link IH2HNode#connect()}, this method returns null.
+	 */
+	Peer getPeer();
 }

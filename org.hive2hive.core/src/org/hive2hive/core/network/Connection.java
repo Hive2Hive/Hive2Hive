@@ -37,6 +37,7 @@ public class Connection {
 
 	/**
 	 * Creates a peer and connects it to the network.
+	 * 
 	 * @return True, if the peer creation and connection was successful, false otherwise
 	 */
 	public boolean connect() {
@@ -55,6 +56,7 @@ public class Connection {
 
 	/**
 	 * Creates a peer and connects it to the network.
+	 * 
 	 * @param bootstrapAddress Bootstrap IP address.
 	 * @return true, if peer creation and bootstrapping was successful, false otherwise.
 	 */
@@ -64,6 +66,7 @@ public class Connection {
 
 	/**
 	 * Creates a peer and connects it to the network.
+	 * 
 	 * @param bootstrapAddress Bootstrap IP address.
 	 * @param port Bootstrap port.
 	 * @return True, if peer creation and bootstrapping was successful, false otherwise.
@@ -103,6 +106,7 @@ public class Connection {
 
 	/**
 	 * Disconnects a peer from the network.
+	 * 
 	 * @return True, if disconnection was successful, false otherwise.
 	 */
 	public boolean disconnect() {
@@ -110,7 +114,7 @@ public class Connection {
 		if (isConnected) {
 			isDisconnected = peer.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			isConnected = !isDisconnected;
-			
+
 			if (isDisconnected)
 				logger.debug("Peer successfully disconnected.");
 			else
@@ -131,13 +135,12 @@ public class Connection {
 	public boolean isConnected() {
 		return isConnected;
 	}
-	
+
 	public Peer getPeer() {
 		return peer;
 	}
 
 	private boolean createPeer() {
-
 		int port = H2HConstants.H2H_PORT;
 		while (NetworkUtils.isPortAvailable(port) == false)
 			port++;

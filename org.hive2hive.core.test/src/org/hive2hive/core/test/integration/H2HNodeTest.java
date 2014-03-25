@@ -6,7 +6,12 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.api.H2HNode;
+import org.hive2hive.core.api.configs.FileConfiguration;
+import org.hive2hive.core.api.configs.NetworkConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
+import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -14,7 +19,6 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,18 +62,13 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
 		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
-
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		registerProcess.attachListener(listener);
-		UseCaseTestUtil.waitTillSucceded(listener, 20);
+		UseCaseTestUtil.executeProcess(registerProcess);
 
 		rootDirectory = NetworkTestUtil.getTempDirectory();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
 		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials,
 				rootDirectory.toPath());
-		TestProcessComponentListener loginListener = new TestProcessComponentListener();
-		loginProcess.attachListener(loginListener);
-		UseCaseTestUtil.waitTillSucceded(loginListener, 20);
+		UseCaseTestUtil.executeProcess(loginProcess);
 	}
 
 	@Test
@@ -139,6 +138,18 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		test2File = new File(folder2, "test2.txt");
 		Assert.assertEquals("Hello World 2", FileUtils.readFileToString(test2File));
+	}
+
+	@Test
+	public void getPeer() {
+		// a unconnected node does not provide a peer
+		INetworkConfiguration config = NetworkConfiguration.create();
+		IFileConfiguration fileConfig = FileConfiguration.createDefault();
+		IH2HNode node = H2HNode.createNode(config, fileConfig);
+		Assert.assertNull(node.getPeer());
+
+		// connected nodes return a peer
+		Assert.assertNotNull(network.get(random.nextInt(NETWORK_SIZE)).getPeer());
 	}
 
 	@After

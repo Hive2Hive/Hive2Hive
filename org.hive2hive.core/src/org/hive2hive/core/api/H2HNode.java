@@ -1,5 +1,7 @@
 package org.hive2hive.core.api;
 
+import net.tomp2p.p2p.Peer;
+
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
@@ -72,5 +74,10 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IFileConfiguration getFileConfiguration() {
 		return fileConfiguration;
+	}
+
+	@Override
+	public Peer getPeer() {
+		return networkManager.getConnection().getPeer();
 	}
 }
