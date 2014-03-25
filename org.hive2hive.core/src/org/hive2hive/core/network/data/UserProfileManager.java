@@ -5,6 +5,7 @@ import java.security.KeyPair;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
@@ -290,13 +291,13 @@ public class UserProfileManager {
 
 	private class QueueEntry {
 		private final String pid;
-		private final Object getWaiter;
+		private final CountDownLatch getWaiter;
 		private UserProfile userProfile; // got from DHT
 		private GetFailedException getFailedException;
 
 		public QueueEntry(String pid) {
 			this.pid = pid;
-			this.getWaiter = new Object();
+			this.getWaiter = new CountDownLatch(1);
 		}
 
 		public String getPid() {
@@ -304,9 +305,7 @@ public class UserProfileManager {
 		}
 
 		public void notifyGet() {
-			synchronized (getWaiter) {
-				getWaiter.notify();
-			}
+			getWaiter.countDown();
 		}
 
 		public void waitForGet() throws GetFailedException {
@@ -314,12 +313,10 @@ public class UserProfileManager {
 				throw getFailedException;
 			}
 
-			synchronized (getWaiter) {
-				try {
-					getWaiter.wait();
-				} catch (InterruptedException e) {
-					getFailedException = new GetFailedException("Could not wait for getting the user profile");
-				}
+			try {
+				getWaiter.await();
+			} catch (InterruptedException e) {
+				getFailedException = new GetFailedException("Could not wait for getting the user profile");
 			}
 
 			if (getFailedException != null) {
@@ -382,12 +379,12 @@ public class UserProfileManager {
 
 		private final AtomicBoolean readyToPut;
 		private final AtomicBoolean abort;
-		private final Object putWaiter;
+		private final CountDownLatch putWaiter;
 		private PutFailedException putFailedException;
 
 		public PutQueueEntry(String pid) {
 			super(pid);
-			putWaiter = new Object();
+			putWaiter = new CountDownLatch(1);
 			readyToPut = new AtomicBoolean(false);
 			abort = new AtomicBoolean(false);
 		}
@@ -409,9 +406,7 @@ public class UserProfileManager {
 		}
 
 		public void notifyPut() {
-			synchronized (putWaiter) {
-				putWaiter.notify();
-			}
+			putWaiter.countDown();
 		}
 
 		public void waitForPut() throws PutFailedException {
@@ -419,12 +414,10 @@ public class UserProfileManager {
 				throw putFailedException;
 			}
 
-			synchronized (putWaiter) {
-				try {
-					putWaiter.wait();
-				} catch (InterruptedException e) {
-					putFailedException = new PutFailedException("Could not wait to put the user profile");
-				}
+			try {
+				putWaiter.await();
+			} catch (InterruptedException e) {
+				putFailedException = new PutFailedException("Could not wait to put the user profile");
 			}
 
 			if (putFailedException != null) {
