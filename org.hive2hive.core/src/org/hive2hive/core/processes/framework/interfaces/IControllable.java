@@ -17,7 +17,7 @@ public interface IControllable {
 	 * 
 	 * @throws InvalidProcessStateException If the component is in an invalid state for this operation.
 	 */
-	void start() throws InvalidProcessStateException;
+	IProcessComponent start() throws InvalidProcessStateException;
 
 	/**
 	 * Pauses the execution or rollbacking of the component, depending on its current state.
