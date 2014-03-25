@@ -4,9 +4,9 @@ import java.io.File;
 
 import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.api.watcher.H2HFileListener;
-import org.hive2hive.core.api.watcher.H2HFileWatcher;
-import org.hive2hive.core.api.watcher.H2HFileWatcher.H2HFileWatcherBuilder;
+import org.hive2hive.core.file.watcher.H2HFileListener;
+import org.hive2hive.core.file.watcher.H2HFileWatcher;
+import org.hive2hive.core.file.watcher.H2HFileWatcher.H2HFileWatcherBuilder;
 
 public class FileObserverMenu extends ConsoleMenu {
 

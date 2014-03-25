@@ -1,12 +1,16 @@
-package org.hive2hive.core.api.watcher;
+package org.hive2hive.core.file.watcher;
 
 import java.io.File;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.api.interfaces.IFileManager;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
  * Default implementation of a file listener. The file events are caught and the according process is
@@ -76,15 +80,15 @@ public class H2HFileListener implements FileAlterationListener {
 	}
 
 	private void modifyFile(File file) {
-		// try {
-		// IProcessComponent process = fileManager.update(file);
-		// if (!fileManager.isAutostart()) {
-		// process.start();
-		// }
-		// } catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
-		// | InvalidProcessStateException e) {
-		// logger.error(e.getMessage());
-		// }
+		try {
+			IProcessComponent process = fileManager.update(file);
+			if (!fileManager.isAutostart()) {
+				process.start();
+			}
+		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
+				| InvalidProcessStateException e) {
+			logger.error(e.getMessage());
+		}
 	}
 
 	private void printFileDetails(String reason, File file) {
