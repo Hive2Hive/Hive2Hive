@@ -180,6 +180,11 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public void await() throws InterruptedException {
+		await(-1);
+	}
+	
+	@Override
+	public void await(long timeout) throws InterruptedException {
 
 		if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED)
 			return;
@@ -197,7 +202,11 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 		// blocking wait for completion or interruption
 		try {
-			latch.await();
+			if (timeout < 0) {
+				latch.await();
+			} else {
+				latch.await(timeout, TimeUnit.MILLISECONDS);
+			}
 		} catch (InterruptedException e) {
 			throw e;
 		} finally {

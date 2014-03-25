@@ -15,9 +15,16 @@ public interface IProcessComponent extends IControllable {
 
 	/**
 	 * Wait for the process component to terminate. Blocks execution until then.
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	void await() throws InterruptedException;
+	
+	/**
+	 * Wait for the process component to terminate. Blocks execution until then.
+	 * @param timeout The maximal waiting time in milliseconds.
+	 * @throws InterruptedException
+	 */
+	void await(long timeout) throws InterruptedException;
 
 	/**
 	 * Attaches an {@link IProcessComponentListener} to the process component.
