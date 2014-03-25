@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -97,15 +98,17 @@ public class RelinkUserProfileStep extends ProcessStep {
 			// notify other users
 			initNotificationParameters(oldParent.getCalculatedUserList(), movedNode);
 
-		} catch (NoSessionException | GetFailedException | PutFailedException e) {
+		} catch (NoSessionException | GetFailedException | PutFailedException | NoPeerConnectionException e) {
 			throw new ProcessExecutionException(e);
 		}
 	}
 
-	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
+	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys)
+			throws NoPeerConnectionException {
 		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode,
 				oldProtectionKeys, newProtectionKeys);
-		getParent().insertNext(new InitializeMetaUpdateStep(pkUpdateContext, networkManager), this);
+		getParent().insertNext(
+				new InitializeMetaUpdateStep(pkUpdateContext, networkManager.getDataManager()), this);
 	}
 
 	/**

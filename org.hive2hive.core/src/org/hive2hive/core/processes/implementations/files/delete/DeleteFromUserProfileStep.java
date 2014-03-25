@@ -14,15 +14,19 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 
 /**
  * Step that deletes a file from the index in the user profile after doing some verification.
+ * In case the deleted file is a file (and not a folder), this step initiates the deletion of the meta file
+ * and all according chunks.
  * 
  * @author Nico
  * 
@@ -34,6 +38,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	private final DeleteFileProcessContext context;
 	private final File file;
 	private final UserProfileManager profileManager;
+	private DataManager dataManager;
 	private final Path root;
 
 	private Index index;
@@ -44,6 +49,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		super(networkManager.getDataManager());
 		this.file = file;
 		this.context = context;
+		this.dataManager = networkManager.getDataManager();
 		this.profileManager = networkManager.getSession().getProfileManager();
 		this.root = networkManager.getSession().getRoot();
 	}
@@ -90,6 +96,21 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			profileManager.readyToPut(profile, getID());
 		} catch (PutFailedException e) {
 			throw new ProcessExecutionException("Could not put user profile.");
+		}
+
+		if (index.isFile()) {
+			/**
+			 * Delete the meta file and all chunks
+			 */
+			File2MetaFileComponent file2Meta = new File2MetaFileComponent(index, context, context,
+					dataManager);
+			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
+			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
+
+			// insert them in correct order
+			getParent().insertNext(file2Meta, this);
+			getParent().insertNext(deleteChunks, file2Meta);
+			getParent().insertNext(deleteMeta, deleteChunks);
 		}
 	}
 

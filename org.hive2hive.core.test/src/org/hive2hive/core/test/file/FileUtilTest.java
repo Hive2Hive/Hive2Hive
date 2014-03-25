@@ -2,6 +2,8 @@ package org.hive2hive.core.test.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -58,5 +60,34 @@ public class FileUtilTest extends H2HJUnitTest {
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());
 		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
 		Assert.assertTrue(fileTree.containsKey(fileName));
+	}
+
+	@Test
+	public void testSortPreorder() {
+		List<File> files = new ArrayList<File>();
+
+		File aaa = new File("/aaa");
+		files.add(aaa);
+
+		File bbb = new File("/bbb");
+		files.add(bbb);
+
+		File c = new File(aaa, "c.txt");
+		files.add(c);
+
+		File d = new File("/bzz", "d.txt");
+		files.add(d);
+
+		File bzz = new File("/bzz");
+		files.add(bzz);
+
+		FileUtil.sortPreorder(files);
+
+		int index = 0;
+		Assert.assertEquals(aaa, files.get(index++));
+		Assert.assertEquals(c, files.get(index++));
+		Assert.assertEquals(bbb, files.get(index++));
+		Assert.assertEquals(bzz, files.get(index++));
+		Assert.assertEquals(d, files.get(index++));
 	}
 }

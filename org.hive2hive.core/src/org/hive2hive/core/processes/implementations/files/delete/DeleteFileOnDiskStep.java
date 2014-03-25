@@ -11,6 +11,12 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 
+/**
+ * Deletes a file on the disk (if it exists)
+ * 
+ * @author Nico
+ * 
+ */
 public class DeleteFileOnDiskStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileOnDiskStep.class);
@@ -42,11 +48,9 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-
 		File trashFile = new File(H2HConstants.TRASH_DIRECTORY, file.getName());
 
 		if (trashFile.exists()) {
-
 			try {
 				FileUtils.moveFileToDirectory(trashFile, file.getParentFile(), true);
 			} catch (IOException e) {

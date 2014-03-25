@@ -1,18 +1,12 @@
 package org.hive2hive.core.api.watcher;
 
 import java.io.File;
-import java.util.List;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
-import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 /**
  * Default implementation of a file listener. The file events are caught and the according process is
@@ -26,11 +20,13 @@ public class H2HFileListener implements FileAlterationListener {
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HFileListener.class);
 
 	private final IFileManager fileManager;
-	private FileEventBuffer addFileBuffer;
+	private final IFileBuffer addFileBuffer;
+	private final IFileBuffer deleteFileBuffer;
 
 	public H2HFileListener(IFileManager fileManager) {
 		this.fileManager = fileManager;
-		addFileBuffer = new AddFileBuffer();
+		addFileBuffer = new AddFileBuffer(fileManager);
+		deleteFileBuffer = new DeleteFileBuffer(fileManager);
 	}
 
 	@Override
@@ -51,7 +47,7 @@ public class H2HFileListener implements FileAlterationListener {
 	@Override
 	public void onDirectoryDelete(File directory) {
 		printFileDetails("deleted", directory);
-		removeFile(directory);
+		deleteFileBuffer.addFileToBuffer(directory);
 	}
 
 	@Override
@@ -71,7 +67,7 @@ public class H2HFileListener implements FileAlterationListener {
 	@Override
 	public void onFileDelete(File file) {
 		printFileDetails("deleted", file);
-		removeFile(file);
+		deleteFileBuffer.addFileToBuffer(file);
 	}
 
 	@Override
@@ -79,20 +75,16 @@ public class H2HFileListener implements FileAlterationListener {
 		// nothing to do
 	}
 
-	private void removeFile(File file) {
-		try {
-			fileManager.delete(file);
-		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
-			logger.error(e.getMessage());
-		}
-	}
-
 	private void modifyFile(File file) {
-		try {
-			fileManager.update(file);
-		} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException e) {
-			logger.error(e.getMessage());
-		}
+		// try {
+		// IProcessComponent process = fileManager.update(file);
+		// if (!fileManager.isAutostart()) {
+		// process.start();
+		// }
+		// } catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
+		// | InvalidProcessStateException e) {
+		// logger.error(e.getMessage());
+		// }
 	}
 
 	private void printFileDetails(String reason, File file) {
@@ -100,20 +92,4 @@ public class H2HFileListener implements FileAlterationListener {
 				file.getAbsolutePath()));
 	}
 
-	private class AddFileBuffer extends FileEventBuffer {
-
-		@Override
-		protected void processBufferedFiles(List<File> bufferedFiles) {
-			for (File toAdd : bufferedFiles) {
-				try {
-					IProcessComponent process = fileManager.add(toAdd);
-					if (!fileManager.isAutostart())
-						process.start();
-				} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation
-						| InvalidProcessStateException e) {
-					logger.error(e.getMessage());
-				}
-			}
-		}
-	}
 }
