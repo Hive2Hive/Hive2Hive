@@ -124,14 +124,14 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		updatedLocations.addPeerAddress(networkManager.getConnection().getPeer().getPeerAddress());
 		context.provideLocations(updatedLocations);
 
-		// evaluate if master
+		// evaluate if initial
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
 
 		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
 				networkManager.getConnection().getPeer().getPeerAddress())) {
-			context.setIsMaster(true);
+			context.setIsInitial(true);
 		} else {
-			context.setIsMaster(false);
+			context.setIsInitial(false);
 		}
 	}
 

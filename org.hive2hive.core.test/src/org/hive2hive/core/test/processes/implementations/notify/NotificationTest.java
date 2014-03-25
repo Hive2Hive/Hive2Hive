@@ -162,7 +162,7 @@ public class NotificationTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also the master client of user B
+	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also the initial client of user B
 	 * (peer 3 or 4) and user C (peer 5)
 	 * 
 	 * @throws InvalidProcessStateException
@@ -197,7 +197,7 @@ public class NotificationTest extends H2HJUnitTest {
 
 	/**
 	 * Scenario: User A (peer 0) contacts his own clients (peer 1 and 2) and also user B
-	 * (peer 3 or 4). Peer 3 (master) has occurred an unfriendly logout, thus, the message must be sent to
+	 * (peer 3 or 4). Peer 3 (initial) has occurred an unfriendly logout, thus, the message must be sent to
 	 * Peer 4.
 	 * 
 	 * @throws InvalidProcessStateException
@@ -207,7 +207,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws ProcessExecutionException
 	 */
 	@Test
-	public void testNotifyUnfriendlyLogoutMaster() throws ClassNotFoundException, IOException,
+	public void testNotifyUnfriendlyLogoutInitial() throws ClassNotFoundException, IOException,
 			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
 			NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);

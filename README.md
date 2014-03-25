@@ -1,6 +1,6 @@
 Hive2Hive
 =========
-Hive2Hive is an open-source library, written in Java, for distributed, P2P-based file synchronization and sharing.
+Hive2Hive is an open-source library, written in Java, for distributed, P2P-based file synchronization and sharing. It is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
 Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
 

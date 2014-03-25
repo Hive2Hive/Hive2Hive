@@ -15,7 +15,7 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 
 	private UserProfile profile;
 	private Locations locations;
-	private boolean isMaster;
+	private boolean isInitial;
 
 	@Override
 	public void provideUserProfile(UserProfile profile) {
@@ -32,12 +32,12 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 		return locations;
 	}
 
-	public void setIsMaster(boolean isMaster) {
-		this.isMaster = isMaster;
+	public void setIsInitial(boolean isInitial) {
+		this.isInitial = isInitial;
 	}
 
-	public boolean getIsMaster() {
-		return isMaster;
+	public boolean getIsInitial() {
+		return isInitial;
 	}
 
 	@Override

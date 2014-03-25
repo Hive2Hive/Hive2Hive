@@ -18,6 +18,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.junit.AfterClass;
@@ -45,7 +46,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 dKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 cKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
+		KeyPair protectionKeys = H2HEncryptionUtil.generateProtectionKeys();
 
 		int numVersions = H2HConstants.MAX_VERSIONS_HISTORY + random.nextInt(5) + 1;
 		List<H2HTestData> versions = new ArrayList<H2HTestData>();
@@ -91,7 +92,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 dKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 cKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKeys = EncryptionUtil.generateProtectionKey();
+		KeyPair protectionKeys = H2HEncryptionUtil.generateProtectionKeys();
 
 		int numVersions = H2HConstants.MAX_VERSIONS_HISTORY + random.nextInt(5) + 1;
 		List<H2HTestData> versions = new ArrayList<H2HTestData>();

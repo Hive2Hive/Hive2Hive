@@ -12,6 +12,7 @@ import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 public interface H2HConstants {
 
 	// TODO this interface should be more structured and documented in a consistent way
+	// TODO there are constants that are not used anymore, remove
 
 	// H2HNode default values
 	public static final long DEFAULT_MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
@@ -19,7 +20,7 @@ public interface H2HConstants {
 	public static final long DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = 25 * 1024 * 1024 * 100; // max_size * max_num
 	public static final long DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1 MB
 	public static final boolean DEFAULT_AUTOSTART_PROCESSES = true;
-	public static final boolean DEFAULT_IS_MASTER_PEER = false;
+	public static final boolean DEFAULT_IS_INITIAL_PEER = false;
 	public static final InetAddress DEFAULT_BOOTSTRAP_ADDRESS = null;
 	public static final String DEFAULT_ROOT_PATH = new File(System.getProperty("user.home"), "Hive2Hive")
 			.getAbsolutePath();

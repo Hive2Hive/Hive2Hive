@@ -82,9 +82,9 @@ public class SynchronizeFilesStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		if (context.getIsMaster()) {
-			// If is master, process the user profile queue
-			logger.debug("Starting to process all user tasks because I'm defined as master");
+		if (context.getIsInitial()) {
+			// if is initial, process the user profile queue
+			logger.debug("Starting to process all user tasks because I'm defined as initial.");
 			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}
 	}

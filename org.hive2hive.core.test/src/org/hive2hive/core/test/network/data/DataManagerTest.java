@@ -16,7 +16,7 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -269,8 +269,8 @@ public class DataManagerTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testChangeProtectionKey() throws NoPeerConnectionException, IOException {
-		KeyPair keypair1 = EncryptionUtil.generateProtectionKey();
-		KeyPair keypair2 = EncryptionUtil.generateProtectionKey();
+		KeyPair keypair1 = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair keypair2 = H2HEncryptionUtil.generateProtectionKeys();
 
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
@@ -335,7 +335,7 @@ public class DataManagerTest extends H2HJUnitTest {
 		Assert.assertTrue(putFuture1.isSuccess());
 
 		// put 1st version with keypair 1
-		KeyPair keypair = EncryptionUtil.generateProtectionKey();
+		KeyPair keypair = H2HEncryptionUtil.generateProtectionKeys();
 		H2HTestData data1v1 = new H2HTestData(NetworkTestUtil.randomString());
 		data1v1.generateVersionKey();
 		data1v1.setBasedOnKey(data1v0.getVersionKey());
