@@ -3,6 +3,11 @@ package org.hive2hive.core.processes.framework.abstracts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -172,6 +177,33 @@ public abstract class ProcessComponent implements IProcessComponent {
 	}
 
 	@Override
+	public void await() throws InterruptedException {
+
+		if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED)
+			return;
+
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+		ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED)
+					latch.countDown();
+			}
+		}, 0, 100, TimeUnit.MILLISECONDS);
+
+		// blocking wait for completion or interruption
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			throw e;
+		} finally {
+			handle.cancel(true);
+		}
+	}
+
+	@Override
 	public String getID() {
 		return id;
 	}
@@ -188,7 +220,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	public void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
-		
+
 		// TODO check if correct
 		// if process component completed already
 		if (state == ProcessState.SUCCEEDED) {
