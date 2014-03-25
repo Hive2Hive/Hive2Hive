@@ -63,7 +63,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		} catch (ProcessExecutionException e) {
 			cancel(e.getRollbackReason());
 		}
-		
+
 		return this;
 	}
 
@@ -182,7 +182,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	public void await() throws InterruptedException {
 		await(-1);
 	}
-	
+
 	@Override
 	public void await(long timeout) throws InterruptedException {
 
@@ -205,9 +205,13 @@ public abstract class ProcessComponent implements IProcessComponent {
 			if (timeout < 0) {
 				latch.await();
 			} else {
-				latch.await(timeout, TimeUnit.MILLISECONDS);
+				boolean success = latch.await(timeout, TimeUnit.MILLISECONDS);
+				if (!success) {
+					throw new InterruptedException("Waiting for process timed out");
+				}
 			}
 		} catch (InterruptedException e) {
+			logger.error("Interrupted while waiting for process", e);
 			throw e;
 		} finally {
 			handle.cancel(true);

@@ -37,6 +37,8 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager) throws IOException {
+		assert root != null;
+
 		// generate the new persistent meta data
 		PersistentMetaData metaData = new PersistentMetaData();
 

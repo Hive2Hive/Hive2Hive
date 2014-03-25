@@ -159,7 +159,7 @@ public class Connection {
 					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
 					.makeAndListen();
 		} catch (IOException e) {
-			logger.error(String.format("Exception while creating a peer: ", e));
+			logger.error("Exception while creating a peer: ", e);
 			return false;
 		}
 
