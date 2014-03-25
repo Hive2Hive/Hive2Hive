@@ -21,7 +21,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 
 public final class H2HEncryptionUtil {
 
-	private static final String PROTECTION_SIGNATURE_ALGORITHM = "DSA";
+	private static final String PROTECTION_SIGNATURE_ALGORITHM = "RSA";
 	
 	private H2HEncryptionUtil() {
 	}
