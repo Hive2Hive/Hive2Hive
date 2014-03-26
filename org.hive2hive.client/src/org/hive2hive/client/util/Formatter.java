@@ -1,4 +1,4 @@
-package org.hive2hive.client;
+package org.hive2hive.client.util;
 
 import static org.fusesource.jansi.Ansi.ansi;
 

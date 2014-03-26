@@ -1,10 +1,11 @@
-package org.hive2hive.client.menu;
+package org.hive2hive.client.menu.advanced;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 
 public class UtilMenu extends ConsoleMenu {
 

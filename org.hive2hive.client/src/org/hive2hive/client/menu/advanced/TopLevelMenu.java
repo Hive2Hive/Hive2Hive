@@ -1,4 +1,4 @@
-package org.hive2hive.client.menu;
+package org.hive2hive.client.menu.advanced;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -13,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.Formatter;
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;

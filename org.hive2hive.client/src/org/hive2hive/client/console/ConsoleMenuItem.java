@@ -1,6 +1,6 @@
-package org.hive2hive.client.menuitem;
+package org.hive2hive.client.console;
 
-import org.hive2hive.client.Formatter;
+import org.hive2hive.client.util.Formatter;
 
 /**
  * An abstract console menu item representing an option. It predefines the execution of an operation by means

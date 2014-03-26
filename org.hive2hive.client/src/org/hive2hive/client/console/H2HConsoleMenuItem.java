@@ -1,6 +1,6 @@
-package org.hive2hive.client.menuitem;
+package org.hive2hive.client.console;
 
-import org.hive2hive.client.Formatter;
+import org.hive2hive.client.util.Formatter;
 
 /**
  * A specified console menu item. Allows to check preconditions before executing the operation.

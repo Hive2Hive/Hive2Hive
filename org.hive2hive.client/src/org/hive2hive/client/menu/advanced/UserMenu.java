@@ -1,7 +1,8 @@
-package org.hive2hive.client.menu;
+package org.hive2hive.client.menu.advanced;
 
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.core.security.UserCredentials;
 
 /**

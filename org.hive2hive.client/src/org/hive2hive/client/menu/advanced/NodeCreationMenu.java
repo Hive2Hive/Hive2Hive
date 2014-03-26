@@ -1,11 +1,12 @@
-package org.hive2hive.client.menu;
+package org.hive2hive.client.menu.advanced;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
 
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;

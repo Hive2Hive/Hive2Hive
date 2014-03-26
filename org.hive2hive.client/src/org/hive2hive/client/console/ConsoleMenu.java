@@ -1,12 +1,9 @@
-package org.hive2hive.client.menu;
+package org.hive2hive.client.console;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.hive2hive.client.Formatter;
-import org.hive2hive.client.console.UIConsole;
-import org.hive2hive.client.menuitem.ConsoleMenuItem;
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.util.Formatter;
 
 /**
  * An abstract console menu to be used with a {@link UIConsole}.
