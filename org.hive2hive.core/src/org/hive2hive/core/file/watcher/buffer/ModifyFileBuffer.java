@@ -1,6 +1,7 @@
 package org.hive2hive.core.file.watcher.buffer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,27 +13,55 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HEncryptionUtil;
 
 public class ModifyFileBuffer extends BaseFileBuffer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ModifyFileBuffer.class);
 
-	public ModifyFileBuffer(IFileManager fileManager, File root) {
-		super(fileManager, root);
+	public ModifyFileBuffer(IFileManager fileManager) {
+		super(fileManager);
 	}
 
 	@Override
 	protected void processBuffer(IFileBufferHolder buffer) {
 		List<File> fileBuffer = buffer.getFileBuffer();
+		Set<FileTaste> syncFiles = buffer.getSyncFiles();
+
+		/**
+		 * Start the verification: remove files that are not in the DHT yet and remove files that equal to the
+		 * ones in the DHT.
+		 */
 		Set<File> toDelete = new HashSet<File>();
 		for (File file : fileBuffer) {
-			if (!buffer.getSyncFiles().contains(file)) {
-				// don't modify a file that is not in the DHT
-				toDelete.add(file);
+			FileTaste fileTaste = null;
+			for (FileTaste syncFile : syncFiles) {
+				if (syncFile.getFile().equals(file)) {
+					fileTaste = syncFile;
+					break;
+				}
 			}
 
-			// TODO: check for MD5 hashes, if equal, skip the file
+			if (fileTaste == null) {
+				// don't modify a file that is not in the DHT
+				toDelete.add(file);
+			} else {
+				try {
+					// check for MD5 hashes, if equal, skip the file
+					byte[] fileHash = EncryptionUtil.generateMD5Hash(file);
+					if (H2HEncryptionUtil.compareMD5(fileHash, fileTaste.getMd5())) {
+						// hashes are equal, no need to upload it to the DHT
+						toDelete.add(file);
+					}
+				} catch (IOException e) {
+					logger.warn("Could not generate the MD5 hash of the file to be able to compare against the file taste");
+				}
+			}
 		}
+
+		fileBuffer.removeAll(toDelete);
 
 		for (File file : fileBuffer) {
 			try {

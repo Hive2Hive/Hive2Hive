@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +43,7 @@ import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDis
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.implementations.files.download.FindInUserProfileStep;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.core.processes.implementations.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.move.RelinkUserProfileStep;
@@ -314,10 +314,13 @@ public final class ProcessFactory {
 	 * 
 	 * @param networkManager The network manager / node on which the file list operations should be executed.
 	 * @return A file list process.
+	 * @throws NoSessionException
 	 */
-	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
-		GetFileListStep listStep = new GetFileListStep(networkManager);
-		return new AsyncResultComponent<List<Path>>(listStep);
+	public IResultProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
+			throws NoSessionException {
+		H2HSession session = networkManager.getSession();
+		GetFileListStep listStep = new GetFileListStep(session.getProfileManager(), session.getRootFile());
+		return new AsyncResultComponent<List<FileTaste>>(listStep);
 	}
 
 	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,

@@ -13,12 +13,14 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -79,7 +81,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 
 	@Test
 	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, NoSessionException {
 
 		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 		UserProfileManager profileManager = new UserProfileManager(client, credentials);
@@ -97,13 +99,13 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 
 		// TODO maybe move to UseCaseTestUtil
 		// test process
-		IResultProcessComponent<List<Path>> fileListProcess = ProcessFactory.instance()
+		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance()
 				.createFileListProcess(client);
-		TestResultProcessComponentListener<List<Path>> listener = new TestResultProcessComponentListener<List<Path>>();
+		TestResultProcessComponentListener<List<FileTaste>> listener = new TestResultProcessComponentListener<List<FileTaste>>();
 		fileListProcess.attachListener(listener);
 		fileListProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(1000);
+		H2HWaiter waiter = new H2HWaiter(10000);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasResultArrived());

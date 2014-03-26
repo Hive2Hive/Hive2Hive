@@ -14,14 +14,15 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 
 public class DeleteFileBuffer extends BaseFileBuffer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileBuffer.class);
 	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000; // timeout to omit blocks
 
-	public DeleteFileBuffer(IFileManager fileManager, File root) {
-		super(fileManager, root);
+	public DeleteFileBuffer(IFileManager fileManager) {
+		super(fileManager);
 	}
 
 	/**
@@ -31,12 +32,20 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 	 */
 	protected void processBuffer(IFileBufferHolder buffer) {
 		List<File> bufferedFiles = buffer.getFileBuffer();
-		Set<File> syncFiles = buffer.getSyncFiles();
+		Set<FileTaste> syncFiles = buffer.getSyncFiles();
 
 		Set<File> toRemove = new HashSet<File>();
 		for (File file : bufferedFiles) {
-			if (!syncFiles.contains(file)) {
-				// has already been deleted
+			boolean found = false;
+			for (FileTaste fileTaste : syncFiles) {
+				if (fileTaste.getFile().equals(file)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				// has already been removed, is not in UP anymore
 				toRemove.add(file);
 			}
 		}

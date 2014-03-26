@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 
 /**
  * Holds two file lists:<br>
@@ -29,7 +30,7 @@ public class FileBufferHolder implements IFileBufferHolder {
 
 	private final List<File> fileBuffer;
 	private final CountDownLatch syncFilesLatch;
-	private Set<File> syncFiles;
+	private Set<FileTaste> syncFiles;
 
 	public FileBufferHolder() {
 		this.fileBuffer = new ArrayList<File>();
@@ -46,7 +47,7 @@ public class FileBufferHolder implements IFileBufferHolder {
 	/**
 	 * Set the files which are in sync with the DHT
 	 */
-	public void setSyncFiles(Set<File> syncFiles) {
+	public void setSyncFiles(Set<FileTaste> syncFiles) {
 		this.syncFiles = syncFiles;
 	}
 
@@ -71,7 +72,7 @@ public class FileBufferHolder implements IFileBufferHolder {
 	}
 
 	@Override
-	public Set<File> getSyncFiles() {
+	public Set<FileTaste> getSyncFiles() {
 		return syncFiles;
 	}
 

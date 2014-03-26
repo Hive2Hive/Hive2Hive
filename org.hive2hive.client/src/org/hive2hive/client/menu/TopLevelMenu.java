@@ -3,7 +3,6 @@ package org.hive2hive.client.menu;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,6 +24,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 
 /**
  * The top-level menu of the {@link ConsoleClient}.
@@ -200,15 +200,15 @@ public final class TopLevelMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Get File list") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
-				IResultProcessComponent<List<Path>> process = nodeMenu.getH2HNode().getFileManager()
+				IResultProcessComponent<List<FileTaste>> process = nodeMenu.getH2HNode().getFileManager()
 						.getFileList();
-				IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
+				IProcessResultListener<List<FileTaste>> resultListener = new IProcessResultListener<List<FileTaste>>() {
 					@Override
-					public void onResultReady(List<Path> result) {
+					public void onResultReady(List<FileTaste> result) {
 						// print the digest
 						System.out.println("File List:");
-						for (Path path : result) {
-							System.out.println("* " + path.toString());
+						for (FileTaste taste : result) {
+							System.out.println("* " + taste.getPath().toString());
 						}
 					}
 				};

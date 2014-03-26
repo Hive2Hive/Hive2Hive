@@ -2,7 +2,6 @@ package org.hive2hive.core.api.interfaces;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -11,6 +10,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 
 /**
@@ -116,7 +116,8 @@ public interface IFileManager extends IManager {
 	 * with the file tree on disk because Hive2Hive only performs file operations at manual calls.
 	 * 
 	 * @return an observable process component providing results of the request asynchronous.
+	 * @throws NoSessionException no user has logged in
 	 */
-	IResultProcessComponent<List<Path>> getFileList();
+	IResultProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
 
 }

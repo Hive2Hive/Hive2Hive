@@ -27,10 +27,10 @@ public class H2HFileListener implements FileAlterationListener {
 	private final IFileBuffer deleteFileBuffer;
 	private final ModifyFileBuffer modifyFileBuffer;
 
-	public H2HFileListener(IFileManager fileManager, File root) {
-		addFileBuffer = new AddFileBuffer(fileManager, root);
-		deleteFileBuffer = new DeleteFileBuffer(fileManager, root);
-		modifyFileBuffer = new ModifyFileBuffer(fileManager, root);
+	public H2HFileListener(IFileManager fileManager) {
+		addFileBuffer = new AddFileBuffer(fileManager);
+		deleteFileBuffer = new DeleteFileBuffer(fileManager);
+		modifyFileBuffer = new ModifyFileBuffer(fileManager);
 	}
 
 	@Override

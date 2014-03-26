@@ -19,6 +19,7 @@ import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
@@ -177,11 +178,12 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IResultProcessComponent<List<Path>> getFileList() {
-		IResultProcessComponent<List<Path>> fileListProcess = ProcessFactory.instance()
+	public IResultProcessComponent<List<FileTaste>> getFileList() throws NoSessionException {
+		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance()
 				.createFileListProcess(networkManager);
 
-		AsyncResultComponent<List<Path>> asyncProcess = new AsyncResultComponent<List<Path>>(fileListProcess);
+		AsyncResultComponent<List<FileTaste>> asyncProcess = new AsyncResultComponent<List<FileTaste>>(
+				fileListProcess);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
