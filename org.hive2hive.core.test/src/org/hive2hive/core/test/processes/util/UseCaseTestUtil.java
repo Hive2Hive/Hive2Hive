@@ -3,6 +3,7 @@ package org.hive2hive.core.test.processes.util;
 import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -21,8 +22,10 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.common.GetMetaFileStep;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HWaiter;
@@ -43,7 +46,7 @@ public class UseCaseTestUtil {
 	private UseCaseTestUtil() {
 		// only static methods
 	}
-	
+
 	public static void waitTillSucceded(TestProcessComponentListener listener, int maxSeconds) {
 		H2HWaiter waiter = new H2HWaiter(maxSeconds);
 		do {
@@ -69,7 +72,7 @@ public class UseCaseTestUtil {
 	public static void executeProcess(IProcessComponent process) {
 		executeProcessTillSucceded(process);
 	}
-	
+
 	public static void executeProcessTillSucceded(IProcessComponent process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
@@ -81,7 +84,7 @@ public class UseCaseTestUtil {
 			Assert.fail();
 		}
 	}
-	
+
 	public static void executeProcessTillFailed(IProcessComponent process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
@@ -195,19 +198,19 @@ public class UseCaseTestUtil {
 		return context.locations;
 	}
 
-	// public static IGetFileListProcess getDigest(NetworkManager networkManager,
-	// UserProfileManager profileManager, FileManager fileManager, IFileConfiguration config) {
-	//
-	// networkManager.setSession(new H2HSession(EncryptionUtil
-	// .generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), profileManager, config, fileManager));
-	// GetFileListProcess process = null;
-	// try {
-	// process = new GetFileListProcess(networkManager);
-	// executeProcess(process);
-	// } catch (NoSessionException e) {
-	// // never happens because session is set before
-	// }
-	//
-	// return process;
-	// }
+	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoSessionException,
+			InvalidProcessStateException {
+		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance()
+				.createFileListProcess(networkManager);
+		TestResultProcessComponentListener<List<FileTaste>> listener = new TestResultProcessComponentListener<List<FileTaste>>();
+		fileListProcess.attachListener(listener);
+		fileListProcess.start();
+
+		H2HWaiter waiter = new H2HWaiter(MAX_PROCESS_WAIT_TIME);
+		do {
+			waiter.tickASecond();
+		} while (!listener.hasResultArrived());
+
+		return listener.getResult();
+	}
 }
