@@ -13,7 +13,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  * Simple blocking listener to change the protection key. In contrast to the {@link FuturePutListener} this
  * listener does not re-try at failure but instantly return a fail.
  * 
- * @author Nico
+ * @author Nico, Seppi
  */
 public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut> {
 
@@ -22,14 +22,17 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 	private final Number160 locationKey;
 	private final Number160 domainKey;
 	private final Number160 contentKey;
+	private final Number160 versionKey;
 	private final CountDownLatch latch;
 
 	private boolean success = false;
 
-	public FutureChangeProtectionListener(Number160 locationKey, Number160 domainKey, Number160 contentKey) {
+	public FutureChangeProtectionListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
+			Number160 versionKey) {
 		this.locationKey = locationKey;
 		this.domainKey = domainKey;
 		this.contentKey = contentKey;
+		this.versionKey = versionKey;
 		this.latch = new CountDownLatch(1);
 	}
 
@@ -51,15 +54,15 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
 		if (future.isFailed()) {
-			logger.warn(String.format(
-					"Change was not successful. location key = '%s' domain key = '%s' content key = '%s'",
-					locationKey, domainKey, contentKey));
+			logger.warn(String
+					.format("Change was not successful. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
+							locationKey, domainKey, contentKey, versionKey));
 			success = false;
 			latch.countDown();
 		} else {
 			logger.trace(String
-					.format("Change of protection key successful. location key = '%s' domain key = '%s' content key = '%s'",
-							locationKey, domainKey, contentKey));
+					.format("Change of protection key successful. location key = '%s' domain key = '%s' content key = '%s'  version key = '%s'",
+							locationKey, domainKey, contentKey, versionKey));
 			success = true;
 			latch.countDown();
 		}

@@ -37,7 +37,8 @@ public interface IDataManager {
 	 * @param newKey the protection key (cannot be null) in order to prevent other users to overwrite
 	 * @return the success of the put
 	 */
-	boolean changeProtectionKey(String locationKey, String contentKey, int ttl, KeyPair oldKey, KeyPair newKey);
+	boolean changeProtectionKey(String locationKey, String contentKey, Number160 versionKey,
+			Number160 basedOnKey, int ttl, KeyPair oldKey, KeyPair newKey, byte[] hash);
 
 	/**
 	 * This is a special put because a {@link UserProfileTask} needs to be put to a certain place in order
