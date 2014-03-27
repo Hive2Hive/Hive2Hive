@@ -13,7 +13,6 @@ public class FileObserverMenu extends ConsoleMenu {
 	private final H2HFileWatcherBuilder watcherBuilder;
 	private H2HFileWatcher watcher;
 	private IFileManager fileManager;
-	private File rootDirectory;
 
 	public FileObserverMenu(File rootDirectory, IFileManager fileManager) {
 		watcherBuilder = new H2HFileWatcherBuilder(rootDirectory);
