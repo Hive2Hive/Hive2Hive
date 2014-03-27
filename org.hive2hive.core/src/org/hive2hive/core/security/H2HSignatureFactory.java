@@ -14,12 +14,12 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+import net.tomp2p.connection.SignatureFactory;
+import net.tomp2p.message.SignatureCodec;
+import net.tomp2p.p2p.PeerMaker;
+
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-
-import net.tomp2p.connection.SignatureFactory;
-import net.tomp2p.message.SHA1Signature;
-import net.tomp2p.p2p.PeerMaker;
 
 /**
  * The signature is done with SHA1withRSA.
@@ -85,9 +85,9 @@ public class H2HSignatureFactory implements SignatureFactory {
 		buf.writeShort(data.length);
 		buf.writeBytes(data);
 	}
-
+	
 	@Override
-	public SHA1Signature sign(PrivateKey privateKey, ByteBuf buf) throws InvalidKeyException,
+	public SignatureCodec sign(PrivateKey privateKey, ByteBuf buf) throws InvalidKeyException,
 			SignatureException, IOException {
 		Signature signature = signatureInstance();
 		signature.initSign(privateKey);
@@ -97,15 +97,16 @@ public class H2HSignatureFactory implements SignatureFactory {
 			ByteBuffer buffer = byteBuffers[i];
 			signature.update(buffer);
 		}
+		
 		byte[] signatureData = signature.sign();
 
-		SHA1Signature decodedSignature = new SHA1Signature();
+		SignatureCodec decodedSignature = new H2HSignatureCodec();
 		decodedSignature.decode(signatureData);
 		return decodedSignature;
 	}
 
 	@Override
-	public boolean verify(PublicKey publicKey, ByteBuf buf, SHA1Signature signatureEncoded)
+	public boolean verify(PublicKey publicKey, ByteBuf buf, SignatureCodec signatureEncoded)
 			throws SignatureException, InvalidKeyException, IOException {
 		Signature signature = signatureInstance();
 		signature.initVerify(publicKey);
@@ -131,4 +132,8 @@ public class H2HSignatureFactory implements SignatureFactory {
 		return signature;
 	}
 
+	@Override
+    public SignatureCodec signatureCodec() {
+	    return new H2HSignatureCodec();
+    }
 }
