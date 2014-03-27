@@ -18,6 +18,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
+import org.hive2hive.core.security.H2HSignatureFactory;
 
 public class Connection {
 
@@ -149,9 +150,11 @@ public class Connection {
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
 
 		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
+		clientConfig.signatureFactory(new H2HSignatureFactory());
 		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
 
 		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
+		serverConfig.signatureFactory(new H2HSignatureFactory());
 		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
 
 		try {
@@ -170,4 +173,5 @@ public class Connection {
 
 		return true;
 	}
+	
 }

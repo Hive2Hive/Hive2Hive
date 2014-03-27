@@ -17,7 +17,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IProvideN
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFileProtectionKey;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProtectionKeys, IProvideMetaFile,
@@ -37,7 +37,7 @@ public class ShareProcessContext implements IProvideProtectionKeys, IConsumeProt
 	public ShareProcessContext(File folder, UserPermission permission) {
 		this.folder = folder;
 		this.permission = permission;
-		this.newProtectionKeys = H2HEncryptionUtil.generateProtectionKeys();
+		this.newProtectionKeys = EncryptionUtil.generateRSAKeyPair();
 	}
 
 	public File getFolder() {

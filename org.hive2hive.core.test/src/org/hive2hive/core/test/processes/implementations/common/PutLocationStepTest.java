@@ -20,7 +20,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.implementations.common.base.DenyingPutTestStorage;
@@ -69,7 +69,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
 		newLocations.addPeerAddress(putter.getConnection().getPeer().getPeerAddress());
-		KeyPair protectionKeys = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair();
 
 		// initialize the process and the one and only step to test
 		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);
@@ -102,7 +102,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
 		newLocations.addPeerAddress(putter.getConnection().getPeer().getPeerAddress());
-		KeyPair protectionKeys = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair();
 
 		// initialize the process and the one and only step to test
 		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);

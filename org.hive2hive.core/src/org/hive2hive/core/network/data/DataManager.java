@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.SignatureException;
 
+import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
@@ -22,15 +23,18 @@ import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
+import org.hive2hive.core.security.H2HSignatureFactory;
 
 public class DataManager implements IDataManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DataManager.class);
 
 	private final NetworkManager networkManager;
+	private final SignatureFactory signatureFactory;
 
 	public DataManager(NetworkManager networkManager) {
 		this.networkManager = networkManager;
+		this.signatureFactory = new H2HSignatureFactory();
 	}
 
 	/**
@@ -99,7 +103,7 @@ public class DataManager implements IDataManager {
 			Data data = new Data(content);
 			data.ttlSeconds(content.getTimeToLive()).basedOn(content.getBasedOnKey());
 			if (protectionKey != null) {
-				data.setProtectedEntry().sign(protectionKey);
+				data.setProtectedEntry().sign(protectionKey, signatureFactory);
 				return getPeer().put(locationKey).setData(contentKey, data).setDomainKey(domainKey)
 						.setVersionKey(content.getVersionKey()).keyPair(protectionKey).start();
 			} else {
@@ -130,11 +134,11 @@ public class DataManager implements IDataManager {
 				return null;
 			} else {
 				// create dummy object to change the protection key
-				Data data = new Data("dummy");
+				Data data = new Data();
 				data.ttlSeconds(ttl);
 
 				// create a meta duplicate
-				data = data.setProtectedEntry().sign(newProtectionKey).duplicateMeta();
+				data = data.setProtectedEntry().sign(newProtectionKey, signatureFactory).duplicateMeta();
 
 				// the content will be protected after this put
 				if (oldProtectionKey == null) {
