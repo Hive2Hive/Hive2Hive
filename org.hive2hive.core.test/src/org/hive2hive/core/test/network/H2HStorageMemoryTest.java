@@ -18,7 +18,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.junit.AfterClass;
@@ -279,7 +279,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		Number160 locationKey = Number160.createHash(node.getNodeId());
 		Number160 domainKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKey = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
 
 		H2HTestData data1 = new H2HTestData(NetworkTestUtil.randomString());
 		FuturePut futurePut = node.getDataManager().put(locationKey, domainKey, contentKey, data1,

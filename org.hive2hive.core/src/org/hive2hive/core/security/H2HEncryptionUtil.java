@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -21,19 +19,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 
 public final class H2HEncryptionUtil {
 
-	private static final String PROTECTION_SIGNATURE_ALGORITHM = "RSA";
-	
 	private H2HEncryptionUtil() {
-	}
-
-	public static KeyPair generateProtectionKeys() {
-		KeyPairGenerator gen = null;
-		try {
-			gen = KeyPairGenerator.getInstance(PROTECTION_SIGNATURE_ALGORITHM);
-		} catch (NoSuchAlgorithmException e) {
-			return null;
-		}
-		return gen.generateKeyPair();
 	}
 
 	/**

@@ -13,7 +13,7 @@ import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -39,7 +39,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKey = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
 
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
@@ -68,8 +68,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKey = H2HEncryptionUtil.generateProtectionKeys();
-
+		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
+		
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		H2HTestData data1 = new H2HTestData("bla1");
@@ -106,8 +106,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKey1 = H2HEncryptionUtil.generateProtectionKeys();
-		KeyPair protectionKey2 = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 		
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
@@ -136,8 +136,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKey1 = H2HEncryptionUtil.generateProtectionKeys();
-		KeyPair protectionKey2 = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 		
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
@@ -178,8 +178,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		Number160 locationKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 domainKey = Number160.createHash(NetworkTestUtil.randomString());
 		Number160 contentKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKey1 = H2HEncryptionUtil.generateProtectionKeys();
-		KeyPair protectionKey2 = H2HEncryptionUtil.generateProtectionKeys();
+		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 		
 		NetworkManager node = network.get(random.nextInt(networkSize));
 

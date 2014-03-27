@@ -10,7 +10,6 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 
 /**
  * File which contains all keys and meta information about the files of the owner.
@@ -34,7 +33,7 @@ public class UserProfile extends NetworkContent {
 
 		// create the root node
 		root = new FolderIndex(null, encryptionKeys, null);
-		root.setProtectionKeys(H2HEncryptionUtil.generateProtectionKeys());
+		root.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
 
