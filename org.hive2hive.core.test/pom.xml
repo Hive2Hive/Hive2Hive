@@ -1,7 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-  <artifactId>org.hive2hive.core.test</artifactId>
+	<artifactId>org.hive2hive.core.test</artifactId>
+	<packaging>jar</packaging>
+
+	<name>Hive2Hive test cases</name>
+	<description>This module contains core-tests of the Hive2Hive library.</description>
+
+	<parent>
+		<groupId>org.hive2hive</groupId>
+		<artifactId>org.hive2hive.parent</artifactId>
+		<version>1.1.0</version>
+	</parent>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -12,6 +23,7 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -25,10 +37,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<parent>
-		<groupId>org.hive2hive</groupId>
-		<artifactId>org.hive2hive.core</artifactId>
-		<version>1.1.0</version>
-	</parent>
-	<packaging>pom</packaging>
 </project>
