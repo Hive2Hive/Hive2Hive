@@ -4,6 +4,7 @@ import java.security.KeyPair;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 
 /**
@@ -19,13 +20,10 @@ public interface IDataManager {
 	/**
 	 * Put some content to the DHT
 	 * 
-	 * @param locationKey the location key (which peer it stores)
-	 * @param contentKey the content key (which type of document)
-	 * @param content the content to add to the DHT
-	 * @param protectionKey the protection key (can be null) in order to prevent other users to overwrite
+	 * @param parameters containing data and keys for routing and signing
 	 * @return the success of the put
 	 */
-	boolean put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey);
+	boolean put(IParameters parameters);
 
 	/**
 	 * Put some content to the DHT and change its protection key
@@ -47,20 +45,27 @@ public interface IDataManager {
 	 * @param userId the user for which the task is intended
 	 * @param contentKey the proxy peer of the user (ususally a hash of the user id of the receiver)
 	 * @param content the (encrypted) user profile task
-	 * @param protectionKey heavily recommended thus no other user can delete or overwrite the task
+	 * @param protectionKeys heavily recommended thus no other user can delete or overwrite the task
 	 * @return the success of the put
 	 */
 	boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
-			KeyPair protectionKey);
+			KeyPair protectionKeys);
 
 	/**
-	 * Gets some content from the DHT.
+	 * Gets some content from the DHT, which is the newest version.
 	 * 
-	 * @param locationKey the location key of the content
-	 * @param contentKey the content key (which type of document)
+	 * @param parameters containing the keys for routing
 	 * @return an encrypted or unencrypted content or null if no content was found
 	 */
-	NetworkContent get(String locationKey, String contentKey);
+	NetworkContent get(IParameters parameters);
+	
+	/**
+	 * Gets a specific version of some content from the DHT.
+	 * 
+	 * @param parameters containing the keys for routing
+	 * @return an encrypted or unencrypted content or null if no content was found
+	 */
+	NetworkContent getVersion(IParameters parameters);
 
 	/**
 	 * This is a special get because a {@link UserProfileTask} is stored at a certain pre-defined place.
@@ -75,26 +80,19 @@ public interface IDataManager {
 	/**
 	 * Remove some content of the DHT. All versions are removed.
 	 * 
-	 * @param locationKey the location key (which peer it stores)
-	 * @param contentKey the content key (which type of document)
-	 * @param protectionKey if the content is protected, the very same protection keys must be handed as well
-	 *            to be able to delete the content
+	 * @param parameters containing the keys for routing and signing
 	 * @return the success of the removal
 	 */
-	boolean remove(String locationKey, String contentKey, KeyPair protectionKey);
+	boolean remove(IParameters parameters);
 
 	/**
 	 * Removes a specific version of a content in the DHT, not touching other versions. This is mostly
 	 * required for roll-backs or to resolve concurrency problems.
 	 * 
-	 * @param locationKey the location key (which peer it stores)
-	 * @param contentKey the content key (which type of document)
-	 * @param versionKey the specific version to remove
-	 * @param protectionKey if the content is protected, the very same protection keys must be handed as well
-	 *            to be able to delete the content
+	 * @param parameters containing the keys for routing and signing
 	 * @return the success of the removal
 	 */
-	boolean remove(String locationKey, String contentKey, Number160 versionKey, KeyPair protectionKey);
+	boolean removeVersion(IParameters parameters);
 
 	/**
 	 * This is a special removal because a {@link UserProfileTask} is stored at a certain pre-defined place.
