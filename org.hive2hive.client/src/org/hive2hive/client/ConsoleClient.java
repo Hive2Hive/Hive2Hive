@@ -12,7 +12,10 @@ import org.hive2hive.client.menu.TopLevelMenu;
 public class ConsoleClient {
 
 	public static void main(String[] args) {
+		new ConsoleClient().start();
+	}
 
+	public void start() {
 		AnsiConsole.systemInstall();
 		Formatter.setDefaultForeground();
 		printHeader();
