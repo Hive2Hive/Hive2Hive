@@ -60,26 +60,84 @@ public interface IParameters {
 	public Number160 getCKey();
 
 	/**
-	 * Forth dimension of <code>TomP2P</code> key resolution. Stored content on a node can have multiple versions.
+	 * Forth dimension of <code>TomP2P</code> key resolution. Stored content on a node can have multiple
+	 * versions.
 	 * 
 	 * @return hashed version key
 	 */
 	public Number160 getVersionKey();
-	
+
 	/**
-	 * Get the key containing all four <code>TomP2P</code> key dimensions. 
+	 * Some data can base on other data. The based on key is the version key of the basing on data.
+	 * 
+	 * @return a based on key
+	 */
+	public Number160 getBasedOnKey();
+
+	/**
+	 * Get the key containing all four <code>TomP2P</code> key dimensions.
 	 * 
 	 * @return key containing the location, domain, content and version key
 	 */
 	public Number640 getKey();
-	
+
 	/**
 	 * All content in the network gets signed in order to prevent unauthorized overwrites or deletes.
 	 * 
 	 * @return content protection key pair
 	 */
 	public KeyPair getProtectionKeys();
-	
+
+	/**
+	 * Get data which gets stored in the network
+	 * 
+	 * @return data to store
+	 */
 	public NetworkContent getData();
+
+	/**
+	 * All content in the network has a time-to-live value (in seconds). If data is expired it gets
+	 * automatically removed from network.
+	 * 
+	 * @return time-to-live value in seconds
+	 */
+	public int getTTL();
+
+	/**
+	 * Sometimes the content protection keys have to be changed.
+	 * 
+	 * @return new content protection keys
+	 */
+	public KeyPair getNewProtectionKeys();
+
+	/**
+	 * Set a flag which indicates the signature procedure to store the created hash.
+	 * 
+	 * @param hashFlag <code>true</code> for storing the hash, otherwise <code>false</code> 
+	 * @return it-self (builder pattern) 
+	 */
+	public IParameters setHashFlag(boolean hashFlag);
+
+	/**
+	 * Set a flag which indicates that the signature procedure has to store the created hash.
+	 * 
+	 * @return <code>true</code> if hash has to be stored, otherwise <code>false</code>
+	 */
+	public boolean getHashFlag();
+
+	/**
+	 * Set the hash of some data which has been signed in front of putting in network.
+	 * 
+	 * @param hash of the signed data
+	 * @return it-self (builder pattern)
+	 */
+	public IParameters setHash(byte[] hash);
+
+	/**
+	 * Get the hash of the signed data.
+	 * 
+	 * @return hash of the signed data
+	 */
+	public byte[] getHash();
 
 }

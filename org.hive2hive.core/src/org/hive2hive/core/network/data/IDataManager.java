@@ -28,15 +28,10 @@ public interface IDataManager {
 	/**
 	 * Put some content to the DHT and change its protection key
 	 * 
-	 * @param locationKey the location key (which peer it stores)
-	 * @param contentKey the content key (which type of document)
-	 * @param ttl the time to live for the object
-	 * @param oldKey the protection key (can be null) in order to prevent other users to overwrite
-	 * @param newKey the protection key (cannot be null) in order to prevent other users to overwrite
+	 * @param parameters containing all necessary keys
 	 * @return the success of the put
 	 */
-	boolean changeProtectionKey(String locationKey, String contentKey, Number160 versionKey,
-			Number160 basedOnKey, int ttl, KeyPair oldKey, KeyPair newKey, byte[] hash);
+	boolean changeProtectionKey(IParameters parameters);
 
 	/**
 	 * This is a special put because a {@link UserProfileTask} needs to be put to a certain place in order

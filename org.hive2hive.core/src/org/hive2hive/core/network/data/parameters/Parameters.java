@@ -22,8 +22,13 @@ public class Parameters implements IParameters {
 	private Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 cKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 vKey = H2HConstants.TOMP2P_DEFAULT_KEY;
+	private Number160 bKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private NetworkContent data;
 	private KeyPair protectionKeys;
+	private KeyPair newProtectionKeys;
+	private int ttl = -1;
+	private boolean hashFlag = false;
+	private byte[] hash;
 
 	public Parameters setLocationKey(String locationKey) {
 		this.locationKey = locationKey;
@@ -111,6 +116,58 @@ public class Parameters implements IParameters {
 	@Override
 	public Number640 getKey() {
 		return new Number640(lKey, dKey, cKey, vKey);
+	}
+	
+	public Parameters setBasedOnKey(Number160 basedOnKey) {
+		this.bKey = basedOnKey;
+		return this;
+	}
+
+	@Override
+	public Number160 getBasedOnKey() {
+		return bKey;
+	}
+
+	public Parameters setTTL(int ttl) {
+		this.ttl = ttl;
+		return this;
+	}
+
+	@Override
+	public int getTTL() {
+		return ttl;
+	}
+
+	public Parameters setNewProtectionKEs(KeyPair newProtectionKeys) {
+		this.newProtectionKeys = newProtectionKeys;
+		return this;
+	}
+
+	@Override
+	public KeyPair getNewProtectionKeys() {
+		return newProtectionKeys;
+	}
+
+	@Override
+	public Parameters setHashFlag(boolean hashFlag) {
+		this.hashFlag = hashFlag;
+		return this;
+	}
+
+	@Override
+	public boolean getHashFlag() {
+		return hashFlag;
+	}
+	
+	@Override
+	public Parameters setHash(byte[] hash) {
+		this.hash = hash;
+		return this;
+	}
+	
+	@Override
+	public byte[] getHash() {
+		return hash;
 	}
 
 	@Override

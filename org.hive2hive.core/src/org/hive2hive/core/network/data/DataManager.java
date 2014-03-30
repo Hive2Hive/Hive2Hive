@@ -71,19 +71,13 @@ public class DataManager implements IDataManager {
 	}
 
 	@Override
-	public boolean changeProtectionKey(String locationKey, String contentKey, Number160 versionKey,
-			Number160 basedOnKey, int ttl, KeyPair oldKey, KeyPair newKey, byte[] hash) {
-		Number160 lKey = Number160.createHash(locationKey);
-		Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
-		Number160 cKey = Number160.createHash(contentKey);
-		FuturePut putFuture = changeProtectionKey(lKey, dKey, cKey, versionKey, basedOnKey, ttl, oldKey,
-				newKey, hash);
+	public boolean changeProtectionKey(IParameters parameters) {
+		FuturePut putFuture = changeProtectionKeyUnblocked(parameters);
 		if (putFuture == null) {
 			return false;
 		}
 
-		FutureChangeProtectionListener listener = new FutureChangeProtectionListener(lKey, dKey, cKey,
-				versionKey);
+		FutureChangeProtectionListener listener = new FutureChangeProtectionListener(parameters);
 		putFuture.addListener(listener);
 		return listener.await();
 	}
@@ -113,15 +107,15 @@ public class DataManager implements IDataManager {
 			if (parameters.getProtectionKeys() != null) {
 				data.setProtectedEntry().sign(parameters.getProtectionKeys(), signatureFactory);
 
-				// // check if content can be shared
-				// if (content instanceof SharableNetworkContent) {
-				// // decrypt signature to get hash of the object
-				// Cipher rsa = Cipher.getInstance("RSA");
-				// rsa.init(Cipher.DECRYPT_MODE, protectionKey.getPublic());
-				// byte[] hash = rsa.doFinal(data.signature().encode());
-				// // store hash
-				// ((SharableNetworkContent) content).setHash(hash);
-				// }
+				// check if hash creation is needed
+				if (parameters.getHashFlag()) {
+					// decrypt signature to get hash of the object
+					Cipher rsa = Cipher.getInstance("RSA");
+					rsa.init(Cipher.DECRYPT_MODE, parameters.getProtectionKeys().getPublic());
+					byte[] hash = rsa.doFinal(data.signature().encode());
+					// store hash
+					parameters.setHash(hash);
+				}
 
 				return getPeer().put(parameters.getLKey()).setData(parameters.getCKey(), data)
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey())
@@ -130,39 +124,38 @@ public class DataManager implements IDataManager {
 				return getPeer().put(parameters.getLKey()).setData(parameters.getCKey(), data)
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey()).start();
 			}
-		} catch (IOException | InvalidKeyException | SignatureException e) {
+		} catch (IOException | InvalidKeyException | SignatureException | NoSuchAlgorithmException
+				| NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.error(String.format("Put failed. %s exception = '%s'", parameters.toString(),
 					e.getMessage()));
 			return null;
 		}
 	}
 
-	public FuturePut changeProtectionKey(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, Number160 basedOnKey, int ttl, KeyPair oldProtectionKey,
-			KeyPair newProtectionKey, byte[] hash) {
-		logger.debug(String
-				.format("change content protection key location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
-						locationKey, domainKey, contentKey, versionKey));
+	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
+		logger.debug(String.format("Change content protection key. %s", parameters.toString()));
 		try {
 			// create dummy object to change the protection key
-			Data data = new Data().ttlSeconds(ttl).basedOn(basedOnKey);
+			Data data = new Data().basedOn(parameters.getBasedOnKey());
+			if (parameters.getTTL() != -1)
+				data.ttlSeconds(parameters.getTTL());
 
 			// encrypt hash with new key pair to get the new signature (without having the data object)
 			Cipher rsa = Cipher.getInstance("RSA");
-			rsa.init(Cipher.ENCRYPT_MODE, newProtectionKey.getPrivate());
-			byte[] newSignature = rsa.doFinal(hash);
+			rsa.init(Cipher.ENCRYPT_MODE, parameters.getNewProtectionKeys().getPrivate());
+			byte[] newSignature = rsa.doFinal(parameters.getHash());
 
 			// sign duplicated meta (don't forget to set signed flag)
 			data = data.signature(signatureCodec.decode(newSignature)).signed(true).duplicateMeta();
 
 			// change the protection key through a put meta
-			return getPeer().put(locationKey).setDomainKey(domainKey).putMeta().setData(contentKey, data)
-					.setVersionKey(versionKey).keyPair(oldProtectionKey).start();
+			return getPeer().put(parameters.getLKey()).setDomainKey(parameters.getDKey()).putMeta()
+					.setData(parameters.getCKey(), data).setVersionKey(parameters.getVersionKey())
+					.keyPair(parameters.getProtectionKeys()).start();
 		} catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e) {
-			logger.error(String
-					.format("Change protection key failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s' exception = '%s'",
-							locationKey, domainKey, contentKey, versionKey, e.getMessage()));
+			logger.error(String.format("Change protection key failed. %s exception = '%s'",
+					parameters.toString(), e.getMessage()));
 			return null;
 		}
 	}
