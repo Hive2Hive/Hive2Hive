@@ -7,7 +7,6 @@ import java.security.KeyPair;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -20,6 +19,7 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -36,7 +36,6 @@ import org.junit.Test;
  * Tests deleting a file.
  * 
  * @author Nico
- * 
  */
 public class DeleteFileTest extends H2HJUnitTest {
 
@@ -86,8 +85,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
 			for (String key : version.getChunkIds()) {
-				FutureGet get = client.getDataManager().get(Number160.createHash(key),
-						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.FILE_CHUNK));
+				FutureGet get = client.getDataManager().getUnblocked(
+						new Parameters().setLocationKey(key).setContentKey(H2HConstants.FILE_CHUNK));
 				get.awaitUninterruptibly();
 				get.getFutureRequests().awaitUninterruptibly();
 

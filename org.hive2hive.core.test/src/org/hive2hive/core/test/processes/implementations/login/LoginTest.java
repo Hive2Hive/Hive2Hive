@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
@@ -15,6 +14,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -34,7 +34,6 @@ import org.junit.Test;
  * Tests the login procedure. Should not be able to login if the credentials are wrong.
  * 
  * @author Nico
- * 
  */
 public class LoginTest extends H2HJUnitTest {
 
@@ -67,8 +66,9 @@ public class LoginTest extends H2HJUnitTest {
 		Assert.assertEquals(userCredentials.getUserId(), client.getUserId());
 
 		// verify the locations map
-		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userCredentials.getUserId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
+		FutureGet futureGet = client.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(
+						H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 
 		Locations locations = (Locations) futureGet.getData().object();

@@ -3,13 +3,13 @@ package org.hive2hive.core.test.processes.implementations.common;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -48,12 +48,11 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		Locations newLocations = new Locations(userId);
 		newLocations.addPeerAddress(getter.getConnection().getPeer().getPeerAddress());
 
-		Number160 lKey = Number160.createHash(userId);
-		Number160 dKey = Number160.ZERO;
-		Number160 cKey = Number160.createHash(H2HConstants.USER_LOCATIONS);
-
 		// put the locations to the DHT
-		proxy.getDataManager().put(lKey, dKey, cKey, newLocations, null).awaitUninterruptibly();
+		proxy.getDataManager()
+				.putUnblocked(
+						new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)
+								.setData(newLocations)).awaitUninterruptibly();
 
 		GetLocationsContext context = new GetLocationsContext();
 		GetUserLocationsStep step = new GetUserLocationsStep(userId, context, getter.getDataManager());

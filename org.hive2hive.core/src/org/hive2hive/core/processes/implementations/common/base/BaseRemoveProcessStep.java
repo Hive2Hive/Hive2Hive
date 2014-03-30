@@ -3,7 +3,6 @@ package org.hive2hive.core.processes.implementations.common.base;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -40,26 +39,18 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		this.dataManager = dataManager;
 	}
 
-	protected void remove(PublicKey locationKey, String contentKey, NetworkContent contentToRemove,
-			KeyPair protectionKey) throws RemoveFailedException {
-		remove(H2HEncryptionUtil.key2String(locationKey), contentKey, contentToRemove, protectionKey);
+	protected void remove(PublicKey locationKey, String contentKey, KeyPair protectionKey)
+			throws RemoveFailedException {
+		remove(H2HEncryptionUtil.key2String(locationKey), contentKey, protectionKey);
 	}
 
-	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove,
-			KeyPair protectionKey) throws RemoveFailedException {
+	protected void remove(String locationKey, String contentKey, KeyPair protectionKey)
+			throws RemoveFailedException {
 		parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setVersionKey(contentToRemove.getVersionKey()).setData(contentToRemove)
 				.setProtectionKeys(protectionKey);
 
-		boolean success = false;
-		if (parameters.getData() == null
-				|| contentToRemove.getVersionKey().equals(H2HConstants.TOMP2P_DEFAULT_KEY)) {
-			// deletes all versions
-			success = dataManager.remove(parameters);
-		} else {
-			// deletes selected version
-			success = dataManager.removeVersion(parameters);
-		}
+		// deletes all versions
+		boolean success = dataManager.remove(parameters);
 		removePerformed = true;
 
 		if (!success) {

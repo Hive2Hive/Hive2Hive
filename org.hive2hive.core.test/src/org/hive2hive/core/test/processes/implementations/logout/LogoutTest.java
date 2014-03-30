@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
@@ -25,8 +25,7 @@ import org.junit.Test;
 /**
  * Tests the logout procedure.
  * 
- * @author Christian
- * 
+ * @author Christian, Seppi
  */
 public class LogoutTest extends H2HJUnitTest {
 
@@ -51,8 +50,9 @@ public class LogoutTest extends H2HJUnitTest {
 		NetworkManager client = network.get(0);
 
 		// verify the locations map before logout
-		FutureGet futureGet = client.getDataManager().get(Number160.createHash(userCredentials.getUserId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
+		FutureGet futureGet = client.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(
+						H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 		futureGet.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) futureGet.getData().object();
@@ -64,8 +64,9 @@ public class LogoutTest extends H2HJUnitTest {
 		UseCaseTestUtil.executeProcess(process);
 
 		// verify the locations map after logout
-		FutureGet futureGet2 = client.getDataManager().get(Number160.createHash(userCredentials.getUserId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS));
+		FutureGet futureGet2 = client.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(
+						H2HConstants.USER_LOCATIONS));
 		futureGet2.awaitUninterruptibly();
 		futureGet2.getFutureRequests().awaitUninterruptibly();
 		Locations locations2 = (Locations) futureGet2.getData().object();

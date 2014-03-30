@@ -7,6 +7,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.PutUserProfileTaskStep;
+import org.hive2hive.core.test.network.userprofiletask.TestUserProfileTask;
 
 public class TestPutUserProfileTaskStep extends PutUserProfileTaskStep {
 

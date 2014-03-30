@@ -1,10 +1,9 @@
 package org.hive2hive.core.test.processes.implementations.notify;
 
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.test.H2HTestData;
@@ -14,7 +13,6 @@ import org.junit.Assert;
  * Message to test whether a notification is received. As a verification, it puts a content on a given address
  * 
  * @author Nico
- * 
  */
 public class TestDirectNotificationMessage extends BaseDirectMessage {
 
@@ -37,8 +35,9 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 		try {
 			networkManager
 					.getDataManager()
-					.put(Number160.createHash(verificationLoc), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(verificationContentKey), verificationData, null)
+					.putUnblocked(
+							new Parameters().setLocationKey(verificationLoc)
+									.setContentKey(verificationContentKey).setData(verificationData))
 					.awaitUninterruptibly();
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();
