@@ -15,7 +15,6 @@ import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
  * to hand over the required data.
  * 
  * @author Nico
- * 
  */
 public class ChangeProtectionKeyStep extends BasePutProcessStep {
 

@@ -4,6 +4,8 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -28,7 +30,8 @@ public abstract class BaseGetProcessStep extends ProcessStep {
 	}
 
 	protected NetworkContent get(String locationKey, String contentKey) throws InvalidProcessStateException {
-		return dataManager.get(locationKey, contentKey);
+		IParameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey);
+		return dataManager.get(parameters);
 	}
 
 }

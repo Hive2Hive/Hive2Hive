@@ -20,6 +20,8 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -253,8 +255,9 @@ public class UserProfileManager {
 				return;
 			}
 
-			NetworkContent content = dataManager.get(credentials.getProfileLocationKey(),
-					H2HConstants.USER_PROFILE);
+			IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
+					.setContentKey(H2HConstants.USER_PROFILE);
+			NetworkContent content = dataManager.get(parameters);
 			entry.processGetResult(content);
 		}
 
@@ -273,9 +276,10 @@ public class UserProfileManager {
 				DataManager dataManager = networkManager.getDataManager();
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
-				boolean success = dataManager.put(credentials.getProfileLocationKey(),
-						H2HConstants.USER_PROFILE, encryptedUserProfile, entry.getUserProfile()
-								.getProtectionKeys());
+				IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
+						.setContentKey(H2HConstants.USER_PROFILE).setData(encryptedUserProfile)
+						.setProtectionKeys(entry.getUserProfile().getProtectionKeys());
+				boolean success = dataManager.put(parameters);
 				if (!success)
 					entry.setPutError(new PutFailedException("Put failed."));
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {

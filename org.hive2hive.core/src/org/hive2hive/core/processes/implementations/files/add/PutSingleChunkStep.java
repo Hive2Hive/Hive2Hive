@@ -17,6 +17,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -29,7 +30,6 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * Puts a single chunk without storing it anywhere (thus large files should be no problem).
  * 
  * @author Nico
- * 
  */
 public class PutSingleChunkStep extends ProcessStep {
 
@@ -41,6 +41,7 @@ public class PutSingleChunkStep extends ProcessStep {
 	private IDataManager dataManager;
 	private final String chunkId;
 
+	private Parameters parameters;
 	// for rollback
 	private boolean putPerformed;
 
@@ -85,8 +86,10 @@ public class PutSingleChunkStep extends ProcessStep {
 						.getChunkEncryptionKeys().getPublic());
 
 				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getName());
-				boolean success = dataManager.put(chunk.getId(), H2HConstants.FILE_CHUNK, encryptedContent,
-						context.consumeProtectionKeys());
+				Parameters parameters = new Parameters().setLocationKey(chunk.getId())
+						.setContentKey(H2HConstants.FILE_CHUNK).setData(encryptedContent)
+						.setProtectionKeys(context.consumeProtectionKeys());
+				boolean success = dataManager.put(parameters);
 				putPerformed = true;
 
 				if (!success) {
@@ -108,8 +111,7 @@ public class PutSingleChunkStep extends ProcessStep {
 			return;
 		}
 
-		boolean success = dataManager.remove(chunkId, H2HConstants.FILE_CHUNK,
-				context.consumeProtectionKeys());
+		boolean success = dataManager.remove(parameters);
 		if (success) {
 			logger.debug("Rollback of putting the chunk succeeded.");
 		} else {

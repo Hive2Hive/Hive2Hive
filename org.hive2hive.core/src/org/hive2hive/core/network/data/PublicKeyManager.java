@@ -12,6 +12,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.network.data.parameters.Parameters;
 
 /**
  * A caching public key manager, which if necessary gets the desired public key of an user from the network.
@@ -87,7 +89,9 @@ public class PublicKeyManager {
 			// check the cache
 			return publicKeyCache.get(userId);
 
-		NetworkContent content = dataManager.get(userId, H2HConstants.USER_PUBLIC_KEY);
+		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(
+				H2HConstants.USER_PUBLIC_KEY);
+		NetworkContent content = dataManager.get(parameters);
 		return evaluateResult(content, userId);
 	}
 
