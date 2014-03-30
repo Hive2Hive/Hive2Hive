@@ -1,6 +1,5 @@
 package org.hive2hive.core.network.data.futures;
 
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.parameters.IParameters;
 
 /**
  * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
@@ -42,11 +42,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(FuturePutListener.class);
 
-	private final Number160 locationKey;
-	private final Number160 domainKey;
-	private final Number160 contentKey;
-	private final KeyPair protectionKey;
-	private final NetworkContent content;
+	private final IParameters parameters;
 	private final DataManager dataManager;
 	private final CountDownLatch latch;
 
@@ -54,13 +50,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private int putTries = 0;
 	private boolean success = false;
 
-	public FuturePutListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			NetworkContent content, KeyPair protectionKey, DataManager dataManager) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = contentKey;
-		this.protectionKey = protectionKey;
-		this.content = content;
+	public FuturePutListener(IParameters parameters, DataManager dataManager) {
+		this.parameters = parameters;
 		this.dataManager = dataManager;
 		this.latch = new CountDownLatch(1);
 	}
@@ -82,14 +73,10 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
-		logger.trace(String
-				.format("Start verification of put. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-						locationKey, domainKey, contentKey, content.getVersionKey()));
+		logger.trace(String.format("Start verification of put. %s", parameters.toString()));
 
 		if (future.isFailed()) {
-			logger.warn(String
-					.format("Put future was not successful. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+			logger.warn(String.format("Put future was not successful. %s", parameters.toString()));
 			retryPut();
 			return;
 		} else if (future.getRawResult().isEmpty()) {
@@ -104,9 +91,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		for (PeerAddress peeradress : future.getRawResult().keySet()) {
 			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
 			if (map == null) {
-				logger.warn(String.format("A node gave no status (null) back."
-						+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-						locationKey, domainKey, contentKey, content.getVersionKey()));
+				logger.warn(String.format("A node gave no status (null) back. %s", parameters.toString()));
 				fail.add(peeradress);
 			} else {
 				for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
@@ -117,22 +102,16 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 						case FAILED:
 						case FAILED_NOT_ABSENT:
 						case FAILED_SECURITY:
-							logger.warn(String
-									.format("A node denied putting data. reason = '%s'"
-											+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-											PutStatusH2H.values()[status], locationKey, domainKey,
-											contentKey, content.getVersionKey()));
+							logger.warn(String.format("A node denied putting data. reason = '%s' %s",
+									PutStatusH2H.values()[status], parameters.toString()));
 							fail.add(peeradress);
 							break;
 						case VERSION_CONFLICT:
 						case VERSION_CONFLICT_NO_BASED_ON:
 						case VERSION_CONFLICT_NO_VERSION_KEY:
 						case VERSION_CONFLICT_OLD_TIMESTAMP:
-							logger.warn(String
-									.format("A version conflict detected. reason = '%s'"
-											+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-											PutStatusH2H.values()[status], locationKey, domainKey,
-											contentKey, content.getVersionKey()));
+							logger.warn(String.format("A version conflict detected. reason = '%s' %s",
+									PutStatusH2H.values()[status], parameters.toString()));
 							versionConflict.add(peeradress);
 							break;
 					}
@@ -141,9 +120,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 
 		if (!versionConflict.isEmpty()) {
-			logger.warn(String.format("Put verification failed. Version conflict!"
-					+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-					locationKey, domainKey, contentKey, content.getVersionKey()));
+			logger.warn(String.format("Put verification failed. Version conflict! %s", parameters.toString()));
 			notifyFailure();
 		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
 			// majority of the contacted nodes responded with ok
@@ -161,29 +138,22 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 */
 	private void retryPut() {
 		if (putTries++ < H2HConstants.PUT_RETRIES) {
-			logger.warn(String
-					.format("Put retry #%s. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							putTries, locationKey, domainKey, contentKey, content.getVersionKey()));
+			logger.warn(String.format("Put retry #%s. %s", putTries, parameters.toString()));
 			// remove succeeded puts
-			FutureRemove futureRemove = dataManager.remove(locationKey, domainKey, contentKey,
-					content.getVersionKey(), protectionKey);
+			FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
 			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 				@Override
 				public void operationComplete(FutureRemove future) {
 					if (future.isFailed())
-						logger.warn(String
-								.format("Put Retry: Could not delete the newly put content."
-										+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-										locationKey, domainKey, contentKey, content.getVersionKey()));
+						logger.warn(String.format("Put Retry: Could not delete the newly put content. %s",
+								parameters.toString()));
 
-					dataManager.put(locationKey, domainKey, contentKey, content, protectionKey).addListener(
-							FuturePutListener.this);
+					dataManager.putUnblocked(parameters).addListener(FuturePutListener.this);
 				}
 			});
 		} else {
-			logger.error(String.format("Put verification failed. Couldn't put data after %s tries."
-					+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-					putTries, locationKey, domainKey, contentKey, content.getVersionKey()));
+			logger.error(String.format("Put verification failed. Couldn't put data after %s tries. %s",
+					putTries, parameters.toString()));
 			notifyFailure();
 		}
 	}
@@ -194,9 +164,12 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 * @return future with the digest request
 	 */
 	private FutureDigest getDigest() {
-		DigestBuilder digestBuilder = dataManager.getDigest(locationKey);
-		digestBuilder.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO)).to(
-				new Number640(locationKey, domainKey, contentKey, Number160.MAX_VALUE));
+		DigestBuilder digestBuilder = dataManager.getDigest(parameters.getLKey());
+		digestBuilder.from(
+				new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.ZERO)).to(
+				new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.MAX_VALUE));
 		return digestBuilder.start();
 	}
 
@@ -210,9 +183,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
 				if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
-					logger.error(String.format("Put verification failed. Couldn't get digest."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.error(String.format("Put verification failed. Couldn't get digest. %s",
+							parameters.toString()));
 					notifyFailure();
 				} else {
 					checkVersionKey(future.getRawDigest());
@@ -233,28 +205,23 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		for (PeerAddress peerAddress : rawDigest.keySet()) {
 			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).keyDigest() == null
 					|| rawDigest.get(peerAddress).keyDigest().isEmpty()) {
-				logger.warn(String.format("Put verification: Received from peer '%s' no digest."
-						+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-						peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+				logger.warn(String.format("Put verification: Received from peer '%s' no digest. %s",
+						peerAddress, parameters.toString()));
 			} else {
 				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).keyDigest();
 
-				if (keyDigest.firstEntry().getKey().getVersionKey().equals(content.getVersionKey())) {
-					logger.trace(String.format("Put verification: On peer '%s' entry is newest."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+				if (keyDigest.firstEntry().getKey().getVersionKey().equals(parameters.getVersionKey())) {
+					logger.trace(String.format("Put verification: On peer '%s' entry is newest. %s",
+							peerAddress, parameters.toString()));
 
-				} else if (keyDigest.containsKey(new Number640(locationKey, domainKey, contentKey, content
-						.getVersionKey()))) {
-					logger.trace(String.format("Put verification: entry on peer '%s' exists in history."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+				} else if (keyDigest.containsKey(parameters.getKey())) {
+					logger.trace(String.format("Put verification: entry on peer '%s' exists in history. %s",
+							peerAddress, parameters.toString()));
 
 				} else {
-					logger.warn(String
-							.format("Put verification: Concurrent modification on peer '%s' happened."
-									+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-									peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.warn(String.format(
+							"Put verification: Concurrent modification on peer '%s' happened. %s",
+							peerAddress, parameters.toString()));
 
 					// if version key is older than the other, the version wins
 					if (!checkIfMyVerisonWins(keyDigest, peerAddress)) {
@@ -281,45 +248,40 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	protected boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest,
 			PeerAddress peerAddress) {
 		/* Check if based on entry exists */
-		if (!keyDigest
-				.containsKey(new Number640(locationKey, domainKey, contentKey, content.getBasedOnKey()))) {
-			logger.warn(String.format("Put verification: Peer '%s' doesn't contain based on version."
-					+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-					peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+		if (!keyDigest.containsKey(new Number640(parameters.getLKey(), parameters.getDKey(), parameters
+				.getCKey(), parameters.getData().getBasedOnKey()))) {
+			logger.warn(String.format("Put verification: Peer '%s' doesn't contain based on version. %s",
+					peerAddress, parameters.toString()));
 			// something is definitely wrong with this peer
 			return true;
 		} else {
 			// figure out the next version based on same version
 			Number640 entryBasingOnSameParent = getSuccessor(keyDigest);
 			if (entryBasingOnSameParent == null) {
-				if (keyDigest.firstKey().getVersionKey().equals(content.getBasedOnKey())) {
-					logger.error(String.format("Put verification: Peer '%s' has no successor version."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+				if (keyDigest.firstKey().getVersionKey().equals(parameters.getData().getBasedOnKey())) {
+					logger.error(String.format("Put verification: Peer '%s' has no successor version. %s",
+							peerAddress, parameters.toString()));
 					// this peer doesn't contain any successor version, with this peer is something wrong
 					return true;
 				} else {
-					logger.error(String.format("Put verification: Peer '%s' has a corrupt version history."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.error(String.format(
+							"Put verification: Peer '%s' has a corrupt version history. %s", peerAddress,
+							parameters.toString()));
 					return true;
 				}
 			} else {
-				int compare = entryBasingOnSameParent.getVersionKey().compareTo(content.getVersionKey());
+				int compare = entryBasingOnSameParent.getVersionKey().compareTo(parameters.getVersionKey());
 				if (compare == 0) {
-					logger.error(String.format("Put verification: Peer '%s' has same version."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.error(String.format("Put verification: Peer '%s' has same version. %s",
+							peerAddress, parameters.toString()));
 					return true;
 				} else if (compare < 0) {
-					logger.warn(String.format("Put verification: Peer '%s' has older version."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.warn(String.format("Put verification: Peer '%s' has older version. %s",
+							peerAddress, parameters.toString()));
 					return false;
 				} else {
-					logger.warn(String.format("Put verification: Peer '%s' has newer version."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							peerAddress, locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.warn(String.format("Put verification: Peer '%s' has newer version. %s",
+							peerAddress, parameters.toString()));
 					return true;
 				}
 			}
@@ -336,7 +298,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private Number640 getSuccessor(NavigableMap<Number640, Number160> keyDigest) {
 		Number640 entryBasingOnSameParent = null;
 		for (Number640 key : keyDigest.keySet()) {
-			if (keyDigest.get(key).equals(content.getBasedOnKey())) {
+			if (keyDigest.get(key).equals(parameters.getData().getBasedOnKey())) {
 				entryBasingOnSameParent = key;
 				break;
 			}
@@ -345,9 +307,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	}
 
 	private void notifySuccess() {
-		logger.trace(String
-				.format("Verification for put completed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-						locationKey, domainKey, contentKey, content.getVersionKey()));
+		logger.trace(String.format("Verification for put completed. %s", parameters.toString()));
 		// everything is ok
 		success = true;
 		latch.countDown();
@@ -358,15 +318,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 */
 	private void notifyFailure() {
 		// remove succeeded puts
-		FutureRemove futureRemove = dataManager.remove(locationKey, domainKey, contentKey,
-				content.getVersionKey(), protectionKey);
+		FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
 		futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 			@Override
 			public void operationComplete(FutureRemove future) {
 				if (future.isFailed())
-					logger.warn(String.format("Put Retry: Could not delete the newly put content."
-							+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-							locationKey, domainKey, contentKey, content.getVersionKey()));
+					logger.warn(String.format("Put Retry: Could not delete the newly put content. %s",
+							parameters.toString()));
 
 				success = false;
 				latch.countDown();
