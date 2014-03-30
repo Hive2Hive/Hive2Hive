@@ -12,9 +12,9 @@ import java.util.Random;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -42,16 +42,15 @@ public class FutureGetTest extends H2HJUnitTest {
 	public void testGetNoVersion() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData content = new H2HTestData(NetworkTestUtil.randomString());
 
-		nodeA.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setData(data);
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey);
-		assertEquals(content.getTestString(), result.getTestString());
+		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(parameters);
+		assertEquals(data.getTestString(), result.getTestString());
 	}
 
 	@Test
@@ -59,15 +58,14 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(
+				NetworkTestUtil.randomString());
 
-		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey);
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(parameters);
 		assertNull(result);
 	}
 
@@ -89,12 +87,13 @@ public class FutureGetTest extends H2HJUnitTest {
 			}
 			content.add(data);
 
-			nodeA.getDataManager()
-					.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), data, null).awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+					.setVersionKey(data.getVersionKey()).setData(data);
+			nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 		}
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey);
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		assertNotNull(result);
 		assertEquals(content.get(numberOfContent - 1).getTestString(), result.getTestString());
 	}
@@ -103,18 +102,17 @@ public class FutureGetTest extends H2HJUnitTest {
 	public void testGetAVersion() throws IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData content = new H2HTestData(NetworkTestUtil.randomString());
-		content.generateVersionKey();
 
-		nodeA.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		data.generateVersionKey();
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString())
+				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setData(data);
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey,
-				content.getVersionKey());
-		assertEquals(content.getTestString(), result.getTestString());
+		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().getVersion(parameters);
+		assertEquals(data.getTestString(), result.getTestString());
 	}
 
 	@Test
@@ -122,16 +120,16 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		Number160 versionKey = Number160.createHash(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString())
+				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setData(data);
 
-		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(locationKey, contentKey, versionKey);
+		H2HTestData result = (H2HTestData) nodeB.getDataManager().getVersion(parameters);
 		assertNull(result);
 	}
 
