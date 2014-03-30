@@ -10,14 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import net.tomp2p.peers.Number160;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
@@ -73,10 +72,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			String userId = NetworkTestUtil.randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
-			network.get(random.nextInt(networkSize))
-					.getDataManager()
-					.put(Number160.createHash(userId), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(H2HConstants.USER_PUBLIC_KEY), userPublicKey, null)
+			Parameters parameters = new Parameters().setLocationKey(userId)
+					.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(userPublicKey);
+			network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
 					.awaitUninterruptibly();
 			publicKeys.put(userId, key.getPublic());
 		}
@@ -101,10 +99,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			String userId = NetworkTestUtil.randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
-			network.get(random.nextInt(networkSize))
-					.getDataManager()
-					.put(Number160.createHash(userId), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(H2HConstants.USER_PUBLIC_KEY), userPublicKey, null)
+			Parameters parameters = new Parameters().setLocationKey(userId)
+					.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(userPublicKey);
+			network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
 					.awaitUninterruptibly();
 			publicKeys.put(userId, key.getPublic());
 		}
@@ -113,10 +110,10 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			assertEquals(publicKeys.get(userId), publicKeyManager.getPublicKey(userId));
 
 			// remove the public keys from network, the manager shouldn't do any get request
-			network.get(random.nextInt(networkSize))
-					.getDataManager()
-					.remove(Number160.createHash(userId), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(H2HConstants.USER_PUBLIC_KEY), null).awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(
+					H2HConstants.USER_PUBLIC_KEY);
+			network.get(random.nextInt(networkSize)).getDataManager().removeUnblocked(parameters)
+					.awaitUninterruptibly();
 
 			// the public key manager should use his cache
 			assertEquals(publicKeys.get(userId), publicKeyManager.getPublicKey(userId));
@@ -153,10 +150,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 		String otherUser = NetworkTestUtil.randomString();
 		H2HTestData noPublicKey = new H2HTestData("public key");
-		network.get(random.nextInt(networkSize))
-				.getDataManager()
-				.put(Number160.createHash(otherUser), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(H2HConstants.USER_PUBLIC_KEY), noPublicKey, null)
+		Parameters parameters = new Parameters().setLocationKey(otherUser)
+				.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(noPublicKey);
+		network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
 				.awaitUninterruptibly();
 
 		try {
@@ -182,10 +178,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			String userId = NetworkTestUtil.randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
-			network.get(random.nextInt(networkSize))
-					.getDataManager()
-					.put(Number160.createHash(userId), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(H2HConstants.USER_PUBLIC_KEY), userPublicKey, null)
+			Parameters parameters = new Parameters().setLocationKey(userId)
+					.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(userPublicKey);
+			network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
 					.awaitUninterruptibly();
 			publicKeys.put(userId, key.getPublic());
 		}
