@@ -7,14 +7,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.SharableNetworkContent;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Holds meta data of a file in the DHT
  * 
  * @author Nico, Seppi
  */
-public class MetaFile extends SharableNetworkContent {
+public class MetaFile extends NetworkContent {
 
 	private static final long serialVersionUID = -3385321499412137545L;
 	private final PublicKey id;

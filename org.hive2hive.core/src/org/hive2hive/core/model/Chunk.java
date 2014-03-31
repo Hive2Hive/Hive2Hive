@@ -1,14 +1,14 @@
 package org.hive2hive.core.model;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.SharableNetworkContent;
+import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Raw data part of a file that is added to the DHT
  * 
- * @author Nico, Seppi
+ * @author Nico
  */
-public class Chunk extends SharableNetworkContent {
+public class Chunk extends NetworkContent {
 
 	private static final long serialVersionUID = 1L;
 
