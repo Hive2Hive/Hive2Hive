@@ -138,7 +138,7 @@ public class Parameters implements IParameters {
 		return ttl;
 	}
 
-	public Parameters setNewProtectionKEs(KeyPair newProtectionKeys) {
+	public Parameters setNewProtectionKeys(KeyPair newProtectionKeys) {
 		this.newProtectionKeys = newProtectionKeys;
 		return this;
 	}

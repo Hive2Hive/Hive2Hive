@@ -104,9 +104,10 @@ public class DataManager implements IDataManager {
 			Data data = new Data(parameters.getData());
 			data.ttlSeconds(parameters.getData().getTimeToLive()).basedOn(
 					parameters.getData().getBasedOnKey());
+			
+			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
 				data.setProtectedEntry().sign(parameters.getProtectionKeys(), signatureFactory);
-
 				// check if hash creation is needed
 				if (parameters.getHashFlag()) {
 					// decrypt signature to get hash of the object
