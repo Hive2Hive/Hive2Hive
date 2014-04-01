@@ -40,13 +40,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * A test which test the content protection mechanisms of <code>TomP2P</code>. Tests should be completely
- * independent of <code>Hive2Hive</code>.
+ * A test which test the content protection mechanisms (signing of put/remove messages) and data signing of
+ * <code>TomP2P</code>. Tests should be completely independent of <code>Hive2Hive</code>.
  * 
  * @author Seppi
  */
 public class SecurityTest extends H2HJUnitTest {
-	
+
 	private static SignatureFactory signatureFactory = new DSASignatureFactory();
 
 	@BeforeClass
@@ -55,20 +55,11 @@ public class SecurityTest extends H2HJUnitTest {
 		beforeClass();
 	}
 
-	/**
-	 * Tests if a protected entry can be overwritten without the according key.
-	 * 
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws NoSuchAlgorithmException
-	 * @throws SignatureException
-	 * @throws InvalidKeyException
-	 */
 	@Test
-	public void testPut1() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
+	public void testPutOverwriteWithoutContentProtectionKeys() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
 			InvalidKeyException, SignatureException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-
+		
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
 		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838).keyPair(keyPairPeer1)
 				.setEnableIndirectReplication(true).makeAndListen();
@@ -86,26 +77,26 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		String testData = "data";
-		Data data = new Data(testData).setProtectedEntry().sign(keyPair, signatureFactory);
+		Data data = new Data(testData).setProtectedEntry();
 
-		// initial put with protection key
+		// put with protection key
 		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).setDomainKey(dKey).keyPair(keyPair).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
+		// verify put from peer 1
 		FutureGet futureGet1a = p1.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet1a.awaitUninterruptibly();
 		assertTrue(futureGet1a.isSuccess());
 		Data retData = futureGet1a.getData();
 		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
 
+		// verify put from peer 2
 		FutureGet futureGet1b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet1b.awaitUninterruptibly();
 		assertTrue(futureGet1b.isSuccess());
 		retData = futureGet1b.getData();
 		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
 
 		// try a put without a protection key (through peer 2)
 		Data data2 = new Data("data2");
@@ -113,84 +104,56 @@ public class SecurityTest extends H2HJUnitTest {
 		futurePut2.awaitUninterruptibly();
 		assertFalse(futurePut2.isSuccess());
 
+		// verify that nothing changed from peer 1
 		FutureGet futureGet2a = p1.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet2a.awaitUninterruptibly();
 		assertTrue(futureGet2a.isSuccess());
 		retData = futureGet2a.getData();
 		// should have been not modified
 		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
 
+		// verify that nothing changed from peer 2
 		FutureGet futureGet2b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet2b.awaitUninterruptibly();
 		assertTrue(futureGet2b.isSuccess());
 		retData = futureGet2b.getData();
 		// should have been not modified
 		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
 
-		// try a put without a protection key (through peer 1)
-		Data data3 = new Data("data3");
-		FuturePut futurePut3 = p2.put(lKey).setData(cKey, data3).setDomainKey(dKey).start();
-		futurePut3.awaitUninterruptibly();
-		assertFalse(futurePut3.isSuccess());
-
-		FutureGet futureGet3a = p1.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
-		futureGet3a.awaitUninterruptibly();
-		assertTrue(futureGet3a.isSuccess());
-		retData = futureGet3a.getData();
-		// should have been not modified
-		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
-
-		FutureGet futureGet3b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
-		futureGet3b.awaitUninterruptibly();
-		assertTrue(futureGet3b.isSuccess());
-		retData = futureGet3b.getData();
-		// should have been not modified
-		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
-
-		// now we put a signed data object
+		// overwrite
 		String newTestData = "new data";
-		data = new Data(newTestData).setProtectedEntry().sign(keyPair, signatureFactory);
+		data = new Data(newTestData).setProtectedEntry();
+		// sign put message with protection keys
 		FuturePut futurePut4 = p1.put(lKey).setData(cKey, data).keyPair(keyPair).setDomainKey(dKey).start();
 		futurePut4.awaitUninterruptibly();
 		Assert.assertTrue(futurePut4.isSuccess());
 
+		// verify overwrite from peer 1
 		FutureGet futureGet4a = p1.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet4a.awaitUninterruptibly();
 		assertTrue(futureGet4a.isSuccess());
 		retData = futureGet4a.getData();
 		// should have been modified
 		assertEquals(newTestData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
 
+		// verify overwrite from peer 2
 		FutureGet futureGet4b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet4b.awaitUninterruptibly();
 		assertTrue(futureGet4b.isSuccess());
 		retData = futureGet4b.getData();
 		// should have been modified
 		assertEquals(newTestData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
 
-	/**
-	 * Put of a protected entry using version keys.
-	 * 
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 */
 	@Test
-	public void testPut2() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
+	public void testPutSignedAndContentProtectedData() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
 			InvalidKeyException, SignatureException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+		
+		SignatureFactory factory = new DSASignatureFactory();
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
 		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838).keyPair(keyPairPeer1)
@@ -211,7 +174,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 bKey = Number160.createHash("based on");
 
 		String testData = "data";
-		Data data = new Data(testData).setProtectedEntry().sign(keyPair, signatureFactory);
+		Data data = new Data(testData).setProtectedEntry().sign(keyPair, factory);
 		data.ttlSeconds(10000).basedOn(bKey);
 
 		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).setDomainKey(dKey).setVersionKey(vKey)
@@ -225,7 +188,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertTrue(futureGet1a.isSuccess());
 		Data retData = futureGet1a.getData();
 		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
+		assertTrue(retData.verify(keyPair.getPublic(), factory));
 
 		FutureGet futureGet1b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).setVersionKey(vKey)
 				.start();
@@ -233,25 +196,18 @@ public class SecurityTest extends H2HJUnitTest {
 		assertTrue(futureGet1b.isSuccess());
 		retData = futureGet1b.getData();
 		assertEquals(testData, (String) retData.object());
-		assertTrue(retData.verify(keyPair.getPublic(), signatureFactory));
+		assertTrue(retData.verify(keyPair.getPublic(), factory));
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
 
-	/**
-	 * Test overwriting a protected entry with a wrong key pair.
-	 * 
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 */
 	@Test
-	public void testPut3() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
+	public void testPutOverwriteWithWrongContentProtectionKeys() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
 			InvalidKeyException, SignatureException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+
+		SignatureFactory factory = new DSASignatureFactory();
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
 		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838).keyPair(keyPairPeer1)
@@ -270,9 +226,9 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 dKey = Number160.createHash("domain");
 		Number160 cKey = Number160.createHash("content");
 
-		// initial put using key pair 2
+		// initial put using content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).setProtectedEntry().sign(keyPair1, signatureFactory);
+		Data data = new Data(testData1).setProtectedEntry();
 		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).setDomainKey(dKey).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
@@ -282,18 +238,16 @@ public class SecurityTest extends H2HJUnitTest {
 		assertTrue(futureGet1a.isSuccess());
 		Data retData = futureGet1a.getData();
 		assertEquals(testData1, (String) retData.object());
-		assertTrue(retData.verify(keyPair1.getPublic(), signatureFactory));
 
 		FutureGet futureGet1b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet1b.awaitUninterruptibly();
 		assertTrue(futureGet1b.isSuccess());
 		retData = futureGet1b.getData();
 		assertEquals(testData1, (String) retData.object());
-		assertTrue(retData.verify(keyPair1.getPublic(), signatureFactory));
 
-		// put with wrong key
+		// try to put with wrong content protection keys 2
 		String testData2 = "data2";
-		Data data2 = new Data(testData2).setProtectedEntry().sign(keyPair2, signatureFactory);
+		Data data2 = new Data(testData2).setProtectedEntry().sign(keyPair2, factory);
 		FuturePut futurePut2 = p2.put(lKey).setData(cKey, data2).setDomainKey(dKey).keyPair(keyPair2).start();
 		futurePut2.awaitUninterruptibly();
 		assertFalse(futurePut2.isSuccess());
@@ -304,7 +258,6 @@ public class SecurityTest extends H2HJUnitTest {
 		// should have been not modified
 		retData = futureGet2a.getData();
 		assertEquals(testData1, (String) retData.object());
-		assertTrue(retData.verify(keyPair1.getPublic(), signatureFactory));
 
 		FutureGet futureGet2b = p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start();
 		futureGet2b.awaitUninterruptibly();
@@ -312,7 +265,6 @@ public class SecurityTest extends H2HJUnitTest {
 		// should have been not modified
 		retData = futureGet2b.getData();
 		assertEquals(testData1, (String) retData.object());
-		assertTrue(retData.verify(keyPair1.getPublic(), signatureFactory));
 
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
@@ -1082,8 +1034,8 @@ public class SecurityTest extends H2HJUnitTest {
 		Data intialData = new Data("data").setProtectedEntry();
 		intialData.ttlSeconds(ttl).basedOn(bKey).sign(keyPair1, factory);
 		// put using content protection key 1 to sign message
-		FuturePut futureIntialPut = p1.put(lKey).setDomainKey(dKey).setData(cKey, intialData).setVersionKey(vKey)
-				.keyPair(keyPair1).start();
+		FuturePut futureIntialPut = p1.put(lKey).setDomainKey(dKey).setData(cKey, intialData)
+				.setVersionKey(vKey).keyPair(keyPair1).start();
 		futureIntialPut.awaitUninterruptibly();
 		Assert.assertTrue(futureIntialPut.isSuccess());
 
@@ -1114,8 +1066,8 @@ public class SecurityTest extends H2HJUnitTest {
 		data = new Data("dataB").setProtectedEntry();
 		data.ttlSeconds(ttl).basedOn(bKey).sign(keyPair1, factory);
 		// put using wrong content protection keys 2 to sign message
-		futureTryOverwrite = p1.put(lKey).setDomainKey(dKey).setData(cKey, data)
-				.setVersionKey(vKey).keyPair(keyPair2).start();
+		futureTryOverwrite = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).setVersionKey(vKey)
+				.keyPair(keyPair2).start();
 		futureTryOverwrite.awaitUninterruptibly();
 		Assert.assertFalse(futureTryOverwrite.isSuccess());
 
@@ -1125,29 +1077,12 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals("data", (String) retData.object());
 		// verify that data signature is still the same
 		Assert.assertTrue(retData.verify(keyPair1.getPublic(), factory));
-		
+
 		// try to overwrite without content protection and without data signature (expected to fail)
 		data = new Data("dataC");
 		data.ttlSeconds(ttl).basedOn(bKey).sign(keyPair1, factory);
 		// put using wrong content protection keys 2 to sign message
-		futureTryOverwrite = p1.put(lKey).setDomainKey(dKey).setData(cKey, data)
-				.setVersionKey(vKey).start();
-		futureTryOverwrite.awaitUninterruptibly();
-		Assert.assertFalse(futureTryOverwrite.isSuccess());
-		
-		// verify that nothing changed
-		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start()
-				.awaitUninterruptibly().getData();
-		Assert.assertEquals("data", (String) retData.object());
-		// verify that data signature is still the same
-		Assert.assertTrue(retData.verify(keyPair1.getPublic(), factory));
-		
-		// try to overwrite with wrong protection keys 2 and without data signature (expected to fail)
-		data = new Data("dataD").setProtectedEntry();
-		data.ttlSeconds(ttl).basedOn(bKey).sign(keyPair1, factory);
-		// put using wrong content protection keys 2 to sign message
-		futureTryOverwrite = p1.put(lKey).setDomainKey(dKey).setData(cKey, data)
-				.setVersionKey(vKey).keyPair(keyPair2).start();
+		futureTryOverwrite = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).setVersionKey(vKey).start();
 		futureTryOverwrite.awaitUninterruptibly();
 		Assert.assertFalse(futureTryOverwrite.isSuccess());
 
@@ -1157,13 +1092,29 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals("data", (String) retData.object());
 		// verify that data signature is still the same
 		Assert.assertTrue(retData.verify(keyPair1.getPublic(), factory));
-		
+
+		// try to overwrite with wrong protection keys 2 and without data signature (expected to fail)
+		data = new Data("dataD").setProtectedEntry();
+		data.ttlSeconds(ttl).basedOn(bKey).sign(keyPair1, factory);
+		// put using wrong content protection keys 2 to sign message
+		futureTryOverwrite = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).setVersionKey(vKey)
+				.keyPair(keyPair2).start();
+		futureTryOverwrite.awaitUninterruptibly();
+		Assert.assertFalse(futureTryOverwrite.isSuccess());
+
+		// verify that nothing changed
+		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start()
+				.awaitUninterruptibly().getData();
+		Assert.assertEquals("data", (String) retData.object());
+		// verify that data signature is still the same
+		Assert.assertTrue(retData.verify(keyPair1.getPublic(), factory));
+
 		// overwrite with content protection keys 1 and no data signature
 		intialData = new Data("data2").setProtectedEntry();
 		intialData.ttlSeconds(ttl).basedOn(bKey);
 		// put using content protection key 1 to sign message
-		FuturePut futureOverwrite1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, intialData).setVersionKey(vKey)
-				.keyPair(keyPair1).start();
+		FuturePut futureOverwrite1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, intialData)
+				.setVersionKey(vKey).keyPair(keyPair1).start();
 		futureOverwrite1.awaitUninterruptibly();
 		Assert.assertTrue(futureOverwrite1.isSuccess());
 
@@ -1178,8 +1129,8 @@ public class SecurityTest extends H2HJUnitTest {
 		intialData = new Data("data3").setProtectedEntry();
 		intialData.ttlSeconds(ttl).basedOn(bKey).sign(keyPair1, factory);
 		// put using content protection key 1 to sign message
-		FuturePut futureOverwrite2 = p1.put(lKey).setDomainKey(dKey).setData(cKey, intialData).setVersionKey(vKey)
-				.keyPair(keyPair1).start();
+		FuturePut futureOverwrite2 = p1.put(lKey).setDomainKey(dKey).setData(cKey, intialData)
+				.setVersionKey(vKey).keyPair(keyPair1).start();
 		futureOverwrite2.awaitUninterruptibly();
 		Assert.assertTrue(futureOverwrite2.isSuccess());
 
@@ -1228,7 +1179,7 @@ public class SecurityTest extends H2HJUnitTest {
 				.keyPair(keyPair1).start();
 		futureOverwrite3.awaitUninterruptibly();
 		Assert.assertTrue(futureOverwrite3.isSuccess());
-		
+
 		// verify change
 		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start()
 				.awaitUninterruptibly().getData();
@@ -1239,11 +1190,11 @@ public class SecurityTest extends H2HJUnitTest {
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
-	
+
 	@Test
-	public void testChangeDataSignatureAndChangeContentProtectionSimultanously() throws NoSuchAlgorithmException,
-			IOException, ClassNotFoundException, InvalidKeyException, SignatureException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public void testChangeDataSignatureAndChangeContentProtectionSimultanously()
+			throws NoSuchAlgorithmException, IOException, ClassNotFoundException, InvalidKeyException,
+			SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
 		// create custom RSA factories
@@ -1296,7 +1247,7 @@ public class SecurityTest extends H2HJUnitTest {
 		// change data signature to keys 2 using same data, sign with new key 2
 		data = new Data("data1").ttlSeconds(ttl).setProtectedEntry().sign(keyPair2, factory);
 		// change content protection keys to keys 2
-		// data.publicKey(keyPair2.getPublic()); is already done with data.sign(...) 
+		// data.publicKey(keyPair2.getPublic()); is already done with data.sign(...)
 		// create meta data
 		data.duplicateMeta();
 		// put meta using content content protection key 1 to sign message
@@ -1320,7 +1271,7 @@ public class SecurityTest extends H2HJUnitTest {
 				.keyPair(keyPair1).start();
 		futureOverwrite3.awaitUninterruptibly();
 		Assert.assertFalse(futureOverwrite3.isSuccess());
-		
+
 		// verify that nothing changed
 		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start()
 				.awaitUninterruptibly().getData();
@@ -1331,11 +1282,11 @@ public class SecurityTest extends H2HJUnitTest {
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
-	
+
 	@Test
-	public void testChangeDataSignatureWithReusedHashAndChangeContentProtectionSimultanously() throws NoSuchAlgorithmException,
-			IOException, ClassNotFoundException, InvalidKeyException, SignatureException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public void testChangeDataSignatureWithReusedHashAndChangeContentProtectionSimultanously()
+			throws NoSuchAlgorithmException, IOException, ClassNotFoundException, InvalidKeyException,
+			SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
 		// create custom RSA factories
@@ -1428,7 +1379,7 @@ public class SecurityTest extends H2HJUnitTest {
 				.keyPair(keyPair1).start();
 		futureOverwrite3.awaitUninterruptibly();
 		Assert.assertFalse(futureOverwrite3.isSuccess());
-		
+
 		// verify that nothing changed
 		retData = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start()
 				.awaitUninterruptibly().getData();
@@ -1439,11 +1390,214 @@ public class SecurityTest extends H2HJUnitTest {
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
-	
-	// TODO testContentProtectionAppliesToAllVersionKeys
-	
-	// TODO testContentProtectionChangeAppliesToAllVersionKeys
-	
+
+	@Test
+	public void testContentProtectionAppliesToAllVersionKeys() throws NoSuchAlgorithmException, IOException,
+			ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
+		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+
+		KeyPair keyPairPeer1 = gen.generateKeyPair();
+		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4834).keyPair(keyPairPeer1)
+				.setEnableIndirectReplication(true).makeAndListen();
+		KeyPair keyPairPeer2 = gen.generateKeyPair();
+		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1).keyPair(keyPairPeer2)
+				.setEnableIndirectReplication(true).makeAndListen();
+
+		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
+
+		KeyPair keyPair1 = gen.generateKeyPair();
+		KeyPair keyPair2 = gen.generateKeyPair();
+
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+		Number160 cKey = Number160.createHash("content");
+
+		// put version 1 with protection keys 1
+		Data data1 = new Data("data1").setProtectedEntry();
+		Number160 vKey1 = Number160.ZERO;
+		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data1).setDomainKey(dKey).setVersionKey(vKey1)
+				.keyPair(keyPair1).start();
+		futurePut1.awaitUninterruptibly();
+		assertTrue(futurePut1.isSuccess());
+
+		// verify put of version 1
+		assertEquals("data1",
+				(String) p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).setVersionKey(vKey1).start()
+						.awaitUninterruptibly().getData().object());
+
+		// try to overwrite version 1 without protection keys (expected to fail)
+		Data data1A = new Data("data1A");
+		FuturePut futurePut1A = p1.put(lKey).setData(cKey, data1A).setDomainKey(dKey).setVersionKey(vKey1)
+				.start();
+		futurePut1A.awaitUninterruptibly();
+		assertFalse(futurePut1A.isSuccess());
+
+		// verify that nothing changed
+		assertEquals("data1",
+				(String) p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).setVersionKey(vKey1).start()
+						.awaitUninterruptibly().getData().object());
+
+		// try to overwrite version 1 with wrong protection keys 2 (expected to fail)
+		Data data1B = new Data("data1B").setProtectedEntry();
+		FuturePut futurePut1B = p1.put(lKey).setData(cKey, data1B).setDomainKey(dKey).setVersionKey(vKey1)
+				.keyPair(keyPair2).start();
+		futurePut1B.awaitUninterruptibly();
+		assertFalse(futurePut1B.isSuccess());
+
+		// verify that nothing changed
+		assertEquals("data1", (String) p2.get(lKey).setContentKey(cKey).setDomainKey(dKey).start()
+				.awaitUninterruptibly().getData().object());
+
+		// overwrite version 1 with protection keys 1
+		Data data1Overwrite = new Data("data1Overwrite").setProtectedEntry();
+		FuturePut futurePutOverwrite = p1.put(lKey).setData(cKey, data1Overwrite).setDomainKey(dKey)
+				.setVersionKey(vKey1).keyPair(keyPair1).start();
+		futurePutOverwrite.awaitUninterruptibly();
+		assertTrue(futurePutOverwrite.isSuccess());
+
+		// verify overwrite
+		assertEquals("data1Overwrite", (String) p2.get(lKey).setContentKey(cKey).setVersionKey(vKey1)
+				.setDomainKey(dKey).start().awaitUninterruptibly().getData().object());
+
+		// try to put new version 2 (basing on version 1) with wrong protection keys 2 (expected to fail)
+		Data data2 = new Data("data2").basedOn(vKey1).setProtectedEntry();
+		// version 2 takes new version key
+		Number160 vKey2 = Number160.createHash("version2");
+		FuturePut futurePut2 = p1.put(lKey).setData(cKey, data2).setDomainKey(dKey).setVersionKey(vKey2)
+				.keyPair(keyPair2).start();
+		futurePut2.awaitUninterruptibly();
+		assertFalse(futurePut2.isSuccess());
+
+		// verify no put of version 2
+		assertNull(p2.get(lKey).setContentKey(cKey).setVersionKey(vKey2).setDomainKey(dKey).start()
+				.awaitUninterruptibly().getData());
+
+		// put new version 3 (basing on version 1) with correct protection keys 1
+		Data data3 = new Data("data3").basedOn(vKey1).setProtectedEntry();
+		Number160 vKey3 = Number160.createHash("version3");
+		FuturePut futurePut3 = p1.put(lKey).setData(cKey, data3).setDomainKey(dKey).setVersionKey(vKey3)
+				.keyPair(keyPair1).start();
+		futurePut3.awaitUninterruptibly();
+		assertTrue(futurePut3.isSuccess());
+
+		// verify put of version 3
+		assertEquals("data3",
+				(String) p2.get(lKey).setContentKey(cKey).setVersionKey(vKey3).setDomainKey(dKey).start()
+						.awaitUninterruptibly().getData().object());
+
+		// try to put a version X in version key range of version 1 and 3 with wrong protection keys 2
+		// (expected to fail)
+		Data dataX = new Data("dataX").setProtectedEntry();
+		Number160 vKeyX = Number160.createHash("versionX");
+		FuturePut futurePut4 = p1.put(lKey).setData(cKey, dataX).setDomainKey(dKey).setVersionKey(vKeyX)
+				.keyPair(keyPair2).start();
+		futurePut4.awaitUninterruptibly();
+		assertFalse(futurePut4.isSuccess());
+
+		// verify no put of version X
+		assertNull(p2.get(lKey).setContentKey(cKey).setVersionKey(vKeyX).setDomainKey(dKey).start()
+				.awaitUninterruptibly().getData());
+
+		// try to put random version Y in version key range of version 1 and 3 without protection keys
+		// (expected to fail)
+		Data dataY = new Data("dataY").setProtectedEntry();
+		Number160 vKeyY = Number160.createHash("versionX");
+		futurePut4 = p1.put(lKey).setData(cKey, dataY).setDomainKey(dKey).setVersionKey(vKeyY).start();
+		futurePut4.awaitUninterruptibly();
+		assertFalse(futurePut4.isSuccess());
+
+		// verify no put of version Y
+		assertNull(p2.get(lKey).setContentKey(cKey).setVersionKey(vKeyY).setDomainKey(dKey).start()
+				.awaitUninterruptibly().getData());
+
+		p1.shutdown().awaitUninterruptibly();
+		p2.shutdown().awaitUninterruptibly();
+	}
+
+	@Test
+	public void testContentProtectionChangeAppliesToAllVersionKeys() throws NoSuchAlgorithmException, IOException,
+			ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
+		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+
+		KeyPair keyPairPeer1 = gen.generateKeyPair();
+		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4834).keyPair(keyPairPeer1)
+				.setEnableIndirectReplication(true).makeAndListen();
+		KeyPair keyPairPeer2 = gen.generateKeyPair();
+		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1).keyPair(keyPairPeer2)
+				.setEnableIndirectReplication(true).makeAndListen();
+
+		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
+
+		KeyPair keyPair1 = gen.generateKeyPair();
+		KeyPair keyPair2 = gen.generateKeyPair();
+
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+		Number160 cKey = Number160.createHash("content");
+
+		// put version 1 with protection keys 1
+		Data data1 = new Data("data1").setProtectedEntry();
+		Number160 vKey1 = Number160.ZERO;
+		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data1).setDomainKey(dKey).setVersionKey(vKey1)
+				.keyPair(keyPair1).start();
+		futurePut1.awaitUninterruptibly();
+		assertTrue(futurePut1.isSuccess());
+
+		// put new version 2 (basing on version 1) with protection keys 1
+		Data data2 = new Data("data2").basedOn(vKey1).setProtectedEntry();
+		// version 2 takes new version key
+		Number160 vKey2 = Number160.createHash("version2");
+		FuturePut futurePut2 = p1.put(lKey).setData(cKey, data2).setDomainKey(dKey).setVersionKey(vKey2)
+				.keyPair(keyPair2).start();
+		futurePut2.awaitUninterruptibly();
+		assertTrue(futurePut2.isSuccess());
+
+		// change protection key on version 1 with a put meta
+		//TODO
+		// overwrite version 1 with protection keys 2
+		
+		// overwrite version 2 with protection keys 2
+
+		// put new version 3 (basing on version 2) with protection keys 2
+		Data data3 = new Data("data3").basedOn(vKey2).setProtectedEntry();
+		Number160 vKey3 = Number160.createHash("version3");
+		FuturePut futurePut3 = p1.put(lKey).setData(cKey, data3).setDomainKey(dKey).setVersionKey(vKey3)
+				.keyPair(keyPair2).start();
+		futurePut3.awaitUninterruptibly();
+		assertTrue(futurePut3.isSuccess());
+
+		// try to put a version X in version key range of version 1, 2 and 3 with wrong protection keys 1
+		// (expected to fail)
+		Data dataX = new Data("dataX").setProtectedEntry();
+		Number160 vKeyX = Number160.createHash("versionX");
+		FuturePut futurePut4 = p1.put(lKey).setData(cKey, dataX).setDomainKey(dKey).setVersionKey(vKeyX)
+				.keyPair(keyPair1).start();
+		futurePut4.awaitUninterruptibly();
+		assertFalse(futurePut4.isSuccess());
+
+		// verify no put of version X
+		assertNull(p2.get(lKey).setContentKey(cKey).setVersionKey(vKeyX).setDomainKey(dKey).start()
+				.awaitUninterruptibly().getData());
+
+		// try to put random version Y in version key range of version 1, 2 and 3 without protection keys
+		// (expected to fail)
+		Data dataY = new Data("dataY").setProtectedEntry();
+		Number160 vKeyY = Number160.createHash("versionX");
+		futurePut4 = p1.put(lKey).setData(cKey, dataY).setDomainKey(dKey).setVersionKey(vKeyY).start();
+		futurePut4.awaitUninterruptibly();
+		assertFalse(futurePut4.isSuccess());
+
+		// verify no put of version Y
+		assertNull(p2.get(lKey).setContentKey(cKey).setVersionKey(vKeyY).setDomainKey(dKey).start()
+				.awaitUninterruptibly().getData());
+
+		p1.shutdown().awaitUninterruptibly();
+		p2.shutdown().awaitUninterruptibly();
+	}
 
 	@AfterClass
 	public static void cleanAfterClass() {
