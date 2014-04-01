@@ -37,6 +37,7 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -47,8 +48,6 @@ import org.junit.Test;
  */
 public class SecurityTest extends H2HJUnitTest {
 
-	private static SignatureFactory signatureFactory = new DSASignatureFactory();
-
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = SecurityTest.class;
@@ -56,10 +55,10 @@ public class SecurityTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutOverwriteWithoutContentProtectionKeys() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
-			InvalidKeyException, SignatureException {
+	public void testPutOverwriteWithoutContentProtectionKeys() throws IOException, ClassNotFoundException,
+			NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-		
+
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
 		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4838).keyPair(keyPairPeer1)
 				.setEnableIndirectReplication(true).makeAndListen();
@@ -149,10 +148,10 @@ public class SecurityTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutSignedAndContentProtectedData() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
-			InvalidKeyException, SignatureException {
+	public void testPutSignedAndContentProtectedData() throws IOException, ClassNotFoundException,
+			NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-		
+
 		SignatureFactory factory = new DSASignatureFactory();
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -203,8 +202,8 @@ public class SecurityTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutOverwriteWithWrongContentProtectionKeys() throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
-			InvalidKeyException, SignatureException {
+	public void testPutOverwriteWithWrongContentProtectionKeys() throws IOException, ClassNotFoundException,
+			NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		SignatureFactory factory = new DSASignatureFactory();
@@ -271,8 +270,8 @@ public class SecurityTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemove1() throws NoSuchAlgorithmException, IOException, InvalidKeyException,
-			SignatureException, ClassNotFoundException {
+	public void testRemoveWithWrongOrWrongContentProtectionKeys() throws NoSuchAlgorithmException,
+			IOException, InvalidKeyException, SignatureException, ClassNotFoundException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -288,86 +287,65 @@ public class SecurityTest extends H2HJUnitTest {
 		KeyPair keyPair1 = gen.generateKeyPair();
 		KeyPair keyPair2 = gen.generateKeyPair();
 
-		String locationKey = "location";
-		Number160 lKey = Number160.createHash(locationKey);
-		String contentKey = "content";
-		Number160 cKey = Number160.createHash(contentKey);
+		Number160 lKey = Number160.createHash("location");
+		Number160 cKey = Number160.createHash("content");
 
+		// put with content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).setProtectedEntry().sign(keyPair1, signatureFactory);
-
-		// put trough peer 1 with key pair -------------------------------------------------------
-
+		Data data = new Data(testData1).setProtectedEntry();
 		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
+		// verify put from peer 1
 		FutureGet futureGet1a = p1.get(lKey).setContentKey(cKey).start();
 		futureGet1a.awaitUninterruptibly();
 		assertTrue(futureGet1a.isSuccess());
 		assertEquals(testData1, (String) futureGet1a.getData().object());
 
+		// verify put from peer 2
 		FutureGet futureGet1b = p2.get(lKey).setContentKey(cKey).start();
 		futureGet1b.awaitUninterruptibly();
 		assertTrue(futureGet1b.isSuccess());
 		assertEquals(testData1, (String) futureGet1b.getData().object());
 
-		// try to remove without key pair -------------------------------------------------------
+		// try to remove without content protection keys
+		FutureRemove futureRemove1 = p1.remove(lKey).contentKey(cKey).start();
+		futureRemove1.awaitUninterruptibly();
+		assertFalse(futureRemove1.isSuccess());
 
-		FutureRemove futureRemove1a = p1.remove(lKey).contentKey(cKey).start();
-		futureRemove1a.awaitUninterruptibly();
-		assertFalse(futureRemove1a.isSuccess());
-
-		FutureGet futureGet2a = p1.get(lKey).setContentKey(cKey).start();
-		futureGet2a.awaitUninterruptibly();
-		assertTrue(futureGet2a.isSuccess());
+		// verify failed remove
+		FutureGet futureGet2 = p1.get(lKey).setContentKey(cKey).start();
+		futureGet2.awaitUninterruptibly();
+		assertTrue(futureGet2.isSuccess());
 		// should have been not modified
-		assertEquals(testData1, (String) futureGet2a.getData().object());
+		assertEquals(testData1, (String) futureGet2.getData().object());
 
-		FutureRemove futureRemove1b = p2.remove(lKey).contentKey(cKey).start();
-		futureRemove1b.awaitUninterruptibly();
-		assertFalse(futureRemove1b.isSuccess());
+		// try to remove with wrong content protection keys 2
+		FutureRemove futureRemove2 = p1.remove(lKey).contentKey(cKey).keyPair(keyPair2).start();
+		futureRemove2.awaitUninterruptibly();
+		assertFalse(futureRemove2.isSuccess());
 
-		FutureGet futureGet2b = p2.get(lKey).setContentKey(cKey).start();
-		futureGet2b.awaitUninterruptibly();
-		assertTrue(futureGet2b.isSuccess());
+		// verify failed remove
+		FutureGet futureGet3 = p1.get(lKey).setContentKey(cKey).start();
+		futureGet3.awaitUninterruptibly();
+		assertTrue(futureGet3.isSuccess());
 		// should have been not modified
-		assertEquals(testData1, (String) futureGet2b.getData().object());
+		assertEquals(testData1, (String) futureGet3.getData().object());
 
-		// try to remove with wrong key pair ---------------------------------------------------
-
-		FutureRemove futureRemove2a = p1.remove(lKey).contentKey(cKey).keyPair(keyPair2).start();
-		futureRemove2a.awaitUninterruptibly();
-		assertFalse(futureRemove2a.isSuccess());
-
-		FutureGet futureGet3a = p1.get(lKey).setContentKey(cKey).start();
-		futureGet3a.awaitUninterruptibly();
-		assertTrue(futureGet3a.isSuccess());
-		// should have been not modified
-		assertEquals(testData1, (String) futureGet3a.getData().object());
-
-		FutureRemove futureRemove2b = p2.remove(lKey).contentKey(cKey).keyPair(keyPair2).start();
-		futureRemove2b.awaitUninterruptibly();
-		assertFalse(futureRemove2b.isSuccess());
-
-		FutureGet futureGet3b = p2.get(lKey).setContentKey(cKey).start();
-		futureGet3b.awaitUninterruptibly();
-		assertTrue(futureGet3b.isSuccess());
-		// should have been not modified
-		assertEquals(testData1, (String) futureGet3b.getData().object());
-
-		// remove with correct key pair ---------------------------------------------------------
-
+		// remove with correct content protection keys
 		FutureRemove futureRemove4 = p1.remove(lKey).contentKey(cKey).keyPair(keyPair1).start();
 		futureRemove4.awaitUninterruptibly();
 		assertTrue(futureRemove4.isSuccess());
 
-		FutureGet futureGet4a = p2.get(lKey).setContentKey(cKey).start();
+		// verify remove from peer 1
+		FutureGet futureGet4a = p1.get(lKey).setContentKey(cKey).start();
 		futureGet4a.awaitUninterruptibly();
 		assertFalse(futureGet4a.isSuccess());
 		// should have been removed
 		assertNull(futureGet4a.getData());
 
+		// verify remove from peer 2
 		FutureGet futureGet4b = p2.get(lKey).setContentKey(cKey).start();
 		futureGet4b.awaitUninterruptibly();
 		assertFalse(futureGet4b.isSuccess());
@@ -379,63 +357,8 @@ public class SecurityTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemove2() throws NoSuchAlgorithmException, IOException, ClassNotFoundException {
-		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-
-		KeyPair keyPairPeer1 = gen.generateKeyPair();
-		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4834).keyPair(keyPairPeer1)
-				.setEnableIndirectReplication(true).makeAndListen();
-		KeyPair keyPairPeer2 = gen.generateKeyPair();
-		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1).keyPair(keyPairPeer2)
-				.setEnableIndirectReplication(true).makeAndListen();
-
-		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
-		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
-		KeyPair keyPair = gen.generateKeyPair();
-
-		String locationKey = "location";
-		Number160 lKey = Number160.createHash(locationKey);
-		String contentKey = "content";
-		Number160 cKey = Number160.createHash(contentKey);
-
-		String testData1 = "data1";
-		Data data = new Data(testData1);
-
-		// put trough peer 1 with key pair -------------------------------------------------------
-
-		FuturePut futurePut1 = p1.put(lKey).setData(cKey, data).start();
-		futurePut1.awaitUninterruptibly();
-		assertTrue(futurePut1.isSuccess());
-
-		FutureGet futureGet1a = p1.get(lKey).setContentKey(cKey).start();
-		futureGet1a.awaitUninterruptibly();
-		assertTrue(futureGet1a.isSuccess());
-		assertEquals(testData1, (String) futureGet1a.getData().object());
-
-		FutureGet futureGet1b = p2.get(lKey).setContentKey(cKey).start();
-		futureGet1b.awaitUninterruptibly();
-		assertTrue(futureGet1b.isSuccess());
-		assertEquals(testData1, (String) futureGet1b.getData().object());
-
-		// remove with key pair ------------------------------------------------------------------
-
-		FutureRemove futureRemove3 = p1.remove(lKey).contentKey(cKey).keyPair(keyPair).start();
-		futureRemove3.awaitUninterruptibly();
-		assertTrue(futureRemove3.isSuccess());
-
-		FutureGet futureGet3 = p2.get(lKey).setContentKey(cKey).start();
-		futureGet3.awaitUninterruptibly();
-		assertFalse(futureGet3.isSuccess());
-		// should have been removed
-		assertNull(futureGet3.getData());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
-	}
-
-	@Test
-	public void testRemoveFromTo1() throws NoSuchAlgorithmException, IOException, InvalidKeyException,
-			SignatureException, ClassNotFoundException {
+	public void testRemoveWithFromToContentProtectedEntry() throws NoSuchAlgorithmException, IOException,
+			InvalidKeyException, SignatureException, ClassNotFoundException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -451,108 +374,72 @@ public class SecurityTest extends H2HJUnitTest {
 		KeyPair key1 = gen.generateKeyPair();
 		KeyPair key2 = gen.generateKeyPair();
 
-		String locationKey = "location";
-		Number160 lKey = Number160.createHash(locationKey);
-		String domainKey = "domain";
-		Number160 dKey = Number160.createHash(domainKey);
-		String contentKey = "content";
-		Number160 cKey = Number160.createHash(contentKey);
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+		Number160 cKey = Number160.createHash("content");
+		Number160 vKey = Number160.createHash("version");
 
+		// put with content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).setProtectedEntry().sign(key1, signatureFactory);
-
-		// put trough peer 1 with key pair -------------------------------------------------------
-
-		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(key1).start();
+		Data data = new Data(testData1).setProtectedEntry();
+		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).setVersionKey(vKey)
+				.keyPair(key1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
-
-		FutureGet futureGet1a = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet1a.awaitUninterruptibly();
-		assertTrue(futureGet1a.isSuccess());
-		assertEquals(testData1, (String) futureGet1a.getData().object());
-
-		FutureGet futureGet1b = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
+		
+		// verify put
+		FutureGet futureGet1b = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start();
 		futureGet1b.awaitUninterruptibly();
 		assertTrue(futureGet1b.isSuccess());
 		assertEquals(testData1, (String) futureGet1b.getData().object());
 
-		// try to remove without key pair using from/to -----------------------------------------
-
-		FutureRemove futureRemove1a = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+		// try to remove without content protection keys using from/to
+		FutureRemove futureRemove1 = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
 				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
-		futureRemove1a.awaitUninterruptibly();
-		assertFalse(futureRemove1a.isSuccess());
+		futureRemove1.awaitUninterruptibly();
+		assertFalse(futureRemove1.isSuccess());
 
-		FutureGet futureGet2a = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet2a.awaitUninterruptibly();
-		assertTrue(futureGet2a.isSuccess());
+		// verify failed remove
+		FutureGet futureGet2 = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start();
+		futureGet2.awaitUninterruptibly();
+		assertTrue(futureGet2.isSuccess());
 		// should have been not modified
-		assertEquals(testData1, (String) futureGet2a.getData().object());
+		assertEquals(testData1, (String) futureGet2.getData().object());
 
-		FutureRemove futureRemove1b = p2.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
-		futureRemove1b.awaitUninterruptibly();
-		assertFalse(futureRemove1b.isSuccess());
-
-		FutureGet futureGet2b = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet2b.awaitUninterruptibly();
-		assertTrue(futureGet2b.isSuccess());
-		// should have been not modified
-		assertEquals(testData1, (String) futureGet2b.getData().object());
-
-		// remove with wrong key pair -----------------------------------------------------------
-
+		// remove with wrong content protection keys 2 using from/to
 		FutureRemove futureRemove2a = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
 				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).keyPair(key2).start();
 		futureRemove2a.awaitUninterruptibly();
 		assertFalse(futureRemove2a.isSuccess());
 
-		FutureGet futureGet3a = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet3a.awaitUninterruptibly();
-		assertTrue(futureGet3a.isSuccess());
+		// verify failed remove
+		FutureGet futureGet3 = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start();
+		futureGet3.awaitUninterruptibly();
+		assertTrue(futureGet3.isSuccess());
 		// should have been not modified
-		assertEquals(testData1, (String) futureGet3a.getData().object());
+		assertEquals(testData1, (String) futureGet3.getData().object());
 
-		FutureRemove futureRemove2b = p2.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).keyPair(key2).start();
-		futureRemove2b.awaitUninterruptibly();
-		assertFalse(futureRemove2b.isSuccess());
-
-		FutureGet futureGet3b = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet3b.awaitUninterruptibly();
-		assertTrue(futureGet3b.isSuccess());
-		// should have been not modified
-		assertEquals(testData1, (String) futureGet3b.getData().object());
-
-		// remove with correct key pair -----------------------------------------------------------
-
+		// remove with correct content protection keys 1 using from/to
 		FutureRemove futureRemove4 = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
 				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).keyPair(key1).start();
 		futureRemove4.awaitUninterruptibly();
 		assertTrue(futureRemove4.isSuccess());
 
-		FutureGet futureGet4a = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet4a.awaitUninterruptibly();
+		// verify remove
+		FutureGet futureGet4 = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start();
+		futureGet4.awaitUninterruptibly();
 		// we did not find the data
-		Assert.assertTrue(futureGet4a.isFailed());
+		Assert.assertTrue(futureGet4.isFailed());
 		// should have been removed
-		assertNull(futureGet4a.getData());
-
-		FutureGet futureGet4b = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet4b.awaitUninterruptibly();
-		// we did not find the data
-		Assert.assertTrue(futureGet4b.isFailed());
-		// should have been removed
-		assertNull(futureGet4b.getData());
-
+		assertNull(futureGet4.getData());
+		
 		p1.shutdown().awaitUninterruptibly();
 		p2.shutdown().awaitUninterruptibly();
 	}
 
 	@Test
-	public void testRemoveFromTo2() throws NoSuchAlgorithmException, IOException, InvalidKeyException,
-			SignatureException, ClassNotFoundException {
+	public void testRemoveWithFromToSeveralVersionWithContentProtection() throws NoSuchAlgorithmException,
+			IOException, InvalidKeyException, SignatureException, ClassNotFoundException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -565,49 +452,54 @@ public class SecurityTest extends H2HJUnitTest {
 		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
 		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
 
-		KeyPair key1 = gen.generateKeyPair();
+		KeyPair key = gen.generateKeyPair();
 
-		String locationKey = "location";
-		Number160 lKey = Number160.createHash(locationKey);
-		String domainKey = "domain";
-		Number160 dKey = Number160.createHash(domainKey);
-		String contentKey = "content";
-		Number160 cKey = Number160.createHash(contentKey);
+		Number160 lKey = Number160.createHash("location");
+		Number160 dKey = Number160.createHash("domain");
+		Number160 cKey = Number160.createHash("content");
 
-		String testData1 = "data1";
-		Data data = new Data(testData1).setProtectedEntry().sign(key1, signatureFactory);
-
-		// put trough peer 1 with key pair -------------------------------------------------------
-
-		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).keyPair(key1).start();
+		// put version 1 with content protection keys
+		Data data1 = new Data("data1").setProtectedEntry();
+		Number160 vKey1 = Number160.createHash("version1");
+		FuturePut futurePut1 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data1).setVersionKey(vKey1).keyPair(key).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
-		FutureGet futureGet1a = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet1a.awaitUninterruptibly();
-		assertTrue(futureGet1a.isSuccess());
-		assertEquals(testData1, (String) futureGet1a.getData().object());
+		// verify put of version 1
+		FutureGet futureGet1 = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey1).start();
+		futureGet1.awaitUninterruptibly();
+		assertTrue(futureGet1.isSuccess());
+		assertEquals("data1", (String) futureGet1.getData().object());
+		
+		// put version 2 basing on version 1 with content protection keys
+		Data data2 = new Data("data2").basedOn(vKey1).setProtectedEntry();
+		Number160 vKey2 = Number160.createHash("version2");
+		FuturePut futurePut2 = p1.put(lKey).setDomainKey(dKey).setData(cKey, data2).setVersionKey(vKey2).keyPair(key).start();
+		futurePut2.awaitUninterruptibly();
+		assertTrue(futurePut2.isSuccess());
 
-		FutureGet futureGet1b = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).start();
-		futureGet1b.awaitUninterruptibly();
-		assertTrue(futureGet1b.isSuccess());
-		assertEquals(testData1, (String) futureGet1b.getData().object());
+		// verify put of version 2
+		FutureGet futureGet2 = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey2).start();
+		futureGet2.awaitUninterruptibly();
+		assertTrue(futureGet2.isSuccess());
+		assertEquals("data2", (String) futureGet2.getData().object());
+		
+		// remove with correct content protection keys using from/to
+		FutureRemove futureRemove = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).keyPair(key).start();
+		futureRemove.awaitUninterruptibly();
+		assertTrue(futureRemove.isSuccess());
 
-		// remove with correct key pair -----------------------------------------------------------
-
-		FutureRemove futureRemove4 = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).keyPair(key1).start();
-		futureRemove4.awaitUninterruptibly();
-		assertTrue(futureRemove4.isSuccess());
-
-		FutureGet futureGet4a = p2.get(lKey).setContentKey(cKey).start();
+		// verify remove of version 1
+		FutureGet futureGet4a = p2.get(lKey).setContentKey(cKey).setVersionKey(vKey1).start();
 		futureGet4a.awaitUninterruptibly();
 		// we did not find the data
 		Assert.assertTrue(futureGet4a.isFailed());
 		// should have been removed
 		assertNull(futureGet4a.getData());
 
-		FutureGet futureGet4b = p2.get(lKey).setContentKey(cKey).start();
+		// verify remove of version 2
+		FutureGet futureGet4b = p2.get(lKey).setContentKey(cKey).setVersionKey(vKey2).start();
 		futureGet4b.awaitUninterruptibly();
 		// we did not find the data
 		Assert.assertTrue(futureGet4b.isFailed());
@@ -1517,9 +1409,10 @@ public class SecurityTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testContentProtectionChangeAppliesToAllVersionKeys() throws NoSuchAlgorithmException, IOException,
-			ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchPaddingException,
-			IllegalBlockSizeException, BadPaddingException {
+	@Ignore
+	public void testContentProtectionChangeAppliesToAllVersionKeys() throws NoSuchAlgorithmException,
+			IOException, ClassNotFoundException, InvalidKeyException, SignatureException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -1557,9 +1450,9 @@ public class SecurityTest extends H2HJUnitTest {
 		assertTrue(futurePut2.isSuccess());
 
 		// change protection key on version 1 with a put meta
-		//TODO
+		// TODO
 		// overwrite version 1 with protection keys 2
-		
+
 		// overwrite version 2 with protection keys 2
 
 		// put new version 3 (basing on version 2) with protection keys 2
