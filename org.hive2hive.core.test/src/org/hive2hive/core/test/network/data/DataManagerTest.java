@@ -20,14 +20,13 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HSignatureFactory;
 import org.hive2hive.core.test.H2HJUnitTest;
-import org.hive2hive.core.test.H2HSharableTestData;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -262,17 +261,18 @@ public class DataManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testChangeProtectionKey() throws NoPeerConnectionException, IOException, InvalidKeyException,
-			SignatureException {
+	public void testChangeProtectionKeySingleVersionKey() throws NoPeerConnectionException, IOException,
+			InvalidKeyException, SignatureException {
 		KeyPair keypairOld = EncryptionUtil.generateRSAKeyPair();
 		KeyPair keypairNew = EncryptionUtil.generateRSAKeyPair();
 
-		H2HSharableTestData data = new H2HSharableTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		data.generateVersionKey();
 		data.setBasedOnKey(Number160.ZERO);
 		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setContentKey(NetworkTestUtil.randomString()).setData(data).setProtectionKeys(keypairOld)
-				.setNewProtectionKEs(keypairNew).setTTL(data.getTimeToLive()).setHashFlag(true);
+				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey())
+				.setData(data).setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew)
+				.setTTL(data.getTimeToLive()).setHashFlag(true);
 
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
@@ -280,6 +280,12 @@ public class DataManagerTest extends H2HJUnitTest {
 		FuturePut putFuture1 = node.getDataManager().putUnblocked(parameters);
 		putFuture1.awaitUninterruptibly();
 		Assert.assertTrue(putFuture1.isSuccess());
+		
+		// parameters without the data object itself
+		parameters = new Parameters().setLocationKey(parameters.getLocationKey())
+			.setContentKey(parameters.getContentKey()).setVersionKey(data.getVersionKey())
+			.setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew)
+			.setTTL(data.getTimeToLive());
 
 		// change content protection key
 		FuturePut changeFuture = node.getDataManager().changeProtectionKeyUnblocked(parameters);
@@ -288,7 +294,15 @@ public class DataManagerTest extends H2HJUnitTest {
 
 		// verify if content protection key has been changed
 		Data resData = node.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData();
-		Assert.assertTrue(resData.verify(keypairNew.getPublic(), new H2HSignatureFactory()));
+		Assert.assertEquals(keypairNew.getPublic(), resData.publicKey());
+	}
+
+	@Test
+	@Ignore
+	public void testChangeProtectionKeyMultipleVersionKeys() throws NoPeerConnectionException, IOException,
+			InvalidKeyException, SignatureException {
+		// TODO test case for changing entries wit same location, domain and content key, but different
+		// version keys
 	}
 
 	@AfterClass
