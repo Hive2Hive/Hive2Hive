@@ -62,6 +62,8 @@ public final class NodeCreationMenu extends ConsoleMenu {
 				} else {
 					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
 				}
+				
+				exit();
 			}
 		};
 
@@ -73,6 +75,8 @@ public final class NodeCreationMenu extends ConsoleMenu {
 					nodeID = awaitStringParameter();
 				}
 				createNode(NetworkConfiguration.create(nodeID));
+				
+				exit();
 			}
 		};
 	}

@@ -2,25 +2,24 @@ package org.hive2hive.client.menu.basic;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.menu.NodeCreationMenu;
 
 public class BasicMenu extends ConsoleMenu {
 
-	public H2HConsoleMenuItem connectionMenu;
-	
 	@Override
 	protected void createItems() {
-		connectionMenu = new H2HConsoleMenuItem("Connect") {
-			
-			@Override
-			protected void execute() throws Exception {
-				new ConnectionMenu().open();
-			}
-		};
 	}
 	
 	@Override
 	protected void addMenuItems() {
-		add(connectionMenu);
+		
+		add(new H2HConsoleMenuItem("Connect") {
+			
+			@Override
+			protected void execute() throws Exception {
+				new NodeCreationMenu(false).open();
+			}
+		});
 	}
 
 	@Override
