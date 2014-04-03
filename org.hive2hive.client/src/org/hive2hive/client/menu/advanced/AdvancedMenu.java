@@ -33,7 +33,7 @@ import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent
  * @author Christian, Nico
  * 
  */
-public final class TopLevelMenu extends ConsoleMenu {
+public final class AdvancedMenu extends ConsoleMenu {
 
 	public H2HConsoleMenuItem Login;
 
@@ -42,7 +42,7 @@ public final class TopLevelMenu extends ConsoleMenu {
 	private FileObserverMenu fileObserverMenu;
 	protected File root;
 
-	public TopLevelMenu() {
+	public AdvancedMenu() {
 		userMenu = new UserMenu();
 		nodeMenu = new NodeCreationMenu();
 	}

@@ -29,7 +29,7 @@ public abstract class ConsoleMenu {
 			}
 		});
 	}
-
+	
 	/**
 	 * Specifies the {@link H2HConsoleMenuItem}s of this menu.<br/>
 	 * <b>Note:</b> Not all {@link H2HConsoleMenuItem}s are specified here, as they might also be specified
