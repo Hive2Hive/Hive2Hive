@@ -1,21 +1,11 @@
 package org.hive2hive.core.network.data;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
-import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.message.SignatureCodec;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.builder.DigestBuilder;
 import net.tomp2p.peers.Number160;
@@ -32,21 +22,23 @@ import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.H2HSignatureCodec;
-import org.hive2hive.core.security.H2HSignatureFactory;
 
+/**
+ * @author Seppi
+ */
 public class DataManager implements IDataManager {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DataManager.class);
 
 	private final NetworkManager networkManager;
-	private final SignatureFactory signatureFactory;
-	private final SignatureCodec signatureCodec;
+
+	// private final SignatureFactory signatureFactory;
+	// private final SignatureCodec signatureCodec;
 
 	public DataManager(NetworkManager networkManager) {
 		this.networkManager = networkManager;
-		this.signatureFactory = new H2HSignatureFactory();
-		this.signatureCodec = new H2HSignatureCodec();
+		// this.signatureFactory = new H2HSignatureFactory();
+		// this.signatureCodec = new H2HSignatureCodec();
 	}
 
 	/**
@@ -104,19 +96,22 @@ public class DataManager implements IDataManager {
 			Data data = new Data(parameters.getData());
 			data.ttlSeconds(parameters.getData().getTimeToLive()).basedOn(
 					parameters.getData().getBasedOnKey());
-			
+
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				data.setProtectedEntry().sign(parameters.getProtectionKeys(), signatureFactory);
-				// check if hash creation is needed
-				if (parameters.getHashFlag()) {
-					// decrypt signature to get hash of the object
-					Cipher rsa = Cipher.getInstance("RSA");
-					rsa.init(Cipher.DECRYPT_MODE, parameters.getProtectionKeys().getPublic());
-					byte[] hash = rsa.doFinal(data.signature().encode());
-					// store hash
-					parameters.setHash(hash);
-				}
+				data.setProtectedEntry();
+
+				// // sign the data
+				// data.sign(parameters.getProtectionKeys(), signatureFactory);
+				// // check if hash creation is needed
+				// if (parameters.getHashFlag()) {
+				// // decrypt signature to get hash of the object
+				// Cipher rsa = Cipher.getInstance("RSA");
+				// rsa.init(Cipher.DECRYPT_MODE, parameters.getProtectionKeys().getPublic());
+				// byte[] hash = rsa.doFinal(data.signature().encode());
+				// // store hash
+				// parameters.setHash(hash);
+				// }
 
 				return getPeer().put(parameters.getLKey()).setData(parameters.getCKey(), data)
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey())
@@ -125,8 +120,7 @@ public class DataManager implements IDataManager {
 				return getPeer().put(parameters.getLKey()).setData(parameters.getCKey(), data)
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey()).start();
 			}
-		} catch (IOException | InvalidKeyException | SignatureException | NoSuchAlgorithmException
-				| NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
+		} catch (IOException e) {
 			logger.error(String.format("Put failed. %s exception = '%s'", parameters.toString(),
 					e.getMessage()));
 			return null;
@@ -135,30 +129,36 @@ public class DataManager implements IDataManager {
 
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
 		logger.debug(String.format("Change content protection key. %s", parameters.toString()));
-		try {
-			// create dummy object to change the protection key
-			Data data = new Data().basedOn(parameters.getBasedOnKey());
-			if (parameters.getTTL() != -1)
-				data.ttlSeconds(parameters.getTTL());
+		// create dummy object to change the protection key
+		Data data = new Data().setProtectedEntry();
+		// set new content protection keys
+		data.publicKey(parameters.getNewProtectionKeys().getPublic());
+		if (parameters.getTTL() != -1)
+			data.ttlSeconds(parameters.getTTL());
 
-			// encrypt hash with new key pair to get the new signature (without having the data object)
-			Cipher rsa = Cipher.getInstance("RSA");
-			rsa.init(Cipher.ENCRYPT_MODE, parameters.getNewProtectionKeys().getPrivate());
-			byte[] newSignature = rsa.doFinal(parameters.getHash());
+		// // sign the data
+		// try {
+		// // encrypt hash with new key pair to get the new signature (without having the data object)
+		// Cipher rsa = Cipher.getInstance("RSA");
+		// rsa.init(Cipher.ENCRYPT_MODE, parameters.getNewProtectionKeys().getPrivate());
+		// byte[] newSignature = rsa.doFinal(parameters.getHash());
+		//
+		// // create new data signature
+		// data = data.signature(signatureCodec.decode(newSignature));
+		// } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+		// | IllegalBlockSizeException | BadPaddingException e) {
+		// logger.error(String.format("Change protection key failed. %s exception = '%s'",
+		// parameters.toString(), e.getMessage()));
+		// return null;
+		// }
 
-			// sign duplicated meta (don't forget to set signed flag)
-			data = data.signature(signatureCodec.decode(newSignature)).signed(true).duplicateMeta();
+		// create meta data
+		data = data.duplicateMeta();
 
-			// change the protection key through a put meta
-			return getPeer().put(parameters.getLKey()).setDomainKey(parameters.getDKey()).putMeta()
-					.setData(parameters.getCKey(), data).setVersionKey(parameters.getVersionKey())
-					.keyPair(parameters.getProtectionKeys()).start();
-		} catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-				| IllegalBlockSizeException | BadPaddingException e) {
-			logger.error(String.format("Change protection key failed. %s exception = '%s'",
-					parameters.toString(), e.getMessage()));
-			return null;
-		}
+		// change the protection key through a put meta
+		return getPeer().put(parameters.getLKey()).setDomainKey(parameters.getDKey()).putMeta()
+				.setData(parameters.getCKey(), data).setVersionKey(parameters.getVersionKey())
+				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
 	@Override

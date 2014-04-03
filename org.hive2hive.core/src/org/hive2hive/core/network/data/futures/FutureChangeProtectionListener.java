@@ -39,7 +39,7 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 			latch.await();
 		} catch (InterruptedException e) {
 			logger.error(String.format(
-					"Could not wait until the protection key change has finished. reson = '%s' %s",
+					"Could not wait until the protection key change has finished. reason = '%s' %s",
 					e.getMessage(), parameters.toString()));
 		}
 
@@ -49,7 +49,7 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
 		if (future.isFailed()) {
-			logger.warn(String.format("Change was not successful. %s", parameters.toString()));
+			logger.warn(String.format("Change was not successful. %s reason = '%s'", parameters.toString(), future.getFailedReason()));
 			success = false;
 			latch.countDown();
 		} else {

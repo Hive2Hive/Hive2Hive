@@ -184,8 +184,14 @@ public class Parameters implements IParameters {
 			builder.append("content key = '").append(cKey).append("' ");
 		if (!vKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY))
 			builder.append("version key = '").append(vKey).append("' ");
+		if (!bKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY))
+			builder.append("based on key = '").append(bKey).append("' ");
+		if (ttl != -1)
+			builder.append("ttl = '").append(ttl).append("' ");
 		if (protectionKeys != null)
 			builder.append("protected = 'true' ");
+		if (hashFlag)
+			builder.append("hashFlag = 'true'");
 		return builder.toString();
 	}
 
