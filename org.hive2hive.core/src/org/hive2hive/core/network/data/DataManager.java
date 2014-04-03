@@ -94,15 +94,14 @@ public class DataManager implements IDataManager {
 		logger.debug(String.format("Put. %s ", parameters.toString()));
 		try {
 			Data data = new Data(parameters.getData());
-			data.ttlSeconds(parameters.getData().getTimeToLive()).basedOn(
-					parameters.getData().getBasedOnKey());
+			data.ttlSeconds(parameters.getTTL()).basedOn(parameters.getData().getBasedOnKey());
 
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				data.setProtectedEntry();
+				data.setProtectedEntry().publicKey(parameters.getProtectionKeys().getPublic());
 
-				// // sign the data
-				// data.sign(parameters.getProtectionKeys(), signatureFactory);
+				// sign the data
+				// data.sign(parameters.getProtectionKeys(), new RSASignatureFactory());
 				// // check if hash creation is needed
 				// if (parameters.getHashFlag()) {
 				// // decrypt signature to get hash of the object
