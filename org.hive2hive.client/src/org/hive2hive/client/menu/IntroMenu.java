@@ -2,9 +2,8 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
-import org.hive2hive.client.menu.advanced.AdvancedMenu;
-import org.hive2hive.client.menu.advanced.NodeCreationMenu;
 import org.hive2hive.client.menu.basic.BasicMenu;
+import org.hive2hive.client.menu.expert.ExpertMenu;
 
 /**
  * The topmost intro menu of the console client.
@@ -28,16 +27,16 @@ public class IntroMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 		
-		add(new H2HConsoleMenuItem("Basic (Recommended)") {
+		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
 				new BasicMenu().open();
 			}
 		});
-		add(new H2HConsoleMenuItem("Advanced") {
+		add(new H2HConsoleMenuItem("Expert Mode") {
 			@Override
 			protected void execute() throws Exception {
-				new AdvancedMenu().open();
+				new ExpertMenu().open();
 			}
 		});
 	}
@@ -64,7 +63,7 @@ public class IntroMenu extends ConsoleMenu {
 
 	@Override
 	protected String getInstruction() {
-		return "Do you want to use the basic or advanced console?";
+		return "Do you want to use the console in basic or expert mode?";
 	}
 
 }

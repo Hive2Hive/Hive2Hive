@@ -1,4 +1,4 @@
-package org.hive2hive.client.menu.advanced;
+package org.hive2hive.client.menu;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.menu.expert.UtilMenu;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -22,6 +23,10 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
  */
 public final class NodeCreationMenu extends ConsoleMenu {
 
+	// TODO configuration steps can be split further up (own menus, distinction between expert mode)
+	
+	private final boolean isExpertMode;
+	
 	private IH2HNode node;
 
 	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
@@ -31,14 +36,21 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
+	
+	public NodeCreationMenu(boolean isExpertMode) {
+		this.isExpertMode = isExpertMode;
+	}
 
 	@Override
 	protected void createItems() {
 		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
-				// System.out.println("Specify Node ID:\n");
-				// String nodeID = awaitStringParameter();
+
 				String nodeID = UUID.randomUUID().toString();
+				if (isExpertMode) {
+					System.out.println("Specify Node ID:\n");
+					nodeID = awaitStringParameter();
+				}
 
 				System.out.println("Specify Bootstrap Address:\n");
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
@@ -55,12 +67,67 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
-				// System.out.println("Specify Node ID:\n");
-				// String nodeID = awaitStringParameter();
 				String nodeID = UUID.randomUUID().toString();
+				if (isExpertMode) {
+					System.out.println("Specify Node ID:\n");
+					nodeID = awaitStringParameter();
+				}
 				createNode(NetworkConfiguration.create(nodeID));
 			}
 		};
+	}
+
+	@Override
+	protected void addMenuItems() {
+
+		add(ConnectToExistingNetworkItem);
+		add(CreateNetworkMenuItem);
+		
+		if (isExpertMode) {
+			add(new H2HConsoleMenuItem("Set MaxFileSize") {
+
+				protected void execute() {
+					System.out.println("Specify MaxFileSize:\n");
+					maxFileSize = Long.parseLong(awaitStringParameter());
+				}
+			});
+
+			add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
+				protected void execute() {
+					System.out.println("Specify MaxNumOfVersions:\n");
+					maxNumOfVersions = Long.parseLong(awaitStringParameter());
+				}
+			});
+
+			add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
+				protected void execute() {
+					System.out.println("Specify MaxSizeAllVersions:\n");
+					maxSizeAllVersions = Long.parseLong(awaitStringParameter());
+				}
+			});
+
+			add(new H2HConsoleMenuItem("Set ChunkSize") {
+				protected void execute() {
+					System.out.println("Specify ChunkSize:\n");
+					chunkSize = Long.parseLong(awaitStringParameter());
+				}
+			});
+			
+			add(new H2HConsoleMenuItem("Open Utils") {
+				protected void execute() {
+					new UtilMenu().open();
+				}
+			});
+		}
+	}
+
+	@Override
+	public String getInstruction() {
+		return "Configure the H2H node and connect to (or create) the network.\n";
+	}
+
+	public IH2HNode getNode() {
+		return node;
 	}
 
 	private void createNode(INetworkConfiguration networkConfig) {
@@ -69,55 +136,5 @@ public final class NodeCreationMenu extends ConsoleMenu {
 		node.getUserManager().configureAutostart(false);
 		node.getFileManager().configureAutostart(false);
 		node.connect();
-	}
-
-	@Override
-	protected void addMenuItems() {
-
-		add(new H2HConsoleMenuItem("Open Utils") {
-			protected void execute() {
-				new UtilMenu().open();
-			}
-		});
-		add(new H2HConsoleMenuItem("Set MaxFileSize") {
-
-			protected void execute() {
-				System.out.println("Specify MaxFileSize:\n");
-				maxFileSize = Long.parseLong(awaitStringParameter());
-			}
-		});
-
-		add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
-			protected void execute() {
-				System.out.println("Specify MaxNumOfVersions:\n");
-				maxNumOfVersions = Long.parseLong(awaitStringParameter());
-			}
-		});
-
-		add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
-			protected void execute() {
-				System.out.println("Specify MaxSizeAllVersions:\n");
-				maxSizeAllVersions = Long.parseLong(awaitStringParameter());
-			}
-		});
-
-		add(new H2HConsoleMenuItem("Set ChunkSize") {
-			protected void execute() {
-				System.out.println("Specify ChunkSize:\n");
-				chunkSize = Long.parseLong(awaitStringParameter());
-			}
-		});
-
-		add(ConnectToExistingNetworkItem);
-		add(CreateNetworkMenuItem);
-	}
-
-	@Override
-	public String getInstruction() {
-		return "Configure the H2H node and connect to (or create) the network.\n";
-	}
-
-	public IH2HNode getH2HNode() {
-		return node;
 	}
 }

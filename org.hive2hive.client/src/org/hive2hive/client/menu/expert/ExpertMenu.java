@@ -1,32 +1,20 @@
-package org.hive2hive.client.menu.advanced;
+package org.hive2hive.client.menu.expert;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.Formatter;
-import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
-import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 
-public final class AdvancedMenu extends ConsoleMenu {
+public final class ExpertMenu extends ConsoleMenu {
 
 	public H2HConsoleMenuItem Login;
 
@@ -35,7 +23,7 @@ public final class AdvancedMenu extends ConsoleMenu {
 	private FileObserverMenu fileObserverMenu;
 	protected File root;
 
-	public AdvancedMenu() {
+	public ExpertMenu() {
 
 		userMenu = new UserMenu();
 	}

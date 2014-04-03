@@ -1,4 +1,4 @@
-package org.hive2hive.client.menu.advanced;
+package org.hive2hive.client.menu.expert;
 
 import java.io.File;
 
