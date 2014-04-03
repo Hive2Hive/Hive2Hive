@@ -16,7 +16,6 @@ public class BasicMenu extends ConsoleMenu {
 				new ConnectionMenu().open();
 			}
 		};
-
 	}
 	
 	@Override

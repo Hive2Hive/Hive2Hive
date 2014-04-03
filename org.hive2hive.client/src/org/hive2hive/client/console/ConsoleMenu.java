@@ -72,6 +72,9 @@ public abstract class ConsoleMenu {
 
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
+			
+			if (i == items.size()-1)
+				System.out.println();
 			System.out.println(String.format("    [%s]  %s", i + 1, item.getDisplayText()));
 		}
 		System.out.println();

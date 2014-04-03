@@ -3,6 +3,11 @@ package org.hive2hive.client.menu;
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 
+/**
+ * The topmost intro menu of the console client.
+ * @author Christian
+ *
+ */
 public class IntroMenu extends ConsoleMenu {
 
 	@Override
@@ -25,8 +30,7 @@ public class IntroMenu extends ConsoleMenu {
 
 	@Override
 	protected String getInstruction() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Do you want to use the basic or advanced console?";
 	}
 
 }

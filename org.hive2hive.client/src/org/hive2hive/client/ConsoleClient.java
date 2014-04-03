@@ -2,9 +2,6 @@ package org.hive2hive.client;
 
 import org.fusesource.jansi.AnsiConsole;
 import org.hive2hive.client.menu.IntroMenu;
-import org.hive2hive.client.menu.advanced.AdvancedMenu;
-import org.hive2hive.client.menu.basic.BasicMenu;
-import org.hive2hive.client.util.Formatter;
 import org.hive2hive.client.util.LoggerInit;
 
 /**
@@ -20,6 +17,7 @@ public class ConsoleClient {
 		AnsiConsole.systemInstall();
 //		Formatter.setDefaultForeground();
 		printHeader();
+		printInstructions();
 		
 		LoggerInit.initLogger();
 
@@ -39,8 +37,7 @@ public class ConsoleClient {
 		System.out.println("*    .´ `-´ `.        Welcome to the Hive2Hive console client!        .´ `-´ `.    *");
 		System.out.println("*    |   |   |                                                        |   |   |    *");
 		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
-		System.out.println("************************************************************************************");
-		System.out.println("\nConfigure and operate on you H2H network by following the guides.\n");
+		System.out.println("************************************************************************************\n");
 	}
 	
 	private static void printFooter() {
@@ -51,5 +48,10 @@ public class ConsoleClient {
 		System.out.println("*    |   |   |                    (hive2hive.com)                     |   |   |    *");
 		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
 		System.out.println("************************************************************************************");
+	}
+	
+	private static void printInstructions() {
+		System.out.println("Configure and operate on you H2H network by following the guides.\n");
+		System.out.println("Please navigate through the menus by entering the numbers next to the items of your choice.\n");
 	}
 }
