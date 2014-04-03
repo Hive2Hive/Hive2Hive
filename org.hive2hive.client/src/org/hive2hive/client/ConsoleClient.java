@@ -31,7 +31,7 @@ public class ConsoleClient {
 	}
 
 	private static void printHeader() {		
-		System.out.println("\n**********************************************************************************");
+		System.out.println("\n************************************************************************************");
 		System.out.println("*      .´'`.                                                            .´'`.      *");
 		System.out.println("*      |   |                                                            |   |      *");
 		System.out.println("*    .´ `-´ `.        Welcome to the Hive2Hive console client!        .´ `-´ `.    *");
@@ -41,17 +41,17 @@ public class ConsoleClient {
 	}
 	
 	private static void printFooter() {
-		System.out.println("\n**********************************************************************************");
+		System.out.println("\n************************************************************************************");
 		System.out.println("*      .´'`.                                                            .´'`.      *");
 		System.out.println("*      |   |                                                            |   |      *");
-		System.out.println("     .´ `-´ `.                        Goodbye!                        .´ `-´ `.    *");
+		System.out.println("*    .´ `-´ `.                        Goodbye!                        .´ `-´ `.    *");
 		System.out.println("*    |   |   |                    (hive2hive.com)                     |   |   |    *");
 		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
 		System.out.println("************************************************************************************");
 	}
 	
 	private static void printInstructions() {
-		System.out.println("Configure and operate on you H2H network by following the guides.\n");
-		System.out.println("Please navigate through the menus by entering the numbers next to the items of your choice.\n");
+		System.out.println("Configure and operate on your Hive2Hive network by following the guides.\n");
+		System.out.println("Navigate through the menus by entering the numbers next to the items of your choice.\n");
 	}
 }

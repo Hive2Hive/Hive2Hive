@@ -2,6 +2,9 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.menu.advanced.AdvancedMenu;
+import org.hive2hive.client.menu.advanced.NodeCreationMenu;
+import org.hive2hive.client.menu.basic.BasicMenu;
 
 /**
  * The topmost intro menu of the console client.
@@ -24,8 +27,38 @@ public class IntroMenu extends ConsoleMenu {
 	
 	@Override
 	protected void addMenuItems() {
-		// TODO Auto-generated method stub
-
+		
+		add(new H2HConsoleMenuItem("Basic (Recommended)") {
+			@Override
+			protected void execute() throws Exception {
+				new BasicMenu().open();
+			}
+		});
+		add(new H2HConsoleMenuItem("Advanced") {
+			@Override
+			protected void execute() throws Exception {
+				new AdvancedMenu().open();
+			}
+		});
+	}
+	
+	@Override
+	protected void onMenuExit() {
+		
+		// TODO check whether network indeed has to be shut down here
+		
+//		// shutdown network
+//		if (nodeMenu.getH2HNode() != null) {
+//			nodeMenu.getH2HNode().disconnect();
+//		}
+//		// shutdown file observer
+//		if (fileObserverMenu != null && fileObserverMenu.getWatcher() != null) {
+//			try {
+//				fileObserverMenu.getWatcher().stop();
+//			} catch (Exception e) {
+//				printError(e.getMessage());
+//			}
+//		}
 	}
 
 	@Override
