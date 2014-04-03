@@ -13,18 +13,6 @@ import org.hive2hive.client.menu.expert.ExpertMenu;
 public class IntroMenu extends ConsoleMenu {
 
 	@Override
-	protected void setup() {
-		createItems();
-		addMenuItems();
-
-		add(new H2HConsoleMenuItem("Exit") {
-			protected void execute() {
-				exit();
-			}
-		});
-	}
-	
-	@Override
 	protected void addMenuItems() {
 		
 		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
@@ -41,6 +29,15 @@ public class IntroMenu extends ConsoleMenu {
 		});
 	}
 	
+	@Override
+	protected void addExitItem() {
+		add(new H2HConsoleMenuItem("Exit") {
+			protected void execute() {
+				exit();
+			}
+		});
+	}
+
 	@Override
 	protected void onMenuExit() {
 		

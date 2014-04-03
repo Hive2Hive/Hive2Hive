@@ -19,19 +19,8 @@ public abstract class ConsoleMenu {
 
 	public ConsoleMenu() {
 		this.items = new ArrayList<ConsoleMenuItem>();
-
-		setup();
-	}
-	
-	protected void setup() {
 		createItems();
-		addMenuItems();
 
-		add(new H2HConsoleMenuItem("Back") {
-			protected void execute() {
-				exit();
-			}
-		});
 	}
 	
 	/**
@@ -49,20 +38,29 @@ public abstract class ConsoleMenu {
 	 */
 	protected abstract void addMenuItems();
 
+	protected void addExitItem() {
+		
+		add(new H2HConsoleMenuItem("Back") {
+			protected void execute() {
+				exit();
+			}
+		});
+	}
+
 	protected final void add(ConsoleMenuItem menuItem) {
 		items.add(menuItem);
 	}
 
 	public final void open() {
+		
+		addMenuItems();
+		addExitItem();
+		
 		this.exited = false;
 		while (!exited) {
 			show();
 		}
 		onMenuExit();
-	}
-
-	protected void onMenuExit() {
-		// do nothing by default
 	}
 
 	private final void show() {
@@ -131,6 +129,10 @@ public abstract class ConsoleMenu {
 
 	protected void exit() {
 		exited = true;
+	}
+
+	protected void onMenuExit() {
+		// do nothing by default
 	}
 
 	protected abstract String getInstruction();
