@@ -1,19 +1,19 @@
 package org.hive2hive.client.menu.basic;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.PreconditionConsoleMenuItem;
 
 public class ConnectionMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		add(new H2HConsoleMenuItem("New Newtork") {
+		add(new PreconditionConsoleMenuItem("New Newtork") {
 			@Override
 			protected void execute() throws Exception {
 				notImplemented(); // TODO
 			}
 		});
-		add(new H2HConsoleMenuItem("Existing Network") {
+		add(new PreconditionConsoleMenuItem("Existing Network") {
 			@Override
 			protected void execute() throws Exception {
 				notImplemented(); // TODO

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.PreconditionConsoleMenuItem;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -35,7 +35,7 @@ import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent
  */
 public final class AdvancedMenu extends ConsoleMenu {
 
-	public H2HConsoleMenuItem Login;
+	public PreconditionConsoleMenuItem Login;
 
 	private final UserMenu userMenu;
 	private final NodeCreationMenu nodeMenu;
@@ -65,7 +65,7 @@ public final class AdvancedMenu extends ConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		Login = new H2HConsoleMenuItem("Login") {
+		Login = new PreconditionConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
 				if (nodeMenu.getH2HNode() == null) {
@@ -105,19 +105,19 @@ public final class AdvancedMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		add(new H2HConsoleMenuItem("Network Configuration") {
+		add(new PreconditionConsoleMenuItem("Network Configuration") {
 			protected void execute() {
 				nodeMenu.open();
 			}
 		});
 
-		add(new H2HConsoleMenuItem("User Configuration") {
+		add(new PreconditionConsoleMenuItem("User Configuration") {
 			protected void execute() {
 				userMenu.open();
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Register") {
+		add(new PreconditionConsoleMenuItem("Register") {
 			protected void checkPreconditions() {
 				if (nodeMenu.getH2HNode() == null) {
 					printPreconditionError("Cannot register: Please create a H2HNode first.");
@@ -139,7 +139,7 @@ public final class AdvancedMenu extends ConsoleMenu {
 
 		add(Login);
 
-		add(new H2HConsoleMenuItem("Add File") {
+		add(new PreconditionConsoleMenuItem("Add File") {
 			@Override
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().add(askForFile(true));
@@ -147,13 +147,13 @@ public final class AdvancedMenu extends ConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Update File") {
+		add(new PreconditionConsoleMenuItem("Update File") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().update(askForFile(true));
 				executeBlocking(process);
 			}
 		});
-		add(new H2HConsoleMenuItem("Move File") {
+		add(new PreconditionConsoleMenuItem("Move File") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				System.out.println("Source path needed: ");
 				File source = askForFile(true);
@@ -165,19 +165,19 @@ public final class AdvancedMenu extends ConsoleMenu {
 				executeBlocking(process);
 			}
 		});
-		add(new H2HConsoleMenuItem("Delete File") {
+		add(new PreconditionConsoleMenuItem("Delete File") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				IProcessComponent process = nodeMenu.getH2HNode().getFileManager().delete(askForFile(false));
 				executeBlocking(process);
 			}
 		});
-		add(new H2HConsoleMenuItem("Recover File") {
+		add(new PreconditionConsoleMenuItem("Recover File") {
 			protected void execute() throws Hive2HiveException {
 				// TODO implement recover process
 				notImplemented();
 			}
 		});
-		add(new H2HConsoleMenuItem("Share") {
+		add(new PreconditionConsoleMenuItem("Share") {
 			protected void execute() throws IllegalArgumentException, NoSessionException,
 					IllegalFileLocation, NoPeerConnectionException, InterruptedException,
 					InvalidProcessStateException {
@@ -199,7 +199,7 @@ public final class AdvancedMenu extends ConsoleMenu {
 				executeBlocking(process);
 			}
 		});
-		add(new H2HConsoleMenuItem("Get File list") {
+		add(new PreconditionConsoleMenuItem("Get File list") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				IResultProcessComponent<List<Path>> process = nodeMenu.getH2HNode().getFileManager()
 						.getFileList();
@@ -219,7 +219,7 @@ public final class AdvancedMenu extends ConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("File Observer") {
+		add(new PreconditionConsoleMenuItem("File Observer") {
 			protected void checkPreconditions() {
 				if (root == null) {
 					printPreconditionError("Cannot configure file observer: Root path not defined yet. Please login first.");
@@ -239,7 +239,7 @@ public final class AdvancedMenu extends ConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Logout") {
+		add(new PreconditionConsoleMenuItem("Logout") {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				IProcessComponent process = nodeMenu.getH2HNode().getUserManager().logout();
 				executeBlocking(process);

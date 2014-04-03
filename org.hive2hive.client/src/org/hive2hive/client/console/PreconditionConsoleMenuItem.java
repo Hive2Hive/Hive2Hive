@@ -8,9 +8,9 @@ import org.hive2hive.client.util.Formatter;
  * @author Christian
  * 
  */
-public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
+public abstract class PreconditionConsoleMenuItem extends ConsoleMenuItem {
 
-	public H2HConsoleMenuItem(String displayText) {
+	public PreconditionConsoleMenuItem(String displayText) {
 		super(displayText);
 	}
 

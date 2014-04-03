@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.PreconditionConsoleMenuItem;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -29,12 +29,12 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
 	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
 
-	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
-	public H2HConsoleMenuItem CreateNetworkMenuItem;
+	public PreconditionConsoleMenuItem ConnectToExistingNetworkItem;
+	public PreconditionConsoleMenuItem CreateNetworkMenuItem;
 
 	@Override
 	protected void createItems() {
-		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
+		ConnectToExistingNetworkItem = new PreconditionConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
 				// System.out.println("Specify Node ID:\n");
 				// String nodeID = awaitStringParameter();
@@ -53,7 +53,7 @@ public final class NodeCreationMenu extends ConsoleMenu {
 			}
 		};
 
-		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
+		CreateNetworkMenuItem = new PreconditionConsoleMenuItem("Create New Network") {
 			protected void execute() {
 				// System.out.println("Specify Node ID:\n");
 				// String nodeID = awaitStringParameter();
@@ -74,12 +74,12 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 
-		add(new H2HConsoleMenuItem("Open Utils") {
+		add(new PreconditionConsoleMenuItem("Open Utils") {
 			protected void execute() {
 				new UtilMenu().open();
 			}
 		});
-		add(new H2HConsoleMenuItem("Set MaxFileSize") {
+		add(new PreconditionConsoleMenuItem("Set MaxFileSize") {
 
 			protected void execute() {
 				System.out.println("Specify MaxFileSize:\n");
@@ -87,21 +87,21 @@ public final class NodeCreationMenu extends ConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
+		add(new PreconditionConsoleMenuItem("Set MaxNumOfVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxNumOfVersions:\n");
 				maxNumOfVersions = Long.parseLong(awaitStringParameter());
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
+		add(new PreconditionConsoleMenuItem("Set MaxSizeAllVersions") {
 			protected void execute() {
 				System.out.println("Specify MaxSizeAllVersions:\n");
 				maxSizeAllVersions = Long.parseLong(awaitStringParameter());
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Set ChunkSize") {
+		add(new PreconditionConsoleMenuItem("Set ChunkSize") {
 			protected void execute() {
 				System.out.println("Specify ChunkSize:\n");
 				chunkSize = Long.parseLong(awaitStringParameter());

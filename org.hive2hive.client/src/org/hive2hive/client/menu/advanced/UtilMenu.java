@@ -5,13 +5,13 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.PreconditionConsoleMenuItem;
 
 public class UtilMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		add(new H2HConsoleMenuItem("Show Local Network Interfaces & IP Addresses") {
+		add(new PreconditionConsoleMenuItem("Show Local Network Interfaces & IP Addresses") {
 			
 			@Override
 			protected void execute() throws Exception {

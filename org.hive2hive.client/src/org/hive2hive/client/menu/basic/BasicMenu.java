@@ -1,15 +1,15 @@
 package org.hive2hive.client.menu.basic;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.PreconditionConsoleMenuItem;
 
 public class BasicMenu extends ConsoleMenu {
 
-	public H2HConsoleMenuItem connectionMenu;
+	public PreconditionConsoleMenuItem connectionMenu;
 	
 	@Override
 	protected void createItems() {
-		connectionMenu = new H2HConsoleMenuItem("Connect") {
+		connectionMenu = new PreconditionConsoleMenuItem("Connect") {
 			
 			@Override
 			protected void execute() throws Exception {
