@@ -112,6 +112,7 @@ public class Connection {
 	public boolean disconnect() {
 		boolean isDisconnected = true;
 		if (isConnected) {
+			// TODO check whether this always shuts down the whole network or if the peer just leaves
 			isDisconnected = peer.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			isConnected = !isDisconnected;
 

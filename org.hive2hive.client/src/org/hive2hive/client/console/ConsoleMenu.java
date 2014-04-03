@@ -87,8 +87,6 @@ public abstract class ConsoleMenu {
 			ConsoleMenuItem item = items.get(chosen - 1);
 			item.invoke();
 		}
-
-		// do not close input
 	}
 
 	protected String awaitStringParameter() {
@@ -98,17 +96,15 @@ public abstract class ConsoleMenu {
 		@SuppressWarnings("resource")
 		Scanner input = new Scanner(System.in);
 
-		String parameter;
-		try {
-			parameter = input.nextLine();
-		} catch (Exception e) {
-			printError("Exception while parsing the parameter.");
+		String parameter = null;
+		boolean success = false;
+		while (!success) {
 			try {
-				input.nextLine();
-			} catch (Exception ex) {
-				// ignore
+				parameter = input.next();
+				success = true;
+			} catch (Exception e) {
+				printError("Exception while parsing the parameter.");
 			}
-			return null;
 		}
 
 		Formatter.setDefaultForeground();
@@ -118,14 +114,12 @@ public abstract class ConsoleMenu {
 	protected int awaitIntParameter() {
 		boolean success = false;
 		int number = 0;
-		int tries = 0;
-		while (!success && tries < 5) {
+		while (!success) {
 			try {
 				number = Integer.parseInt(awaitStringParameter());
 				success = true;
 			} catch (NumberFormatException e) {
-				tries++;
-				printError("This was not a number... Try again! (" + (5 - tries) + " tries left)");
+				printError("This was not a number... Try again!");
 			}
 		}
 		return number;

@@ -45,7 +45,8 @@ public class IntroMenu extends ConsoleMenu {
 	@Override
 	protected void onMenuExit() {
 		
-		// TODO check whether network indeed has to be shut down here
+		// TODO check whether network indeed has to be shut down here, e.g., when bootstrapped -> just leave
+		// TODO check whether it is possible to remotely kill a network
 		
 //		// shutdown network
 //		if (nodeMenu.getH2HNode() != null) {
