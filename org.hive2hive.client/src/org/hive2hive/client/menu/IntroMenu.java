@@ -1,7 +1,7 @@
 package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.PreconditionConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 
 public class IntroMenu extends ConsoleMenu {
 
@@ -10,7 +10,7 @@ public class IntroMenu extends ConsoleMenu {
 		createItems();
 		addMenuItems();
 
-		add(new PreconditionConsoleMenuItem("Exit") {
+		add(new H2HConsoleMenuItem("Exit") {
 			protected void execute() {
 				exit();
 			}

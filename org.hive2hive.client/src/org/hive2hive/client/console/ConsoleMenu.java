@@ -27,7 +27,7 @@ public abstract class ConsoleMenu {
 		createItems();
 		addMenuItems();
 
-		add(new PreconditionConsoleMenuItem("Back") {
+		add(new H2HConsoleMenuItem("Back") {
 			protected void execute() {
 				exit();
 			}
@@ -35,17 +35,17 @@ public abstract class ConsoleMenu {
 	}
 	
 	/**
-	 * Specifies the {@link PreconditionConsoleMenuItem}s of this menu.<br/>
-	 * <b>Note:</b> Not all {@link PreconditionConsoleMenuItem}s are specified here, as they might also be specified
+	 * Specifies the {@link H2HConsoleMenuItem}s of this menu.<br/>
+	 * <b>Note:</b> Not all {@link H2HConsoleMenuItem}s are specified here, as they might also be specified
 	 * in-line in {@link ConsoleMenu#addMenuItems()}.</br>
-	 * <b>Note:</b> {@link PreconditionConsoleMenuItem}s with preconditions should be specified by this method.
+	 * <b>Note:</b> {@link H2HConsoleMenuItem}s with preconditions should be specified by this method.
 	 */
 	protected void createItems() {
 		// do nothing by default
 	}
 
 	/**
-	 * Enlists the {@link PreconditionConsoleMenuItem}s of this menu.
+	 * Enlists the {@link H2HConsoleMenuItem}s of this menu.
 	 */
 	protected abstract void addMenuItems();
 

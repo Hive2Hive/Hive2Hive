@@ -8,17 +8,10 @@ import org.hive2hive.client.util.Formatter;
  * @author Christian
  * 
  */
-public abstract class PreconditionConsoleMenuItem extends ConsoleMenuItem {
+public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 
-	public PreconditionConsoleMenuItem(String displayText) {
+	public H2HConsoleMenuItem(String displayText) {
 		super(displayText);
-	}
-
-	@Override
-	public void invoke() {
-		// check preconditions before invoking
-		checkPreconditions();
-		super.invoke();
 	}
 
 	@Override
@@ -34,25 +27,21 @@ public abstract class PreconditionConsoleMenuItem extends ConsoleMenuItem {
 		printExecuted();
 	}
 
-	protected void checkPreconditions() {
-		// nothing by default
-	}
-
 	private void printSelection() {
 		Formatter.setSuccessForeground();
-		System.out.println(String.format("Selected Option: %s\n", displayText));
+		System.out.println(String.format("Selected Option: %s", displayText));
 		Formatter.setDefaultForeground();
 	}
 
 	protected void printPreconditionError(String message) {
 		Formatter.setErrorForeground();
-		System.out.println(String.format("Unsatisfied Precondition: %s\n", message));
+		System.out.println(String.format("Unsatisfied Precondition: %s", message));
 		Formatter.setDefaultForeground();
 	}
 
 	private void printExecuted() {
 		Formatter.setSuccessForeground();
-		System.out.println(String.format("\n%s executed.\n", displayText));
+		System.out.println(String.format("%s executed.", displayText));
 		Formatter.setDefaultForeground();
 	}
 }

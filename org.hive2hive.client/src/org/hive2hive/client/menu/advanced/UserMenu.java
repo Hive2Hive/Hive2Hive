@@ -2,7 +2,7 @@ package org.hive2hive.client.menu.advanced;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.PreconditionConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -13,10 +13,10 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public final class UserMenu extends ConsoleMenu {
 
-	public PreconditionConsoleMenuItem SetUserID;
-	public PreconditionConsoleMenuItem SetUserPassword;
-	public PreconditionConsoleMenuItem SetUserPin;
-	public PreconditionConsoleMenuItem CreateUserCredentials;
+	public H2HConsoleMenuItem SetUserID;
+	public H2HConsoleMenuItem SetUserPassword;
+	public H2HConsoleMenuItem SetUserPin;
+	public H2HConsoleMenuItem CreateUserCredentials;
 
 	private String userId;
 	private String password;
@@ -29,25 +29,25 @@ public final class UserMenu extends ConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		SetUserID = new PreconditionConsoleMenuItem("Set User ID") {
+		SetUserID = new H2HConsoleMenuItem("Set User ID") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user ID:");
 				userId = awaitStringParameter().trim();
 			}
 		};
-		SetUserPassword = new PreconditionConsoleMenuItem("Set User Password") {
+		SetUserPassword = new H2HConsoleMenuItem("Set User Password") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user password:");
 				password = awaitStringParameter().trim();
 			}
 		};
-		SetUserPin = new PreconditionConsoleMenuItem("Set User PIN") {
+		SetUserPin = new H2HConsoleMenuItem("Set User PIN") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user PIN:");
 				pin = awaitStringParameter().trim();
 			}
 		};
-		CreateUserCredentials = new PreconditionConsoleMenuItem("Create User Credentials") {
+		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
 			@Override
 			protected void checkPreconditions() {
 				if (userId == null) {
