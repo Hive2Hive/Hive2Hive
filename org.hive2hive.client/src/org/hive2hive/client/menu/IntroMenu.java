@@ -12,6 +12,7 @@ import org.hive2hive.client.menu.expert.RootMenu;
 public class IntroMenu extends ConsoleMenu {
 
 	private final NodeMenu nodeMenu = new NodeMenu();
+	private final UserMenu userMenu = new UserMenu();
 	
 	@Override
 	protected void addMenuItems() {
@@ -19,13 +20,13 @@ public class IntroMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
-				new RootMenu(nodeMenu).open(false);
+				new RootMenu(nodeMenu, userMenu).open(false);
 			}
 		});
 		add(new H2HConsoleMenuItem("Expert Mode") {
 			@Override
 			protected void execute() throws Exception {
-				new RootMenu(nodeMenu).open(true);
+				new RootMenu(nodeMenu, userMenu).open(true);
 			}
 		});
 	}

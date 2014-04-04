@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.menu.NodeMenu;
+import org.hive2hive.client.menu.UserMenu;
 import org.hive2hive.client.util.Formatter;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
@@ -17,15 +19,11 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 public final class RootMenu extends H2HConsoleMenu {
 
 	private final NodeMenu nodeMenu;
+	private final UserMenu userMenu;
 
-	public RootMenu(NodeMenu nodeMenu) {
+	public RootMenu(NodeMenu nodeMenu, UserMenu userMenu) {
 		this.nodeMenu = nodeMenu;
-		
-	}
-
-	@Override
-	protected void createItems() {
-//		
+		this.userMenu = userMenu;
 	}
 
 	@Override
@@ -35,13 +33,29 @@ public final class RootMenu extends H2HConsoleMenu {
 				nodeMenu.open(isExpertMode);
 			}
 		});
-//
-//		add(new H2HConsoleMenuItem("User Configuration") {
-//			protected void execute() {
-//				userMenu.open();
-//			}
-//		});
-//
+		
+		add(new H2HConsoleMenuItem("Login") {
+			@Override
+			protected void checkPreconditions() {
+				if (nodeMenu.getNode() == null) {
+					printPreconditionError("Cannot login: Please connect to a network first.");
+					nodeMenu.open(isExpertMode);
+				}
+				if (userMenu.getUserCredentials() == null) {
+					printPreconditionError("Cannot login: Please create user credentials first.");
+					userMenu.CreateUserCredentials.invoke();
+				}
+
+			}
+
+			protected void execute() throws NoPeerConnectionException, InterruptedException,
+					InvalidProcessStateException {
+//				IProcessComponent process = node.getUserManager().login(userMenu.getUserCredentials(), root.toPath());
+//				executeBlocking(process);
+				
+			}
+		});
+		
 //		add(new H2HConsoleMenuItem("Register") {
 //			protected void checkPreconditions() {
 //				if (node == null) {
