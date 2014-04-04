@@ -27,12 +27,12 @@ import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.message.SignatureCodec;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
-import net.tomp2p.p2p.RSASignatureCodec;
-import net.tomp2p.p2p.RSASignatureFactory;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
+import org.hive2hive.core.security.H2HSignatureCodec;
+import org.hive2hive.core.security.H2HSignatureFactory;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -721,8 +721,8 @@ public class SecurityTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
 		// create custom RSA factories
-		SignatureFactory factory = new RSASignatureFactory();
-		SignatureCodec codec = new RSASignatureCodec();
+		SignatureFactory factory = new H2HSignatureFactory();
+		SignatureCodec codec = new H2HSignatureCodec();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
@@ -801,8 +801,8 @@ public class SecurityTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
 		// create custom RSA factories
-		SignatureFactory factory = new RSASignatureFactory();
-		SignatureCodec codec = new RSASignatureCodec();
+		SignatureFactory factory = new H2HSignatureFactory();
+		SignatureCodec codec = new H2HSignatureCodec();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
@@ -1009,7 +1009,7 @@ public class SecurityTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
 		// create custom RSA factories
-		SignatureFactory factory = new RSASignatureFactory();
+		SignatureFactory factory = new H2HSignatureFactory();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
@@ -1105,8 +1105,8 @@ public class SecurityTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
 		// create custom RSA factories
-		SignatureFactory factory = new RSASignatureFactory();
-		SignatureCodec codec = new RSASignatureCodec();
+		SignatureFactory factory = new H2HSignatureFactory();
+		SignatureCodec codec = new H2HSignatureCodec();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
