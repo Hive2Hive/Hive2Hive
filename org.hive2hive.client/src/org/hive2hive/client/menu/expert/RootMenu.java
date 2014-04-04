@@ -1,36 +1,26 @@
 package org.hive2hive.client.menu.expert;
 
-import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.menu.NodeMenu;
-import org.hive2hive.client.menu.UserMenu;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
-public final class ExpertMenu extends ConsoleMenu {
+public final class RootMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem Login;
+	private final NodeMenu nodeMenu;
 
-	private final UserMenu userMenu;
-	
-	private FileObserverMenu fileObserverMenu;
-	protected File root;
-
-	private NodeMenu nodeMenu;
-
-	public ExpertMenu(NodeMenu nodeMenu) {
+	public RootMenu(NodeMenu nodeMenu) {
 		this.nodeMenu = nodeMenu;
 		
-		userMenu = new UserMenu();
 	}
 
 	@Override
@@ -229,20 +219,20 @@ public final class ExpertMenu extends ConsoleMenu {
 		Formatter.setDefaultForeground();
 	}
 
-	/**
-	 * Asks for a (valid) file
-	 */
-	private File askForFile(boolean expectExistence) {
-		File file = null;
-		do {
-			System.out.println("Specify the relative file path to " + root.getAbsolutePath());
-			String path = awaitStringParameter();
-			file = new File(root, path);
-			if (expectExistence && !file.exists())
-				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again.");
-		} while (expectExistence && (file == null || !file.exists()));
-		return file;
-	}
+//	/**
+//	 * Asks for a (valid) file
+//	 */
+//	private File askForFile(boolean expectExistence) {
+//		File file = null;
+//		do {
+//			System.out.println("Specify the relative file path to " + root.getAbsolutePath());
+//			String path = awaitStringParameter();
+//			file = new File(root, path);
+//			if (expectExistence && !file.exists())
+//				System.out.println("File '" + file.getAbsolutePath() + "' does not exist. Try again.");
+//		} while (expectExistence && (file == null || !file.exists()));
+//		return file;
+//	}
 
 	@Override
 	public String getInstruction() {
