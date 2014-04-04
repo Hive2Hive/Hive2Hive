@@ -79,7 +79,7 @@ public class DataManager implements IDataManager {
 			KeyPair protectionKey) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(contentKey)
 				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setData(content)
-				.setProtectionKeys(protectionKey);
+				.setProtectionKeys(protectionKey).setTTL(content.getTimeToLive());
 		FuturePut putFuture = putUnblocked(parameters);
 		if (putFuture == null) {
 			return false;

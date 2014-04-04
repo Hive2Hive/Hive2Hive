@@ -278,7 +278,8 @@ public class UserProfileManager {
 				encryptedUserProfile.generateVersionKey();
 				IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
 						.setContentKey(H2HConstants.USER_PROFILE).setData(encryptedUserProfile)
-						.setProtectionKeys(entry.getUserProfile().getProtectionKeys());
+						.setProtectionKeys(entry.getUserProfile().getProtectionKeys())
+						.setTTL(entry.getUserProfile().getTimeToLive());
 				boolean success = dataManager.put(parameters);
 				if (!success)
 					entry.setPutError(new PutFailedException("Put failed."));
