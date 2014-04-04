@@ -3,13 +3,13 @@ package org.hive2hive.core.processes.implementations.common.base;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import net.tomp2p.peers.Number160;
-
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -31,38 +31,26 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
+	private IParameters parameters;
 	private final IDataManager dataManager;
-	private String locationKey;
-	private String contentKey;
-	private NetworkContent contentToRemove;
-	private KeyPair protectionKey;
 	private boolean removePerformed = false;
 
 	public BaseRemoveProcessStep(IDataManager dataManager) {
 		this.dataManager = dataManager;
 	}
 
-	protected void remove(PublicKey locationKey, String contentKey, NetworkContent contentToRemove,
-			KeyPair protectionKey) throws RemoveFailedException {
-		remove(H2HEncryptionUtil.key2String(locationKey), contentKey, contentToRemove, protectionKey);
+	protected void remove(PublicKey locationKey, String contentKey, KeyPair protectionKey)
+			throws RemoveFailedException {
+		remove(H2HEncryptionUtil.key2String(locationKey), contentKey, protectionKey);
 	}
 
-	protected void remove(String locationKey, String contentKey, NetworkContent contentToRemove,
-			KeyPair protectionKey) throws RemoveFailedException {
-		this.locationKey = locationKey;
-		this.contentKey = contentKey;
-		this.contentToRemove = contentToRemove;
-		this.protectionKey = protectionKey;
+	protected void remove(String locationKey, String contentKey, KeyPair protectionKey)
+			throws RemoveFailedException {
+		parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+				.setProtectionKeys(protectionKey);
 
-		boolean success = false;
-		if (this.contentToRemove == null || this.contentToRemove.getVersionKey() == Number160.ZERO) {
-			// deletes all versions
-			success = dataManager.remove(locationKey, contentKey, protectionKey);
-		} else {
-			// deletes selected version
-			success = dataManager.remove(locationKey, contentKey, this.contentToRemove.getVersionKey(),
-					protectionKey);
-		}
+		// deletes all versions
+		boolean success = dataManager.remove(parameters);
 		removePerformed = true;
 
 		if (!success) {
@@ -78,22 +66,17 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		}
 
 		// TODO ugly bug fix
-		if (contentToRemove == null) {
-			logger.warn(String
-					.format("Roll back of remove failed. No content to re-put. location key = '%s' content key = '%s'",
-							locationKey, contentKey));
+		if (parameters.getData() == null) {
+			logger.warn(String.format("Roll back of remove failed. No content to re-put. %s",
+					parameters.toString()));
 			return;
 		}
 
-		boolean success = dataManager.put(locationKey, contentKey, contentToRemove, protectionKey);
+		boolean success = dataManager.put(parameters);
 		if (success) {
-			logger.debug(String.format(
-					"Roll back of remove succeeded. location key = '%s' content key = '%s'", locationKey,
-					contentKey));
+			logger.debug(String.format("Roll back of remove succeeded. %s", parameters.toString()));
 		} else {
-			logger.warn(String.format(
-					"Roll back of remove failed. Re-put failed. location key = '%s' content key = '%s'",
-					locationKey, contentKey));
+			logger.warn(String.format("Roll back of remove failed. Re-put failed. %s", parameters.toString()));
 		}
 	}
 }

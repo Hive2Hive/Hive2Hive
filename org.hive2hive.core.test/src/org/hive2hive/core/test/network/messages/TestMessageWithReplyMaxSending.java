@@ -1,10 +1,8 @@
 package org.hive2hive.core.test.network.messages;
 
-import net.tomp2p.peers.Number160;
-
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -37,8 +35,9 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 		try {
 			networkManager
 					.getDataManager()
-					.put(Number160.createHash(networkManager.getNodeId()), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), new H2HTestData(secret), null)
+					.putUnblocked(
+							new Parameters().setLocationKey(networkManager.getNodeId())
+									.setContentKey(contentKey).setData(new H2HTestData(secret)))
 					.awaitUninterruptibly();
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();
@@ -65,13 +64,13 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 		@Override
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
-
 			try {
 				networkManager
 						.getDataManager()
-						.put(Number160.createHash(networkManager.getNodeId()),
-								H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey),
-								new H2HTestData(receivedSecret), null).awaitUninterruptibly();
+						.putUnblocked(
+								new Parameters().setLocationKey(networkManager.getNodeId())
+										.setContentKey(contentKey).setData(new H2HTestData(receivedSecret)))
+						.awaitUninterruptibly();
 			} catch (NoPeerConnectionException e) {
 				Assert.fail();
 			}

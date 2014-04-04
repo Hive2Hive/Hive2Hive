@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
@@ -18,6 +17,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -73,12 +73,10 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// generate random data and content key
 		String data = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
-		Number160 lKey = Number160.createHash(nodeB.getNodeId());
-		Number160 dKey = Number160.ZERO;
-		Number160 cKey = Number160.createHash(contentKey);
+		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey);
 
 		// check if selected location is empty
-		FutureGet futureGet = nodeA.getDataManager().get(lKey, dKey, cKey);
+		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
@@ -108,7 +106,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		H2HWaiter w = new H2HWaiter(10);
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().get(lKey, dKey, cKey);
+			futureGet = nodeB.getDataManager().getUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
 		} while (futureGet.getData() == null);
 
@@ -134,12 +132,10 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// generate random data and content key
 		String data = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
-		Number160 lKey = Number160.createHash(nodeB.getNodeId());
-		Number160 dKey = Number160.ZERO;
-		Number160 cKey = Number160.createHash(contentKey);
+		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey);
 
 		// check if selected location is empty
-		FutureGet futureGet = nodeA.getDataManager().get(lKey, dKey, cKey);
+		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
@@ -174,7 +170,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 10);
 
 		// check if selected location is still empty
-		futureGet = nodeB.getDataManager().get(lKey, dKey, cKey);
+		futureGet = nodeB.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
@@ -195,16 +191,16 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
 		// generate a random content key
 		final String contentKey = NetworkTestUtil.randomString();
-		final Number160 lKeyA = Number160.createHash(nodeA.getNodeId());
-		final Number160 lKeyB = Number160.createHash(nodeB.getNodeId());
-		final Number160 dKey = Number160.ZERO;
-		final Number160 cKey = Number160.createHash(contentKey);
+		final Parameters parametersA = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(
+				contentKey);
+		final Parameters parametersB = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(
+				contentKey);
 
 		// check if selected locations are empty
-		FutureGet futureGet = nodeB.getDataManager().get(lKeyA, dKey, cKey);
+		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parametersA);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
-		futureGet = nodeA.getDataManager().get(lKeyB, dKey, cKey);
+		futureGet = nodeA.getDataManager().getUnblocked(parametersB);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 
@@ -219,7 +215,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
 				try {
-					nodeA.getDataManager().put(lKeyA, dKey, cKey, new H2HTestData(receivedSecret), null)
+					nodeA.getDataManager().putUnblocked(parametersA.setData(new H2HTestData(receivedSecret)))
 							.awaitUninterruptibly();
 				} catch (NoPeerConnectionException e) {
 					Assert.fail();
@@ -241,13 +237,13 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
 			waiter.tickASecond();
-			futureGet = nodeA.getDataManager().get(lKeyA, dKey, cKey);
+			futureGet = nodeA.getDataManager().getUnblocked(parametersA);
 			futureGet.awaitUninterruptibly();
 		} while (futureGet.getData() == null);
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
-		futureGet = nodeB.getDataManager().get(lKeyB, dKey, cKey);
+		futureGet = nodeB.getDataManager().getUnblocked(parametersB);
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);

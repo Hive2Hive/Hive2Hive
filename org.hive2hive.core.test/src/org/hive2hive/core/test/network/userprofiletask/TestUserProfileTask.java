@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.processes.implementations.userprofiletask;
+package org.hive2hive.core.test.network.userprofiletask;
 
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.test.network.NetworkTestUtil;

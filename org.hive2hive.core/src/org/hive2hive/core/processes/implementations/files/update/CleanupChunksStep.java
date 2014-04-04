@@ -6,6 +6,7 @@ import java.util.List;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -19,8 +20,7 @@ import org.hive2hive.core.processes.implementations.files.delete.DeleteSingleChu
  * Initializes all {@link DeleteSingleChunkStep} to delete the chunks that are not used anymore. These are the
  * ones exceeding the limits at the {@link FileConfiguration}.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class CleanupChunksStep extends ProcessStep {
 
@@ -36,15 +36,16 @@ public class CleanupChunksStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		List<String> chunksToDelete = context.getChunksToDelete();
+		List<MetaChunk> chunksToDelete = context.getChunksToDelete();
 		KeyPair protectionKeys = context.consumeProtectionKeys();
 
-		logger.debug("Cleaning " + chunksToDelete.size() + " old file chunks");
+		logger.debug(String.format("Cleaning %s old file chunks", chunksToDelete.size()));
 		int counter = 0;
 		ProcessComponent prev = this;
-		for (String chunkId : chunksToDelete) {
-			logger.debug("Delete chunk " + counter++ + "/" + chunksToDelete.size());
-			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(chunkId, protectionKeys, dataManager);
+		for (MetaChunk metaChunk : chunksToDelete) {
+			logger.debug(String.format("Delete chunk %s of %s", counter++, chunksToDelete.size()));
+			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(metaChunk.getChunkId(),
+					protectionKeys, dataManager);
 
 			// make async, insert it as next step
 			AsyncComponent asyncDeletion = new AsyncComponent(deleteStep);

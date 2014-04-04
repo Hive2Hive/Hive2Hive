@@ -6,7 +6,6 @@ import java.security.KeyPair;
  * Abstract context to update a protection key (used for sharing / unsharing)
  * 
  * @author Nico
- * 
  */
 public abstract class BasePKUpdateContext {
 
@@ -31,4 +30,7 @@ public abstract class BasePKUpdateContext {
 	public abstract String getContentKey();
 
 	public abstract int getTTL();
+	
+	public abstract byte[] getHash();
+	
 }

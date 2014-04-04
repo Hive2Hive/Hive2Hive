@@ -7,7 +7,6 @@ import java.util.List;
 import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FuturePut;
-import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -16,6 +15,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -32,7 +32,6 @@ import org.junit.Test;
  * Tests the generic step that puts the user profile into the DHT
  * 
  * @author Nico, Seppi
- * 
  */
 public class GetUserProfileStepTest extends H2HJUnitTest {
 
@@ -61,9 +60,9 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
-		FuturePut putGlobal = putter.getDataManager().put(
-				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(H2HConstants.USER_PROFILE), encrypted, null);
+		FuturePut putGlobal = putter.getDataManager().putUnblocked(
+				new Parameters().setLocationKey(credentials.getProfileLocationKey())
+						.setContentKey(H2HConstants.USER_PROFILE).setData(encrypted));
 		putGlobal.awaitUninterruptibly();
 
 		UserProfile profile = UseCaseTestUtil.getUserProfile(putter, credentials);
@@ -73,11 +72,15 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccessWithNoUserProfile() throws GetFailedException {
+	public void testStepSuccessWithNoUserProfile() {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
-		UserProfile userProfile = UseCaseTestUtil.getUserProfile(network.get(0), credentials);
-		Assert.assertNull(userProfile);
+		try {
+			UseCaseTestUtil.getUserProfile(network.get(0), credentials);
+			Assert.fail("Should have triggered a GetFailedException");
+		} catch (GetFailedException e) {
+			// has to be triggered here
+		}
 	}
 
 	@AfterClass

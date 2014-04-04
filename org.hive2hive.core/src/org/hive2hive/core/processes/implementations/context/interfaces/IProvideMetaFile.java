@@ -8,4 +8,5 @@ public interface IProvideMetaFile {
 	void provideMetaFile(MetaFile metaFile);
 
 	void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaFile);
+
 }

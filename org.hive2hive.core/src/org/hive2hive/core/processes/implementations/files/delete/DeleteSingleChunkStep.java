@@ -23,7 +23,7 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
-			remove(locationKey, H2HConstants.FILE_CHUNK, null, protectionKeys);
+			remove(locationKey, H2HConstants.FILE_CHUNK, protectionKeys);
 		} catch (RemoveFailedException e) {
 			throw new ProcessExecutionException("Removal of chunk failed.", e);
 		}

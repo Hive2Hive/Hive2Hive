@@ -7,13 +7,13 @@ import java.util.Set;
 /**
  * An index stored in the user profile that represents a file in the directory
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class FileIndex extends Index {
 
 	private static final long serialVersionUID = -465877391037883409L;
 	private byte[] md5LatestVersion;
+	private byte[] metaFileHash;
 
 	/**
 	 * Constructor for child nodes of type 'file'
@@ -83,6 +83,26 @@ public class FileIndex extends Index {
 	@Override
 	public Set<String> getCalculatedUserList() {
 		return parent.getCalculatedUserList();
+	}
+
+	/**
+	 * Set the hash of the corresponding {@link MetaFile} of this {@link FileIndex}, which gets stored in the
+	 * user profile. The hash gets created while signing the data in front of a put into the network.
+	 * 
+	 * @param metaFileHash hash of the corresponding {@link MetaFile}
+	 */
+	public void setMetaFileHash(byte[] metaFileHash) {
+		this.metaFileHash = metaFileHash;
+	}
+
+	/**
+	 * Get the hash of the corresponding {@link MetaFile} of this {@link FileIndex}. The hash gets created
+	 * while signing the {@link MetaFile} in front of a put into the network.
+	 * 
+	 * @return hash of the corresponding meta file
+	 */
+	public byte[] getMetaFileHash() {
+		return metaFileHash;
 	}
 
 }

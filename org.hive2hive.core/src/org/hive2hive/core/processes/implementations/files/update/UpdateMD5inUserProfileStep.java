@@ -21,8 +21,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 /**
  * A step updating the MD5 hash in the user profile
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class UpdateMD5inUserProfileStep extends ProcessStep {
 
@@ -40,7 +39,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws ProcessExecutionException {
-		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
+		MetaFile metaFile = context.consumeMetaFile();
 		byte[] newMD5;
 		try {
 			newMD5 = EncryptionUtil.generateMD5Hash(context.getFile());
@@ -52,7 +51,10 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 			FileIndex index = (FileIndex) userProfile.getFileById(metaFile.getId());
-
+			
+			// store hash of meta file
+			index.setMetaFileHash(context.consumeHash());
+			
 			// store for backup
 			originalMD5 = index.getMD5();
 			if (H2HEncryptionUtil.compareMD5(originalMD5, newMD5)) {

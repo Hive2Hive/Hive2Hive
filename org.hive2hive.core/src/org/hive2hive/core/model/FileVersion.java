@@ -7,8 +7,7 @@ import java.util.List;
  * A version of a file in the DHT. A version contains several chunks (depending on the file size and the
  * settings).
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class FileVersion implements Serializable, IFileVersion {
 
@@ -16,17 +15,23 @@ public class FileVersion implements Serializable, IFileVersion {
 	private final int index; // version count
 	private final long size; // size of the version
 	private final long date; // date when it's created
-	private final List<String> chunkIds; // the chunk id's to find the chunks
+	private final List<MetaChunk> metaChunks; // the chunk id's to find the chunks
 
-	public FileVersion(int index, long size, long date, List<String> chunkIds) {
+	public FileVersion(int index, long size, long date, List<MetaChunk> metaChunks) {
 		this.index = index;
 		this.size = size;
 		this.date = date;
-		this.chunkIds = chunkIds;
+		this.metaChunks = metaChunks;
 	}
 
-	public List<String> getChunkIds() {
-		return chunkIds;
+	/**
+	 * Get a list containing all {@link MetaChunks}. Each meta chunk stores the chunk id and the hash of the
+	 * corresponding chunk stored in the network.
+	 * 
+	 * @return a list with all meta chunks
+	 */
+	public List<MetaChunk> getMetaChunks() {
+		return metaChunks;
 	}
 
 	@Override
@@ -43,4 +48,5 @@ public class FileVersion implements Serializable, IFileVersion {
 	public long getDate() {
 		return date;
 	}
+
 }

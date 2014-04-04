@@ -2,8 +2,6 @@ package org.hive2hive.core.processes.implementations.files.add;
 
 import java.io.File;
 import java.security.KeyPair;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -22,8 +20,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 /**
  * Initializes all {@link PutSingleChunkStep} for the file to upload.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class InitializeChunksStep extends ProcessStep {
 
@@ -43,30 +40,33 @@ public class InitializeChunksStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
 
-		logger.debug("Create chunk keys for the file: " + context.getFile().getName());
-		KeyPair chunkKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-		context.setChunkEncryptionKeys(chunkKeyPair);
-
 		// only continue if the file has content
 		if (file.isDirectory()) {
-			logger.debug("File " + file.getName() + ": No data to put because the file is a folder");
+			logger.trace(String.format("File '%s': No data to put because the file is a folder.",
+					file.getName()));
 			return;
 		}
 
-		List<String> chunkIds = new ArrayList<String>();
+		if (context.consumeChunkKeys() == null) {
+			logger.trace(String.format("Create chunk keys for the file '%s'.", file.getName()));
+			// create and provide chunk keys
+			KeyPair chunkKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
+			context.provideChunkKeys(chunkKeys);
+		}
+
+		// create put chunks steps
 		int chunks = FileUtil.getNumberOfChunks(file, config.getChunkSize());
-		logger.debug(chunks + " chunks to upload for file '" + file.getName() + "'.");
+		logger.trace(String.format("%s chunks to upload for file '%s'.", Integer.toString(chunks),
+				file.getName()));
 		ProcessComponent prev = this;
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();
-			chunkIds.add(chunkId);
 			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager, config);
 
 			// insert just after this step
 			getParent().insertNext(putChunkStep, prev);
 			prev = putChunkStep;
 		}
-
-		context.setChunkIds(chunkIds);
 	}
+
 }

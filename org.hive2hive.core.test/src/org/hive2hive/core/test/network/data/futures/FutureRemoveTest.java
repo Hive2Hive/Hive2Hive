@@ -9,11 +9,10 @@ import java.util.List;
 import java.util.Random;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -22,7 +21,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * 
  * @author Seppi, Nico
  */
 public class FutureRemoveTest extends H2HJUnitTest {
@@ -42,19 +40,17 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	public void testRemove() throws NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData content = new H2HTestData(NetworkTestUtil.randomString());
 
-		nodeA.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setData(data);
 
-		boolean success = nodeB.getDataManager().remove(locationKey, contentKey, null);
+		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+
+		boolean success = nodeB.getDataManager().remove(parameters);
 		assertTrue(success);
 
-		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey), content.getVersionKey());
+		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
@@ -63,21 +59,19 @@ public class FutureRemoveTest extends H2HJUnitTest {
 	public void testRemoveSingleVersion() throws IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData content = new H2HTestData(NetworkTestUtil.randomString());
-		content.generateVersionKey();
 
-		nodeA.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), content, null).awaitUninterruptibly();
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		data.generateVersionKey();
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey())
+				.setData(data);
 
-		boolean success = nodeB.getDataManager().remove(locationKey, contentKey, content.getVersionKey(),
-				null);
+		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+
+		boolean success = nodeB.getDataManager().removeVersion(parameters);
 		assertTrue(success);
 
-		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey), content.getVersionKey());
+		FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
@@ -98,18 +92,20 @@ public class FutureRemoveTest extends H2HJUnitTest {
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());
 			}
-			nodeA.getDataManager()
-					.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-							Number160.createHash(contentKey), data, null).awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+					.setVersionKey(data.getVersionKey()).setData(data);
+			nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 			content.add(data);
 		}
 
-		boolean success = nodeB.getDataManager().remove(locationKey, contentKey, null);
+		boolean success = nodeB.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		assertTrue(success);
 
 		for (H2HTestData data : content) {
-			FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
-					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey), data.getVersionKey());
+			Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+					.setVersionKey(data.getVersionKey()).setData(data);
+			FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
 			assertNull(futureGet.getData());
 		}

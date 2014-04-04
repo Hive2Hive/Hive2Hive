@@ -16,11 +16,12 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -28,28 +29,23 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 /**
  * Puts a single chunk without storing it anywhere (thus large files should be no problem).
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
-public class PutSingleChunkStep extends ProcessStep {
+public class PutSingleChunkStep extends BasePutProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PutSingleChunkStep.class);
 
 	private final int index;
 	private final AddFileProcessContext context;
 	private final IFileConfiguration config;
-	private IDataManager dataManager;
 	private final String chunkId;
-
-	// for rollback
-	private boolean putPerformed;
 
 	public PutSingleChunkStep(AddFileProcessContext context, int index, String chunkId,
 			IDataManager dataManager, IFileConfiguration config) {
+		super(dataManager);
 		this.index = index;
 		this.context = context;
 		this.chunkId = chunkId;
-		this.dataManager = dataManager;
 		this.config = config;
 	}
 
@@ -82,38 +78,24 @@ public class PutSingleChunkStep extends ProcessStep {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
 				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptHybrid(chunk, context
-						.getChunkEncryptionKeys().getPublic());
+						.consumeChunkKeys().getPublic());
 
 				logger.debug("Uploading chunk " + chunk.getOrder() + " of file " + file.getName());
-				boolean success = dataManager.put(chunk.getId(), H2HConstants.FILE_CHUNK, encryptedContent,
-						context.consumeProtectionKeys());
-				putPerformed = true;
-
-				if (!success) {
-					throw new PutFailedException();
-				}
+				Parameters parameters = new Parameters().setLocationKey(chunk.getId())
+						.setContentKey(H2HConstants.FILE_CHUNK).setData(encryptedContent)
+						.setProtectionKeys(context.consumeProtectionKeys()).setTTL(chunk.getTimeToLive());
+				// data manager has to produce the hash, which gets used for signing
+				parameters.setHashFlag(true);
+				// put the encrypted chunk into the network
+				put(parameters);
+				// store the hash in the index of the meta file
+				context.getMetaChunks().add(new MetaChunk(chunkId, parameters.getHash()));
 			} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException
 					| PutFailedException e) {
 				logger.error("Could not encrypt and put the chunk", e);
 				throw new ProcessExecutionException("Could not encrypt and put the chunk", e);
 			}
-		}
-	}
-
-	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (!putPerformed) {
-			// nothing to rollback
-			return;
-		}
-
-		boolean success = dataManager.remove(chunkId, H2HConstants.FILE_CHUNK,
-				context.consumeProtectionKeys());
-		if (success) {
-			logger.debug("Rollback of putting the chunk succeeded.");
-		} else {
-			logger.warn("Rollback of putting the chunk failed.");
 		}
 	}
 

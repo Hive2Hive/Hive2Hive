@@ -4,54 +4,28 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.List;
 
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
-import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.core.model.MetaChunk;
 
-public class UpdateFileProcessContext extends AddFileProcessContext implements IProvideMetaFile,
-		IProvideProtectionKeys {
-
-	// protection keys of the existing meta file
-	private KeyPair protectionKeys;
+public class UpdateFileProcessContext extends AddFileProcessContext {
 
 	// the chunk keys to delete (if the configuration does not allow as many or as big chunks as existent)
-	private List<String> chunksToDelete;
+	private List<MetaChunk> chunksToDelete;
 
 	public UpdateFileProcessContext(File file) {
 		super(file);
 	}
 
-	@Override
-	public void provideMetaFile(MetaFile metaFile) {
-		provideNewMetaFile(metaFile);
-	}
-
-	@Override
-	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
-		// ignore because only used for deletion
-	}
-
-	public List<String> getChunksToDelete() {
+	public List<MetaChunk> getChunksToDelete() {
 		return chunksToDelete;
 	}
 
-	public void setChunksToDelete(List<String> chunksToDelete) {
+	public void setChunksToDelete(List<MetaChunk> chunksToDelete) {
 		this.chunksToDelete = chunksToDelete;
 	}
-
+	
 	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
-	}
-
-	@Override
-	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
-	}
-
-	@Override
-	public KeyPair getChunkEncryptionKeys() {
+	public KeyPair consumeChunkKeys() {
 		return consumeMetaFile().getChunkKey();
 	}
+
 }

@@ -103,6 +103,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
+		encrypted.setTimeToLive(upTask.getTimeToLive());
 		boolean success = dataManager.putUserProfileTask(userId, upTask.getContentKey(), encrypted,
 				upTask.getProtectionKey());
 		if (success) {

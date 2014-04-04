@@ -8,6 +8,8 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -16,8 +18,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 /**
  * Abstract class for {@link ProcessStep}s that intend to PUT content to the DHT.
  * 
- * @author Christian
- * 
+ * @author Christian, Seppi
  */
 public abstract class BasePutProcessStep extends ProcessStep {
 
@@ -26,10 +27,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 	private final IDataManager dataManager;
 	protected boolean putPerformed;
 
-	private String locationKey;
-	private String contentKey;
-	private KeyPair protectionKey;
-	private NetworkContent content;
+	private IParameters parameters;
 
 	public BasePutProcessStep(IDataManager dataManager) {
 		this.dataManager = dataManager;
@@ -40,19 +38,24 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		put(H2HEncryptionUtil.key2String(locationKey), contentKey, content, protectionKey);
 	}
 
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKeys)
 			throws PutFailedException {
-		this.locationKey = locationKey;
-		this.contentKey = contentKey;
-		this.content = content;
-		this.protectionKey = protectionKey;
+		Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(content)
+				.setProtectionKeys(protectionKeys).setTTL(content.getTimeToLive());
 
-		boolean success = dataManager.put(locationKey, contentKey, content, protectionKey);
+		put(parameters);
+	}
+	
+	protected void put(IParameters parameters) throws PutFailedException {
+		// store for roll back
+		this.parameters = parameters;
+		
+		boolean success = dataManager.put(parameters);
 		putPerformed = true;
 
 		if (!success) {
 			throw new PutFailedException();
-		}
+		}	
 	}
 
 	@Override
@@ -62,15 +65,11 @@ public abstract class BasePutProcessStep extends ProcessStep {
 			return;
 		}
 
-		boolean success = dataManager.remove(locationKey, contentKey, content.getVersionKey(), protectionKey);
+		boolean success = dataManager.removeVersion(parameters);
 		if (success) {
-			logger.debug(String.format(
-					"Rollback of put succeeded. location key = '%s' content key = '%s' version key = '%s'",
-					locationKey, contentKey, content.getVersionKey()));
+			logger.debug(String.format("Rollback of put succeeded. %s", parameters.toString()));
 		} else {
-			logger.warn(String
-					.format("Rollback of put failed. Remove failed. location key = '%s' content key = '%s' version key = '%s'",
-							locationKey, contentKey, content.getVersionKey()));
+			logger.warn(String.format("Rollback of put failed. Remove failed. %s", parameters.toString()));
 		}
 	}
 }

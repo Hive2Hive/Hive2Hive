@@ -7,7 +7,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 
-import net.tomp2p.connection.DSASignatureFactory;
 import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
@@ -62,7 +61,7 @@ public class TTLTest extends H2HJUnitTest {
 		int ttl = 4;
 
 		String testData = "data";
-		Data data = new Data(testData).setProtectedEntry().sign(keyPair1, new DSASignatureFactory());
+		Data data = new Data(testData).setProtectedEntry();
 		data.ttlSeconds(ttl).basedOn(bKey);
 
 		// initial put

@@ -7,14 +7,13 @@ import java.io.IOException;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
@@ -61,8 +60,8 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 				putter.getDataManager());
 		UseCaseTestUtil.executeProcess(putStep);
 
-		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = proxy.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
 		assertEquals(data, ((H2HTestData) futureGet.getData().object()).getTestString());
 	}
@@ -88,8 +87,8 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		// wait for the process to finish
 		UseCaseTestUtil.waitTillFailed(listener, 10);
 
-		FutureGet futureGet = proxy.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = proxy.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
