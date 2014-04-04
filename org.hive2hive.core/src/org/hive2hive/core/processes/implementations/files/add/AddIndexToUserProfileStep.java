@@ -3,10 +3,8 @@ package org.hive2hive.core.processes.implementations.files.add;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.KeyPair;
 import java.security.PublicKey;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
@@ -48,17 +46,13 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		// first generate the new key pair for the meta file (which are stored to the context)
-		logger.debug("Create meta file keys for the new file: " + context.getFile().getName());
-		KeyPair metaKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		context.setNewMetaKeyPair(metaKeyPair);
-
 		File file = context.getFile();
-		logger.debug("Start updating the user profile where adding the file: " + file.getName());
+
+		logger.trace(String.format("Start updating the user profile where adding the file '%s'.",
+				file.getName()));
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 
-			// create a file tree node in the user profile
 			// find the parent node using the relative path to navigate there
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
 
@@ -68,22 +62,24 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 						"This directory is write protected (and we don't have the keys).");
 			}
 
+			// create a file tree node in the user profile
 			parentKey = parentNode.getFilePublicKey();
 			// use the file keys generated above is stored
 			if (file.isDirectory()) {
-				context.provideIndex(new FolderIndex(parentNode, metaKeyPair, file.getName()));
+				context.provideIndex(new FolderIndex(parentNode, context.getMetaKeys(), file.getName()));
 			} else {
 				byte[] md5 = EncryptionUtil.generateMD5Hash(file);
-				context.provideIndex(new FileIndex(parentNode, metaKeyPair, file.getName(), md5));
+				context.provideIndex(new FileIndex(parentNode, context.getMetaKeys(), file.getName(), md5));
 			}
 
 			// put the updated user profile
 			profileManager.readyToPut(userProfile, getID());
 			modified = true;
 		} catch (IOException e) {
-			logger.error("Creating MD5 hash of file " + file.getName() + " was not possible. Reason: "
-					+ e.getMessage());
-			throw new ProcessExecutionException("Could not add file to the user profile.", e);
+			logger.error(String.format("Creating MD5 hash of file '%s' was not possible. reason = '%s' ",
+					file.getName(), e.getMessage()));
+			throw new ProcessExecutionException(String.format("Could not add file '%s' to the user profile.",
+					file.getName()), e);
 		} catch (PutFailedException | GetFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

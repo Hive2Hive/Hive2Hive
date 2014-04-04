@@ -64,6 +64,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			this.protectionKey = userProfileTask.getProtectionKey();
 			DataManager dataManager = networkManager.getDataManager();
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
+			encrypted.setTimeToLive(userProfileTask.getTimeToLive());
 			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
 

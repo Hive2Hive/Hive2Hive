@@ -19,6 +19,7 @@ import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -53,9 +54,9 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 		// support to download a specific version
 		int versionToDownload = context.getVersionToDownload();
-		List<String> chunkIds = metaFile.getNewestVersion().getChunkIds();
+		List<MetaChunk> metaChunks = metaFile.getNewestVersion().getMetaChunks();
 		if (versionToDownload != DownloadFileContext.NEWEST_VERSION_INDEX) {
-			chunkIds = metaFile.getVersionByIndex(versionToDownload).getChunkIds();
+			metaChunks = metaFile.getVersionByIndex(versionToDownload).getMetaChunks();
 		}
 
 		// support to store the file on another location than default (used for recover)
@@ -71,21 +72,26 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 		// start the download
 		int counter = 0;
-		for (String chunkId : chunkIds) {
-			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + chunkIds.size());
-			NetworkContent content = get(chunkId, H2HConstants.FILE_CHUNK);
+		for (MetaChunk metaChunk : metaChunks) {
+			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + metaChunks.size());
+			NetworkContent content = get(metaChunk.getChunkId(), H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
 				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFile.getChunkKey()
 						.getPrivate());
 				chunkBuffer.add((Chunk) decrypted);
-				writeBufferToDisk();
 			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
 					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
-					| InvalidCipherTextException | IllegalArgumentException e) {
+					| InvalidCipherTextException | IllegalArgumentException | IOException e) {
 				throw new ProcessExecutionException("Could not decrypt file chunk.", e);
+			}
+
+			try {
+				writeBufferToDisk();
 			} catch (IOException e) {
-				throw new ProcessExecutionException("Could not write file chunk.", e);
+				throw new ProcessExecutionException(String.format(
+						"Could not write file chunk into file '%s'. reason = '%s'", destination.getName(),
+						e.getMessage()), e);
 			}
 		}
 
@@ -117,7 +123,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 					logger.warn("File already exists on disk, it will be overwritten");
 				}
 			} catch (IOException e) {
-				// ignore and just downlaod the file
+				// ignore and just download the file
 			}
 		}
 

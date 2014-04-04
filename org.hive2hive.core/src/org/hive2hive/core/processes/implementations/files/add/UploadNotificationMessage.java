@@ -47,10 +47,10 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 
 	private void downloadSingle() {
 		try {
+			logger.debug(String.format("Got notified and start to download the file = '%s'", index.getName()));
 			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
 					index.getFilePublicKey(), networkManager);
 			process.start();
-			logger.debug("Got notified and start to download the file");
 		} catch (Exception e) {
 			logger.error("Got notified but cannot download the file", e);
 		}

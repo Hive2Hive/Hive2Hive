@@ -23,8 +23,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFi
 /**
  * Takes the shared folder and iteratively changes the protection keys of all meta documents
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class InitializeMetaUpdateStep extends ProcessStep {
 
@@ -82,9 +81,9 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		// each meta document gets own context
 		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(
 				context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys(),
-				index.getFilePublicKey());
+				index.getFilePublicKey(), index);
 		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, dataManager));
-		sequential.add(new ChangeProtectionKeyStep(metaContext, dataManager));
+		sequential.add(new ChangeProtectionKeysStep(metaContext, dataManager));
 		sequential.add(new InitializeChunkUpdateStep(metaContext, dataManager));
 		return sequential;
 	}

@@ -35,6 +35,7 @@ import org.hive2hive.core.processes.implementations.context.UpdateFileProcessCon
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
+import org.hive2hive.core.processes.implementations.files.add.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
 import org.hive2hive.core.processes.implementations.files.add.InitializeChunksStep;
 import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
@@ -204,13 +205,14 @@ public final class ProcessFactory {
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
-		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
+		process.add(new CheckWriteAccessStep(context, session.getProfileManager(), session.getRoot()));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
 			process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 			process.add(new CreateMetaFileStep(context));
-			process.add(new PutMetaFileStep(context, context, dataManager));
+			process.add(new PutMetaFileStep(context, dataManager));
 		}
+		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
@@ -230,7 +232,7 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
-		process.add(new PutMetaFileStep(context, context, dataManager));
+		process.add(new PutMetaFileStep(context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it

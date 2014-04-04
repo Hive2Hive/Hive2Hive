@@ -16,6 +16,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileVersion;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -84,9 +85,10 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNull(metaDocument);
 
 		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
-			for (String key : version.getChunkIds()) {
+			for (MetaChunk metaChunks : version.getMetaChunks()) {
 				FutureGet get = client.getDataManager().getUnblocked(
-						new Parameters().setLocationKey(key).setContentKey(H2HConstants.FILE_CHUNK));
+						new Parameters().setLocationKey(metaChunks.getChunkId()).setContentKey(
+								H2HConstants.FILE_CHUNK));
 				get.awaitUninterruptibly();
 				get.getFutureRequests().awaitUninterruptibly();
 

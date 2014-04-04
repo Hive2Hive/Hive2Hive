@@ -40,15 +40,22 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKeys)
 			throws PutFailedException {
-		parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(content)
-				.setProtectionKeys(protectionKeys);
+		Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(content)
+				.setProtectionKeys(protectionKeys).setTTL(content.getTimeToLive());
 
+		put(parameters);
+	}
+	
+	protected void put(IParameters parameters) throws PutFailedException {
+		// store for roll back
+		this.parameters = parameters;
+		
 		boolean success = dataManager.put(parameters);
 		putPerformed = true;
 
 		if (!success) {
 			throw new PutFailedException();
-		}
+		}	
 	}
 
 	@Override

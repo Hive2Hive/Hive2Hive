@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.FileVersion;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -26,10 +27,10 @@ public class MetaFileTest extends H2HJUnitTest {
 	public void testGetNewestVersion() {
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		List<FileVersion> versions = new ArrayList<FileVersion>();
-		versions.add(new FileVersion(0, 123, System.currentTimeMillis(), new ArrayList<String>()));
-		versions.add(new FileVersion(1, 123, System.currentTimeMillis(), new ArrayList<String>()));
+		versions.add(new FileVersion(0, 123, System.currentTimeMillis(), new ArrayList<MetaChunk>()));
+		versions.add(new FileVersion(1, 123, System.currentTimeMillis(), new ArrayList<MetaChunk>()));
 		// timestamp is older
-		versions.add(new FileVersion(2, 123, System.currentTimeMillis() - 1000 * 60, new ArrayList<String>()));
+		versions.add(new FileVersion(2, 123, System.currentTimeMillis() - 1000 * 60, new ArrayList<MetaChunk>()));
 
 		MetaFile metaFile = new MetaFile(keys.getPublic(), versions, keys);
 
