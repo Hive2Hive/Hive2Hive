@@ -12,19 +12,21 @@ import org.hive2hive.client.menu.expert.ExpertMenu;
  */
 public class IntroMenu extends ConsoleMenu {
 
+	private final NodeMenu nodeMenu = new NodeMenu();
+	
 	@Override
 	protected void addMenuItems() {
 		
 		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
-				new BasicMenu().open();
+				new BasicMenu(nodeMenu).open();
 			}
 		});
 		add(new H2HConsoleMenuItem("Expert Mode") {
 			@Override
 			protected void execute() throws Exception {
-				new ExpertMenu().open();
+				new ExpertMenu(nodeMenu).open();
 			}
 		});
 	}
@@ -42,12 +44,10 @@ public class IntroMenu extends ConsoleMenu {
 	protected void onMenuExit() {
 		
 		// TODO check whether network indeed has to be shut down here, e.g., when bootstrapped -> just leave
-		// TODO check whether it is possible to remotely kill a network
 		
-//		// shutdown network
-//		if (nodeMenu.getH2HNode() != null) {
-//			nodeMenu.getH2HNode().disconnect();
-//		}
+		// shutdown network
+		nodeMenu.disconnectNode();
+		
 //		// shutdown file observer
 //		if (fileObserverMenu != null && fileObserverMenu.getWatcher() != null) {
 //			try {

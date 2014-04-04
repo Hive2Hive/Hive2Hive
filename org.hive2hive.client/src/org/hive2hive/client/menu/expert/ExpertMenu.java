@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.menu.NodeMenu;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -23,8 +24,11 @@ public final class ExpertMenu extends ConsoleMenu {
 	private FileObserverMenu fileObserverMenu;
 	protected File root;
 
-	public ExpertMenu() {
+	private NodeMenu nodeMenu;
 
+	public ExpertMenu(NodeMenu nodeMenu) {
+		this.nodeMenu = nodeMenu;
+		
 		userMenu = new UserMenu();
 	}
 
@@ -70,11 +74,11 @@ public final class ExpertMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-//		add(new H2HConsoleMenuItem("Network Configuration") {
-//			protected void execute() {
-//				nodeMenu.open();
-//			}
-//		});
+		add(new H2HConsoleMenuItem("Connect") {
+			protected void execute() {
+				nodeMenu.open(true);
+			}
+		});
 //
 //		add(new H2HConsoleMenuItem("User Configuration") {
 //			protected void execute() {

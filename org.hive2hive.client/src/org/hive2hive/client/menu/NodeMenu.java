@@ -21,11 +21,11 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
  * @author Christian, Nico
  * 
  */
-public final class NodeCreationMenu extends ConsoleMenu {
+public final class NodeMenu extends ConsoleMenu {
 
 	// TODO configuration steps can be split further up (own menus, distinction between expert mode)
 	
-	private final boolean isExpertMode;
+	private boolean isExpertMode;
 	
 	private IH2HNode node;
 
@@ -37,8 +37,9 @@ public final class NodeCreationMenu extends ConsoleMenu {
 	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
 	
-	public NodeCreationMenu(boolean isExpertMode) {
+	public void open(boolean isExpertMode) {
 		this.isExpertMode = isExpertMode;
+		open();
 	}
 
 	@Override
@@ -127,7 +128,11 @@ public final class NodeCreationMenu extends ConsoleMenu {
 
 	@Override
 	public String getInstruction() {
-		return "Configure the H2H node and connect to (or create) the network.\n";
+		
+		if (isExpertMode)
+			return "Configure and set up your own network or connect to an existing one.\n";
+		else
+			return "Do you want to create a new network or connect to an existing one?\n";
 	}
 
 	public IH2HNode getNode() {
@@ -141,4 +146,11 @@ public final class NodeCreationMenu extends ConsoleMenu {
 		node.getFileManager().configureAutostart(false);
 		node.connect();
 	}
+	
+	public void disconnectNode() {
+		if (node != null) {
+			node.disconnect();
+		}
+	}
+	
 }
