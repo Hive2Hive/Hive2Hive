@@ -26,6 +26,8 @@ public final class NodeMenu extends H2HConsoleMenu {
 	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
 	
+	private IH2HNode node;
+	
 	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
 	private long maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
 	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;

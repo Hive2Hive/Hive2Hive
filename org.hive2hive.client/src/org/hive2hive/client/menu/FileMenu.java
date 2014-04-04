@@ -53,14 +53,15 @@ public class FileMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	protected String getInstruction() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	public File getRootDirectory() {
+		return rootDirectory;
+	}
 }
