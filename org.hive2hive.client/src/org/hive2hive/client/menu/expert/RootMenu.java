@@ -32,7 +32,7 @@ public final class RootMenu extends H2HConsoleMenu {
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Connect") {
 			protected void execute() {
-				nodeMenu.open(true);
+				nodeMenu.open(isExpertMode);
 			}
 		});
 //
