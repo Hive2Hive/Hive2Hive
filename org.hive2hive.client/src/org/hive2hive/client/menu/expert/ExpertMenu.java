@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.menu.NodeMenu;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
@@ -17,7 +17,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 public final class ExpertMenu extends ConsoleMenu {
 
-	public H2HConsoleMenuItemFactory Login;
+	public H2HConsoleMenuItem Login;
 
 	private final UserMenu userMenu;
 	
@@ -39,7 +39,7 @@ public final class ExpertMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		add(new H2HConsoleMenuItemFactory("Connect") {
+		add(new H2HConsoleMenuItem("Connect") {
 			protected void execute() {
 				nodeMenu.open(true);
 			}

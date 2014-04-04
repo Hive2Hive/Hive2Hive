@@ -1,7 +1,7 @@
 package org.hive2hive.client.menu.basic;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.menu.NodeMenu;
 
 public class BasicMenu extends ConsoleMenu {
@@ -19,7 +19,7 @@ public class BasicMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 		
-		add(new H2HConsoleMenuItemFactory("Connect") {
+		add(new H2HConsoleMenuItem("Connect") {
 			
 			@Override
 			protected void execute() throws Exception {
@@ -27,7 +27,7 @@ public class BasicMenu extends ConsoleMenu {
 			}
 		});
 		
-		add(new H2HConsoleMenuItemFactory("Login") {
+		add(new H2HConsoleMenuItem("Login") {
 			
 			@Override
 			protected void checkPreconditions() {
