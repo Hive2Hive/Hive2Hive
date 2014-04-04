@@ -32,12 +32,12 @@ public class FileObserverMenu extends ConsoleMenu {
 		});
 		add(new H2HConsoleMenuItem("Set File Filter") {
 			protected void execute() {
-				notImplemented(); // TODO implement file filter setting
+				// TODO implement file filter setting
 			}
 		});
 		add(new H2HConsoleMenuItem("Set Case Sensitivity") {
 			protected void execute() {
-				notImplemented(); // TODO implement case sensitivity setting
+				// TODO implement case sensitivity setting
 			}
 		});
 		add(new H2HConsoleMenuItem("Start File Observer") {

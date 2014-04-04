@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 import java.util.UUID;
 
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.menu.expert.UtilMenu;
 import org.hive2hive.core.H2HConstants;
@@ -21,26 +21,15 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
  * @author Christian, Nico
  * 
  */
-public final class NodeMenu extends ConsoleMenu {
-
-	// TODO configuration steps can be split further up (own menus, distinction between expert mode)
-	
-	private boolean isExpertMode;
-	
-	private IH2HNode node;
-
-	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
-	private long maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
-	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
-	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
+public final class NodeMenu extends H2HConsoleMenu {
 
 	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
 	
-	public void open(boolean isExpertMode) {
-		this.isExpertMode = isExpertMode;
-		open();
-	}
+	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
+	private long maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
+	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
+	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
 
 	@Override
 	protected void createItems() {

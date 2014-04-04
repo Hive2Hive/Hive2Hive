@@ -87,7 +87,7 @@ public abstract class ConsoleMenu {
 		}
 	}
 
-	protected String awaitStringParameter() {
+	public static String awaitStringParameter() {
 		Formatter.setInputForeground();
 
 		// do not close input
@@ -109,7 +109,7 @@ public abstract class ConsoleMenu {
 		return parameter;
 	}
 
-	protected int awaitIntParameter() {
+	public static int awaitIntParameter() {
 		boolean success = false;
 		int number = 0;
 		while (!success) {
@@ -123,8 +123,14 @@ public abstract class ConsoleMenu {
 		return number;
 	}
 
-	protected boolean awaitBooleanParameter() {
+	public static boolean awaitBooleanParameter() {
 		return Boolean.parseBoolean(awaitStringParameter());
+	}
+
+	public static void printError(String errorMsg) {
+		Formatter.setErrorForeground();
+		System.err.println(errorMsg);
+		Formatter.setDefaultForeground();
 	}
 
 	protected void exit() {
@@ -136,14 +142,4 @@ public abstract class ConsoleMenu {
 	}
 
 	protected abstract String getInstruction();
-
-	protected void printError(String errorMsg) {
-		Formatter.setErrorForeground();
-		System.err.println(errorMsg);
-		Formatter.setDefaultForeground();
-	}
-
-	protected void notImplemented() {
-		System.out.println("This option has not yet been implemented.\n");
-	}
 }

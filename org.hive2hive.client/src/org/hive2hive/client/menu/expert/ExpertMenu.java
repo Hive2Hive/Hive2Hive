@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.menu.NodeMenu;
+import org.hive2hive.client.menu.UserMenu;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
