@@ -1,7 +1,7 @@
 package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
 import org.hive2hive.client.menu.basic.BasicMenu;
 import org.hive2hive.client.menu.expert.ExpertMenu;
 
@@ -17,13 +17,13 @@ public class IntroMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 		
-		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
+		add(new H2HConsoleMenuItemFactory("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
 				new BasicMenu(nodeMenu).open();
 			}
 		});
-		add(new H2HConsoleMenuItem("Expert Mode") {
+		add(new H2HConsoleMenuItemFactory("Expert Mode") {
 			@Override
 			protected void execute() throws Exception {
 				new ExpertMenu(nodeMenu).open();
@@ -33,7 +33,7 @@ public class IntroMenu extends ConsoleMenu {
 	
 	@Override
 	protected void addExitItem() {
-		add(new H2HConsoleMenuItem("Exit") {
+		add(new H2HConsoleMenuItemFactory("Exit") {
 			protected void execute() {
 				exit();
 			}

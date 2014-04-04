@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
 import org.hive2hive.client.menu.NodeMenu;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
@@ -17,7 +17,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 public final class ExpertMenu extends ConsoleMenu {
 
-	public H2HConsoleMenuItem Login;
+	public H2HConsoleMenuItemFactory Login;
 
 	private final UserMenu userMenu;
 	
@@ -34,47 +34,12 @@ public final class ExpertMenu extends ConsoleMenu {
 
 	@Override
 	protected void createItems() {
-//		Login = new H2HConsoleMenuItem("Login") {
-//			@Override
-//			protected void checkPreconditions() {
-//				if (node == null) {
-//					printPreconditionError("Cannot login: Please connect to a network first.");
-//					nodeMenu.open();
-//				}
-//				if (userMenu.getUserCredentials() == null) {
-//					printPreconditionError("Cannot login: Please create UserCredentials first.");
-//					userMenu.CreateUserCredentials.invoke();
-//				}
-//				if (root == null) {
-//					root = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
-//					System.out.printf("Specify root path or enter 'ok' if you agree to: %s", root.toPath());
-//					String input = awaitStringParameter();
-//					if (!input.equalsIgnoreCase("ok"))
-//						root = new File(input);
-//					if (!Files.exists(root.toPath(), LinkOption.NOFOLLOW_LINKS)) {
-//						try {
-//							FileUtils.forceMkdir(root);
-//						} catch (Exception e) {
-//							printError(String.format("Exception on creating the root directory %s: " + e,
-//									root.toPath()));
-//							checkPreconditions();
-//						}
-//					}
-//				}
-//			}
-//
-//			protected void execute() throws NoPeerConnectionException, InterruptedException,
-//					InvalidProcessStateException {
-//				IProcessComponent process = node.getUserManager()
-//						.login(userMenu.getUserCredentials(), root.toPath());
-//				executeBlocking(process);
-//			}
-//		};
+//		
 	}
 
 	@Override
 	protected void addMenuItems() {
-		add(new H2HConsoleMenuItem("Connect") {
+		add(new H2HConsoleMenuItemFactory("Connect") {
 			protected void execute() {
 				nodeMenu.open(true);
 			}

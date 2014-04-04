@@ -1,15 +1,15 @@
 package org.hive2hive.client.menu.basic;
 
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
 import org.hive2hive.client.menu.NodeMenu;
 
 public class BasicMenu extends ConsoleMenu {
 
-	private final NodeMenu nodeCreationMenu;
+	private final NodeMenu nodeMenu;
 
 	public BasicMenu(NodeMenu nodeCreationMenu) {
-		this.nodeCreationMenu = nodeCreationMenu;
+		this.nodeMenu = nodeCreationMenu;
 	}
 	
 	@Override
@@ -19,11 +19,24 @@ public class BasicMenu extends ConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 		
-		add(new H2HConsoleMenuItem("Connect") {
+		add(new H2HConsoleMenuItemFactory("Connect") {
 			
 			@Override
 			protected void execute() throws Exception {
-				nodeCreationMenu.open(true);
+				nodeMenu.open(true);
+			}
+		});
+		
+		add(new H2HConsoleMenuItemFactory("Login") {
+			
+			@Override
+			protected void checkPreconditions() {
+			}
+			
+			@Override
+			protected void execute() throws Exception {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 	}

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
 import org.hive2hive.client.menu.expert.UtilMenu;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
@@ -34,8 +34,8 @@ public final class NodeMenu extends ConsoleMenu {
 	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
 	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
 
-	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
-	public H2HConsoleMenuItem CreateNetworkMenuItem;
+	public H2HConsoleMenuItemFactory ConnectToExistingNetworkItem;
+	public H2HConsoleMenuItemFactory CreateNetworkMenuItem;
 	
 	public void open(boolean isExpertMode) {
 		this.isExpertMode = isExpertMode;
@@ -44,7 +44,7 @@ public final class NodeMenu extends ConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
+		ConnectToExistingNetworkItem = new H2HConsoleMenuItemFactory("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
 
 				String nodeID = UUID.randomUUID().toString();
@@ -68,7 +68,7 @@ public final class NodeMenu extends ConsoleMenu {
 			}
 		};
 
-		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
+		CreateNetworkMenuItem = new H2HConsoleMenuItemFactory("Create New Network") {
 			protected void execute() {
 				String nodeID = UUID.randomUUID().toString();
 				if (isExpertMode) {
@@ -89,7 +89,7 @@ public final class NodeMenu extends ConsoleMenu {
 		add(CreateNetworkMenuItem);
 		
 		if (isExpertMode) {
-			add(new H2HConsoleMenuItem("Set MaxFileSize") {
+			add(new H2HConsoleMenuItemFactory("Set MaxFileSize") {
 
 				protected void execute() {
 					System.out.println("Specify MaxFileSize:\n");
@@ -97,28 +97,28 @@ public final class NodeMenu extends ConsoleMenu {
 				}
 			});
 
-			add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
+			add(new H2HConsoleMenuItemFactory("Set MaxNumOfVersions") {
 				protected void execute() {
 					System.out.println("Specify MaxNumOfVersions:\n");
 					maxNumOfVersions = Long.parseLong(awaitStringParameter());
 				}
 			});
 
-			add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
+			add(new H2HConsoleMenuItemFactory("Set MaxSizeAllVersions") {
 				protected void execute() {
 					System.out.println("Specify MaxSizeAllVersions:\n");
 					maxSizeAllVersions = Long.parseLong(awaitStringParameter());
 				}
 			});
 
-			add(new H2HConsoleMenuItem("Set ChunkSize") {
+			add(new H2HConsoleMenuItemFactory("Set ChunkSize") {
 				protected void execute() {
 					System.out.println("Specify ChunkSize:\n");
 					chunkSize = Long.parseLong(awaitStringParameter());
 				}
 			});
 			
-			add(new H2HConsoleMenuItem("Open Utils") {
+			add(new H2HConsoleMenuItemFactory("Open Utils") {
 				protected void execute() {
 					new UtilMenu().open();
 				}

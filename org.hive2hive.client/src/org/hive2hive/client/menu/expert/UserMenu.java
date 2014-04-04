@@ -2,7 +2,7 @@ package org.hive2hive.client.menu.expert;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenuItemFactory;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -13,10 +13,10 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public final class UserMenu extends ConsoleMenu {
 
-	public H2HConsoleMenuItem SetUserID;
-	public H2HConsoleMenuItem SetUserPassword;
-	public H2HConsoleMenuItem SetUserPin;
-	public H2HConsoleMenuItem CreateUserCredentials;
+	public H2HConsoleMenuItemFactory SetUserID;
+	public H2HConsoleMenuItemFactory SetUserPassword;
+	public H2HConsoleMenuItemFactory SetUserPin;
+	public H2HConsoleMenuItemFactory CreateUserCredentials;
 
 	private String userId;
 	private String password;
@@ -29,25 +29,25 @@ public final class UserMenu extends ConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		SetUserID = new H2HConsoleMenuItem("Set User ID") {
+		SetUserID = new H2HConsoleMenuItemFactory("Set User ID") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user ID:");
 				userId = awaitStringParameter().trim();
 			}
 		};
-		SetUserPassword = new H2HConsoleMenuItem("Set User Password") {
+		SetUserPassword = new H2HConsoleMenuItemFactory("Set User Password") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user password:");
 				password = awaitStringParameter().trim();
 			}
 		};
-		SetUserPin = new H2HConsoleMenuItem("Set User PIN") {
+		SetUserPin = new H2HConsoleMenuItemFactory("Set User PIN") {
 			protected void execute() throws Exception {
 				System.out.println("Specify the user PIN:");
 				pin = awaitStringParameter().trim();
 			}
 		};
-		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
+		CreateUserCredentials = new H2HConsoleMenuItemFactory("Create User Credentials") {
 			@Override
 			protected void checkPreconditions() {
 				if (userId == null) {
