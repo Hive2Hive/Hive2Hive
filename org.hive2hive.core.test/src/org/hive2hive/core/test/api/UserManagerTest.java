@@ -3,6 +3,8 @@ package org.hive2hive.core.test.api;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +16,7 @@ import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class UserManagerTest extends H2HJUnitTest {
@@ -43,7 +46,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		String userId = generateRandomString(20);
 		UserCredentials userCredentials = new UserCredentials(userId, generateRandomString(8), generateRandomString(8));
 		
-		// all nodes in network must have same result: false
+		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
 			
 			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
@@ -55,7 +58,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		userManager.configureAutostart(true);
 		userManager.register(userCredentials).await();
 		
-		// all nodes in network must have same result: true
+		// all nodes must have same result: true
 		for (int i = 0; i < network.size(); i++) {
 			
 			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
@@ -63,7 +66,40 @@ public class UserManagerTest extends H2HJUnitTest {
 		}
 		
 		// TODO test after unregistering
+	}
+	
+	@Ignore
+	@Test
+	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException {
 		
+		// TODO check before registering
 		
+		String userId = generateRandomString(20);
+		UserCredentials userCredentials = new UserCredentials(userId, generateRandomString(8), generateRandomString(8));
+		Path rootPah = (new File("testRoot")).toPath();
+		
+		// all nodes must have same result: false
+		for (int i = 0; i < network.size(); i++) {
+			
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			assertFalse(isLoggedIn);
+		}
+		
+		// login all nodes and check again
+		for (int i = 0; i < network.size(); i++) {
+			
+			// before registering
+			network.get(i).getUserManager().login(userCredentials, rootPah).await();
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			assertFalse(isLoggedIn);
+			
+			// after registering
+			network.get(i).getUserManager().register(userCredentials).await();
+			network.get(i).getUserManager().login(userCredentials, rootPah).await();
+			isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			assertTrue(isLoggedIn);
+		}
+		
+		// TODO test after logout
 	}
 }

@@ -6,6 +6,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -76,6 +77,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		
 		RegisterProcessContext context = new RegisterProcessContext();
 		
+		// TODO it is better to check for the existence of a user profile
+		
 		IProcessComponent checkProcess = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
 		executeProcess(checkProcess);
 		
@@ -89,7 +92,12 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		
 		IProcessComponent checkProcess = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
 		executeProcess(checkProcess);
-
-		return context.consumeLocations().getPeerAddresses().contains(networkManager.getConnection().getPeer().getPeerAddress());
+		
+		Locations locations = context.consumeLocations();
+		
+		if (locations == null)
+			return false;
+		else
+			return locations.getPeerAddresses().contains(networkManager.getConnection().getPeer().getPeerAddress());
 	}
 }
