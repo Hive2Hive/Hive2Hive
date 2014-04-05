@@ -25,6 +25,9 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 
+// TODO NetworkTestUtil#createNetwork and NetwortTestUtil#createH2HNetwork seem to be redundant!! remove!
+// TODO test classes using a test network should inherit from the same test class that handles instantiation and shutdown of network, all in the same way
+
 /**
  * Helper class for testing. Provides methods for creating, shutdown nodes and some random generators.
  * 

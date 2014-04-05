@@ -24,12 +24,16 @@ public abstract class H2HManager implements IManager {
 
 	protected void submitProcess(IProcessComponent processComponent) {
 		if (isAutostart)
-			try {
-				processComponent.start();
-			} catch (InvalidProcessStateException e) {
-				// should not happen
-				e.printStackTrace();
-			}
+			executeProcess(processComponent);
+	}
+
+	protected void executeProcess(IProcessComponent processComponent) {
+		try {
+			processComponent.start();
+		} catch (InvalidProcessStateException e) {
+			// should not happen
+			e.printStackTrace();
+		}
 	}
 
 	public NetworkManager getNetworkManager() {

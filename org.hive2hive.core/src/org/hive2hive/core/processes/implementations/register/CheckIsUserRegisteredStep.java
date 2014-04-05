@@ -1,19 +1,18 @@
 package org.hive2hive.core.processes.implementations.register;
 
 import org.hive2hive.core.exceptions.UserAlreadyRegisteredException;
-import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 
-public class CheckUserIsNotRegisteredStep extends GetUserLocationsStep {
+public class CheckIsUserRegisteredStep extends GetUserLocationsStep {
 
 	private final RegisterProcessContext context;
 	private final String userId;
 
-	public CheckUserIsNotRegisteredStep(String userId, RegisterProcessContext context, IDataManager dataManager) {
+	public CheckIsUserRegisteredStep(String userId, RegisterProcessContext context, IDataManager dataManager) {
 		super(userId, context, dataManager);
 		this.userId = userId;
 		this.context = context;
@@ -25,8 +24,6 @@ public class CheckUserIsNotRegisteredStep extends GetUserLocationsStep {
 
 		if (context.consumeLocations() != null) {
 			throw new ProcessExecutionException(new UserAlreadyRegisteredException(userId));
-		} else {
-			context.provideLocations(new Locations(userId));
 		}
 	}
 }

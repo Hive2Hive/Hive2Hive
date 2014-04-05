@@ -11,7 +11,9 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
+import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HUserManager extends H2HManager implements IUserManager {
@@ -61,5 +63,16 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
+	}
+	
+	@Override
+	public boolean isRegistered(String userId) throws NoPeerConnectionException {
+		
+		RegisterProcessContext context = new RegisterProcessContext();
+		
+		IProcessComponent registerProcess = new CheckIsUserRegisteredStep(userId, context, networkManager.getDataManager());
+		executeProcess(registerProcess);
+		
+		return context.consumeLocations() != null;
 	}
 }

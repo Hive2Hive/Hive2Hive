@@ -67,7 +67,8 @@ import org.hive2hive.core.processes.implementations.notify.PutAllUserProfileTask
 import org.hive2hive.core.processes.implementations.notify.RemoveUnreachableStep;
 import org.hive2hive.core.processes.implementations.notify.SendNotificationsMessageStep;
 import org.hive2hive.core.processes.implementations.notify.VerifyNotificationFactoryStep;
-import org.hive2hive.core.processes.implementations.register.CheckUserIsNotRegisteredStep;
+import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
+import org.hive2hive.core.processes.implementations.register.LocationsCreationStep;
 import org.hive2hive.core.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
 import org.hive2hive.core.processes.implementations.register.UserProfileCreationStep;
@@ -116,7 +117,8 @@ public final class ProcessFactory {
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new CheckUserIsNotRegisteredStep(credentials.getUserId(), context, dataManager));
+		process.add(new CheckIsUserRegisteredStep(credentials.getUserId(), context, dataManager));
+		process.add(new LocationsCreationStep(credentials.getUserId(), context));
 		process.add(new UserProfileCreationStep(credentials.getUserId(), context));
 		process.add(new AsyncComponent(new PutUserProfileStep(credentials, context, dataManager)));
 		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, dataManager)));
