@@ -2,7 +2,6 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
-import org.hive2hive.client.menu.expert.RootMenu;
 
 /**
  * The topmost intro menu of the console client.

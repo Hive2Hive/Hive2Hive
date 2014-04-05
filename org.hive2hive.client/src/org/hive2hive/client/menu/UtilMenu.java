@@ -1,4 +1,4 @@
-package org.hive2hive.client.menu.expert;
+package org.hive2hive.client.menu;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;

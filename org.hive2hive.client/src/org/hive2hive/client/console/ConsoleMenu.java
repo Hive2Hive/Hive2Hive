@@ -16,7 +16,7 @@ public abstract class ConsoleMenu {
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
-
+ 
 	public ConsoleMenu() {
 		this.items = new ArrayList<ConsoleMenuItem>();
 		createItems();

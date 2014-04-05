@@ -1,4 +1,4 @@
-package org.hive2hive.client.menu.expert;
+package org.hive2hive.client.menu;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,14 +8,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
-import org.hive2hive.client.menu.FileMenu;
-import org.hive2hive.client.menu.NodeMenu;
-import org.hive2hive.client.menu.UserMenu;
 import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
 
 public final class RootMenu extends H2HConsoleMenu {
 
@@ -54,8 +53,34 @@ public final class RootMenu extends H2HConsoleMenu {
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
 					InvalidProcessStateException {
+				
+				// TODO wait for negative feedback that user isn't yet registered
+				// TODO return specific NotRegisteredException
+				
 				IProcessComponent process = nodeMenu.getNode().getUserManager().login(userMenu.getUserCredentials(),
 						fileMenu.getRootDirectory().toPath());
+				
+				process.attachListener(new IProcessComponentListener() {
+					
+					@Override
+					public void onSucceeded() {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onFinished() {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onFailed(RollbackReason reason) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
 				executeBlocking(process);
 			}
 		});

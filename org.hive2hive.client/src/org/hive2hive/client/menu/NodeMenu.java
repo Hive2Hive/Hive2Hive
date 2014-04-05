@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
-import org.hive2hive.client.menu.expert.UtilMenu;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
