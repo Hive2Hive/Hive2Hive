@@ -12,9 +12,9 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
+import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
-import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HUserManager extends H2HManager implements IUserManager {
@@ -80,5 +80,16 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		executeProcess(checkProcess);
 		
 		return context.consumeLocations() != null;
+	}
+
+	@Override
+	public boolean isLoggedIn(String userId) throws NoPeerConnectionException {
+		
+		LoginProcessContext context = new LoginProcessContext();
+		
+		IProcessComponent checkProcess = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
+		executeProcess(checkProcess);
+
+		return context.consumeLocations().getPeerAddresses().contains(networkManager.getConnection().getPeer().getPeerAddress());
 	}
 }
