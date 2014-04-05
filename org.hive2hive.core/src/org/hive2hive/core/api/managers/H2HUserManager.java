@@ -26,6 +26,11 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		this.fileConfiguration = fileConfiguration;
 	}
 
+	public H2HUserManager autostart(boolean autostart) {
+		configureAutostart(autostart);
+		return this;
+	}
+	
 	@Override
 	public IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException {
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,

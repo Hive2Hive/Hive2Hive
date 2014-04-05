@@ -29,6 +29,11 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	public H2HFileManager(NetworkManager networkManager) {
 		super(networkManager);
 	}
+	
+	public H2HFileManager autostart(boolean autostart) {
+		configureAutostart(autostart);
+		return this;
+	}
 
 	@Override
 	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException,
