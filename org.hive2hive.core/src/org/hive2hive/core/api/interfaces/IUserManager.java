@@ -47,4 +47,6 @@ public interface IUserManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 */
 	IProcessComponent logout() throws NoPeerConnectionException, NoSessionException;
+	
+	boolean isRegistered(String userId) throws NoPeerConnectionException;
 }

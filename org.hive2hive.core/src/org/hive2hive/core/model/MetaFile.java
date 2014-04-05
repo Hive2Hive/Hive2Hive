@@ -12,8 +12,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 /**
  * Holds meta data of a file in the DHT
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class MetaFile extends NetworkContent {
 

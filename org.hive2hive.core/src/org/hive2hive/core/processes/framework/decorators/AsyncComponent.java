@@ -72,7 +72,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 		}
 		;
 
-		logger.debug("Starting async component...");
+		logger.trace("Starting async component...");
 
 		// starts and rollbacks itself if needed (component knows nothing about the composite of which the
 		// AsyncComponent is part of)

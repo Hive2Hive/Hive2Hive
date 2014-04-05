@@ -5,6 +5,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
@@ -14,16 +15,21 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * Provides the required context to update the meta document
+ * 
+ * @author Nico, Seppi
  */
 public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements IProvideProtectionKeys,
 		IProvideMetaFile, IConsumeMetaFile {
 
 	private final PublicKey fileKey;
+	private final FileIndex fileIndex;
 	private MetaFile metaFile;
 
-	public MetaDocumentPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys, PublicKey fileKey) {
+	public MetaDocumentPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys,
+			PublicKey fileKey, FileIndex fileIndex) {
 		super(oldProtectionKeys, newProtectionKeys);
 		this.fileKey = fileKey;
+		this.fileIndex = fileIndex;
 	}
 
 	@Override
@@ -60,4 +66,10 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 	public int getTTL() {
 		return TimeToLiveStore.getInstance().getMetaFile();
 	}
+
+	@Override
+	public byte[] getHash() {
+		return fileIndex.getMetaFileHash();
+	}
+
 }

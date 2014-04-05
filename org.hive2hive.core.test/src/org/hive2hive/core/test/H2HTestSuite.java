@@ -11,6 +11,7 @@ import org.hive2hive.core.test.network.data.DataManagerTest;
 import org.hive2hive.core.test.network.messages.BaseMessageTest;
 import org.hive2hive.core.test.network.messages.BaseRequestMessageTest;
 import org.hive2hive.core.test.network.messages.direct.BaseDirectRequestMessageTest;
+import org.hive2hive.core.test.network.userprofiletask.TestUserProfileTask;
 import org.hive2hive.core.test.processes.framework.ProcessListenerTest;
 import org.hive2hive.core.test.processes.framework.SequentialProcessTest;
 import org.hive2hive.core.test.processes.implementations.common.GetLocationStepTest;
@@ -33,8 +34,13 @@ import org.hive2hive.core.test.processes.implementations.logout.LogoutTest;
 import org.hive2hive.core.test.processes.implementations.notify.NotificationTest;
 import org.hive2hive.core.test.processes.implementations.register.PutUserProfileStepTest;
 import org.hive2hive.core.test.processes.implementations.register.RegisterProcessTest;
-import org.hive2hive.core.test.processes.implementations.userprofiletask.TestUserProfileTask;
+import org.hive2hive.core.test.security.EncryptionUtilTest;
+import org.hive2hive.core.test.security.H2HSignatureFactoryTest;
+import org.hive2hive.core.test.security.PasswordUtilTest;
+import org.hive2hive.core.test.tomp2p.FromToTest;
 import org.hive2hive.core.test.tomp2p.ReplicationTest;
+import org.hive2hive.core.test.tomp2p.SecurityTest;
+import org.hive2hive.core.test.tomp2p.TTLTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -46,56 +52,59 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-// TomP2P
-		ReplicationTest.class,
+	// TomP2P
+	ReplicationTest.class, FromToTest.class, SecurityTest.class, TTLTest.class,
 
-		// Network
-		H2HStorageMemoryTest.class, ConnectionTest.class,
-		// Network, Data
-		DataManagerTest.class,
-		// Network, Message
-		BaseMessageTest.class, BaseRequestMessageTest.class,
-		// Network, Message, Direct
-		BaseDirectRequestMessageTest.class,
+	// Network
+	H2HStorageMemoryTest.class, ConnectionTest.class,
+	// Network, Data
+	DataManagerTest.class,
+	// Network, Message
+	BaseMessageTest.class, BaseRequestMessageTest.class,
+	// Network, Message, Direct
+	BaseDirectRequestMessageTest.class,
 
-		// Processes
-		ProcessListenerTest.class, SequentialProcessTest.class,
+	// Processes
+	ProcessListenerTest.class, SequentialProcessTest.class,
 
-		// ProcessStep, Common, Get
-		BaseGetProcessStepTest.class, GetLocationStepTest.class, GetUserProfileStepTest.class,
-		// ProcessStep, Common, Put
-		BasePutProcessStepTest.class, PutLocationStepTest.class, PutUserProfileStepTest.class,
-		// ProcessStep, Common, Remove
-		BaseRemoveProcessStepTest.class,
-		// ProcessStep, Common, Message
-		BaseMessageProcessStepTest.class, BaseDirectMessageProcessStepTest.class,
+	// ProcessStep, Common, Get
+	BaseGetProcessStepTest.class, GetLocationStepTest.class, GetUserProfileStepTest.class,
+	// ProcessStep, Common, Put
+	BasePutProcessStepTest.class, PutLocationStepTest.class, PutUserProfileStepTest.class,
+	// ProcessStep, Common, Remove
+	BaseRemoveProcessStepTest.class,
+	// ProcessStep, Common, Message
+	BaseMessageProcessStepTest.class, BaseDirectMessageProcessStepTest.class,
 
-		// Process: Register, Login, Logout
-		RegisterProcessTest.class, LoginTest.class, LogoutTest.class,
+	// Process: Register, Login, Logout
+	RegisterProcessTest.class, LoginTest.class, LogoutTest.class,
 
-		// Process: Upload and download
-		AddFileTest.class, UpdateFileTest.class, DownloadFileTest.class,
+	// Process: Upload and download
+	AddFileTest.class, UpdateFileTest.class, DownloadFileTest.class,
 
-		// Process: Delete
-		DeleteFileTest.class,
+	// Process: Delete
+	DeleteFileTest.class,
 
-		// Process: Move
-		MoveFileTest.class,
+	// Process: Move
+	MoveFileTest.class,
 
-		// Process: Recover
-		RecoverFileTest.class,
+	// Process: Recover
+	RecoverFileTest.class,
 
-		// Process: Filelist
-		GetFileListProcessTest.class,
+	// Process: Filelist
+	GetFileListProcessTest.class,
 
-		// Process: Notification and UP Tasks
-		NotificationTest.class, TestUserProfileTask.class,
+	// Process: Notification and UP Tasks
+	NotificationTest.class, TestUserProfileTask.class,
 
-		// Files
-		FileUtilTest.class, FileSynchronizerTest.class,
+	// Files
+	FileUtilTest.class, FileSynchronizerTest.class,
 
-		// Model
-		IndexTest.class, UserCredentialsTest.class, MetaFileTest.class
+	// Model
+	IndexTest.class, UserCredentialsTest.class, MetaFileTest.class,
+	
+	// Security
+	EncryptionUtilTest.class, H2HSignatureFactoryTest.class, PasswordUtilTest.class
 
 })
 public class H2HTestSuite {

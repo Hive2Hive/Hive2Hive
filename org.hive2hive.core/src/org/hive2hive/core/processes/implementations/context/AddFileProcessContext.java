@@ -2,31 +2,42 @@ package org.hive2hive.core.processes.implementations.context;
 
 import java.io.File;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideHash;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMetaFile,
-		IConsumeNotificationFactory, IProvideNotificationFactory, IConsumeIndex, IProvideIndex {
+/**
+ * The context for the process of putting a file.
+ * 
+ * @author Nico, Seppi
+ */
+public class AddFileProcessContext implements IProvideHash, IConsumeNotificationFactory, IProvideProtectionKeys, IProvideMetaFile {
 
 	private final File file;
 
-	private KeyPair chunkKeys;
-	private KeyPair metaKeyPair;
-	private MetaFile newMetaFile;
+	private KeyPair metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
+
+	private KeyPair chunkEncryptionKeys;
+	private MetaFile metaFile;
+	private byte[] hash;
+	private KeyPair protectionKeys;
+
+	private Index index;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
-	private Index index;
-	private List<String> chunkIds;
 
 	public AddFileProcessContext(File file) {
 		this.file = file;
@@ -36,51 +47,59 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 		return file;
 	}
 
-	/**
-	 * The keypair for the encryption of all chunks
-	 */
-	public void setChunkEncryptionKeys(KeyPair chunkKeys) {
-		this.chunkKeys = chunkKeys;
+	public KeyPair getMetaKeys() {
+		return metaKeys;
 	}
 
-	/**
-	 * The keypair for the encryption of all chunks
-	 */
-	public KeyPair getChunkEncryptionKeys() {
-		return chunkKeys;
+	public List<MetaChunk> getMetaChunks() {
+		return metaChunks;
+	}
+	
+	public void provideChunkKeys(KeyPair chunkEncryptionKeys) {
+		this.chunkEncryptionKeys = chunkEncryptionKeys;
+	}
+	
+	public KeyPair consumeChunkKeys() {
+		return chunkEncryptionKeys;
 	}
 
-	public void setNewMetaKeyPair(KeyPair metaKeyPair) {
-		this.metaKeyPair = metaKeyPair;
-	}
-
-	public KeyPair getNewMetaKeyPair() {
-		return metaKeyPair;
-	}
-
-	@Override
 	public MetaFile consumeMetaFile() {
-		// return the new meta file
-		return newMetaFile;
-	}
-
-	public void provideNewMetaFile(MetaFile newMetaFile) {
-		this.newMetaFile = newMetaFile;
+		return metaFile;
 	}
 
 	@Override
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
+	}
+
+	@Override
+	public void provideHash(byte[] hash) {
+		this.hash = hash;
+	}
+
+	public byte[] consumeHash() {
+		return hash;
+	}
+
+	@Override
+	public void provideProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+
 	public KeyPair consumeProtectionKeys() {
-		return index.getProtectionKeys();
+		return protectionKeys;
 	}
 
-	@Override
+	public void provideIndex(Index index) {
+		this.index = index;
+	}
+
+	public Index consumeIndex() {
+		return index;
+	}
+
 	public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
-	}
-
-	@Override
-	public void provideUsersToNotify(Set<String> users) {
-		this.users = users;
 	}
 
 	@Override
@@ -88,32 +107,17 @@ public class AddFileProcessContext implements IConsumeProtectionKeys, IConsumeMe
 		return messageFactory;
 	}
 
-	@Override
+	public void provideUsersToNotify(Set<String> users) {
+		this.users = users;
+	}
+
 	public Set<String> consumeUsersToNotify() {
 		return users;
 	}
 
 	@Override
-	public void provideIndex(Index index) {
-		this.index = index;
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaFile) {
+		// never used in this context
 	}
 
-	@Override
-	public Index consumeIndex() {
-		return index;
-	}
-
-	/**
-	 * The ids of all chunks of this upload
-	 */
-	public List<String> getChunkIds() {
-		return chunkIds;
-	}
-
-	/**
-	 * The ids of all chunks of this upload
-	 */
-	public void setChunkIds(List<String> chunkIds) {
-		this.chunkIds = chunkIds;
-	}
 }

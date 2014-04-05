@@ -18,13 +18,13 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
+import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -36,7 +36,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * 
  * @author Seppi, Nico
  */
 public class FuturePutTest extends H2HJUnitTest {
@@ -71,14 +70,13 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		IParameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setData(data);
 
-		boolean success = nodeB.getDataManager().put(locationKey, contentKey, data, null);
+		boolean success = nodeB.getDataManager().put(parameters);
 		Assert.assertTrue(success);
-		FutureGet futureGet = nodeB.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
 		assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
@@ -103,10 +101,11 @@ public class FuturePutTest extends H2HJUnitTest {
 			}
 			content.add(data);
 
-			boolean success = nodeB.getDataManager().put(locationKey, contentKey, data, null);
+			IParameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+					.setData(data);
+			boolean success = nodeB.getDataManager().put(parameters);
 			Assert.assertTrue(success);
-			FutureGet futureGet = nodeB.getDataManager().get(Number160.createHash(locationKey),
-					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+			FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
 
 			assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
@@ -122,14 +121,13 @@ public class FuturePutTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().getPeerBean().storage(new TestPutFailureStorage());
 		nodeC.getConnection().getPeer().getPeerBean().storage(new TestPutFailureStorage());
 
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData content1 = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setData(data);
 
-		boolean success = nodeB.getDataManager().put(locationKey, contentKey, content1, null);
+		boolean success = nodeB.getDataManager().put(parameters);
 		Assert.assertFalse(success);
-		FutureGet futureGet = nodeA.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
 		assertNull(futureGet.getData());
@@ -142,14 +140,13 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		nodeB.getConnection().getPeer().getPeerBean().storage(new TestPutFailureStorage());
 
-		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setData(data);
 
-		boolean success = nodeB.getDataManager().put(locationKey, contentKey, data, null);
+		boolean success = nodeB.getDataManager().put(parameters);
 		Assert.assertTrue(success);
-		FutureGet futureGet = nodeB.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
 		assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
@@ -174,25 +171,25 @@ public class FuturePutTest extends H2HJUnitTest {
 		data2B.generateVersionKey();
 		data2B.setBasedOnKey(data1.getVersionKey());
 
-		nodeB.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), data1, null).awaitUninterruptibly();
-		nodeB.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), data2A, null).awaitUninterruptibly();
+		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+				.setVersionKey(data1.getVersionKey()).setData(data1);
+		Parameters parameters2A = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+				.setVersionKey(data2A.getVersionKey()).setData(data2A);
+		Parameters parameters2B = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+				.setVersionKey(data2B.getVersionKey()).setData(data2B);
 
-		boolean success = nodeB.getDataManager().put(locationKey, contentKey, data2B, null);
+		nodeB.getDataManager().putUnblocked(parameters1).awaitUninterruptibly();
+		nodeB.getDataManager().putUnblocked(parameters2A).awaitUninterruptibly();
+
+		boolean success = nodeB.getDataManager().put(parameters2B);
 		Assert.assertFalse(success);
-		FutureGet futureGet2A = nodeB.getDataManager().get(Number160.createHash(locationKey),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
-		futureGet2A.awaitUninterruptibly();
 
+		FutureGet futureGet2A = nodeB.getDataManager().getUnblocked(parameters2A);
+		futureGet2A.awaitUninterruptibly();
 		assertEquals(data2A.getTestString(), ((H2HTestData) futureGet2A.getData().object()).getTestString());
 
-		FutureGet futureGet2B = nodeA.getDataManager().get(Number160.createHash(locationKey),
-				Number160.createHash(contentKey), data2B.getVersionKey());
+		FutureGet futureGet2B = nodeA.getDataManager().getVersionUnblocked(parameters2B);
 		futureGet2B.awaitUninterruptibly();
-
 		assertNull(futureGet2B.getData());
 	}
 
@@ -232,8 +229,9 @@ public class FuturePutTest extends H2HJUnitTest {
 		Number640 data2ANewerKey = new Number640(Number160.createHash(locationKey), Number160.ZERO,
 				Number160.createHash(contentKey), data2ANewer.getVersionKey());
 
-		TestFuturePutListener futurePutListener = new TestFuturePutListener(locationKey, contentKey, data2B,
-				null);
+		TestFuturePutListener futurePutListener = new TestFuturePutListener(new Parameters()
+				.setLocationKey(locationKey).setContentKey(contentKey).setVersionKey(data2B.getVersionKey())
+				.setData(data2B), null);
 		NavigableMap<Number640, Number160> dataMap = new ConcurrentSkipListMap<Number640, Number160>();
 
 		// empty map
@@ -287,10 +285,8 @@ public class FuturePutTest extends H2HJUnitTest {
 	}
 
 	private class TestFuturePutListener extends FuturePutListener {
-		public TestFuturePutListener(String locationKey, String contentKey, NetworkContent content,
-				DataManager dataManager) {
-			super(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY, Number160
-					.createHash(contentKey), content, null, dataManager);
+		public TestFuturePutListener(IParameters parameters, DataManager dataManager) {
+			super(parameters, dataManager);
 		}
 
 		public boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest) {

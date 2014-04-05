@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -161,6 +162,22 @@ public final class EncryptionUtil {
 		//
 		// AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
 		// return keyPair;
+	}
+
+	/**
+	 * Generates an asymmetric RSA key pair (1024 bit).
+	 * 
+	 * @return An asymmetric RSA key pair (1024 bit).
+	 */
+	public static KeyPair generateRSAKeyPair() {
+		KeyPairGenerator gen = null;
+		try {
+			gen = KeyPairGenerator.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Exception whil RSA key pair generation:", e);
+			return null;
+		}
+		return gen.generateKeyPair();
 	}
 
 	/**

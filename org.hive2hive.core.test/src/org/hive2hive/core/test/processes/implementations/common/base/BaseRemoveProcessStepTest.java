@@ -9,12 +9,12 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.rpc.DigestInfo;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseRemoveProcessStep;
@@ -54,19 +54,17 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		// put some data to remove
 		network.get(0)
 				.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), testData, null).awaitUninterruptibly();
+				.putUnblocked(
+						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+								.setData(testData)).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, testData, network
-				.get(0).getDataManager());
+		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0)
+				.getDataManager());
 		UseCaseTestUtil.executeProcess(putStep);
 
-		FutureGet futureGet = network
-				.get(0)
-				.getDataManager()
-				.get(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey));
+		FutureGet futureGet = network.get(0).getDataManager()
+				.getUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
@@ -86,12 +84,13 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		// put some data to remove
 		network.get(0)
 				.getDataManager()
-				.put(Number160.createHash(locationKey), H2HConstants.TOMP2P_DEFAULT_KEY,
-						Number160.createHash(contentKey), testData, null).awaitUninterruptibly();
+				.putUnblocked(
+						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+								.setData(testData)).awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, testData,
-				network.get(0).getDataManager());
+		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0)
+				.getDataManager());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		removeStep.attachListener(listener);
 		removeStep.start();
@@ -131,20 +130,17 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 		private final String locationKey;
 		private final String contentKey;
-		private final H2HTestData data;
 
-		public TestRemoveProcessStep(String locationKey, String contentKey, H2HTestData data,
-				IDataManager dataManager) {
+		public TestRemoveProcessStep(String locationKey, String contentKey, IDataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
-			this.data = data;
 		}
 
 		@Override
 		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
-				remove(locationKey, contentKey, data, null);
+				remove(locationKey, contentKey, null);
 			} catch (RemoveFailedException e) {
 				throw new ProcessExecutionException(e);
 			}

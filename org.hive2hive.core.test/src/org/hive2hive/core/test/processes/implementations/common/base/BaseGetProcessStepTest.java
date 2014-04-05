@@ -2,12 +2,11 @@ package org.hive2hive.core.test.processes.implementations.common.base;
 
 import java.util.List;
 
-import net.tomp2p.peers.Number160;
-
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
@@ -45,13 +44,13 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		NetworkManager holder = network.get(1);
 
 		String locationKey = holder.getNodeId();
-		Number160 lKey = Number160.createHash(locationKey);
-		Number160 dKey = Number160.ZERO;
 		String contentKey = NetworkTestUtil.randomString();
-		Number160 cKey = Number160.createHash(contentKey);
 
 		// put in the memory of 2nd peer
-		holder.getDataManager().put(lKey, dKey, cKey, data, null).awaitUninterruptibly();
+		holder.getDataManager()
+				.putUnblocked(
+						new Parameters().setLocationKey(holder.getNodeId()).setContentKey(contentKey)
+								.setData(data)).awaitUninterruptibly();
 
 		TestGetProcessStep getStep = new TestGetProcessStep(locationKey, contentKey, getter.getDataManager());
 		UseCaseTestUtil.executeProcess(getStep);

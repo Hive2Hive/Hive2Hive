@@ -100,8 +100,8 @@ public class SelectVersionStep extends ProcessStep {
 
 			// generate a new file name indicating that the file is restored
 			Date versionDate = new Date(selected.getDate());
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss");
-			String newFileName = context.getFile().getName() + "_" + sdf.format(versionDate);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
+			String newFileName = context.getFile().getName() + "-" + sdf.format(versionDate);
 			logger.debug("Starting to download the restored file under the name '" + newFileName + "'");
 
 			File destination = new File(context.getFile().getParentFile(), newFileName);

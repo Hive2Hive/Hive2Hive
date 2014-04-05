@@ -59,6 +59,9 @@ public class PutUserProfileStep extends BasePutProcessStep {
 			throw new ProcessExecutionException("User profile version key could not be generated.", e);
 		}
 
+		// assign ttl value
+		encryptedProfile.setTimeToLive(userProfile.getTimeToLive());
+		
 		// put encrypted user profile
 		try {
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedProfile,

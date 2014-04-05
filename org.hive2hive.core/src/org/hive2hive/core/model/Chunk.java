@@ -7,7 +7,6 @@ import org.hive2hive.core.network.data.NetworkContent;
  * Raw data part of a file that is added to the DHT
  * 
  * @author Nico
- * 
  */
 public class Chunk extends NetworkContent {
 

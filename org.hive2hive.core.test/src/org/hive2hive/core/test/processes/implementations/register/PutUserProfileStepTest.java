@@ -9,7 +9,6 @@ import java.util.List;
 import javax.crypto.SecretKey;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -17,6 +16,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
 import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
@@ -38,7 +38,6 @@ import org.junit.Test;
  * Tests the generic step that puts the user profile into the DHT.
  * 
  * @author Nico, Seppi
- * 
  */
 public class PutUserProfileStepTest extends H2HJUnitTest {
 
@@ -70,9 +69,9 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		UseCaseTestUtil.executeProcess(step);
 
 		// get the user profile which should be stored at the proxy
-		FutureGet global = client.getDataManager().get(
-				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(H2HConstants.USER_PROFILE));
+		FutureGet global = client.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(credentials.getProfileLocationKey()).setContentKey(
+						H2HConstants.USER_PROFILE));
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
@@ -109,9 +108,9 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		UseCaseTestUtil.waitTillFailed(listener, 20);
 
 		// get the locations which should be stored at the proxy --> they should be null
-		FutureGet futureGet = proxy.getDataManager().get(
-				Number160.createHash(credentials.getProfileLocationKey()), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(H2HConstants.USER_LOCATIONS));
+		FutureGet futureGet = proxy.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(credentials.getProfileLocationKey()).setContentKey(
+						H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}

@@ -32,7 +32,6 @@ import org.junit.Test;
  * Tests the notification procedure
  * 
  * @author Nico
- * 
  */
 public class NotificationTest extends H2HJUnitTest {
 

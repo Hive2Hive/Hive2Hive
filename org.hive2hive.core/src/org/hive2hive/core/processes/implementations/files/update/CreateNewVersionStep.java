@@ -8,6 +8,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -47,7 +48,7 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		MetaFile metaFile = context.consumeMetaFile();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
-				System.currentTimeMillis(), context.getChunkIds());
+				System.currentTimeMillis(), context.getMetaChunks());
 		metaFile.getVersions().add(newVersion);
 
 		initiateCleanup();
@@ -69,11 +70,10 @@ public class CreateNewVersionStep extends ProcessStep {
 		}
 
 		logger.debug(String.format("Need to remove %s old versions", deletedFileVersions.size()));
-		List<String> chunksToDelete = new ArrayList<String>();
+		List<MetaChunk> chunksToDelete = new ArrayList<MetaChunk>();
 		for (FileVersion fileVersion : deletedFileVersions) {
-			chunksToDelete.addAll(fileVersion.getChunkIds());
+			chunksToDelete.addAll(fileVersion.getMetaChunks());
 		}
-
 		context.setChunksToDelete(chunksToDelete);
 	}
 

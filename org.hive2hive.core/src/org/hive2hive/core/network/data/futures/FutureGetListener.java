@@ -11,6 +11,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.parameters.IParameters;
 
 /**
  * A future listener for a get. It can be blocked until the result is here. Then, it returns the desired
@@ -22,10 +23,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(FutureGetListener.class);
 
-	private final Number160 locationKey;
-	private final Number160 domainKey;
-	private final Number160 contentKey;
-	private final Number160 versionKey;
+	private final IParameters parameters;
 	private final DataManager dataManager;
 	private final CountDownLatch latch;
 
@@ -37,22 +35,9 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	// used to count get retries
 	private int getTries = 0;
 
-	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			DataManager dataManager) {
-		this(locationKey, domainKey, contentKey, Number160.ZERO, dataManager);
-	}
-
-	public FutureGetListener(Number160 locationKey, Number160 domainKey, DataManager dataManager) {
-		this(locationKey, domainKey, null, null, dataManager);
-		this.retry = false;
-	}
-
-	public FutureGetListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, DataManager dataManager) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = contentKey;
-		this.versionKey = versionKey;
+	public FutureGetListener(IParameters parameters, boolean retry, DataManager dataManager) {
+		this.retry = retry;
+		this.parameters = parameters;
 		this.dataManager = dataManager;
 		this.latch = new CountDownLatch(1);
 	}
@@ -78,29 +63,26 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		if (retry) {
 			if (future == null || future.isFailed() || future.getData() == null) {
 				if (getTries++ < H2HConstants.GET_RETRIES) {
-					logger.warn(String
-							.format("Get retry #%s because future failed. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-									getTries, locationKey, domainKey, contentKey, versionKey));
-					if (versionKey == Number160.ZERO)
-						dataManager.get(locationKey, domainKey, contentKey).addListener(this);
+					logger.warn(String.format("Get retry #%s because future failed. %s", getTries,
+							parameters.toString()));
+					if (parameters.getVersionKey().equals(Number160.ZERO))
+						dataManager.getUnblocked(parameters).addListener(this);
 					else
-						dataManager.get(locationKey, domainKey, contentKey, versionKey).addListener(this);
+						dataManager.getVersionUnblocked(parameters).addListener(this);
 				} else {
-					logger.warn(String
-							.format("Get failed after %s tries. location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
-									getTries, locationKey, domainKey, contentKey, versionKey));
+					logger.warn(String.format("Get failed after %s tries. %s", getTries,
+							parameters.toString()));
 					notify(null);
 				}
 			} else {
 				NetworkContent content = (NetworkContent) future.getData().object();
 				if (content == null) {
-					logger.warn(String
-							.format("Get retry #%s because content is null. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-									getTries, locationKey, domainKey, contentKey, versionKey));
-					if (versionKey == Number160.ZERO)
-						dataManager.get(locationKey, domainKey, contentKey).addListener(this);
+					logger.warn(String.format("Get retry #%s because content is null. %s", getTries,
+							parameters.toString()));
+					if (parameters.getVersionKey().equals(Number160.ZERO))
+						dataManager.getUnblocked(parameters).addListener(this);
 					else
-						dataManager.get(locationKey, domainKey, contentKey, versionKey).addListener(this);
+						dataManager.getVersionUnblocked(parameters).addListener(this);
 				} else {
 					notify(content);
 				}
@@ -123,13 +105,10 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	 */
 	private void notify(NetworkContent result) {
 		if (result == null) {
-			logger.warn(String.format(
-					"Got null. location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-					locationKey, domainKey, contentKey, versionKey));
+			logger.warn(String.format("Got null. %s", parameters.toString()));
 		} else {
-			logger.debug(String
-					.format("got result = '%s' location key = '%s' domain key = '%s' content key = '%s' version key '%s'",
-							result.getClass().getSimpleName(), locationKey, domainKey, contentKey, versionKey));
+			logger.debug(String.format("got result = '%s' %s", result.getClass().getSimpleName(),
+					parameters.toString()));
 		}
 
 		this.result = result;
@@ -138,7 +117,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	@Override
 	public void exceptionCaught(Throwable t) throws Exception {
-		logger.error("Exception caught during get for key '" + locationKey + "'", t);
+		logger.error("Exception caught during get for " + parameters.toString(), t);
 		operationComplete(null);
 	}
 

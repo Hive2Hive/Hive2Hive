@@ -1,6 +1,5 @@
 package org.hive2hive.core.network.data.futures;
 
-import java.security.KeyPair;
 import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.futures.BaseFutureAdapter;
@@ -14,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.parameters.IParameters;
 
 /**
  * A future listener for a remove. After the operation completed the listener verifies with a get digest if
@@ -29,27 +29,15 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	// used to count remove retries
 	private int removeTries = 0;
 
-	private final Number160 locationKey;
-	private final Number160 domainKey;
-	private final Number160 contentKey;
-	private final Number160 versionKey;
-	private final KeyPair protectionKey;
+	private final IParameters parameters;
+	private final boolean versionRemove;
 	private final DataManager dataManager;
 	private final CountDownLatch latch;
 	private boolean success = false;
 
-	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			KeyPair protectionKey, DataManager dataManager) {
-		this(locationKey, domainKey, contentKey, null, protectionKey, dataManager);
-	}
-
-	public FutureRemoveListener(Number160 locationKey, Number160 domainKey, Number160 contentKey,
-			Number160 versionKey, KeyPair protectionKey, DataManager dataManager) {
-		this.locationKey = locationKey;
-		this.domainKey = domainKey;
-		this.contentKey = contentKey;
-		this.versionKey = versionKey;
-		this.protectionKey = protectionKey;
+	public FutureRemoveListener(IParameters parameters, boolean versionRemove, DataManager dataManager) {
+		this.parameters = parameters;
+		this.versionRemove = versionRemove;
 		this.dataManager = dataManager;
 		this.latch = new CountDownLatch(1);
 	}
@@ -71,16 +59,18 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
 	@Override
 	public void operationComplete(FutureRemove future) throws Exception {
-		logger.debug(String.format("Start verification of remove."
-				+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-				locationKey, domainKey, contentKey, versionKey));
+		logger.debug(String.format("Start verification of remove. %s", parameters.toString()));
 		// get data to verify if everything went correct
-		DigestBuilder digestBuilder = dataManager.getDigest(locationKey);
-		if (versionKey != null) {
-			digestBuilder.setDomainKey(domainKey).setContentKey(contentKey).setVersionKey(versionKey);
+		DigestBuilder digestBuilder = dataManager.getDigest(parameters.getLKey());
+		if (versionRemove) {
+			digestBuilder.setDomainKey(parameters.getDKey()).setContentKey(parameters.getCKey())
+					.setVersionKey(parameters.getVersionKey());
 		} else {
-			digestBuilder.from(new Number640(locationKey, domainKey, contentKey, Number160.ZERO)).to(
-					new Number640(locationKey, domainKey, contentKey, Number160.MAX_VALUE));
+			digestBuilder.from(
+					new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+							Number160.ZERO)).to(
+					new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+							Number160.MAX_VALUE));
 		}
 		FutureDigest digestFuture = digestBuilder.start();
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
@@ -91,9 +81,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 				} else if (!future.getDigest().keyDigest().isEmpty()) {
 					retryRemove();
 				} else {
-					logger.debug(String.format("Verification for remove completed."
-							+ " location key = '%s' domain key = '%s' content key = '%s' versionKey = '%s'",
-							locationKey, domainKey, contentKey, versionKey));
+					logger.debug(String.format("Verification for remove completed. %s", parameters.toString()));
 					success = true;
 					latch.countDown();
 				}
@@ -106,19 +94,16 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	 */
 	private void retryRemove() {
 		if (removeTries++ < H2HConstants.REMOVE_RETRIES) {
-			logger.warn(String.format("Remove verification failed. Data is not null. Try #%s."
-					+ " location key = '%s' domain key = '%s' content key = '%s' versionKey = '%s'",
-					removeTries, locationKey, domainKey, contentKey, versionKey));
-			if (versionKey == null) {
-				dataManager.remove(locationKey, domainKey, contentKey, protectionKey).addListener(this);
+			logger.warn(String.format("Remove verification failed. Data is not null. Try #%s. %s",
+					removeTries, parameters.toString()));
+			if (!versionRemove) {
+				dataManager.removeUnblocked(parameters).addListener(this);
 			} else {
-				dataManager.remove(locationKey, domainKey, contentKey, versionKey, protectionKey)
-						.addListener(this);
+				dataManager.removeVersionUnblocked(parameters).addListener(this);
 			}
 		} else {
-			logger.error(String.format("Remove verification failed. Data is not null after %s tries."
-					+ " location key = '%s' domain key = '%s' content key = '%s' version key = '%s'",
-					removeTries - 1, locationKey, domainKey, contentKey, versionKey));
+			logger.error(String.format("Remove verification failed. Data is not null after %s tries. %s",
+					removeTries - 1, parameters.toString()));
 			success = false;
 			latch.countDown();
 		}

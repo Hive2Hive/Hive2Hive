@@ -1,9 +1,9 @@
 package org.hive2hive.core.test.processes.implementations.common.base;
 
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
 import org.hive2hive.core.test.H2HTestData;
@@ -32,10 +32,10 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 	public void run() {
 		String secret = NetworkTestUtil.randomString();
 
-		Number160 lKey = Number160.createHash(networkManager.getNodeId());
-		Number160 cKey = Number160.createHash(contentKey);
 		try {
-			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, new H2HTestData(secret), null)
+			networkManager.getDataManager().putUnblocked(
+					new Parameters().setLocationKey(networkManager.getNodeId())
+					.setContentKey(contentKey).setData(new H2HTestData(secret)))
 					.awaitUninterruptibly();
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();

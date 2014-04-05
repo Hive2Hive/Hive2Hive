@@ -8,12 +8,11 @@ import java.security.PublicKey;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.H2HWaiter;
@@ -66,15 +65,15 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		FutureGet futureGet = null;
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().get(Number160.createHash(nodeA.getNodeId()),
-					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+			futureGet = nodeB.getDataManager().getUnblocked(
+					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
 		} while (futureGet.getData() == null);
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
-		futureGet = nodeB.getDataManager().get(Number160.createHash(nodeB.getNodeId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet = nodeB.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
@@ -106,15 +105,15 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		FutureGet futureGet = null;
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().get(Number160.createHash(nodeA.getNodeId()),
-					H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+			futureGet = nodeB.getDataManager().getUnblocked(
+					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
 		} while (futureGet.getData() == null);
 
 		// load and verify if same secret was shared
 		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
-		futureGet = nodeB.getDataManager().get(Number160.createHash(nodeB.getNodeId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+		futureGet = nodeB.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
 		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);

@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +35,7 @@ import org.hive2hive.core.processes.implementations.context.UpdateFileProcessCon
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
+import org.hive2hive.core.processes.implementations.files.add.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
 import org.hive2hive.core.processes.implementations.files.add.InitializeChunksStep;
 import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
@@ -44,6 +44,7 @@ import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDis
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.implementations.files.download.FindInUserProfileStep;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.list.GetFileListStep;
 import org.hive2hive.core.processes.implementations.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.move.RelinkUserProfileStep;
@@ -66,7 +67,8 @@ import org.hive2hive.core.processes.implementations.notify.PutAllUserProfileTask
 import org.hive2hive.core.processes.implementations.notify.RemoveUnreachableStep;
 import org.hive2hive.core.processes.implementations.notify.SendNotificationsMessageStep;
 import org.hive2hive.core.processes.implementations.notify.VerifyNotificationFactoryStep;
-import org.hive2hive.core.processes.implementations.register.AssureUserInexistentStep;
+import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
+import org.hive2hive.core.processes.implementations.register.LocationsCreationStep;
 import org.hive2hive.core.processes.implementations.register.PutPublicKeyStep;
 import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
 import org.hive2hive.core.processes.implementations.register.UserProfileCreationStep;
@@ -115,7 +117,8 @@ public final class ProcessFactory {
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new AssureUserInexistentStep(credentials.getUserId(), context, dataManager));
+		process.add(new CheckIsUserRegisteredStep(credentials.getUserId(), context, dataManager));
+		process.add(new LocationsCreationStep(credentials.getUserId(), context));
 		process.add(new UserProfileCreationStep(credentials.getUserId(), context));
 		process.add(new AsyncComponent(new PutUserProfileStep(credentials, context, dataManager)));
 		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, dataManager)));
@@ -204,13 +207,14 @@ public final class ProcessFactory {
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
-		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
+		process.add(new CheckWriteAccessStep(context, session.getProfileManager(), session.getRoot()));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
 			process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 			process.add(new CreateMetaFileStep(context));
-			process.add(new PutMetaFileStep(context, context, dataManager));
+			process.add(new PutMetaFileStep(context, dataManager));
 		}
+		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
@@ -230,7 +234,7 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
-		process.add(new PutMetaFileStep(context, context, dataManager));
+		process.add(new PutMetaFileStep(context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
@@ -314,10 +318,13 @@ public final class ProcessFactory {
 	 * 
 	 * @param networkManager The network manager / node on which the file list operations should be executed.
 	 * @return A file list process.
+	 * @throws NoSessionException
 	 */
-	public IResultProcessComponent<List<Path>> createFileListProcess(NetworkManager networkManager) {
-		GetFileListStep listStep = new GetFileListStep(networkManager);
-		return new AsyncResultComponent<List<Path>>(listStep);
+	public IResultProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
+			throws NoSessionException {
+		H2HSession session = networkManager.getSession();
+		GetFileListStep listStep = new GetFileListStep(session.getProfileManager(), session.getRootFile());
+		return new AsyncResultComponent<List<FileTaste>>(listStep);
 	}
 
 	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,

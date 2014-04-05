@@ -1,8 +1,7 @@
 package org.hive2hive.core.test.network.messages;
 
-import net.tomp2p.peers.Number160;
-
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.test.H2HTestData;
@@ -15,7 +14,6 @@ import org.junit.Assert;
  * {@link BaseMessageTest#testSendingAnAsynchronousMessageWithNoReplyToTargetNode()}
  * 
  * @author Seppi
- * 
  */
 public class TestMessage extends BaseMessage {
 
@@ -32,11 +30,12 @@ public class TestMessage extends BaseMessage {
 
 	@Override
 	public void run() {
-		Number160 lKey = Number160.createHash(networkManager.getNodeId());
-		Number160 cKey = Number160.createHash(contentKey);
 		try {
-			networkManager.getDataManager().put(lKey, Number160.ZERO, cKey, wrapper, null)
-					.awaitUninterruptibly();
+			networkManager
+					.getDataManager()
+					.putUnblocked(
+							new Parameters().setLocationKey(networkManager.getNodeId())
+									.setContentKey(contentKey).setData(wrapper)).awaitUninterruptibly();
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();
 		}

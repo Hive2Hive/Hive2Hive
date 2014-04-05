@@ -5,18 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.test.H2HTestData;
 import org.hive2hive.core.test.network.NetworkTestUtil;
-import org.hive2hive.core.test.processes.implementations.userprofiletask.TestUserProfileTask;
+import org.hive2hive.core.test.network.userprofiletask.TestUserProfileTask;
 import org.junit.Assert;
 
 /**
@@ -24,7 +23,6 @@ import org.junit.Assert;
  * {@link TestDirectNotificationMessage} has put the ordered content (indicating that it arrived)
  * 
  * @author Nico
- * 
  */
 public class CountingNotificationMessageFactory extends BaseNotificationMessageFactory {
 
@@ -50,8 +48,8 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 		for (String contentKey : testContentKeys) {
 			FutureGet futureGet = null;
 			try {
-				futureGet = sender.getDataManager().get(Number160.createHash(sender.getNodeId()),
-						H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(contentKey));
+				futureGet = sender.getDataManager().getUnblocked(
+						new Parameters().setLocationKey(sender.getNodeId()).setContentKey(contentKey));
 				futureGet.awaitUninterruptibly();
 			} catch (NoPeerConnectionException e1) {
 				Assert.fail();

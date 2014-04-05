@@ -9,7 +9,6 @@ import java.util.List;
 
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
-import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -18,6 +17,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -77,9 +77,9 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		assertEquals(credentials.getUserId(), getUserProfile.getUserId());
 
 		// verify put locations
-		FutureGet getLocations = otherClient.getDataManager().get(
-				Number160.createHash(credentials.getUserId()), H2HConstants.TOMP2P_DEFAULT_KEY,
-				Number160.createHash(H2HConstants.USER_LOCATIONS));
+		FutureGet getLocations = otherClient.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(
+						H2HConstants.USER_LOCATIONS));
 		getLocations.awaitUninterruptibly();
 		getLocations.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) getLocations.getData().object();
@@ -89,8 +89,9 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		assertTrue(locations.getPeerAddresses().isEmpty());
 
 		// verify put user public key
-		FutureGet getKey = otherClient.getDataManager().get(Number160.createHash(credentials.getUserId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_PUBLIC_KEY));
+		FutureGet getKey = otherClient.getDataManager().getUnblocked(
+				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(
+						H2HConstants.USER_PUBLIC_KEY));
 		getKey.awaitUninterruptibly();
 		getKey.getFutureRequests().awaitUninterruptibly();
 		UserPublicKey publicKey = (UserPublicKey) getKey.getData().object();
@@ -105,9 +106,10 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// already put a locations map
-		FuturePut putLocations = client.getDataManager().put(Number160.createHash(credentials.getUserId()),
-				H2HConstants.TOMP2P_DEFAULT_KEY, Number160.createHash(H2HConstants.USER_LOCATIONS),
-				new Locations(credentials.getUserId()), null);
+		FuturePut putLocations = client.getDataManager().putUnblocked(
+				new Parameters().setLocationKey(credentials.getUserId())
+						.setContentKey(H2HConstants.USER_LOCATIONS)
+						.setData(new Locations(credentials.getUserId())));
 		putLocations.awaitUninterruptibly();
 		putLocations.getFutureRequests().awaitUninterruptibly();
 

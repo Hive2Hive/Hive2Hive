@@ -13,13 +13,14 @@ import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 
 public class AddFileBuffer extends BaseFileBuffer {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AddFileBuffer.class);
 
-	public AddFileBuffer(IFileManager fileManager, File root) {
-		super(fileManager, root);
+	public AddFileBuffer(IFileManager fileManager) {
+		super(fileManager);
 	}
 
 	@Override
@@ -38,10 +39,12 @@ public class AddFileBuffer extends BaseFileBuffer {
 		}
 	}
 
-	private Set<File> filterBuffer(List<File> fileBuffer, Set<File> syncFiles) {
+	private Set<File> filterBuffer(List<File> fileBuffer, Set<FileTaste> syncFiles) {
 		// remove the files from the buffer which are already in the DHT
 		// the event has been triggered by Hive2Hive when downloading it.
-		fileBuffer.removeAll(syncFiles);
+		for (FileTaste syncFile : syncFiles) {
+			fileBuffer.remove(syncFile.getFile());
+		}
 
 		Set<File> filtered = new HashSet<File>(fileBuffer);
 

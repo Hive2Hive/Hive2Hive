@@ -1,4 +1,4 @@
-package org.hive2hive.core.test.processes.implementations.userprofiletask;
+package org.hive2hive.core.test.network.userprofiletask;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,7 +16,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
 import net.tomp2p.futures.FutureGet;
-import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -26,6 +25,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
@@ -40,6 +40,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
+import org.hive2hive.core.test.processes.implementations.userprofiletask.TestPutUserProfileTaskStep;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
@@ -49,6 +50,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * @author Seppi
+ */
 public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
@@ -77,9 +81,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 				key.getPublic(), node);
 		UseCaseTestUtil.executeProcess(putStep);
 
-		Number160 lKey = Number160.createHash(userId);
-		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-		FutureGet futureGet = node.getDataManager().get(lKey, dKey, userProfileTask.getContentKey());
+		Parameters parameters = new Parameters().setLocationKey(userId)
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
+				.setContentKey(userProfileTask.getContentKey());
+		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
 		assertNotNull(futureGet.getData());
@@ -107,10 +112,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		putStep.cancel(new RollbackReason("Testing whether rollback works."));
 		UseCaseTestUtil.waitTillFailed(listener, 10);
 
-		Number160 lKey = Number160.createHash(userId);
-		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-
-		FutureGet futureGet = node.getDataManager().get(lKey, dKey, userProfileTask.getContentKey());
+		Parameters parameters = new Parameters().setLocationKey(userId)
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
+				.setContentKey(userProfileTask.getContentKey());
+		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 		assertNull(futureGet.getData());
 	}
@@ -178,9 +183,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		UseCaseTestUtil.executeProcess(process);
 
-		Number160 lKey = Number160.createHash(userId);
-		Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-		FutureGet futureGet = node.getDataManager().get(lKey, dKey, userProfileTask.getContentKey());
+		Parameters parameters = new Parameters().setLocationKey(userId)
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
+				.setContentKey(userProfileTask.getContentKey());
+		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
 		assertNull(futureGet.getData());

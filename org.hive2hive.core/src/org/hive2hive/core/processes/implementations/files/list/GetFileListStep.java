@@ -1,37 +1,35 @@
 package org.hive2hive.core.processes.implementations.files.list;
 
+import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.concretes.ResultProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
-public class GetFileListStep extends ResultProcessStep<List<Path>> {
+public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 
-	private final NetworkManager networkManager;
+	private final UserProfileManager profileManager;
+	private final File rootFile;
 
-	public GetFileListStep(NetworkManager networkManager) {
-		this.networkManager = networkManager;
+	public GetFileListStep(UserProfileManager profileManager, File root) {
+		this.profileManager = profileManager;
+		this.rootFile = root;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-
 		// get the user profile
-		UserProfileManager profileManager = null;
-		try {
-			profileManager = networkManager.getSession().getProfileManager();
-		} catch (NoSessionException e) {
-			throw new ProcessExecutionException(e);
-		}
-
 		UserProfile profile = null;
 		try {
 			profile = profileManager.getUserProfile(getID(), false);
@@ -39,13 +37,34 @@ public class GetFileListStep extends ResultProcessStep<List<Path>> {
 			throw new ProcessExecutionException("User profile could not be loaded.");
 		}
 
+		// the result set
+		List<FileTaste> files = new ArrayList<FileTaste>();
+
 		// build the digest recursively
 		FolderIndex root = profile.getRoot();
-		List<Path> digest = FolderIndex.getFilePathList(root);
+		List<Index> digest = Index.getIndexList(root);
+		for (Index index : digest) {
+			if (index.equals(root)) {
+				// skip the root
+				continue;
+			}
 
-		// remove the root
-		digest.remove(root.getFullPath());
+			Path path = index.getFullPath();
+			File file = new File(rootFile, path.toString());
 
-		notifyResultComputed(digest);
+			byte[] md5Hash = null;
+			Set<UserPermission> userPermissions;
+			if (index.isFile()) {
+				FileIndex fileIndex = ((FileIndex) index);
+				md5Hash = fileIndex.getMD5();
+				userPermissions = fileIndex.getParent().getCalculatedUserPermissions();
+			} else {
+				userPermissions = ((FolderIndex) index).getCalculatedUserPermissions();
+			}
+
+			files.add(new FileTaste(file, path, md5Hash, userPermissions));
+		}
+
+		notifyResultComputed(files);
 	}
 }

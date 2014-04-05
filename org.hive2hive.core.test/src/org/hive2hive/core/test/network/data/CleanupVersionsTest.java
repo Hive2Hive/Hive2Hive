@@ -1,9 +1,8 @@
-package org.hive2hive.core.test.network;
+package org.hive2hive.core.test.network.data;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,15 +16,19 @@ import net.tomp2p.peers.Number640;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HTestData;
+import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * @author Seppi
+ */
 public class CleanupVersionsTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
@@ -43,10 +46,9 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	public void testCleanUpFreshVersion() throws InterruptedException, IOException, NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
-		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 dKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 cKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKeys = H2HEncryptionUtil.generateProtectionKeys();
+		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
+				.setDomainKey(NetworkTestUtil.randomString()).setContentKey(NetworkTestUtil.randomString())
+				.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
 
 		int numVersions = H2HConstants.MAX_VERSIONS_HISTORY + random.nextInt(5) + 1;
 		List<H2HTestData> versions = new ArrayList<H2HTestData>();
@@ -69,12 +71,18 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 		if (timeDiff < H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS)
 			Assert.fail("H2H constant is too low to generate appropriate time stamps.");
 
-		for (H2HTestData testData : versions)
-			node.getDataManager().put(lKey, dKey, cKey, testData, protectionKeys).awaitUninterruptibly();
+		for (H2HTestData testData : versions) {
+			parameters.setVersionKey(testData.getVersionKey()).setData(testData);
+			node.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+		}
 
-		FutureDigest futureDigest = node.getDataManager().getDigest(lKey)
-				.from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+		FutureDigest futureDigest = node
+				.getDataManager()
+				.getDigest(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.MAX_VALUE)).start();
 		futureDigest.awaitUninterruptibly();
 
 		assertEquals(versions.size(), futureDigest.getDigest().keyDigest().size());
@@ -89,10 +97,9 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
-		Number160 lKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 dKey = Number160.createHash(NetworkTestUtil.randomString());
-		Number160 cKey = Number160.createHash(NetworkTestUtil.randomString());
-		KeyPair protectionKeys = H2HEncryptionUtil.generateProtectionKeys();
+		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
+				.setDomainKey(NetworkTestUtil.randomString()).setContentKey(NetworkTestUtil.randomString())
+				.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
 
 		int numVersions = H2HConstants.MAX_VERSIONS_HISTORY + random.nextInt(5) + 1;
 		List<H2HTestData> versions = new ArrayList<H2HTestData>();
@@ -119,12 +126,18 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 		if (timeDiff < H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS)
 			Assert.fail("H2H constant is too low to generate appropriate time stamps.");
 
-		for (H2HTestData testData : versions)
-			node.getDataManager().put(lKey, dKey, cKey, testData, protectionKeys).awaitUninterruptibly();
+		for (H2HTestData testData : versions) {
+			parameters.setVersionKey(testData.getVersionKey()).setData(testData);
+			node.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+		}
 
-		FutureDigest futureDigest = node.getDataManager().getDigest(lKey)
-				.from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).ascending().start();
+		FutureDigest futureDigest = node
+				.getDataManager()
+				.getDigest(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.MAX_VALUE)).ascending().start();
 		futureDigest.awaitUninterruptibly();
 
 		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().keyDigest().size());

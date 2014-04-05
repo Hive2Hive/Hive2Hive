@@ -98,7 +98,7 @@ public class H2HJUnitTest {
 	}
 
 	/**
-	 * Returns a random string that with a specified maximal length of chars.
+	 * Returns a random string that with a specified maximal length of chars. The returned string has at least one char.
 	 * 
 	 * @return
 	 */
@@ -107,7 +107,11 @@ public class H2HJUnitTest {
 		Random random = new Random();
 		char[] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-		char buf[] = new char[random.nextInt(maxLength)];
+		int length = 0;
+		while (length < 1) {
+			length = random.nextInt(maxLength);
+		}
+		char buf[] = new char[length];
 		for (int i = 0; i < buf.length; i++) {
 			int index = random.nextInt(subset.length);
 			buf[i] = subset[index];

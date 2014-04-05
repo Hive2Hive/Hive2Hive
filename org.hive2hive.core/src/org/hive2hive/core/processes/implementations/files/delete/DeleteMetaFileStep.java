@@ -30,8 +30,7 @@ public class DeleteMetaFileStep extends BaseRemoveProcessStep {
 		}
 
 		try {
-			remove(context.consumeMetaFile().getId(), H2HConstants.META_FILE,
-					context.consumeEncryptedMetaFile(), context.consumeProtectionKeys());
+			remove(context.consumeMetaFile().getId(), H2HConstants.META_FILE, context.consumeProtectionKeys());
 		} catch (RemoveFailedException e) {
 			throw new ProcessExecutionException("Remove of meta document failed.", e);
 		}
