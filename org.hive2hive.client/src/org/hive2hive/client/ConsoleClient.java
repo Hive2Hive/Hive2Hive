@@ -33,24 +33,24 @@ public class ConsoleClient {
 
 		System.exit(0);
 	}
-
+	
 	private static void printHeader() {		
 		System.out.println("\n************************************************************************************");
-		System.out.println("*      .�'`.                                                            .�'`.      *");
+		System.out.println("*      .´'`.                                                            .´'`.      *");
 		System.out.println("*      |   |                                                            |   |      *");
-		System.out.println("*    .� `-� `.        Welcome to the Hive2Hive console client!        .� `-� `.    *");
+		System.out.println("*    .´ `-´ `.        Welcome to the Hive2Hive console client!        .´ `-´ `.    *");
 		System.out.println("*    |   |   |                                                        |   |   |    *");
-		System.out.println("*     `-� `-�                                                          `-� `-�     *");
+		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
 		System.out.println("************************************************************************************\n");
 	}
 	
 	private static void printFooter() {
 		System.out.println("\n************************************************************************************");
-		System.out.println("*      .�'`.                                                            .�'`.      *");
+		System.out.println("*      .´'`.                                                            .´'`.      *");
 		System.out.println("*      |   |                                                            |   |      *");
-		System.out.println("*    .� `-� `.                        Goodbye!                        .� `-� `.    *");
+		System.out.println("*    .´ `-´ `.                        Goodbye!                        .´ `-´ `.    *");
 		System.out.println("*    |   |   |                    (hive2hive.com)                     |   |   |    *");
-		System.out.println("*     `-� `-�                                                          `-� `-�     *");
+		System.out.println("*     `-´ `-´                                                          `-´ `-´     *");
 		System.out.println("************************************************************************************");
 	}
 	
