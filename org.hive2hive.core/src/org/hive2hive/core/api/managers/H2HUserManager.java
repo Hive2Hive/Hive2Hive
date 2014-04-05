@@ -14,7 +14,6 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
-import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HUserManager extends H2HManager implements IUserManager {

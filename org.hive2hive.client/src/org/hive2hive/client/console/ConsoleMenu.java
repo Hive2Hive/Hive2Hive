@@ -67,6 +67,7 @@ public abstract class ConsoleMenu {
 		int chosen = 0;
 
 		System.out.println(getInstruction());
+		System.out.println();
 
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
