@@ -1,11 +1,13 @@
 package org.hive2hive.core.test.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.api.interfaces.IH2HNode;
+import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
@@ -49,8 +51,9 @@ public class UserManagerTest extends H2HJUnitTest {
 		}
 		
 		// registering from random node (await)
-		network.get(r.nextInt(network.size())).getUserManager().register(userCredentials).await();
-		
+		IUserManager userManager = network.get(r.nextInt(network.size())).getUserManager();
+		userManager.configureAutostart(true);
+		userManager.register(userCredentials).await();
 		
 		// all nodes in network must have same result: true
 		for (int i = 0; i < network.size(); i++) {

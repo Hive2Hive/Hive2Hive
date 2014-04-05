@@ -174,7 +174,7 @@ public class NetworkTestUtil {
 						NetworkConfiguration.create("node " + i, bootstrapAddress),
 						FileConfiguration.createDefault());
 				node.connect();
-				node.getFileManager().configureAutostart(false);
+				node.getFileManager().configureAutostart(false); // TODO check if this is a good idea, contradicts our default behaviour
 				node.getUserManager().configureAutostart(false);
 				nodes.add(node);
 			}

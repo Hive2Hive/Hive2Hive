@@ -11,6 +11,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
@@ -75,8 +76,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		
 		RegisterProcessContext context = new RegisterProcessContext();
 		
-		IProcessComponent registerProcess = new CheckIsUserRegisteredStep(userId, context, networkManager.getDataManager());
-		executeProcess(registerProcess);
+		IProcessComponent checkProcess = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
+		executeProcess(checkProcess);
 		
 		return context.consumeLocations() != null;
 	}
