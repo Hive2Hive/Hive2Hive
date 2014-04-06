@@ -27,9 +27,13 @@ public class GetUserLocationsStep extends BaseGetProcessStep {
 		if (loadedContent == null) {
 			context.provideLocations(null);
 		} else {
-			context.provideLocations((Locations) loadedContent);
+			Locations locations = (Locations) loadedContent;
+			if (!locations.getUserId().equalsIgnoreCase(userId))
+				throw new ProcessExecutionException(String.format(
+						"The wrong locations have been loaded. Required: %s. Got: %s.", userId,
+						locations.getUserId()));
+
+			context.provideLocations(locations);
 		}
-
 	}
-
 }

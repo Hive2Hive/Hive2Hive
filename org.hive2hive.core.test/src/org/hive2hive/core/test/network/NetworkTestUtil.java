@@ -158,9 +158,11 @@ public class NetworkTestUtil {
 	 */
 	public static List<IH2HNode> createH2HNetwork(int numberOfNodes) {
 		if (numberOfNodes < 1)
-			throw new IllegalArgumentException("invalid size of network");
+			throw new IllegalArgumentException("Invalid network size.");
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
+		// TODO the initial peer has an autostart, whereas the others dont
+		
 		// create initial peer
 		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"),
 				FileConfiguration.createDefault());
