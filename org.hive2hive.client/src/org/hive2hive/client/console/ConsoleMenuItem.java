@@ -48,4 +48,17 @@ public abstract class ConsoleMenuItem {
 	public String getDisplayText() {
 		return displayText;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+            return false;
+        if (obj == this)
+            return true;
+        if (!(obj instanceof ConsoleMenuItem))
+            return false;
+
+        ConsoleMenuItem cmi = (ConsoleMenuItem) obj;
+        return cmi.displayText.equals(displayText);
+	}
 }

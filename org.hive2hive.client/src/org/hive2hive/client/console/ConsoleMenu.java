@@ -16,13 +16,13 @@ public abstract class ConsoleMenu {
 	private final ArrayList<ConsoleMenuItem> items;
 
 	private boolean exited;
- 
+
 	public ConsoleMenu() {
 		this.items = new ArrayList<ConsoleMenuItem>();
 		createItems();
 
 	}
-	
+
 	/**
 	 * Specifies the {@link H2HConsoleMenuItem}s of this menu.<br/>
 	 * <b>Note:</b> Not all {@link H2HConsoleMenuItem}s are specified here, as they might also be specified
@@ -39,7 +39,7 @@ public abstract class ConsoleMenu {
 	protected abstract void addMenuItems();
 
 	protected void addExitItem() {
-		
+
 		add(new H2HConsoleMenuItem("Back") {
 			protected void execute() {
 				exit();
@@ -48,14 +48,16 @@ public abstract class ConsoleMenu {
 	}
 
 	protected final void add(ConsoleMenuItem menuItem) {
-		items.add(menuItem);
+
+		if (!items.contains(menuItem))
+			items.add(menuItem);
 	}
 
 	public final void open() {
-		
+
 		addMenuItems();
 		addExitItem();
-		
+
 		this.exited = false;
 		while (!exited) {
 			show();
@@ -71,8 +73,8 @@ public abstract class ConsoleMenu {
 
 		for (int i = 0; i < items.size(); ++i) {
 			ConsoleMenuItem item = items.get(i);
-			
-			if (i == items.size()-1)
+
+			if (i == items.size() - 1)
 				System.out.println();
 			System.out.println(String.format("    [%s]  %s", i + 1, item.getDisplayText()));
 		}
