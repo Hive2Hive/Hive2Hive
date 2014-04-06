@@ -13,6 +13,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
+import org.hive2hive.core.processes.implementations.common.GetUserProfileStep;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
@@ -73,16 +74,14 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 	
 	@Override
-	public boolean isRegistered(String userId) throws NoPeerConnectionException {
+	public boolean isRegistered(UserCredentials credentials) throws NoPeerConnectionException {
 		
 		RegisterProcessContext context = new RegisterProcessContext();
 		
-		// TODO it is better to check for the existence of a user profile
-		
-		IProcessComponent checkProcess = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
+		IProcessComponent checkProcess = new GetUserProfileStep(credentials, context, networkManager.getDataManager());
 		executeProcess(checkProcess);
 		
-		return context.consumeLocations() != null;
+		return context.consumeUserProfile() != null;
 	}
 
 	@Override

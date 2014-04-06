@@ -54,7 +54,7 @@ public interface IUserManager extends IManager {
 	 * @return <code>true</code> if logged in, <code>false</code> otherwise
 	 * @throws NoPeerConnectionException
 	 */
-	boolean isRegistered(String userId) throws NoPeerConnectionException;
+	boolean isRegistered(UserCredentials credentials) throws NoPeerConnectionException;
 	
 	/**
 	 * Checks whether a user is logged in on the network <b>from this {@link IH2HNode}</b>.

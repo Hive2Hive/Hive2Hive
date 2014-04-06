@@ -57,7 +57,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
 			
-			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
+			boolean isRegistered = network.get(i).getUserManager().isRegistered(userCredentials);
 			assertFalse(isRegistered);
 		}
 		
@@ -69,7 +69,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		// all nodes must have same result: true
 		for (int i = 0; i < network.size(); i++) {
 			
-			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
+			boolean isRegistered = network.get(i).getUserManager().isRegistered(userCredentials);
 			assertTrue(isRegistered);
 		}
 		
