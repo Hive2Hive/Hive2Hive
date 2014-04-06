@@ -54,13 +54,17 @@ public final class RootMenu extends H2HConsoleMenu {
 							.register(userMenu.getUserCredentials());
 					executeBlocking(registerProcess, "Register");
 				}
-
+				
 				// login
 				IProcessComponent loginProcess = nodeMenu.getNode().getUserManager()
 						.login(userMenu.getUserCredentials(), fileMenu.getRootDirectory().toPath());
 				executeBlocking(loginProcess, "Login");
 				
-				// TODO check if login successful and enter filemenu
+				if (nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
+					new FileMenu().open(isExpertMode);
+				} else {
+					printError("Login failed.");
+				}
 			}
 		});
 		
