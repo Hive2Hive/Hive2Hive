@@ -18,6 +18,7 @@ import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
+import org.hive2hive.core.processes.implementations.common.GetUserProfileStep;
 import org.hive2hive.core.processes.implementations.common.PutMetaFileStep;
 import org.hive2hive.core.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
@@ -54,7 +55,6 @@ import org.hive2hive.core.processes.implementations.files.update.CleanupChunksSt
 import org.hive2hive.core.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.core.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.implementations.login.ContactOtherClientsStep;
-import org.hive2hive.core.processes.implementations.login.GetUserProfileStep;
 import org.hive2hive.core.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.processes.implementations.login.SynchronizeFilesStep;

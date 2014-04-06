@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.implementations.login;
+package org.hive2hive.core.processes.implementations.common;
 
 import java.io.IOException;
 
@@ -39,7 +39,6 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 		if (loadedContent == null) {
 			throw new ProcessExecutionException("User profile not found.");
 		} else {
-
 			// decrypt user profile
 			EncryptedNetworkContent encryptedContent = (EncryptedNetworkContent) loadedContent;
 
