@@ -33,7 +33,7 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 		Formatter.setDefaultForeground();
 	}
 
-	protected void printPreconditionError(String message) {
+	public static void printPreconditionError(String message) {
 		Formatter.setErrorForeground();
 		System.out.println(String.format("Unsatisfied Precondition: %s", message));
 		Formatter.setDefaultForeground();

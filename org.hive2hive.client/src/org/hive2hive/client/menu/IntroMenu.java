@@ -46,6 +46,7 @@ public class IntroMenu extends ConsoleMenu {
 		// TODO check whether network indeed has to be shut down here, e.g., when bootstrapped -> just leave
 		
 		// shutdown network
+		System.out.println("Disconnecting from the network...");
 		nodeMenu.disconnectNode();
 		
 //		// shutdown file observer

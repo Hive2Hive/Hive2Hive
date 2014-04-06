@@ -30,16 +30,9 @@ public final class RootMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
-				if (nodeMenu.getNode() == null) {
-					printPreconditionError("Cannot login: Please connect to a network first.");
-					nodeMenu.open(isExpertMode);
-				}
-				if (userMenu.getUserCredentials() == null) {
-					userMenu.CreateUserCredentials.invoke();
-				}
-				if (fileMenu.getRootDirectory() == null) {
-					fileMenu.CreateRootDirectory.invoke();
-				}
+				checkNetwork();
+				checkUserCredentials();
+				checkRootDirectory();
 			}
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
@@ -67,9 +60,20 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 		});
 		
+		// TODO only add if logged in
 		add(new H2HConsoleMenuItem("Logout") {
+			protected void checkPreconditions() {
+				checkNetwork();
+				checkUserCredentials();
+			}
+			
 			protected void execute() throws Exception {
-				// TODO check if logged in
+				if (nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
+					IProcessComponent logoutProcess = nodeMenu.getNode().getUserManager().logout();
+					executeBlocking(logoutProcess, "Logout");
+				} else {
+					System.out.println("Logout is not possible. You are not logged in.");
+				}
 			}
 		});
 	}
@@ -86,5 +90,25 @@ public final class RootMenu extends H2HConsoleMenu {
 	@Override
 	public String getInstruction() {
 		return "Please select an option:";
+	}
+	
+	private void checkNetwork() {
+		
+		while (nodeMenu.getNode() == null) {
+			H2HConsoleMenuItem.printPreconditionError("You are not connected to a network. Connect to a network first.");
+			nodeMenu.open(isExpertMode);
+		}
+	}
+	
+	private void checkUserCredentials() {
+		while (userMenu.getUserCredentials() == null) {
+			userMenu.CreateUserCredentials.invoke();
+		}
+	}
+	
+	private void checkRootDirectory() {
+		while (fileMenu.getRootDirectory() == null) {
+			fileMenu.CreateRootDirectory.invoke();
+		}
 	}
 }
