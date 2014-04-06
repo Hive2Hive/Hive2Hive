@@ -46,9 +46,8 @@ public final class RootMenu extends H2HConsoleMenu {
 					InvalidProcessStateException {
 
 				// check if registration required
-				if (!nodeMenu.getNode().getUserManager()
-						.isRegistered(userMenu.getUserCredentials().getUserId())) {
-					System.out.println("This is your first visit on this network. Please register first.");
+				if (!nodeMenu.getNode().getUserManager().isRegistered(userMenu.getUserCredentials())) {
+					System.out.println("This is your first visit on this network. You are now being registered.");
 					// register
 					IProcessComponent registerProcess = nodeMenu.getNode().getUserManager()
 							.register(userMenu.getUserCredentials());

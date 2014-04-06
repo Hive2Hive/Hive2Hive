@@ -120,9 +120,9 @@ public final class NodeMenu extends H2HConsoleMenu {
 	public String getInstruction() {
 		
 		if (isExpertMode)
-			return "Configure and set up your own network or connect to an existing one.\n";
+			return "Configure and set up your own network or connect to an existing one.";
 		else
-			return "Do you want to create a new network or connect to an existing one?\n";
+			return "Do you want to create a new network or connect to an existing one?";
 	}
 
 	public IH2HNode getNode() {
