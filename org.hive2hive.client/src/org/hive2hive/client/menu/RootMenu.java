@@ -2,7 +2,6 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
-import org.hive2hive.client.util.Formatter;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
@@ -30,9 +29,9 @@ public final class RootMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
-				checkNetwork();
-				checkUserCredentials();
-				checkRootDirectory();
+				nodeMenu.checkNetwork();
+				userMenu.checkUserCredentials();
+				fileMenu.checkRootDirectory();
 			}
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
@@ -53,7 +52,7 @@ public final class RootMenu extends H2HConsoleMenu {
 				executeBlocking(loginProcess, "Login");
 				
 				if (nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
-					new FileMenu().open(isExpertMode);
+					fileMenu.open(isExpertMode);
 				} else {
 					printError("Login failed.");
 				}
@@ -63,8 +62,8 @@ public final class RootMenu extends H2HConsoleMenu {
 		// TODO only add if logged in
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void checkPreconditions() {
-				checkNetwork();
-				checkUserCredentials();
+				nodeMenu.checkNetwork();
+				userMenu.checkUserCredentials();
 			}
 			
 			protected void execute() throws Exception {
@@ -76,39 +75,12 @@ public final class RootMenu extends H2HConsoleMenu {
 				}
 			}
 		});
-	}
-
-	private void executeBlocking(IProcessComponent process, String itemName) throws InterruptedException,
-			InvalidProcessStateException {
 		
-		Formatter.setExecutionForeground();
-		System.out.println(String.format("Executing '%s'...", itemName));
-		process.start().await();
-		Formatter.setDefaultForeground();
+		// TODO add option to go into FileMenu (not only after login)
 	}
 
 	@Override
 	public String getInstruction() {
 		return "Please select an option:";
-	}
-	
-	private void checkNetwork() {
-		
-		while (nodeMenu.getNode() == null) {
-			H2HConsoleMenuItem.printPreconditionError("You are not connected to a network. Connect to a network first.");
-			nodeMenu.open(isExpertMode);
-		}
-	}
-	
-	private void checkUserCredentials() {
-		while (userMenu.getUserCredentials() == null) {
-			userMenu.CreateUserCredentials.invoke();
-		}
-	}
-	
-	private void checkRootDirectory() {
-		while (fileMenu.getRootDirectory() == null) {
-			fileMenu.CreateRootDirectory.invoke();
-		}
 	}
 }

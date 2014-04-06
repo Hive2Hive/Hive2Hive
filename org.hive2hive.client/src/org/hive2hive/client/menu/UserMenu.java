@@ -58,4 +58,10 @@ public final class UserMenu extends H2HConsoleMenu {
 		System.out.println("Specify the user PIN:");
 		return awaitStringParameter().trim();
 	}
+	
+	public void checkUserCredentials() {
+		while (getUserCredentials() == null) {
+			CreateUserCredentials.invoke();
+		}
+	}
 }

@@ -12,7 +12,7 @@ public class IntroMenu extends ConsoleMenu {
 
 	private final NodeMenu nodeMenu = new NodeMenu();
 	private final UserMenu userMenu = new UserMenu();
-	private final FileMenu fileMenu = new FileMenu();
+	private final FileMenu fileMenu = new FileMenu(nodeMenu);
 	
 	@Override
 	protected void addMenuItems() {
