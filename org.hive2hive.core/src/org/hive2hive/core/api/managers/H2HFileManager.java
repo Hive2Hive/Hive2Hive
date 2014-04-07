@@ -86,14 +86,16 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	public IProcessComponent move(File source, File destination) throws NoSessionException,
 			NoPeerConnectionException {
 		// TODO support the file listener that already moved the file
+		
+		// TODO support file movement to already existing destination
 		if (!source.exists()) {
-			throw new IllegalArgumentException("Source file not found");
+			throw new IllegalArgumentException("Source file not found.");
 		} else if (destination.exists()) {
-			throw new IllegalArgumentException("Destination already exists");
+			throw new IllegalArgumentException("Destination already exists.");
 		} else if (!FileUtil.isInH2HDirectory(source, networkManager.getSession())) {
-			throw new IllegalArgumentException("Source file not in the Hive2Hive directory");
+			throw new IllegalArgumentException("Source file not in the Hive2Hive directory.");
 		} else if (!FileUtil.isInH2HDirectory(destination, networkManager.getSession())) {
-			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
+			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory.");
 		}
 
 		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,

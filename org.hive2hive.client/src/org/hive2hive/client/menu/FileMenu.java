@@ -28,8 +28,10 @@ public class FileMenu extends H2HConsoleMenu {
 		CreateRootDirectory = new H2HConsoleMenuItem("Create Root Directory") {
 			protected void execute() throws Exception {
 
-				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
-
+//				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
+				// TODO change
+				rootDirectory = new File(FileUtils.getUserDirectory(), "Hive2Hive");
+				
 				if (isExpertMode) {
 					System.out.printf(
 							"Please specify the root directory path or enter 'ok' if you agree with '%s'.",
@@ -62,39 +64,56 @@ public class FileMenu extends H2HConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 
+		// TODO add file observer
+
 		add(new H2HConsoleMenuItem("Add File") {
 			protected void checkPreconditions() {
 				forceRootDirectory();
 			}
+
 			protected void execute() throws Hive2HiveException, InterruptedException {
 
 				File file = askForFile(true);
 				if (file == null)
 					return;
-				
+
 				IProcessComponent addFileProcess = nodeMenu.getNode().getFileManager().add(file);
-				executeBlocking(addFileProcess, "Add File");
+				executeBlocking(addFileProcess, displayText);
 			}
 		});
-		//
-		// add(new H2HConsoleMenuItem("Update File") {
-		// protected void execute() throws Hive2HiveException, InterruptedException {
-		// IProcessComponent process = node.getFileManager().update(askForFile(true));
-		// executeBlocking(process);
-		// }
-		// });
-		// add(new H2HConsoleMenuItem("Move File") {
-		// protected void execute() throws Hive2HiveException, InterruptedException {
-		// System.out.println("Source path needed: ");
-		// File source = askForFile(true);
-		//
-		// System.out.println("Destination path needed: ");
-		// File destination = askForFile(false);
-		//
-		// IProcessComponent process = node.getFileManager().move(source, destination);
-		// executeBlocking(process);
-		// }
-		// });
+
+		add(new H2HConsoleMenuItem("Update File") {
+			protected void checkPreconditions() {
+				forceRootDirectory();
+			}
+
+			protected void execute() throws Hive2HiveException, InterruptedException {
+
+				File file = askForFile(true);
+				if (file == null)
+					return;
+				IProcessComponent updateFileProcess = nodeMenu.getNode().getFileManager().update(file);
+				executeBlocking(updateFileProcess, displayText);
+			}
+		});
+
+		add(new H2HConsoleMenuItem("Move File") {
+			protected void checkPreconditions() {
+				forceRootDirectory();
+			}
+
+			protected void execute() throws Hive2HiveException, InterruptedException {
+				File source = askForFile("Specify the relative path of the source file to the root directory '%s'.", true);
+				if (source == null)
+					return;
+				File destination = askForFile("Specify the relative path of the destination file to the root directory '%s'.", false);
+				if (destination == null)
+					return;
+
+				IProcessComponent moveFileProcess = nodeMenu.getNode().getFileManager().move(source, destination);
+				executeBlocking(moveFileProcess, displayText);
+			}
+		});
 		// add(new H2HConsoleMenuItem("Delete File") {
 		// protected void execute() throws Hive2HiveException, InterruptedException {
 		// IProcessComponent process = node.getFileManager().delete(askForFile(false));
@@ -191,29 +210,33 @@ public class FileMenu extends H2HConsoleMenu {
 		// });
 	}
 
-	private File askForFile(boolean expectExistence) {
-
+	private File askForFile(String msg, boolean expectExistence) {
 		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
 
 		File file = null;
 		do {
-			System.out.println(String.format("Specify the relative path to the root directory '%s'."
-					.concat(expectExistence ? " The file at this path must exist." : ""), rootDirectory
-					.getAbsolutePath()));
+			System.out.println(String.format(
+					msg.concat(expectExistence ? " The file at this path must exist." : ""),
+					rootDirectory.getAbsolutePath()));
 			System.out.println("Or enter 'cancel' in order to go back.");
 
 			String input = awaitStringParameter();
-			
+
 			if (input.equalsIgnoreCase("cancel"))
 				return null;
-			
+
 			file = new File(rootDirectory, input);
 			if (expectExistence && !file.exists())
 				System.out.println(String.format("The specified file '%s' does not exist. Try again.",
 						file.getAbsolutePath()));
 		} while (expectExistence && (file == null || !file.exists()));
 		return file;
+
+	}
+
+	private File askForFile(boolean expectExistence) {
+		return askForFile("Specify the relative path to the root directory '%s'.", expectExistence);
 	}
 
 	@Override
@@ -224,7 +247,7 @@ public class FileMenu extends H2HConsoleMenu {
 	public File getRootDirectory() {
 		return rootDirectory;
 	}
-	
+
 	public void forceRootDirectory() {
 		while (getRootDirectory() == null) {
 			CreateRootDirectory.invoke();

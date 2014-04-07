@@ -8,6 +8,8 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 public final class RootMenu extends H2HConsoleMenu {
 
+	// TODO when executing processes, check for exceptions/rollbacks
+
 	private final NodeMenu nodeMenu;
 	private final UserMenu userMenu;
 	private final FileMenu fileMenu;
@@ -26,6 +28,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 		});
 
+		// TODO following menu items only if connected
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
@@ -41,23 +44,17 @@ public final class RootMenu extends H2HConsoleMenu {
 
 				IProcessComponent loginProcess = nodeMenu.getNode().getUserManager()
 						.login(userMenu.getUserCredentials(), fileMenu.getRootDirectory().toPath());
-				executeBlocking(loginProcess, "Login");
+				executeBlocking(loginProcess, displayText);
 			}
 		});
 
 		// TODO following menu items only if logged in
 		add(new H2HConsoleMenuItem("Logout") {
-			protected void checkPreconditions() {
-				nodeMenu.forceNetwork();
-				userMenu.forceUserCredentials();
-			}
-
 			protected void execute() throws Exception {
-				if (nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
+
+				if (checkLogin()) {
 					IProcessComponent logoutProcess = nodeMenu.getNode().getUserManager().logout();
-					executeBlocking(logoutProcess, "Logout");
-				} else {
-					System.out.println("Logout is not possible. You are not logged in.");
+					executeBlocking(logoutProcess, displayText);
 				}
 			}
 		});
@@ -87,7 +84,9 @@ public final class RootMenu extends H2HConsoleMenu {
 	}
 
 	private boolean checkLogin() throws NoPeerConnectionException {
-		if (!nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
+
+		if (nodeMenu.getNode() == null || userMenu.getUserCredentials() == null
+				|| !nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
 			H2HConsoleMenuItem.printPreconditionError("You are not logged in.");
 			return false;
 		}
