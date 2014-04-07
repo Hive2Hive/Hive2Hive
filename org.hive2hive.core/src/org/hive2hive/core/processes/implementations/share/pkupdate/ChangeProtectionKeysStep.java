@@ -35,7 +35,8 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		parameters = new Parameters().setLocationKey(context.getLocationKey())
-				.setContentKey(context.getContentKey()).setProtectionKeys(context.consumeOldProtectionKeys())
+				.setContentKey(context.getContentKey()).setVersionKey(context.getVersionKey())
+				.setProtectionKeys(context.consumeOldProtectionKeys())
 				.setNewProtectionKeys(context.consumeNewProtectionKeys()).setTTL(context.getTTL())
 				.setHash(context.getHash());
 
@@ -55,8 +56,8 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 		logger.debug(String.format("Rollbacking change of content protection key. %s", parameters.toString()));
 
 		Parameters rollbackParameters = new Parameters().setLocationKey(parameters.getLocationKey())
-				.setContentKey(parameters.getContentKey()).setTTL(parameters.getTTL())
-				.setHash(parameters.getHash());
+				.setContentKey(parameters.getContentKey()).setVersionKey(parameters.getVersionKey())
+				.setTTL(parameters.getTTL()).setHash(parameters.getHash());
 		// switch the content protection keys
 		rollbackParameters.setProtectionKeys(parameters.getNewProtectionKeys()).setNewProtectionKeys(
 				parameters.getProtectionKeys());

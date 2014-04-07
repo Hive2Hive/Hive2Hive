@@ -2,6 +2,8 @@ package org.hive2hive.core.processes.implementations.context;
 
 import java.security.KeyPair;
 
+import net.tomp2p.peers.Number160;
+
 /**
  * Abstract context to update a protection key (used for sharing / unsharing)
  * 
@@ -28,6 +30,8 @@ public abstract class BasePKUpdateContext {
 	public abstract String getLocationKey();
 
 	public abstract String getContentKey();
+	
+	public abstract Number160 getVersionKey();
 
 	public abstract int getTTL();
 	
