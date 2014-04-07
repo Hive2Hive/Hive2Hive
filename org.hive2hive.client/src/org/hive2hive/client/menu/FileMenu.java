@@ -64,7 +64,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Add File") {
 			protected void checkPreconditions() {
-				checkRootDirectory();
+				forceRootDirectory();
 			}
 			protected void execute() throws Hive2HiveException, InterruptedException {
 
@@ -225,7 +225,7 @@ public class FileMenu extends H2HConsoleMenu {
 		return rootDirectory;
 	}
 	
-	public void checkRootDirectory() {
+	public void forceRootDirectory() {
 		while (getRootDirectory() == null) {
 			CreateRootDirectory.invoke();
 		}

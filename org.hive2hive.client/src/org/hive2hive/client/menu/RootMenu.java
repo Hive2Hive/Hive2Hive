@@ -29,43 +29,29 @@ public final class RootMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
-				nodeMenu.checkNetwork();
-				userMenu.checkUserCredentials();
-				fileMenu.checkRootDirectory();
+				nodeMenu.forceNetwork();
+				userMenu.forceUserCredentials();
+				fileMenu.forceRootDirectory();
 			}
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
 					InvalidProcessStateException {
 
-				// check if registration required
-				if (!nodeMenu.getNode().getUserManager().isRegistered(userMenu.getUserCredentials())) {
-					System.out.println("This is your first visit on this network. You are now being registered.");
-					// register
-					IProcessComponent registerProcess = nodeMenu.getNode().getUserManager()
-							.register(userMenu.getUserCredentials());
-					executeBlocking(registerProcess, "Register");
-				}
-				
-				// login
+				forceRegistration();
+
 				IProcessComponent loginProcess = nodeMenu.getNode().getUserManager()
 						.login(userMenu.getUserCredentials(), fileMenu.getRootDirectory().toPath());
 				executeBlocking(loginProcess, "Login");
-				
-				if (nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
-					fileMenu.open(isExpertMode);
-				} else {
-					printError("Login failed.");
-				}
 			}
 		});
-		
-		// TODO only add if logged in
+
+		// TODO following menu items only if logged in
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void checkPreconditions() {
-				nodeMenu.checkNetwork();
-				userMenu.checkUserCredentials();
+				nodeMenu.forceNetwork();
+				userMenu.forceUserCredentials();
 			}
-			
+
 			protected void execute() throws Exception {
 				if (nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
 					IProcessComponent logoutProcess = nodeMenu.getNode().getUserManager().logout();
@@ -75,12 +61,36 @@ public final class RootMenu extends H2HConsoleMenu {
 				}
 			}
 		});
-		
-		// TODO add option to go into FileMenu (not only after login)
+
+		add(new H2HConsoleMenuItem("File Menu") {
+			protected void execute() throws Exception {
+				if (checkLogin()) {
+					fileMenu.open(isExpertMode);
+				}
+			}
+		});
 	}
 
 	@Override
 	public String getInstruction() {
 		return "Please select an option:";
+	}
+
+	private void forceRegistration() throws InvalidProcessStateException, InterruptedException,
+			NoPeerConnectionException {
+		while (!nodeMenu.getNode().getUserManager().isRegistered(userMenu.getUserCredentials())) {
+			H2HConsoleMenuItem.printPreconditionError("You are not registered.");
+			IProcessComponent registerProcess = nodeMenu.getNode().getUserManager()
+					.register(userMenu.getUserCredentials());
+			executeBlocking(registerProcess, "Register");
+		}
+	}
+
+	private boolean checkLogin() throws NoPeerConnectionException {
+		if (!nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
+			H2HConsoleMenuItem.printPreconditionError("You are not logged in.");
+			return false;
+		}
+		return true;
 	}
 }

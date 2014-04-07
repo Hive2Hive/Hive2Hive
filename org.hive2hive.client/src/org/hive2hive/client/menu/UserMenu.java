@@ -59,7 +59,7 @@ public final class UserMenu extends H2HConsoleMenu {
 		return awaitStringParameter().trim();
 	}
 	
-	public void checkUserCredentials() {
+	public void forceUserCredentials() {
 		while (getUserCredentials() == null) {
 			CreateUserCredentials.invoke();
 		}

@@ -143,7 +143,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 		}
 	}
 	
-	public void checkNetwork() {
+	public void forceNetwork() {
 		
 		while (getNode() == null) {
 			H2HConsoleMenuItem.printPreconditionError("You are not connected to a network. Connect to a network first.");
