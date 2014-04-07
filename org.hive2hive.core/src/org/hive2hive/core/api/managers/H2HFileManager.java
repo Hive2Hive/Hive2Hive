@@ -135,9 +135,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			NoPeerConnectionException {
 		// do some verifications
 		if (file.isDirectory()) {
-			throw new IllegalArgumentException("A foler has only one version");
+			throw new IllegalArgumentException("A folder has only one version.");
 		} else if (!file.exists()) {
-			throw new FileNotFoundException("File does not exist");
+			throw new FileNotFoundException("File does not exist.");
 		}
 
 		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file,

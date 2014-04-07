@@ -63,7 +63,6 @@ public class FileMenu extends H2HConsoleMenu {
 				}
 			}
 		};
-
 	}
 
 	@Override
@@ -147,12 +146,9 @@ public class FileMenu extends H2HConsoleMenu {
 					return;
 				
 				IVersionSelector versionSelector = new IVersionSelector() {
-					
 					@Override
 					public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
-						
-						
-						return null;
+						return new VersionSelectionMenu(availableVersions).openAndSelect();
 					}
 				};
 				
