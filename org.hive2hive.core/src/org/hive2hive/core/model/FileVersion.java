@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class FileVersion implements Serializable, IFileVersion {
 
+	// TODO override equals() and hashCode()
+	
 	private static final long serialVersionUID = 1L;
 	private final int index; // version count
 	private final long size; // size of the version
@@ -48,5 +50,4 @@ public class FileVersion implements Serializable, IFileVersion {
 	public long getDate() {
 		return date;
 	}
-
 }

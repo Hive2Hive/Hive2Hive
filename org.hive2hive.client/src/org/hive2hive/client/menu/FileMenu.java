@@ -138,9 +138,10 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 		});
 		
+		// TODO bugfix recover process
 		add(new H2HConsoleMenuItem("Recover File") {
 			protected void execute() throws Hive2HiveException, FileNotFoundException, IllegalArgumentException, InterruptedException {
-				// TODO implement recover process
+				
 				File file = askForFile(true);
 				if (file == null)
 					return;
@@ -156,6 +157,8 @@ public class FileMenu extends H2HConsoleMenu {
 				executeBlocking(recoverFileProcess, displayText);
 			}
 		});
+		
+		
 //		add(new H2HConsoleMenuItem("Share") {
 //			protected void execute() throws IllegalArgumentException, NoSessionException,
 //					IllegalFileLocation, NoPeerConnectionException, InterruptedException,
