@@ -6,7 +6,7 @@ package org.hive2hive.core.model;
  * @author Nico
  * 
  */
-public interface IFileVersion {
+public interface T {
 
 	/**
 	 * Each version has a unique index which counts up with each version

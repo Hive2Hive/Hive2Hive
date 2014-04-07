@@ -10,7 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.IFileVersion;
+import org.hive2hive.core.model.T;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -87,10 +87,10 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 		IVersionSelector selector = new IVersionSelector() {
 			@Override
-			public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
+			public T selectVersion(List<T> availableVersions) {
 				// should have 3 versions possible to restore
 				Assert.assertEquals(3, availableVersions.size());
-				for (IFileVersion version : availableVersions) {
+				for (T version : availableVersions) {
 					if (version.getIndex() == versionToRestore)
 						return version;
 				}

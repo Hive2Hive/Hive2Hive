@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author Nico, Seppi
  */
-public class FileVersion implements Serializable, IFileVersion {
+public class FileVersion implements Serializable, T {
 
 	// TODO override equals() and hashCode()
 	

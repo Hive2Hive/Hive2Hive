@@ -4,13 +4,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.model.IFileVersion;
+import org.hive2hive.core.exceptions.IllegalFileLocation;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.T;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 
@@ -127,59 +133,70 @@ public class FileMenu extends H2HConsoleMenu {
 			protected void checkPreconditions() {
 				forceRootDirectory();
 			}
+
 			protected void execute() throws Hive2HiveException, InterruptedException {
-				
+
 				File file = askForFile(true);
 				if (file == null)
 					return;
-				
+
 				IProcessComponent deleteFileProcess = nodeMenu.getNode().getFileManager().delete(file);
 				executeBlocking(deleteFileProcess, displayText);
 			}
 		});
-		
+
 		// TODO bugfix recover process
 		add(new H2HConsoleMenuItem("Recover File") {
-			protected void execute() throws Hive2HiveException, FileNotFoundException, IllegalArgumentException, InterruptedException {
-				
+			protected void execute() throws Hive2HiveException, FileNotFoundException,
+					IllegalArgumentException, InterruptedException {
+
 				File file = askForFile(true);
 				if (file == null)
 					return;
-				
+
 				IVersionSelector versionSelector = new IVersionSelector() {
 					@Override
-					public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
-						return new VersionSelectionMenu(availableVersions).openAndSelect();
+					public T selectVersion(List<T> availableVersions) {
+						return new SelectionMenu<T>(availableVersions,
+								"Choose the version you want to recover.").openAndSelect();
 					}
 				};
-				
-				IProcessComponent recoverFileProcess = nodeMenu.getNode().getFileManager().recover(file, versionSelector);
+
+				IProcessComponent recoverFileProcess = nodeMenu.getNode().getFileManager()
+						.recover(file, versionSelector);
 				executeBlocking(recoverFileProcess, displayText);
 			}
 		});
-		
-		
-//		add(new H2HConsoleMenuItem("Share") {
-//			protected void execute() throws IllegalArgumentException, NoSessionException,
-//					IllegalFileLocation, NoPeerConnectionException, InterruptedException,
-//					InvalidProcessStateException {
-//				System.out.println("Specify the folder to share:");
-//				File folder = askForFile(true);
-//
-//				System.out.println("Who do you want to share with?");
-//				String friendId = awaitStringParameter();
-//
-//				System.out.println("Read or write permissions? Enter 1 for 'READ-ONLY', 2 for WRITE");
-//				int permission = awaitIntParameter();
-//				PermissionType perm = PermissionType.WRITE;
-//				if (permission == 1) {
-//					perm = PermissionType.READ;
-//				}
-//
-//				IProcessComponent process = node.getFileManager().share(folder, friendId, perm);
-//				executeBlocking(process);
-//			}
-//		});
+
+		add(new H2HConsoleMenuItem("Share") {
+			protected void execute() throws NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
+					InterruptedException {
+
+				File folderToShare = askForFile(
+						"Specify the relative path of the folder you want to share to the root directory '%s'.",
+						true);
+				if (folderToShare == null)
+					return;
+
+				System.out.println("Specify the user ID of the user you want to share with.");
+				String friendID = awaitStringParameter();
+
+				PermissionType permission = askForPermission(folderToShare.getAbsolutePath(), friendID);
+				if (permission == null)
+					return;
+
+				IProcessComponent shareProcess;
+				try {
+					shareProcess = nodeMenu.getNode().getFileManager()
+							.share(folderToShare, friendID, permission);
+				} catch (IllegalFileLocation | IllegalArgumentException e) {
+					// TODO handle wrong files
+					e.printStackTrace();
+				}
+//				executeBlocking(shareProcess, displayText);
+			}
+		});
+
 		// add(new H2HConsoleMenuItem("Get File list") {
 		// protected void execute() throws Hive2HiveException, InterruptedException {
 		// IResultProcessComponent<List<Path>> process = node.getFileManager()
@@ -242,6 +259,7 @@ public class FileMenu extends H2HConsoleMenu {
 		// });
 	}
 
+	// TODO add flag for expectFolder/expectFile
 	private File askForFile(String msg, boolean expectExistence) {
 		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
@@ -269,6 +287,20 @@ public class FileMenu extends H2HConsoleMenu {
 
 	private File askForFile(boolean expectExistence) {
 		return askForFile("Specify the relative path to the root directory '%s'.", expectExistence);
+	}
+
+	private PermissionType askForPermission(String folder, String userID) {
+
+		List<PermissionType> permissionTypes = new ArrayList<PermissionType>();
+		permissionTypes.add(PermissionType.WRITE);
+		permissionTypes.add(PermissionType.READ);
+
+		List<String> displayTexts = new ArrayList<String>();
+		displayTexts.add("Read and Write");
+		displayTexts.add("Read Only");
+
+		return new SelectionMenu<PermissionType>(permissionTypes, displayTexts, String.format(
+				"Specify the permissions of folder '%s' for the user '%s'.", folder, userID)).openAndSelect();
 	}
 
 	@Override
