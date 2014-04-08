@@ -20,8 +20,11 @@ public class H2HFileObserver implements IFileObserver {
 	private final FileAlterationObserver observer;
 	private final FileAlterationMonitor monitor;
 
+	private boolean isRunning;
+
 	/**
 	 * A file observer that uses the specified interval to check for file changes.
+	 * 
 	 * @param rootDirectory
 	 * @param ms
 	 */
@@ -32,21 +35,19 @@ public class H2HFileObserver implements IFileObserver {
 
 	/**
 	 * A file observer that uses the default interval to check for file changes.
+	 * 
 	 * @param rootDirectory
 	 */
 	public H2HFileObserver(File rootDirectory) {
 		this(rootDirectory, H2HConstants.DEFAULT_FILE_OBSERVER_INTERVAL);
 	}
-	
-	@Override
-	public void setInterval(long ms) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void start() throws Exception {
-		monitor.start();
+		if (!isRunning) {
+			monitor.start();
+			isRunning = true;
+		}
 	}
 
 	@Override
@@ -55,7 +56,10 @@ public class H2HFileObserver implements IFileObserver {
 	}
 
 	public void stop(long ms) throws Exception {
-		monitor.stop(ms);
+		if (isRunning) {
+			monitor.stop(ms);
+			isRunning = false;
+		}
 	}
 
 	@Override
@@ -66,6 +70,10 @@ public class H2HFileObserver implements IFileObserver {
 	@Override
 	public void removeFileObserverListener(IFileObserverListener listener) {
 		observer.removeListener(listener);
+	}
+
+	public boolean isRunning() {
+		return isRunning;
 	}
 
 }

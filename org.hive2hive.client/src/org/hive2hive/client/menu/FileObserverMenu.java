@@ -21,6 +21,7 @@ public class FileObserverMenu extends ConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
+
 		add(new H2HConsoleMenuItem("Set Interval") {
 			protected void execute() {
 				System.out.println("Specify the observation interval (ms):");

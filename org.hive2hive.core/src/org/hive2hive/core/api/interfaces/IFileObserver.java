@@ -8,12 +8,6 @@ package org.hive2hive.core.api.interfaces;
 public interface IFileObserver {
 	
 	/**
-	 * Sets the file observation interval in milliseconds.
-	 * @param ms The interval in milliseconds.
-	 */
-	void setInterval(long ms);
-	
-	/**
 	 * Start the file observer.
 	 * @throws Exception 
 	 */
