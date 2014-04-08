@@ -1,4 +1,4 @@
-package org.hive2hive.core.api.managers;
+package org.hive2hive.core.api;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IManager;

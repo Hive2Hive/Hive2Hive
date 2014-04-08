@@ -47,19 +47,21 @@ public interface IUserManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 */
 	IProcessComponent logout() throws NoPeerConnectionException, NoSessionException;
-	
+
 	/**
 	 * Checks whether a user is registered in the network.
+	 * 
 	 * @param userId the ID of the user
 	 * @return <code>true</code> if logged in, <code>false</code> otherwise
 	 * @throws NoPeerConnectionException
 	 */
-	boolean isRegistered(UserCredentials credentials) throws NoPeerConnectionException;
-	
+	boolean isRegistered(String userId) throws NoPeerConnectionException;
+
 	/**
 	 * Checks whether a user is logged in on the network <b>from this {@link IH2HNode}</b>.
+	 * 
 	 * @param uderId the ID of the user
-	 * @return <code>true</code> if registered, <code>false</code> otherwise
+	 * @return <code>true</code> if logged in, <code>false</code> otherwise
 	 * @throws NoPeerConnectionException
 	 */
 	boolean isLoggedIn(String uderId) throws NoPeerConnectionException;

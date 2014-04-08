@@ -102,4 +102,10 @@ public interface H2HConstants {
 
 	// period in milliseconds between successive ttl refreshment task executions
 	public static final int TTL_REFRESHMENT_PERIOD = 1000;
+
+	/**
+	 * File Observer
+	 */
+	// default interval in milliseconds between file observation checks
+	static final long DEFAULT_FILE_OBSERVER_INTERVAL = 1000;
 }

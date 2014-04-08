@@ -7,10 +7,13 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.api.managers.H2HFileManager;
-import org.hive2hive.core.api.managers.H2HUserManager;
 import org.hive2hive.core.network.NetworkManager;
 
+/**
+ * Default implementation of {@link IH2HNode}.
+ * @author Christian, Nico
+ *
+ */
 public class H2HNode implements IH2HNode {
 
 	// TODO atm, this class is just a wrapper for the NetworkManager

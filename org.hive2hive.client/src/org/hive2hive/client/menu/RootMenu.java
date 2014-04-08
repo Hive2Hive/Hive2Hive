@@ -75,7 +75,7 @@ public final class RootMenu extends H2HConsoleMenu {
 
 	private void forceRegistration() throws InvalidProcessStateException, InterruptedException,
 			NoPeerConnectionException {
-		while (!nodeMenu.getNode().getUserManager().isRegistered(userMenu.getUserCredentials())) {
+		while (!nodeMenu.getNode().getUserManager().isRegistered(userMenu.getUserCredentials().getUserId())) {
 			H2HConsoleMenuItem.printPreconditionError("You are not registered.");
 			IProcessComponent registerProcess = nodeMenu.getNode().getUserManager()
 					.register(userMenu.getUserCredentials());

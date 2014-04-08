@@ -1,4 +1,4 @@
-package org.hive2hive.core.api.managers;
+package org.hive2hive.core.api;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,6 +24,11 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 
+/**
+ * Default implementation of {@link IFileManager}.
+ * @author Christian, Nico
+ *
+ */
 public class H2HFileManager extends H2HManager implements IFileManager {
 
 	public H2HFileManager(NetworkManager networkManager) {
@@ -87,13 +92,13 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			NoPeerConnectionException {
 		// TODO support the file listener that already moved the file
 		if (!source.exists()) {
-			throw new IllegalArgumentException("Source file not found.");
+			throw new IllegalArgumentException("Source file not found");
 		} else if (destination.exists()) {
-			throw new IllegalArgumentException("Destination already exists.");
+			throw new IllegalArgumentException("Destination already exists");
 		} else if (!FileUtil.isInH2HDirectory(source, networkManager.getSession())) {
-			throw new IllegalArgumentException("Source file not in the Hive2Hive directory.");
+			throw new IllegalArgumentException("Source file not in the Hive2Hive directory");
 		} else if (!FileUtil.isInH2HDirectory(destination, networkManager.getSession())) {
-			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory.");
+			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
 		}
 
 		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
@@ -133,9 +138,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			NoPeerConnectionException {
 		// do some verifications
 		if (file.isDirectory()) {
-			throw new IllegalArgumentException("A folder has only one version.");
+			throw new IllegalArgumentException("A foler has only one version");
 		} else if (!file.exists()) {
-			throw new FileNotFoundException("File does not exist.");
+			throw new FileNotFoundException("File does not exist");
 		}
 
 		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file,

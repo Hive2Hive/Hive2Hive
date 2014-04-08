@@ -21,8 +21,6 @@ public class WritePersistentStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		// TODO Store the Public Keys of the cache as well, read it later at login
-
 		// write the current state to a meta file
 		try {
 			FileUtil.writePersistentMetaData(root, keyManager);
