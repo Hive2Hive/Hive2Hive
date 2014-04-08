@@ -1,4 +1,4 @@
-package org.hive2hive.core.api.managers;
+package org.hive2hive.core.api;
 
 import java.io.File;
 import java.io.FileNotFoundException;
