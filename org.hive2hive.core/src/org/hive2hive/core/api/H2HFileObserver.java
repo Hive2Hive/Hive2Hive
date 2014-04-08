@@ -1,7 +1,10 @@
 package org.hive2hive.core.api;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.H2HConstants;
@@ -70,6 +73,21 @@ public class H2HFileObserver implements IFileObserver {
 	@Override
 	public void removeFileObserverListener(IFileObserverListener listener) {
 		observer.removeListener(listener);
+	}
+	
+	@Override
+	public List<IFileObserverListener> getFileObserverListeners() {
+		List<IFileObserverListener> listeners = new ArrayList<IFileObserverListener>();
+		
+		// TODO check if this interface casting is allowed
+		for (FileAlterationListener listener : observer.getListeners()) {
+			listeners.add((IFileObserverListener) listener);
+		}
+		return listeners;
+	}
+
+	public long getInterval() {
+		return monitor.getInterval();
 	}
 
 	public boolean isRunning() {
