@@ -86,8 +86,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	public IProcessComponent move(File source, File destination) throws NoSessionException,
 			NoPeerConnectionException {
 		// TODO support the file listener that already moved the file
-		
-		// TODO support file movement to already existing destination
 		if (!source.exists()) {
 			throw new IllegalArgumentException("Source file not found.");
 		} else if (destination.exists()) {

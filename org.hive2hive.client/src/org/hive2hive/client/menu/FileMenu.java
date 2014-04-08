@@ -76,8 +76,6 @@ public class FileMenu extends H2HConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 
-		// TODO add file observer
-
 		add(new H2HConsoleMenuItem("Add File") {
 			protected void checkPreconditions() {
 				forceRootDirectory();
@@ -121,7 +119,7 @@ public class FileMenu extends H2HConsoleMenu {
 					return;
 				File destination = askForFile(
 						"Specify the relative path of the destination file to the root directory '%s'.",
-						false); // TODO allow file destination that already exists
+						false);
 				if (destination == null)
 					return;
 
@@ -149,6 +147,10 @@ public class FileMenu extends H2HConsoleMenu {
 
 		// TODO bugfix recover process
 		add(new H2HConsoleMenuItem("Recover File") {
+			protected void checkPreconditions() {
+				forceRootDirectory();
+			}
+			
 			protected void execute() throws Hive2HiveException, FileNotFoundException,
 					IllegalArgumentException, InterruptedException {
 
@@ -157,7 +159,6 @@ public class FileMenu extends H2HConsoleMenu {
 					return;
 
 				IVersionSelector versionSelector = new IVersionSelector() {
-					@Override
 					public T selectVersion(List<T> availableVersions) {
 						return new SelectionMenu<T>(availableVersions,
 								"Choose the version you want to recover.").openAndSelect();
@@ -171,6 +172,9 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Share") {
+			protected void checkPreconditions() {
+				forceRootDirectory();
+			}
 			protected void execute() throws NoSessionException, NoPeerConnectionException,
 					InvalidProcessStateException, InterruptedException {
 
@@ -214,64 +218,18 @@ public class FileMenu extends H2HConsoleMenu {
 					System.out.println("The file list is empty.");
 				}
 			}
-//			protected void execute() throws Hive2HiveException, InterruptedException {
-//				IResultProcessComponent<List<Path>> process = node.getFileManager().getFileList();
-//				IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
-//					@Override
-//					public void onResultReady(List<Path> result) {
-//						// print the digest
-//						System.out.println("File List:");
-//						for (Path path : result) {
-//							System.out.println("* " + path.toString());
-//						}
-//					}
-//				};
-//
-//				process.attachListener(resultListener);
-//				executeBlocking(process);
-//			}
 		});
 
-		// add(new H2HConsoleMenuItem("File Observer") {
-		// protected void checkPreconditions() {
-		// if (root == null) {
-		// printPreconditionError("Cannot configure file observer: Root path not defined yet. Please login first.");
-		// Login.invoke();
-		// }
-		// if (node == null) {
-		// printPreconditionError("Cannot register: Please create a H2HNode first.");
-		// nodeMenu.open();
-		// checkPreconditions();
-		// }
-		// }
-		//
-		// @Override
-		// protected void execute() throws Exception {
-		// fileObserverMenu = new FileObserverMenu(root, node.getFileManager());
-		// fileObserverMenu.open();
-		// }
-		// });
-		//
-		// add(new H2HConsoleMenuItem("Logout") {
-		// protected void execute() throws Hive2HiveException, InterruptedException {
-		// IProcessComponent process = node.getUserManager().logout();
-		// executeBlocking(process);
-		// }
-		// });
+		add(new H2HConsoleMenuItem("File Observer") {
+			protected void checkPreconditions() {
+				forceRootDirectory();
+			}
 
-		// add(new H2HConsoleMenuItem("Get Status") {
-		// protected void execute() throws Hive2HiveException {
-		// IH2HNodeStatus status = nodeMenu.getH2HNode().getStatus();
-		// System.out.println("Connected: " + status.isConnected());
-		// if (status.isLoggedIn()) {
-		// System.out.println("User ID: " + status.getUserId());
-		// System.out.println("Root path: " + status.getRoot().getAbsolutePath());
-		// } else {
-		// System.out.println("Currently, nobody is logged in");
-		// }
-		// System.out.println("Number of processes: " + status.getNumberOfProcesses());
-		// }
-		// });
+			protected void execute() throws Exception {
+//				fileObserverMenu = new FileObserverMenu(root, node.getFileManager());
+//				fileObserverMenu.open();
+			}
+		});
 	}
 
 	private File askForFile(boolean expectExistence) {
