@@ -63,7 +63,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.registerAndLogin(userCredentials, client, root);
 
 		// add an intial file to the network
-		file = new File(root, "test-file");
+		file = new File(root, "test-file.txt");
 		FileUtils.write(file, "0");
 		UseCaseTestUtil.uploadNewFile(client, file);
 	}
@@ -84,25 +84,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 		final int versionToRestore = 2;
 
-		final String recoveredFileName = file.getName() + "-recovered";
-		IVersionSelector selector = new IVersionSelector() {
-			@Override
-			public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
-				// should have 3 versions possible to restore
-				Assert.assertEquals(3, availableVersions.size());
-				for (IFileVersion version : availableVersions) {
-					if (version.getIndex() == versionToRestore)
-						return version;
-				}
-				return null;
-			}
-
-			@Override
-			public String getRecoveredFileName(String originalName) {
-				return recoveredFileName;
-			}
-		};
-
+		TestVersionSelector selector = new TestVersionSelector(versionToRestore);
 		ProcessComponent process = ProcessFactory.instance().createRecoverFileProcess(file, selector, client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
@@ -112,7 +94,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		// to verify, find the restored file
 		File restoredFile = null;
 		for (File fileInList : root.listFiles()) {
-			if (fileInList.getName().equals(recoveredFileName)) {
+			if (fileInList.getName().equals(selector.getRecoveredFileName())) {
 				restoredFile = fileInList;
 				break;
 			}
@@ -127,4 +109,35 @@ public class RecoverFileTest extends H2HJUnitTest {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
+
+	private class TestVersionSelector implements IVersionSelector {
+
+		private final int versionToRestore;
+		private String recoveredFileName;
+
+		public TestVersionSelector(int versionToRestore) {
+			this.versionToRestore = versionToRestore;
+		}
+
+		@Override
+		public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
+			// should have 3 versions possible to restore
+			Assert.assertEquals(3, availableVersions.size());
+			for (IFileVersion version : availableVersions) {
+				if (version.getIndex() == versionToRestore)
+					return version;
+			}
+			return null;
+		}
+
+		@Override
+		public String getRecoveredFileName(String fullName, String name, String extension) {
+			recoveredFileName = name + "-recovered" + extension;
+			return recoveredFileName;
+		}
+
+		public String getRecoveredFileName() {
+			return recoveredFileName;
+		}
+	};
 }

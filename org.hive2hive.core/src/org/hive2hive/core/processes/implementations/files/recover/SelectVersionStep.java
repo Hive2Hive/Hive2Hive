@@ -99,15 +99,17 @@ public class SelectVersionStep extends ProcessStep {
 				throw new Hive2HiveException("File node not found");
 			}
 
-			// generate a new file name indicating that the file is restored
+			// ask the user for the new file name
 			String originalFileName = context.getFile().getName();
-			String recoveredFileName = selector.getRecoveredFileName(originalFileName);
+			String noSuffix = FilenameUtils.removeExtension(originalFileName);
+			String extension = FilenameUtils.getExtension(originalFileName);
+			String recoveredFileName = selector.getRecoveredFileName(originalFileName, noSuffix, extension);
 			if (originalFileName.equals(recoveredFileName)) {
+				// generate a new file name indicating that the file is restored
 				logger.warn("Replacing the given file name with a custom file name because it equals to the original file");
 				Date versionDate = new Date(selected.getDate());
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-				recoveredFileName = FilenameUtils.removeExtension(originalFileName) + "-"
-						+ sdf.format(versionDate) + FilenameUtils.getExtension(originalFileName);
+				recoveredFileName = noSuffix + "-" + sdf.format(versionDate) + extension;
 			}
 
 			logger.debug("Starting to download the restored file under the name '" + recoveredFileName + "'");

@@ -19,8 +19,10 @@ public interface IVersionSelector {
 	/**
 	 * Set a name of the currently recovered file. Note that the name should not equal with the original name
 	 * 
-	 * @param the original file name
+	 * @param fullName the original file name with extension
+	 * @param name the original file name without the extension
+	 * @param extension the file extension
 	 * @return the name of the new file
 	 */
-	String getRecoveredFileName(String originalName);
+	String getRecoveredFileName(String fullName, String name, String extension);
 }
