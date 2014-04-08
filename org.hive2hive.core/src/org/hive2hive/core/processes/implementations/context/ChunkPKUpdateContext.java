@@ -2,6 +2,8 @@ package org.hive2hive.core.processes.implementations.context;
 
 import java.security.KeyPair;
 
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.MetaChunk;
@@ -38,6 +40,11 @@ public class ChunkPKUpdateContext extends BasePKUpdateContext {
 	@Override
 	public byte[] getHash() {
 		return metaChunk.getChunkHash();
+	}
+
+	@Override
+	public Number160 getVersionKey() {
+		return H2HConstants.TOMP2P_DEFAULT_KEY;
 	}
 
 }

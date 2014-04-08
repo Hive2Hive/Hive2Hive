@@ -21,7 +21,8 @@ import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdate
 import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFileProtectionKey;
 
 /**
- * Takes the shared folder and iteratively changes the protection keys of all meta documents
+ * Takes the shared folder and iteratively changes the protection keys of all meta files. Appends further
+ * steps to change the content protection key of all contained chunks.
  * 
  * @author Nico, Seppi
  */
@@ -67,8 +68,9 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 	}
 
 	private void initForFile(FileIndex fileIndex) throws NoSessionException, NoPeerConnectionException {
-		logger.debug("Initialize to change the protection key of meta document of index '"
-				+ fileIndex.getName() + "'.");
+		logger.debug(String.format(
+				"Initialize to change the protection keys of meta document of index '%s'.",
+				fileIndex.getName()));
 		// create the process and make wrap it to make it asynchronous
 		getParent().add(new AsyncComponent(buildProcess(fileIndex)));
 	}

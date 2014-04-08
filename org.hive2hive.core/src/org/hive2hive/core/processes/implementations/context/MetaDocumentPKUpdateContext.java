@@ -3,6 +3,8 @@ package org.hive2hive.core.processes.implementations.context;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FileIndex;
@@ -70,6 +72,15 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 	@Override
 	public byte[] getHash() {
 		return fileIndex.getMetaFileHash();
+	}
+
+	@Override
+	public Number160 getVersionKey() {
+		return metaFile.getVersionKey();
+	}
+	
+	public String getFileName() {
+		return fileIndex.getName();
 	}
 
 }

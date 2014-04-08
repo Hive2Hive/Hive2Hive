@@ -17,6 +17,12 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 
+/**
+ * Updates the corresponding {@link FolderIndex} in the {@link UserProfile}. Sets content protection keys,
+ * user permissions and the share flag.
+ * 
+ * @author Nico, Seppi
+ */
 public class UpdateUserProfileStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateUserProfileStep.class);
@@ -35,31 +41,36 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		logger.debug("Updating user profile for sharing.");
+		logger.debug(String.format("Updating user profile for sharing folder '%s'.", context.getFolder()
+				.getName()));
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 			FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
 			if (!folderIndex.canWrite()) {
-				throw new ProcessExecutionException("Cannot share a folder that I have read-only access");
+				throw new ProcessExecutionException(String.format(
+						"Cannot share folder '%s' with read-only access.", folderIndex.getName()));
 			} else if (!folderIndex.getSharedFlag() && folderIndex.isSharedOrHasSharedChildren()) {
-				// restriction that diallows sharing folders within other shared folders
-				throw new ProcessExecutionException("Folder is already shared or contains an shared folder.");
+				// restriction that disallows sharing folders within other shared folders
+				throw new ProcessExecutionException(String.format(
+						"Folder '%s' is already shared or contains an shared folder.", folderIndex.getName()));
 			}
 
 			// check if the folder is already shared with this user
 			if (folderIndex.getCalculatedUserList().contains(context.getFriendId())) {
-				throw new ProcessExecutionException("Friend '" + context.getFriendId()
-						+ "' already has access to this folder");
+				throw new ProcessExecutionException(String.format(
+						"Friend '%s' already has access to folder '%s'.", context.getFriendId(),
+						folderIndex.getName()));
 			}
 
 			// store for the notification
 			context.provideIndex(folderIndex);
 
 			if (folderIndex.getSharedFlag()) {
-				// this if-clause allows sharing with multiple uses and omits the next if-clause
-				logger.debug("Sharing an already shared folder");
+				// this if-clause allows sharing with multiple users and omits the next if-clause
+				logger.debug(String.format("Sharing an already shared folder '%s' with friend '%s'",
+						folderIndex.getName(), context.getFriendId()));
 				folderIndex.addUserPermissions(context.getUserPermission());
 			} else {
 				// make the node shared with the new protection keys
@@ -87,10 +98,15 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 				// unshare the fileNode
 				folderNode.unshare();
+
 				profileManager.readyToPut(userProfile, getID());
+
+				// reset flag
+				modified = false;
 			} catch (Exception e) {
 				logger.warn(String.format(
-						"Rollback of updating user profile (sharing a folder) failed. exception = '%s'", e));
+						"Rollback of updating user profile (sharing a folder) failed. exception = '%s'",
+						e.getMessage()));
 			}
 		}
 	}

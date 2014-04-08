@@ -23,6 +23,7 @@ import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessa
 public class PrepareNotificationsStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(PrepareNotificationsStep.class);
+
 	private final ShareProcessContext context;
 	private final String userId;
 
@@ -33,6 +34,10 @@ public class PrepareNotificationsStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
+		logger.debug(String
+				.format("Preparing a notification message to the friend '%s' and all other sharers of shared folder '%s'.",
+						context.getFriendId(), context.getFolder().getName()));
+
 		FolderIndex fileNode = (FolderIndex) context.consumeIndex();
 
 		// create a subtree containing all children
@@ -52,8 +57,14 @@ public class PrepareNotificationsStep extends ProcessStep {
 
 		// if the friend receives write access, he gets the protection key
 		if (context.getPermissionType() == PermissionType.WRITE) {
+			logger.debug(String
+					.format("Friend '%s' gets WRITE access to shared folder '%s'.",
+							context.getFriendId(), context.getFolder().getName()));
 			sharedNode.share(context.consumeNewProtectionKeys(), permissionArray);
 		} else {
+			logger.debug(String
+					.format("Friend '%s' gets READ access to shared folder '%s'.",
+							context.getFriendId(), context.getFolder().getName()));
 			sharedNode.share(null, permissionArray);
 		}
 
@@ -64,7 +75,6 @@ public class PrepareNotificationsStep extends ProcessStep {
 		Set<String> friends = new HashSet<String>();
 		friends.addAll(fileNode.getCalculatedUserList());
 		friends.remove(userId); // skip to notify myself
-		logger.debug("Sending a notification message to the friend and all other sharers.");
 
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode,
 				context.getUserPermission());

@@ -10,6 +10,8 @@ import java.util.List;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
+import net.tomp2p.peers.Number160;
+
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
@@ -20,11 +22,12 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
 import org.hive2hive.core.processes.implementations.share.pkupdate.ChangeProtectionKeysStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
-import org.hive2hive.core.security.H2HSignatureFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
@@ -52,9 +55,9 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccessWithChunk() throws InterruptedException, NoPeerConnectionException,
+	public void testStepSuccessAndRollbackWithChunk() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 		// where the data gets stored
@@ -90,18 +93,24 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// create a change protection keys process step
 		ChangeProtectionKeysStep step = new ChangeProtectionKeysStep(context, getter.getDataManager());
 		// run process, should not fail
-		UseCaseTestUtil.executeProcess(step);
+		UseCaseTestUtil.executeProcessTillSucceded(step);
 
-		// verify if signature has changed
-		Assert.assertTrue(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData()
-				.verify(protectionKeysNew.getPublic(), new H2HSignatureFactory()));
-
+		// verify if content protection keys have changed
+		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
+				.awaitUninterruptibly().getData().publicKey());
+		
+		// manually trigger roll back
+		step.cancel(new RollbackReason("Testing rollback."));
+		
+		// verify if content protection keys have changed to old ones
+		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
+				.awaitUninterruptibly().getData().publicKey());
 	}
 
 	@Test
-	public void testStepSuccessWithMetaFile() throws InterruptedException, NoPeerConnectionException,
+	public void testStepSuccessAndRollbackWithMetaFile() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 
@@ -146,16 +155,22 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// initialize a fake process context
 		BasePKUpdateContext context = new TestMetaFilePKUpdateContext(protectionKeysOld, protectionKeysNew,
-				metaFile, parameters.getHash());
+				metaFile, parameters.getHash(), encryptedMetaFile.getVersionKey());
 		// create a change protection keys process step
 		ChangeProtectionKeysStep step = new ChangeProtectionKeysStep(context, getter.getDataManager());
 		// run process, should not fail
-		UseCaseTestUtil.executeProcess(step);
+		UseCaseTestUtil.executeProcessTillSucceded(step);
 
-		// verify if signature has changed
-		Assert.assertTrue(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData()
-				.verify(protectionKeysNew.getPublic(), new H2HSignatureFactory()));
-
+		// verify if content protection keys have changed
+		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
+				.awaitUninterruptibly().getData().publicKey());
+		
+		// manually trigger roll back
+		step.cancel(new RollbackReason("Testing rollback."));
+		
+		// verify if content protection keys have changed to old ones
+		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
+				.awaitUninterruptibly().getData().publicKey());
 	}
 
 	@AfterClass
@@ -196,18 +211,25 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 			return hash;
 		}
 
+		@Override
+		public Number160 getVersionKey() {
+			return H2HConstants.TOMP2P_DEFAULT_KEY;
+		}
+
 	}
 
 	private class TestMetaFilePKUpdateContext extends BasePKUpdateContext {
 
 		private final MetaFile metaFile;
 		private final byte[] hash;
+		private final Number160 versionKey;
 
 		public TestMetaFilePKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys,
-				MetaFile metaFile, byte[] hash) {
+				MetaFile metaFile, byte[] hash, Number160 versionKey) {
 			super(oldProtectionKeys, newProtectionKeys);
 			this.metaFile = metaFile;
 			this.hash = hash;
+			this.versionKey = versionKey;
 		}
 
 		@Override
@@ -228,6 +250,11 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		@Override
 		public byte[] getHash() {
 			return hash;
+		}
+
+		@Override
+		public Number160 getVersionKey() {
+			return versionKey;
 		}
 
 	}
