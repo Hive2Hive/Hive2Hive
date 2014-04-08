@@ -55,7 +55,7 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 		int read = 0;
 		long offset = config.getChunkSize() * index;
 		// TODO check if the cast is ok!
-		byte[] data = new byte[(int) config.getChunkSize()];
+		byte[] data = new byte[config.getChunkSize()];
 
 		try {
 			// read the next chunk of the file considering the offset

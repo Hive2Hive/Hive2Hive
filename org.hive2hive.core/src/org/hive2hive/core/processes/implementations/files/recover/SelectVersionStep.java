@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
-import org.hive2hive.core.model.T;
+import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
@@ -53,7 +53,7 @@ public class SelectVersionStep extends ProcessStep {
 		}
 
 		// cast the versions to the public interface
-		List<T> versions = new ArrayList<T>();
+		List<IFileVersion> versions = new ArrayList<IFileVersion>();
 		for (FileVersion version : metaFile.getVersions()) {
 			if (metaFile.getNewestVersion().equals(version)) {
 				// skip newest version since it's not worth to restore it
@@ -65,7 +65,7 @@ public class SelectVersionStep extends ProcessStep {
 
 		logger.debug("Start with the selection of the version by the user. He has choice between "
 				+ versions.size() + " versions");
-		T selected = selector.selectVersion(versions);
+		IFileVersion selected = selector.selectVersion(versions);
 		if (selected == null) {
 			throw new ProcessExecutionException("Selected file version is null.");
 		}

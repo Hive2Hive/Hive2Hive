@@ -46,6 +46,7 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		logger.debug("Adding a new version to the meta file.");
 
+		// create a new version and add it to the meta file
 		MetaFile metaFile = context.consumeMetaFile();
 		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
 				System.currentTimeMillis(), context.getMetaChunks());
@@ -60,7 +61,9 @@ public class CreateNewVersionStep extends ProcessStep {
 		// remove files when the number of allowed versions is exceeded or when the total file size (sum
 		// of all versions) exceeds the allowed file size
 		while (metaFile.getVersions().size() > config.getMaxNumOfVersions()
-				|| metaFile.getTotalSize() > config.getMaxSizeAllVersions()) {
+				|| metaFile.getTotalSize().compareTo(config.getMaxSizeAllVersions()) == 1) {
+			// more versions than allowed or size is larger
+
 			// keep at least one version
 			if (metaFile.getVersions().size() == 1)
 				break;

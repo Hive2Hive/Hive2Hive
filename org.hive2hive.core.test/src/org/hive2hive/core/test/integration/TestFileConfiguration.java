@@ -1,26 +1,29 @@
 package org.hive2hive.core.test.integration;
 
+import java.math.BigInteger;
+
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 
 public class TestFileConfiguration implements IFileConfiguration {
 
 	@Override
-	public long getMaxFileSize() {
-		return 1024 * 1024;
+	public BigInteger getMaxFileSize() {
+		return H2HConstants.MEGABYTES;
 	}
 
 	@Override
-	public long getMaxNumOfVersions() {
+	public int getMaxNumOfVersions() {
 		return 10;
 	}
 
 	@Override
-	public long getMaxSizeAllVersions() {
-		return getMaxFileSize() * getMaxNumOfVersions();
+	public BigInteger getMaxSizeAllVersions() {
+		return getMaxFileSize().multiply(BigInteger.valueOf(getMaxNumOfVersions()));
 	}
 
 	@Override
-	public long getChunkSize() {
+	public int getChunkSize() {
 		return 1024;
 	}
 

@@ -14,8 +14,8 @@ import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.model.T;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
@@ -159,8 +159,8 @@ public class FileMenu extends H2HConsoleMenu {
 					return;
 
 				IVersionSelector versionSelector = new IVersionSelector() {
-					public T selectVersion(List<T> availableVersions) {
-						return new SelectionMenu<T>(availableVersions,
+					public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
+						return new SelectionMenu<IFileVersion>(availableVersions,
 								"Choose the version you want to recover.").openAndSelect();
 					}
 				};

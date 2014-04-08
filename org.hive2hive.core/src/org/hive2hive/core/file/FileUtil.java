@@ -132,9 +132,9 @@ public class FileUtil {
 	 * @param chunkSize the size of an individual chunk
 	 * @return the number of chunks
 	 */
-	public static int getNumberOfChunks(File file, long chunkSize) {
+	public static int getNumberOfChunks(File file, int chunkSize) {
 		long fileSize = getFileSize(file);
-		return (int) Math.ceil((double) fileSize / (double) chunkSize);
+		return (int) Math.ceil((double) fileSize / chunkSize);
 	}
 
 	/**

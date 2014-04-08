@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.implementations.files.recover;
 
 import java.util.List;
 
-import org.hive2hive.core.model.T;
+import org.hive2hive.core.model.IFileVersion;
 
 public interface IVersionSelector {
 
@@ -14,5 +14,5 @@ public interface IVersionSelector {
 	 * @param availableVersions all versions in the DHT
 	 * @return the selected version
 	 */
-	T selectVersion(List<T> availableVersions);
+	IFileVersion selectVersion(List<IFileVersion> availableVersions);
 }

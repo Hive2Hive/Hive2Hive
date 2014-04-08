@@ -1,5 +1,6 @@
 package org.hive2hive.client.menu;
 
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
@@ -27,10 +28,10 @@ public final class NodeMenu extends H2HConsoleMenu {
 	
 	private IH2HNode node;
 	
-	private long maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
-	private long maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
-	private long maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
-	private long chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
+	private BigInteger maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
+	private int maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
+	private BigInteger maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
+	private int chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
 
 	@Override
 	protected void createItems() {
@@ -83,28 +84,28 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 				protected void execute() {
 					System.out.println("Specify MaxFileSize:\n");
-					maxFileSize = Long.parseLong(awaitStringParameter());
+					maxFileSize = BigInteger.valueOf(awaitIntParameter());
 				}
 			});
 
 			add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
 				protected void execute() {
 					System.out.println("Specify MaxNumOfVersions:\n");
-					maxNumOfVersions = Long.parseLong(awaitStringParameter());
+					maxNumOfVersions = awaitIntParameter();
 				}
 			});
 
 			add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
 				protected void execute() {
 					System.out.println("Specify MaxSizeAllVersions:\n");
-					maxSizeAllVersions = Long.parseLong(awaitStringParameter());
+					maxSizeAllVersions = BigInteger.valueOf(awaitIntParameter());
 				}
 			});
 
 			add(new H2HConsoleMenuItem("Set ChunkSize") {
 				protected void execute() {
 					System.out.println("Specify ChunkSize:\n");
-					chunkSize = Long.parseLong(awaitStringParameter());
+					chunkSize = awaitIntParameter();
 				}
 			});
 			

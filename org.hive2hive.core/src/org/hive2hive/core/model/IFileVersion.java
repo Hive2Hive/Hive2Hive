@@ -1,12 +1,14 @@
 package org.hive2hive.core.model;
 
+import java.math.BigInteger;
+
 /**
  * Public interface for a file version
  * 
  * @author Nico
  * 
  */
-public interface T {
+public interface IFileVersion {
 
 	/**
 	 * Each version has a unique index which counts up with each version
@@ -20,7 +22,7 @@ public interface T {
 	 * 
 	 * @return file size in bytes
 	 */
-	long getSize();
+	BigInteger getSize();
 
 	/**
 	 * A version as a date when the version has been uploaded to the DHT.

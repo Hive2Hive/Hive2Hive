@@ -1,6 +1,7 @@
 package org.hive2hive.core.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -9,17 +10,21 @@ import java.util.List;
  * 
  * @author Nico, Seppi
  */
-public class FileVersion implements Serializable, T {
+public class FileVersion implements Serializable, IFileVersion {
 
 	// TODO override equals() and hashCode()
 	
 	private static final long serialVersionUID = 1L;
 	private final int index; // version count
-	private final long size; // size of the version
+	private final BigInteger size; // size of the version
 	private final long date; // date when it's created
 	private final List<MetaChunk> metaChunks; // the chunk id's to find the chunks
 
 	public FileVersion(int index, long size, long date, List<MetaChunk> metaChunks) {
+		this(index, BigInteger.valueOf(size), date, metaChunks);
+	}
+
+	public FileVersion(int index, BigInteger size, long date, List<MetaChunk> metaChunks) {
 		this.index = index;
 		this.size = size;
 		this.date = date;
@@ -42,7 +47,7 @@ public class FileVersion implements Serializable, T {
 	}
 
 	@Override
-	public long getSize() {
+	public BigInteger getSize() {
 		return size;
 	}
 

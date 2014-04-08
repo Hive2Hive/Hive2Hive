@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.implementations.files.add;
 
 import java.io.File;
+import java.math.BigInteger;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
@@ -26,7 +27,7 @@ public class ValidateFileSizeStep extends ProcessStep {
 		}
 
 		// validate the file size
-		if (FileUtil.getFileSize(file) > config.getMaxFileSize()) {
+		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {
 			throw new ProcessExecutionException("File is too large.");
 		}
 	}

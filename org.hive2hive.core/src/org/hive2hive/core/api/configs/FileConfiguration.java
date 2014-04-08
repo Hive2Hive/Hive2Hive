@@ -1,5 +1,7 @@
 package org.hive2hive.core.api.configs;
 
+import java.math.BigInteger;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 
@@ -12,12 +14,18 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
  */
 public class FileConfiguration implements IFileConfiguration {
 
-	private final long maxFileSize;
-	private final long maxNumOfVersions;
-	private final long maxSizeOfAllVersions;
-	private final long chunkSize;
+	private final BigInteger maxFileSize;
+	private final int maxNumOfVersions;
+	private final BigInteger maxSizeOfAllVersions;
+	private final int chunkSize;
 
-	private FileConfiguration(long maxFileSize, long maxNumOfVersions, long maxSizeAllVersions, long chunkSize) {
+	private FileConfiguration(BigInteger maxFileSize, int maxNumOfVersions, BigInteger maxSizeAllVersions,
+			int chunkSize) {
+		assert maxFileSize.signum() == 1;
+		assert maxNumOfVersions > 0;
+		assert maxSizeAllVersions.signum() == 1;
+		assert chunkSize > 0;
+
 		this.maxFileSize = maxFileSize;
 		this.maxNumOfVersions = maxNumOfVersions;
 		this.maxSizeOfAllVersions = maxSizeAllVersions;
@@ -43,28 +51,28 @@ public class FileConfiguration implements IFileConfiguration {
 	 * @param maxSizeAllVersions the maximum file size when summing up all versions (in bytes)
 	 * @param chunkSize the size of a chunk (in bytes)
 	 */
-	public static IFileConfiguration createCustom(long maxFileSize, long maxNumOfVersions,
-			long maxSizeAllVersions, long chunkSize) {
+	public static IFileConfiguration createCustom(BigInteger maxFileSize, int maxNumOfVersions,
+			BigInteger maxSizeAllVersions, int chunkSize) {
 		return new FileConfiguration(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize);
 	}
 
 	@Override
-	public long getMaxFileSize() {
+	public BigInteger getMaxFileSize() {
 		return maxFileSize;
 	}
 
 	@Override
-	public long getMaxNumOfVersions() {
+	public int getMaxNumOfVersions() {
 		return maxNumOfVersions;
 	}
 
 	@Override
-	public long getMaxSizeAllVersions() {
+	public BigInteger getMaxSizeAllVersions() {
 		return maxSizeOfAllVersions;
 	}
 
 	@Override
-	public long getChunkSize() {
+	public int getChunkSize() {
 		return chunkSize;
 	}
 }
