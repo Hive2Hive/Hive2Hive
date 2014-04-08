@@ -3,7 +3,6 @@ package org.hive2hive.core.test.api;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
@@ -77,7 +76,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
-		Path rootPah = (new File("testRoot")).toPath();
+		Path rootPah = NetworkTestUtil.getTempDirectory().toPath();
 
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
