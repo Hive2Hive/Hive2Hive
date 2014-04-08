@@ -104,9 +104,9 @@ public class SelectVersionStep extends ProcessStep {
 			String noSuffix = FilenameUtils.removeExtension(originalFileName);
 			String extension = FilenameUtils.getExtension(originalFileName);
 			String recoveredFileName = selector.getRecoveredFileName(originalFileName, noSuffix, extension);
-			if (originalFileName.equals(recoveredFileName)) {
+			if (recoveredFileName == null || originalFileName.equals(recoveredFileName)) {
 				// generate a new file name indicating that the file is restored
-				logger.warn("Replacing the given file name with a custom file name because it equals to the original file");
+				logger.warn("Replacing the given file name with a custom file name because it was invalid.");
 				Date versionDate = new Date(selected.getDate());
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
 				recoveredFileName = noSuffix + "-" + sdf.format(versionDate) + extension;
