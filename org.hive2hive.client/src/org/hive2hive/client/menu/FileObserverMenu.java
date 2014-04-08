@@ -59,7 +59,7 @@ public class FileObserverMenu extends ConsoleMenu {
 
 	@Override
 	protected String getInstruction() {
-		return "Please configure and start/stop the file observer:\n";
+		return "Please configure and start/stop the file observer:";
 	}
 
 }
