@@ -46,7 +46,7 @@ public class MetaFile extends NetworkContent {
 		} else {
 			BigInteger sum = BigInteger.ZERO;
 			for (FileVersion version : versions) {
-				sum.add(version.getSize());
+				sum = sum.add(version.getSize());
 			}
 			return sum;
 		}

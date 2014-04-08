@@ -220,7 +220,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// update the file (append some data)
 		FileUtils.write(file, NetworkTestUtil.randomString(), true);
-		FileUtils.write(file, NetworkTestUtil.randomString(), true);
 
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
 
