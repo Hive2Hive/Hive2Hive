@@ -35,8 +35,7 @@ public class H2HFileObserverListener implements IFileObserverListener {
 
 	@Override
 	public void onStart(FileAlterationObserver observer) {
-		logger.debug(String.format("File observer for '%s' has been started.", observer.getDirectory()
-				.toPath()));
+//		logger.debug(String.format("File observer for '%s' has been started.", observer.getDirectory().toPath()));
 	}
 
 	@Override
@@ -78,8 +77,7 @@ public class H2HFileObserverListener implements IFileObserverListener {
 
 	@Override
 	public void onStop(FileAlterationObserver observer) {
-		logger.debug(String.format("File observer for '%s' has been stopped.", observer.getDirectory()
-				.toPath()));
+//		logger.debug(String.format("File observer for '%s' has been stopped.", observer.getDirectory().toPath()));
 	}
 
 	private void printFileDetails(String reason, File file) {

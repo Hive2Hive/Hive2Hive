@@ -227,8 +227,7 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Exception {
-//				fileObserverMenu = new FileObserverMenu(root, node.getFileManager());
-//				fileObserverMenu.open();
+				new FileObserverMenu(nodeMenu, getRootDirectory()).open(isExpertMode);
 			}
 		});
 	}
@@ -249,7 +248,8 @@ public class FileMenu extends H2HConsoleMenu {
 
 		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
-
+		// TODO be more flexible with inputs, e.g. files with whitespaces in name
+		
 		File file = null;
 		do {
 			System.out.println(String.format(msg.concat(expectExistence ? String.format(

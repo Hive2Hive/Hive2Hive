@@ -49,14 +49,9 @@ public class IntroMenu extends ConsoleMenu {
 		System.out.println("Disconnecting from the network...");
 		nodeMenu.disconnectNode();
 		
-//		// shutdown file observer
-//		if (fileObserverMenu != null && fileObserverMenu.getWatcher() != null) {
-//			try {
-//				fileObserverMenu.getWatcher().stop();
-//			} catch (Exception e) {
-//				printError(e.getMessage());
-//			}
-//		}
+		// TODO stop file observer
+		
+	
 	}
 
 	@Override
