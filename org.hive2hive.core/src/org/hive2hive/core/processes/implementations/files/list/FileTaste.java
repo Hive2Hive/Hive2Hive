@@ -99,10 +99,11 @@ public class FileTaste {
 	public boolean isShared() {
 		return getUserPermissions().size() > 1;
 	}
-	
+
 	@Override
 	public String toString() {
-		
-		return String.format("%s: %s [%s] (MD5: %s)", isFile() ? "File" : "Folder", getPath(), getUserPermissions(), EncryptionUtil.byteToHex(getMd5()));
+
+		return String.format("%s: %s [%s] %s", isFile() ? "File" : "Folder", getPath(), getUserPermissions(),
+				isFile() ? String.format("(MD5: %s)", EncryptionUtil.byteToHex(getMd5())) : "");
 	}
 }

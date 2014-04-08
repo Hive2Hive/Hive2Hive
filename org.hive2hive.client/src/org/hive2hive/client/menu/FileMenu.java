@@ -40,10 +40,7 @@ public class FileMenu extends H2HConsoleMenu {
 		CreateRootDirectory = new H2HConsoleMenuItem("Create Root Directory") {
 			protected void execute() throws Exception {
 
-				// rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" +
-				// System.currentTimeMillis());
-				// TODO change
-				rootDirectory = new File(FileUtils.getUserDirectory(), "Hive2Hive");
+				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
 
 				if (isExpertMode) {
 					System.out.printf(
@@ -145,7 +142,6 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 		});
 
-		// TODO bugfix recover process
 		add(new H2HConsoleMenuItem("Recover File") {
 			protected void checkPreconditions() {
 				forceRootDirectory();
@@ -203,7 +199,7 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Print File list") {
+		add(new H2HConsoleMenuItem("Print File List") {
 			@Override
 			protected void execute() throws Exception {
 				
