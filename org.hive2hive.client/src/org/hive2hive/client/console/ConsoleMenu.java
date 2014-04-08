@@ -48,13 +48,12 @@ public abstract class ConsoleMenu {
 	}
 
 	protected final void add(ConsoleMenuItem menuItem) {
-
-		if (!items.contains(menuItem))
-			items.add(menuItem);
+		items.add(menuItem);
 	}
 
 	public final void open() {
 
+		items.clear();
 		addMenuItems();
 		addExitItem();
 
