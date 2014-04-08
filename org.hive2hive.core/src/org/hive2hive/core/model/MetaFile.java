@@ -1,5 +1,6 @@
 package org.hive2hive.core.model;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Collections;
@@ -39,13 +40,13 @@ public class MetaFile extends NetworkContent {
 		return chunkKey;
 	}
 
-	public int getTotalSize() {
+	public BigInteger getTotalSize() {
 		if (versions == null) {
-			return 0;
+			return BigInteger.ZERO;
 		} else {
-			int sum = 0;
+			BigInteger sum = BigInteger.ZERO;
 			for (FileVersion version : versions) {
-				sum += version.getSize();
+				sum.add(version.getSize());
 			}
 			return sum;
 		}

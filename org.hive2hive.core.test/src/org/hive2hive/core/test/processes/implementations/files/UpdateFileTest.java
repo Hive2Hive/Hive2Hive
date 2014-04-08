@@ -2,6 +2,7 @@ package org.hive2hive.core.test.processes.implementations.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -148,22 +149,22 @@ public class UpdateFileTest extends H2HJUnitTest {
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
 			@Override
-			public long getMaxSizeAllVersions() {
-				return Integer.MAX_VALUE;
+			public BigInteger getMaxSizeAllVersions() {
+				return BigInteger.valueOf(Long.MAX_VALUE);
 			}
 
 			@Override
-			public long getMaxNumOfVersions() {
+			public int getMaxNumOfVersions() {
 				return 1;
 			}
 
 			@Override
-			public long getMaxFileSize() {
-				return Integer.MAX_VALUE;
+			public BigInteger getMaxFileSize() {
+				return BigInteger.valueOf(Long.MAX_VALUE);
 			}
 
 			@Override
-			public long getChunkSize() {
+			public int getChunkSize() {
 				return H2HConstants.DEFAULT_CHUNK_SIZE;
 			}
 		};
@@ -192,22 +193,22 @@ public class UpdateFileTest extends H2HJUnitTest {
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
 			@Override
-			public long getMaxSizeAllVersions() {
-				return fileSize;
+			public BigInteger getMaxSizeAllVersions() {
+				return BigInteger.valueOf(fileSize);
 			}
 
 			@Override
-			public long getMaxNumOfVersions() {
-				return Long.MAX_VALUE;
+			public int getMaxNumOfVersions() {
+				return Integer.MAX_VALUE;
 			}
 
 			@Override
-			public long getMaxFileSize() {
-				return Long.MAX_VALUE;
+			public BigInteger getMaxFileSize() {
+				return BigInteger.valueOf(Long.MAX_VALUE);
 			}
 
 			@Override
-			public long getChunkSize() {
+			public int getChunkSize() {
 				return H2HConstants.DEFAULT_CHUNK_SIZE;
 			}
 		};

@@ -1,5 +1,7 @@
 package org.hive2hive.core.api.interfaces;
 
+import java.math.BigInteger;
+
 /**
  * The file configuration is essential for the performance of the system. Depending on the application, the
  * developer can adapt the parameters. Hive2Hive automatically changes its behavior for example while cleaning
@@ -18,7 +20,7 @@ public interface IFileConfiguration {
 	 * 
 	 * @return the number of bytes that a file can have
 	 */
-	long getMaxFileSize();
+	BigInteger getMaxFileSize();
 
 	/**
 	 * This parameter configures the number of available versions, once a file gets updated. In case the
@@ -27,7 +29,7 @@ public interface IFileConfiguration {
 	 * 
 	 * @return the number of versions that a file may have
 	 */
-	long getMaxNumOfVersions();
+	int getMaxNumOfVersions();
 
 	/**
 	 * Even though this parameter would not be necessary (since {@link IFileConfiguration#getMaxFileSize()} *
@@ -38,7 +40,7 @@ public interface IFileConfiguration {
 	 * 
 	 * @return the total number of bytes summed up over all versions of a specific file
 	 */
-	long getMaxSizeAllVersions();
+	BigInteger getMaxSizeAllVersions();
 
 	/**
 	 * When uploading a file it gets chunked and distributed over the network. The network load becomes
@@ -49,6 +51,6 @@ public interface IFileConfiguration {
 	 * 
 	 * @return the number of bytes a chunk has.
 	 */
-	long getChunkSize();
+	int getChunkSize();
 
 }

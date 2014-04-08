@@ -1,5 +1,7 @@
 package org.hive2hive.core.model;
 
+import java.math.BigInteger;
+
 /**
  * Public interface for a file version
  * 
@@ -20,7 +22,7 @@ public interface IFileVersion {
 	 * 
 	 * @return file size in bytes
 	 */
-	long getSize();
+	BigInteger getSize();
 
 	/**
 	 * A version as a date when the version has been uploaded to the DHT.

@@ -1,6 +1,7 @@
 package org.hive2hive.core;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.net.InetAddress;
 
 import net.tomp2p.peers.Number160;
@@ -14,11 +15,14 @@ public interface H2HConstants {
 	// TODO this interface should be more structured and documented in a consistent way
 	// TODO there are constants that are not used anymore, remove
 
-	// H2HNode default values
-	public static final long DEFAULT_MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
-	public static final long DEFAULT_MAX_NUM_OF_VERSIONS = 100;
-	public static final long DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = 25 * 1024 * 1024 * 100; // max_size * max_num
-	public static final long DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1 MB
+	// Default file configuration
+	static final BigInteger MEGABYTES = BigInteger.valueOf(1024 * 1024);
+	public static final BigInteger DEFAULT_MAX_FILE_SIZE = BigInteger.valueOf(25).multiply(MEGABYTES);// 25 MB
+	public static final int DEFAULT_MAX_NUM_OF_VERSIONS = 100; // 100 versions
+	public static final BigInteger DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE
+			.multiply(BigInteger.valueOf(DEFAULT_MAX_NUM_OF_VERSIONS));// max_size * max_num
+	public static final int DEFAULT_CHUNK_SIZE = MEGABYTES.intValue(); // 1 MB
+
 	public static final boolean DEFAULT_AUTOSTART_PROCESSES = true;
 	public static final boolean DEFAULT_IS_INITIAL_PEER = false;
 	public static final InetAddress DEFAULT_BOOTSTRAP_ADDRESS = null;
@@ -89,13 +93,13 @@ public interface H2HConstants {
 
 	// key length for symmetric part of hybrid encryption
 	public static final AES_KEYLENGTH KEYLENGTH_HYBRID_AES = AES_KEYLENGTH.BIT_256;
-	
+
 	/**
 	 * TTL Refreshment Management
 	 */
 	// delay in milliseconds before first ttl refreshment task is to be executed
 	public static final int TTL_REFRESHMENT_DELAY = 500;
-	
+
 	// period in milliseconds between successive ttl refreshment task executions
 	public static final int TTL_REFRESHMENT_PERIOD = 1000;
 }
