@@ -38,18 +38,17 @@ public final class NodeMenu extends H2HConsoleMenu {
 		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
 
-				String nodeID = UUID.randomUUID().toString();
-				if (isExpertMode) {
-					System.out.println("Specify Node ID:\n");
-					nodeID = awaitStringParameter();
-				}
+				String nodeID = askNodeID();
 
-				System.out.println("Specify Bootstrap Address:\n");
+				System.out.println("Specify Bootstrap Address:");
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
 
-				System.out.println("Specify Bootstrap Port or enter 'default':\n");
-				String port = awaitStringParameter();
-				if ("default".equalsIgnoreCase(port)) {
+				String port = "default";
+				if (isExpertMode) {
+					System.out.println("Specify Bootstrap Port or enter 'default':");
+					port = awaitStringParameter();
+				}
+				if (port.equalsIgnoreCase("default")) {
 					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
 				} else {
 					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
@@ -61,11 +60,8 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
-				String nodeID = UUID.randomUUID().toString();
-				if (isExpertMode) {
-					System.out.println("Specify Node ID:\n");
-					nodeID = awaitStringParameter();
-				}
+				
+				String nodeID = askNodeID();
 				createNode(NetworkConfiguration.create(nodeID));
 				
 				exit();
@@ -76,9 +72,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 	@Override
 	protected void addMenuItems() {
 
-		add(ConnectToExistingNetworkItem);
-		add(CreateNetworkMenuItem);
-		
 		if (isExpertMode) {
 			add(new H2HConsoleMenuItem("Set MaxFileSize") {
 
@@ -115,6 +108,9 @@ public final class NodeMenu extends H2HConsoleMenu {
 				}
 			});
 		}
+		
+		add(CreateNetworkMenuItem);
+		add(ConnectToExistingNetworkItem);
 	}
 
 	@Override
@@ -150,6 +146,15 @@ public final class NodeMenu extends H2HConsoleMenu {
 			H2HConsoleMenuItem.printPreconditionError("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
 		}
+	}
+
+	private String askNodeID() {
+		String nodeID = UUID.randomUUID().toString();
+		if (isExpertMode) {
+			System.out.println("Specify Node ID:");
+			nodeID = awaitStringParameter();
+		}
+		return nodeID;
 	}
 	
 }
