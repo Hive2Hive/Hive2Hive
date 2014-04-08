@@ -169,10 +169,10 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Share") {
-			protected void execute() throws NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
-					InterruptedException {
+			protected void execute() throws NoSessionException, NoPeerConnectionException,
+					InvalidProcessStateException, InterruptedException {
 
-				File folderToShare = askForFile(
+				File folderToShare = askForFolder(
 						"Specify the relative path of the folder you want to share to the root directory '%s'.",
 						true);
 				if (folderToShare == null)
@@ -190,10 +190,10 @@ public class FileMenu extends H2HConsoleMenu {
 					shareProcess = nodeMenu.getNode().getFileManager()
 							.share(folderToShare, friendID, permission);
 				} catch (IllegalFileLocation | IllegalArgumentException e) {
-					// TODO handle wrong files
-					e.printStackTrace();
+					printError(e.getMessage());
+					return;
 				}
-//				executeBlocking(shareProcess, displayText);
+				executeBlocking(shareProcess, displayText);
 			}
 		});
 
@@ -259,16 +259,28 @@ public class FileMenu extends H2HConsoleMenu {
 		// });
 	}
 
-	// TODO add flag for expectFolder/expectFile
+	private File askForFile(boolean expectExistence) {
+		return askForFile("Specify the relative path to the root directory '%s'.", expectExistence);
+	}
+
 	private File askForFile(String msg, boolean expectExistence) {
+		return askFor(msg, expectExistence, false);
+	}
+
+	private File askForFolder(String msg, boolean expectExistence) {
+		return askFor(msg, expectExistence, true);
+	}
+
+	private File askFor(String msg, boolean expectExistence, boolean isDirectory) {
+
 		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
 
 		File file = null;
 		do {
-			System.out.println(String.format(
-					msg.concat(expectExistence ? " The file at this path must exist." : ""),
-					rootDirectory.getAbsolutePath()));
+			System.out.println(String.format(msg.concat(expectExistence ? String.format(
+					" The %s at this path must exist.", isDirectory ? "folder" : "file") : ""), rootDirectory
+					.getAbsolutePath()));
 			System.out.println("Or enter 'cancel' in order to go back.");
 
 			String input = awaitStringParameter();
@@ -277,16 +289,17 @@ public class FileMenu extends H2HConsoleMenu {
 				return null;
 
 			file = new File(rootDirectory, input);
-			if (expectExistence && !file.exists())
-				System.out.println(String.format("The specified file '%s' does not exist. Try again.",
+			if (expectExistence && !file.exists()) {
+				printError(String.format("The specified %s '%s' does not exist. Try again.",
+						isDirectory ? "folder" : "file", file.getAbsolutePath()));
+				continue;
+			}
+			if (expectExistence && !file.isDirectory()) {
+				printError(String.format("The specified file '%s' is not a folder. Try again.",
 						file.getAbsolutePath()));
-		} while (expectExistence && (file == null || !file.exists()));
+			}
+		} while (expectExistence && (file == null || !file.exists() || (isDirectory && !file.isDirectory())));
 		return file;
-
-	}
-
-	private File askForFile(boolean expectExistence) {
-		return askForFile("Specify the relative path to the root directory '%s'.", expectExistence);
 	}
 
 	private PermissionType askForPermission(String folder, String userID) {
