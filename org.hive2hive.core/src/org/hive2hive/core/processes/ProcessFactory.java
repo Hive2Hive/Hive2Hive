@@ -73,7 +73,7 @@ import org.hive2hive.core.processes.implementations.register.PutUserProfileStep;
 import org.hive2hive.core.processes.implementations.register.UserProfileCreationStep;
 import org.hive2hive.core.processes.implementations.share.PrepareNotificationsStep;
 import org.hive2hive.core.processes.implementations.share.UpdateUserProfileStep;
-import org.hive2hive.core.processes.implementations.share.VerifyFriendId;
+import org.hive2hive.core.processes.implementations.share.VerifyFriendIdStep;
 import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
@@ -368,10 +368,10 @@ public final class ProcessFactory {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new VerifyFriendId(networkManager.getSession().getKeyManager(), permission.getUserId()));
+		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission.getUserId()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
-		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
 		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
+		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;

@@ -8,12 +8,17 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 
-public class VerifyFriendId extends ProcessStep {
+/**
+ * A step which loads the public key of the friend. No result is a sign for a non-existing friend.
+ * 
+ * @author Nico, Seppi
+ */
+public class VerifyFriendIdStep extends ProcessStep {
 
 	private final PublicKeyManager keyManager;
 	private final String friendId;
 
-	public VerifyFriendId(PublicKeyManager keyManager, String friendId) {
+	public VerifyFriendIdStep(PublicKeyManager keyManager, String friendId) {
 		this.keyManager = keyManager;
 		this.friendId = friendId;
 	}
@@ -25,9 +30,11 @@ public class VerifyFriendId extends ProcessStep {
 			// first time), the result will be cached, making the notification faster.
 			PublicKey publicKey = keyManager.getPublicKey(friendId);
 			if (publicKey == null)
-				throw new GetFailedException("The friend does not seem to exist.");
+				throw new GetFailedException(String.format("The friend '%s' does not seem to exist.",
+						friendId));
 		} catch (GetFailedException e) {
-			throw new ProcessExecutionException("The friend '" + friendId + "' does not seem to exist.", e);
+			throw new ProcessExecutionException(String.format(
+					"The friend '%s' does not seem to exist. reason = '%s'", friendId, e.getMessage()));
 		}
 	}
 

@@ -13,6 +13,11 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.context.ChunkPKUpdateContext;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
 
+/**
+ * Takes the meta file and iteratively changes the protection keys of all chunks.
+ * 
+ * @author Nico, Seppi
+ */
 public class InitializeChunkUpdateStep extends ProcessStep {
 
 	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeChunkUpdateStep.class);
@@ -32,7 +37,8 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 			throw new ProcessExecutionException("Meta File not found");
 		}
 
-		logger.debug("Initialize updating all chunks for a file in a shared folder...");
+		logger.debug(String.format("Initialize updating all chunks for file '%s' in a shared folder.",
+				context.getFileName()));
 		int counter = 0;
 		for (FileVersion version : metaFile.getVersions()) {
 			for (MetaChunk metaChunk : version.getMetaChunks()) {
@@ -47,6 +53,7 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 			}
 		}
 
-		logger.debug(counter + " chunks need to update their protection key");
+		logger.debug(String.format("%s chunks of file '%s' need to update their protection keys.", counter,
+				context.getFileName()));
 	}
 }

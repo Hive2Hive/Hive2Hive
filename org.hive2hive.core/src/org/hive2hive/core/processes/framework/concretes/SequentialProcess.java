@@ -167,7 +167,7 @@ public class SequentialProcess extends Process {
 		if (handles.isEmpty())
 			return;
 
-		logger.debug("Checking async components for fails.");
+		logger.trace("Checking async components for fails.");
 
 		for (Future<RollbackReason> handle : handles) {
 
