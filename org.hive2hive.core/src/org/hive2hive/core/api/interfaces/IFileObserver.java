@@ -15,12 +15,18 @@ public interface IFileObserver {
 	
 	/**
 	 * Start the file observer.
+	 * @throws Exception 
 	 */
-	void start();
+	void start() throws Exception;
 	
 	/**
 	 * Stop the file observer.
+	 * @throws Exception 
 	 */
-	void stop();
+	void stop() throws Exception;
+	
+	void addFileObserverListener(IFileObserverListener listener);
+	
+	void removeFileObserverListener(IFileObserverListener listener);
 
 }

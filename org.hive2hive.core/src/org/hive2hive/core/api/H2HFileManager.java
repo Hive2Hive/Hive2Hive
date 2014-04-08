@@ -24,6 +24,11 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 
+/**
+ * Default implementation of {@link IFileManager}.
+ * @author Christian, Nico
+ *
+ */
 public class H2HFileManager extends H2HManager implements IFileManager {
 
 	public H2HFileManager(NetworkManager networkManager) {

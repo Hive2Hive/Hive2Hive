@@ -16,6 +16,11 @@ import org.hive2hive.core.processes.implementations.context.IsRegisteredContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
+/**
+ * Default implementation of {@link IUserManager}.
+ * @author Christian, Nico
+ *
+ */
 public class H2HUserManager extends H2HManager implements IUserManager {
 
 	private final IFileConfiguration fileConfiguration;

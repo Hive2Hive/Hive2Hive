@@ -9,6 +9,11 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.network.NetworkManager;
 
+/**
+ * Default implementation of {@link IH2HNode}.
+ * @author Christian, Nico
+ *
+ */
 public class H2HNode implements IH2HNode {
 
 	// TODO atm, this class is just a wrapper for the NetworkManager
