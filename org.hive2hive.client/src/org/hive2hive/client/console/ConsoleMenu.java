@@ -65,6 +65,9 @@ public abstract class ConsoleMenu {
 	}
 
 	private final void show() {
+		
+		// TODO show exit menu with a [Q]
+		
 		int chosen = 0;
 
 		System.out.println(getInstruction());

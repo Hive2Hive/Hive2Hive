@@ -16,7 +16,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  * Default implementation of a file listener. The file events are caught and the according process is
  * automatically started. Note that the processes are started even though the autostart may be turned off.
  * 
- * @author Nico
+ * @author Christian
  * 
  */
 public class H2HFileListener implements FileAlterationListener {
