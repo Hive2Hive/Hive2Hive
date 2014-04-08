@@ -15,4 +15,12 @@ public interface IVersionSelector {
 	 * @return the selected version
 	 */
 	IFileVersion selectVersion(List<IFileVersion> availableVersions);
+
+	/**
+	 * Set a name of the currently recovered file. Note that the name should not equal with the original name
+	 * 
+	 * @param the original file name
+	 * @return the name of the new file
+	 */
+	String getRecoveredFileName(String originalName);
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.log.H2HLoggerFactory;
@@ -99,12 +100,18 @@ public class SelectVersionStep extends ProcessStep {
 			}
 
 			// generate a new file name indicating that the file is restored
-			Date versionDate = new Date(selected.getDate());
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-			String newFileName = context.getFile().getName() + "-" + sdf.format(versionDate);
-			logger.debug("Starting to download the restored file under the name '" + newFileName + "'");
+			String originalFileName = context.getFile().getName();
+			String recoveredFileName = selector.getRecoveredFileName(originalFileName);
+			if (originalFileName.equals(recoveredFileName)) {
+				logger.warn("Replacing the given file name with a custom file name because it equals to the original file");
+				Date versionDate = new Date(selected.getDate());
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
+				recoveredFileName = FilenameUtils.removeExtension(originalFileName) + "-"
+						+ sdf.format(versionDate) + FilenameUtils.getExtension(originalFileName);
+			}
 
-			File destination = new File(context.getFile().getParentFile(), newFileName);
+			logger.debug("Starting to download the restored file under the name '" + recoveredFileName + "'");
+			File destination = new File(context.getFile().getParentFile(), recoveredFileName);
 
 			// add the process to download the file
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(

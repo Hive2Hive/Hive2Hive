@@ -1,7 +1,6 @@
 package org.hive2hive.core.test.processes.implementations.files;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
@@ -85,6 +84,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 		final int versionToRestore = 2;
 
+		final String recoveredFileName = file.getName() + "-recovered";
 		IVersionSelector selector = new IVersionSelector() {
 			@Override
 			public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
@@ -96,6 +96,11 @@ public class RecoverFileTest extends H2HJUnitTest {
 				}
 				return null;
 			}
+
+			@Override
+			public String getRecoveredFileName(String originalName) {
+				return recoveredFileName;
+			}
 		};
 
 		ProcessComponent process = ProcessFactory.instance().createRecoverFileProcess(file, selector, client);
@@ -106,21 +111,12 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 		// to verify, find the restored file
 		File restoredFile = null;
-		File[] listFiles = root.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.getName().startsWith(file.getName());
-			}
-		});
-
-		for (File fileInList : listFiles) {
-			if (fileInList.getName().startsWith(file.getName() + "_")) {
+		for (File fileInList : root.listFiles()) {
+			if (fileInList.getName().equals(recoveredFileName)) {
 				restoredFile = fileInList;
 				break;
 			}
 		}
-
-		Assert.assertEquals(2, listFiles.length);
 
 		String content = FileUtils.readFileToString(restoredFile);
 		Assert.assertEquals(versionToRestore, Integer.parseInt(content));
