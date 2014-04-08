@@ -38,4 +38,9 @@ public class AsyncResultComponent<T> extends AsyncComponent implements IResultPr
 	public void notifyResultComputed(T result) {
 		((IResultProcessComponent<T>) decoratedComponent).notifyResultComputed(result);
 	}
+
+	@Override
+	public T getResult() {
+		return ((IResultProcessComponent<T>) decoratedComponent).getResult();
+	}
 }

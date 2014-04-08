@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 import org.hive2hive.core.model.UserPermission;
+import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * Gives information about a file in the DHT
@@ -97,5 +98,11 @@ public class FileTaste {
 	 */
 	public boolean isShared() {
 		return getUserPermissions().size() > 1;
+	}
+	
+	@Override
+	public String toString() {
+		
+		return String.format("%s: %s [%s] (MD5: %s)", isFile() ? "File" : "Folder", getPath(), getUserPermissions(), EncryptionUtil.byteToHex(getMd5()));
 	}
 }

@@ -9,6 +9,11 @@ package org.hive2hive.core.processes.framework.interfaces;
  */
 public interface IResultProcessComponent<T> extends IProcessComponent {
 
+	/**
+	 * Returns the computed result. Maybe <code>null</code> in case the computation has not finished yet.
+	 * @return Result or <code>null</code> if computation not finished.
+	 */
+	T getResult();
 	
 	void notifyResultComputed(T result);
 	

@@ -18,6 +18,8 @@ import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.T;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 
 public class FileMenu extends H2HConsoleMenu {
@@ -197,26 +199,39 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 		});
 
-		// add(new H2HConsoleMenuItem("Get File list") {
-		// protected void execute() throws Hive2HiveException, InterruptedException {
-		// IResultProcessComponent<List<Path>> process = node.getFileManager()
-		// .getFileList();
-		// IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
-		// @Override
-		// public void onResultReady(List<Path> result) {
-		// // print the digest
-		// System.out.println("File List:");
-		// for (Path path : result) {
-		// System.out.println("* " + path.toString());
-		// }
-		// }
-		// };
-		//
-		// process.attachListener(resultListener);
-		// executeBlocking(process);
-		// }
-		// });
-		//
+		add(new H2HConsoleMenuItem("Print File list") {
+			@Override
+			protected void execute() throws Exception {
+				
+				IResultProcessComponent<List<FileTaste>> fileListProcess = nodeMenu.getNode().getFileManager().getFileList();
+				executeBlocking(fileListProcess, displayText);
+				
+				if (!fileListProcess.getResult().isEmpty()) {
+					for (FileTaste fileTaste : fileListProcess.getResult()) {
+						System.out.println("* " + fileTaste);
+					}
+				} else {
+					System.out.println("The file list is empty.");
+				}
+			}
+//			protected void execute() throws Hive2HiveException, InterruptedException {
+//				IResultProcessComponent<List<Path>> process = node.getFileManager().getFileList();
+//				IProcessResultListener<List<Path>> resultListener = new IProcessResultListener<List<Path>>() {
+//					@Override
+//					public void onResultReady(List<Path> result) {
+//						// print the digest
+//						System.out.println("File List:");
+//						for (Path path : result) {
+//							System.out.println("* " + path.toString());
+//						}
+//					}
+//				};
+//
+//				process.attachListener(resultListener);
+//				executeBlocking(process);
+//			}
+		});
+
 		// add(new H2HConsoleMenuItem("File Observer") {
 		// protected void checkPreconditions() {
 		// if (root == null) {
@@ -271,7 +286,7 @@ public class FileMenu extends H2HConsoleMenu {
 		return askFor(msg, expectExistence, true);
 	}
 
-	private File askFor(String msg, boolean expectExistence, boolean isDirectory) {
+	private File askFor(String msg, boolean expectExistence, boolean requireDirectory) {
 
 		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
@@ -279,7 +294,7 @@ public class FileMenu extends H2HConsoleMenu {
 		File file = null;
 		do {
 			System.out.println(String.format(msg.concat(expectExistence ? String.format(
-					" The %s at this path must exist.", isDirectory ? "folder" : "file") : ""), rootDirectory
+					" The %s at this path must exist.", requireDirectory ? "folder" : "file") : ""), rootDirectory
 					.getAbsolutePath()));
 			System.out.println("Or enter 'cancel' in order to go back.");
 
@@ -291,14 +306,14 @@ public class FileMenu extends H2HConsoleMenu {
 			file = new File(rootDirectory, input);
 			if (expectExistence && !file.exists()) {
 				printError(String.format("The specified %s '%s' does not exist. Try again.",
-						isDirectory ? "folder" : "file", file.getAbsolutePath()));
+						requireDirectory ? "folder" : "file", file.getAbsolutePath()));
 				continue;
 			}
-			if (expectExistence && !file.isDirectory()) {
+			if (expectExistence && requireDirectory && !file.isDirectory()) {
 				printError(String.format("The specified file '%s' is not a folder. Try again.",
 						file.getAbsolutePath()));
 			}
-		} while (expectExistence && (file == null || !file.exists() || (isDirectory && !file.isDirectory())));
+		} while (expectExistence && (file == null || !file.exists() || (requireDirectory && !file.isDirectory())));
 		return file;
 	}
 

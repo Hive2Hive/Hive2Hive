@@ -21,6 +21,8 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 
 	private final UserProfileManager profileManager;
 	private final File rootFile;
+	
+	private List<FileTaste> result = new ArrayList<FileTaste>();
 
 	public GetFileListStep(UserProfileManager profileManager, File root) {
 		this.profileManager = profileManager;
@@ -38,7 +40,7 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 		}
 
 		// the result set
-		List<FileTaste> files = new ArrayList<FileTaste>();
+		result.clear();
 
 		// build the digest recursively
 		FolderIndex root = profile.getRoot();
@@ -62,9 +64,14 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 				userPermissions = ((FolderIndex) index).getCalculatedUserPermissions();
 			}
 
-			files.add(new FileTaste(file, path, md5Hash, userPermissions));
+			result.add(new FileTaste(file, path, md5Hash, userPermissions));
 		}
 
-		notifyResultComputed(files);
+		notifyResultComputed(result);
+	}
+
+	@Override
+	public List<FileTaste> getResult() {
+		return result;
 	}
 }
