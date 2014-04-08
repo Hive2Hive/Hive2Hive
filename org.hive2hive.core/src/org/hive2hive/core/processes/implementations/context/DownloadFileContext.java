@@ -64,8 +64,22 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaFile, I
 		return destination;
 	}
 
+	/**
+	 * Returns whether the download should happen to the default destination, same as in user profile
+	 */
+	public boolean downloadToDefaultDestination() {
+		return destination == null;
+	}
+
 	public int getVersionToDownload() {
 		return versionToDownload;
+	}
+
+	/**
+	 * Returns whether the newest version should be downloaded
+	 */
+	public boolean downloadNewestVersion() {
+		return versionToDownload == NEWEST_VERSION_INDEX;
 	}
 
 	@Override
