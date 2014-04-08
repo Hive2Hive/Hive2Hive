@@ -162,11 +162,14 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// TODO the initial peer has an autostart, whereas the others dont
-		
+
 		// create initial peer
 		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"),
 				FileConfiguration.createDefault());
 		initial.connect();
+		initial.getFileManager().configureAutostart(false);
+		initial.getUserManager().configureAutostart(false);
+
 		nodes.add(initial);
 
 		try {
@@ -176,7 +179,7 @@ public class NetworkTestUtil {
 						NetworkConfiguration.create("node " + i, bootstrapAddress),
 						FileConfiguration.createDefault());
 				node.connect();
-				node.getFileManager().configureAutostart(false); // TODO check if this is a good idea, contradicts our default behaviour
+				node.getFileManager().configureAutostart(false);
 				node.getUserManager().configureAutostart(false);
 				nodes.add(node);
 			}

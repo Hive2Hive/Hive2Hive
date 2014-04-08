@@ -98,12 +98,12 @@ public class H2HJUnitTest {
 	}
 
 	/**
-	 * Returns a random string that with a specified maximal length of chars. The returned string has at least one char.
+	 * Returns a random string that with a specified maximal length of chars. The returned string has at least
+	 * one char.
 	 * 
 	 * @return
 	 */
 	public static String generateRandomString(int maxLength) {
-
 		Random random = new Random();
 		char[] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
