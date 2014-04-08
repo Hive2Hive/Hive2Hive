@@ -159,6 +159,11 @@ public class FileMenu extends H2HConsoleMenu {
 						return new SelectionMenu<IFileVersion>(availableVersions,
 								"Choose the version you want to recover.").openAndSelect();
 					}
+
+					public String getRecoveredFileName(String fullName, String name, String extension) {
+						// TODO implemnt a renaming menu
+						return null;
+					}
 				};
 
 				IProcessComponent recoverFileProcess = nodeMenu.getNode().getFileManager()
