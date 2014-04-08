@@ -27,7 +27,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 	}
 
 	@Override
-	public final void addFileToBuffer(File file) {
+	public final synchronized void addFileToBuffer(File file) {
 		if (currentBuffer == null) {
 			currentBuffer = new FileBufferHolder();
 			startBuffering(currentBuffer);

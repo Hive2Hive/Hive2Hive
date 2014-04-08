@@ -53,19 +53,21 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
 
 		// support to download a specific version
-		int versionToDownload = context.getVersionToDownload();
-		List<MetaChunk> metaChunks = metaFile.getNewestVersion().getMetaChunks();
-		if (versionToDownload != DownloadFileContext.NEWEST_VERSION_INDEX) {
-			metaChunks = metaFile.getVersionByIndex(versionToDownload).getMetaChunks();
+		List<MetaChunk> metaChunks;
+		if (context.downloadNewestVersion()) {
+			metaChunks = metaFile.getNewestVersion().getMetaChunks();
+		} else {
+			metaChunks = metaFile.getVersionByIndex(context.getVersionToDownload()).getMetaChunks();
 		}
 
-		// support to store the file on another location than default (used for recover)
-		destination = FileUtil.getPath(root, context.consumeIndex()).toFile();
-		if (context.getDestination() != null) {
+		// support to store the file on another location than default (used for recovery)
+		if (context.downloadToDefaultDestination()) {
+			destination = FileUtil.getPath(root, context.consumeIndex()).toFile();
+		} else {
 			destination = context.getDestination();
 		}
 
-		if (!verifyFile(destination)) {
+		if (!validateDestination()) {
 			throw new ProcessExecutionException(
 					"File already exists on disk. Content does match; no download needed.");
 		}
@@ -73,7 +75,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		// start the download
 		int counter = 0;
 		for (MetaChunk metaChunk : metaChunks) {
-			logger.info("File " + destination + ": Downloading chunk " + counter++ + "/" + metaChunks.size());
+			logger.info("File " + destination + ": Downloading chunk " + ++counter + "/" + metaChunks.size());
 			NetworkContent content = get(metaChunk.getChunkId(), H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
@@ -100,7 +102,6 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 			// normal case: done with the process.
 			logger.debug("Finished downloading file '" + destination + "'.");
 		} else {
-			// should be empty
 			logger.error("All chunks downloaded but still some in buffer.");
 			throw new ProcessExecutionException("Could not write all chunks to disk. We're stuck at chunk "
 					+ currentChunkOrder);
@@ -111,7 +112,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 	 * @return true when ok, otherwise false
 	 * @throws InvalidProcessStateException
 	 */
-	private boolean verifyFile(File destination) throws InvalidProcessStateException {
+	private boolean validateDestination() throws InvalidProcessStateException {
 		// verify before downloading
 		if (destination != null && destination.exists()) {
 			try {
