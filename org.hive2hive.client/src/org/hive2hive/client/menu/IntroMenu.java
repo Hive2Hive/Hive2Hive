@@ -45,11 +45,10 @@ public class IntroMenu extends ConsoleMenu {
 	protected void onMenuExit() {
 		
 		// TODO check whether network indeed has to be shut down here, e.g., when bootstrapped -> just leave
-		// TODO implement IH2HNode isConnected()
 		
 		// shutdown network
 		IH2HNode node = menus.getNodeMenu().getNode();
-		if (node != null) {
+		if (node != null && node.isConnected()) {
 			System.out.println("Disconnecting from the network...");
 			node.disconnect();			
 		}

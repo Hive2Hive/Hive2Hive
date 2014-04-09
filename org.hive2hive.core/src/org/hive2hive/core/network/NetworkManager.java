@@ -30,7 +30,7 @@ public class NetworkManager {
 	/**
 	 * Connects to the network based on the provided {@link INetworkConfiguration}s in the constructor.
 	 * 
-	 * @return True, if the connection was successful, false otherwise.
+	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect() {
 		if (networkConfiguration.isInitialPeer()) {
@@ -46,13 +46,22 @@ public class NetworkManager {
 	/**
 	 * Disconnects from the network.
 	 * 
-	 * @return True, if the disconnection was successful, false otherwise.
+	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
 	 */
 	public boolean disconnect() {
 		if (session != null && session.getProfileManager() != null)
 			session.getProfileManager().stopQueueWorker();
 
 		return connection.disconnect();
+	}
+
+	/**
+	 * Checks whether this {@link NetworkManager} is connected to a network.
+	 * 
+	 * @return <code>true</code> if connected, <code>false</code> otherwise
+	 */
+	public boolean isConnected() {
+		return connection.isConnected();
 	}
 
 	public String getNodeId() {
