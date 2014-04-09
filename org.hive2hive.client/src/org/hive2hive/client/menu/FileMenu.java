@@ -43,9 +43,9 @@ public class FileMenu extends H2HConsoleMenu {
 				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
 
 				if (isExpertMode) {
-					System.out.printf(
+					print(String.format(
 							"Please specify the root directory path or enter 'ok' if you agree with '%s'.",
-							rootDirectory.toPath());
+							rootDirectory.toPath()));
 
 					String input = awaitStringParameter();
 
@@ -99,7 +99,8 @@ public class FileMenu extends H2HConsoleMenu {
 				File file = askForFile(true);
 				if (file == null)
 					return;
-				IProcessComponent updateFileProcess = menus.getNodeMenu().getNode().getFileManager().update(file);
+				IProcessComponent updateFileProcess = menus.getNodeMenu().getNode().getFileManager()
+						.update(file);
 				executeBlocking(updateFileProcess, displayText);
 			}
 		});
@@ -137,7 +138,8 @@ public class FileMenu extends H2HConsoleMenu {
 				if (file == null)
 					return;
 
-				IProcessComponent deleteFileProcess = menus.getNodeMenu().getNode().getFileManager().delete(file);
+				IProcessComponent deleteFileProcess = menus.getNodeMenu().getNode().getFileManager()
+						.delete(file);
 				executeBlocking(deleteFileProcess, displayText);
 			}
 		});
@@ -146,7 +148,7 @@ public class FileMenu extends H2HConsoleMenu {
 			protected void checkPreconditions() {
 				forceRootDirectory();
 			}
-			
+
 			protected void execute() throws Hive2HiveException, FileNotFoundException,
 					IllegalArgumentException, InterruptedException {
 
@@ -161,7 +163,9 @@ public class FileMenu extends H2HConsoleMenu {
 					}
 
 					public String getRecoveredFileName(String fullName, String name, String extension) {
-						System.out.println(String.format("Specify the new name for the recovered file '%s' or enter 'default' to take the default values:", fullName));
+						print(String
+								.format("Specify the new name for the recovered file '%s' or enter 'default' to take the default values:",
+										fullName));
 						String input = awaitStringParameter();
 						if (input.equalsIgnoreCase("default"))
 							return null;
@@ -180,6 +184,7 @@ public class FileMenu extends H2HConsoleMenu {
 			protected void checkPreconditions() {
 				forceRootDirectory();
 			}
+
 			protected void execute() throws NoSessionException, NoPeerConnectionException,
 					InvalidProcessStateException, InterruptedException {
 
@@ -189,7 +194,7 @@ public class FileMenu extends H2HConsoleMenu {
 				if (folderToShare == null)
 					return;
 
-				System.out.println("Specify the user ID of the user you want to share with.");
+				print("Specify the user ID of the user you want to share with.");
 				String friendID = awaitStringParameter();
 
 				PermissionType permission = askForPermission(folderToShare.getAbsolutePath(), friendID);
@@ -211,16 +216,17 @@ public class FileMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Print File List") {
 			@Override
 			protected void execute() throws Exception {
-				
-				IResultProcessComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode().getFileManager().getFileList();
+
+				IResultProcessComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode()
+						.getFileManager().getFileList();
 				executeBlocking(fileListProcess, displayText);
-				
+
 				if (!fileListProcess.getResult().isEmpty()) {
 					for (FileTaste fileTaste : fileListProcess.getResult()) {
-						System.out.println("* " + fileTaste);
+						print("* " + fileTaste);
 					}
 				} else {
-					System.out.println("The file list is empty.");
+					print("The file list is empty.");
 				}
 			}
 		});
@@ -253,13 +259,13 @@ public class FileMenu extends H2HConsoleMenu {
 		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
 		// TODO be more flexible with inputs, e.g. files with whitespaces in name
-		
+
 		File file = null;
 		do {
-			System.out.println(String.format(msg.concat(expectExistence ? String.format(
-					" The %s at this path must exist.", requireDirectory ? "folder" : "file") : ""), rootDirectory
-					.getAbsolutePath()));
-			System.out.println("Or enter 'cancel' in order to go back.");
+			print(String.format(msg.concat(expectExistence ? String.format(
+					" The %s at this path must exist.", requireDirectory ? "folder" : "file") : ""),
+					rootDirectory.getAbsolutePath()));
+			print("Or enter 'cancel' in order to go back.");
 
 			String input = awaitStringParameter();
 
@@ -276,7 +282,8 @@ public class FileMenu extends H2HConsoleMenu {
 				printError(String.format("The specified file '%s' is not a folder. Try again.",
 						file.getAbsolutePath()));
 			}
-		} while (expectExistence && (file == null || !file.exists() || (requireDirectory && !file.isDirectory())));
+		} while (expectExistence
+				&& (file == null || !file.exists() || (requireDirectory && !file.isDirectory())));
 		return file;
 	}
 
@@ -293,7 +300,7 @@ public class FileMenu extends H2HConsoleMenu {
 		return new SelectionMenu<PermissionType>(permissionTypes, displayTexts, String.format(
 				"Specify the permissions of folder '%s' for the user '%s'.", folder, userID)).openAndSelect();
 	}
-	
+
 	@Override
 	protected String getInstruction() {
 		return "Select a file operation:";

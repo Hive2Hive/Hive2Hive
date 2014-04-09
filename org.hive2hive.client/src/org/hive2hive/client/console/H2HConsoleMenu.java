@@ -22,7 +22,7 @@ public abstract class H2HConsoleMenu extends ConsoleMenu {
 	protected void executeBlocking(IProcessComponent process, String itemName) throws InterruptedException,
 			InvalidProcessStateException {
 
-		System.out.println(String.format("Executing '%s'...", itemName));
+		print(String.format("Executing '%s'...", itemName));
 		process.start().await();
 	}
 }

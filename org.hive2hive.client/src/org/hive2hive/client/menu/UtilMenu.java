@@ -21,13 +21,13 @@ public class UtilMenu extends ConsoleMenu {
 	            while(interfaces.hasMoreElements())
 	            {
 	                NetworkInterface netInterface = (NetworkInterface) interfaces.nextElement();
-	                System.out.println(String.format("* %s: ", netInterface.getDisplayName()));
+	                print(String.format("* %s: ", netInterface.getDisplayName()));
 	                
 	                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
 	                while(addresses.hasMoreElements())
 	                {
 	                    InetAddress address = (InetAddress) addresses.nextElement();
-	                    System.out.println(String.format("\t- %s", address.getHostAddress()));
+	                    print(String.format("\t- %s", address.getHostAddress()));
 	                }
 	            }
 				
@@ -35,6 +35,7 @@ public class UtilMenu extends ConsoleMenu {
 			}
 		});
 		
+		// TODO add menu item for showing external IP
 //		add(new H2HConsoleMenuItem("Show External IP") {
 //			
 //			@Override

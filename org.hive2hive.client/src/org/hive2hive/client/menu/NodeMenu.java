@@ -45,12 +45,12 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 				String nodeID = askNodeID();
 
-				System.out.println("Specify Bootstrap Address:");
+				print("Specify Bootstrap Address:");
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
 
 				String port = "default";
 				if (isExpertMode) {
-					System.out.println("Specify Bootstrap Port or enter 'default':");
+					print("Specify Bootstrap Port or enter 'default':");
 					port = awaitStringParameter();
 				}
 				if (port.equalsIgnoreCase("default")) {
@@ -81,28 +81,28 @@ public final class NodeMenu extends H2HConsoleMenu {
 			add(new H2HConsoleMenuItem("Set MaxFileSize") {
 
 				protected void execute() {
-					System.out.println("Specify MaxFileSize:\n");
+					print("Specify MaxFileSize:");
 					maxFileSize = BigInteger.valueOf(awaitIntParameter());
 				}
 			});
 
 			add(new H2HConsoleMenuItem("Set MaxNumOfVersions") {
 				protected void execute() {
-					System.out.println("Specify MaxNumOfVersions:\n");
+					print("Specify MaxNumOfVersions:");
 					maxNumOfVersions = awaitIntParameter();
 				}
 			});
 
 			add(new H2HConsoleMenuItem("Set MaxSizeAllVersions") {
 				protected void execute() {
-					System.out.println("Specify MaxSizeAllVersions:\n");
+					print("Specify MaxSizeAllVersions:");
 					maxSizeAllVersions = BigInteger.valueOf(awaitIntParameter());
 				}
 			});
 
 			add(new H2HConsoleMenuItem("Set ChunkSize") {
 				protected void execute() {
-					System.out.println("Specify ChunkSize:\n");
+					print("Specify ChunkSize:");
 					chunkSize = awaitIntParameter();
 				}
 			});
@@ -151,7 +151,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 	private String askNodeID() {
 		String nodeID = UUID.randomUUID().toString();
 		if (isExpertMode) {
-			System.out.println("Specify Node ID:");
+			print("Specify Node ID:");
 			nodeID = awaitStringParameter();
 		}
 		return nodeID;

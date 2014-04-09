@@ -50,17 +50,17 @@ public final class UserMenu extends H2HConsoleMenu {
 	}
 
 	private String askUsedId() {
-		System.out.println("Specify the user ID:");
+		print("Specify the user ID:");
 		return awaitStringParameter().trim();
 	}
 
 	private String askPassword() {
-		System.out.println("Specify the user password:");
+		print("Specify the user password:");
 		return awaitStringParameter().trim();
 	}
 
 	private String askPin() {
-		System.out.println("Specify the user PIN:");
+		print("Specify the user PIN:");
 		return awaitStringParameter().trim();
 	}
 

@@ -26,14 +26,14 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	}
 
 	private void printSelection() {
-		System.out.println(String.format("Selected Option: %s", displayText));
+		ConsoleMenu.print(String.format("Selected Option: %s", displayText));
 	}
 
 	public static void printPreconditionError(String message) {
-		System.out.println(String.format("Unsatisfied Precondition: %s", message));
+		ConsoleMenu.print(String.format("Unsatisfied Precondition: %s", message));
 	}
 
 	private void printExecuted() {
-		System.out.println(String.format("%s executed.", displayText));
+		ConsoleMenu.print(String.format("%s executed.", displayText));
 	}
 }

@@ -136,6 +136,14 @@ public abstract class ConsoleMenu {
 	public static boolean awaitBooleanParameter() {
 		return Boolean.parseBoolean(awaitStringParameter());
 	}
+	
+	public static void print() {
+		System.out.println();
+	}
+	
+	public static void print(String message) {
+		System.out.println(message);
+	}
 
 	public static void printError(Throwable error) {
 		printError(String.format("An exception has been thrown: ", error.getMessage()));

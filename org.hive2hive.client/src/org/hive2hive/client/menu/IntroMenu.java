@@ -49,14 +49,14 @@ public class IntroMenu extends ConsoleMenu {
 		// shutdown network
 		IH2HNode node = menus.getNodeMenu().getNode();
 		if (node != null && node.isConnected()) {
-			System.out.println("Disconnecting from the network...");
+			print("Disconnecting from the network...");
 			node.disconnect();			
 		}
 		
 		// stop file observer
 		IFileObserver fileObserver = menus.getFileObserverMenu().getFileObserver();
 		if (fileObserver != null && fileObserver.isRunning()) {
-			System.out.println("Stopping the file observer...");
+			print("Stopping the file observer...");
 			try {
 				fileObserver.stop();
 			} catch (Exception e) {
