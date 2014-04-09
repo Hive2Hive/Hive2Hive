@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.implementations.files.add;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.UUID;
 
@@ -9,6 +10,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
+import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -46,11 +49,17 @@ public class InitializeChunksStep extends ProcessStep {
 					file.getName()));
 			return;
 		} else if (context.isLargeFile()) {
-			logger.trace(String.format("File '%s': No data to put because the file is a large file.",
-					file.getName()));
-			return;
+			try {
+				initLargeFile(file);
+			} catch (IOException e) {
+				throw new ProcessExecutionException("Cannot read the large file", e);
+			}
+		} else {
+			initSmallFile(file);
 		}
+	}
 
+	private void initSmallFile(File file) {
 		if (context.consumeChunkKeys() == null) {
 			logger.trace(String.format("Create chunk keys for the file '%s'.", file.getName()));
 			// create and provide chunk keys
@@ -73,4 +82,17 @@ public class InitializeChunksStep extends ProcessStep {
 		}
 	}
 
+	private void initLargeFile(File file) throws IOException {
+		// init the large file chunks
+		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
+		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
+
+		// process chunk for chunk, hash it and add the meta information to the context
+		for (int i = 0; i < chunks; i++) {
+			String chunkId = UUID.randomUUID().toString();
+			Chunk chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), i, chunkId);
+			byte[] md5Hash = EncryptionUtil.generateMD5Hash(chunk.getData());
+			context.getMetaChunks().add(new MetaChunk(chunkId, md5Hash, i));
+		}
+	}
 }

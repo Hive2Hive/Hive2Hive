@@ -57,7 +57,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepSuccessAndRollbackWithChunk() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException,
+			InvalidProcessStateException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 		// where the data gets stored
@@ -98,19 +99,20 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
 				.awaitUninterruptibly().getData().publicKey());
-		
+
 		// manually trigger roll back
 		step.cancel(new RollbackReason("Testing rollback."));
-		
+
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
 				.awaitUninterruptibly().getData().publicKey());
 	}
 
 	@Test
-	public void testStepSuccessAndRollbackWithMetaFile() throws InterruptedException, NoPeerConnectionException,
-			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
+	public void testStepSuccessAndRollbackWithMetaFile() throws InterruptedException,
+			NoPeerConnectionException, DataLengthException, InvalidKeyException, IllegalStateException,
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException,
+			SignatureException, InvalidProcessStateException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 
@@ -123,12 +125,12 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// generate a fake meta file
 		List<MetaChunk> metaChunks1 = new ArrayList<MetaChunk>();
 		metaChunks1.add(new MetaChunk(NetworkTestUtil.randomString(), NetworkTestUtil.randomString()
-				.getBytes()));
+				.getBytes(), 0));
 		metaChunks1.add(new MetaChunk(NetworkTestUtil.randomString(), NetworkTestUtil.randomString()
-				.getBytes()));
+				.getBytes(), 1));
 		List<MetaChunk> metaChunks2 = new ArrayList<MetaChunk>();
 		metaChunks2.add(new MetaChunk(NetworkTestUtil.randomString(), NetworkTestUtil.randomString()
-				.getBytes()));
+				.getBytes(), 2));
 		List<FileVersion> fileVersions = new ArrayList<FileVersion>();
 		fileVersions.add(new FileVersion(0, 123, System.currentTimeMillis(), metaChunks1));
 		fileVersions.add(new FileVersion(1, 123, System.currentTimeMillis(), metaChunks2));
@@ -164,10 +166,10 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
 				.awaitUninterruptibly().getData().publicKey());
-		
+
 		// manually trigger roll back
 		step.cancel(new RollbackReason("Testing rollback."));
-		
+
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
 				.awaitUninterruptibly().getData().publicKey());

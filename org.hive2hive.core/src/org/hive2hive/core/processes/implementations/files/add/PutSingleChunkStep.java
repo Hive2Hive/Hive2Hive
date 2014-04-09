@@ -79,7 +79,7 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 				put(parameters);
 
 				// store the hash in the index of the meta file
-				context.getMetaChunks().add(new MetaChunk(chunkId, parameters.getHash()));
+				context.getMetaChunks().add(new MetaChunk(chunkId, parameters.getHash(), index));
 			} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException
 					| PutFailedException e) {

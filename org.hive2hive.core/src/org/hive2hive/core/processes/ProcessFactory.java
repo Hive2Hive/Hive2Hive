@@ -206,7 +206,7 @@ public final class ProcessFactory {
 		AddFileProcessContext context = new AddFileProcessContext(file);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
+		process.add(new ValidateFileSizeStep(context, session.getFileConfiguration(), true));
 		process.add(new CheckWriteAccessStep(context, session.getProfileManager(), session.getRoot()));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
@@ -230,7 +230,7 @@ public final class ProcessFactory {
 
 		SequentialProcess process = new SequentialProcess();
 		// TODO validate if the user has write permission
-		process.add(new ValidateFileSizeStep(file, session.getFileConfiguration()));
+		process.add(new ValidateFileSizeStep(context, session.getFileConfiguration(), false));
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
@@ -370,7 +370,8 @@ public final class ProcessFactory {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission.getUserId()));
+		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission
+				.getUserId()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
 		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));

@@ -23,7 +23,8 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Nico, Seppi
  */
-public class AddFileProcessContext implements IProvideHash, IConsumeNotificationFactory, IProvideProtectionKeys, IProvideMetaFile {
+public class AddFileProcessContext implements IProvideHash, IConsumeNotificationFactory,
+		IProvideProtectionKeys, IProvideMetaFile {
 
 	private final File file;
 
@@ -39,12 +40,22 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 
+	private boolean largeFile;
+
 	public AddFileProcessContext(File file) {
 		this.file = file;
 	}
 
 	public File getFile() {
 		return file;
+	}
+
+	public void setLargeFile(boolean largeFile) {
+		this.largeFile = largeFile;
+	}
+
+	public boolean isLargeFile() {
+		return largeFile;
 	}
 
 	public KeyPair getMetaKeys() {
@@ -54,11 +65,11 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 	public List<MetaChunk> getMetaChunks() {
 		return metaChunks;
 	}
-	
+
 	public void provideChunkKeys(KeyPair chunkEncryptionKeys) {
 		this.chunkEncryptionKeys = chunkEncryptionKeys;
 	}
-	
+
 	public KeyPair consumeChunkKeys() {
 		return chunkEncryptionKeys;
 	}
@@ -119,5 +130,4 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaFile) {
 		// never used in this context
 	}
-
 }
