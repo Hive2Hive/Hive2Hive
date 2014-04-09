@@ -3,8 +3,6 @@ package org.hive2hive.client.console;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.hive2hive.client.util.Formatter;
-
 /**
  * An abstract console menu to be used with a {@link UIConsole}.
  * 
@@ -102,7 +100,6 @@ public abstract class ConsoleMenu {
 	}
 
 	public static String awaitStringParameter() {
-		Formatter.setInputForeground();
 
 		// do not close input
 		@SuppressWarnings("resource")
@@ -119,7 +116,6 @@ public abstract class ConsoleMenu {
 			}
 		}
 
-		Formatter.setDefaultForeground();
 		return parameter;
 	}
 
@@ -142,13 +138,12 @@ public abstract class ConsoleMenu {
 	}
 
 	public static void printError(Throwable error) {
+		printError(String.format("An exception has been thrown: ", error.getMessage()));
 		error.printStackTrace();
 	}
 	
 	public static void printError(String errorMsg) {
-		Formatter.setErrorForeground();
 		System.err.println(errorMsg);
-		Formatter.setDefaultForeground();
 	}
 
 	protected void exit() {

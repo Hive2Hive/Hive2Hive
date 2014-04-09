@@ -1,7 +1,5 @@
 package org.hive2hive.client.console;
 
-import org.hive2hive.client.util.Formatter;
-
 /**
  * A specified console menu item. Allows to check preconditions before executing the operation.
  * 
@@ -28,20 +26,14 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	}
 
 	private void printSelection() {
-		Formatter.setSuccessForeground();
 		System.out.println(String.format("Selected Option: %s", displayText));
-		Formatter.setDefaultForeground();
 	}
 
 	public static void printPreconditionError(String message) {
-		Formatter.setErrorForeground();
 		System.out.println(String.format("Unsatisfied Precondition: %s", message));
-		Formatter.setDefaultForeground();
 	}
 
 	private void printExecuted() {
-		Formatter.setSuccessForeground();
 		System.out.println(String.format("%s executed.", displayText));
-		Formatter.setDefaultForeground();
 	}
 }

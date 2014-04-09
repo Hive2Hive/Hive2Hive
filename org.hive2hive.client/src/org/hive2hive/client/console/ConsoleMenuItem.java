@@ -1,8 +1,5 @@
 package org.hive2hive.client.console;
 
-import org.hive2hive.client.util.Formatter;
-
-
 /**
  * An abstract console menu item representing an option. It predefines the execution of an operation by means
  * of a template method.
@@ -25,16 +22,12 @@ public abstract class ConsoleMenuItem {
 		try {
 			execute();
 		} catch (Exception e) {
-			Formatter.setErrorForeground();
-			System.err.println("An exception has been thrown:");
-			e.printStackTrace();
-			System.out.println();
-			Formatter.setDefaultForeground();
+			ConsoleMenu.printError(e);
 		} finally {
 			end();
 		}
 	}
-	
+
 	protected void checkPreconditions() {
 		// nothing by default
 	}
@@ -48,17 +41,5 @@ public abstract class ConsoleMenuItem {
 	public String getDisplayText() {
 		return displayText;
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-            return false;
-        if (obj == this)
-            return true;
-        if (!(obj instanceof ConsoleMenuItem))
-            return false;
 
-        ConsoleMenuItem cmi = (ConsoleMenuItem) obj;
-        return cmi.displayText.equals(displayText);
-	}
 }

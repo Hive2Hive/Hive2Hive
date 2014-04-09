@@ -1,8 +1,6 @@
 package org.hive2hive.client;
 
-import org.fusesource.jansi.AnsiConsole;
 import org.hive2hive.client.menu.IntroMenu;
-import org.hive2hive.client.util.Formatter;
 import org.hive2hive.client.util.LoggerInit;
 
 /**
@@ -18,8 +16,6 @@ public class ConsoleClient {
 	}
 
 	public void start() {
-		AnsiConsole.systemInstall();
-		Formatter.setDefaultForeground();
 		printHeader();
 		printInstructions();
 
@@ -28,8 +24,6 @@ public class ConsoleClient {
 		new IntroMenu().open();
 
 		printFooter();
-		Formatter.reset();
-		AnsiConsole.systemUninstall();
 
 		System.exit(0);
 	}
