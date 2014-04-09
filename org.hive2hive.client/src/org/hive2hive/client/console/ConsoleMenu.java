@@ -15,12 +15,12 @@ public abstract class ConsoleMenu {
 
 	private final ArrayList<ConsoleMenuItem> items;
 
+	private final String exitToken = "Q";
 	private boolean exited;
 
 	public ConsoleMenu() {
 		this.items = new ArrayList<ConsoleMenuItem>();
 		createItems();
-
 	}
 
 	/**
@@ -38,13 +38,8 @@ public abstract class ConsoleMenu {
 	 */
 	protected abstract void addMenuItems();
 
-	protected void addExitItem() {
-
-		add(new H2HConsoleMenuItem("Back") {
-			protected void execute() {
-				exit();
-			}
-		});
+	protected String getExitItemText() {
+		return "Back";
 	}
 
 	protected final void add(ConsoleMenuItem menuItem) {
@@ -55,7 +50,6 @@ public abstract class ConsoleMenu {
 
 		items.clear();
 		addMenuItems();
-		addExitItem();
 
 		this.exited = false;
 		while (!exited) {
@@ -65,30 +59,45 @@ public abstract class ConsoleMenu {
 	}
 
 	private final void show() {
-		
-		// TODO show exit menu with a [Q]
-		
-		int chosen = 0;
 
 		System.out.println(getInstruction());
 		System.out.println();
 
+		// print normal items
 		for (int i = 0; i < items.size(); ++i) {
-			ConsoleMenuItem item = items.get(i);
-
-			if (i == items.size() - 1)
-				System.out.println();
-			System.out.println(String.format("    [%s]  %s", i + 1, item.getDisplayText()));
+			System.out.println(String.format("\t[%s]  %s", i + 1, items.get(i).getDisplayText()));
 		}
-		System.out.println();
 
-		chosen = awaitIntParameter();
+		// print exit item
+		System.out.println(String.format("\n\t[%s]  %s", exitToken, getExitItemText()));
 
-		if (chosen > items.size() || chosen < 1) {
-			printError(String.format("Invalid option. Select an option from 1 to %s.\n", items.size()));
-		} else {
-			ConsoleMenuItem item = items.get(chosen - 1);
-			item.invoke();
+		// evaluate input
+		String input = exitToken;
+		boolean validInput = false;
+
+		while (!validInput) {
+			input = awaitStringParameter();
+			if (input.equalsIgnoreCase(exitToken)) {
+				validInput = true;
+				exit();
+			} else {
+				try {
+					int chosen = Integer.valueOf(input);
+					if (chosen > items.size() || chosen < 1) {
+						printError(String.format("Invalid option. Please select an option from 1 to %s.",
+								items.size()));
+						validInput = false;
+					} else {
+						items.get(chosen - 1).invoke();
+						validInput = true;
+					}
+				} catch (NumberFormatException e) {
+					printError(String
+							.format("This was not a valid input. Please select an option from 1 to %s or press '%s' to exit this menu.",
+									items.size(), exitToken));
+					validInput = false;
+				}
+			}
 		}
 	}
 

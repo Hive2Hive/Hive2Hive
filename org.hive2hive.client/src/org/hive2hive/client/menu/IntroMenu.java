@@ -32,12 +32,8 @@ public class IntroMenu extends ConsoleMenu {
 	}
 	
 	@Override
-	protected void addExitItem() {
-		add(new H2HConsoleMenuItem("Exit") {
-			protected void execute() {
-				exit();
-			}
-		});
+	protected String getExitItemText() {
+		return "Exit";
 	}
 
 	@Override
