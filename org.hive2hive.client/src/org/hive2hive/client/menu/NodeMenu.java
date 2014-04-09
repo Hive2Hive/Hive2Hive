@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -25,13 +26,17 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
-	
+
 	private IH2HNode node;
-	
+
 	private BigInteger maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
 	private int maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
 	private BigInteger maxSizeAllVersions = H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS;
 	private int chunkSize = H2HConstants.DEFAULT_CHUNK_SIZE;
+
+	public NodeMenu(MenuContainer menus) {
+		super(menus);
+	}
 
 	@Override
 	protected void createItems() {
@@ -53,17 +58,17 @@ public final class NodeMenu extends H2HConsoleMenu {
 				} else {
 					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
 				}
-				
+
 				exit();
 			}
 		};
 
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
-				
+
 				String nodeID = askNodeID();
 				createNode(NetworkConfiguration.create(nodeID));
-				
+
 				exit();
 			}
 		};
@@ -101,21 +106,21 @@ public final class NodeMenu extends H2HConsoleMenu {
 					chunkSize = awaitIntParameter();
 				}
 			});
-			
+
 			add(new H2HConsoleMenuItem("Open Utils") {
 				protected void execute() {
 					new UtilMenu().open();
 				}
 			});
 		}
-		
+
 		add(CreateNetworkMenuItem);
 		add(ConnectToExistingNetworkItem);
 	}
 
 	@Override
 	public String getInstruction() {
-		
+
 		if (isExpertMode)
 			return "Configure and set up your own network or connect to an existing one.";
 		else
@@ -126,26 +131,21 @@ public final class NodeMenu extends H2HConsoleMenu {
 		return node;
 	}
 
+	public void forceNetwork() {
+
+		while (getNode() == null) {
+			H2HConsoleMenuItem
+					.printPreconditionError("You are not connected to a network. Connect to a network first.");
+			open(isExpertMode);
+		}
+	}
+
 	private void createNode(INetworkConfiguration networkConfig) {
 		node = H2HNode.createNode(networkConfig,
 				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
 		node.getUserManager().configureAutostart(false);
 		node.getFileManager().configureAutostart(false);
 		node.connect();
-	}
-	
-	public void disconnectNode() {
-		if (node != null) {
-			node.disconnect();
-		}
-	}
-	
-	public void forceNetwork() {
-		
-		while (getNode() == null) {
-			H2HConsoleMenuItem.printPreconditionError("You are not connected to a network. Connect to a network first.");
-			open(isExpertMode);
-		}
 	}
 
 	private String askNodeID() {
@@ -156,5 +156,5 @@ public final class NodeMenu extends H2HConsoleMenu {
 		}
 		return nodeID;
 	}
-	
+
 }

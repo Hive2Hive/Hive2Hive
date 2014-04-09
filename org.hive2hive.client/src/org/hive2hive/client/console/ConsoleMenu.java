@@ -141,6 +141,10 @@ public abstract class ConsoleMenu {
 		return Boolean.parseBoolean(awaitStringParameter());
 	}
 
+	public static void printError(Throwable error) {
+		error.printStackTrace();
+	}
+	
 	public static void printError(String errorMsg) {
 		Formatter.setErrorForeground();
 		System.err.println(errorMsg);

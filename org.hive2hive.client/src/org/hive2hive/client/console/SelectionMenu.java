@@ -1,9 +1,6 @@
-package org.hive2hive.client.menu;
+package org.hive2hive.client.console;
 
 import java.util.List;
-
-import org.hive2hive.client.console.ConsoleMenu;
-import org.hive2hive.client.console.SelectionMenuItem;
 
 public class SelectionMenu<T> extends ConsoleMenu {
 
@@ -12,13 +9,13 @@ public class SelectionMenu<T> extends ConsoleMenu {
 	private final String instructions;
 	private T selection = null;
 
-	SelectionMenu(List<T> options, List<String> displayTexts, String instructions) {
+	public SelectionMenu(List<T> options, List<String> displayTexts, String instructions) {
 		this.options = options;
 		this.displayTexts = displayTexts;
 		this.instructions = instructions;
 	}
 
-	SelectionMenu(List<T> options, String instructions) {
+	public SelectionMenu(List<T> options, String instructions) {
 		this(options, null, instructions);
 	}
 

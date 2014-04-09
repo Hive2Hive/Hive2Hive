@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.console.SelectionMenu;
+import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,12 +28,10 @@ public class FileMenu extends H2HConsoleMenu {
 
 	public H2HConsoleMenuItem CreateRootDirectory;
 
-	private final NodeMenu nodeMenu;
-
 	private File rootDirectory;
 
-	public FileMenu(NodeMenu nodeMenu) {
-		this.nodeMenu = nodeMenu;
+	public FileMenu(MenuContainer menus) {
+		super(menus);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class FileMenu extends H2HConsoleMenu {
 				if (file == null)
 					return;
 
-				IProcessComponent addFileProcess = nodeMenu.getNode().getFileManager().add(file);
+				IProcessComponent addFileProcess = menus.getNodeMenu().getNode().getFileManager().add(file);
 				executeBlocking(addFileProcess, displayText);
 			}
 		});
@@ -99,7 +99,7 @@ public class FileMenu extends H2HConsoleMenu {
 				File file = askForFile(true);
 				if (file == null)
 					return;
-				IProcessComponent updateFileProcess = nodeMenu.getNode().getFileManager().update(file);
+				IProcessComponent updateFileProcess = menus.getNodeMenu().getNode().getFileManager().update(file);
 				executeBlocking(updateFileProcess, displayText);
 			}
 		});
@@ -120,7 +120,7 @@ public class FileMenu extends H2HConsoleMenu {
 				if (destination == null)
 					return;
 
-				IProcessComponent moveFileProcess = nodeMenu.getNode().getFileManager()
+				IProcessComponent moveFileProcess = menus.getNodeMenu().getNode().getFileManager()
 						.move(source, destination);
 				executeBlocking(moveFileProcess, displayText);
 			}
@@ -137,7 +137,7 @@ public class FileMenu extends H2HConsoleMenu {
 				if (file == null)
 					return;
 
-				IProcessComponent deleteFileProcess = nodeMenu.getNode().getFileManager().delete(file);
+				IProcessComponent deleteFileProcess = menus.getNodeMenu().getNode().getFileManager().delete(file);
 				executeBlocking(deleteFileProcess, displayText);
 			}
 		});
@@ -166,7 +166,7 @@ public class FileMenu extends H2HConsoleMenu {
 					}
 				};
 
-				IProcessComponent recoverFileProcess = nodeMenu.getNode().getFileManager()
+				IProcessComponent recoverFileProcess = menus.getNodeMenu().getNode().getFileManager()
 						.recover(file, versionSelector);
 				executeBlocking(recoverFileProcess, displayText);
 			}
@@ -194,7 +194,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 				IProcessComponent shareProcess;
 				try {
-					shareProcess = nodeMenu.getNode().getFileManager()
+					shareProcess = menus.getNodeMenu().getNode().getFileManager()
 							.share(folderToShare, friendID, permission);
 				} catch (IllegalFileLocation | IllegalArgumentException e) {
 					printError(e.getMessage());
@@ -208,7 +208,7 @@ public class FileMenu extends H2HConsoleMenu {
 			@Override
 			protected void execute() throws Exception {
 				
-				IResultProcessComponent<List<FileTaste>> fileListProcess = nodeMenu.getNode().getFileManager().getFileList();
+				IResultProcessComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode().getFileManager().getFileList();
 				executeBlocking(fileListProcess, displayText);
 				
 				if (!fileListProcess.getResult().isEmpty()) {
@@ -227,7 +227,7 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Exception {
-				new FileObserverMenu(nodeMenu, getRootDirectory()).open(isExpertMode);
+				menus.getFileObserverMenu().open(isExpertMode);
 			}
 		});
 	}

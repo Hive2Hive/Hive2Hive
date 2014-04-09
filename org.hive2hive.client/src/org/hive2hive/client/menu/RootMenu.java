@@ -2,6 +2,7 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
@@ -9,22 +10,15 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 public final class RootMenu extends H2HConsoleMenu {
 
 	// TODO when executing processes, check for exceptions/rollbacks
-
-	private final NodeMenu nodeMenu;
-	private final UserMenu userMenu;
-	private final FileMenu fileMenu;
-
-	public RootMenu(NodeMenu nodeMenu, UserMenu userMenu, FileMenu fileMenu) {
-		this.nodeMenu = nodeMenu;
-		this.userMenu = userMenu;
-		this.fileMenu = fileMenu;
+	public RootMenu(MenuContainer menus) {
+		super(menus);
 	}
 
 	@Override
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Connect") {
 			protected void execute() {
-				nodeMenu.open(isExpertMode);
+				menus.getNodeMenu().open(isExpertMode);
 			}
 		});
 
@@ -32,9 +26,9 @@ public final class RootMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
-				nodeMenu.forceNetwork();
-				userMenu.forceUserCredentials();
-				fileMenu.forceRootDirectory();
+				menus.getNodeMenu().forceNetwork();
+				menus.getUserMenu().forceUserCredentials();
+				menus.getFileMenu().forceRootDirectory();
 			}
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
@@ -42,8 +36,12 @@ public final class RootMenu extends H2HConsoleMenu {
 
 				forceRegistration();
 
-				IProcessComponent loginProcess = nodeMenu.getNode().getUserManager()
-						.login(userMenu.getUserCredentials(), fileMenu.getRootDirectory().toPath());
+				IProcessComponent loginProcess = menus
+						.getNodeMenu()
+						.getNode()
+						.getUserManager()
+						.login(menus.getUserMenu().getUserCredentials(),
+								menus.getFileMenu().getRootDirectory().toPath());
 				executeBlocking(loginProcess, displayText);
 			}
 		});
@@ -53,7 +51,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			protected void execute() throws Exception {
 
 				if (checkLogin()) {
-					IProcessComponent logoutProcess = nodeMenu.getNode().getUserManager().logout();
+					IProcessComponent logoutProcess = menus.getNodeMenu().getNode().getUserManager().logout();
 					executeBlocking(logoutProcess, displayText);
 				}
 			}
@@ -62,7 +60,7 @@ public final class RootMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("File Menu") {
 			protected void execute() throws Exception {
 				if (checkLogin()) {
-					fileMenu.open(isExpertMode);
+					menus.getFileMenu().open(isExpertMode);
 				}
 			}
 		});
@@ -75,18 +73,21 @@ public final class RootMenu extends H2HConsoleMenu {
 
 	private void forceRegistration() throws InvalidProcessStateException, InterruptedException,
 			NoPeerConnectionException {
-		while (!nodeMenu.getNode().getUserManager().isRegistered(userMenu.getUserCredentials().getUserId())) {
+		while (!menus.getNodeMenu().getNode().getUserManager()
+				.isRegistered(menus.getUserMenu().getUserCredentials().getUserId())) {
 			H2HConsoleMenuItem.printPreconditionError("You are not registered.");
-			IProcessComponent registerProcess = nodeMenu.getNode().getUserManager()
-					.register(userMenu.getUserCredentials());
+			IProcessComponent registerProcess = menus.getNodeMenu().getNode().getUserManager()
+					.register(menus.getUserMenu().getUserCredentials());
 			executeBlocking(registerProcess, "Register");
 		}
 	}
 
 	private boolean checkLogin() throws NoPeerConnectionException {
 
-		if (nodeMenu.getNode() == null || userMenu.getUserCredentials() == null
-				|| !nodeMenu.getNode().getUserManager().isLoggedIn(userMenu.getUserCredentials().getUserId())) {
+		if (menus.getNodeMenu().getNode() == null
+				|| menus.getUserMenu().getUserCredentials() == null
+				|| !menus.getNodeMenu().getNode().getUserManager()
+						.isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
 			H2HConsoleMenuItem.printPreconditionError("You are not logged in.");
 			return false;
 		}

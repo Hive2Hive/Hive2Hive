@@ -2,6 +2,9 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.MenuContainer;
+import org.hive2hive.core.api.interfaces.IFileObserver;
+import org.hive2hive.core.api.interfaces.IH2HNode;
 
 /**
  * The topmost intro menu of the console client.
@@ -10,9 +13,11 @@ import org.hive2hive.client.console.H2HConsoleMenuItem;
  */
 public class IntroMenu extends ConsoleMenu {
 
-	private final NodeMenu nodeMenu = new NodeMenu();
-	private final UserMenu userMenu = new UserMenu();
-	private final FileMenu fileMenu = new FileMenu(nodeMenu);
+	private final MenuContainer menus;
+	
+	public IntroMenu() {
+		menus = new MenuContainer();
+	}
 	
 	@Override
 	protected void addMenuItems() {
@@ -20,13 +25,13 @@ public class IntroMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
-				new RootMenu(nodeMenu, userMenu, fileMenu).open(false);
+				menus.getRootMenu().open(false);
 			}
 		});
 		add(new H2HConsoleMenuItem("Expert Mode") {
 			@Override
 			protected void execute() throws Exception {
-				new RootMenu(nodeMenu, userMenu, fileMenu).open(true);
+				menus.getRootMenu().open(true);
 			}
 		});
 	}
@@ -40,14 +45,25 @@ public class IntroMenu extends ConsoleMenu {
 	protected void onMenuExit() {
 		
 		// TODO check whether network indeed has to be shut down here, e.g., when bootstrapped -> just leave
+		// TODO implement IH2HNode isConnected()
 		
 		// shutdown network
-		System.out.println("Disconnecting from the network...");
-		nodeMenu.disconnectNode();
+		IH2HNode node = menus.getNodeMenu().getNode();
+		if (node != null) {
+			System.out.println("Disconnecting from the network...");
+			node.disconnect();			
+		}
 		
-		// TODO stop file observer
-		
-	
+		// stop file observer
+		IFileObserver fileObserver = menus.getFileObserverMenu().getFileObserver();
+		if (fileObserver != null && fileObserver.isRunning()) {
+			System.out.println("Stopping the file observer...");
+			try {
+				fileObserver.stop();
+			} catch (Exception e) {
+				printError(e);
+			}
+		}
 	}
 
 	@Override
