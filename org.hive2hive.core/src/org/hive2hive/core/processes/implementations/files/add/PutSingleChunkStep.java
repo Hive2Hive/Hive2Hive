@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.implementations.files.add;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 
 import javax.crypto.BadPaddingException;
@@ -14,6 +13,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
@@ -52,28 +52,17 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
-		int read = 0;
-		long offset = config.getChunkSize() * index;
-		byte[] data = new byte[config.getChunkSize()];
 
+		Chunk chunk;
 		try {
-			// read the next chunk of the file considering the offset
-			RandomAccessFile rndAccessFile = new RandomAccessFile(file, "r");
-			rndAccessFile.seek(offset);
-			read = rndAccessFile.read(data);
-			rndAccessFile.close();
+			chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), index, chunkId);
 		} catch (IOException e) {
 			logger.error("File " + file.getAbsolutePath() + ": Could not read the file", e);
 			throw new ProcessExecutionException("File " + file.getAbsolutePath()
 					+ ": Could not read the file", e);
 		}
 
-		if (read > 0) {
-			// the byte-Array may contain many empty slots if last chunk. Truncate it
-			data = truncateData(data, read);
-			// create a chunk
-			Chunk chunk = new Chunk(chunkId, data, index, read);
-
+		if (chunk != null) {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
 				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptHybrid(chunk, context
@@ -83,10 +72,12 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 				Parameters parameters = new Parameters().setLocationKey(chunk.getId())
 						.setContentKey(H2HConstants.FILE_CHUNK).setData(encryptedContent)
 						.setProtectionKeys(context.consumeProtectionKeys()).setTTL(chunk.getTimeToLive());
+
 				// data manager has to produce the hash, which gets used for signing
 				parameters.setHashFlag(true);
 				// put the encrypted chunk into the network
 				put(parameters);
+
 				// store the hash in the index of the meta file
 				context.getMetaChunks().add(new MetaChunk(chunkId, parameters.getHash()));
 			} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
@@ -97,25 +88,4 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 			}
 		}
 	}
-
-	/**
-	 * Truncates a byte array
-	 * 
-	 * @param data
-	 * @param read
-	 * @return a shorter byte array
-	 */
-	private byte[] truncateData(byte[] data, int numOfBytes) {
-		// shortcut
-		if (data.length == numOfBytes) {
-			return data;
-		} else {
-			byte[] truncated = new byte[numOfBytes];
-			for (int i = 0; i < truncated.length; i++) {
-				truncated[i] = data[i];
-			}
-			return truncated;
-		}
-	}
-
 }

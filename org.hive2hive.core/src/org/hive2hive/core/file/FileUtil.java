@@ -126,18 +126,6 @@ public class FileUtil {
 	}
 
 	/**
-	 * Calculates the number of chunks. This depends on the file size and the chunk size
-	 * 
-	 * @param file the file to chunk
-	 * @param chunkSize the size of an individual chunk
-	 * @return the number of chunks
-	 */
-	public static int getNumberOfChunks(File file, int chunkSize) {
-		long fileSize = getFileSize(file);
-		return (int) Math.ceil((double) fileSize / chunkSize);
-	}
-
-	/**
 	 * Move a file according to their nodes. This operation also support renaming and moving in the same step.
 	 * 
 	 * @param sourceName the name of the file at the source

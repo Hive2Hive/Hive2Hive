@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
-import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -45,6 +45,10 @@ public class InitializeChunksStep extends ProcessStep {
 			logger.trace(String.format("File '%s': No data to put because the file is a folder.",
 					file.getName()));
 			return;
+		} else if (context.isLargeFile()) {
+			logger.trace(String.format("File '%s': No data to put because the file is a large file.",
+					file.getName()));
+			return;
 		}
 
 		if (context.consumeChunkKeys() == null) {
@@ -55,7 +59,7 @@ public class InitializeChunksStep extends ProcessStep {
 		}
 
 		// create put chunks steps
-		int chunks = FileUtil.getNumberOfChunks(file, config.getChunkSize());
+		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace(String.format("%s chunks to upload for file '%s'.", Integer.toString(chunks),
 				file.getName()));
 		ProcessComponent prev = this;
