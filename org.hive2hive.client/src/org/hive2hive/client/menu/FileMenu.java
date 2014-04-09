@@ -161,8 +161,12 @@ public class FileMenu extends H2HConsoleMenu {
 					}
 
 					public String getRecoveredFileName(String fullName, String name, String extension) {
-						// TODO implemnt a renaming menu
-						return null;
+						System.out.println(String.format("Specify the new name for the recovered file '%s' or enter 'default' to take the default values:", fullName));
+						String input = awaitStringParameter();
+						if (input.equalsIgnoreCase("default"))
+							return null;
+						else
+							return input;
 					}
 				};
 
@@ -172,7 +176,7 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 		});
 
-		add(new H2HConsoleMenuItem("Share") {
+		add(new H2HConsoleMenuItem("Share File") {
 			protected void checkPreconditions() {
 				forceRootDirectory();
 			}
@@ -289,7 +293,7 @@ public class FileMenu extends H2HConsoleMenu {
 		return new SelectionMenu<PermissionType>(permissionTypes, displayTexts, String.format(
 				"Specify the permissions of folder '%s' for the user '%s'.", folder, userID)).openAndSelect();
 	}
-
+	
 	@Override
 	protected String getInstruction() {
 		return "Select a file operation:";
