@@ -17,16 +17,23 @@ public interface IH2HNode {
 	/**
 	 * Connect to the network. The connection kind is dependent on {@link INetworkConfiguration}.
 	 * 
-	 * @return true if the connect was successful.
+	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	boolean connect();
 
 	/**
 	 * Disconnect the node from the network.
 	 * 
-	 * @return true if the disconnect was successful.
+	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
 	 */
 	boolean disconnect();
+
+	/**
+	 * Checks whether this {@link IH2HNode} is connected.
+	 * 
+	 * @return <code>true</code> if connected, <code>false</code> otherwise
+	 */
+	boolean isConnected();
 
 	/**
 	 * Returns the user management. In the user management, the user can register himself, login and logout.

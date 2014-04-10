@@ -1,7 +1,9 @@
 package org.hive2hive.client.menu;
 
 import org.hive2hive.client.ConsoleClient;
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
+import org.hive2hive.client.console.H2HConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.security.UserCredentials;
 
 /**
@@ -10,79 +12,61 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Christian, Nico
  * 
  */
-public final class UserMenu extends ConsoleMenu {
+public final class UserMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem SetUserID;
-	public H2HConsoleMenuItem SetUserPassword;
-	public H2HConsoleMenuItem SetUserPin;
 	public H2HConsoleMenuItem CreateUserCredentials;
 
-	private String userId;
-	private String password;
-	private String pin;
 	private UserCredentials userCredentials;
 
-	public UserMenu() {
-		// super(console);
+	public UserMenu(MenuContainer menus) {
+		super(menus);
 	}
 
 	@Override
 	protected void createItems() {
-		SetUserID = new H2HConsoleMenuItem("Set User ID") {
-			protected void execute() throws Exception {
-				System.out.println("Specify the user ID:");
-				userId = awaitStringParameter().trim();
-			}
-		};
-		SetUserPassword = new H2HConsoleMenuItem("Set User Password") {
-			protected void execute() throws Exception {
-				System.out.println("Specify the user password:");
-				password = awaitStringParameter().trim();
-			}
-		};
-		SetUserPin = new H2HConsoleMenuItem("Set User PIN") {
-			protected void execute() throws Exception {
-				System.out.println("Specify the user PIN:");
-				pin = awaitStringParameter().trim();
-			}
-		};
 		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
-			@Override
-			protected void checkPreconditions() {
-				if (userId == null) {
-					printPreconditionError("User Credentials cannot be created: Please set User ID first.");
-					SetUserID.invoke();
-				}
-				if (password == null) {
-					printPreconditionError("User Credentials cannot be created: Please set User Password first.");
-					SetUserPassword.invoke();
-				}
-				if (pin == null) {
-					printPreconditionError("User Credentials cannot be created: Please set User PIN first.");
-					SetUserPin.invoke();
-				}
-			}
 
+			@Override
 			protected void execute() throws Exception {
-				userCredentials = new UserCredentials(userId, password, pin);
+				userCredentials = new UserCredentials(askUsedId(), askPassword(), askPin());
+
+				exit();
 			}
 		};
 	}
 
 	@Override
 	protected void addMenuItems() {
-		add(SetUserID);
-		add(SetUserPassword);
-		add(SetUserPin);
 		add(CreateUserCredentials);
 	}
 
 	@Override
 	protected String getInstruction() {
-		return "Please select a user configuration option:\n";
+		return "Please select a user configuration option:";
 	}
 
 	public UserCredentials getUserCredentials() {
 		return userCredentials;
+	}
+
+	private String askUsedId() {
+		print("Specify the user ID:");
+		return awaitStringParameter().trim();
+	}
+
+	private String askPassword() {
+		print("Specify the user password:");
+		return awaitStringParameter().trim();
+	}
+
+	private String askPin() {
+		print("Specify the user PIN:");
+		return awaitStringParameter().trim();
+	}
+
+	public void forceUserCredentials() {
+		while (getUserCredentials() == null) {
+			CreateUserCredentials.invoke();
+		}
 	}
 }

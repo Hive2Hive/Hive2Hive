@@ -56,6 +56,11 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
+	public boolean isConnected() {
+		return networkManager.isConnected();
+	}
+
+	@Override
 	public IUserManager getUserManager() {
 		if (userManager == null)
 			userManager = new H2HUserManager(networkManager, fileConfiguration);
