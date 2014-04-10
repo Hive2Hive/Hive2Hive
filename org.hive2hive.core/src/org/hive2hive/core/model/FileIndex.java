@@ -86,18 +86,18 @@ public class FileIndex extends Index {
 	}
 
 	/**
-	 * Set the hash of the corresponding {@link MetaFile} of this {@link FileIndex}, which gets stored in the
+	 * Set the hash of the corresponding {@link MetaFileSmall} of this {@link FileIndex}, which gets stored in the
 	 * user profile. The hash gets created while signing the data in front of a put into the network.
 	 * 
-	 * @param metaFileHash hash of the corresponding {@link MetaFile}
+	 * @param metaFileHash hash of the corresponding {@link MetaFileSmall}
 	 */
 	public void setMetaFileHash(byte[] metaFileHash) {
 		this.metaFileHash = metaFileHash;
 	}
 
 	/**
-	 * Get the hash of the corresponding {@link MetaFile} of this {@link FileIndex}. The hash gets created
-	 * while signing the {@link MetaFile} in front of a put into the network.
+	 * Get the hash of the corresponding {@link MetaFileSmall} of this {@link FileIndex}. The hash gets created
+	 * while signing the {@link MetaFileSmall} in front of a put into the network.
 	 * 
 	 * @return hash of the corresponding meta file
 	 */

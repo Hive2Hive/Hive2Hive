@@ -8,14 +8,14 @@ import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 
 /**
- * Create a new {@link MetaFile}.
+ * Create a new {@link MetaFileSmall}.
  * 
  * @author Nico, Chris, Seppi
  */
@@ -40,9 +40,9 @@ public class CreateMetaFileStep extends ProcessStep {
 				context.getMetaChunks());
 		List<FileVersion> versions = new ArrayList<FileVersion>(1);
 		versions.add(version);
-		MetaFile metaFile = new MetaFile(context.getMetaKeys().getPublic(), versions, context.consumeChunkKeys());
+		MetaFileSmall metaFileSmall = new MetaFileSmall(context.getMetaKeys().getPublic(), versions, context.consumeChunkKeys());
 
-		context.provideMetaFile(metaFile);
+		context.provideMetaFile(metaFileSmall);
 	}
 
 	@Override

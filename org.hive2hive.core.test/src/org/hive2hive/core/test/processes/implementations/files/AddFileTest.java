@@ -14,6 +14,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -166,10 +167,12 @@ public class AddFileTest extends H2HJUnitTest {
 		if (originalFile.isFile()) {
 			MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaFileKeys);
 			Assert.assertNotNull(metaFile);
+			Assert.assertTrue(metaFile instanceof MetaFileSmall);
+			MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
 
 			// get the meta file with the keys (decrypt it)
-			Assert.assertEquals(1, metaFile.getVersions().size());
-			Assert.assertEquals(expectedChunks, metaFile.getVersions().get(0).getMetaChunks().size());
+			Assert.assertEquals(1, metaFileSmall.getVersions().size());
+			Assert.assertEquals(expectedChunks, metaFileSmall.getVersions().get(0).getMetaChunks().size());
 		}
 
 		// verify the file (should have been downloaded automatically during the notification)

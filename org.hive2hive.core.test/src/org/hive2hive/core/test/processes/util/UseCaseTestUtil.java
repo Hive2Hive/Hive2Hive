@@ -180,7 +180,7 @@ public class UseCaseTestUtil {
 		GetMetaFileStep step = new GetMetaFileStep(context, context, networkManager.getDataManager());
 		if (expectSuccess) {
 			executeProcess(step);
-			return context.metaDocument;
+			return context.metaFile;
 		} else {
 			TestProcessComponentListener listener = new TestProcessComponentListener();
 			step.attachListener(listener);

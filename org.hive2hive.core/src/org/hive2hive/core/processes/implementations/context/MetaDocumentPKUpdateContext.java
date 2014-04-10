@@ -78,7 +78,7 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 	public Number160 getVersionKey() {
 		return metaFile.getVersionKey();
 	}
-	
+
 	public String getFileName() {
 		return fileIndex.getName();
 	}

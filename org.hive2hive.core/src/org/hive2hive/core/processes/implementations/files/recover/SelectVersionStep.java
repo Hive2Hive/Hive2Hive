@@ -14,6 +14,7 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -50,13 +51,14 @@ public class SelectVersionStep extends ProcessStep {
 		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta document not found.");
 		} else if (!(metaFile instanceof MetaFile)) {
-			throw new ProcessExecutionException("Meta document is not a meta file.");
+			throw new ProcessExecutionException("Meta document is not a small meta file.");
 		}
 
+		MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
 		// cast the versions to the public interface
 		List<IFileVersion> versions = new ArrayList<IFileVersion>();
-		for (FileVersion version : metaFile.getVersions()) {
-			if (metaFile.getNewestVersion().equals(version)) {
+		for (FileVersion version : metaFileSmall.getVersions()) {
+			if (metaFileSmall.getNewestVersion().equals(version)) {
 				// skip newest version since it's not worth to restore it
 				continue;
 			}
@@ -73,7 +75,7 @@ public class SelectVersionStep extends ProcessStep {
 
 		// find the selected version
 		FileVersion selectedVersion = null;
-		for (FileVersion version : metaFile.getVersions()) {
+		for (FileVersion version : metaFileSmall.getVersions()) {
 			if (version.getIndex() == selected.getIndex()) {
 				selectedVersion = version;
 				break;
@@ -86,7 +88,7 @@ public class SelectVersionStep extends ProcessStep {
 		}
 
 		logger.debug("Selected version " + selected.getIndex() + " where "
-				+ metaFile.getNewestVersion().getIndex() + " is newest");
+				+ metaFileSmall.getNewestVersion().getIndex() + " is newest");
 
 		// 1. download the file with new name <filename>_<date>
 		// 2. add the file with an AddFileProcess (which also notifies other clients)
@@ -94,7 +96,7 @@ public class SelectVersionStep extends ProcessStep {
 			// find the node at the user profile
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
-			Index selectedNode = userProfile.getFileById(metaFile.getId());
+			Index selectedNode = userProfile.getFileById(metaFileSmall.getId());
 			if (selectedNode == null) {
 				throw new Hive2HiveException("File node not found");
 			}

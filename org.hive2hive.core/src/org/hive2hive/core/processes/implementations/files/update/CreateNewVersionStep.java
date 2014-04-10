@@ -9,7 +9,7 @@ import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -47,29 +47,29 @@ public class CreateNewVersionStep extends ProcessStep {
 		logger.debug("Adding a new version to the meta file.");
 
 		// create a new version and add it to the meta file
-		MetaFile metaFile = context.consumeMetaFile();
-		newVersion = new FileVersion(metaFile.getVersions().size(), FileUtil.getFileSize(context.getFile()),
-				System.currentTimeMillis(), context.getMetaChunks());
-		metaFile.getVersions().add(newVersion);
+		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
+		newVersion = new FileVersion(metaFileSmall.getVersions().size(), FileUtil.getFileSize(context
+				.getFile()), System.currentTimeMillis(), context.getMetaChunks());
+		metaFileSmall.getVersions().add(newVersion);
 
 		initiateCleanup();
 	}
 
 	private void initiateCleanup() {
-		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
+		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 
 		// remove files when the number of allowed versions is exceeded or when the total file size (sum
 		// of all versions) exceeds the allowed file size
-		while (metaFile.getVersions().size() > config.getMaxNumOfVersions()
-				|| metaFile.getTotalSize().compareTo(config.getMaxSizeAllVersions()) == 1) {
+		while (metaFileSmall.getVersions().size() > config.getMaxNumOfVersions()
+				|| metaFileSmall.getTotalSize().compareTo(config.getMaxSizeAllVersions()) == 1) {
 			// more versions than allowed or size is larger
 
 			// keep at least one version
-			if (metaFile.getVersions().size() == 1)
+			if (metaFileSmall.getVersions().size() == 1)
 				break;
 
 			// remove the version of the meta file
-			deletedFileVersions.add(metaFile.getVersions().remove(0));
+			deletedFileVersions.add(metaFileSmall.getVersions().remove(0));
 		}
 
 		logger.debug(String.format("Need to remove %s old versions", deletedFileVersions.size()));
@@ -83,12 +83,12 @@ public class CreateNewVersionStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (context.consumeMetaFile() != null) {
-			MetaFile metaFile = (MetaFile) context.consumeMetaFile();
+			MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 			// remove the new version
-			metaFile.getVersions().remove(newVersion);
+			metaFileSmall.getVersions().remove(newVersion);
 
 			// add the cleaned up versions
-			metaFile.getVersions().addAll(deletedFileVersions);
+			metaFileSmall.getVersions().addAll(deletedFileVersions);
 		}
 	}
 }

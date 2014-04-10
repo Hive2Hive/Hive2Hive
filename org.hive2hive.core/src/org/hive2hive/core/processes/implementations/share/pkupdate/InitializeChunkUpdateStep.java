@@ -5,6 +5,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
@@ -35,12 +36,16 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 		MetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta File not found");
+		} else if (!(metaFile instanceof MetaFileSmall)) {
+			logger.debug("No need to update any chunks for a large meta file");
+			return;
 		}
 
+		MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
 		logger.debug(String.format("Initialize updating all chunks for file '%s' in a shared folder.",
 				context.getFileName()));
 		int counter = 0;
-		for (FileVersion version : metaFile.getVersions()) {
+		for (FileVersion version : metaFileSmall.getVersions()) {
 			for (MetaChunk metaChunk : version.getMetaChunks()) {
 				// each chunk gets an own context
 				ChunkPKUpdateContext chunkContext = new ChunkPKUpdateContext(

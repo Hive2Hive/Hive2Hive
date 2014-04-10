@@ -24,6 +24,7 @@ import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,13 +53,13 @@ public class DownloadFileTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = DownloadFileTest.class;
 		beforeClass();
-
-		/** create a network, register a user and add a file **/
-		network = NetworkTestUtil.createNetwork(networkSize);
 	}
 
 	@Before
 	public void uploadFile() throws Exception {
+		/** create a network, register a user and add a file **/
+		network = NetworkTestUtil.createNetwork(networkSize);
+
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		NetworkManager uploader = network.get(networkSize - 1);
 		downloader = network.get(new Random().nextInt(networkSize - 2));
@@ -152,9 +153,13 @@ public class DownloadFileTest extends H2HJUnitTest {
 		Assert.assertEquals(lastModifiedBefore, existing.lastModified());
 	}
 
+	@After
+	public void tearDown() {
+		NetworkTestUtil.shutdownNetwork(network);
+	}
+
 	@AfterClass
 	public static void endTest() throws IOException {
-		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 }

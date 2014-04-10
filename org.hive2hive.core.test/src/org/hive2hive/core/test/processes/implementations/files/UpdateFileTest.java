@@ -16,7 +16,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -138,7 +138,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
 
 		// verify that only one version was created
-		MetaFile metaDocument = (MetaFile) UseCaseTestUtil.getMetaFile(downloader, fileNode.getFileKeys());
+		MetaFileSmall metaDocument = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader,
+				fileNode.getFileKeys());
 		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
@@ -181,8 +182,9 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, uploaderRoot);
-		MetaFile metaFile = UseCaseTestUtil.getMetaFile(downloader, fileNode.getFileKeys());
-		Assert.assertEquals(1, metaFile.getVersions().size());
+		MetaFileSmall metaFileSmall = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader,
+				fileNode.getFileKeys());
+		Assert.assertEquals(1, metaFileSmall.getVersions().size());
 	}
 
 	@Test
@@ -226,8 +228,9 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, uploaderRoot);
-		MetaFile metaFile = UseCaseTestUtil.getMetaFile(downloader, fileNode.getFileKeys());
-		Assert.assertEquals(1, metaFile.getVersions().size());
+		MetaFileSmall metaFileSmall = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader,
+				fileNode.getFileKeys());
+		Assert.assertEquals(1, metaFileSmall.getVersions().size());
 	}
 
 	@After

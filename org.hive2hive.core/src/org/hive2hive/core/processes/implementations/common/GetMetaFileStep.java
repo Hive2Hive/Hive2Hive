@@ -12,7 +12,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -24,7 +24,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Gets a {@link MetaFile} from the DHT and decrypts it.
+ * Gets a {@link MetaFileSmall} from the DHT and decrypts it.
  * 
  * @author Nico
  * 
@@ -64,11 +64,11 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 				throw new ProcessExecutionException("Meta file could not be decrypted.", e);
 			}
 
-			MetaFile metaFile = (MetaFile) decryptedContent;
-			metaFile.setVersionKey(loadedContent.getVersionKey());
-			metaFile.setBasedOnKey(loadedContent.getBasedOnKey());
+			MetaFileSmall metaFileSmall = (MetaFileSmall) decryptedContent;
+			metaFileSmall.setVersionKey(loadedContent.getVersionKey());
+			metaFileSmall.setBasedOnKey(loadedContent.getBasedOnKey());
 
-			metaContext.provideMetaFile(metaFile);
+			metaContext.provideMetaFile(metaFileSmall);
 			metaContext.provideEncryptedMetaFile(encryptedContent);
 			logger.debug("Got and decrypted the meta file.");
 		}

@@ -65,7 +65,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 	@Test
 	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException,
 			NoPeerConnectionException, NoSessionException {
-		NetworkManager client = NetworkTestUtil.getRandomNode(network);
+		NetworkManager client = network.get(0);
 		List<FileTaste> fileList = UseCaseTestUtil.getFileList(client);
 
 		// root does not count as a file

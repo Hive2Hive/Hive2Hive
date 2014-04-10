@@ -20,7 +20,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -50,14 +50,14 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
+		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 
 		// support to download a specific version
 		List<MetaChunk> metaChunks;
 		if (context.downloadNewestVersion()) {
-			metaChunks = metaFile.getNewestVersion().getMetaChunks();
+			metaChunks = metaFileSmall.getNewestVersion().getMetaChunks();
 		} else {
-			metaChunks = metaFile.getVersionByIndex(context.getVersionToDownload()).getMetaChunks();
+			metaChunks = metaFileSmall.getVersionByIndex(context.getVersionToDownload()).getMetaChunks();
 		}
 
 		// support to store the file on another location than default (used for recovery)
@@ -79,7 +79,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 			NetworkContent content = get(metaChunk.getChunkId(), H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
-				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFile.getChunkKey()
+				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFileSmall.getChunkKey()
 						.getPrivate());
 				chunkBuffer.add((Chunk) decrypted);
 			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException

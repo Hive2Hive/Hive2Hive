@@ -5,6 +5,7 @@ import java.security.KeyPair;
 import java.util.List;
 
 import org.hive2hive.core.model.MetaChunk;
+import org.hive2hive.core.model.MetaFileSmall;
 
 public class UpdateFileProcessContext extends AddFileProcessContext {
 
@@ -22,10 +23,10 @@ public class UpdateFileProcessContext extends AddFileProcessContext {
 	public void setChunksToDelete(List<MetaChunk> chunksToDelete) {
 		this.chunksToDelete = chunksToDelete;
 	}
-	
+
 	@Override
 	public KeyPair consumeChunkKeys() {
-		return consumeMetaFile().getChunkKey();
+		return ((MetaFileSmall) consumeMetaFile()).getChunkKey();
 	}
 
 }

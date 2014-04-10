@@ -14,6 +14,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -25,7 +26,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
- * Puts a {@link MetaFile} object into the DHT after encrypting it with the given key.
+ * Puts a {@link MetaFileSmall} object into the DHT after encrypting it with the given key.
  * 
  * @author Nico, Seppi
  */
@@ -46,7 +47,8 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			MetaFile metaFile = context.consumeMetaFile();
 			KeyPair protectionKeys = context.consumeProtectionKeys();
 
-			logger.trace(String.format("Encrypting meta file of file '%s' in a hybrid manner.", context.getFile().getName()));
+			logger.trace(String.format("Encrypting meta file of file '%s' in a hybrid manner.", context
+					.getFile().getName()));
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaFile, metaFile.getId());
 			encrypted.setBasedOnKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();
@@ -69,11 +71,11 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 	}
-	
+
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		super.doRollback(reason);
-		
+
 		// remove provided hash
 		context.provideHash(null);
 	}

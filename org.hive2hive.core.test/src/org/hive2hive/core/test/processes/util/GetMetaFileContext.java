@@ -16,15 +16,15 @@ import org.hive2hive.core.security.HybridEncryptedContent;
 public class GetMetaFileContext implements IConsumeKeyPair, IProvideMetaFile {
 
 	private final KeyPair keys;
-	public MetaFile metaDocument;
+	public MetaFile metaFile;
 
 	public GetMetaFileContext(KeyPair keys) {
 		this.keys = keys;
 	}
 
 	@Override
-	public void provideMetaFile(MetaFile metaDocument) {
-		this.metaDocument = metaDocument;
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
 	}
 
 	@Override

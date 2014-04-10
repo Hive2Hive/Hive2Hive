@@ -18,6 +18,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -71,7 +72,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// store the keys of the meta file to verify them later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaFile metaDocumentBeforeDeletion = UseCaseTestUtil.getMetaFile(client, metaKeyPair);
+		MetaFileSmall metaDocumentBeforeDeletion = (MetaFileSmall) UseCaseTestUtil.getMetaFile(client,
+				metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the file
@@ -135,7 +137,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaFile metaFileBeforeDeletion = (MetaFile) UseCaseTestUtil.getMetaFile(client, metaKeyPairFile);
+		MetaFileSmall metaFileBeforeDeletion = (MetaFileSmall) UseCaseTestUtil.getMetaFile(client,
+				metaKeyPairFile);
 		Assert.assertNotNull(metaFileBeforeDeletion);
 
 		// delete the file

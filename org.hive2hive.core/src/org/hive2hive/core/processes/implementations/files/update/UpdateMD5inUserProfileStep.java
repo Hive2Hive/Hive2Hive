@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -39,7 +39,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws ProcessExecutionException {
-		MetaFile metaFile = context.consumeMetaFile();
+		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 		byte[] newMD5;
 		try {
 			newMD5 = EncryptionUtil.generateMD5Hash(context.getFile());
@@ -50,11 +50,11 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FileIndex index = (FileIndex) userProfile.getFileById(metaFile.getId());
-			
+			FileIndex index = (FileIndex) userProfile.getFileById(metaFileSmall.getId());
+
 			// store hash of meta file
 			index.setMetaFileHash(context.consumeHash());
-			
+
 			// store for backup
 			originalMD5 = index.getMD5();
 			if (H2HEncryptionUtil.compareMD5(originalMD5, newMD5)) {
@@ -75,12 +75,12 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		MetaFile metaFile = (MetaFile) context.consumeMetaFile();
-		if (metaFile != null) {
+		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
+		if (metaFileSmall != null) {
 			try {
 				// return to original MD5 and put the userProfile
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
+				FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFileSmall.getId());
 				fileNode.setMD5(originalMD5);
 				profileManager.readyToPut(userProfile, getID());
 			} catch (Exception e) {

@@ -19,7 +19,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -134,16 +134,16 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		List<FileVersion> fileVersions = new ArrayList<FileVersion>();
 		fileVersions.add(new FileVersion(0, 123, System.currentTimeMillis(), metaChunks1));
 		fileVersions.add(new FileVersion(1, 123, System.currentTimeMillis(), metaChunks2));
-		MetaFile metaFile = new MetaFile(metaFileEncryptionKeys.getPublic(), fileVersions,
+		MetaFileSmall metaFileSmall = new MetaFileSmall(metaFileEncryptionKeys.getPublic(), fileVersions,
 				chunkEncryptionKeys);
 		// encrypt the meta file
-		HybridEncryptedContent encryptedMetaFile = H2HEncryptionUtil.encryptHybrid(metaFile,
+		HybridEncryptedContent encryptedMetaFile = H2HEncryptionUtil.encryptHybrid(metaFileSmall,
 				metaFileEncryptionKeys.getPublic());
 		encryptedMetaFile.generateVersionKey();
 
 		// initialize put
 		Parameters parameters = new Parameters()
-				.setLocationKey(H2HEncryptionUtil.key2String(metaFile.getId()))
+				.setLocationKey(H2HEncryptionUtil.key2String(metaFileSmall.getId()))
 				.setContentKey(H2HConstants.META_FILE).setVersionKey(encryptedMetaFile.getVersionKey())
 				.setProtectionKeys(protectionKeysOld).setData(encryptedMetaFile);
 		// indicate to generate hash
@@ -157,7 +157,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// initialize a fake process context
 		BasePKUpdateContext context = new TestMetaFilePKUpdateContext(protectionKeysOld, protectionKeysNew,
-				metaFile, parameters.getHash(), encryptedMetaFile.getVersionKey());
+				metaFileSmall, parameters.getHash(), encryptedMetaFile.getVersionKey());
 		// create a change protection keys process step
 		ChangeProtectionKeysStep step = new ChangeProtectionKeysStep(context, getter.getDataManager());
 		// run process, should not fail
@@ -222,21 +222,21 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 	private class TestMetaFilePKUpdateContext extends BasePKUpdateContext {
 
-		private final MetaFile metaFile;
+		private final MetaFileSmall metaFileSmall;
 		private final byte[] hash;
 		private final Number160 versionKey;
 
 		public TestMetaFilePKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys,
-				MetaFile metaFile, byte[] hash, Number160 versionKey) {
+				MetaFileSmall metaFileSmall, byte[] hash, Number160 versionKey) {
 			super(oldProtectionKeys, newProtectionKeys);
-			this.metaFile = metaFile;
+			this.metaFileSmall = metaFileSmall;
 			this.hash = hash;
 			this.versionKey = versionKey;
 		}
 
 		@Override
 		public String getLocationKey() {
-			return H2HEncryptionUtil.key2String(metaFile.getId());
+			return H2HEncryptionUtil.key2String(metaFileSmall.getId());
 		}
 
 		@Override
@@ -246,7 +246,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		@Override
 		public int getTTL() {
-			return metaFile.getTimeToLive();
+			return metaFileSmall.getTimeToLive();
 		}
 
 		@Override

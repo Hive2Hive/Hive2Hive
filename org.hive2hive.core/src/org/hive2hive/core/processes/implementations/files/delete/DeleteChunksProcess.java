@@ -6,6 +6,7 @@ import java.util.List;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -34,9 +35,12 @@ public class DeleteChunksProcess extends SequentialProcess {
 		List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 		MetaFile metaFile = context.consumeMetaFile();
 
-		// TODO rather delete file by file than all chunks mixed
-		for (FileVersion version : metaFile.getVersions()) {
-			metaChunks.addAll(version.getMetaChunks());
+		if (metaFile.isSmall()) {
+			MetaFileSmall metaSmall = (MetaFileSmall) metaFile;
+			// TODO rather delete file by file than all chunks mixed
+			for (FileVersion version : metaSmall.getVersions()) {
+				metaChunks.addAll(version.getMetaChunks());
+			}
 		}
 
 		// process composition
