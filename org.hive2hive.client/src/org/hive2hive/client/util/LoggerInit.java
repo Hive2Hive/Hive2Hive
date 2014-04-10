@@ -1,4 +1,4 @@
-package org.hive2hive.client;
+package org.hive2hive.client.util;
 
 import java.io.IOException;
 

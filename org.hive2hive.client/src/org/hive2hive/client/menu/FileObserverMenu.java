@@ -1,65 +1,75 @@
 package org.hive2hive.client.menu;
 
-import java.io.File;
+import org.hive2hive.client.console.H2HConsoleMenu;
+import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.MenuContainer;
+import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.api.H2HFileObserver;
+import org.hive2hive.core.api.H2HFileObserverListener;
+import org.hive2hive.core.api.interfaces.IFileObserver;
+import org.hive2hive.core.api.interfaces.IFileObserverListener;
 
-import org.hive2hive.client.menuitem.H2HConsoleMenuItem;
-import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.file.watcher.H2HFileListener;
-import org.hive2hive.core.file.watcher.H2HFileWatcher;
-import org.hive2hive.core.file.watcher.H2HFileWatcher.H2HFileWatcherBuilder;
+public class FileObserverMenu extends H2HConsoleMenu {
 
-public class FileObserverMenu extends ConsoleMenu {
+	private IFileObserver fileObserver;
+	private long interval = H2HConstants.DEFAULT_FILE_OBSERVER_INTERVAL;
 
-	private final H2HFileWatcherBuilder watcherBuilder;
-	private H2HFileWatcher watcher;
-	private IFileManager fileManager;
-
-	public FileObserverMenu(File rootDirectory, IFileManager fileManager) {
-		watcherBuilder = new H2HFileWatcherBuilder(rootDirectory);
-		this.fileManager = fileManager;
+	public FileObserverMenu(MenuContainer menus) {
+		super(menus);
 	}
 
 	@Override
 	protected void addMenuItems() {
 
-		add(new H2HConsoleMenuItem("Set Interval") {
-			protected void execute() {
-				System.out.println("Specify the observation interval (ms):");
-				watcherBuilder.setInterval(awaitIntParameter());
-			}
-		});
-		add(new H2HConsoleMenuItem("Set File Filter") {
-			protected void execute() {
-				notImplemented(); // TODO implement file filter setting
-			}
-		});
-		add(new H2HConsoleMenuItem("Set Case Sensitivity") {
-			protected void execute() {
-				notImplemented(); // TODO implement case sensitivity setting
-			}
-		});
+		if (isExpertMode) {
+			add(new H2HConsoleMenuItem("Set Interval") {
+				// TODO restart observer
+				protected void execute() {
+					System.out.println("Specify the observation interval (ms):");
+					interval = awaitIntParameter();
+				}
+			});
+		}
+
 		add(new H2HConsoleMenuItem("Start File Observer") {
+			protected void checkPreconditions() {
+				menus.getNodeMenu().forceNetwork();
+				menus.getFileMenu().forceRootDirectory();
+			}
+
 			protected void execute() throws Exception {
-				watcher = watcherBuilder.build();
-				watcher.addFileListener(new H2HFileListener(fileManager));
-				watcher.start();
+
+				fileObserver = new H2HFileObserver(menus.getFileMenu().getRootDirectory(), interval);
+
+				IFileObserverListener listener = new H2HFileObserverListener(menus.getNodeMenu().getNode()
+						.getFileManager());
+
+				fileObserver.addFileObserverListener(listener);
+
+				fileObserver.start();
 			}
 		});
+
 		add(new H2HConsoleMenuItem("Stop File Observer") {
 			protected void execute() throws Exception {
-				if (watcher != null)
-					watcher.stop();
+				if (fileObserver != null) {
+					fileObserver.stop();
+				}
 			}
 		});
-	}
-
-	public H2HFileWatcher getWatcher() {
-		return watcher;
 	}
 
 	@Override
 	protected String getInstruction() {
-		return "Please configure and start/stop the file observer:\n";
+
+		if (isExpertMode)
+			return "Configure and start/stop the file observer:";
+		else
+			return "Start/stop the file observer:";
+	}
+	
+	public IFileObserver getFileObserver() {
+		return fileObserver;
 	}
 
 }

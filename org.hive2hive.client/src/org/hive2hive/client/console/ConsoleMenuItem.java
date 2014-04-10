@@ -1,6 +1,4 @@
-package org.hive2hive.client.menuitem;
-
-import org.hive2hive.client.Formatter;
+package org.hive2hive.client.console;
 
 /**
  * An abstract console menu item representing an option. It predefines the execution of an operation by means
@@ -19,18 +17,19 @@ public abstract class ConsoleMenuItem {
 
 	public void invoke() {
 
+		checkPreconditions();
 		initialize();
 		try {
 			execute();
 		} catch (Exception e) {
-			Formatter.setErrorForeground();
-			System.err.println("An exception has been thrown:");
-			e.printStackTrace();
-			System.out.println();
-			Formatter.setDefaultForeground();
+			ConsoleMenu.printError(e);
 		} finally {
 			end();
 		}
+	}
+
+	protected void checkPreconditions() {
+		// nothing by default
 	}
 
 	protected abstract void initialize();
@@ -42,4 +41,5 @@ public abstract class ConsoleMenuItem {
 	public String getDisplayText() {
 		return displayText;
 	}
+
 }

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * Mapping between the userId and the permission type. This is applied for {@link MetaFolder} objects in order
- * to identify users rights (and undertake necessary actions in case user leaves or wants to change rights)
+ * to identify users rights (and undertake necessary actions in case user leaves or wants to change rights).
  * 
  * @author Nico
  * 
@@ -12,29 +12,25 @@ import java.io.Serializable;
 public class UserPermission implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private PermissionType permission;
+	
 	private final String userId;
+	private PermissionType permission;
 
 	public UserPermission(String userId, PermissionType permission) {
 		this.userId = userId;
 		this.setPermission(permission);
 	}
 
-	public PermissionType getPermission() {
-		return permission;
-	}
-
 	public void setPermission(PermissionType permission) {
 		this.permission = permission;
 	}
 
-	public String getUserId() {
-		return userId;
+	public PermissionType getPermission() {
+		return permission;
 	}
 
-	@Override
-	public int hashCode() {
-		return userId.hashCode() + permission.hashCode();
+	public String getUserId() {
+		return userId;
 	}
 
 	@Override
@@ -45,6 +41,11 @@ public class UserPermission implements Serializable {
 		}
 
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return userId.hashCode() + permission.hashCode();
 	}
 
 	@Override

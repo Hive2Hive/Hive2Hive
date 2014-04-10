@@ -2,6 +2,8 @@ package org.hive2hive.core.model;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,9 +14,10 @@ import java.util.List;
  */
 public class FileVersion implements Serializable, IFileVersion {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -3475882940245139367L;
+
 	private final int index; // version count
-	private final BigInteger size; // size of the version
+	private final BigInteger size; // size of the version in bytes
 	private final long date; // date when it's created
 	private final List<MetaChunk> metaChunks; // the chunk id's to find the chunks
 
@@ -54,4 +57,28 @@ public class FileVersion implements Serializable, IFileVersion {
 		return date;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("Version %s [%s] (%s Bytes)", index, DateFormat.getDateInstance().format(new Date(date)), size);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof FileVersion))
+			return false;
+
+		FileVersion fv = (FileVersion) obj;
+		return fv.index == index && fv.date == date && fv.size == size
+				&& fv.metaChunks.size() == metaChunks.size();
+
+	}
+
+	@Override
+	public int hashCode() {
+		return index;
+	}
 }
