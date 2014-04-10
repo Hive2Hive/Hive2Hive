@@ -245,6 +245,9 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	/**
+	 * Process for downloading the newest version to the default location.
+	 */
 	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
 			throws NoSessionException {
 		return createDownloadFileProcess(fileKey, DownloadFileContext.NEWEST_VERSION_INDEX, null,

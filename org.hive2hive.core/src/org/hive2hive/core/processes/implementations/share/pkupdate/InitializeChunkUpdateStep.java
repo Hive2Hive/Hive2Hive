@@ -36,7 +36,7 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 		MetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta File not found");
-		} else if (!(metaFile instanceof MetaFileSmall)) {
+		} else if (!(metaFile.isSmall())) {
 			logger.debug("No need to update any chunks for a large meta file");
 			return;
 		}

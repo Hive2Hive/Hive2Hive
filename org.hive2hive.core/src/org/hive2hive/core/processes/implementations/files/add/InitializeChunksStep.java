@@ -49,11 +49,7 @@ public class InitializeChunksStep extends ProcessStep {
 					file.getName()));
 			return;
 		} else if (context.isLargeFile()) {
-			try {
-				initLargeFile(file);
-			} catch (IOException e) {
-				throw new ProcessExecutionException("Cannot read the large file", e);
-			}
+			initLargeFile(file);
 		} else {
 			initSmallFile(file);
 		}
@@ -82,7 +78,7 @@ public class InitializeChunksStep extends ProcessStep {
 		}
 	}
 
-	private void initLargeFile(File file) throws IOException {
+	private void initLargeFile(File file) throws ProcessExecutionException {
 		// init the large file chunks
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
@@ -90,7 +86,14 @@ public class InitializeChunksStep extends ProcessStep {
 		// process chunk for chunk, hash it and add the meta information to the context
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();
-			Chunk chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), i, chunkId);
+			Chunk chunk;
+
+			try {
+				chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), i, chunkId);
+			} catch (IOException e) {
+				throw new ProcessExecutionException("Cannot read the large file", e);
+			}
+
 			byte[] md5Hash = EncryptionUtil.generateMD5Hash(chunk.getData());
 			context.getMetaChunks().add(new MetaChunk(chunkId, md5Hash, i));
 		}

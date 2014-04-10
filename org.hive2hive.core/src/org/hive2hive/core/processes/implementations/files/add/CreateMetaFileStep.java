@@ -8,6 +8,8 @@ import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.log.H2HLogger;
 import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
+import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -22,7 +24,7 @@ import org.hive2hive.core.processes.implementations.context.AddFileProcessContex
 public class CreateMetaFileStep extends ProcessStep {
 
 	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CreateMetaFileStep.class);
-	
+
 	private final AddFileProcessContext context;
 
 	public CreateMetaFileStep(AddFileProcessContext context) {
@@ -35,14 +37,20 @@ public class CreateMetaFileStep extends ProcessStep {
 
 		logger.trace(String.format("Creating new meta file for file '%s'", file.getName()));
 
-		// create new meta file with new version
-		FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis(),
-				context.getMetaChunks());
-		List<FileVersion> versions = new ArrayList<FileVersion>(1);
-		versions.add(version);
-		MetaFileSmall metaFileSmall = new MetaFileSmall(context.getMetaKeys().getPublic(), versions, context.consumeChunkKeys());
+		MetaFile metaFile = null;
+		if (context.isLargeFile()) {
+			metaFile = new MetaFileLarge(context.getMetaKeys().getPublic(), context.getMetaChunks());
+		} else {
+			// create new meta file with new version
+			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis(),
+					context.getMetaChunks());
+			List<FileVersion> versions = new ArrayList<FileVersion>(1);
+			versions.add(version);
+			metaFile = new MetaFileSmall(context.getMetaKeys().getPublic(), versions,
+					context.consumeChunkKeys());
 
-		context.provideMetaFile(metaFileSmall);
+		}
+		context.provideMetaFile(metaFile);
 	}
 
 	@Override

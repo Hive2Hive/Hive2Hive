@@ -9,6 +9,12 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
+/**
+ * The notification message factory is used when a file has been added / updated.
+ * 
+ * @author Nico
+ * 
+ */
 public class UploadNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final Index index;

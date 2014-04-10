@@ -50,7 +50,7 @@ public class SelectVersionStep extends ProcessStep {
 		MetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta document not found.");
-		} else if (!(metaFile instanceof MetaFile)) {
+		} else if (!metaFile.isSmall()) {
 			throw new ProcessExecutionException("Meta document is not a small meta file.");
 		}
 

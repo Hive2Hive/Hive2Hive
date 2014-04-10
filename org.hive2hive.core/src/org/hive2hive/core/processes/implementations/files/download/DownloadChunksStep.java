@@ -20,6 +20,8 @@ import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
+import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -50,14 +52,24 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
+		MetaFile metaFile = context.consumeMetaFile();
 
+		if (metaFile.isSmall()) {
+			downloadChunksFromDHT((MetaFileSmall) metaFile);
+		} else {
+			downloadChunksFromUsers((MetaFileLarge) metaFile);
+		}
+
+	}
+
+	private void downloadChunksFromDHT(MetaFileSmall metaFile) throws InvalidProcessStateException,
+			ProcessExecutionException {
 		// support to download a specific version
 		List<MetaChunk> metaChunks;
 		if (context.downloadNewestVersion()) {
-			metaChunks = metaFileSmall.getNewestVersion().getMetaChunks();
+			metaChunks = metaFile.getNewestVersion().getMetaChunks();
 		} else {
-			metaChunks = metaFileSmall.getVersionByIndex(context.getVersionToDownload()).getMetaChunks();
+			metaChunks = metaFile.getVersionByIndex(context.getVersionToDownload()).getMetaChunks();
 		}
 
 		// support to store the file on another location than default (used for recovery)
@@ -79,7 +91,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 			NetworkContent content = get(metaChunk.getChunkId(), H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
-				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFileSmall.getChunkKey()
+				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFile.getChunkKey()
 						.getPrivate());
 				chunkBuffer.add((Chunk) decrypted);
 			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
@@ -106,6 +118,13 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 			throw new ProcessExecutionException("Could not write all chunks to disk. We're stuck at chunk "
 					+ currentChunkOrder);
 		}
+	}
+
+	private void downloadChunksFromUsers(MetaFileLarge metaFile) {
+		// TODO
+		// set the destination to the default value
+		// submit the task to a background thread that regularly checks for other clients, downloads and
+		// assemblies the file
 	}
 
 	/**
