@@ -109,7 +109,7 @@ public class SelectVersionStep extends ProcessStep {
 				logger.warn("Replacing the given file name with a custom file name because it was invalid.");
 				Date versionDate = new Date(selected.getDate());
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-				recoveredFileName = noSuffix + "-" + sdf.format(versionDate) + extension;
+				recoveredFileName = noSuffix + "-" + sdf.format(versionDate) + "." + extension;
 			}
 
 			logger.debug("Starting to download the restored file under the name '" + recoveredFileName + "'");
