@@ -6,8 +6,6 @@ import java.nio.file.FileAlreadyExistsException;
 
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -15,10 +13,12 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CreateFolderStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CreateFolderStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(CreateFolderStep.class);
 
 	private final NetworkManager networkManager;
 	private final DownloadFileContext context;
@@ -32,7 +32,7 @@ public class CreateFolderStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		Index file = context.consumeIndex();
-		logger.debug("Try creating a new folder on disk: " + file.getName());
+		logger.debug("Try creating a new folder '{}' on disk.", file.getName());
 		try {
 			// create the folder on disk
 			File folder = FileUtil.getPath(networkManager.getSession().getRoot(), file).toFile();
@@ -47,7 +47,7 @@ public class CreateFolderStep extends ProcessStep {
 		}
 
 		// done with 'downloading' the file
-		logger.debug("New folder has successfuly been created on disk: " + file.getName());
+		logger.debug("New folder '{}' has successfuly been created on disk.", file.getName());
 	}
 
 	@Override
