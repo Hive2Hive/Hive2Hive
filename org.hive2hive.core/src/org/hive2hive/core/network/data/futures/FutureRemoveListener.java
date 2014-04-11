@@ -9,11 +9,11 @@ import net.tomp2p.p2p.builder.DigestBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A future listener for a remove. After the operation completed the listener verifies with a get digest if
@@ -24,7 +24,7 @@ import org.hive2hive.core.network.data.parameters.IParameters;
  */
 public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(FutureRemoveListener.class);
+	private final static Logger logger = LoggerFactory.getLogger(FutureRemoveListener.class);
 
 	// used to count remove retries
 	private int removeTries = 0;
@@ -51,7 +51,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error("Could not wait until put has finished", e);
+			logger.error("Could not wait until put has finished.", e);
 		}
 
 		return success;
@@ -59,7 +59,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
 	@Override
 	public void operationComplete(FutureRemove future) throws Exception {
-		logger.debug(String.format("Start verification of remove. %s", parameters.toString()));
+		logger.debug("Start verification of remove. '{}'", parameters.toString());
 		// get data to verify if everything went correct
 		DigestBuilder digestBuilder = dataManager.getDigest(parameters.getLKey());
 		if (versionRemove) {
@@ -81,7 +81,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 				} else if (!future.getDigest().keyDigest().isEmpty()) {
 					retryRemove();
 				} else {
-					logger.debug(String.format("Verification for remove completed. %s", parameters.toString()));
+					logger.debug("Verification for remove completed. '{}'", parameters.toString());
 					success = true;
 					latch.countDown();
 				}
@@ -94,16 +94,16 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	 */
 	private void retryRemove() {
 		if (removeTries++ < H2HConstants.REMOVE_RETRIES) {
-			logger.warn(String.format("Remove verification failed. Data is not null. Try #%s. %s",
-					removeTries, parameters.toString()));
+			logger.warn("Remove verification failed. Data is not null. Try #{}. '{}'",
+					removeTries, parameters.toString());
 			if (!versionRemove) {
 				dataManager.removeUnblocked(parameters).addListener(this);
 			} else {
 				dataManager.removeVersionUnblocked(parameters).addListener(this);
 			}
 		} else {
-			logger.error(String.format("Remove verification failed. Data is not null after %s tries. %s",
-					removeTries - 1, parameters.toString()));
+			logger.error("Remove verification failed. Data is not null after {} tries. '{}'",
+					removeTries - 1, parameters.toString());
 			success = false;
 			latch.countDown();
 		}

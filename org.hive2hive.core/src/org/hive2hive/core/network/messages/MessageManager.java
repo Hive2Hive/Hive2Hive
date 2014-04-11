@@ -19,8 +19,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -30,6 +28,8 @@ import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles the sending of messages.
@@ -38,7 +38,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public final class MessageManager implements IMessageManager {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(MessageManager.class);
 
 	private final NetworkManager networkManager;
 	private final HashMap<String, IResponseCallBackHandler> callBackHandlers;
@@ -75,11 +75,11 @@ public final class MessageManager implements IMessageManager {
 		boolean success = listener.await();
 
 		if (success) {
-			logger.debug(String.format("Message sent target key = '%s' message id = '%s'",
-					message.getTargetKey(), message.getMessageID()));
+			logger.debug("Message sent. Target key = '{}', Message ID = '{}'.",
+					message.getTargetKey(), message.getMessageID());
 		} else {
-			logger.error(String.format("Message could not be sent. target key = '%s' message id = '%s'",
-					message.getTargetKey(), message.getMessageID()));
+			logger.error("Message could not be sent. Target key = '{}', Message ID = '{}'.",
+					message.getTargetKey(), message.getMessageID());
 		}
 		return success;
 	}
@@ -87,9 +87,9 @@ public final class MessageManager implements IMessageManager {
 	@Override
 	public boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
 		if (message.getTargetAddress() == null)
-			throw new IllegalArgumentException("target address cannot be null");
+			throw new IllegalArgumentException("Target address cannot be null.");
 		if (targetPublicKey == null)
-			throw new IllegalArgumentException("target public key cannot be null");
+			throw new IllegalArgumentException("Target public key cannot be null.");
 
 		// prepare message
 		prepareMessage(message);
@@ -109,13 +109,11 @@ public final class MessageManager implements IMessageManager {
 		boolean success = listener.await();
 
 		if (success) {
-			logger.debug(String.format(
-					"Message (direct) sent. message id = '%s' target address = '%s' sender address = '%s'",
-					message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
+			logger.debug("Message (direct) sent. Message ID = '{}', Target address = '{}', Sender address = '{}'.",
+					message.getMessageID(), message.getTargetAddress(), message.getSenderAddress());
 		} else {
-			logger.error(String
-					.format("Message (direct) could not be sent. message id = '%s' target address = '%s' sender address = '%s'",
-							message.getMessageID(), message.getTargetAddress(), message.getSenderAddress()));
+			logger.error("Message (direct) could not be sent. Message ID = '{}', Target address = '{}', Sender address = '{}'.",
+					message.getMessageID(), message.getTargetAddress(), message.getSenderAddress());
 		}
 		return success;
 	}
@@ -172,7 +170,7 @@ public final class MessageManager implements IMessageManager {
 			try {
 				message.setSenderPublicKey(networkManager.getSession().getKeyPair().getPublic());
 			} catch (NoSessionException e) {
-				logger.error("Could not set the sender's public key");
+				logger.error("Could not set the sender's public key.");
 				message.setSenderPublicKey(null);
 			}
 		}

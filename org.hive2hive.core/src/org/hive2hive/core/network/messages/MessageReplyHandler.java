@@ -13,11 +13,11 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the general message handler of each node. It checks if received
@@ -31,7 +31,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public class MessageReplyHandler implements ObjectDataReply {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(MessageReplyHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(MessageReplyHandler.class);
 
 	private final NetworkManager networkManager;
 
@@ -54,9 +54,8 @@ public class MessageReplyHandler implements ObjectDataReply {
 				session = networkManager.getSession();
 			}
 		} catch (NoSessionException e) {
-			logger.warn(String.format(
-					"Currently no user logged in! Keys for decryption needed. node id = '%s'",
-					networkManager.getNodeId()));
+			logger.warn("Currently no user is logged in! Keys for decryption needed. Node ID = '{}'.",
+					networkManager.getNodeId());
 			return AcceptanceReply.FAILURE;
 		}
 
@@ -85,7 +84,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		try {
 			message = EncryptionUtil.deserializeObject(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
-			logger.error(String.format("Message could not be deserialized. reason = '%s'", e.getMessage()));
+			logger.error("Message could not be deserialized. Reason = '{}'.", e.getMessage());
 		}
 
 		if (message != null && message instanceof BaseMessage) {
@@ -100,7 +99,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 				try {
 					receivedMessage.setNetworkManager(networkManager);
 				} catch (NoPeerConnectionException e) {
-					logger.error("Cannot process the message because the peer is not connected");
+					logger.error("Cannot process the message because the peer is not connected.");
 					return AcceptanceReply.FAILURE;
 				}
 
@@ -108,13 +107,12 @@ public class MessageReplyHandler implements ObjectDataReply {
 				AcceptanceReply reply = receivedMessage.accept();
 				if (AcceptanceReply.OK == reply) {
 					// handle message in own thread
-					logger.debug(String.format("Received and accepted the message. node id = '%s'",
-							networkManager.getNodeId()));
+					logger.debug("Received and accepted the message. Node ID = '{}'.",
+							networkManager.getNodeId());
 					new Thread(receivedMessage).start();
 				} else {
-					logger.warn(String.format(
-							"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
-							networkManager.getNodeId()));
+					logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.",
+							reply, networkManager.getNodeId());
 				}
 
 				return reply;
@@ -132,17 +130,16 @@ public class MessageReplyHandler implements ObjectDataReply {
 		try {
 			PublicKey publicKey = networkManager.getSession().getKeyManager().getPublicKey(senderId);
 			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey)) {
-				logger.debug(String.format("Message's signature from user '%s' verified. node id = '%s'",
-						senderId, networkManager.getNodeId()));
+				logger.debug("Message signature from user '{}' verified. Node ID = '{}'.", senderId,
+						networkManager.getNodeId());
 				return true;
 			} else {
-				logger.error(String.format("Message from user '%s' has wrong signature. node id = '%s'",
-						senderId, networkManager.getNodeId()));
+				logger.error("Message from user '{}' has wrong signature. Node ID = '{}'.", senderId,
+						networkManager.getNodeId());
 				return false;
 			}
 		} catch (GetFailedException | InvalidKeyException | SignatureException | NoSessionException e) {
-			logger.error(String.format("Verifying message from user '%s' failed. reason = '%s'", senderId,
-					e.getMessage()));
+			logger.error("Verifying message from user '{}' failed. Reason = '%s'.", senderId, e.getMessage());
 			return false;
 		}
 	}
@@ -170,7 +167,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			try {
 				message.setNetworkManager(networkManager);
 			} catch (NoPeerConnectionException e) {
-				logger.error("Cannot process the message because the peer is not connected");
+				logger.error("Cannot process the message because the peer is not connected.");
 				return;
 			}
 
@@ -178,13 +175,11 @@ public class MessageReplyHandler implements ObjectDataReply {
 			AcceptanceReply reply = message.accept();
 			if (AcceptanceReply.OK == reply) {
 				// handle message in own thread
-				logger.debug(String.format("Received and accepted the message. node id = '%s'",
-						networkManager.getNodeId()));
+				logger.debug("Received and accepted the message. Node ID = '{}'.", networkManager.getNodeId());
 				new Thread(message).start();
 			} else {
-				logger.warn(String.format(
-						"Received but denied a message. Acceptance reply = '%s' node id = '%s'", reply,
-						networkManager.getNodeId()));
+				logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.", reply,
+						networkManager.getNodeId());
 			}
 		}
 

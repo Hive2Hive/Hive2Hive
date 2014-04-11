@@ -1,31 +1,11 @@
 package org.hive2hive.core.network.data;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
-import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.model.FileVersion;
-import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.security.H2HEncryptionUtil;
-import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides methods to start and stop a periodical task to refresh the time-to-live value of data which has
@@ -35,7 +15,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public class TTLRefreshManager {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(TTLRefreshManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(TTLRefreshManager.class);
 
 	private Timer timer;
 	private RefreshTask task;

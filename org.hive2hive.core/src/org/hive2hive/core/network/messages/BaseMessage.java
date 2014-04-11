@@ -10,9 +10,9 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the base class of all messages used by <code>Hive2Hive</code>.</br>
@@ -36,7 +36,7 @@ import org.hive2hive.core.network.NetworkManager;
  */
 public abstract class BaseMessage implements Runnable, Serializable {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(BaseMessage.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -228,7 +228,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 *             {@link AcceptanceReply#FUTURE_FAILURE}
 	 */
 	public boolean handleSendingFailure(AcceptanceReply reply) throws IllegalArgumentException {
-		logger.debug(String.format("Have to handle a sending failure. reply = '%s'", reply));
+		logger.debug("Have to handle a sending failure. Reply = '{}'.", reply);
 		switch (reply) {
 			case FAILURE:
 			case FUTURE_FAILURE:
@@ -236,33 +236,32 @@ public abstract class BaseMessage implements Runnable, Serializable {
 					if (routedSendingCounter < H2HConstants.MAX_MESSAGE_SENDING) {
 						return true;
 					} else {
-						logger.error(String
-								.format("Message does not getting accepted by the targets in %d tries. target key = '%s'",
-										routedSendingCounter, targetKey));
+						logger.error(
+								"Message did not get accepted by the targets in {} tries. Target key = '{}'.",
+								routedSendingCounter, targetKey);
 						return false;
 					}
 				} else {
-					logger.warn(String.format(
-							"Message not accepted by the target after one try. target key = '%s'", targetKey));
+					logger.warn("Message not accepted by the target after one try. Target key = '{}'.",
+							targetKey);
 					return false;
 				}
 			case FAILURE_DECRYPTION:
-				logger.warn(String
-						.format("Message not accepted by the target. Decryption on target node failed. target key = '%s'",
-								targetKey));
+				logger.warn(
+						"Message not accepted by the target. Decryption on target node failed. Target key = '{}'.",
+						targetKey);
 				return false;
 			case FAILURE_SIGNATURE:
-				logger.warn(String.format(
-						"Message not accepted by the target. Signature is wrong. target key = '%s'",
-						targetKey));
+				logger.warn("Message not accepted by the target. Signature is wrong. Target key = '{}'.",
+						targetKey);
 				return false;
 			case OK:
-				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
+				logger.error("Trying to handle an AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
 			default:
-				logger.error(String.format("Unkown AcceptanceReply argument: %s", reply));
+				logger.error("Unkown AcceptanceReply argument: {}.", reply);
 				throw new IllegalArgumentException(
-						String.format("Unkown AcceptanceReply argument: %s", reply));
+						String.format("Unkown AcceptanceReply argument: %s.", reply));
 		}
 	}
 

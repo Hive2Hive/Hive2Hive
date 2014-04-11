@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A caching public key manager, which if necessary gets the desired public key of an user from the network.
@@ -22,7 +22,7 @@ import org.hive2hive.core.network.data.parameters.Parameters;
  */
 public class PublicKeyManager {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(PublicKeyManager.class);
+	private final static Logger logger = LoggerFactory.getLogger(PublicKeyManager.class);
 
 	private final String userId;
 	private final KeyPair usersKeyPair;
@@ -81,7 +81,7 @@ public class PublicKeyManager {
 	 * @throws GetFailedException if the public key can't be fetched
 	 */
 	public PublicKey getPublicKey(String userId) throws GetFailedException {
-		logger.debug("Requested to get the public key of user '" + userId + "'.");
+		logger.debug("Requested to get the public key of user '{}'.", userId);
 		if (this.userId.equals(userId))
 			// get the own public key
 			return usersKeyPair.getPublic();
@@ -98,21 +98,21 @@ public class PublicKeyManager {
 	private PublicKey evaluateResult(NetworkContent content, String requestingUserId)
 			throws GetFailedException {
 		if (content == null) {
-			logger.warn(String.format("Did not find the public key of user '%s'.", requestingUserId));
+			logger.warn("Did not find the public key of user '{}'.", requestingUserId);
 			throw new GetFailedException("No public key found.");
 		} else if (!(content instanceof UserPublicKey)) {
-			logger.error(String
-					.format("The received content is not an user public key. Did not find the public key of user '%s'.",
-							requestingUserId));
+			logger.error(
+					"The received content is not a user public key. Did not find the public key of user '{}'.",
+					requestingUserId);
 			throw new GetFailedException("Received unkown content.");
 		} else {
-			logger.trace(String.format("Received sucessfully the public key of user '%s'.", requestingUserId));
+			logger.trace("Successfully received the public key of user '{}'.", requestingUserId);
 			UserPublicKey userPublicKey = (UserPublicKey) content;
 			if (userPublicKey.getPublicKey() == null) {
-				logger.error(String.format("User public key of user '%s' is corrupted.", requestingUserId));
+				logger.error("User public key of user '{}' is corrupted.", requestingUserId);
 				throw new GetFailedException("Received corrupted public key.");
 			} else {
-				logger.debug("Successfully got the public key of user '" + userId + "'.");
+				logger.debug("Successfully got the public key of user '{}'.", userId);
 				// store it in the cache
 				publicKeyCache.put(requestingUserId, userPublicKey.getPublicKey());
 				// return it
