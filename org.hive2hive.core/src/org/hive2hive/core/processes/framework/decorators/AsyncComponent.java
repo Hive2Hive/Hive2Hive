@@ -67,7 +67,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 		try {
 			Thread.currentThread().checkAccess();
 			Thread.currentThread().setName(
-					String.format("async-process %s ", decoratedComponent.getClass().getSimpleName()));
+					String.format("async-process %s", decoratedComponent.getClass().getSimpleName()));
 		} catch (SecurityException e) {
 		}
 		;
