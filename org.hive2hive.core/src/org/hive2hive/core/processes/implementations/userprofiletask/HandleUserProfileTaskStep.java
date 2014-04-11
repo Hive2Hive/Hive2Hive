@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.implementations.userprofiletask;
 
-import org.apache.log4j.Logger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -9,10 +7,12 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HandleUserProfileTaskStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(HandleUserProfileTaskStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(HandleUserProfileTaskStep.class);
 
 	private final UserProfileTaskContext context;
 	private final NetworkManager networkManager;
@@ -31,14 +31,13 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 		String userId = networkManager.getUserId();
 
 		if (userProfileTask == null) {
-			logger.debug(String.format(
-					"No more user profile tasks in queue. Stopping handling. user id = '%s'", userId));
+			logger.debug("No more user profile tasks in queue. Stopping handling. User ID = '{}'.", userId);
 			// all user profile tasks are handled, stop process
 			return;
 		}
 
-		logger.debug(String.format("Executing a '%s' user profile task. user id = '%s'", userProfileTask
-				.getClass().getSimpleName(), userId));
+		logger.debug("Executing a '{}' user profile task. User ID = '{}'.", userProfileTask.getClass()
+				.getSimpleName(), userId);
 		// give the network manager reference to be able to run
 		userProfileTask.setNetworkManager(networkManager);
 		// run the user profile task in own thread

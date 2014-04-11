@@ -2,12 +2,12 @@ package org.hive2hive.core.processes.implementations.notify;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.apache.log4j.Logger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A general user profile task notification message which encourages the receiver to check his user profile
@@ -19,7 +19,7 @@ public class UserProfileTaskNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 1614762764885721467L;
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileTaskNotificationMessage.class);
+	private final static Logger logger = LoggerFactory.getLogger(UserProfileTaskNotificationMessage.class);
 
 	private final String senderId;
 
@@ -30,12 +30,12 @@ public class UserProfileTaskNotificationMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		logger.debug(String.format("Received an user profile task notification. from = '%s'", senderId));
+		logger.debug("Received a user profile task notification from '{}'.", senderId);
 		try {
 			ProcessComponent process = ProcessFactory.instance().createUserProfileTaskStep(networkManager);
 			process.start();
 		} catch (InvalidProcessStateException e) {
-			logger.error("Can't handle user profile task queue. Currently no user logged in.");
+			logger.error("Cannot handle user profile task queue. Currently no user is logged in.");
 		}
 	}
 }

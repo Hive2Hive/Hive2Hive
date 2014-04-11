@@ -4,8 +4,6 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -14,6 +12,8 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class for {@link ProcessStep}s that intend to PUT content to the DHT.
@@ -22,7 +22,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
  */
 public abstract class BasePutProcessStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BasePutProcessStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(BasePutProcessStep.class);
 
 	private final IDataManager dataManager;
 	protected boolean putPerformed;
@@ -67,9 +67,9 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 		boolean success = dataManager.removeVersion(parameters);
 		if (success) {
-			logger.debug(String.format("Rollback of put succeeded. %s", parameters.toString()));
+			logger.debug("Rollback of put succeeded. '{}'", parameters.toString());
 		} else {
-			logger.warn(String.format("Rollback of put failed. Remove failed. %s", parameters.toString()));
+			logger.warn("Rollback of put failed. Remove failed. '{}'", parameters.toString());
 		}
 	}
 }

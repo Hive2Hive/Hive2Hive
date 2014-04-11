@@ -11,8 +11,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -23,6 +21,8 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A process step which removes a {@link UserProfileTask} object from the network.
@@ -31,7 +31,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public class RemoveUserProfileTaskStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(RemoveUserProfileTaskStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUserProfileTaskStep.class);
 
 	private final IConsumeUserProfileTask context;
 
@@ -70,7 +70,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (!removePerformed) {
-			logger.info("Noting has been removed. Skip re-adding it to the network.");
+			logger.info("Nothing has been removed. Skip re-adding it to the network.");
 			return;
 		}
 
@@ -78,7 +78,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		try {
 			session = networkManager.getSession();
 		} catch (NoSessionException e1) {
-			logger.error("Could not rollback because no session");
+			logger.error("Could not roll back because no session.");
 			return;
 		}
 
@@ -88,7 +88,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 			encrypted = H2HEncryptionUtil.encryptHybrid(upTask, session.getKeyPair().getPublic());
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | IOException e) {
-			logger.error("Could not encrypt the user profile task while rollback");
+			logger.error("Could not encrypt the user profile task while rollback.");
 			return;
 		}
 
@@ -97,9 +97,9 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
-			logger.warn(String
-					.format("Roll back of remove user profile task failed. No connection. user id = '%s' content key = '%s'",
-							userId, upTask.getContentKey()));
+			logger.warn(
+					"Rollback of remove user profile task failed. No connection. User ID = '{}', Content key = '{}'.",
+					userId, upTask.getContentKey());
 			return;
 		}
 
@@ -107,13 +107,13 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		boolean success = dataManager.putUserProfileTask(userId, upTask.getContentKey(), encrypted,
 				upTask.getProtectionKey());
 		if (success) {
-			logger.debug(String.format(
-					"Roll back of removing user profile task succeeded. user id = '%s' content key = '%s'",
-					userId, upTask.getContentKey()));
+			logger.debug(
+					"Rollback of removing user profile task succeeded. User ID = '{}', Content key = '{}'.",
+					userId, upTask.getContentKey());
 		} else {
-			logger.warn(String
-					.format("Roll back of removing user profile task failed. Re-put failed. user id = '%s' content key = '%s'",
-							userId, upTask.getContentKey()));
+			logger.warn(
+					"Rollback of removing user profile task failed. Re-put failed. User ID = '{}', Content key = '{}'.",
+					userId, upTask.getContentKey());
 		}
 	}
 }

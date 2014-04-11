@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gets all public keys from these users iteratively
@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.implementations.context.NotifyProcessContext
 // TODO get the keys in parallel
 public class GetPublicKeysStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(GetPublicKeysStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(GetPublicKeysStep.class);
 	private final NotifyProcessContext context;
 	private final PublicKeyManager keyManager;
 
@@ -37,7 +37,7 @@ public class GetPublicKeysStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		Set<String> users = context.consumeUsersToNotify();
 
-		logger.debug("Start getting public keys from " + users.size() + " user(s)");
+		logger.debug("Start getting public keys from {} user(s).", users.size());
 		Map<String, PublicKey> keys = new HashMap<String, PublicKey>();
 
 		for (String user : users) {

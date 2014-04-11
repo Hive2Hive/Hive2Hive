@@ -4,14 +4,14 @@ import java.util.List;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.apache.log4j.Logger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This message is sent after an upload has finished. It downloads the newest version at the receiver side
@@ -22,7 +22,8 @@ import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil
 public class UploadNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = -695268345354561544L;
-	private final static Logger logger = H2HLoggerFactory.getLogger(UploadNotificationMessage.class);
+	
+	private final static Logger logger = LoggerFactory.getLogger(UploadNotificationMessage.class);
 	private final Index index;
 
 	public UploadNotificationMessage(PeerAddress targetAddress, Index index) {
@@ -32,7 +33,7 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		logger.debug("Notification message received");
+		logger.debug("Notification message received.");
 		if (index.isFile()) {
 			downloadSingle();
 		} else {
@@ -47,12 +48,12 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 
 	private void downloadSingle() {
 		try {
-			logger.debug(String.format("Got notified and start to download the file = '%s'", index.getName()));
+			logger.debug("Got notified and start to download the file '{}'.", index.getName());
 			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
 					index.getFilePublicKey(), networkManager);
 			process.start();
 		} catch (Exception e) {
-			logger.error("Got notified but cannot download the file", e);
+			logger.error("Got notified but cannot download the file.", e);
 		}
 	}
 
@@ -61,9 +62,9 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 		try {
 			ProcessComponent process = FileRecursionUtil.buildDownloadProcess(files, networkManager);
 			process.start();
-			logger.debug("Got notified and start to download a file tree");
+			logger.debug("Got notified and start downloading a file tree.");
 		} catch (Exception e) {
-			logger.error("Could not download the full tree", e);
+			logger.error("Could not download the full tree.", e);
 		}
 	}
 }

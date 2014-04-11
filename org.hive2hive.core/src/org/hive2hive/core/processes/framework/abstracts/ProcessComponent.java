@@ -9,14 +9,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for all process components. Keeps track of a components most essential properties and
@@ -27,7 +27,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListen
  */
 public abstract class ProcessComponent implements IProcessComponent {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ProcessComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProcessComponent.class);
 
 	private final String id;
 	private double progress;
@@ -49,7 +49,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public IProcessComponent start() throws InvalidProcessStateException {
-		logger.debug(String.format("Executing '%s'.", this.getClass().getSimpleName()));
+		logger.debug("Executing '{}'.", this.getClass().getSimpleName());
 
 		if (state != ProcessState.READY) {
 			throw new InvalidProcessStateException(state);
@@ -103,8 +103,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
-			logger.warn(String.format("Rolling back '%s'. Reason: %s", this.getClass().getSimpleName(),
-					reason.getHint()));
+			logger.warn("Rolling back '{}'. Reason: '{}'.", this.getClass().getSimpleName(),
+					reason.getHint());
 
 			doRollback(reason);
 		}
@@ -207,11 +207,11 @@ public abstract class ProcessComponent implements IProcessComponent {
 			} else {
 				boolean success = latch.await(timeout, TimeUnit.MILLISECONDS);
 				if (!success) {
-					throw new InterruptedException("Waiting for process timed out");
+					throw new InterruptedException("Waiting for process timed out.");
 				}
 			}
 		} catch (InterruptedException e) {
-			logger.error("Interrupted while waiting for process", e);
+			logger.error("Interrupted while waiting for process.", e);
 			throw e;
 		} finally {
 			handle.cancel(true);

@@ -4,8 +4,6 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -14,6 +12,8 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A process step which removes a {@link NetworkContent} object under the given keys from the network.</br>
@@ -29,7 +29,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 	// multiple times. Make sure, that a single step only calls remove() once. Otherwise, create multiple
 	// steps! (e.g. DeleteSingleChunkStep)
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseRemoveProcessStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
 	private IParameters parameters;
 	private final IDataManager dataManager;
@@ -61,22 +61,21 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (!removePerformed) {
-			logger.info("Noting has been removed. Skip re-adding it to the network");
+			logger.info("Noting has been removed. Skip re-adding it to the network.");
 			return;
 		}
 
 		// TODO ugly bug fix
 		if (parameters.getData() == null) {
-			logger.warn(String.format("Roll back of remove failed. No content to re-put. %s",
-					parameters.toString()));
+			logger.warn("Rollback of remove failed. No content to re-put. '{}'", parameters.toString());
 			return;
 		}
 
 		boolean success = dataManager.put(parameters);
 		if (success) {
-			logger.debug(String.format("Roll back of remove succeeded. %s", parameters.toString()));
+			logger.debug("Rollback of remove succeeded. '{}'", parameters.toString());
 		} else {
-			logger.warn(String.format("Roll back of remove failed. Re-put failed. %s", parameters.toString()));
+			logger.warn("Rollback of remove failed. Re-put failed. '{}'", parameters.toString());
 		}
 	}
 }

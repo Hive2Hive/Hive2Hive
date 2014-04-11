@@ -3,9 +3,7 @@ package org.hive2hive.core.processes.implementations.share;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserPermission;
@@ -15,12 +13,14 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ShareFolderUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -2476009828696898562L;
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(ShareFolderUserProfileTask.class);
+	private final static Logger logger = LoggerFactory.getLogger(ShareFolderUserProfileTask.class);
 
 	private final FolderIndex sharedIndex;
 	private final UserPermission addedFriend;
@@ -46,7 +46,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 				processSharedWithMe();
 			} else {
 				// New sharer, but I have the file already
-				logger.debug("Other user shared folder with new user '" + addedFriend + "'.");
+				logger.debug("Other user shared folder with new user '{}'.", addedFriend);
 				processSharedWithOther();
 			}
 		} catch (Hive2HiveException e) {
@@ -93,17 +93,17 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		userProfile.getRoot().addChild(sharedIndex);
 		sharedIndex.setParent(userProfile.getRoot());
 		profileManager.readyToPut(userProfile, pid);
-		logger.debug("Added the newly shared folder to the own user profile");
+		logger.debug("Added the newly shared folder to the own user profile.");
 
 		/** 2. Notify others that files are available */
 		notifyOtherClients(new UploadNotificationMessageFactory(sharedIndex, null));
-		logger.debug("Notified other client that new (shared) files are available for download");
+		logger.debug("Notified other client that new (shared) files are available for download.");
 
 		/** 3. download the files that are now available */
 		List<Index> fileList = Index.getIndexList(sharedIndex);
 		// the folder itself is also contained, so remove it
 		ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList, networkManager);
-		logger.debug("Start to download " + fileList.size() + " files that have been shared with me");
+		logger.debug("Start to download {} files that have been shared with me.", fileList.size());
 		downloadProcess.start();
 	}
 }

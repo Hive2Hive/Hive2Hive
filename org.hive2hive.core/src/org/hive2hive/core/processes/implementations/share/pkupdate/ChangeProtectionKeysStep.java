@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.implementations.share.pkupdate;
 
-import org.apache.log4j.Logger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -11,6 +9,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Changes the protection key for any data of type {@link NetworkContent}. Use the {@link BasePKUpdateContext}
@@ -20,7 +20,7 @@ import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
  */
 public class ChangeProtectionKeysStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(ChangeProtectionKeysStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(ChangeProtectionKeysStep.class);
 
 	private final BasePKUpdateContext context;
 	private final IDataManager dataManager;
@@ -53,7 +53,7 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 		if (!changePerformed)
 			return;
 
-		logger.debug(String.format("Rollbacking change of content protection key. %s", parameters.toString()));
+		logger.debug("Rollbacking change of content protection key. '{}'", parameters.toString());
 
 		Parameters rollbackParameters = new Parameters().setLocationKey(parameters.getLocationKey())
 				.setContentKey(parameters.getContentKey()).setVersionKey(parameters.getVersionKey())
@@ -64,11 +64,11 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 
 		boolean success = dataManager.changeProtectionKey(rollbackParameters);
 		if (success) {
-			logger.debug(String.format("Rollback of change protection key succeeded. %s",
-					parameters.toString()));
+			logger.debug("Rollback of change protection key succeeded. '{}'",
+					parameters.toString());
 		} else {
-			logger.warn(String.format("Rollback of change protection key failed. Remove failed. %s",
-					parameters.toString()));
+			logger.warn("Rollback of change protection key failed. Remove failed. '{}'",
+					parameters.toString());
 		}
 	}
 }
