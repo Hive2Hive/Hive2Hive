@@ -9,17 +9,17 @@ import java.util.Set;
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModifyFileBuffer extends BaseFileBuffer {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ModifyFileBuffer.class);
+	private static final Logger logger = LoggerFactory.getLogger(ModifyFileBuffer.class);
 
 	public ModifyFileBuffer(IFileManager fileManager) {
 		super(fileManager);
@@ -56,7 +56,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 						toDelete.add(file);
 					}
 				} catch (IOException e) {
-					logger.warn("Could not generate the MD5 hash of the file to be able to compare against the file taste");
+					logger.warn("Could not generate the MD5 hash of the file to be able to compare against the file taste.");
 				}
 			}
 		}

@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds two file lists:<br>
@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.implementations.files.list.FileTaste;
  */
 public class FileBufferHolder implements IFileBufferHolder {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileBufferHolder.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileBufferHolder.class);
 
 	// The maximum amount of time to wait until the sync files should be ready.
 	private static final long MAX_SYNC_FILES_AWAIT_MS = 20000;
@@ -66,7 +66,7 @@ public class FileBufferHolder implements IFileBufferHolder {
 			try {
 				syncFilesLatch.await(MAX_SYNC_FILES_AWAIT_MS, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
-				logger.error("Could not wait until the file digest was ready");
+				logger.error("Could not wait until the file digest was ready.");
 			}
 		}
 	}

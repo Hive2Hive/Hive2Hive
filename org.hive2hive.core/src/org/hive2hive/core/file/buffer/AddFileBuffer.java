@@ -9,15 +9,15 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AddFileBuffer extends BaseFileBuffer {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AddFileBuffer.class);
+	private static final Logger logger = LoggerFactory.getLogger(AddFileBuffer.class);
 
 	public AddFileBuffer(IFileManager fileManager) {
 		super(fileManager);
@@ -54,9 +54,7 @@ public class AddFileBuffer extends BaseFileBuffer {
 			for (File possibleParent : fileBuffer) {
 				if (!bufferedFile.equals(possibleParent)
 						&& bufferedFile.getAbsolutePath().startsWith(possibleParent.getAbsolutePath())) {
-					logger.debug("Parent (" + possibleParent.getAbsolutePath()
-							+ ") already in buffer, no need to add " + bufferedFile.getAbsolutePath()
-							+ " too.");
+					logger.debug("Parent ({}) already in buffer, no need to add child ({}), too.", possibleParent.getAbsolutePath(), bufferedFile.getAbsolutePath());
 					filtered.remove(bufferedFile);
 				}
 			}
