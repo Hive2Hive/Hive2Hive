@@ -14,8 +14,6 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -24,6 +22,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A process step which puts a {@link UserProfileTask} object.</br>
@@ -34,7 +34,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public abstract class PutUserProfileTaskStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PutUserProfileTaskStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(PutUserProfileTaskStep.class);
 
 	protected final NetworkManager networkManager;
 	private String userId;
@@ -59,7 +59,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 		this.userId = userId;
 
 		try {
-			logger.debug("Encrypting user profile task in a hybrid manner");
+			logger.debug("Encrypting user profile task in a hybrid manner.");
 			this.contentKey = userProfileTask.getContentKey();
 			this.protectionKey = userProfileTask.getProtectionKey();
 			DataManager dataManager = networkManager.getDataManager();
@@ -82,7 +82,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (!putPerformed) {
-			logger.warn("Nothing to remove at rollback because nothing has been put");
+			logger.warn("Nothing to remove at rollback because nothing has been put.");
 			return;
 		}
 
@@ -90,21 +90,20 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
-			logger.warn(String
-					.format("Roll back of user profile task put failed. No connection. user id = '%s' content key = '%s'",
-							userId, contentKey));
+			logger.warn(
+					"Rollback of user profile task put failed. No connection. User ID = '{}', Content key = '{}'.",
+					userId, contentKey);
 			return;
 		}
 
 		boolean success = dataManager.removeUserProfileTask(userId, contentKey, protectionKey);
 		if (success) {
-			logger.debug(String.format(
-					"Roll back of user profile task put succeeded. user id = '%s' content key = '%s'",
-					userId, contentKey));
+			logger.debug("Rollback of user profile task put succeeded. User ID = '{}', Content key = '{}'.",
+					userId, contentKey);
 		} else {
-			logger.warn(String.format(
-					"Roll back of user profile put failed. Remove failed. user id = '%s' content key = '%s'",
-					userId, contentKey));
+			logger.warn(
+					"Rollback of user profile put failed. Remove failed. User ID = '{}', Content key = '{}'.",
+					userId, contentKey);
 		}
 	}
 }

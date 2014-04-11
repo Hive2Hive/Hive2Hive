@@ -7,12 +7,10 @@ import java.security.PrivateKey;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
-import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -23,6 +21,8 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfileTask;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A process step which gets the next {@link UserProfileTask} object of the currently logged in user.
@@ -31,7 +31,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public class GetUserProfileTaskStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(GetUserProfileTaskStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(GetUserProfileTaskStep.class);
 
 	private final IProvideUserProfileTask context;
 	private String userId;
@@ -56,14 +56,14 @@ public class GetUserProfileTaskStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		logger.debug(String.format("Get the next user profile task of user '%s'.", userId));
+		logger.debug("Get the next user profile task of user '{}'.", userId);
 		NetworkContent content = dataManager.getUserProfileTask(userId);
 
 		if (content == null) {
-			logger.warn(String.format("Did not get an user profile task. user id = '%s'", userId));
+			logger.warn("Did not get an user profile task. User ID = '{}'.", userId);
 			context.provideUserProfileTask(null);
 		} else {
-			logger.debug(String.format("Got encrypted user profile task. user id = '%s'", userId));
+			logger.debug("Got encrypted user profile task. User ID = '{}'", userId);
 
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			PrivateKey key = null;
@@ -81,7 +81,7 @@ public class GetUserProfileTaskStep extends ProcessStep {
 				throw new ProcessExecutionException("Could not decrypt user profile task.", e);
 			}
 			context.provideUserProfileTask((UserProfileTask) decrypted);
-			logger.debug(String.format("Successfully decrypted a user profile task. user id = '%s'", userId));
+			logger.debug("Successfully decrypted a user profile task. User ID = '{}'.", userId);
 
 		}
 	}

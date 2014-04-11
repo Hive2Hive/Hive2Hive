@@ -7,15 +7,15 @@ import java.util.Map;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gets all locations of a given list of users (iterative). If all locations are fetched, this step sends
@@ -27,7 +27,7 @@ import org.hive2hive.core.processes.implementations.context.NotifyProcessContext
 // TODO: do parallel for faster processing
 public class GetAllLocationsStep extends BaseGetProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(GetAllLocationsStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(GetAllLocationsStep.class);
 	private final NotifyProcessContext context;
 
 	public GetAllLocationsStep(NotifyProcessContext context, IDataManager dataManager) {
@@ -37,7 +37,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		logger.debug("Starting to get all locations from the users to be notified");
+		logger.debug("Starting to get all locations from the users to be notified.");
 		Map<String, List<PeerAddress>> allLocations = new HashMap<String, List<PeerAddress>>();
 
 		// iterate over all users and get the locations of them
@@ -53,7 +53,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 		}
 
 		// done with all locations
-		logger.debug("Sending notifications to " + allLocations.size() + " users");
+		logger.debug("Sending notifications to {} users.", allLocations.size());
 		context.setAllLocations(allLocations);
 	}
 }

@@ -16,13 +16,13 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.DigestResult;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
@@ -40,7 +40,7 @@ import org.hive2hive.core.network.data.parameters.IParameters;
  */
 public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(FuturePutListener.class);
+	private final static Logger logger = LoggerFactory.getLogger(FuturePutListener.class);
 
 	private final IParameters parameters;
 	private final DataManager dataManager;
@@ -65,7 +65,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error("Could not wait until put has finished", e);
+			logger.error("Could not wait until put has finished.", e);
 		}
 
 		return success;
@@ -73,10 +73,10 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
-		logger.trace(String.format("Start verification of put. %s", parameters.toString()));
+		logger.trace("Start verification of put. '{}'", parameters.toString());
 
 		if (future.isFailed()) {
-			logger.warn(String.format("Put future was not successful. %s", parameters.toString()));
+			logger.warn("Put future was not successful. '{}'", parameters.toString());
 			retryPut();
 			return;
 		} else if (future.getRawResult().isEmpty()) {
@@ -91,7 +91,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		for (PeerAddress peeradress : future.getRawResult().keySet()) {
 			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
 			if (map == null) {
-				logger.warn(String.format("A node gave no status (null) back. %s", parameters.toString()));
+				logger.warn("A node gave no status (null) back. '{}'", parameters.toString());
 				fail.add(peeradress);
 			} else {
 				for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
@@ -102,16 +102,16 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 						case FAILED:
 						case FAILED_NOT_ABSENT:
 						case FAILED_SECURITY:
-							logger.warn(String.format("A node denied putting data. reason = '%s' %s",
-									PutStatusH2H.values()[status], parameters.toString()));
+							logger.warn("A node denied putting data. Reason = '%s'. '{}'",
+									PutStatusH2H.values()[status], parameters.toString());
 							fail.add(peeradress);
 							break;
 						case VERSION_CONFLICT:
 						case VERSION_CONFLICT_NO_BASED_ON:
 						case VERSION_CONFLICT_NO_VERSION_KEY:
 						case VERSION_CONFLICT_OLD_TIMESTAMP:
-							logger.warn(String.format("A version conflict detected. reason = '%s' %s",
-									PutStatusH2H.values()[status], parameters.toString()));
+							logger.warn("Version conflict detected. Reason = '{}'. '{}'",
+									PutStatusH2H.values()[status], parameters.toString());
 							versionConflict.add(peeradress);
 							break;
 					}
@@ -120,14 +120,13 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 
 		if (!versionConflict.isEmpty()) {
-			logger.warn(String.format("Put verification failed. Version conflict! %s", parameters.toString()));
+			logger.warn("Put verification failed. Version conflict! '{}'", parameters.toString());
 			notifyFailure();
 		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
 			// majority of the contacted nodes responded with ok
 			verifyPut();
 		} else {
-			logger.warn(String.format("%s of %s contacted nodes failed.", fail.size(), future.getRawResult()
-					.size()));
+			logger.warn("{} of {} contacted nodes failed.", fail.size(), future.getRawResult().size());
 			retryPut();
 		}
 	}
@@ -138,22 +137,22 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 */
 	private void retryPut() {
 		if (putTries++ < H2HConstants.PUT_RETRIES) {
-			logger.warn(String.format("Put retry #%s. %s", putTries, parameters.toString()));
+			logger.warn("Put retry #{}. '{}'", putTries, parameters.toString());
 			// remove succeeded puts
 			FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
 			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 				@Override
 				public void operationComplete(FutureRemove future) {
 					if (future.isFailed())
-						logger.warn(String.format("Put Retry: Could not delete the newly put content. %s",
-								parameters.toString()));
+						logger.warn("Put retry: Could not delete the newly put content. '{}'",
+								parameters.toString());
 
 					dataManager.putUnblocked(parameters).addListener(FuturePutListener.this);
 				}
 			});
 		} else {
-			logger.error(String.format("Put verification failed. Couldn't put data after %s tries. %s",
-					putTries, parameters.toString()));
+			logger.error("Put verification failed. Could not put data after {} tries. '{}'", putTries,
+					parameters.toString());
 			notifyFailure();
 		}
 	}
@@ -183,8 +182,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
 				if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
-					logger.error(String.format("Put verification failed. Couldn't get digest. %s",
-							parameters.toString()));
+					logger.error("Put verification failed. Could not get digest. '{}'", parameters.toString());
 					notifyFailure();
 				} else {
 					checkVersionKey(future.getRawDigest());
@@ -205,23 +203,22 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		for (PeerAddress peerAddress : rawDigest.keySet()) {
 			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).keyDigest() == null
 					|| rawDigest.get(peerAddress).keyDigest().isEmpty()) {
-				logger.warn(String.format("Put verification: Received from peer '%s' no digest. %s",
-						peerAddress, parameters.toString()));
+				logger.warn("Put verification: Received no digest from peer '{}'. '{}'", peerAddress,
+						parameters.toString());
 			} else {
 				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).keyDigest();
 
 				if (keyDigest.firstEntry().getKey().getVersionKey().equals(parameters.getVersionKey())) {
-					logger.trace(String.format("Put verification: On peer '%s' entry is newest. %s",
-							peerAddress, parameters.toString()));
+					logger.trace("Put verification: On peer '{}' entry is newest. '{}'",
+							peerAddress, parameters.toString());
 
 				} else if (keyDigest.containsKey(parameters.getKey())) {
-					logger.trace(String.format("Put verification: entry on peer '%s' exists in history. %s",
-							peerAddress, parameters.toString()));
+					logger.trace("Put verification: On peer '{}' entry exists in history. '{}'",
+							peerAddress, parameters.toString());
 
 				} else {
-					logger.warn(String.format(
-							"Put verification: Concurrent modification on peer '%s' happened. %s",
-							peerAddress, parameters.toString()));
+					logger.warn("Put verification: Concurrent modification on peer '{}' happened. '{}'",
+							peerAddress, parameters.toString());
 
 					// if version key is older than the other, the version wins
 					if (!checkIfMyVerisonWins(keyDigest, peerAddress)) {
@@ -250,8 +247,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		/* Check if based on entry exists */
 		if (!keyDigest.containsKey(new Number640(parameters.getLKey(), parameters.getDKey(), parameters
 				.getCKey(), parameters.getData().getBasedOnKey()))) {
-			logger.warn(String.format("Put verification: Peer '%s' doesn't contain based on version. %s",
-					peerAddress, parameters.toString()));
+			logger.warn("Put verification: Peer '{}' does not contain based on version. '{}'",
+					peerAddress, parameters.toString());
 			// something is definitely wrong with this peer
 			return true;
 		} else {
@@ -259,29 +256,28 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			Number640 entryBasingOnSameParent = getSuccessor(keyDigest);
 			if (entryBasingOnSameParent == null) {
 				if (keyDigest.firstKey().getVersionKey().equals(parameters.getData().getBasedOnKey())) {
-					logger.error(String.format("Put verification: Peer '%s' has no successor version. %s",
-							peerAddress, parameters.toString()));
+					logger.error("Put verification: Peer '{}' has no successor version. '{}'",
+							peerAddress, parameters.toString());
 					// this peer doesn't contain any successor version, with this peer is something wrong
 					return true;
 				} else {
-					logger.error(String.format(
-							"Put verification: Peer '%s' has a corrupt version history. %s", peerAddress,
-							parameters.toString()));
+					logger.error("Put verification: Peer '{}' has a corrupt version history. '{}'", peerAddress,
+							parameters.toString());
 					return true;
 				}
 			} else {
 				int compare = entryBasingOnSameParent.getVersionKey().compareTo(parameters.getVersionKey());
 				if (compare == 0) {
-					logger.error(String.format("Put verification: Peer '%s' has same version. %s",
-							peerAddress, parameters.toString()));
+					logger.error("Put verification: Peer '{}' has same version. '{}'",
+							peerAddress, parameters.toString());
 					return true;
 				} else if (compare < 0) {
-					logger.warn(String.format("Put verification: Peer '%s' has older version. %s",
-							peerAddress, parameters.toString()));
+					logger.warn("Put verification: Peer '{}' has older version. '{}'",
+							peerAddress, parameters.toString());
 					return false;
 				} else {
-					logger.warn(String.format("Put verification: Peer '%s' has newer version. %s",
-							peerAddress, parameters.toString()));
+					logger.warn("Put verification: Peer '{}' has newer version. '{}'",
+							peerAddress, parameters.toString());
 					return true;
 				}
 			}
@@ -307,7 +303,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	}
 
 	private void notifySuccess() {
-		logger.trace(String.format("Verification for put completed. %s", parameters.toString()));
+		logger.trace("Verification for put completed. '{}'", parameters.toString());
 		// everything is ok
 		success = true;
 		latch.countDown();
@@ -323,8 +319,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			@Override
 			public void operationComplete(FutureRemove future) {
 				if (future.isFailed())
-					logger.warn(String.format("Put Retry: Could not delete the newly put content. %s",
-							parameters.toString()));
+					logger.warn("Put retry: Could not delete the newly put content. '{}'",
+							parameters.toString());
 
 				success = false;
 				latch.countDown();

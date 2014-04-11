@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.UserProfile;
@@ -17,6 +15,8 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A step updating the MD5 hash in the user profile
@@ -25,7 +25,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
  */
 public class UpdateMD5inUserProfileStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(UpdateMD5inUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(UpdateMD5inUserProfileStep.class);
 
 	private final UpdateFileProcessContext context;
 	private final UserProfileManager profileManager;
@@ -63,7 +63,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 			// make and put modifications
 			index.setMD5(newMD5);
-			logger.debug("Updating the md5 hash in the user profile");
+			logger.debug("Updating the MD5 hash in the user profile.");
 			profileManager.readyToPut(userProfile, getID());
 
 			// store for notification

@@ -3,11 +3,11 @@ package org.hive2hive.core.network.messages.direct;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the base class of all messages used by <code>Hive2Hive</code> which has to be sent directly to
@@ -33,7 +33,7 @@ import org.hive2hive.core.network.messages.MessageManager;
  */
 public abstract class BaseDirectMessage extends BaseMessage {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseDirectMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(BaseDirectMessage.class);
 
 	private static final long serialVersionUID = 5080812282190501445L;
 
@@ -129,37 +129,35 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	@Override
 	public boolean handleSendingFailure(AcceptanceReply reply) throws IllegalArgumentException {
-		logger.debug(String.format("Have to handle a sending failure. reply = '%s'", reply));
+		logger.debug("Have to handle a sending failure. Reply = '{}'.", reply);
 		switch (reply) {
 			case WRONG_TARGET:
-				logger.error(String
-						.format("Wrong node responded while sending this message directly using the peer address '%s' ",
-								getTargetAddress()));
+				logger.error(
+						"Wrong node responded while sending this message directly using the peer address '{}'.",
+						getTargetAddress());
 			case FAILURE:
 			case FUTURE_FAILURE:
 				if (directSendingCounter < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
 					return true;
 				} else {
-					logger.debug(String.format(
-							"Failure while sending this message directly using the peer address '%s' ",
-							getTargetAddress()));
+					logger.debug("Failure while sending this message directly using the peer address '{}'.",
+							getTargetAddress());
 					return false;
 				}
 			case FAILURE_DECRYPTION:
-				logger.warn(String
-						.format("Message not accepted by the target. Decryption on target node failed. peer address = '%s'",
-								getTargetAddress()));
+				logger.warn(
+						"Message not accepted by the target. Decryption on target node failed. Peer address = '{}'.",
+						getTargetAddress());
 				return false;
 			case FAILURE_SIGNATURE:
-				logger.warn(String.format(
-						"Message not accepted by the target. Signature is wrong. peer address = '%s'",
-						getTargetAddress()));
+				logger.warn("Message not accepted by the target. Signature is wrong. Peer address = '{}'.",
+						getTargetAddress());
 				return false;
 			case OK:
 				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
 			default:
-				logger.error(String.format("Unkown AcceptanceReply argument: %s", reply));
+				logger.error("Unkown AcceptanceReply argument: {}.", reply);
 				throw new IllegalArgumentException(
 						String.format("Unkown AcceptanceReply argument: %s", reply));
 		}

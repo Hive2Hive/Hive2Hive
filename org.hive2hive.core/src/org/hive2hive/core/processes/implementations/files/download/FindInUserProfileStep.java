@@ -1,10 +1,8 @@
 package org.hive2hive.core.processes.implementations.files.download;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -15,10 +13,12 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.GetMetaFileStep;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FindInUserProfileStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(FindInUserProfileStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(FindInUserProfileStep.class);
 
 	private final DownloadFileContext context;
 	private final NetworkManager networkManager;
@@ -47,10 +47,10 @@ public class FindInUserProfileStep extends ProcessStep {
 
 		// add the next steps here
 		if (index.isFolder()) {
-			logger.info("No download of the file needed since '" + index.getFullPath() + "' is a folder");
+			logger.info("No download of the file needed since '{}' is a folder.", index.getFullPath());
 			getParent().add(new CreateFolderStep(context, networkManager));
 		} else {
-			logger.info("Initalize the process for downloading file '" + index.getFullPath() + "'.");
+			logger.info("Initalize the process for downloading file '{}'.", index.getFullPath());
 			try {
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaFileStep(context, context, dataManager));

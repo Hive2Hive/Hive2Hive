@@ -5,9 +5,9 @@ import java.util.concurrent.CountDownLatch;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FuturePut;
 
-import org.apache.log4j.Logger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.parameters.IParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple blocking listener to change the protection key. In contrast to the {@link FuturePutListener} this
@@ -17,7 +17,7 @@ import org.hive2hive.core.network.data.parameters.IParameters;
  */
 public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut> {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(FutureChangeProtectionListener.class);
+	private final static Logger logger = LoggerFactory.getLogger(FutureChangeProtectionListener.class);
 
 	private final IParameters parameters;
 	private final CountDownLatch latch;
@@ -38,9 +38,8 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error(String.format(
-					"Could not wait until the protection key change has finished. reason = '%s' %s",
-					e.getMessage(), parameters.toString()));
+			logger.error("Could not wait until the protection key change has finished. Reason = '{}'. '{}'",
+					e.getMessage(), parameters.toString());
 		}
 
 		return success;
@@ -49,11 +48,11 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
 		if (future.isFailed()) {
-			logger.warn(String.format("Change was not successful. %s reason = '%s'", parameters.toString(), future.getFailedReason()));
+			logger.warn("Change was not successful. Reason = '{}'. '{}'", future.getFailedReason(), parameters.toString());
 			success = false;
 			latch.countDown();
 		} else {
-			logger.trace(String.format("Change of protection key successful. %s", parameters.toString()));
+			logger.trace("Change of protection key successful. '{}'", parameters.toString());
 			success = true;
 			latch.countDown();
 		}

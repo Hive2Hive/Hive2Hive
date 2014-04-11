@@ -3,10 +3,8 @@ package org.hive2hive.core.processes.implementations.files.update;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
@@ -15,6 +13,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates a new file version.
@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.implementations.context.UpdateFileProcessCon
  */
 public class CreateNewVersionStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(CreateNewVersionStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(CreateNewVersionStep.class);
 
 	private final UpdateFileProcessContext context;
 	private final IFileConfiguration config;
@@ -72,7 +72,7 @@ public class CreateNewVersionStep extends ProcessStep {
 			deletedFileVersions.add(metaFile.getVersions().remove(0));
 		}
 
-		logger.debug(String.format("Need to remove %s old versions", deletedFileVersions.size()));
+		logger.debug("Need to remove {} old versions.", deletedFileVersions.size());
 		List<MetaChunk> chunksToDelete = new ArrayList<MetaChunk>();
 		for (FileVersion fileVersion : deletedFileVersions) {
 			chunksToDelete.addAll(fileVersion.getMetaChunks());

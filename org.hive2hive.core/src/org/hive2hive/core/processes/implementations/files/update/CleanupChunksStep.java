@@ -4,8 +4,6 @@ import java.security.KeyPair;
 import java.util.List;
 
 import org.hive2hive.core.api.configs.FileConfiguration;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
@@ -15,6 +13,8 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteSingleChunkStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Initializes all {@link DeleteSingleChunkStep} to delete the chunks that are not used anymore. These are the
@@ -24,7 +24,7 @@ import org.hive2hive.core.processes.implementations.files.delete.DeleteSingleChu
  */
 public class CleanupChunksStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CleanupChunksStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(CleanupChunksStep.class);
 
 	private final UpdateFileProcessContext context;
 	private final IDataManager dataManager;
@@ -39,11 +39,11 @@ public class CleanupChunksStep extends ProcessStep {
 		List<MetaChunk> chunksToDelete = context.getChunksToDelete();
 		KeyPair protectionKeys = context.consumeProtectionKeys();
 
-		logger.debug(String.format("Cleaning %s old file chunks", chunksToDelete.size()));
+		logger.debug("Cleaning {} old file chunks.", chunksToDelete.size());
 		int counter = 0;
 		ProcessComponent prev = this;
 		for (MetaChunk metaChunk : chunksToDelete) {
-			logger.debug(String.format("Delete chunk %s of %s", counter++, chunksToDelete.size()));
+			logger.debug("Delete chunk {} of {}.", counter++, chunksToDelete.size());
 			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(metaChunk.getChunkId(),
 					protectionKeys, dataManager);
 

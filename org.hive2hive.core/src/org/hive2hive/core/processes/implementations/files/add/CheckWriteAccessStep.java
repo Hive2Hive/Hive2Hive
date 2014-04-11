@@ -4,8 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -14,6 +12,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads the user profile, verifies write access, creates a new meta key pair for the
@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.implementations.context.AddFileProcessContex
  */
 public class CheckWriteAccessStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(CheckWriteAccessStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckWriteAccessStep.class);
 
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
@@ -39,8 +39,8 @@ public class CheckWriteAccessStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
 
-		logger.trace(String.format("Check write access in folder '%s' to add file '%s'.", file
-				.getParentFile().getName(), file.getName()));
+		logger.trace("Check write access in folder '{}' to add file '{}'.", file
+				.getParentFile().getName(), file.getName());
 
 		UserProfile userProfile = null;
 		try {

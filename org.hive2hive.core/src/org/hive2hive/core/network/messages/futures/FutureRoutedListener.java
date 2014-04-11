@@ -7,11 +7,11 @@ import java.util.concurrent.CountDownLatch;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureSend;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Use this future adapter when sending a {@link BaseMessage}. Attach this listener to the future which gets
@@ -30,7 +30,7 @@ import org.hive2hive.core.network.messages.MessageManager;
  */
 public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureRoutedListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FutureRoutedListener.class);
 
 	private final BaseMessage message;
 	private final PublicKey receiverPublicKey;
@@ -69,7 +69,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error("Could not wait until the message is sent successfully");
+			logger.error("Could not wait until the message is sent successfully.");
 		}
 
 		switch (state) {
@@ -84,7 +84,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 				return messageManager.send(message, receiverPublicKey);
 			default:
 				// invalid state
-				logger.error("The sending procedure has not finished, but the lock has already been released");
+				logger.error("The sending procedure has not finished, but the lock has already been released.");
 				return false;
 		}
 	}
@@ -101,12 +101,12 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 			boolean resending = message.handleSendingFailure(reply);
 			if (resending) {
 				// re-send the message
-				logger.debug("Try to resend the message");
+				logger.debug("Try to resend the message.");
 				state = DeliveryState.RESEND;
 				latch.countDown();
 			} else {
 				// notify the listener about the fail of sending the message
-				logger.debug("No resend of the message. It failed");
+				logger.debug("No resending of the message. It failed.");
 				state = DeliveryState.ERROR;
 				latch.countDown();
 			}
@@ -140,11 +140,11 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 					errorReason = "The returned object was not of type AcceptanceReply!";
 				}
 			}
-			logger.error(String.format("A failure while sending a message occured. reason = '%s'",
-					errorReason));
+			logger.error("A failure while sending a message occured. Reason = '{}'",
+					errorReason);
 			return AcceptanceReply.FAILURE;
 		} else {
-			logger.error(String.format("Future not successful. reason = '%s'", future.getFailedReason()));
+			logger.error("Future not successful. Reason = '{}'.", future.getFailedReason());
 			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}

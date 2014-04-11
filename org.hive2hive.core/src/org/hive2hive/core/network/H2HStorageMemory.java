@@ -10,8 +10,8 @@ import net.tomp2p.storage.StorageLayer;
 import net.tomp2p.storage.StorageMemory;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Every <code>Hive2Hive</code> node has validation strategies when data is
@@ -23,7 +23,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public class H2HStorageMemory extends StorageLayer {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HStorageMemory.class);
+	private static final Logger logger = LoggerFactory.getLogger(H2HStorageMemory.class);
 
 	public enum PutStatusH2H {
 		OK,
@@ -44,12 +44,11 @@ public class H2HStorageMemory extends StorageLayer {
 	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
 			boolean domainProtection) {
 		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
-			logger.trace(String.format(
-					"Start put verification. location key = '%s' content key = '%s' version key = '%s' ",
-					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
+			logger.trace("Start put verification. Location key = '%s', Content key = '%s', Version key = '%s'.",
+					key.getLocationKey(), key.getContentKey(), key.getVersionKey());
 
 			if (isProtectionKeyChange(newData)) {
-				logger.trace("Only chaning the protection key, no need to verify the versions");
+				logger.trace("Only chaning the protection key, no need to verify the versions.");
 				return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
 			}
 
@@ -63,11 +62,11 @@ public class H2HStorageMemory extends StorageLayer {
 			}
 
 			logger.trace(String.format(
-					"Put verification finished. location key = '%s' content key = '%s' version key = '%s' ",
+					"Put verification finished. Location key = '%s', Content key = '%s', Version key = '%s'.",
 					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
 			return status;
 		} else {
-			logger.trace("Disabled the put verification strategy on the remote peer");
+			logger.trace("Disabled the put verification strategy on the remote peer.");
 			return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
 		}
 	}
@@ -117,7 +116,7 @@ public class H2HStorageMemory extends StorageLayer {
 		/** 1. if version is null or zero and no history yet, it is the first entry here **/
 		if (newData.basedOn().equals(Number160.ZERO)) {
 			if (history.isEmpty()) {
-				logger.trace("First version of a content is added");
+				logger.trace("First version of a content is added.");
 				return PutStatusH2H.OK;
 			} else {
 				logger.warn("History is not empty and not based on key given.");
@@ -130,9 +129,8 @@ public class H2HStorageMemory extends StorageLayer {
 
 		/** 2. check if previous exists **/
 		if (!history.lastKey().getVersionKey().equals(newData.basedOn())) {
-			logger.warn(String.format(
-					"New data is not based on previous version. previous version key = '%s' ",
-					key.getVersionKey()));
+			logger.warn("New data is not based on previous version. Previous version key = '{}'.",
+					key.getVersionKey());
 			return PutStatusH2H.VERSION_CONFLICT;
 		}
 
@@ -160,7 +158,7 @@ public class H2HStorageMemory extends StorageLayer {
 			// // stop removal because oldest version is too 'young'
 			// break;
 			// } else {
-			logger.trace(String.format("Removing an older version. version key = '%s'", key.getVersionKey()));
+			logger.trace("Removing an older version. Version key = '{}'.", key.getVersionKey());
 			history.remove(toRemove);
 			super.remove(toRemove, publicKey, false);
 			// }

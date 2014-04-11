@@ -11,12 +11,10 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
@@ -29,10 +27,12 @@ import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessSt
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DownloadChunksStep extends BaseGetProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(DownloadChunksStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(DownloadChunksStep.class);
 
 	private final DownloadFileContext context;
 	private final List<Chunk> chunkBuffer;
@@ -75,7 +75,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		// start the download
 		int counter = 0;
 		for (MetaChunk metaChunk : metaChunks) {
-			logger.info("File " + destination + ": Downloading chunk " + ++counter + "/" + metaChunks.size());
+			logger.info("File '{}': Downloading chunk {}/{}.", destination, ++counter, metaChunks.size());
 			NetworkContent content = get(metaChunk.getChunkId(), H2HConstants.FILE_CHUNK);
 			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
 			try {
@@ -100,11 +100,11 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		// all chunks downloaded
 		if (chunkBuffer.isEmpty()) {
 			// normal case: done with the process.
-			logger.debug("Finished downloading file '" + destination + "'.");
+			logger.debug("Finished downloading file '{}'.", destination);
 		} else {
 			logger.error("All chunks downloaded but still some in buffer.");
-			throw new ProcessExecutionException("Could not write all chunks to disk. We're stuck at chunk "
-					+ currentChunkOrder);
+			throw new ProcessExecutionException(String.format(
+					"Could not write all chunks to disk. We're stuck at chunk %s.", currentChunkOrder));
 		}
 	}
 
@@ -121,7 +121,7 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 				if (H2HEncryptionUtil.compareMD5(destination, fileIndex.getMD5())) {
 					return false;
 				} else {
-					logger.warn("File already exists on disk, it will be overwritten");
+					logger.warn("File already exists on disk. It will be overwritten.");
 				}
 			} catch (IOException e) {
 				// ignore and just download the file

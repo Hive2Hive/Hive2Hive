@@ -5,12 +5,10 @@ import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -29,10 +27,12 @@ import org.hive2hive.core.processes.implementations.files.add.UploadNotification
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RelinkUserProfileStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(RelinkUserProfileStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(RelinkUserProfileStep.class);
 
 	private final MoveFileProcessContext context;
 	private final NetworkManager networkManager;
@@ -91,7 +91,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 			// check if the protection key needs to be updated
 			if (!H2HEncryptionUtil.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
 				// update the protection key of the meta file and eventually all chunks
-				logger.info("Required to update the protection key of the moved file(s) / folder(s).");
+				logger.info("Required to update the protection key of the moved file(s)/folder(s).");
 				initPKUpdateStep(movedNode, oldParent.getProtectionKeys(), newParent.getProtectionKeys());
 			}
 
@@ -140,7 +140,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		String destName = context.getDestination().getName();
 
 		// inform common users
-		logger.debug("Inform " + common.size() + " users that a file has been moved");
+		logger.debug("Inform {} users that a file has been moved.", common.size());
 		PublicKey newParentKey = movedNode.getParent().getFilePublicKey();
 		MoveNotificationContext moveContext = context.getMoveNotificationContext();
 		moveContext.provideMessageFactory(new MoveNotificationMessageFactory(sourceName, destName,
@@ -148,8 +148,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		moveContext.provideUsersToNotify(common);
 
 		// inform users that don't have access to the new destination anymore
-		logger.debug("Inform " + usersAtSource.size()
-				+ " users that a file has been removed (after movement)");
+		logger.debug("Inform {} users that a file has been removed (after movement).", usersAtSource.size());
 		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
 		deleteContext
@@ -157,8 +156,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file
-		logger.debug("Inform " + usersAtDestination.size()
-				+ " users that a file has been added (after movement)");
+		logger.debug("Inform {} users that a file has been added (after movement).", usersAtDestination.size());
 		usersAtDestination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
 		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode

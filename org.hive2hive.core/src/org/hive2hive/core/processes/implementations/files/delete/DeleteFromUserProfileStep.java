@@ -8,8 +8,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -22,6 +20,8 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Step that deletes a file from the index in the user profile after doing some verification.
@@ -33,7 +33,7 @@ import org.hive2hive.core.processes.implementations.context.DeleteFileProcessCon
  */
 public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFromUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeleteFromUserProfileStep.class);
 
 	private final DeleteFileProcessContext context;
 	private final File file;
@@ -123,7 +123,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			try {
 				profile = profileManager.getUserProfile(getID(), true);
 			} catch (GetFailedException e) {
-				logger.warn("Rollback failed: " + e.getMessage());
+				logger.warn("Rollback failed: {}.", e.getMessage());
 				return;
 			}
 
@@ -136,7 +136,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			try {
 				profileManager.readyToPut(profile, getID());
 			} catch (PutFailedException e) {
-				logger.warn("Rollback failed: " + e.getMessage());
+				logger.warn("Rollback failed: {}.", e.getMessage());
 			}
 		}
 	}

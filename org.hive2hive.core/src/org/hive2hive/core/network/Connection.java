@@ -15,14 +15,14 @@ import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.security.H2HSignatureFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connection {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(Connection.class);
+	private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
 	private final String nodeID;
 	private final NetworkManager networkManager;
@@ -80,10 +80,10 @@ public class Connection {
 		futureDiscover.awaitUninterruptibly();
 
 		if (futureDiscover.isSuccess()) {
-			logger.debug(String.format("Discovery successful: Outside address is: %s.",
-					futureDiscover.getPeerAddress()));
+			logger.debug("Discovery successful: Outside address is '{}'.",
+					futureDiscover.getPeerAddress());
 		} else {
-			logger.warn(String.format("Discovery failed: %s.", futureDiscover.getFailedReason()));
+			logger.warn("Discovery failed: {}.", futureDiscover.getFailedReason());
 			peer.shutdown();
 			isConnected = false;
 			return false;
@@ -94,11 +94,11 @@ public class Connection {
 		futureBootstrap.awaitUninterruptibly();
 
 		if (futureBootstrap.isSuccess()) {
-			logger.debug(String.format("Bootstrapping successful: Bootstrapped to %s.",
-					bootstrapAddress.getHostAddress()));
+			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.",
+					bootstrapAddress.getHostAddress());
 			return true;
 		} else {
-			logger.warn(String.format("Bootstrapping failed: %s.", futureBootstrap.getFailedReason()));
+			logger.warn("Bootstrapping failed: {}.", futureBootstrap.getFailedReason());
 			peer.shutdown();
 			isConnected = false;
 			return false;
@@ -122,7 +122,7 @@ public class Connection {
 			else
 				logger.warn("Peer disconnection failed.");
 		} else {
-			logger.warn("Peer disconnection failed: Peer is not connected.");
+			logger.warn("Peer disconnection failed. Peer is not connected.");
 		}
 
 		if (eventExecutorGroup != null) {

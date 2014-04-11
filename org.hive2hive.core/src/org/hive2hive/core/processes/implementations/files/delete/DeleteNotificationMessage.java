@@ -9,13 +9,13 @@ import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Performs the necessary processes when another user did any modification on the file
@@ -26,7 +26,8 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 public class DeleteNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = -695268345354561544L;
-	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteNotificationMessage.class);
+	
+	private final static Logger logger = LoggerFactory.getLogger(DeleteNotificationMessage.class);
 	private final PublicKey parentFileKey;
 	private final String fileName;
 
@@ -38,7 +39,7 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		logger.debug("File notification message received");
+		logger.debug("File notification message received.");
 		delete();
 	}
 
@@ -52,15 +53,15 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 			Index parentNode = userProfile.getFileById(parentFileKey);
 
 			if (parentNode == null) {
-				throw new FileNotFoundException("Got notified about a file we don't know the parent");
+				throw new FileNotFoundException("Got notified about a file we don't know the parent of.");
 			} else {
 				boolean deleted = new File(FileUtil.getPath(root, parentNode).toFile(), fileName).delete();
 				if (!deleted) {
-					throw new IOException("Could not delete the file");
+					throw new IOException("Could not delete the file.");
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Got notified but cannot delete the file", e);
+			logger.error("Got notified but cannot delete the file.", e);
 		}
 	}
 

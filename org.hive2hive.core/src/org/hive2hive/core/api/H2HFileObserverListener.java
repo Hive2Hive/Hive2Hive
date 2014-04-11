@@ -9,8 +9,8 @@ import org.hive2hive.core.file.buffer.AddFileBuffer;
 import org.hive2hive.core.file.buffer.DeleteFileBuffer;
 import org.hive2hive.core.file.buffer.IFileBuffer;
 import org.hive2hive.core.file.buffer.ModifyFileBuffer;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of {@link IFileObserverListener}. The file events are caught and the according
@@ -21,7 +21,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public class H2HFileObserverListener implements IFileObserverListener {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HFileObserverListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(H2HFileObserverListener.class);
 
 	private final IFileBuffer addFileBuffer;
 	private final IFileBuffer deleteFileBuffer;
@@ -35,7 +35,7 @@ public class H2HFileObserverListener implements IFileObserverListener {
 
 	@Override
 	public void onStart(FileAlterationObserver observer) {
-//		logger.debug(String.format("File observer for '%s' has been started.", observer.getDirectory().toPath()));
+		// logger.debug("File observer for '{}' has been started.", observer.getDirectory().toPath()));
 	}
 
 	@Override
@@ -77,12 +77,10 @@ public class H2HFileObserverListener implements IFileObserverListener {
 
 	@Override
 	public void onStop(FileAlterationObserver observer) {
-//		logger.debug(String.format("File observer for '%s' has been stopped.", observer.getDirectory().toPath()));
+		// logger.debug("File observer for '{}' has been stopped.", observer.getDirectory().toPath()));
 	}
 
 	private void printFileDetails(String reason, File file) {
-		logger.debug(String.format("%s %s: %s", file.isDirectory() ? "Directory" : "File", reason,
-				file.getAbsolutePath()));
+		logger.debug("{} {}: {}", file.isDirectory() ? "Directory" : "File", reason, file.getAbsolutePath());
 	}
-
 }

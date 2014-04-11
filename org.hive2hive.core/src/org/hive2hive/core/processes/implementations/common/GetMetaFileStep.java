@@ -10,8 +10,6 @@ import javax.crypto.IllegalBlockSizeException;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.NetworkContent;
@@ -22,6 +20,8 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeK
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gets a {@link MetaFile} from the DHT and decrypts it.
@@ -31,7 +31,7 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  */
 public class GetMetaFileStep extends BaseGetProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(GetMetaFileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(GetMetaFileStep.class);
 
 	private final IConsumeKeyPair keyContext;
 	private final IProvideMetaFile metaContext;
