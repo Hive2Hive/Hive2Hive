@@ -18,8 +18,8 @@ import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.message.SignatureCodec;
 import net.tomp2p.p2p.PeerMaker;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The signature is done with SHA1withRSA.
@@ -28,7 +28,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public class H2HSignatureFactory implements SignatureFactory {
 	
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(H2HSignatureFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(H2HSignatureFactory.class);
 	
 	/**
 	 * @return The signature mechanism
@@ -37,7 +37,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 		try {
 			return Signature.getInstance("SHA1withRSA");
 		} catch (NoSuchAlgorithmException e) {
-			logger.error("could not find algorithm", e);
+			logger.error("Could not find signature algorithm:", e);
 			return null;
 		}
 	}
@@ -49,10 +49,10 @@ public class H2HSignatureFactory implements SignatureFactory {
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 			return keyFactory.generatePublic(pubKeySpec);
 		} catch (NoSuchAlgorithmException e) {
-			logger.error("could not find algorithm", e);
+			logger.error("Could not find decoding algorithm:", e);
 			return null;
 		} catch (InvalidKeySpecException e) {
-			logger.error("wrong keyspec", e);
+			logger.error("Invalid key specs provided:", e);
 			return null;
 		}
 	}
