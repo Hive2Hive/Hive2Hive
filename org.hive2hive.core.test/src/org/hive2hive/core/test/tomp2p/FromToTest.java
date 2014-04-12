@@ -109,7 +109,7 @@ public class FromToTest extends H2HJUnitTest {
 		Collections.shuffle(shuffledTimeStamps);
 		for (Long timeStamp : shuffledTimeStamps) {
 			Number160 contentKey = new Number160(timeStamp);
-			logger.debug(String.format("%s, %s", timeStamp, contentKey));
+			logger.debug("{}, {}", timeStamp, contentKey);
 			p2.put(lKey).setData(contentKey, new Data(timeStamp)).setDomainKey(dKey).start()
 					.awaitUninterruptibly();
 		}
@@ -125,7 +125,7 @@ public class FromToTest extends H2HJUnitTest {
 			if (futureGet.getData() != null) {
 				long timeStamp = (Long) futureGet.getData().object();
 				Number160 contentKey = new Number160(timeStamp);
-				logger.debug(String.format("%s, %s", timeStamp, contentKey));
+				logger.debug("{}, {}", timeStamp, contentKey);
 				downloadedTimestamps.add(timeStamp);
 				// remove fetched time stamp from network
 				p2.remove(lKey).setDomainKey(dKey).contentKey(contentKey).start().awaitUninterruptibly();

@@ -60,7 +60,9 @@ public class UserProfileManager {
 		modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
 
 		worker = new QueueWorker();
-		new Thread(worker).start();
+		Thread thread = new Thread(worker);
+		thread.setName("UP queue");
+		thread.start();
 	}
 
 	public void stopQueueWorker() {

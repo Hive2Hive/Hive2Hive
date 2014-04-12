@@ -45,14 +45,14 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing AES %s-bit key generation.", sizes[s].value()));
+			logger.debug("Testing AES {}-bit key generation.", sizes[s].value());
 
 			// generate AES key
 			long start = System.currentTimeMillis();
 			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s]);
 			long stop = System.currentTimeMillis();
-			logger.debug(String.format("Generated AES key: %s", EncryptionUtil.toHex(aesKey.getEncoded())));
-			logger.debug(String.format("Time: %s ms", stop-start));
+			logger.debug("Generated AES key: {}.", EncryptionUtil.toHex(aesKey.getEncoded()));
+			logger.debug("Time: {} ms.", stop - start);
 
 			assertNotNull(aesKey);
 			assertTrue(aesKey.getAlgorithm().equals("AES"));
@@ -67,22 +67,20 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing RSA %s-bit key pair generation.", sizes[s].value()));
+			logger.debug("Testing RSA {}-bit key pair generation.", sizes[s].value());
 
 			// generate RSA key pair
 			long start = System.currentTimeMillis();
 			KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
 			long stop = System.currentTimeMillis();
-			
+
 			assertNotNull(rsaKeyPair);
 			assertNotNull(rsaKeyPair.getPrivate());
 			assertNotNull(rsaKeyPair.getPublic());
 
-			logger.debug(String.format("Private Key: %s",
-					EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded())));
-			logger.debug(String.format("Public Key: %s",
-					EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded())));
-			logger.debug(String.format("Time: %s ms", stop-start));
+			logger.debug("Private Key: {}.", EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded()));
+			logger.debug("Public Key: {}.", EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded()));
+			logger.debug("Time: {} ms.", stop - start);
 		}
 	}
 
@@ -94,7 +92,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing AES %s-bit encryption and decryption", sizes[s].value()));
+			logger.debug("Testing AES {}-bit encryption and decryption.", sizes[s].value());
 
 			// generate random sized content (max. 2MB)
 			byte[] data = generateRandomContent(2097152);
@@ -140,13 +138,13 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing RSA %s-bit encryption and decryption", sizes[s].value()));
+			logger.debug("Testing RSA {}-bit encryption and decryption.", sizes[s].value());
 
 			// generate random sized content (max. (key size / 8) - 11 bytes)
 			byte[] data = generateRandomContent((sizes[s].value() / 8) - 11);
 
-			logger.debug(String.format("Testing RSA encryption of a sample %s byte file with a %s bit key.",
-					data.length, sizes[s].value()));
+			logger.debug("Testing RSA encryption of a sample {} byte file with a {} bit key.", data.length,
+					sizes[s].value());
 			printBytes("Original Data", data);
 
 			// generate RSA key pair
@@ -199,15 +197,15 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				// generate random content (50 MB)
 				byte[] data = generateFixedContent(52428800);
 
-				logger.debug(String
-						.format("Testing hybrid encryption and decryption of a sample %s byte file with a %s bit RSA and a %s bit AES key.",
-								data.length, rsaSizes[s1].value(), aesSizes[s2].value()));
+				logger.debug(
+						"Testing hybrid encryption and decryption of a sample {} byte file with a {} bit RSA and a {} bit AES key.",
+						data.length, rsaSizes[s1].value(), aesSizes[s2].value());
 
 				// generate RSA key pair
 				long start = System.currentTimeMillis();
 				KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(rsaSizes[s1]);
 				long stop = System.currentTimeMillis();
-				logger.debug(String.format("RSA Key Generation Time: %s ms", stop - start));
+				logger.debug("RSA Key Generation Time: {} ms.", stop - start);
 
 				// encrypt data with public key
 				HybridEncryptedContent encryptedData = null;
@@ -215,7 +213,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 					start = System.currentTimeMillis();
 					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2]);
 					stop = System.currentTimeMillis();
-					logger.debug(String.format("Hybrid Encryption Time: %s ms", stop - start));
+					logger.debug("Hybrid Encryption Time: {} ms.", stop - start);
 				} catch (DataLengthException | InvalidKeyException | IllegalStateException
 						| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception while testing hybrid encryption:", e);
@@ -233,7 +231,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 					start = System.currentTimeMillis();
 					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate());
 					stop = System.currentTimeMillis();
-					logger.debug(String.format("Hybrid Decryption Time: %s ms", stop - start));
+					logger.debug("Hybrid Decryption Time: {} ms.", stop - start);
 				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
 						| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
 					logger.error("Exception while testing hybrid decryption:", e);
@@ -254,8 +252,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		for (int s = 0; s < sizes.length; s++) {
 
-			logger.debug(String.format("Testing SHA-1 with RSA %s-bit signing and verificiation.",
-					sizes[s].value()));
+			logger.debug("Testing SHA-1 with RSA {}-bit signing and verificiation.", sizes[s].value());
 
 			// generate random sized content (max. 100 bytes)
 			byte[] data = generateRandomContent(100);
@@ -328,7 +325,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 		String data = generateRandomString(1000);
 		logger.debug("Testing data serialization.");
-		logger.debug("Test String: " + data);
+		logger.debug("Test String: {}.", data);
 
 		byte[] serializedData = EncryptionUtil.serializeObject(data);
 		assertNotNull(serializedData);
