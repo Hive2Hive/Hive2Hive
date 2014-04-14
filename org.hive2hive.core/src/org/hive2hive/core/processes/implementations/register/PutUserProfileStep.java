@@ -4,12 +4,10 @@ import java.io.IOException;
 
 import javax.crypto.SecretKey;
 
-import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -20,10 +18,12 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PutUserProfileStep extends BasePutProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(PutUserProfileStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(PutUserProfileStep.class);
 
 	private final UserCredentials credentials;
 	private final IConsumeUserProfile context;
@@ -37,7 +37,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		logger.debug("Starting to encrypt and put the user profile for user " + credentials.getUserId());
+		logger.debug("Starting to encrypt and put the user profile for user '{}'.", credentials.getUserId());
 
 		// consume the profile from the context
 		UserProfile userProfile = context.consumeUserProfile();
@@ -66,7 +66,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 		try {
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedProfile,
 					userProfile.getProtectionKeys());
-			logger.debug("User profile successfully put for user " + credentials.getUserId());
+			logger.debug("User profile successfully put for user {}.", credentials.getUserId());
 		} catch (PutFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

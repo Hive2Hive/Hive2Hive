@@ -14,18 +14,18 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileUtil {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(FileUtil.class);
+	private final static Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
 	private FileUtil() {
 		// only static methods
@@ -150,14 +150,14 @@ public class FileUtil {
 		File toMoveDest = new File(newParentFile, destName);
 
 		if (toMoveDest.exists()) {
-			logger.warn("Overwriting '" + toMoveDest.getAbsolutePath()
-					+ "' because file has been moved remotely");
+			logger.warn("Overwriting '{}' because file has been moved remotely.",
+					toMoveDest.getAbsolutePath());
 		}
 
 		// move the file
 		Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
-		logger.debug("Successfully moved the file from " + toMoveSource.getAbsolutePath() + " to "
-				+ toMoveDest.getAbsolutePath());
+		logger.debug("Successfully moved the file from {} to {}.", toMoveSource.getAbsolutePath(),
+				toMoveDest.getAbsolutePath());
 	}
 
 	/**

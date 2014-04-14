@@ -6,12 +6,12 @@ import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A future listener for a get. It can be blocked until the result is here. Then, it returns the desired
@@ -21,7 +21,7 @@ import org.hive2hive.core.network.data.parameters.IParameters;
  */
 public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(FutureGetListener.class);
+	private final static Logger logger = LoggerFactory.getLogger(FutureGetListener.class);
 
 	private final IParameters parameters;
 	private final DataManager dataManager;
@@ -51,7 +51,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error("Latch to wait for the get was interrupted");
+			logger.error("Latch to wait for the get was interrupted.");
 			return null;
 		}
 
@@ -63,22 +63,22 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		if (retry) {
 			if (future == null || future.isFailed() || future.getData() == null) {
 				if (getTries++ < H2HConstants.GET_RETRIES) {
-					logger.warn(String.format("Get retry #%s because future failed. %s", getTries,
-							parameters.toString()));
+					logger.warn("Get retry #{} because future failed. '{}'", getTries,
+							parameters.toString());
 					if (parameters.getVersionKey().equals(Number160.ZERO))
 						dataManager.getUnblocked(parameters).addListener(this);
 					else
 						dataManager.getVersionUnblocked(parameters).addListener(this);
 				} else {
-					logger.warn(String.format("Get failed after %s tries. %s", getTries,
-							parameters.toString()));
+					logger.warn("Get failed after {} tries. '{}'", getTries,
+							parameters.toString());
 					notify(null);
 				}
 			} else {
 				NetworkContent content = (NetworkContent) future.getData().object();
 				if (content == null) {
-					logger.warn(String.format("Get retry #%s because content is null. %s", getTries,
-							parameters.toString()));
+					logger.warn("Get retry #{} because content is null. '{}'", getTries,
+							parameters.toString());
 					if (parameters.getVersionKey().equals(Number160.ZERO))
 						dataManager.getUnblocked(parameters).addListener(this);
 					else
@@ -105,10 +105,10 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	 */
 	private void notify(NetworkContent result) {
 		if (result == null) {
-			logger.warn(String.format("Got null. %s", parameters.toString()));
+			logger.warn("Got null. '{}'", parameters.toString());
 		} else {
-			logger.debug(String.format("got result = '%s' %s", result.getClass().getSimpleName(),
-					parameters.toString()));
+			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(),
+					parameters.toString());
 		}
 
 		this.result = result;

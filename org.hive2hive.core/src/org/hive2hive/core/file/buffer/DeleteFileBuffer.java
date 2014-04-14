@@ -10,15 +10,15 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeleteFileBuffer extends BaseFileBuffer {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(DeleteFileBuffer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeleteFileBuffer.class);
 	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000; // timeout to omit blocks
 
 	public DeleteFileBuffer(IFileManager fileManager) {
@@ -59,7 +59,7 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 		// delete individual files
 		for (File toDelete : bufferedFiles) {
 			try {
-				logger.debug("Starting to delete buffered file " + toDelete);
+				logger.debug("Starting to delete buffered file {}.", toDelete);
 				IProcessComponent delete = fileManager.delete(toDelete);
 				if (!fileManager.isAutostart())
 					delete.start();
@@ -70,6 +70,6 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 			}
 		}
 
-		logger.debug("Buffer with " + bufferedFiles.size() + " files processed.");
+		logger.debug("Buffer with {} files processed.", bufferedFiles.size());
 	}
 }

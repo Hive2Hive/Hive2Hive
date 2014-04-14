@@ -6,16 +6,16 @@ import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This message is sent after a file has been moved and the receiver had access to the file before and after
@@ -27,7 +27,8 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 public class MoveNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 2855700202146422905L;
-	private final static Logger logger = H2HLoggerFactory.getLogger(MoveNotificationMessage.class);
+	
+	private final static Logger logger = LoggerFactory.getLogger(MoveNotificationMessage.class);
 	private final String sourceFileName;
 	private final String destFileName;
 	private final PublicKey oldParentKey;
@@ -44,7 +45,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		logger.debug("Notification message received");
+		logger.debug("Notification message received.");
 		move();
 	}
 
@@ -58,7 +59,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 			Index newParent = userProfile.getFileById(newParentKey);
 			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (NoSessionException | GetFailedException | IOException e) {
-			logger.error("Could not process the notification message", e);
+			logger.error("Could not process the notification message.", e);
 		}
 
 	}

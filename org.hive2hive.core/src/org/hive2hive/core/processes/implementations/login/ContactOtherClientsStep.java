@@ -12,8 +12,6 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
@@ -26,11 +24,13 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO this class should be split up into multiple steps
 public class ContactOtherClientsStep extends ProcessStep implements IResponseCallBackHandler {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ContactOtherClientsStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(ContactOtherClientsStep.class);
 
 	private final ConcurrentHashMap<PeerAddress, String> evidences = new ConcurrentHashMap<PeerAddress, String>();
 	private final ConcurrentHashMap<PeerAddress, Boolean> responses = new ConcurrentHashMap<PeerAddress, Boolean>();
@@ -82,7 +82,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		try {
 			waitForResponses.await(H2HConstants.CONTACT_PEERS_AWAIT_MS, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
-			logger.error("Could not wait the given time for the clients to respond", e);
+			logger.error("Could not wait the given time for the clients to respond.", e);
 		}
 		updateLocations();
 	}
@@ -91,9 +91,9 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 	public void handleResponseMessage(ResponseMessage responseMessage) {
 		if (isUpdated) {
 			// TODO notify delayed response client nodes about removing him from location map
-			logger.warn(String
-					.format("Received a delayed contact peer response message, which gets ignored. peer address = '%s'",
-							responseMessage.getSenderAddress()));
+			logger.warn(
+					"Received a delayed contact peer response message, which gets ignored. Peer address = '{}'.",
+					responseMessage.getSenderAddress());
 			return;
 		}
 
@@ -102,9 +102,9 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 			responses.put(responseMessage.getSenderAddress(), true);
 			waitForResponses.countDown();
 		} else {
-			logger.error(String
-					.format("Received during liveness check of other clients a wrong evidence content. responding node = '%s'",
-							responseMessage.getSenderAddress()));
+			logger.error(
+					"Received during liveness check of other clients a wrong evidence content. Responding node = '{}'.",
+					responseMessage.getSenderAddress());
 		}
 	}
 

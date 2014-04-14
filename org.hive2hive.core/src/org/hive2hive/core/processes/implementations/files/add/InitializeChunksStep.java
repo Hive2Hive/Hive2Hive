@@ -5,11 +5,9 @@ import java.io.IOException;
 import java.security.KeyPair;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileChunkUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
@@ -19,6 +17,8 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Initializes all {@link PutSingleChunkStep} for the file to upload.
@@ -27,7 +27,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  */
 public class InitializeChunksStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeChunksStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
 	private final AddFileProcessContext context;
 	private final IFileConfiguration config;
 	private final IDataManager dataManager;
@@ -45,8 +45,7 @@ public class InitializeChunksStep extends ProcessStep {
 
 		// only continue if the file has content
 		if (file.isDirectory()) {
-			logger.trace(String.format("File '%s': No data to put because the file is a folder.",
-					file.getName()));
+			logger.trace("File '{}': No data to put because the file is a folder.", file.getName());
 			return;
 		} else if (context.isLargeFile()) {
 			initLargeFile(file);
@@ -57,7 +56,7 @@ public class InitializeChunksStep extends ProcessStep {
 
 	private void initSmallFile(File file) {
 		if (context.consumeChunkKeys() == null) {
-			logger.trace(String.format("Create chunk keys for the file '%s'.", file.getName()));
+			logger.trace("Create chunk keys for the file '{}'.", file.getName());
 			// create and provide chunk keys
 			KeyPair chunkKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
 			context.provideChunkKeys(chunkKeys);
@@ -65,8 +64,7 @@ public class InitializeChunksStep extends ProcessStep {
 
 		// create put chunks steps
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
-		logger.trace(String.format("%s chunks to upload for file '%s'.", Integer.toString(chunks),
-				file.getName()));
+		logger.trace("{} chunks to upload for file '{}'.", Integer.toString(chunks), file.getName());
 		ProcessComponent prev = this;
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();

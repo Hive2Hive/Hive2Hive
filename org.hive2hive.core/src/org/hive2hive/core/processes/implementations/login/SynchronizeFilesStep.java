@@ -9,8 +9,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileSynchronizer;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -23,15 +21,17 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Synchronizes the local files with the entries in the user profile:
  * <ul>
  * <li>Files that have been added to the user profile while the client was offline --> missing on disk</li>
- * <li>Files that have been added to the folder on disk while the client was offline --> missing in
- * userprofile</li>
+ * <li>Files that have been added to the folder on disk while the client was offline --> missing in user
+ * profile</li>
  * <li>Files that have been changed during the client was offline. The changes could have been made in the
- * userprofile or on the local disc. If changes on both locations have been made, the version in the user
+ * user profile or on the local disc. If changes on both locations have been made, the version in the user
  * profile wins.</li>
  * <li>If a file was deleted on disk during offline phase, the file gets deleted in the DHT too.</li>
  * <li>If a file was deleted in the user profile, the file gets deleted on disk too.</li>
@@ -42,7 +42,7 @@ import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil
  */
 public class SynchronizeFilesStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SynchronizeFilesStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(SynchronizeFilesStep.class);
 
 	private final LoginProcessContext context;
 	private final NetworkManager networkManager;
@@ -84,7 +84,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		if (context.getIsInitial()) {
 			// if is initial, process the user profile queue
-			logger.debug("Starting to process all user tasks because I'm defined as initial.");
+			logger.debug("Starting to process all user tasks.");
 			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}
 	}

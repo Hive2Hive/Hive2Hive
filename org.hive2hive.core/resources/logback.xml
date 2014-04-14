@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<!-- Appenders -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss} %-12.-12([%thread])[%-5level] %logger{0} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Loggers -->
+	<logger name="net.tomp2p" level="OFF" /> <!-- mute tomp2p library -->
+	<logger name="io.netty" level="OFF" /> <!-- mute netty library -->
+	
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

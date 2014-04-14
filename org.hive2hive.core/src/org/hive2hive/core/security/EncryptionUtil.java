@@ -45,8 +45,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides fundamental functionalities for data encryption, decryption, signing and verification.
@@ -58,7 +58,7 @@ import org.hive2hive.core.log.H2HLoggerFactory;
  */
 public final class EncryptionUtil {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(EncryptionUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(EncryptionUtil.class);
 
 	private static final String SINGATURE_ALGORITHM = "SHA1withRSA";
 	private static final int IV_LENGTH = 16;

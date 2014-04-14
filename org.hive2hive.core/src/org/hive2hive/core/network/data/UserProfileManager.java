@@ -10,14 +10,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
 
-import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -26,6 +24,8 @@ import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the user profile resource. Each process waiting for get / put is added to a queue and delivered in
@@ -36,7 +36,7 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public class UserProfileManager {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(UserProfileManager.class);
+	private final static Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
 	private static final long MAX_MODIFICATION_TIME = 1000;
 
 	private final NetworkManager networkManager;
@@ -60,7 +60,9 @@ public class UserProfileManager {
 		modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
 
 		worker = new QueueWorker();
-		new Thread(worker).start();
+		Thread thread = new Thread(worker);
+		thread.setName("UP queue");
+		thread.start();
 	}
 
 	public void stopQueueWorker() {
@@ -175,17 +177,16 @@ public class UserProfileManager {
 						}
 					}
 				} else if (modifyQueue.isEmpty()) {
-					logger.debug(readOnlyQueue.size() + " process(es) are waiting for read-only access");
+					logger.debug("{} process(es) are waiting for read-only access.", readOnlyQueue.size());
 					// a process wants to read
 					QueueEntry entry = readOnlyQueue.peek();
 
 					get(entry);
 
-					logger.debug("Notifying " + readOnlyQueue.size()
-							+ " processes that newest profile is ready");
+					logger.debug("Notifying {} processes that newest profile is ready.", readOnlyQueue.size());
 					// notify all read only processes
 					while (!readOnlyQueue.isEmpty()) {
-						// copy userprofile and errors to other entries
+						// copy user profile and errors to other entries
 						QueueEntry readOnly = readOnlyQueue.poll();
 						readOnly.setUserProfile(entry.getUserProfile());
 						readOnly.setGetError(entry.getGetError());
@@ -194,16 +195,14 @@ public class UserProfileManager {
 				} else {
 					// a process wants to modify
 					modifying = modifyQueue.poll();
-					logger.debug("Process " + modifying.getPid()
-							+ " is waiting to make profile modifications");
+					logger.debug("Process {} is waiting to make profile modifications.", modifying.getPid());
 					get(modifying);
-					logger.debug("Notifying " + (readOnlyQueue.size() + 1) + " processes (inclusive process "
-							+ modifying.getPid() + ") to get newest profile");
+					logger.debug("Notifying {} processes (inclusive process {}) to get newest profile.", readOnlyQueue.size() + 1, modifying.getPid());
 
 					modifying.notifyGet();
 					// notify all read only processes
 					while (!readOnlyQueue.isEmpty()) {
-						// copy userprofile and errors to other entries
+						// copy user profile and errors to other entries
 						QueueEntry readOnly = readOnlyQueue.poll();
 						readOnly.setUserProfile(modifying.getUserProfile());
 						readOnly.setGetError(modifying.getGetError());
@@ -224,13 +223,11 @@ public class UserProfileManager {
 
 					if (modifying.isReadyToPut()) {
 						// is ready to put
-						logger.debug("Process " + modifying.getPid()
-								+ " made modifcations and uploads them now");
+						logger.debug("Process {} made modifcations and uploads them now.", modifying.getPid());
 						put(modifying);
 					} else if (!modifying.isAborted()) {
 						// request is not ready to put and has not been aborted
-						logger.error("Process " + modifying.getPid()
-								+ " never finished doing modifications. Abort the put request.");
+						logger.error("Process {} never finished doing modifications. Abort the put request.", modifying.getPid());
 						modifying.abort();
 						modifying.setPutError(new PutFailedException("Too long modification. Only "
 								+ MAX_MODIFICATION_TIME + "ms are allowed."));
@@ -246,12 +243,12 @@ public class UserProfileManager {
 		 * Performs a get call (blocking) and decrypts the received user profile.
 		 */
 		private void get(QueueEntry entry) {
-			logger.debug("Getting the user profile from the DHT");
+			logger.debug("Getting the user profile from the DHT.");
 			DataManager dataManager;
 			try {
 				dataManager = networkManager.getDataManager();
 			} catch (NoPeerConnectionException e) {
-				entry.setGetError(new GetFailedException("Node is not connected to the network"));
+				entry.setGetError(new GetFailedException("Node is not connected to the network."));
 				return;
 			}
 
@@ -265,13 +262,13 @@ public class UserProfileManager {
 		 * Encrypts the modified user profile and puts it (blocking).
 		 */
 		private void put(PutQueueEntry entry) {
-			logger.debug("Encrypting UserProfile with 256bit AES key from password");
+			logger.debug("Encrypting user profile with 256bit AES key from password.");
 			try {
 				SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
 						credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 				EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(
 						entry.getUserProfile(), encryptionKey);
-				logger.debug("Putting UserProfile into the DHT");
+				logger.debug("Putting user profile into the DHT.");
 
 				DataManager dataManager = networkManager.getDataManager();
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
@@ -285,9 +282,9 @@ public class UserProfileManager {
 					entry.setPutError(new PutFailedException("Put failed."));
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 				logger.error("Cannot encrypt the user profile.", e);
-				entry.setPutError(new PutFailedException("Cannot encrypt the user profile"));
+				entry.setPutError(new PutFailedException("Cannot encrypt the user profile."));
 			} catch (NoPeerConnectionException e) {
-				entry.setPutError(new PutFailedException("Node is not connected to the network"));
+				entry.setPutError(new PutFailedException("Node is not connected to the network."));
 			} finally {
 				entry.notifyPut();
 			}
@@ -321,7 +318,7 @@ public class UserProfileManager {
 			try {
 				getWaiter.await();
 			} catch (InterruptedException e) {
-				getFailedException = new GetFailedException("Could not wait for getting the user profile");
+				getFailedException = new GetFailedException("Could not wait for getting the user profile.");
 			}
 
 			if (getFailedException != null) {
@@ -353,7 +350,7 @@ public class UserProfileManager {
 			try {
 				if (content == null) {
 					logger.warn("Did not find user profile.");
-					setGetError(new GetFailedException("User profile not found"));
+					setGetError(new GetFailedException("User profile not found."));
 				} else {
 					// decrypt it
 					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
@@ -372,9 +369,9 @@ public class UserProfileManager {
 				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
 				logger.error("Cannot decrypt the user profile.", e);
-				setGetError(new GetFailedException("Cannot decrypt the user profile"));
+				setGetError(new GetFailedException("Cannot decrypt the user profile."));
 			} catch (Exception e) {
-				logger.error("Cannot get the user profile. Reason: " + e.getMessage());
+				logger.error("Cannot get the user profile. Reason: {}.", e.getMessage());
 				setGetError(new GetFailedException(e.getMessage()));
 			}
 		}

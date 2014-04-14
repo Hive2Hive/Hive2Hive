@@ -2,12 +2,10 @@ package org.hive2hive.core.processes.implementations.share;
 
 import java.nio.file.Path;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -16,6 +14,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Updates the corresponding {@link FolderIndex} in the {@link UserProfile}. Sets content protection keys,
@@ -25,7 +25,7 @@ import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
  */
 public class UpdateUserProfileStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(UpdateUserProfileStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(UpdateUserProfileStep.class);
 
 	private final ShareProcessContext context;
 	private final UserProfileManager profileManager;
@@ -41,8 +41,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		logger.debug(String.format("Updating user profile for sharing folder '%s'.", context.getFolder()
-				.getName()));
+		logger.debug("Updating user profile for sharing folder '{}'.", context.getFolder().getName());
 
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
@@ -69,8 +68,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 			if (folderIndex.getSharedFlag()) {
 				// this if-clause allows sharing with multiple users and omits the next if-clause
-				logger.debug(String.format("Sharing an already shared folder '%s' with friend '%s'",
-						folderIndex.getName(), context.getFriendId()));
+				logger.debug("Sharing an already shared folder '{}' with friend '{}'.",
+						folderIndex.getName(), context.getFriendId());
 				folderIndex.addUserPermissions(context.getUserPermission());
 			} else {
 				// make the node shared with the new protection keys
@@ -104,9 +103,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 				// reset flag
 				modified = false;
 			} catch (Exception e) {
-				logger.warn(String.format(
-						"Rollback of updating user profile (sharing a folder) failed. exception = '%s'",
-						e.getMessage()));
+				logger.warn("Rollback of updating user profile (sharing a folder) failed. Exception = '{}'.",
+						e.getMessage());
 			}
 		}
 	}

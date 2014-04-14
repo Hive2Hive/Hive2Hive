@@ -11,13 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helps to synchronize when a client comes online. It compares the meta data from last logout with the
@@ -28,7 +28,7 @@ import org.hive2hive.core.security.H2HEncryptionUtil;
  */
 public class FileSynchronizer {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FileSynchronizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileSynchronizer.class);
 
 	private final Path root;
 	private final UserProfile userProfile;
@@ -51,7 +51,7 @@ public class FileSynchronizer {
 			Files.walkFileTree(root, visitor);
 			now = visitor.getFileTree();
 		} catch (IOException e) {
-			logger.error("Cannot walk the current tree");
+			logger.error("Cannot walk the current tree.");
 			now = new HashMap<String, byte[]>(0);
 		}
 	}
@@ -80,7 +80,7 @@ public class FileSynchronizer {
 						FileIndex fileNode = (FileIndex) node;
 						if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))) {
 							// file has not been modified remotely, delete it
-							logger.debug("File '" + path + "' has been deleted locally during absence");
+							logger.debug("File '{}' has been deleted locally during absence.", path);
 							deletedLocally.add(node);
 						}
 					}
@@ -92,8 +92,7 @@ public class FileSynchronizer {
 		sortNodesPreorder(deletedLocally);
 		Collections.reverseOrder();
 
-		logger.info("Found " + deletedLocally.size()
-				+ " files/folders that have been deleted locally during absence");
+		logger.info("Found {} files/folders that have been deleted locally during absence.", deletedLocally.size());
 		return deletedLocally;
 	}
 
@@ -116,8 +115,7 @@ public class FileSynchronizer {
 			}
 		}
 
-		logger.debug("Found " + deletedRemotely.size()
-				+ " files/folders that have been deleted remotely during absence");
+		logger.debug("Found {} files/folders that have been deleted remotely during absence.", deletedRemotely.size());
 		return deletedRemotely;
 	}
 
@@ -136,14 +134,13 @@ public class FileSynchronizer {
 			Index node = userProfile.getFileByPath(path);
 			if (node == null) {
 				// not in profile --> it has been added locally
-				logger.debug("File '" + p + "' has been added locally during absence");
+				logger.debug("File '{}' has been added locally during absence.", p);
 				addedLocally.add(Paths.get(root.toString(), path.toString()));
 			}
 		}
 
 		sortFilesPreorder(addedLocally);
-		logger.info("Found " + addedLocally.size()
-				+ " files/folders that have been added locally during absence");
+		logger.info("Found {} files/folders that have been added locally during absence.", addedLocally.size());
 		return addedLocally;
 	}
 
@@ -162,16 +159,15 @@ public class FileSynchronizer {
 		for (Index index : indexList) {
 			if (now.containsKey(index.getFullPath().toString())) {
 				// was here before and is still here --> nothing to add
-				logger.trace("File '" + index.getFullPath() + "' was already here");
+				logger.trace("File '{}' was already here.", index.getFullPath());
 			} else {
-				logger.debug("File '" + index.getFullPath() + "' has been added remotely during absence");
+				logger.debug("File '{}' has been added remotely during absence.", index.getFullPath());
 				addedRemotely.add(index);
 			}
 		}
 
 		sortNodesPreorder(addedRemotely);
-		logger.info("Found " + addedRemotely.size()
-				+ " files/folders that have been added remotely during absence");
+		logger.info("Found {} files/folders that have been added remotely during absence.", addedRemotely.size());
 		return addedRemotely;
 	}
 
@@ -207,14 +203,13 @@ public class FileSynchronizer {
 			// different versions. Thus, the profile wins.
 			if (H2HEncryptionUtil.compareMD5(fileNode.getMD5(), before.get(path))
 					&& !H2HEncryptionUtil.compareMD5(fileNode.getMD5(), now.get(path))) {
-				logger.debug("File '" + path + "' has been updated locally during absence");
+				logger.debug("File '{}' has been updated locally during absence.", path);
 				updatedLocally.add(FileUtil.getPath(root, fileNode));
 			}
 		}
 
 		sortFilesPreorder(updatedLocally);
-		logger.info("Found " + updatedLocally.size()
-				+ " files/folders that have been updated locally during absence");
+		logger.info("Found {} files/folders that have been updated locally during absence.", updatedLocally.size());
 		return updatedLocally;
 	}
 
@@ -242,15 +237,13 @@ public class FileSynchronizer {
 						&& !H2HEncryptionUtil.compareMD5(fileIndex.getMD5(),
 								before.get(fileIndex.getFullPath().toString()))) {
 					// different md5 hashes than 'before' and 'now'
-					logger.debug("File '" + fileIndex.getFullPath()
-							+ "' has been updated remotely during absence");
+					logger.debug("File '{}' has been updated remotely during absence.", fileIndex.getFullPath());
 					updatedRemotely.add(fileIndex);
 				}
 			}
 		}
 
-		logger.info("Found " + updatedRemotely.size()
-				+ " files/folders that have been updated remotely during absence");
+		logger.info("Found {} files/folders that have been updated remotely during absence.", updatedRemotely.size());
 		return updatedRemotely;
 	}
 

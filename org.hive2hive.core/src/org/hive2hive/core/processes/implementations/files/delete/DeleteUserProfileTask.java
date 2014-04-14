@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
@@ -15,13 +14,14 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link UserProfileTask} that is pushed into the queue when a shared file is deleted. It removes the dead
@@ -32,7 +32,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
  */
 public class DeleteUserProfileTask extends UserProfileTask {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(DeleteUserProfileTask.class);
+	private final static Logger logger = LoggerFactory.getLogger(DeleteUserProfileTask.class);
 
 	private static final long serialVersionUID = 4580106953301162049L;
 	private final PublicKey fileKey;
@@ -59,7 +59,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 			// notify others
 			startNotification(toDelete);
 		} catch (Hive2HiveException e) {
-			logger.error("Could not execute the task", e);
+			logger.error("Could not execute the task.", e);
 		}
 	}
 
@@ -76,25 +76,25 @@ public class DeleteUserProfileTask extends UserProfileTask {
 		UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
 		Index toDelete = userProfile.getFileById(fileKey);
 		if (toDelete == null) {
-			logger.warn("Could not delete the file because it does not exist anymore");
+			logger.warn("Could not delete the file because it does not exist anymore.");
 			return null;
 		}
 
 		FolderIndex parent = toDelete.getParent();
 		if (parent == null) {
-			logger.error("Got task to delete the root, which is invalid");
+			logger.error("Got task to delete the root, which is invalid.");
 			return null;
 		}
 
 		// check write permision
 		if (!parent.canWrite(sender)) {
-			logger.error("User without WRITE permissions tried to delete a file");
+			logger.error("User without WRITE permissions tried to delete a file.");
 			return null;
 		}
 
 		parent.removeChild(toDelete);
 		profileManager.readyToPut(userProfile, randomPID);
-		logger.debug("Removed the dead link from the user profile");
+		logger.debug("Removed the dead link from the user profile.");
 		return toDelete;
 	}
 
@@ -107,17 +107,17 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	private void removeFileOnDisk(Path root, Index toDelete) {
 		Path path = FileUtil.getPath(root, toDelete);
 		if (path == null) {
-			logger.error("Could not find the file to delete");
+			logger.error("Could not find the file to delete.");
 		}
 		File file = path.toFile();
 		if (!file.exists()) {
-			logger.error("File does not exist and cannot be deleted");
+			logger.error("File does not exist and cannot be deleted.");
 		}
 
 		try {
 			Files.delete(path);
 		} catch (IOException e) {
-			logger.error("Could not delete file on disk", e);
+			logger.error("Could not delete file on disk.", e);
 		}
 	}
 
@@ -138,7 +138,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(fileKey, parentFileKey,
 				fileName);
 		notifyOtherClients(messageFactory);
-		logger.debug("Started to notify other clients that the file has been deleted by another user");
+		logger.debug("Started to notify other clients about the file having been deleted by another user.");
 	}
 
 }

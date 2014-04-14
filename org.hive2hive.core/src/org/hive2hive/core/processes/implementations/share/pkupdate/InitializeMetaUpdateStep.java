@@ -2,10 +2,8 @@ package org.hive2hive.core.processes.implementations.share.pkupdate;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -19,6 +17,8 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
 import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFileProtectionKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Takes the shared folder and iteratively changes the protection keys of all meta files. Appends further
@@ -28,7 +28,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFi
  */
 public class InitializeMetaUpdateStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeMetaUpdateStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(InitializeMetaUpdateStep.class);
 
 	private final IUpdateFileProtectionKey context;
 	private final IDataManager dataManager;
@@ -68,9 +68,8 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 	}
 
 	private void initForFile(FileIndex fileIndex) throws NoSessionException, NoPeerConnectionException {
-		logger.debug(String.format(
-				"Initialize to change the protection keys of meta document of index '%s'.",
-				fileIndex.getName()));
+		logger.debug("Initialize to change the protection keys of meta document of index '{}'.",
+				fileIndex.getName());
 		// create the process and make wrap it to make it asynchronous
 		getParent().add(new AsyncComponent(buildProcess(fileIndex)));
 	}

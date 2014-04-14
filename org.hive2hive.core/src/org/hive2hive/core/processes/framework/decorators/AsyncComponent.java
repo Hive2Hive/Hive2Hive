@@ -6,8 +6,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.Process;
@@ -16,6 +14,8 @@ import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A process component decorator that executes, and if necessary rollbacks, the wrapped component in an
@@ -39,7 +39,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 	// TODO this class could hold a static thread pool to limit and manage all
 	// asynchronous processes
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AsyncComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(AsyncComponent.class);
 
 	private final ExecutorService asyncExecutor;
 	private Future<RollbackReason> handle;
@@ -66,15 +66,13 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 
 		try {
 			Thread.currentThread().checkAccess();
-			Thread.currentThread().setName(
-					String.format("async-process %s ", decoratedComponent.getClass().getSimpleName()));
+			Thread.currentThread().setName("async proc");
 		} catch (SecurityException e) {
+			logger.error("Async thread cannot be renamed.", e);
 		}
 		;
 
-		logger.trace("Starting async component...");
-
-		// starts and rollbacks itself if needed (component knows nothing about the composite of which the
+		// starts and rolls back itself if needed (component knows nothing about the composite of which the
 		// AsyncComponent is part of)
 
 		decoratedComponent.attachListener(new IProcessComponentListener() {
@@ -98,7 +96,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 					try {
 						cancel(reason);
 					} catch (InvalidProcessStateException e) {
-						logger.error(e);
+						logger.error("Asynchronous component could not be cancelled.", e);
 						e.printStackTrace();
 					}
 				}
@@ -139,8 +137,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 			decoratedComponent.cancel(reason);
 		} catch (InvalidProcessStateException e) {
 			if (e.getCurrentState() == ProcessState.FAILED) {
-				// async componend rolled itself back already
-				// logger.debug("AsyncComponent already rolled back.");
+				// async component rolled itself back already
 				return;
 			} else {
 				throw e;

@@ -7,9 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.Index;
@@ -24,6 +22,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.RecoverFileContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Asks the user which version to restore and initiates the restore steps
@@ -33,7 +33,7 @@ import org.hive2hive.core.processes.implementations.context.RecoverFileContext;
  */
 public class SelectVersionStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(SelectVersionStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(SelectVersionStep.class);
 	private final RecoverFileContext context;
 	private final IVersionSelector selector;
 	private final NetworkManager networkManager;
@@ -66,8 +66,9 @@ public class SelectVersionStep extends ProcessStep {
 			versions.add(version);
 		}
 
-		logger.debug("Start with the selection of the version by the user. He has choice between "
-				+ versions.size() + " versions");
+		logger.debug(
+				"Start with the selection of the version by the user. The user has choice between {} versions.",
+				versions.size());
 		IFileVersion selected = selector.selectVersion(versions);
 		if (selected == null) {
 			throw new ProcessExecutionException("Selected file version is null.");
@@ -87,8 +88,8 @@ public class SelectVersionStep extends ProcessStep {
 			throw new ProcessExecutionException("Invalid version index selected.");
 		}
 
-		logger.debug("Selected version " + selected.getIndex() + " where "
-				+ metaFileSmall.getNewestVersion().getIndex() + " is newest");
+		logger.debug("Selected version {} where {} is newest.", selected.getIndex(), metaFileSmall
+				.getNewestVersion().getIndex());
 
 		// 1. download the file with new name <filename>_<date>
 		// 2. add the file with an AddFileProcess (which also notifies other clients)
@@ -114,7 +115,7 @@ public class SelectVersionStep extends ProcessStep {
 				recoveredFileName = noSuffix + "-" + sdf.format(versionDate) + "." + extension;
 			}
 
-			logger.debug("Starting to download the restored file under the name '" + recoveredFileName + "'");
+			logger.debug("Starting to download the restored file under the name '{}'.", recoveredFileName);
 			File destination = new File(context.getFile().getParentFile(), recoveredFileName);
 
 			// add the process to download the file

@@ -6,18 +6,18 @@ import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Removes all locations that are unreachable and puts the reduced locations back into the DHT
@@ -27,7 +27,7 @@ import org.hive2hive.core.processes.implementations.context.NotifyProcessContext
  */
 public class RemoveUnreachableStep extends BasePutProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(RemoveUnreachableStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(RemoveUnreachableStep.class);
 
 	private final NotifyProcessContext context;
 	private final NetworkManager networkManager;
@@ -53,7 +53,7 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 		try {
 			protectionKeys = networkManager.getSession().getProfileManager().getDefaultProtectionKey();
 		} catch (GetFailedException | NoSessionException e) {
-			logger.error("Could not get the protection keys", e);
+			logger.error("Could not get the protection keys.", e);
 			return;
 		}
 
@@ -66,14 +66,14 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 		try {
 			locations.generateVersionKey();
 		} catch (IOException e) {
-			logger.error("Version Key could not be generated");
+			logger.error("Version key could not be generated.");
 			return;
 		}
 
 		try {
 			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, protectionKeys);
 		} catch (PutFailedException e) {
-			logger.error("Could not put the updated locations");
+			logger.error("Could not put the updated locations.");
 		}
 	}
 }

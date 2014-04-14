@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This message has to be used for response messages when a request message implementing the
@@ -30,7 +30,7 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
  */
 public class ResponseMessage extends BaseDirectMessage {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ResponseMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResponseMessage.class);
 
 	private static final long serialVersionUID = -4182581031050888858L;
 
@@ -57,9 +57,8 @@ public class ResponseMessage extends BaseDirectMessage {
 		if (handler != null) {
 			handler.handleResponseMessage(this);
 		} else {
-			logger.warn(String.format(
-					"No call back handler for this message! currentNodeID='%s', AsyncReturnMessage='%s'",
-					networkManager.getNodeId(), this));
+			logger.warn("No call back handler for this message! CurrentNodeID = '{}', AsyncReturnMessage = '{}'.",
+					networkManager.getNodeId(), this);
 		}
 	}
 
@@ -78,9 +77,8 @@ public class ResponseMessage extends BaseDirectMessage {
 	@Override
 	public boolean handleSendingFailure(AcceptanceReply reply) {
 		if (AcceptanceReply.NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE == reply) {
-			logger.warn(String.format(
-					"Receiving node has no callback handler for this message. message id = %s",
-					getMessageID()));
+			logger.warn("Receiving node has no callback handler for this message. Message ID = '{}'.",
+					getMessageID());
 			return false;
 		} else {
 			return super.handleSendingFailure(reply);

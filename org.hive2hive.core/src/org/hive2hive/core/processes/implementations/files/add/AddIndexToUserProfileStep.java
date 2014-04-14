@@ -7,8 +7,6 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -20,6 +18,8 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A step adding the new file (node) into the user profile (tree)
@@ -28,7 +28,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  */
 public class AddIndexToUserProfileStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(AddIndexToUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(AddIndexToUserProfileStep.class);
 
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
@@ -48,8 +48,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
 
-		logger.trace(String.format("Start updating the user profile where adding the file '%s'.",
-				file.getName()));
+		logger.trace("Start updating the user profile where adding the file '{}'.",
+				file.getName());
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 
@@ -76,8 +76,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			profileManager.readyToPut(userProfile, getID());
 			modified = true;
 		} catch (IOException e) {
-			logger.error(String.format("Creating MD5 hash of file '%s' was not possible. reason = '%s' ",
-					file.getName(), e.getMessage()));
+			logger.error("Creating MD5 hash of file '{}' was not possible. Reason = '{}'.",
+					file.getName(), e.getMessage());
 			throw new ProcessExecutionException(String.format("Could not add file '%s' to the user profile.",
 					file.getName()), e);
 		} catch (PutFailedException | GetFailedException e) {

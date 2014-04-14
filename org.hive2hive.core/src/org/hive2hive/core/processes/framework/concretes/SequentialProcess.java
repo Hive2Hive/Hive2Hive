@@ -11,8 +11,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.ProcessState;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.Process;
@@ -20,6 +18,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A process component container that executes and rollbacks its process components in a sequential manner. In presence
@@ -31,7 +31,7 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
  */
 public class SequentialProcess extends Process {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(SequentialProcess.class);
+	private static final Logger logger = LoggerFactory.getLogger(SequentialProcess.class);
 
 	private List<ProcessComponent> components = new ArrayList<ProcessComponent>();
 	private List<Future<RollbackReason>> asyncHandles = new ArrayList<Future<RollbackReason>>();
@@ -115,7 +115,7 @@ public class SequentialProcess extends Process {
 		if (getState() != ProcessState.RUNNING)
 			return;
 
-		logger.debug(String.format("Awaiting async components for completion."));
+		logger.debug("Awaiting async components for completion.");
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
@@ -151,7 +151,7 @@ public class SequentialProcess extends Process {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error(e);
+			logger.error("Exception while waiting for async components.", e);
 			e.printStackTrace();
 		}
 		handle.cancel(true);
@@ -167,8 +167,6 @@ public class SequentialProcess extends Process {
 		if (handles.isEmpty())
 			return;
 
-		logger.trace("Checking async components for fails.");
-
 		for (Future<RollbackReason> handle : handles) {
 
 			if (!handle.isDone())
@@ -178,7 +176,7 @@ public class SequentialProcess extends Process {
 			try {
 				result = handle.get();
 			} catch (InterruptedException e) {
-				logger.error(e);
+				logger.error("Error while checking async component.", e);
 				e.printStackTrace();
 			} catch (ExecutionException e) {
 				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());

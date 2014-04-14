@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Is pushed in a user profile queue of a user (A) when another user (B) has moved a file. The file has been
@@ -26,7 +26,8 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 public class MoveUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = 2182278170922295626L;
-	private final static Logger logger = H2HLoggerFactory.getLogger(MoveUserProfileTask.class);
+	
+	private final static Logger logger = LoggerFactory.getLogger(MoveUserProfileTask.class);
 
 	private final String sourceFileName;
 	private final String destFileName;
@@ -53,25 +54,25 @@ public class MoveUserProfileTask extends UserProfileTask {
 			// get and check the file nodes to be rearranged
 			FolderIndex oldParent = (FolderIndex) userProfile.getFileById(oldParentKey);
 			if (oldParent == null) {
-				logger.error("Could not find the old parent");
+				logger.error("Could not find the old parent.");
 				return;
 			} else if (!oldParent.canWrite(sender)) {
-				logger.error("User was not allowed to change the source directory");
+				logger.error("User was not allowed to change the source directory.");
 				return;
 			}
 
 			Index child = oldParent.getChildByName(sourceFileName);
 			if (child == null) {
-				logger.error("File node that should be moved not found");
+				logger.error("File node that should be moved not found.");
 				return;
 			}
 
 			FolderIndex newParent = (FolderIndex) userProfile.getFileById(newParentKey);
 			if (newParent == null) {
-				logger.error("Could not find the new parent");
+				logger.error("Could not find the new parent.");
 				return;
 			} else if (!newParent.canWrite(sender)) {
-				logger.error("User was not allowed to change the destination directory");
+				logger.error("User was not allowed to change the destination directory.");
 				return;
 			}
 
@@ -88,7 +89,7 @@ public class MoveUserProfileTask extends UserProfileTask {
 			// move the file on disk
 			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (Hive2HiveException | IOException e) {
-			logger.error("Could not process the user profile task", e);
+			logger.error("Could not process the user profile task.", e);
 		}
 	}
 }

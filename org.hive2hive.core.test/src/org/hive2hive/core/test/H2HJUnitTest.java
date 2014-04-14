@@ -3,20 +3,20 @@ package org.hive2hive.core.test;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class H2HJUnitTest {
 	private static final String START_STRING = "Start ";
 	private static final String END_STRING = "End ";
 
 	protected static Class<? extends H2HJUnitTest> testClass;
-	protected static H2HLogger logger;
+	protected static Logger logger;
 
 	@Rule
 	public TestName name = new TestName();
@@ -32,8 +32,7 @@ public class H2HJUnitTest {
 	}
 
 	public static final void beforeClass() throws Exception {
-		H2HLoggerFactory.initFactory();
-		logger = H2HLoggerFactory.getLogger(testClass);
+		logger = LoggerFactory.getLogger(testClass);
 		printTestIdentifier(testClass.getName(), true);
 	}
 

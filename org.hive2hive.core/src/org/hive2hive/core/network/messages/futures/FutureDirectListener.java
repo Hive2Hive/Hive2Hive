@@ -6,12 +6,12 @@ import java.util.concurrent.CountDownLatch;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDirect;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Use this future adapter when sending a {@link BaseDirectMessage}. Attach this listener to the future which
@@ -33,7 +33,7 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
  */
 public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(FutureDirectListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FutureDirectListener.class);
 
 	private final BaseDirectMessage message;
 	private final PublicKey receiverPublicKey;
@@ -75,7 +75,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error("Could not wait until the message is sent successfully");
+			logger.error("Could not wait until the message is sent successfully.");
 		}
 
 		switch (state) {
@@ -93,7 +93,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 				return messageManager.send(message, receiverPublicKey);
 			default:
 				// invalid state
-				logger.error("The sending procedure has not finished, but the lock has already been released");
+				logger.error("The sending procedure has not finished, but the lock has already been released.");
 				return false;
 		}
 	}
@@ -115,9 +115,8 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			} else {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
-					logger.warn(String
-							.format("Sending direct message failed. Using normal routed sending as fallback. target key = '%s' target address = '%s'",
-									message.getTargetKey(), message.getTargetAddress()));
+					logger.warn("Sending direct message failed. Using normal routed sending as fallback. Target key = '{}', Target address = '{}'.",
+									message.getTargetKey(), message.getTargetAddress());
 					// re-send the message (routed)
 					state = DeliveryState.RESEND_ROUTED;
 					latch.countDown();
@@ -155,11 +154,11 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			} catch (Exception e) {
 				errorReason = "Exception occured while getting the object.";
 			}
-			logger.error(String.format("A failure while sending a message occured. reason = '%s'",
-					errorReason));
+			logger.error("A failure while sending a message occured. Reason = '{}'.",
+					errorReason);
 			return AcceptanceReply.FAILURE;
 		} else {
-			logger.error(String.format("Future not successful. reason = '%s'", future.getFailedReason()));
+			logger.error("Future not successful. Reason = '{}'.", future.getFailedReason());
 			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}

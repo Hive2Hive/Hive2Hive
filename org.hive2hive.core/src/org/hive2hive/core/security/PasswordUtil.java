@@ -11,9 +11,9 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides basic functionalities regarding password validation.
@@ -23,7 +23,7 @@ import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
  */
 public final class PasswordUtil {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(PasswordUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(PasswordUtil.class);
 
 	public static final int HASH_BIT_SIZE = 192;
 	public static final int SALT_BIT_SIZE = HASH_BIT_SIZE;

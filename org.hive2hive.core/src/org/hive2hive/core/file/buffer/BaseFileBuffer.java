@@ -8,16 +8,16 @@ import java.util.TimerTask;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseFileBuffer implements IFileBuffer {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(BaseFileBuffer.class);
+	private static final Logger logger = LoggerFactory.getLogger(BaseFileBuffer.class);
 
 	protected final IFileManager fileManager;
 	protected FileBufferHolder currentBuffer;
@@ -37,13 +37,12 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 	}
 
 	private void startBuffering(final FileBufferHolder fileBuffer) {
-		logger.debug("Start buffering for " + IFileBuffer.BUFFER_WAIT_TIME_MS + " ms");
+		logger.debug("Start buffering for {} ms.", IFileBuffer.BUFFER_WAIT_TIME_MS);
 		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
 				currentBuffer = null;
-				logger.debug("Finished buffering. " + fileBuffer.getFileBuffer().size()
-						+ " file(s) in buffer");
+				logger.debug("Finished buffering. {} file(s) in buffer.", fileBuffer.getFileBuffer().size());
 
 				fileBuffer.awaitReady();
 				processBuffer(fileBuffer);
@@ -75,7 +74,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 			try {
 				fileList = fileManager.getFileList();
 			} catch (NoSessionException e) {
-				logger.error("Could not get the file list ", e);
+				logger.error("Could not get the file list.", e);
 				fileBuffer.setSyncFiles(new HashSet<FileTaste>(0));
 				fileBuffer.setReady();
 				return;
@@ -95,7 +94,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 				try {
 					fileList.start();
 				} catch (InvalidProcessStateException e) {
-					logger.error("Could not launch the process to get the file list");
+					logger.error("Could not launch the process to get the file list.");
 				}
 			}
 		}

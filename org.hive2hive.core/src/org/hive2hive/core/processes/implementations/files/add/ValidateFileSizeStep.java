@@ -5,12 +5,12 @@ import java.math.BigInteger;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.log.H2HLogger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Validates the file size
@@ -20,7 +20,7 @@ import org.hive2hive.core.processes.implementations.context.AddFileProcessContex
  */
 public class ValidateFileSizeStep extends ProcessStep {
 
-	private static final H2HLogger logger = H2HLoggerFactory.getLogger(ValidateFileSizeStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValidateFileSizeStep.class);
 
 	private final AddFileProcessContext context;
 	private final IFileConfiguration config;

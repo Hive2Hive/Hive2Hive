@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.implementations.share.pkupdate;
 
-import org.apache.log4j.Logger;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
@@ -13,6 +11,8 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.ChunkPKUpdateContext;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Takes the meta file and iteratively changes the protection keys of all chunks.
@@ -21,7 +21,7 @@ import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdate
  */
 public class InitializeChunkUpdateStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(InitializeChunkUpdateStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(InitializeChunkUpdateStep.class);
 
 	private final MetaDocumentPKUpdateContext context;
 	private final IDataManager dataManager;
@@ -42,8 +42,8 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 		}
 
 		MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
-		logger.debug(String.format("Initialize updating all chunks for file '%s' in a shared folder.",
-				context.getFileName()));
+		logger.debug("Initialize updating all chunks for file '{}' in a shared folder.",
+				context.getFileName());
 		int counter = 0;
 		for (FileVersion version : metaFileSmall.getVersions()) {
 			for (MetaChunk metaChunk : version.getMetaChunks()) {
@@ -58,7 +58,7 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 			}
 		}
 
-		logger.debug(String.format("%s chunks of file '%s' need to update their protection keys.", counter,
-				context.getFileName()));
+		logger.debug("{} chunks of file '{}' need to update their protection keys.", counter,
+				context.getFileName());
 	}
 }

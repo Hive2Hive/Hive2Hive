@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import org.apache.log4j.Logger;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.log.H2HLoggerFactory;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -18,6 +16,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Verifies and moves the file to the destination on disk. It also prepares the file keys which are used later
@@ -26,7 +26,7 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
  */
 public class MoveOnDiskStep extends ProcessStep {
 
-	private final static Logger logger = H2HLoggerFactory.getLogger(MoveOnDiskStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(MoveOnDiskStep.class);
 	private final MoveFileProcessContext context;
 	private final NetworkManager networkManager;
 
@@ -53,8 +53,8 @@ public class MoveOnDiskStep extends ProcessStep {
 			// move the file
 			Files.move(context.getSource().toPath(), context.getDestination().toPath(),
 					StandardCopyOption.ATOMIC_MOVE);
-			logger.debug(String.format("Moved the file from '%s' to '%s'.", context.getSource()
-					.getAbsolutePath(), context.getDestination().getAbsolutePath()));
+			logger.debug("Moved the file from '{}' to '{}'.", context.getSource().getAbsolutePath(), context
+					.getDestination().getAbsolutePath());
 		} catch (IOException e) {
 			throw new ProcessExecutionException("File could not be moved to destination.", e);
 		}
@@ -76,7 +76,8 @@ public class MoveOnDiskStep extends ProcessStep {
 
 		if (!source.getAbsolutePath().startsWith(networkManager.getSession().getRoot().toString())) {
 			throw new IllegalArgumentException("Source file is not in Hive2Hive directory. Use 'add'.");
-		} else if (!destination.getAbsolutePath().startsWith(networkManager.getSession().getRoot().toString())) {
+		} else if (!destination.getAbsolutePath()
+				.startsWith(networkManager.getSession().getRoot().toString())) {
 			throw new IllegalArgumentException("Destination file is not in Hive2Hive directory.");
 		}
 	}
@@ -87,13 +88,14 @@ public class MoveOnDiskStep extends ProcessStep {
 		UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 
 		// get the keys for the file to move
-		Index fileNode = userProfile.getFileByPath(context.getSource(), networkManager.getSession().getRoot());
+		Index fileNode = userProfile
+				.getFileByPath(context.getSource(), networkManager.getSession().getRoot());
 		if (fileNode == null) {
 			throw new IllegalStateException("File to move is not in user profile");
 		}
 		context.setFileNodeKeys(fileNode.getFileKeys());
 
-		logger.debug("Successfully fetched file keys for the file to move, its old parent and its new parent");
+		logger.debug("Successfully fetched file keys for the file to move, its old parent and its new parent.");
 	}
 
 	@Override
