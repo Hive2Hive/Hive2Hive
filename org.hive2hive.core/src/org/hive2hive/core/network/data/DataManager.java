@@ -127,7 +127,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
-		logger.debug(String.format("Change content protection key. '{}'", parameters.toString()));
+		logger.debug("Change content protection key. '{}'", parameters.toString());
 		// create dummy object to change the protection key
 		Data data = new Data().setProtectedEntry();
 		// set new content protection keys
