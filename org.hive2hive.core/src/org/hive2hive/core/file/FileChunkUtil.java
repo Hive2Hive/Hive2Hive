@@ -17,10 +17,15 @@ public class FileChunkUtil {
 	 * 
 	 * @param file the file to chunk
 	 * @param chunkSize the size of an individual chunk
-	 * @return the number of chunks
+	 * @return the number of chunks, if the file is empty, 1 is returned
 	 */
 	public static int getNumberOfChunks(File file, int chunkSize) {
 		long fileSize = FileUtil.getFileSize(file);
+		if (fileSize == 0) {
+			// special case
+			return 1;
+		}
+
 		return (int) Math.ceil((double) fileSize / chunkSize);
 	}
 
