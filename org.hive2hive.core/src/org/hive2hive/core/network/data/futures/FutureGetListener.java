@@ -77,7 +77,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 			} else {
 				NetworkContent content = (NetworkContent) future.getData().object();
 				if (content == null) {
-					logger.warn("Get retry #{} because content is null. '{}'", getTries,
+					logger.debug("Get retry #{} because content is null. '{}'", getTries,
 							parameters.toString());
 					if (parameters.getVersionKey().equals(Number160.ZERO))
 						dataManager.getUnblocked(parameters).addListener(this);
@@ -105,7 +105,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	 */
 	private void notify(NetworkContent result) {
 		if (result == null) {
-			logger.warn("Got null. '{}'", parameters.toString());
+			logger.debug("Got null. '{}'", parameters.toString());
 		} else {
 			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(),
 					parameters.toString());

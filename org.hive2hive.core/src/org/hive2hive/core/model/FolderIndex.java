@@ -2,9 +2,8 @@ package org.hive2hive.core.model;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.hive2hive.core.file.FileUtil;
@@ -19,8 +18,10 @@ import org.hive2hive.core.file.FileUtil;
 public class FolderIndex extends Index {
 
 	private static final long serialVersionUID = 3798065400562165454L;
-	private final Set<Index> children;
-	private final List<UserPermission> userPermissions;
+
+	private final Set<Index> children = new HashSet<Index>();
+	private final Set<UserPermission> userPermissions = new HashSet<UserPermission>();
+
 	private KeyPair protectionKeys = null;
 	private boolean isShared = false;
 
@@ -35,8 +36,6 @@ public class FolderIndex extends Index {
 	// TODO keypair can be generated here, no need to hand over as parameter
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
-		children = new HashSet<Index>();
-		userPermissions = new ArrayList<UserPermission>();
 	}
 
 	/**
@@ -105,7 +104,7 @@ public class FolderIndex extends Index {
 	 * @param protectionKeys if the user has write access, the protection keys are != null, else, they can be
 	 *            null.
 	 */
-	public void share(KeyPair protectionKeys, UserPermission... userPermission) throws IllegalStateException {
+	public void share(KeyPair protectionKeys) throws IllegalStateException {
 		if (isRoot())
 			throw new IllegalStateException("Root node can't be shared.");
 		else if (isSharedOrHasSharedChildren()) {
@@ -114,10 +113,6 @@ public class FolderIndex extends Index {
 
 		this.isShared = true;
 		this.protectionKeys = protectionKeys;
-
-		for (UserPermission permission : userPermission) {
-			userPermissions.add(permission);
-		}
 	}
 
 	/**
@@ -137,8 +132,7 @@ public class FolderIndex extends Index {
 	 * @param userPermission
 	 */
 	public void addUserPermissions(UserPermission userPermission) {
-		if (userPermission != null)
-			userPermissions.add(userPermission);
+		userPermissions.add(userPermission);
 	}
 
 	/**
@@ -147,15 +141,13 @@ public class FolderIndex extends Index {
 	 * @param userId
 	 */
 	public void removeUserPermissions(String userId) {
-		UserPermission toDelete = null;
-		for (UserPermission permission : userPermissions) {
-			if (permission.getUserId().equalsIgnoreCase(userId)) {
-				toDelete = permission;
-				break;
+		Iterator<UserPermission> iter = userPermissions.iterator();
+		while (iter.hasNext()) {
+			UserPermission userPermission = iter.next();
+			if (userPermission.getUserId().equalsIgnoreCase(userId)) {
+				iter.remove();
 			}
 		}
-
-		userPermissions.remove(toDelete);
 	}
 
 	/**
@@ -164,7 +156,7 @@ public class FolderIndex extends Index {
 	 * 
 	 * @return the user permissions of this index.
 	 */
-	public List<UserPermission> getUserPermissions() {
+	public Set<UserPermission> getUserPermissions() {
 		return userPermissions;
 	}
 
@@ -175,13 +167,12 @@ public class FolderIndex extends Index {
 	 * @return
 	 */
 	public Set<UserPermission> getCalculatedUserPermissions() {
-		Set<UserPermission> permissions = new HashSet<UserPermission>();
-		permissions.addAll(getUserPermissions());
+		// if there is a parent and no user permissions, ask parent
+		if (parent != null && userPermissions.isEmpty())
+			return parent.getCalculatedUserPermissions();
 
-		if (parent != null)
-			permissions.addAll(parent.getCalculatedUserPermissions());
-
-		return permissions;
+		// if there is no parent or user permission list is not empty
+		return userPermissions;
 	}
 
 	@Override
