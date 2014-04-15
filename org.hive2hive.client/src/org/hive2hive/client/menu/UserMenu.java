@@ -25,11 +25,8 @@ public final class UserMenu extends H2HConsoleMenu {
 	@Override
 	protected void createItems() {
 		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
-
-			@Override
 			protected void execute() throws Exception {
 				userCredentials = new UserCredentials(askUsedId(), askPassword(), askPin());
-
 				exit();
 			}
 		};

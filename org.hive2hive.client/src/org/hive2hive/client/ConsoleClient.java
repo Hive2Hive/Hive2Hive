@@ -52,6 +52,6 @@ public class ConsoleClient {
 	
 	private static void printInstructions() {
 		ConsoleMenu.print("Configure and operate on your Hive2Hive network by following the guides.\n");
-		ConsoleMenu.print("Navigate through the menus by entering the numbers next to the items of your choice.\n");
+		ConsoleMenu.print("Navigate through the menus by entering the numbers next to the items of your choice.");
 	}
 }

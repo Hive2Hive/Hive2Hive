@@ -37,6 +37,11 @@ public class LoggerMenu extends ConsoleMenu {
 	protected String getInstruction() {
 		return "Do you want this session to be logged?";
 	}
+	
+	@Override
+	protected String getExitItemText() {
+		return "Cancel";
+	}
 
 	private static String createRootLogger() {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
