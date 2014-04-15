@@ -98,7 +98,7 @@ public class PermissionsTest extends H2HJUnitTest {
 	@Test
 	public void testShareWithWritePermission() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		
+
 		logger.debug("1. Upload folder 'folder1' from A.");
 		File folder1AtA = new File(rootA, "folder1");
 		folder1AtA.mkdirs();
@@ -110,16 +110,16 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(folder1AtB, true);
 
 		logger.debug("3. Upload a new file 'folder1/file1' from A.");
-		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5), folder1AtA,
-				config);
+		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1,
+				folder1AtA, config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1AtA);
 		File file1AtB = new File(folder1AtB, file1AtA.getName());
 		waitTillSynchronized(file1AtB, true);
 		Assert.assertEquals(file1AtA.length(), file1AtB.length());
 
 		logger.debug("4. Upload a new file 'folder1/file2' from B.");
-		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtB,
-				config);
+		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1,
+				folder1AtB, config);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file2AtB);
 		File file2AtA = new File(folder1AtA, file2AtB.getName());
 		waitTillSynchronized(file2AtA, true);
@@ -140,15 +140,15 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(subFolder2AtA, true);
 
 		logger.debug("7. Upload a file 'folder1/subfolder2/file3' from A.");
-		File file3AtA = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5), subFolder2AtA,
-				config);
+		File file3AtA = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1,
+				subFolder2AtA, config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3AtA);
 		File file3AtB = new File(subFolder2AtB, file3AtA.getName());
 		waitTillSynchronized(file3AtB, true);
 
 		logger.debug("8. Upload a file 'folder1/subfolder2/file4' from B.");
-		File file4AtB = FileTestUtil.createFileRandomContent("file4", new Random().nextInt(5), subFolder2AtB,
-				config);
+		File file4AtB = FileTestUtil.createFileRandomContent("file4", new Random().nextInt(5) + 1,
+				subFolder2AtB, config);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file4AtB);
 		File file4AtA = new File(subFolder2AtA, file4AtB.getName());
 		waitTillSynchronized(file4AtA, true);
@@ -172,29 +172,33 @@ public class PermissionsTest extends H2HJUnitTest {
 		checkIndex(folder1AIndex, folder1BIndex.getProtectionKeys());
 		checkIndex(folder1BIndex, folder1AIndex.getProtectionKeys());
 
-		logger.debug("10. Delete 'file4' at user A.");
-		UseCaseTestUtil.deleteFile(network.get(0), file4AtA);
-		waitTillSynchronized(file4AtB, false);
+		logger.debug("10. Delete 'file3' at user A.");
+		UseCaseTestUtil.deleteFile(network.get(0), file3AtA);
+		waitTillSynchronized(file3AtB, false);
 
-		logger.debug("11. Delete 'subfolder2' at user B.");
+		logger.debug("11. Delete 'file4' at user B.");
+		UseCaseTestUtil.deleteFile(network.get(1), file4AtB);
+		waitTillSynchronized(file4AtA, false);
+
+		logger.debug("12. Delete 'subfolder2' at user B.");
 		UseCaseTestUtil.deleteFile(network.get(1), subFolder2AtB);
 		waitTillSynchronized(subFolder2AtB, false);
 
-		logger.debug("12. Move 'file2' at user A to root folder.");
-		UseCaseTestUtil.moveFile(network.get(0), file2AtA, rootA);
+		logger.debug("13. Move 'file2' at user A to root folder.");
+		UseCaseTestUtil.moveFile(network.get(0), file2AtA, new File(rootA, file2AtA.getName()));
 		waitTillSynchronized(file2AtB, false);
 
-		logger.debug("13. Move 'file1' at user B to 'folder1/subfolder1'.");
-		UseCaseTestUtil.moveFile(network.get(1), file1AtB, subfolder1AtB);
+		logger.debug("14. Move 'file1' at user B to 'folder1/subfolder1'.");
+		UseCaseTestUtil.moveFile(network.get(1), file1AtB, new File(subfolder1AtB, file1AtB.getName()));
 		waitTillSynchronized(file1AtA, false);
 		file1AtA = new File(subFolder1AtA, "file1");
 		waitTillSynchronized(file1AtA, true);
 
-		logger.debug("14. Move 'folder1/subfolder1' at user A to root folder.");
-		UseCaseTestUtil.moveFile(network.get(0), subFolder1AtA, rootA);
+		logger.debug("15. Move 'folder1/subfolder1' at user A to root folder.");
+		UseCaseTestUtil.moveFile(network.get(0), subFolder1AtA, new File(rootA, subFolder1AtA.getName()));
 		waitTillSynchronized(subfolder1AtB, false);
 
-		logger.debug("15. Delete 'folder1' at user B.");
+		logger.debug("16. Delete 'folder1' at user B.");
 		UseCaseTestUtil.deleteFile(network.get(1), folder1AtB);
 		waitTillSynchronized(folder1AtA, false);
 	}
@@ -218,16 +222,16 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(folder1AtB, true);
 
 		logger.debug("3. Upload a new file 'folder1/file1' from A.");
-		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5), folder1AtA,
-				config);
+		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1,
+				folder1AtA, config);
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(file1AtA,
 				nodeA));
 		File file1AtB = new File(folder1AtB, file1AtA.getName());
 		waitTillSynchronized(file1AtB, true);
 
 		logger.debug("4. Try to upload a new file 'folder1/file2' from B.");
-		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtB,
-				config);
+		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1,
+				folder1AtB, config);
 		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(file2AtB,
 				nodeB));
 		file2AtB.delete();
@@ -262,8 +266,8 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(file1AtB, false);
 
 		logger.debug("9. Upload a new file 'folder1/file2' from A.");
-		File file2AtA = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtA,
-				config);
+		File file2AtA = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1,
+				folder1AtA, config);
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(file2AtA,
 				nodeA));
 		file2AtB = new File(folder1AtB, file2AtA.getName());
@@ -279,9 +283,9 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(file2AtB, false);
 
 		logger.debug("12. Try to delete 'folder1' from B.");
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folder1AtB,
-				nodeB));
-		
+		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(
+				folder1AtB, nodeB));
+
 		logger.debug("13. Delete 'folder1' from A.");
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createDeleteFileProcess(
 				folder1AtA, nodeA));
