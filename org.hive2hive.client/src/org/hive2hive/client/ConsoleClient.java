@@ -2,6 +2,7 @@ package org.hive2hive.client;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.menu.IntroMenu;
+import org.hive2hive.client.menu.LoggerMenu;
 
 /**
  * A console-based client to use the Hive2Hive library.
@@ -19,6 +20,8 @@ public class ConsoleClient {
 	public void start() {
 		printHeader();
 		printInstructions();
+		
+		new LoggerMenu().open();
 		
 		IntroMenu menu = new IntroMenu();
 		menu.open();

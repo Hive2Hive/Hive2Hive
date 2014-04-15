@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<timestamp key="bySecond" datePattern="yyyy-MM-dd'_'HH-mm-ss" />
+	<!-- <timestamp key="bySecond" datePattern="yyyy-MM-dd'_'HH-mm-ss" /> -->
 
-	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+<!-- 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>h2h-log ${bySecond}.txt</file>
 		<encoder>
 			<pattern>%d{HH:mm:ss} %-12.-12([%thread])[%-5level] %logger{0} -%msg%n</pattern>
 		</encoder>
-	</appender>
+	</appender> -->
 
 	<root level="DEBUG">
-		<appender-ref ref="FILE" />
+		<!-- <appender-ref ref="FILE" /> -->
 	</root>
 </configuration>
