@@ -13,17 +13,18 @@ public class ConsoleClient {
 
 	public static void main(String[] args) {
 		new ConsoleClient().start();
+		System.exit(0);
 	}
 
 	public void start() {
 		printHeader();
 		printInstructions();
 		
-		new IntroMenu().open();
-
+		IntroMenu menu = new IntroMenu();
+		menu.open();
+		menu.shutdown();
+		
 		printFooter();
-
-		System.exit(0);
 	}
 	
 	private static void printHeader() {		
