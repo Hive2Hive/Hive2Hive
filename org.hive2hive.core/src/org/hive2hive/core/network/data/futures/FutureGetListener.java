@@ -63,14 +63,14 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		if (retry) {
 			if (future == null || future.isFailed() || future.getData() == null) {
 				if (getTries++ < H2HConstants.GET_RETRIES) {
-					logger.warn("Get retry #{} because future failed. '{}'", getTries,
+					logger.debug("Get retry #{} because future failed. '{}'", getTries,
 							parameters.toString());
 					if (parameters.getVersionKey().equals(Number160.ZERO))
 						dataManager.getUnblocked(parameters).addListener(this);
 					else
 						dataManager.getVersionUnblocked(parameters).addListener(this);
 				} else {
-					logger.warn("Get failed after {} tries. '{}'", getTries,
+					logger.debug("Get failed after {} tries. '{}'", getTries,
 							parameters.toString());
 					notify(null);
 				}
@@ -105,7 +105,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	 */
 	private void notify(NetworkContent result) {
 		if (result == null) {
-			logger.debug("Got null. '{}'", parameters.toString());
+			logger.warn("Got null. '{}'", parameters.toString());
 		} else {
 			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(),
 					parameters.toString());
