@@ -257,7 +257,7 @@ public class FolderIndex extends Index {
 		}
 
 		// ask the parent whether this subfolder is shared
-		return parent.isShared;
+		return parent.isShared();
 	}
 
 	/**
