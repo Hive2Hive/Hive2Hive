@@ -14,15 +14,19 @@ public class ProcessComponentListener implements IProcessComponentListener {
 	protected boolean hasSucceeded;
 	protected boolean hasFailed;
 	protected boolean hasFinished;
+	
+	protected RollbackReason rollbackReason;
 
 	@Override
 	public void onSucceeded() {
 		hasSucceeded = true;
+		rollbackReason = null;
 	}
 
 	@Override
 	public void onFailed(RollbackReason reason) {
 		hasFailed = true;
+		rollbackReason = reason;
 	}
 
 	@Override
@@ -40,6 +44,14 @@ public class ProcessComponentListener implements IProcessComponentListener {
 
 	public boolean hasFinished() {
 		return hasFinished;
+	}
+	
+	/**
+	 * Returns the {@link RollbackReason} in case of a failure and <code>null</code> otherwise.
+	 * @return The {@link RollbackReason} in case of a failure, <code>null</code> otherwise.
+	 */
+	public RollbackReason getRollbackReason() {
+		return rollbackReason;
 	}
 
 }

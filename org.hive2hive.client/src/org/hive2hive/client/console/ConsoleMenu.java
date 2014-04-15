@@ -58,16 +58,16 @@ public abstract class ConsoleMenu {
 
 	private final void show() {
 
-		System.out.println(getInstruction());
-		System.out.println();
+		print(getInstruction());
+		print();
 
 		// print normal items
 		for (int i = 0; i < items.size(); ++i) {
-			System.out.println(String.format("\t[%s]  %s", i + 1, items.get(i).getDisplayText()));
+			print(String.format("\t[%s]  %s", i + 1, items.get(i).getDisplayText()));
 		}
 
 		// print exit item
-		System.out.println(String.format("\n\t[%s]  %s", exitToken, getExitItemText()));
+		print(String.format("\n\t[%s]  %s", exitToken, getExitItemText()));
 
 		// evaluate input
 		String input = exitToken;

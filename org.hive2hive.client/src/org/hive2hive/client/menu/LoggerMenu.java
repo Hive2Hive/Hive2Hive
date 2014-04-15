@@ -46,7 +46,7 @@ public class LoggerMenu extends ConsoleMenu {
 		ple.setContext(loggerContext);
 		ple.start();
 
-		String fileName = String.format("h2h-log %s.txt",
+		String fileName = String.format("logs/h2h-log %s.txt",
 				new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(System.currentTimeMillis()));
 		FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
 		fileAppender.setFile(fileName);
