@@ -18,7 +18,7 @@ public class ConsoleClient {
 	public void start() {
 		printHeader();
 		printInstructions();
-
+		
 		new IntroMenu().open();
 
 		printFooter();
