@@ -42,12 +42,15 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 
 	private static final IFileConfiguration config = new TestFileConfiguration();
 	private static final int networkSize = 3;
+	private static final int maxNumChunks = 2;
 	private static List<NetworkManager> network;
 
 	private static File rootA;
 	private static File rootB;
 	private static File sharedFolderA;
 	private static File sharedFolderB;
+	private static File subFolderA;
+	private static File subFolderB;
 
 	private static UserCredentials userA;
 	private static UserCredentials userB;
@@ -82,10 +85,17 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 		sharedFolderA.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderA);
 
-		logger.debug("Share folder 'folder1' with user B giving write permission.");
+		logger.info("Share folder 'folder1' with user B giving write permission.");
 		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderA, userB.getUserId(), PermissionType.WRITE);
 		sharedFolderB = new File(rootB, sharedFolderA.getName());
 		waitTillSynchronized(sharedFolderB, true);
+
+		logger.info("Upload a new subfolder 'folder1/subfolder'.");
+		subFolderA = new File(sharedFolderA, "subfolder");
+		subFolderA.mkdir();
+		UseCaseTestUtil.uploadNewFile(network.get(0), subFolderA);
+		subFolderB = new File(sharedFolderB, subFolderA.getName());
+		waitTillSynchronized(subFolderB, true);
 	}
 
 	@Test
@@ -93,7 +103,7 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
 			GetFailedException {
 		logger.info("Upload a new file 'folder1/file1FromA' from A.");
-		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(2) + 1,
+		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1FromAAtA);
 
@@ -116,7 +126,7 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
 			GetFailedException {
 		logger.info("Upload a new file 'folder1/file2FromA' from A.");
-		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(2) + 1,
+		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2FromAAtA);
 
@@ -139,7 +149,7 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
 			GetFailedException {
 		logger.info("Upload a new file 'folder1/file1FromB' from B.");
-		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(5) + 1,
+		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, config);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file1FromBAtB);
 
@@ -162,7 +172,7 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
 			GetFailedException {
 		logger.info("Upload a new file 'folder1/file2FromB' from B.");
-		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(5) + 1,
+		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, config);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file2FromBAtB);
 
@@ -271,7 +281,173 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 		waitTillSynchronized(subFolder2FromBAtA, false);
 		checkIndex(subFolder2FromBAtA, subFolder2FromBAtB, true);
 	}
-	
+
+	@Test
+	public void testSynchronizeAddSubFileFromADeleteFromA() throws NoSessionException,
+			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
+			GetFailedException {
+		logger.info("Upload a new file 'folder1/subfolder/file1FromA' from A.");
+		File subFile1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA",
+				new Random().nextInt(maxNumChunks) + 1, subFolderA, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), subFile1FromAAtA);
+
+		logger.info("Wait till new file 'folder1/subfolder/file1FromA' gets synchronized with B.");
+		File subFile1FromAAtB = new File(subFolderB, subFile1FromAAtA.getName());
+		waitTillSynchronized(subFile1FromAAtB, true);
+		compareFiles(subFile1FromAAtA, subFile1FromAAtB);
+		checkIndex(subFile1FromAAtA, subFile1FromAAtB, false);
+
+		logger.info("Delete file 'folder1/subfolder/file1FromA' from A.");
+		UseCaseTestUtil.deleteFile(network.get(0), subFile1FromAAtA);
+
+		logger.info("Wait till deletion of file 'folder1/subfolder/file1FromA' gets synchronized with B.");
+		waitTillSynchronized(subFile1FromAAtB, false);
+		checkIndex(subFile1FromAAtA, subFile1FromAAtB, true);
+	}
+
+	@Test
+	public void testSynchronizeAddSubFileFromADeleteFromB() throws NoSessionException,
+			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
+			GetFailedException {
+		logger.info("Upload a new file 'folder1/subfolder/file2FromA' from A.");
+		File subFile2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA",
+				new Random().nextInt(maxNumChunks) + 1, subFolderA, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), subFile2FromAAtA);
+
+		logger.info("Wait till new file 'folder1/subfolder/file2FromA' gets synchronized with B.");
+		File subFile2FromAAtB = new File(subFolderB, subFile2FromAAtA.getName());
+		waitTillSynchronized(subFile2FromAAtB, true);
+		compareFiles(subFile2FromAAtA, subFile2FromAAtB);
+		checkIndex(subFile2FromAAtA, subFile2FromAAtB, false);
+
+		logger.info("Delete file 'folder1/subfolder/file2FromA' from B.");
+		UseCaseTestUtil.deleteFile(network.get(1), subFile2FromAAtB);
+
+		logger.info("Wait till deletion of file 'folder1/subfolder/file2FromA' gets synchronized with A.");
+		waitTillSynchronized(subFile2FromAAtA, false);
+		checkIndex(subFile2FromAAtA, subFile2FromAAtB, true);
+	}
+
+	@Test
+	public void testSynchronizeAddSubFileFromBDeleteFromA() throws NoSessionException,
+			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
+			GetFailedException {
+		logger.info("Upload a new file 'folder1/subfolder/file1FromB' from B.");
+		File subFile1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB",
+				new Random().nextInt(maxNumChunks) + 1, subFolderB, config);
+		UseCaseTestUtil.uploadNewFile(network.get(1), subFile1FromBAtB);
+
+		logger.info("Wait till new file 'folder1/subfolder/file1FromB' gets synchronized with A.");
+		File subFile1FromBAtA = new File(subFolderA, subFile1FromBAtB.getName());
+		waitTillSynchronized(subFile1FromBAtB, true);
+		compareFiles(subFile1FromBAtA, subFile1FromBAtB);
+		checkIndex(subFile1FromBAtA, subFile1FromBAtB, false);
+
+		logger.info("Delete file 'folder1/subfolder/file1FromB' from A.");
+		UseCaseTestUtil.deleteFile(network.get(0), subFile1FromBAtA);
+
+		logger.info("Wait till deletion of file 'folder1/subfolder/file1FromB' gets synchronized with B.");
+		waitTillSynchronized(subFile1FromBAtB, false);
+		checkIndex(subFile1FromBAtA, subFile1FromBAtB, true);
+	}
+
+	@Test
+	public void testSynchronizeAddSubFileFromBDeleteFromB() throws NoSessionException,
+			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
+			GetFailedException {
+		logger.info("Upload a new file 'folder1/subfolder/file2FromB' from B.");
+		File subFile2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB",
+				new Random().nextInt(maxNumChunks) + 1, subFolderB, config);
+		UseCaseTestUtil.uploadNewFile(network.get(1), subFile2FromBAtB);
+
+		logger.info("Wait till new file 'folder1/subfolder/file2FromB' gets synchronized with A.");
+		File subFile2FromBAtA = new File(subFolderB, subFile2FromBAtB.getName());
+		waitTillSynchronized(subFile2FromBAtB, true);
+		compareFiles(subFile2FromBAtA, subFile2FromBAtB);
+		checkIndex(subFile2FromBAtA, subFile2FromBAtB, false);
+
+		logger.info("Delete file 'folder1/subfolder/file2FromB' from B.");
+		UseCaseTestUtil.deleteFile(network.get(1), subFile2FromBAtB);
+
+		logger.info("Wait till deletion of file 'folder1/subfolder/file2FromB' gets synchronized with A.");
+		waitTillSynchronized(subFile2FromBAtA, false);
+		checkIndex(subFile2FromBAtA, subFile2FromBAtB, true);
+	}
+
+	/**
+	 * addSubFolderFromADeleteFromA
+	 * addSubFolderFromADeleteFromB
+	 * addSubFolderFromBDeleteFromB
+	 * addSubFolderFromBDeleteFromA
+	 * 
+	 * Move
+	 * ====
+	 * Out
+	 * ---
+	 * addFileFromAMoveOutFromA
+	 * addFileFromAMoveOutFromB
+	 * addFileFromBMoveOutFromB
+	 * addFileFromBMoveOutFromA
+	 * addSubFileFromAMoveOutFromA
+	 * addSubFileFromAMoveOutFromB
+	 * addSubFileFromBMoveOutFromB
+	 * addSubFileFromBMoveOutFromA
+	 * 
+	 * addFolderFromAMoveOutFromA
+	 * addFolderFromAMoveOutFromB
+	 * addFolderFromBMoveOutFromB
+	 * addFolderFromBMoveOutFromA
+	 * addSubFolderFromAMoveOutFromA
+	 * addSubFolderFromAMoveOutFromB
+	 * addSubFolderFromBMoveOutFromB
+	 * addSubFolderFromBMoveOutFromA
+	 * 
+	 * Into
+	 * --
+	 * moveFileIntoFromA
+	 * moveFileIntoFromB
+	 * moveFolderIntoFromA
+	 * moveFolderIntoFromB
+	 * 
+	 * moveFileIntoSubfolderFromA
+	 * moveFileIntoSubfolderFromB
+	 * moveFolderIntoSubfolderFromA
+	 * moveFolderIntoSubfolderFromB
+	 * 
+	 * Internal
+	 * -------
+	 * addFileFromAMoveToSubfolderAtA
+	 * addFileFromAMoveToSubfolderAtB
+	 * addFileFromBMoveToSubfolderAtA
+	 * addFileFromBMoveToSubfolderAtB
+	 * addSubFileFromAMoveToFolderAtA
+	 * addSubFileFromAMoveToFolderAtB
+	 * addSubFileFromBMoveToFolderAtA
+	 * addSubFileFromBMoveToFolderAtB
+	 * 
+	 * addFolderFromAMoveToSubfolderAtA
+	 * addFolderFromAMoveToSubfolderAtB
+	 * addFolderFromBMoveToSubfolderAtA
+	 * addFolderFromBMoveToSubfolderAtB
+	 * addSubFolderFromAMoveToFolderAtA
+	 * addSubFolderFromAMoveToFolderAtB
+	 * addSubFolderFromBMoveToFolderAtA
+	 * addSubFolderFromBMoveToFolderAtB
+	 * 
+	 * addSubFileFromAMoveToSubfolderAtA
+	 * addSubFileFromAMoveToSubfolderAtB
+	 * addSubFileFromBMoveToSubfolderAtA
+	 * addSubFileFromBMoveToSubfolderAtB
+	 * addSubFolderFromAMoveToSubfolderAtA
+	 * addSubFolderFromAMoveToSubfolderAtB
+	 * addSubFolderFromBMoveToSubfolderAtA
+	 * addSubFolderFromBMoveToSubfolderAtB
+	 * 
+	 * Update
+	 * ======
+	 * 
+	 */
+
 	// @Test
 	// public void testShareWithWritePermission() throws NoSessionException, NoPeerConnectionException,
 	// IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
