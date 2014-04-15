@@ -259,7 +259,6 @@ public class FileMenu extends H2HConsoleMenu {
 
 	private File askFor(String msg, boolean expectExistence, boolean requireDirectory) {
 
-		// TODO allow drag&drop or another kind of easy navigation
 		// TODO find better way to exit this menu
 		// TODO be more flexible with inputs, e.g. files with whitespaces in name
 
