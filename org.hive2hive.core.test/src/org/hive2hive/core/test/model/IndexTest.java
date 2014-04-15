@@ -154,8 +154,9 @@ public class IndexTest extends H2HJUnitTest {
 		Assert.assertEquals(1, root.getCalculatedUserList().size());
 
 		// add permission to sub-folder
-		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE), new UserPermission(
-				"UserB", PermissionType.READ));
+		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE));
+		dir1.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
+		dir1.addUserPermissions(new UserPermission("UserB", PermissionType.READ));
 
 		// check the sub-folder and the sub-files permission
 		Assert.assertEquals(2, dir1.getCalculatedUserList().size());
