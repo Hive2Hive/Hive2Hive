@@ -28,6 +28,8 @@ public class LoggerMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("No") {
 			protected void execute() throws Exception {
 				// logback.xml defines nothing by default
+				LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+				loggerContext.reset();
 				exit();
 			}
 		});
