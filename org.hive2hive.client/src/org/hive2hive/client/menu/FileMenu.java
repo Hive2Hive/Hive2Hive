@@ -40,7 +40,7 @@ public class FileMenu extends H2HConsoleMenu {
 		CreateRootDirectory = new H2HConsoleMenuItem("Create Root Directory") {
 			protected void execute() throws Exception {
 
-				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" + System.currentTimeMillis());
+				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_" + menus.getUserMenu().getUserCredentials().getUserId());
 
 				if (isExpertMode) {
 					print(String.format(
@@ -61,10 +61,13 @@ public class FileMenu extends H2HConsoleMenu {
 				if (!Files.exists(rootDirectory.toPath(), LinkOption.NOFOLLOW_LINKS)) {
 					try {
 						FileUtils.forceMkdir(rootDirectory);
+						print(String.format("Root directory '%s' created.", rootDirectory));
 					} catch (Exception e) {
 						printError(String.format("Exception on creating the root directory %s: " + e,
 								rootDirectory.toPath()));
 					}
+				} else {
+					print(String.format("Existing root directory '%s' will be used.", rootDirectory));
 				}
 			}
 		};
