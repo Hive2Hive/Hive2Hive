@@ -339,7 +339,7 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 
 		logger.info("Wait till new file 'folder1/subfolder/file1FromB' gets synchronized with A.");
 		File subFile1FromBAtA = new File(subFolderA, subFile1FromBAtB.getName());
-		waitTillSynchronized(subFile1FromBAtB, true);
+		waitTillSynchronized(subFile1FromBAtA, true);
 		compareFiles(subFile1FromBAtA, subFile1FromBAtB);
 		checkIndex(subFile1FromBAtA, subFile1FromBAtB, false);
 
@@ -361,8 +361,8 @@ public class ShareWithWritePermissionTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(network.get(1), subFile2FromBAtB);
 
 		logger.info("Wait till new file 'folder1/subfolder/file2FromB' gets synchronized with A.");
-		File subFile2FromBAtA = new File(subFolderB, subFile2FromBAtB.getName());
-		waitTillSynchronized(subFile2FromBAtB, true);
+		File subFile2FromBAtA = new File(subFolderA, subFile2FromBAtB.getName());
+		waitTillSynchronized(subFile2FromBAtA, true);
 		compareFiles(subFile2FromBAtA, subFile2FromBAtB);
 		checkIndex(subFile2FromBAtA, subFile2FromBAtB, false);
 
