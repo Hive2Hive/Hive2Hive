@@ -91,7 +91,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public FuturePut putUnblocked(IParameters parameters) {
-		logger.debug("Put. '{}'", parameters.toString());
+		logger.debug("Put. {}", parameters.toString());
 		try {
 			Data data = new Data(parameters.getData());
 			data.ttlSeconds(parameters.getTTL()).basedOn(parameters.getData().getBasedOnKey());
@@ -120,14 +120,14 @@ public class DataManager implements IDataManager {
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey()).start();
 			}
 		} catch (IOException e) {
-			logger.error("Put failed. '{}'. Exception = '{}'", parameters.toString(),
+			logger.error("Put failed. {}. Exception = '{}'", parameters.toString(),
 					e.getMessage());
 			return null;
 		}
 	}
 
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
-		logger.debug("Change content protection key. '{}'", parameters.toString());
+		logger.debug("Change content protection key. {}", parameters.toString());
 		// create dummy object to change the protection key
 		Data data = new Data().setProtectedEntry();
 		// set new content protection keys
@@ -192,7 +192,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public FutureGet getUnblocked(IParameters parameters) {
-		logger.debug("Get. '{}'", parameters.toString());
+		logger.debug("Get. {}", parameters.toString());
 		return getPeer()
 				.get(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
@@ -202,7 +202,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public FutureGet getVersionUnblocked(IParameters parameters) {
-		logger.debug("Get version. '{}'", parameters.toString());
+		logger.debug("Get version. {}", parameters.toString());
 		return getPeer().get(parameters.getLKey()).setDomainKey(parameters.getDKey())
 				.setContentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey()).start();
 	}
@@ -235,7 +235,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public FutureRemove removeUnblocked(IParameters parameters) {
-		logger.debug("Remove. '{}'", parameters.toString());
+		logger.debug("Remove. {}", parameters.toString());
 		return getPeer()
 				.remove(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
@@ -245,7 +245,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
-		logger.debug("Remove version. '{}'", parameters.toString());
+		logger.debug("Remove version. {}", parameters.toString());
 		return getPeer().remove(parameters.getLKey()).setDomainKey(parameters.getDKey())
 				.contentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey())
 				.keyPair(parameters.getProtectionKeys()).start();
