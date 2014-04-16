@@ -19,6 +19,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.data.PublicKeyManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,8 @@ public class FileUtil {
 	 * 
 	 * @throws IOException
 	 */
-	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager) throws IOException {
+	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager,
+			DownloadManager downloadManager) throws IOException {
 		assert root != null;
 
 		// generate the new persistent meta data
@@ -52,6 +54,10 @@ public class FileUtil {
 		// add the public keys
 		if (keyManager != null) {
 			metaData.setPublicKeyCache(keyManager.getCachedPublicKeys());
+		}
+
+		if (downloadManager != null) {
+			metaData.setDownloads(downloadManager.getOpenTasks());
 		}
 
 		byte[] encoded = EncryptionUtil.serializeObject(metaData);

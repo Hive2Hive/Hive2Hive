@@ -56,7 +56,7 @@ public class FileUtilTest extends H2HJUnitTest {
 		File file = new File(root, fileName);
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
 
-		FileUtil.writePersistentMetaData(root.toPath(), null);
+		FileUtil.writePersistentMetaData(root.toPath(), null, null);
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());
 		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
 		Assert.assertTrue(fileTree.containsKey(fileName));

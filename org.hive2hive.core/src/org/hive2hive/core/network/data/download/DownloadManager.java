@@ -64,6 +64,10 @@ public class DownloadManager {
 		}
 	}
 
+	public Set<DownloadTask> getOpenTasks() {
+		return openTasks;
+	}
+
 	/**
 	 * Listens for a download to finish and removes it from the open list
 	 */
