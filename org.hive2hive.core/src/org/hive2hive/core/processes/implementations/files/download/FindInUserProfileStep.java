@@ -54,8 +54,7 @@ public class FindInUserProfileStep extends ProcessStep {
 			try {
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaFileStep(context, context, dataManager));
-				getParent().add(
-						new InitDownloadChunksStep(context, dataManager, networkManager.getSession().getRoot()));
+				getParent().add(new InitDownloadChunksStep(context, networkManager.getSession()));
 			} catch (Hive2HiveException e) {
 				throw new ProcessExecutionException(e);
 			}

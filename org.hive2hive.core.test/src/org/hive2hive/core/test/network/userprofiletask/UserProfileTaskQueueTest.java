@@ -25,6 +25,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -127,8 +128,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
-				.getTempDirectory().toPath()));
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), new DownloadManager(node
+				.getDataManager()), null, NetworkTestUtil.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
@@ -152,8 +153,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
-				.getTempDirectory().toPath()));
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), new DownloadManager(node
+				.getDataManager()), null, NetworkTestUtil.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
@@ -171,8 +172,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
-				.getTempDirectory().toPath()));
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), new DownloadManager(node
+				.getDataManager()), null, NetworkTestUtil.getTempDirectory().toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
@@ -203,8 +204,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
-				.getTempDirectory().toPath()));
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), new DownloadManager(node
+				.getDataManager()), null, NetworkTestUtil.getTempDirectory().toPath()));
 
 		// IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 		// HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask,
@@ -254,8 +255,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), null, NetworkTestUtil
-				.getTempDirectory().toPath()));
+				"pin")), new PublicKeyManager(userId, key, node.getDataManager()), new DownloadManager(node
+				.getDataManager()), null, NetworkTestUtil.getTempDirectory().toPath()));
 
 		// create some tasks
 		List<TestUserProfileTask> tasks = new ArrayList<TestUserProfileTask>();

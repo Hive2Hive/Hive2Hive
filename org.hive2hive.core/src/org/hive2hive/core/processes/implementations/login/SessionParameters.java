@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 
 public class SessionParameters {
 
@@ -12,6 +13,7 @@ public class SessionParameters {
 	private PublicKeyManager keyManager;
 	private IFileConfiguration fileConfig;
 	private Path root;
+	private DownloadManager downloadManager;
 
 	public UserProfileManager getProfileManager() {
 		return profileManager;
@@ -43,6 +45,14 @@ public class SessionParameters {
 
 	public void setKeyManager(PublicKeyManager keyManager) {
 		this.keyManager = keyManager;
+	}
+
+	public DownloadManager getDownloadManager() {
+		return downloadManager;
+	}
+
+	public void setDownloadManager(DownloadManager downloadManager) {
+		this.downloadManager = downloadManager;
 	}
 
 }

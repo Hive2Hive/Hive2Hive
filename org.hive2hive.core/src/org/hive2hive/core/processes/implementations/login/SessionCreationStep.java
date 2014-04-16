@@ -11,6 +11,8 @@ import org.hive2hive.core.file.PersistentMetaData;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
+import org.hive2hive.core.network.data.download.DownloadTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -36,18 +38,28 @@ public class SessionCreationStep extends ProcessStep {
 
 		H2HSession session;
 		try {
+			// get the persistently cached items
+			PersistentMetaData metaData = FileUtil.readPersistentMetaData(params.getRoot());
+
 			// create the key manager
 			PublicKeyManager keyManager = new PublicKeyManager(userProfile.getUserId(),
 					userProfile.getEncryptionKeys(), networkManager.getDataManager());
 
 			// read eventually cached keys and add them to the key manager
-			PersistentMetaData metaData = FileUtil.readPersistentMetaData(params.getRoot());
 			Map<String, PublicKey> publicKeyCache = metaData.getPublicKeyCache();
 			for (String userId : publicKeyCache.keySet()) {
 				keyManager.putPublicKey(userId, publicKeyCache.get(userId));
 			}
-
 			params.setKeyManager(keyManager);
+
+			// create the download manager
+			DownloadManager downloadManager = new DownloadManager(networkManager.getDataManager());
+
+			// read the cached downloads and add them to the download manager
+			for (DownloadTask downloadTask : metaData.getDownloads()) {
+				downloadManager.submit(downloadTask);
+			}
+			params.setDownloadManager(downloadManager);
 
 			// create session
 			session = new H2HSession(params);

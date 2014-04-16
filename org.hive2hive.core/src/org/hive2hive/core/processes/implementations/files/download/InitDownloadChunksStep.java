@@ -2,47 +2,35 @@ package org.hive2hive.core.processes.implementations.files.download;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.download.DownloadTask;
+import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InitDownloadChunksStep extends BaseGetProcessStep {
+public class InitDownloadChunksStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(InitDownloadChunksStep.class);
 
 	private final DownloadFileContext context;
-	private final List<Chunk> chunkBuffer;
-	private final Path root;
-	private int currentChunkOrder;
+	private final H2HSession session;
 	private File destination;
 
-	private IDataManager dataManager2;
-
-	public InitDownloadChunksStep(DownloadFileContext context, IDataManager dataManager, Path root) {
-		super(dataManager);
+	public InitDownloadChunksStep(DownloadFileContext context, H2HSession session) {
 		this.context = context;
-		dataManager2 = dataManager;
-		this.root = root;
-		this.currentChunkOrder = 0;
-		this.chunkBuffer = new ArrayList<Chunk>();
+		this.session = session;
 	}
 
 	@Override
@@ -69,7 +57,7 @@ public class InitDownloadChunksStep extends BaseGetProcessStep {
 
 		// support to store the file on another location than default (used for recovery)
 		if (context.downloadToDefaultDestination()) {
-			destination = FileUtil.getPath(root, context.consumeIndex()).toFile();
+			destination = FileUtil.getPath(session.getRoot(), context.consumeIndex()).toFile();
 		} else {
 			destination = context.getDestination();
 		}
@@ -83,21 +71,14 @@ public class InitDownloadChunksStep extends BaseGetProcessStep {
 			// start the download
 			DownloadTask downloadTask = new DownloadTask(metaChunks, false, destination, metaFile
 					.getChunkKey().getPrivate());
-			new DownloadManager(dataManager2).submit(downloadTask);
+			session.getDownloadManager().submit(downloadTask);
 			downloadTask.join();
 		} catch (InterruptedException e) {
 			throw new ProcessExecutionException(e.getMessage());
 		}
 
 		// all chunks downloaded
-		if (chunkBuffer.isEmpty()) {
-			// normal case: done with the process.
-			logger.debug("Finished downloading file '{}'.", destination);
-		} else {
-			logger.error("All chunks downloaded but still some in buffer.");
-			throw new ProcessExecutionException(String.format(
-					"Could not write all chunks to disk. We're stuck at chunk %s.", currentChunkOrder));
-		}
+		logger.debug("Finished downloading file '{}'.", destination);
 	}
 
 	private void downloadChunksFromUsers(MetaFileLarge metaFile) {

@@ -22,6 +22,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -98,10 +99,11 @@ public class NetworkTestUtil {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
 					node.getDataManager());
+			DownloadManager downloadManager = new DownloadManager(node.getDataManager());
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(profileManager, keyManager, null, root.toPath());
+				session = new H2HSession(profileManager, keyManager, downloadManager, null, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -123,10 +125,11 @@ public class NetworkTestUtil {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
 					node.getDataManager());
+			DownloadManager downloadManager = new DownloadManager(node.getDataManager());
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(profileManager, keyManager, null, root.toPath());
+				session = new H2HSession(profileManager, keyManager, downloadManager, null, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();

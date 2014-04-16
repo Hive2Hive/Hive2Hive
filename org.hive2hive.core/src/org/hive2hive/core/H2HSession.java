@@ -8,6 +8,7 @@ import java.security.KeyPair;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -15,18 +16,22 @@ public class H2HSession {
 
 	private final UserProfileManager profileManager;
 	private final PublicKeyManager keyManager;
+	private final DownloadManager downloadManager;
 	private final IFileConfiguration fileConfiguration;
 	private final Path root;
 
 	public H2HSession(SessionParameters params) throws IOException {
-		this(params.getProfileManager(), params.getKeyManager(), params.getFileConfig(), params.getRoot());
+		this(params.getProfileManager(), params.getKeyManager(), params.getDownloadManager(), params
+				.getFileConfig(), params.getRoot());
 	}
 
 	// TODO remove constructor
 	public H2HSession(UserProfileManager profileManager, PublicKeyManager keyManager,
-			IFileConfiguration fileConfiguration, Path root) throws IOException {
+			DownloadManager downloadManager, IFileConfiguration fileConfiguration, Path root)
+			throws IOException {
 		this.profileManager = profileManager;
 		this.keyManager = keyManager;
+		this.downloadManager = downloadManager;
 		this.fileConfiguration = fileConfiguration;
 		this.root = root;
 		if (!root.toFile().exists()) {
@@ -73,5 +78,14 @@ public class H2HSession {
 	 */
 	public PublicKeyManager getKeyManager() {
 		return keyManager;
+	}
+
+	/**
+	 * Returns the download manager, responsible for downloading chunks
+	 * 
+	 * @return the download manager
+	 */
+	public DownloadManager getDownloadManager() {
+		return downloadManager;
 	}
 }

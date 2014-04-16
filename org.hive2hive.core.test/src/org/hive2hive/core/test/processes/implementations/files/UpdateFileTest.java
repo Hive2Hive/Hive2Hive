@@ -172,7 +172,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		H2HSession session = uploader.getSession();
 		H2HSession newSession = new H2HSession(session.getProfileManager(), session.getKeyManager(),
-				limitingConfig, session.getRoot());
+				session.getDownloadManager(), limitingConfig, session.getRoot());
 		uploader.setSession(newSession);
 
 		// update the file
@@ -217,7 +217,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		H2HSession session = uploader.getSession();
 		H2HSession newSession = new H2HSession(session.getProfileManager(), session.getKeyManager(),
-				limitingConfig, session.getRoot());
+				session.getDownloadManager(), limitingConfig, session.getRoot());
 		uploader.setSession(newSession);
 
 		// update the file (append some data)
