@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -13,8 +14,10 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
@@ -114,7 +117,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/file1FromA' gets synchronized with B.");
 		waitTillSynchronized(file1FromAAtB, false);
-		checkIndex(file1FromAAtA, file1FromAAtB);
+		checkIndexes(file1FromAAtA, file1FromAAtB, movedFile1FromAAtA, true);
 	}
 
 	@Test
@@ -136,7 +139,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/file2FromA' gets synchronized with A.");
 		waitTillSynchronized(file2FromAAtA, false);
-		checkIndex(file2FromAAtA, file2FromAAtB);
+		checkIndexes(file2FromAAtA, file2FromAAtB, movedFile1FromAAtB, false);
 	}
 
 	@Test
@@ -158,7 +161,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/file1FromB' gets synchronized with B.");
 		waitTillSynchronized(file1FromBAtB, false);
-		checkIndex(file1FromBAtA, file1FromBAtB);
+		checkIndexes(file1FromBAtA, file1FromBAtB, movedFile1FromAAtA, true);
 	}
 
 	@Test
@@ -180,7 +183,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/file2FromA' gets synchronized with A.");
 		waitTillSynchronized(file2FromBAtA, false);
-		checkIndex(file2FromBAtA, file2FromBAtB);
+		checkIndexes(file2FromBAtA, file2FromBAtB, movedFile1FromAAtB, false);
 	}
 
 	@Test
@@ -202,7 +205,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of subfile 'shardFolder/subfolder/subfile1FromA' gets synchronized with B.");
 		waitTillSynchronized(subFile1FromAAtB, false);
-		checkIndex(subFile1FromAAtA, subFile1FromAAtB);
+		checkIndexes(subFile1FromAAtA, subFile1FromAAtB, movedFile1FromAAtA, true);
 	}
 
 	@Test
@@ -224,7 +227,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of subfile 'shardFolder/subfolder/subfile2FromA' gets synchronized with A.");
 		waitTillSynchronized(subfile2FromAAtA, false);
-		checkIndex(subfile2FromAAtA, subfile2FromAAtB);
+		checkIndexes(subfile2FromAAtA, subfile2FromAAtB, movedFile1FromAAtB, false);
 	}
 
 	@Test
@@ -246,7 +249,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/subfolder/subfile1FromB' gets synchronized with B.");
 		waitTillSynchronized(subfile1FromBAtB, false);
-		checkIndex(subfile1FromBAtA, subfile1FromBAtB);
+		checkIndexes(subfile1FromBAtA, subfile1FromBAtB, movedFile1FromAAtA, true);
 	}
 
 	@Test
@@ -268,7 +271,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/subfolder/subfile2FromA' gets synchronized with A.");
 		waitTillSynchronized(subfile2FromBAtA, false);
-		checkIndex(subfile2FromBAtA, subfile2FromBAtB);
+		checkIndexes(subfile2FromBAtA, subfile2FromBAtB, movedFile1FromAAtB, false);
 	}
 
 	@Test
@@ -290,7 +293,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/subFolder1FromA' gets synchronized with B.");
 		waitTillSynchronized(subFolderFromAAtB, false);
-		checkIndex(subFolder1FromAAtA, subFolderFromAAtB);
+		checkIndexes(subFolder1FromAAtA, subFolderFromAAtB, movedFile1FromAAtA, true);
 	}
 
 	@Test
@@ -312,7 +315,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/subfolder2FromA' gets synchronized with A.");
 		waitTillSynchronized(subFolder2FromAAtA, false);
-		checkIndex(subFolder2FromAAtA, subFolder2FromAAtB);
+		checkIndexes(subFolder2FromAAtA, subFolder2FromAAtB, movedFile1FromAAtB, false);
 	}
 
 	@Test
@@ -334,7 +337,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/subfolder1FromB' gets synchronized with B.");
 		waitTillSynchronized(subFolder1FromBAtB, false);
-		checkIndex(subfolder1FromAAtA, subFolder1FromBAtB);
+		checkIndexes(subfolder1FromAAtA, subFolder1FromBAtB, movedFile1FromAAtA, true);
 	}
 
 	@Test
@@ -356,7 +359,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Wait till moving of file 'shardFolder/file2FromA' gets synchronized with A.");
 		waitTillSynchronized(subFolder2FromAAtA, false);
-		checkIndex(subFolder2FromAAtA, subfolder2FromBAtB);
+		checkIndexes(subFolder2FromAAtA, subfolder2FromBAtB, movedFile1FromAAtB, false);
 	}
 
 	/**
@@ -380,7 +383,8 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndex(File fileAtA, File fileAtB) throws GetFailedException, NoSessionException {
+	private static void checkIndexes(File fileAtA, File fileAtB, File movedFile, boolean userA)
+			throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
 		Path relativePathA = rootA.toPath().relativize(fileAtA.toPath());
@@ -394,6 +398,49 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 		// should have been deleted
 		Assert.assertNull(indexA);
 		Assert.assertNull(indexB);
+
+		if (userA) {
+			checkMovedIndex(movedFile, rootA, userProfileA);
+		} else {
+			checkMovedIndex(movedFile, rootB, userProfileB);
+		}
+
+	}
+
+	private static void checkMovedIndex(File movedFile, File root, UserProfile userProfile)
+			throws GetFailedException, NoSessionException {
+		Path relativePath = root.toPath().relativize(movedFile.toPath());
+		Index index = userProfile.getFileByPath(relativePath);
+
+		Assert.assertNotNull(index);
+
+		// check isShared flag
+		Assert.assertFalse(index.isShared());
+
+		// check if content protection keys are the default content protection key
+		Assert.assertTrue(index.getProtectionKeys().getPrivate()
+				.equals(userProfile.getProtectionKeys().getPrivate()));
+		Assert.assertTrue(index.getProtectionKeys().getPublic()
+				.equals(userProfile.getProtectionKeys().getPublic()));
+
+		// check write access
+		Assert.assertTrue(index.canWrite());
+
+		// check user permissions
+		Set<String> users = index.getCalculatedUserList();
+		Assert.assertEquals(1, users.size());
+		Assert.assertTrue(users.contains(userProfile.getUserId()));
+
+		// check user permissions in case of a folder
+		if (movedFile.isDirectory()) {
+			Assert.assertTrue(index.isFolder());
+			Set<UserPermission> permissions = ((FolderIndex) index).getCalculatedUserPermissions();
+			Assert.assertEquals(1, permissions.size());
+			Assert.assertTrue(permissions.contains(new UserPermission(userProfile.getUserId(),
+					PermissionType.WRITE)));
+		} else {
+			Assert.assertTrue(index.isFile());
+		}
 	}
 
 	@AfterClass
