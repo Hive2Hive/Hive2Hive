@@ -33,8 +33,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * A folder is shared with {@link PermissionType#WRITE} permission. Tests bidirectional add and delete
- * scenarios.
+ * A folder is shared with {@link PermissionType#WRITE} permission. Tests moving files and folders out of a
+ * shared folder.
  * 
  * @author Seppi
  */
