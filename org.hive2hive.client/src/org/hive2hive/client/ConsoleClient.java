@@ -31,23 +31,11 @@ public class ConsoleClient {
 	}
 	
 	private static void printHeader() {		
-		ConsoleMenu.print("\n************************************************************************************");
-		ConsoleMenu.print("*      .´'`.                                                            .´'`.      *");
-		ConsoleMenu.print("*      |   |                                                            |   |      *");
-		ConsoleMenu.print("*    .´ `-´ `.        Welcome to the Hive2Hive console client!        .´ `-´ `.    *");
-		ConsoleMenu.print("*    |   |   |                                                        |   |   |    *");
-		ConsoleMenu.print("*     `-´ `-´                                                          `-´ `-´     *");
-		ConsoleMenu.print("************************************************************************************\n");
+		ConsoleMenu.print("\n****** Welcome to the Hive2Hive console client! ******\n");
 	}
 	
 	private static void printFooter() {
-		ConsoleMenu.print("\n************************************************************************************");
-		ConsoleMenu.print("*      .´'`.                                                            .´'`.      *");
-		ConsoleMenu.print("*      |   |                                                            |   |      *");
-		ConsoleMenu.print("*    .´ `-´ `.                        Goodbye!                        .´ `-´ `.    *");
-		ConsoleMenu.print("*    |   |   |                    (hive2hive.com)                     |   |   |    *");
-		ConsoleMenu.print("*     `-´ `-´                                                          `-´ `-´     *");
-		ConsoleMenu.print("************************************************************************************");
+		ConsoleMenu.print("\n************** Goodbye! (hive2hive.com) **************\n");
 	}
 	
 	private static void printInstructions() {
