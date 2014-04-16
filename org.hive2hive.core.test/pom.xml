@@ -4,7 +4,7 @@
 	<artifactId>org.hive2hive.core.test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Hive2Hive test cases</name>
+	<name>Hive2Hive Tests</name>
 	<description>This module contains core-tests of the Hive2Hive library.</description>
 
 	<parent>
