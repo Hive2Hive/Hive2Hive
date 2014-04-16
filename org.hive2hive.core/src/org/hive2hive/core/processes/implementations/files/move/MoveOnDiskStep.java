@@ -47,7 +47,8 @@ public class MoveOnDiskStep extends ProcessStep {
 		try {
 			getFileKeys();
 		} catch (GetFailedException | NoSessionException | IllegalStateException e) {
-			throw new ProcessExecutionException("File keys could not be fetched.", e);
+			throw new ProcessExecutionException(String.format(
+					"File keys could not be fetched. reason = '%s'", e.getMessage()), e);
 		}
 
 		try {

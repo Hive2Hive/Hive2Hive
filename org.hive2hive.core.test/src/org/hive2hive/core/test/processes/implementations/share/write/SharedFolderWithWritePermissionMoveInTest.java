@@ -102,9 +102,12 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 	public void testSynchronizeMoveFileFromAIntoSharedFolerAtA() throws NoSessionException,
 			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
 			GetFailedException {
-		logger.info("Move file 'fileFromA' at A into shared folder 'sharedfolder'.");
+		logger.info("Upload a new file 'fileFromA' into root folder of A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("fileFromA",
 				new Random().nextInt(maxNumChunks) + 1, rootA, config);
+		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
+		
+		logger.info("Move file 'fileFromA' at A into shared folder 'sharedfolder'.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtA.getName());
 		UseCaseTestUtil.moveFile(network.get(0), fileFromAAtA, movedFileFromAAtA);
 
@@ -119,9 +122,12 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 	public void testSynchronizeMoveFileFromBIntoSharedFolerAtB() throws NoSessionException,
 			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
 			GetFailedException {
-		logger.info("Move file 'fileFromB' at B into shared folder 'sharedfolder'.");
+		logger.info("Upload a new file 'fileFromB' into root folder of B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("fileFromB",
 				new Random().nextInt(maxNumChunks) + 1, rootB, config);
+		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
+		
+		logger.info("Move file 'fileFromB' at B into shared folder 'sharedfolder'.");
 		File movedFileFromBAtB = new File(sharedFolderB, fileFromBAtB.getName());
 		UseCaseTestUtil.moveFile(network.get(1), fileFromBAtB, movedFileFromBAtB);
 
@@ -131,6 +137,46 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 		compareFiles(movedFileFromBAtA, movedFileFromBAtB);
 		checkIndex(movedFileFromBAtA, movedFileFromBAtB);
 	}
+	
+	@Test
+	public void testSynchronizeMoveFolderFromAIntoSharedFolerAtA() throws NoSessionException,
+			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
+			GetFailedException {
+		logger.info("Upload a new folder 'folderFromA' into root folder of A.");
+		File folderFromAAtA = new File(rootA, "folderFromA");
+		folderFromAAtA.mkdir();
+		UseCaseTestUtil.uploadNewFile(network.get(0), folderFromAAtA);
+		
+		logger.info("Move folder 'folderFromA' at A into shared folder 'sharedfolder'.");
+		File movedFolderFromAAtA = new File(sharedFolderA, folderFromAAtA.getName());
+		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
+
+		logger.info("Wait till new moved in folder 'folderFromA' gets synchronized with B.");
+		File movedFolderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
+		waitTillSynchronized(movedFolderFromAAtB);
+		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
+		checkIndex(movedFolderFromAAtA, movedFolderFromAAtB);
+	}
+
+	@Test
+	public void testSynchronizeMoveFolderFromBIntoSharedFolerAtB() throws NoSessionException,
+			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
+			GetFailedException {
+		logger.info("Upload a new folder 'folderFromB' into root folder of B.");
+		File folderFromBAtB = new File(rootB, "folderFromB");
+		folderFromBAtB.mkdir();
+		UseCaseTestUtil.uploadNewFile(network.get(1), folderFromBAtB);
+		
+		logger.info("Move folder 'folderFromB' at B into shared folder 'sharedfolder'.");
+		File movedFolderFromBAtB = new File(sharedFolderB, folderFromBAtB.getName());
+		UseCaseTestUtil.moveFile(network.get(1), folderFromBAtB, movedFolderFromBAtB);
+
+		logger.info("Wait till new moved in folder 'folderFromB' gets synchronized with A.");
+		File movedFolderFromBAtA = new File(sharedFolderA, folderFromBAtB.getName());
+		waitTillSynchronized(movedFolderFromBAtA);
+		compareFiles(movedFolderFromBAtA, movedFolderFromBAtB);
+		checkIndex(movedFolderFromBAtA, movedFolderFromBAtB);
+	}
 
 	/**
 	 * 
@@ -138,8 +184,6 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 	 * ====
 	 * Into
 	 * --
-	 * moveFolderIntoFromA
-	 * moveFolderIntoFromB
 	 * 
 	 * moveFileIntoSubfolderFromA
 	 * moveFileIntoSubfolderFromB
