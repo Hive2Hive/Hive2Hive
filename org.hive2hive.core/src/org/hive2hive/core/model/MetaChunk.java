@@ -2,6 +2,8 @@ package org.hive2hive.core.model;
 
 import java.io.Serializable;
 
+import org.hive2hive.core.security.H2HEncryptionUtil;
+
 /**
  * Holds meta data of a chunk in the DHT
  * 
@@ -48,6 +50,25 @@ public class MetaChunk implements Serializable {
 	 */
 	public int getIndex() {
 		return index;
+	}
+
+	@Override
+	public int hashCode() {
+		return chunkHash.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+
+		if (obj instanceof MetaChunk) {
+			MetaChunk other = (MetaChunk) obj;
+			return other.getChunkId().equalsIgnoreCase(chunkId) && other.getIndex() == index
+					&& H2HEncryptionUtil.compareMD5(chunkHash, other.getChunkHash());
+		}
+
+		return false;
 	}
 
 }

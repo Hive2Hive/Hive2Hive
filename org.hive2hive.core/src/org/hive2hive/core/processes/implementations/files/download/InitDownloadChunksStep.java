@@ -3,17 +3,9 @@ package org.hive2hive.core.processes.implementations.files.download;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileIndex;
@@ -22,19 +14,19 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.network.data.download.DownloadManager;
+import org.hive2hive.core.network.data.download.DownloadTask;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
-import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DownloadChunksStep extends BaseGetProcessStep {
+public class InitDownloadChunksStep extends BaseGetProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadChunksStep.class);
+	private final static Logger logger = LoggerFactory.getLogger(InitDownloadChunksStep.class);
 
 	private final DownloadFileContext context;
 	private final List<Chunk> chunkBuffer;
@@ -42,9 +34,12 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 	private int currentChunkOrder;
 	private File destination;
 
-	public DownloadChunksStep(DownloadFileContext context, IDataManager dataManager, Path root) {
+	private IDataManager dataManager2;
+
+	public InitDownloadChunksStep(DownloadFileContext context, IDataManager dataManager, Path root) {
 		super(dataManager);
 		this.context = context;
+		dataManager2 = dataManager;
 		this.root = root;
 		this.currentChunkOrder = 0;
 		this.chunkBuffer = new ArrayList<Chunk>();
@@ -84,29 +79,14 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 					"File already exists on disk. Content does match; no download needed.");
 		}
 
-		// start the download
-		int counter = 0;
-		for (MetaChunk metaChunk : metaChunks) {
-			logger.info("File '{}': Downloading chunk {}/{}.", destination, ++counter, metaChunks.size());
-			NetworkContent content = get(metaChunk.getChunkId(), H2HConstants.FILE_CHUNK);
-			HybridEncryptedContent encrypted = (HybridEncryptedContent) content;
-			try {
-				NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, metaFile.getChunkKey()
-						.getPrivate());
-				chunkBuffer.add((Chunk) decrypted);
-			} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
-					| IllegalBlockSizeException | BadPaddingException | IllegalStateException
-					| InvalidCipherTextException | IllegalArgumentException | IOException e) {
-				throw new ProcessExecutionException("Could not decrypt file chunk.", e);
-			}
-
-			try {
-				writeBufferToDisk();
-			} catch (IOException e) {
-				throw new ProcessExecutionException(String.format(
-						"Could not write file chunk into file '%s'. reason = '%s'", destination.getName(),
-						e.getMessage()), e);
-			}
+		try {
+			// start the download
+			DownloadTask downloadTask = new DownloadTask(metaChunks, false, destination, metaFile
+					.getChunkKey().getPrivate());
+			new DownloadManager(dataManager2).submit(downloadTask);
+			downloadTask.join();
+		} catch (InterruptedException e) {
+			throw new ProcessExecutionException(e.getMessage());
 		}
 
 		// all chunks downloaded
@@ -148,29 +128,5 @@ public class DownloadChunksStep extends BaseGetProcessStep {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Writes the buffered chunks to the disk (in the correct order)
-	 * 
-	 * @throws IOException
-	 */
-	private void writeBufferToDisk() throws IOException {
-		List<Chunk> wroteToDisk = new ArrayList<Chunk>();
-		do {
-			wroteToDisk.clear();
-			for (Chunk chunk : chunkBuffer) {
-				if (chunk.getOrder() == currentChunkOrder) {
-					// append only if already written a chunk, else overwrite the possibly existent file
-					boolean append = currentChunkOrder != 0;
-
-					FileUtils.writeByteArrayToFile(destination, chunk.getData(), append);
-					wroteToDisk.add(chunk);
-					currentChunkOrder++;
-				}
-			}
-
-			chunkBuffer.removeAll(wroteToDisk);
-		} while (!wroteToDisk.isEmpty());
 	}
 }

@@ -107,5 +107,11 @@ public interface H2HConstants {
 	 * File Observer
 	 */
 	// default interval in milliseconds between file observation checks
-	static final long DEFAULT_FILE_OBSERVER_INTERVAL = 1000;
+	public static final long DEFAULT_FILE_OBSERVER_INTERVAL = 1000;
+
+	/**
+	 * Download Manager
+	 */
+	// the number of concurrent downloads
+	public static final int CONCURRENT_DOWNLOADS = 25;
 }

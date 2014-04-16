@@ -3,7 +3,9 @@ package org.hive2hive.core.file;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.model.Chunk;
 
 public class FileChunkUtil {
@@ -79,6 +81,41 @@ public class FileChunkUtil {
 				truncated[i] = data[i];
 			}
 			return truncated;
+		}
+	}
+
+	/**
+	 * Reassembly of multiple file parts to a single file. Note that the file parts need to be sorted
+	 * beforehand
+	 * 
+	 * @param fileParts the sorted file parts.
+	 * @param destination the destination
+	 * @param removeParts whether to remove copied file parts
+	 * @throws IOException in case the files could not be read or written.
+	 */
+	public static void reassembly(List<File> fileParts, File destination, boolean removeParts)
+			throws IOException {
+		if (fileParts == null || fileParts.isEmpty()) {
+			// nothing to reassembly
+			return;
+		}
+
+		if (destination == null) {
+			// don't know where to reassembly
+			return;
+		}
+
+		if (destination.exists()) {
+			// overwrite
+			destination.delete();
+		}
+
+		for (File filePart : fileParts) {
+			// copy file parts to the new location, append
+			FileUtils.writeByteArrayToFile(destination, FileUtils.readFileToByteArray(filePart), true);
+
+			if (removeParts)
+				filePart.delete();
 		}
 	}
 }

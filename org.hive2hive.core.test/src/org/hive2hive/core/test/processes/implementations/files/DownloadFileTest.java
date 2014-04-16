@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
@@ -20,6 +21,8 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
+import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
@@ -40,9 +43,10 @@ import org.junit.Test;
 public class DownloadFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 5;
-	private final static String testContent = "DownloadFileTest";
-	private static List<NetworkManager> network;
+	private final IFileConfiguration fileConfig = new TestFileConfiguration();
 
+	private List<NetworkManager> network;
+	private String testContent;
 	private File uploadedFile;
 	private Index fileNode;
 	private UserCredentials userCredentials;
@@ -76,8 +80,8 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		// upload a file
 		String fileName = NetworkTestUtil.randomString();
-		uploadedFile = new File(uploaderRoot, fileName);
-		FileUtils.write(uploadedFile, testContent);
+		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, fileConfig);
+		testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 
 		UserProfile up = UseCaseTestUtil.getUserProfile(uploader, userCredentials);
