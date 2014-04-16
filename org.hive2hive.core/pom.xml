@@ -3,6 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.hive2hive.core</artifactId>
 	<packaging>jar</packaging>
+	<name>Hive2Hive Core</name>
+	<description>This is the core project of the Hive2Hive library.</description>
 
 	<parent>
 		<groupId>org.hive2hive</groupId>
