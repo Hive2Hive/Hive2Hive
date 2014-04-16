@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.hive2hive.client</artifactId>
 
-	<name>Hive2Hive console client</name>
+	<name>Hive2Hive Console Client</name>
 	<description>This is a console-based client for testing the functionality of the Hive2Hive library.</description>
 
 	<parent>
