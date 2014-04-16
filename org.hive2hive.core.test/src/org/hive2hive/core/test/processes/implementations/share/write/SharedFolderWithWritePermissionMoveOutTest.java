@@ -360,56 +360,6 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * 
-	 * Move
-	 * ====
-	 * Into
-	 * --
-	 * moveFileIntoFromA
-	 * moveFileIntoFromB
-	 * moveFolderIntoFromA
-	 * moveFolderIntoFromB
-	 * 
-	 * moveFileIntoSubfolderFromA
-	 * moveFileIntoSubfolderFromB
-	 * moveFolderIntoSubfolderFromA
-	 * moveFolderIntoSubfolderFromB
-	 * 
-	 * Internal
-	 * -------
-	 * addFileFromAMoveToSubfolderAtA
-	 * addFileFromAMoveToSubfolderAtB
-	 * addFileFromBMoveToSubfolderAtA
-	 * addFileFromBMoveToSubfolderAtB
-	 * addSubFileFromAMoveToFolderAtA
-	 * addSubFileFromAMoveToFolderAtB
-	 * addSubFileFromBMoveToFolderAtA
-	 * addSubFileFromBMoveToFolderAtB
-	 * 
-	 * addFolderFromAMoveToSubfolderAtA
-	 * addFolderFromAMoveToSubfolderAtB
-	 * addFolderFromBMoveToSubfolderAtA
-	 * addFolderFromBMoveToSubfolderAtB
-	 * addSubFolderFromAMoveToFolderAtA
-	 * addSubFolderFromAMoveToFolderAtB
-	 * addSubFolderFromBMoveToFolderAtA
-	 * addSubFolderFromBMoveToFolderAtB
-	 * 
-	 * addSubFileFromAMoveToSubfolderAtA
-	 * addSubFileFromAMoveToSubfolderAtB
-	 * addSubFileFromBMoveToSubfolderAtA
-	 * addSubFileFromBMoveToSubfolderAtB
-	 * addSubFolderFromAMoveToSubfolderAtA
-	 * addSubFolderFromAMoveToSubfolderAtB
-	 * addSubFolderFromBMoveToSubfolderAtA
-	 * addSubFolderFromBMoveToSubfolderAtB
-	 * 
-	 * Update
-	 * ======
-	 * 
-	 */
-
-	/**
 	 * Waits a certain amount of time till a file appears (add) or disappears (delete).
 	 * 
 	 * @param synchronizingFile
