@@ -20,14 +20,12 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DownloadTask implements Serializable {
+public abstract class BaseDownloadTask implements Serializable {
 
-	private static final long serialVersionUID = -6933011357191806148L;
-	private final static Logger logger = LoggerFactory.getLogger(DownloadTask.class);
+	private final static Logger logger = LoggerFactory.getLogger(BaseDownloadTask.class);
 
 	private final List<MetaChunk> metaChunks;
 	private final File destination;
-	private final boolean directDownload;
 	private final PrivateKey decryptionKey;
 	private final File tempFolder;
 
@@ -37,10 +35,8 @@ public class DownloadTask implements Serializable {
 	private final AtomicBoolean aborted;
 	private String reason;
 
-	public DownloadTask(List<MetaChunk> metaChunks, boolean directDownload, File destination,
-			PrivateKey decryptionKey) {
+	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination, PrivateKey decryptionKey) {
 		this.metaChunks = metaChunks;
-		this.directDownload = directDownload;
 		this.destination = destination;
 		this.decryptionKey = decryptionKey;
 		this.downloadedParts = new File[metaChunks.size()];
@@ -76,9 +72,7 @@ public class DownloadTask implements Serializable {
 		return destination.getName();
 	}
 
-	public boolean isDirectDownload() {
-		return directDownload;
-	}
+	public abstract boolean isDirectDownload();
 
 	public PrivateKey getDecryptionKey() {
 		return decryptionKey;
@@ -126,7 +120,7 @@ public class DownloadTask implements Serializable {
 	public synchronized void setDownloaded(int chunkIndex, File filePart) {
 		downloadedParts[chunkIndex] = filePart;
 
-		if (isDone()) {
+		if (isDone() && !isAborted()) {
 			try {
 				// reassembly
 				List<File> fileParts = Arrays.asList(downloadedParts);

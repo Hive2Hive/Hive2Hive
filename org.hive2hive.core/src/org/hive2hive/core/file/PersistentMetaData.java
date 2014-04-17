@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.hive2hive.core.network.data.download.DownloadTask;
+import org.hive2hive.core.network.data.download.BaseDownloadTask;
 
 /**
  * Holds all meta objects that need to be stored when a client goes offline. These data is used when a client
@@ -23,12 +23,12 @@ public class PersistentMetaData implements Serializable {
 
 	private Map<String, byte[]> fileTree;
 	private Map<String, PublicKey> publicKeyCache;
-	private Set<DownloadTask> downloads;
+	private Set<BaseDownloadTask> downloads;
 
 	public PersistentMetaData() {
 		fileTree = new HashMap<String, byte[]>(0);
 		publicKeyCache = new HashMap<String, PublicKey>(0);
-		setDownloads(new HashSet<DownloadTask>(0));
+		setDownloads(new HashSet<BaseDownloadTask>(0));
 	}
 
 	public Map<String, byte[]> getFileTree() {
@@ -47,11 +47,11 @@ public class PersistentMetaData implements Serializable {
 		this.publicKeyCache = publicKeyCache;
 	}
 
-	public Set<DownloadTask> getDownloads() {
+	public Set<BaseDownloadTask> getDownloads() {
 		return downloads;
 	}
 
-	public void setDownloads(Set<DownloadTask> downloads) {
+	public void setDownloads(Set<BaseDownloadTask> downloads) {
 		this.downloads = downloads;
 	}
 }

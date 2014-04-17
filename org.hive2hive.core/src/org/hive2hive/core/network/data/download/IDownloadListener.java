@@ -2,7 +2,7 @@ package org.hive2hive.core.network.data.download;
 
 public interface IDownloadListener {
 
-	void downloadFinished(DownloadTask task);
+	void downloadFinished(BaseDownloadTask task);
 
-	void downloadFailed(DownloadTask task, String reason);
+	void downloadFailed(BaseDownloadTask task, String reason);
 }

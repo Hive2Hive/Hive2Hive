@@ -11,7 +11,7 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.network.data.download.DownloadTask;
+import org.hive2hive.core.network.data.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -69,10 +69,10 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 		try {
 			// start the download
-			DownloadTask downloadTask = new DownloadTask(metaChunks, false, destination, metaFile
-					.getChunkKey().getPrivate());
-			session.getDownloadManager().submit(downloadTask);
-			downloadTask.join();
+			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFile.getChunkKey()
+					.getPrivate());
+			session.getDownloadManager().submit(task);
+			task.join();
 		} catch (InterruptedException e) {
 			throw new ProcessExecutionException(e.getMessage());
 		}

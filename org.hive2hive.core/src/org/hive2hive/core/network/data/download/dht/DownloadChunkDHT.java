@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data.download;
+package org.hive2hive.core.network.data.download.dht;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,16 +32,19 @@ public class DownloadChunkDHT implements Runnable {
 
 	private final static Logger logger = LoggerFactory.getLogger(DownloadChunkDHT.class);
 
-	private final DownloadTask task;
+	private final DownloadTaskDHT task;
 	private final MetaChunk metaChunk;
 	private final File tempDestination;
 	private final IDataManager dataManager;
 
-	public DownloadChunkDHT(DownloadTask task, MetaChunk chunk, File tempDestination, IDataManager dataManager) {
+	public DownloadChunkDHT(DownloadTaskDHT task, MetaChunk chunk, IDataManager dataManager) {
 		this.task = task;
 		this.metaChunk = chunk;
-		this.tempDestination = tempDestination;
 		this.dataManager = dataManager;
+
+		// create temporary file
+		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-"
+				+ chunk.getIndex());
 	}
 
 	@Override

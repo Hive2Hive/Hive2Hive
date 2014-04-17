@@ -12,7 +12,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.network.data.download.DownloadTask;
+import org.hive2hive.core.network.data.download.BaseDownloadTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
@@ -56,8 +56,8 @@ public class SessionCreationStep extends ProcessStep {
 			DownloadManager downloadManager = new DownloadManager(networkManager.getDataManager());
 
 			// read the cached downloads and add them to the download manager
-			for (DownloadTask downloadTask : metaData.getDownloads()) {
-				downloadManager.submit(downloadTask);
+			for (BaseDownloadTask baseDownloadTask : metaData.getDownloads()) {
+				downloadManager.submit(baseDownloadTask);
 			}
 			params.setDownloadManager(downloadManager);
 

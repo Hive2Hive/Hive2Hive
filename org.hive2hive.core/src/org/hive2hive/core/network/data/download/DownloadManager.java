@@ -1,6 +1,5 @@
 package org.hive2hive.core.network.data.download;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,6 +9,8 @@ import java.util.concurrent.Executors;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.download.dht.DownloadChunkDHT;
+import org.hive2hive.core.network.data.download.dht.DownloadTaskDHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +20,15 @@ public class DownloadManager {
 
 	private final IDataManager dataManager;
 	private ExecutorService executor;
-	private final Set<DownloadTask> openTasks;
+	private final Set<BaseDownloadTask> openTasks;
 
 	public DownloadManager(IDataManager dataManager) {
 		this.dataManager = dataManager;
 		this.executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
-		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<DownloadTask, Boolean>());
+		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
 	}
 
-	public void submit(DownloadTask task) {
+	public void submit(BaseDownloadTask task) {
 		logger.debug("Submitted to download {}", task.getDestinationName());
 
 		// store the task for possible later recovery
@@ -40,19 +41,15 @@ public class DownloadManager {
 		schedule(task);
 	}
 
-	private void schedule(DownloadTask task) {
+	private void schedule(BaseDownloadTask task) {
 		// submit each chunk as a separate thread
 		for (MetaChunk chunk : task.getOpenChunks()) {
-			File tempFile = new File(task.getTempDirectory(), task.getDestinationName() + "-"
-					+ chunk.getIndex());
-
-			Runnable runnable = null;
 			if (task.isDirectDownload()) {
 				// TODO init the 'large' file runnable
 			} else {
-				runnable = new DownloadChunkDHT(task, chunk, tempFile, dataManager);
+				DownloadChunkDHT runnable = new DownloadChunkDHT((DownloadTaskDHT) task, chunk, dataManager);
+				executor.submit(runnable);
 			}
-			executor.submit(runnable);
 		}
 	}
 
@@ -65,12 +62,12 @@ public class DownloadManager {
 
 	public void continueBackgroundProcess() {
 		executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
-		for (DownloadTask task : openTasks) {
+		for (BaseDownloadTask task : openTasks) {
 			schedule(task);
 		}
 	}
 
-	public Set<DownloadTask> getOpenTasks() {
+	public Set<BaseDownloadTask> getOpenTasks() {
 		return openTasks;
 	}
 
@@ -80,14 +77,14 @@ public class DownloadManager {
 	private class DownloadListener implements IDownloadListener {
 
 		@Override
-		public void downloadFinished(DownloadTask task) {
+		public void downloadFinished(BaseDownloadTask task) {
 			// remove it from the task list
 			openTasks.remove(task);
 			logger.debug("Task for downloading {} finished", task.getDestinationName());
 		}
 
 		@Override
-		public void downloadFailed(DownloadTask task, String reason) {
+		public void downloadFailed(BaseDownloadTask task, String reason) {
 			// remove it from the task anyway
 			openTasks.remove(task);
 			logger.debug("Task for downloading {} failed", task.getDestinationName());
