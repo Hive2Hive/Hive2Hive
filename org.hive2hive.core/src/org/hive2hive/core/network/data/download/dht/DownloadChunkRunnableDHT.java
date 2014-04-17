@@ -28,16 +28,16 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
-public class DownloadChunkDHT implements Runnable {
+public class DownloadChunkRunnableDHT implements Runnable {
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadChunkDHT.class);
+	private final static Logger logger = LoggerFactory.getLogger(DownloadChunkRunnableDHT.class);
 
 	private final DownloadTaskDHT task;
 	private final MetaChunk metaChunk;
 	private final File tempDestination;
 	private final IDataManager dataManager;
 
-	public DownloadChunkDHT(DownloadTaskDHT task, MetaChunk chunk, IDataManager dataManager) {
+	public DownloadChunkRunnableDHT(DownloadTaskDHT task, MetaChunk chunk, IDataManager dataManager) {
 		this.task = task;
 		this.metaChunk = chunk;
 		this.dataManager = dataManager;
@@ -87,9 +87,7 @@ public class DownloadChunkDHT implements Runnable {
 
 		// TODO verify MD5 hash here
 
-		// notify the task that this file has been downloaded successfully
+		// notify the task that this file part has been downloaded successfully
 		task.setDownloaded(metaChunk.getIndex(), tempDestination);
-		logger.debug("Successfully downloaded chunk {} of file {}", metaChunk.getIndex(),
-				task.getDestinationName());
 	}
 }

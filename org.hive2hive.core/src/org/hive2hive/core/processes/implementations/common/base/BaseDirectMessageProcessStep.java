@@ -4,7 +4,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.messages.BaseMessage;
-import org.hive2hive.core.network.messages.MessageManager;
+import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -31,7 +31,7 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
  */
 abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
 
-	public BaseDirectMessageProcessStep(MessageManager messageManager) {
+	public BaseDirectMessageProcessStep(IMessageManager messageManager) {
 		super(messageManager);
 	}
 

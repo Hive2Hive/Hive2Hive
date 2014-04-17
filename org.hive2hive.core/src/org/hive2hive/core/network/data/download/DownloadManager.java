@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.network.data.download.dht.DownloadChunkDHT;
+import org.hive2hive.core.network.data.download.dht.DownloadChunkRunnableDHT;
 import org.hive2hive.core.network.data.download.dht.DownloadTaskDHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class DownloadManager {
 			if (task.isDirectDownload()) {
 				// TODO init the 'large' file runnable
 			} else {
-				DownloadChunkDHT runnable = new DownloadChunkDHT((DownloadTaskDHT) task, chunk, dataManager);
+				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task, chunk, dataManager);
 				executor.submit(runnable);
 			}
 		}

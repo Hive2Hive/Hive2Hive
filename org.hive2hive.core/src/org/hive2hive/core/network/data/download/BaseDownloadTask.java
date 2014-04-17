@@ -118,6 +118,7 @@ public abstract class BaseDownloadTask implements Serializable {
 	 * @param filePart
 	 */
 	public synchronized void setDownloaded(int chunkIndex, File filePart) {
+		logger.debug("Successfully downloaded chunk {} of file {}", chunkIndex, getDestinationName());
 		downloadedParts[chunkIndex] = filePart;
 
 		if (isDone() && !isAborted()) {
