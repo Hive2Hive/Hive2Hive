@@ -89,6 +89,8 @@ public class DownloadTask implements Serializable {
 	}
 
 	public void abortDownload(String reason) {
+		logger.error("Download of file {} aborted. Reason: {}", getDestinationName(), reason);
+
 		this.reason = reason;
 		aborted.set(true);
 

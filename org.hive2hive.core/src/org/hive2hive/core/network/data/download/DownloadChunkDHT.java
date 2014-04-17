@@ -23,22 +23,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Downloads and stores a chunk of a file
+ * Downloads a chunk from the DHT and stores it into a temprary file
  * 
  * @author Nico
  * 
  */
-public class DownloadSingleChunk implements Runnable {
+public class DownloadChunkDHT implements Runnable {
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadSingleChunk.class);
+	private final static Logger logger = LoggerFactory.getLogger(DownloadChunkDHT.class);
 
 	private final DownloadTask task;
 	private final MetaChunk metaChunk;
 	private final File tempDestination;
 	private final IDataManager dataManager;
 
-	public DownloadSingleChunk(DownloadTask task, MetaChunk chunk, File tempDestination,
-			IDataManager dataManager) {
+	public DownloadChunkDHT(DownloadTask task, MetaChunk chunk, File tempDestination, IDataManager dataManager) {
 		this.task = task;
 		this.metaChunk = chunk;
 		this.tempDestination = tempDestination;
@@ -53,12 +52,12 @@ public class DownloadSingleChunk implements Runnable {
 			return;
 		}
 
-		logger.debug("Downloading chunk {} of file {}", metaChunk.getIndex(), task.getDestinationName());
+		logger.debug("Downloading chunk {} of file {} from the DHT", metaChunk.getIndex(),
+				task.getDestinationName());
 		IParameters parameters = new Parameters().setLocationKey(metaChunk.getChunkId()).setContentKey(
 				H2HConstants.FILE_CHUNK);
 		NetworkContent content = dataManager.get(parameters);
 		if (content == null) {
-			logger.error("No chunk {} for file {} found", metaChunk.getIndex(), task.getDestinationName());
 			task.abortDownload("Chunk not found in the DHT");
 			return;
 		}
@@ -72,7 +71,6 @@ public class DownloadSingleChunk implements Runnable {
 		} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
 				| IllegalBlockSizeException | BadPaddingException | IllegalStateException
 				| InvalidCipherTextException | IllegalArgumentException | IOException e) {
-			logger.error("Could not decrypt file chunk.", e);
 			task.abortDownload("Decryption of the chunk failed");
 			return;
 		}
@@ -80,7 +78,6 @@ public class DownloadSingleChunk implements Runnable {
 		try {
 			FileUtils.writeByteArrayToFile(tempDestination, chunk.getData());
 		} catch (IOException e) {
-			logger.error("Cannot store the chunk in the file {}", tempDestination.getName());
 			task.abortDownload("Cannot write the chunk data to temporary file");
 			return;
 		}

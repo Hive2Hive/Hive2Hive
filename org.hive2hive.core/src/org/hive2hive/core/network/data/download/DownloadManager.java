@@ -45,7 +45,13 @@ public class DownloadManager {
 		for (MetaChunk chunk : task.getOpenChunks()) {
 			File tempFile = new File(task.getTempDirectory(), task.getDestinationName() + "-"
 					+ chunk.getIndex());
-			DownloadSingleChunk runnable = new DownloadSingleChunk(task, chunk, tempFile, dataManager);
+
+			Runnable runnable = null;
+			if (task.isDirectDownload()) {
+				// TODO init the 'large' file runnable
+			} else {
+				runnable = new DownloadChunkDHT(task, chunk, tempFile, dataManager);
+			}
 			executor.submit(runnable);
 		}
 	}
