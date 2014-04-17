@@ -505,7 +505,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
 		UserProfile userProfileB = network.get(1).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Path relativePathB = rootA.toPath().relativize(fileAtA.toPath());
+		Path relativePathB = rootB.toPath().relativize(fileAtB.toPath());
 		Index indexB = userProfileB.getFileByPath(relativePathB);
 
 		// in case of deletion verify removed index nodes
