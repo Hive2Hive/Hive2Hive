@@ -5,9 +5,6 @@ import java.util.concurrent.CountDownLatch;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.p2p.builder.DigestBuilder;
-import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.DataManager;
@@ -59,20 +56,9 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
 	@Override
 	public void operationComplete(FutureRemove future) throws Exception {
-		logger.debug("Start verification of remove. '{}'", parameters.toString());
+		logger.trace("Start verification of remove. '{}'", parameters.toString());
 		// get data to verify if everything went correct
-		DigestBuilder digestBuilder = dataManager.getDigest(parameters.getLKey());
-		if (versionRemove) {
-			digestBuilder.setDomainKey(parameters.getDKey()).setContentKey(parameters.getCKey())
-					.setVersionKey(parameters.getVersionKey());
-		} else {
-			digestBuilder.from(
-					new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-							Number160.ZERO)).to(
-					new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-							Number160.MAX_VALUE));
-		}
-		FutureDigest digestFuture = digestBuilder.start();
+		FutureDigest digestFuture = dataManager.getDigestUnblocked(parameters);
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
@@ -81,7 +67,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 				} else if (!future.getDigest().keyDigest().isEmpty()) {
 					retryRemove();
 				} else {
-					logger.debug("Verification for remove completed. '{}'", parameters.toString());
+					logger.trace("Verification for remove completed. '{}'", parameters.toString());
 					success = true;
 					latch.countDown();
 				}

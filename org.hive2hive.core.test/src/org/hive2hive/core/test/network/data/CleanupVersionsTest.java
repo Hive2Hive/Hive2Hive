@@ -11,7 +11,6 @@ import java.util.Random;
 
 import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -76,13 +75,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 			node.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 		}
 
-		FutureDigest futureDigest = node
-				.getDataManager()
-				.getDigest(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE)).start();
+		FutureDigest futureDigest = node.getDataManager().getDigestUnblocked(parameters);
 		futureDigest.awaitUninterruptibly();
 
 		assertEquals(versions.size(), futureDigest.getDigest().keyDigest().size());
@@ -131,13 +124,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 			node.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 		}
 
-		FutureDigest futureDigest = node
-				.getDataManager()
-				.getDigest(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE)).ascending().start();
+		FutureDigest futureDigest = node.getDataManager().getDigestUnblocked(parameters);
 		futureDigest.awaitUninterruptibly();
 
 		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().keyDigest().size());

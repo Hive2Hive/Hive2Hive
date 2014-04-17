@@ -3,11 +3,11 @@ package org.hive2hive.core.network.data;
 import java.io.IOException;
 import java.security.KeyPair;
 
+import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FutureGet;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.p2p.Peer;
-import net.tomp2p.p2p.builder.DigestBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -120,8 +120,7 @@ public class DataManager implements IDataManager {
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey()).start();
 			}
 		} catch (IOException e) {
-			logger.error("Put failed. {}. Exception = '{}'", parameters.toString(),
-					e.getMessage());
+			logger.error("Put failed. {}. Exception = '{}'", parameters.toString(), e.getMessage());
 			return null;
 		}
 	}
@@ -251,7 +250,18 @@ public class DataManager implements IDataManager {
 				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
-	public DigestBuilder getDigest(Number160 locationKey) {
-		return getPeer().digest(locationKey);
+	public FutureDigest getDigestUnblocked(IParameters parameters) {
+		logger.debug("Get digest. {}", parameters.toString());
+		if (parameters.getVersionKey().equals(H2HConstants.TOMP2P_DEFAULT_KEY)) {
+			return getPeer().digest(parameters.getLKey()).setDomainKey(parameters.getDKey())
+					.setContentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey()).start();
+		} else {
+			return getPeer()
+					.digest(parameters.getLKey())
+					.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+							Number160.ZERO))
+					.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+							Number160.MAX_VALUE)).start();
+		}
 	}
 }
