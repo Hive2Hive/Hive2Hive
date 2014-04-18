@@ -1,36 +1,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>org.hive2hive.core</artifactId>
-	<packaging>jar</packaging>
-	<name>Hive2Hive Core</name>
-	<description>This is the core project of the Hive2Hive library.</description>
-
+	
 	<parent>
 		<groupId>org.hive2hive</groupId>
 		<artifactId>org.hive2hive.parent</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
-
-	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
+	
+	<artifactId>org.hive2hive.core</artifactId>
+	<packaging>jar</packaging>
+	
+	<name>Hive2Hive Core</name>
+	<url>http://www.hive2hive.org</url>
+	<description>The core project of the Hive2Hive library.</description>
+	
 	<dependencies>
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-transport</artifactId>
-			<version>4.0.13.Final</version>
+			<groupId>net.tomp2p</groupId>
+			<artifactId>tomp2p-core</artifactId>
+			<version>5.0-Alpha4</version>
+			<scope>compile</scope>
+		</dependency>	
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk16</artifactId>
+			<version>1.46</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>tomp2p.net</id>
+			<name>TomP2P Repository</name>
+			<url>http://tomp2p.net/dev/mvn/</url>
+		</repository>
+	</repositories>
+	
 </project>
