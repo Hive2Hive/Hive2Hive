@@ -2,6 +2,7 @@ package org.hive2hive.core.network.data;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.NavigableMap;
 
 import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FutureGet;
@@ -15,6 +16,7 @@ import net.tomp2p.storage.Data;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
+import org.hive2hive.core.network.data.futures.FutureDigestListener;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
@@ -248,6 +250,13 @@ public class DataManager implements IDataManager {
 		return getPeer().remove(parameters.getLKey()).setDomainKey(parameters.getDKey())
 				.contentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey())
 				.keyPair(parameters.getProtectionKeys()).start();
+	}
+	
+	public NavigableMap<Number640, Number160> getDigest(IParameters parameters) {
+		FutureDigest futureDigest = getDigestUnblocked(parameters);
+		FutureDigestListener listener = new FutureDigestListener(parameters);
+		futureDigest.addListener(listener);
+		return listener.awaitAndGet();
 	}
 
 	public FutureDigest getDigestUnblocked(IParameters parameters) {

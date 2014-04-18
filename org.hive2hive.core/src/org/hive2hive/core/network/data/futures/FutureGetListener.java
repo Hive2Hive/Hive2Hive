@@ -63,15 +63,13 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		if (retry) {
 			if (future == null || future.isFailed() || future.getData() == null) {
 				if (getTries++ < H2HConstants.GET_RETRIES) {
-					logger.debug("Get retry #{} because future failed. '{}'", getTries,
-							parameters.toString());
+					logger.debug("Get retry #{} because future failed. '{}'", getTries, parameters.toString());
 					if (parameters.getVersionKey().equals(Number160.ZERO))
 						dataManager.getUnblocked(parameters).addListener(this);
 					else
 						dataManager.getVersionUnblocked(parameters).addListener(this);
 				} else {
-					logger.debug("Get failed after {} tries. '{}'", getTries,
-							parameters.toString());
+					logger.debug("Get failed after {} tries. '{}'", getTries, parameters.toString());
 					notify(null);
 				}
 			} else {
@@ -107,8 +105,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		if (result == null) {
 			logger.warn("Got null. '{}'", parameters.toString());
 		} else {
-			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(),
-					parameters.toString());
+			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
 		}
 
 		this.result = result;
@@ -117,7 +114,8 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	@Override
 	public void exceptionCaught(Throwable t) throws Exception {
-		logger.error("Exception caught during get for " + parameters.toString(), t);
+		logger.error(String.format("Exception caught during get. %s reason = '{}'", parameters.toString()),
+				t.getMessage());
 		operationComplete(null);
 	}
 
