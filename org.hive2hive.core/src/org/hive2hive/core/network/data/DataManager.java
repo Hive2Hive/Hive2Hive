@@ -164,14 +164,14 @@ public class DataManager implements IDataManager {
 	@Override
 	public NetworkContent get(IParameters parameters) {
 		FutureGet futureGet = getUnblocked(parameters);
-		FutureGetListener listener = new FutureGetListener(parameters, false, this);
+		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
 
 	public NetworkContent getVersion(IParameters parameters) {
 		FutureGet futureGet = getUnblocked(parameters);
-		FutureGetListener listener = new FutureGetListener(parameters, false, this);
+		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
@@ -187,7 +187,7 @@ public class DataManager implements IDataManager {
 						Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.MAX_VALUE,
 						Number160.MAX_VALUE)).ascending().returnNr(1).start();
-		FutureGetListener listener = new FutureGetListener(parameters, true, this);
+		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
