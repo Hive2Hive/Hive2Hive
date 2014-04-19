@@ -64,9 +64,9 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 
 	@Override
 	public void handleResponseMessage(ResponseMessage responseMessage) {
-		// check the response, if chunk is in it, ok
+		// check the response
 		if (responseMessage.getContent() == null) {
-			logger.error("Peer {} cannot send the chunk", context.getSelectedPeer());
+			logger.error("Peer {} did not send the chunk", context.getSelectedPeer());
 			rerunProcess();
 			return;
 		}
@@ -75,7 +75,9 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 
 		// verify the md5 hash
 		byte[] respondedHash = EncryptionUtil.generateMD5Hash(chunk.getData());
-		if (!H2HEncryptionUtil.compareMD5(respondedHash, context.getMetaChunk().getChunkHash())) {
+		if (H2HEncryptionUtil.compareMD5(respondedHash, context.getMetaChunk().getChunkHash())) {
+			logger.debug("Peer {} sent a valid content. MD5 verified.", context.getSelectedPeer());
+		} else {
 			logger.error("Peer {} sent an invalid content", context.getSelectedPeer());
 			rerunProcess();
 			return;
@@ -84,9 +86,15 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		// hash is ok, write it to the file
 		try {
 			FileUtils.writeByteArrayToFile(context.getTempDestination(), chunk.getData());
+			logger.debug("Wrote chunk {} to temporary file {}", context.getMetaChunk().getIndex(),
+					context.getTempDestination());
 		} catch (IOException e) {
 			context.getTask().abortDownload("Cannot write the chunk to the temporary file");
+			return;
 		}
+
+		// finalize the sub-process
+		context.getTask().setDownloaded(context.getMetaChunk().getIndex(), context.getTempDestination());
 	}
 
 	/**
@@ -94,9 +102,12 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	 */
 	private void rerunProcess() {
 		logger.debug("Removing peer address {} from the candidate list", context.getSelectedPeer());
+		// remove invalid peer
 		context.getTask().removeAddress(context.getSelectedPeer());
+
+		// select another peer
+		logger.debug("Re-run the process: select another peer and ask him");
 		getParent().add(new SelectPeerForDownloadStep(context));
 		getParent().add(new AskForChunkStep(context, messageManager, keyManager, config));
-		logger.debug("Re-run the process: select another peer and ask him");
 	}
 }

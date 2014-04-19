@@ -94,12 +94,12 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		// verify the chunk hash
 		byte[] md5Hash = EncryptionUtil.generateMD5Hash(chunk.getData());
 		if (H2HEncryptionUtil.compareMD5(md5Hash, chunkHash)) {
-			logger.debug("MD5 hash of the chunk has been verified, returning the chunk");
+			logger.debug("MD5 hash of the chunk {} has been verified, returning the chunk", chunkNumber);
 
 			// return the content of the file part
 			sendDirectResponse(createResponse(chunk));
 		} else {
-			logger.warn("MD5 hash of the read chunk and of the expected file does not match");
+			logger.warn("MD5 hash of the read chunk {} and of the expected file does not match", chunkNumber);
 			sendDirectResponse(createResponse(null));
 		}
 	}

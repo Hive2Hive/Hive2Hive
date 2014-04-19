@@ -52,7 +52,7 @@ public class GetLocationsList implements Runnable {
 			return;
 		}
 
-		logger.debug("Got {} candidate locations too download {}", context.getLocations().size(),
+		logger.debug("Got {} candidate locations to download {}", context.getLocations().size(),
 				task.getDestinationName());
 		task.provideLocations(context.getLocations());
 	}

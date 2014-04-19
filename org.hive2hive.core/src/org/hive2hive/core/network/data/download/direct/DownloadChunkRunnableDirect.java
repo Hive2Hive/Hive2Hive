@@ -59,9 +59,6 @@ public class DownloadChunkRunnableDirect implements Runnable {
 
 		try {
 			process.start().await();
-
-			// notify the task that this file part has been downloaded successfully
-			task.setDownloaded(metaChunk.getIndex(), tempDestination);
 		} catch (InvalidProcessStateException | InterruptedException e) {
 			task.abortDownload(e.getMessage());
 		}

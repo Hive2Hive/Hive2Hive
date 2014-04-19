@@ -21,14 +21,15 @@ import org.slf4j.LoggerFactory;
 
 public abstract class BaseDownloadTask implements Serializable {
 
-	private final static Logger logger = LoggerFactory.getLogger(BaseDownloadTask.class);
+	private static final long serialVersionUID = 1580305288943800375L;
+	private static final Logger logger = LoggerFactory.getLogger(BaseDownloadTask.class);
 
 	private final List<MetaChunk> metaChunks;
 	private final File destination;
 	private final File tempFolder;
 
 	private final File[] downloadedParts;
-	private final CountDownLatch latch;
+	private final CountDownLatch finishedLatch; // when the download has finished
 	private final Set<IDownloadListener> listeners;
 	private final AtomicBoolean aborted;
 	private String reason;
@@ -37,7 +38,7 @@ public abstract class BaseDownloadTask implements Serializable {
 		this.metaChunks = metaChunks;
 		this.destination = destination;
 		this.downloadedParts = new File[metaChunks.size()];
-		this.latch = new CountDownLatch(metaChunks.size());
+		this.finishedLatch = new CountDownLatch(1);
 		this.listeners = new HashSet<IDownloadListener>();
 		this.aborted = new AtomicBoolean(false);
 
@@ -87,8 +88,7 @@ public abstract class BaseDownloadTask implements Serializable {
 		}
 
 		// immediately count down the latch
-		while (latch.getCount() > 0)
-			latch.countDown();
+		finishedLatch.countDown();
 	}
 
 	public boolean isAborted() {
@@ -114,22 +114,36 @@ public abstract class BaseDownloadTask implements Serializable {
 		logger.debug("Successfully downloaded chunk {} of file {}", chunkIndex, getDestinationName());
 		downloadedParts[chunkIndex] = filePart;
 
-		if (isDone() && !isAborted()) {
+		if (isAborted()) {
+			// no need for further processing
+			return;
+		} else if (finishedLatch.getCount() == 0) {
+			// already done with the download
+			return;
+		}
+
+		int openChunkNumber = getOpenChunks().size();
+		if (openChunkNumber > 0) {
+			logger.debug("{} chunks of file {} are still downloading.", openChunkNumber, getDestinationName());
+		} else {
+			logger.debug("All parts of file {} are downloaded, reassembling them...", getDestinationName());
 			try {
 				// reassembly
 				List<File> fileParts = Arrays.asList(downloadedParts);
 				FileChunkUtil.reassembly(fileParts, destination, true);
+				logger.debug("File {} has successfully been reassembled", getDestinationName());
 
 				// notify listeners
 				for (IDownloadListener listener : listeners) {
 					listener.downloadFinished(this);
 				}
+
+				// release the lock
+				finishedLatch.countDown();
 			} catch (IOException e) {
 				abortDownload("Cannot reassembly the file parts");
 			}
 		}
-
-		latch.countDown();
 	}
 
 	public void addListener(IDownloadListener listener) {
@@ -143,7 +157,7 @@ public abstract class BaseDownloadTask implements Serializable {
 	 * @throws InterruptedException if the process was interrupted or was unable to wait
 	 */
 	public void join() throws ProcessExecutionException, InterruptedException {
-		latch.await();
+		finishedLatch.await();
 
 		if (isAborted()) {
 			throw new ProcessExecutionException(reason);
