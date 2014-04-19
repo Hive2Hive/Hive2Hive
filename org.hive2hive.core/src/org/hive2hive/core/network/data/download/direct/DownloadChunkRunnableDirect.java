@@ -2,6 +2,7 @@ package org.hive2hive.core.network.data.download.direct;
 
 import java.io.File;
 
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.direct.process.AskForChunkStep;
@@ -28,14 +29,16 @@ public class DownloadChunkRunnableDirect implements Runnable {
 	private final File tempDestination;
 	private final IMessageManager messageManager;
 	private final PublicKeyManager keyManager;
+	private final IFileConfiguration config;
 
 	public DownloadChunkRunnableDirect(DownloadTaskDirect task, MetaChunk chunk, File tempDestination,
-			IMessageManager messageManager, PublicKeyManager keyManager) {
+			IMessageManager messageManager, PublicKeyManager keyManager, IFileConfiguration config) {
 		this.task = task;
 		this.metaChunk = chunk;
 		this.tempDestination = tempDestination;
 		this.keyManager = keyManager;
 		this.messageManager = messageManager;
+		this.config = config;
 	}
 
 	@Override
@@ -46,11 +49,10 @@ public class DownloadChunkRunnableDirect implements Runnable {
 			return;
 		}
 
-		DownloadDirectContext context = new DownloadDirectContext(task);
+		DownloadDirectContext context = new DownloadDirectContext(task, metaChunk, tempDestination);
 		SequentialProcess process = new SequentialProcess();
 		process.add(new SelectPeerForDownloadStep(context));
-		process.add(new AskForChunkStep(context, messageManager, keyManager));
-		// TODO add more steps
+		process.add(new AskForChunkStep(context, messageManager, keyManager, config));
 
 		try {
 			process.start().await();
