@@ -1,7 +1,6 @@
 package org.hive2hive.core.network.data.download.direct;
 
 import java.io.File;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,8 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private volatile Set<Locations> locations;
 
 	public DownloadTaskDirect(List<MetaChunk> metaChunks, PublicKey fileKey, File destination,
-			PrivateKey decryptionKey, String ownUserName, PeerAddress ownAddress) {
-		super(metaChunks, destination, decryptionKey);
+			String ownUserName, PeerAddress ownAddress) {
+		super(metaChunks, destination);
 		this.fileKey = fileKey;
 		this.ownUserName = ownUserName;
 		this.ownAddress = ownAddress;

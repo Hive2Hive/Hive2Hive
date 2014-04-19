@@ -3,7 +3,6 @@ package org.hive2hive.core.network.data.download;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,7 +25,6 @@ public abstract class BaseDownloadTask implements Serializable {
 
 	private final List<MetaChunk> metaChunks;
 	private final File destination;
-	private final PrivateKey decryptionKey;
 	private final File tempFolder;
 
 	private final File[] downloadedParts;
@@ -35,10 +33,9 @@ public abstract class BaseDownloadTask implements Serializable {
 	private final AtomicBoolean aborted;
 	private String reason;
 
-	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination, PrivateKey decryptionKey) {
+	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination) {
 		this.metaChunks = metaChunks;
 		this.destination = destination;
-		this.decryptionKey = decryptionKey;
 		this.downloadedParts = new File[metaChunks.size()];
 		this.latch = new CountDownLatch(metaChunks.size());
 		this.listeners = new HashSet<IDownloadListener>();
@@ -73,10 +70,6 @@ public abstract class BaseDownloadTask implements Serializable {
 	}
 
 	public abstract boolean isDirectDownload();
-
-	public PrivateKey getDecryptionKey() {
-		return decryptionKey;
-	}
 
 	public File getTempDirectory() {
 		return tempFolder;

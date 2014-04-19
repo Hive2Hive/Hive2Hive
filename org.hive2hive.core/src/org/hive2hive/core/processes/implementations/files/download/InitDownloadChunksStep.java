@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
@@ -12,6 +14,7 @@ import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.download.dht.DownloadTaskDHT;
+import org.hive2hive.core.network.data.download.direct.DownloadTaskDirect;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -26,16 +29,26 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 	private final DownloadFileContext context;
 	private final H2HSession session;
+	private final PeerAddress ownPeerAddress;
+
 	private File destination;
 
-	public InitDownloadChunksStep(DownloadFileContext context, H2HSession session) {
+	public InitDownloadChunksStep(DownloadFileContext context, H2HSession session, PeerAddress ownPeerAddress) {
 		this.context = context;
 		this.session = session;
+		this.ownPeerAddress = ownPeerAddress;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		MetaFile metaFile = context.consumeMetaFile();
+
+		// support to store the file on another location than default (used for recovery)
+		if (context.downloadToDefaultDestination()) {
+			destination = FileUtil.getPath(session.getRoot(), context.consumeIndex()).toFile();
+		} else {
+			destination = context.getDestination();
+		}
 
 		if (metaFile.isSmall()) {
 			downloadChunksFromDHT((MetaFileSmall) metaFile);
@@ -43,6 +56,7 @@ public class InitDownloadChunksStep extends ProcessStep {
 			downloadChunksFromUsers((MetaFileLarge) metaFile);
 		}
 
+		logger.debug("Finished downloading file '{}'.", destination);
 	}
 
 	private void downloadChunksFromDHT(MetaFileSmall metaFile) throws InvalidProcessStateException,
@@ -53,13 +67,6 @@ public class InitDownloadChunksStep extends ProcessStep {
 			metaChunks = metaFile.getNewestVersion().getMetaChunks();
 		} else {
 			metaChunks = metaFile.getVersionByIndex(context.getVersionToDownload()).getMetaChunks();
-		}
-
-		// support to store the file on another location than default (used for recovery)
-		if (context.downloadToDefaultDestination()) {
-			destination = FileUtil.getPath(session.getRoot(), context.consumeIndex()).toFile();
-		} else {
-			destination = context.getDestination();
 		}
 
 		if (!validateDestination()) {
@@ -76,16 +83,20 @@ public class InitDownloadChunksStep extends ProcessStep {
 		} catch (InterruptedException e) {
 			throw new ProcessExecutionException(e.getMessage());
 		}
-
-		// all chunks downloaded
-		logger.debug("Finished downloading file '{}'.", destination);
 	}
 
-	private void downloadChunksFromUsers(MetaFileLarge metaFile) {
-		// TODO
-		// set the destination to the default value
-		// submit the task to a background thread that regularly checks for other clients, downloads and
-		// assemblies the file
+	private void downloadChunksFromUsers(MetaFileLarge metaFile) throws ProcessExecutionException {
+		// TODO support versioning at large files as well
+
+		try {
+			DownloadTaskDirect task = new DownloadTaskDirect(metaFile.getMetaChunks(), metaFile.getId(),
+					destination, session.getUserId(), ownPeerAddress);
+			session.getDownloadManager().submit(task);
+			task.join();
+		} catch (InterruptedException e) {
+			throw new ProcessExecutionException(e.getMessage());
+		}
+
 	}
 
 	/**
