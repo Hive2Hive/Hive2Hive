@@ -37,10 +37,15 @@ public abstract class BaseDownloadTask implements Serializable {
 	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination) {
 		this.metaChunks = metaChunks;
 		this.destination = destination;
-		this.downloadedParts = new File[metaChunks.size()];
 		this.finishedLatch = new CountDownLatch(1);
 		this.listeners = new HashSet<IDownloadListener>();
 		this.aborted = new AtomicBoolean(false);
+
+		// init array as null
+		this.downloadedParts = new File[metaChunks.size()];
+		for (int i = 0; i < downloadedParts.length; i++) {
+			downloadedParts[i] = null;
+		}
 
 		// create the download folder
 		String folderName = destination.getName() + "-" + UUID.randomUUID().toString();
