@@ -90,7 +90,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Upload folder '{}' from A.", sharedFolderA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, sharedFolderA);
 
-		logger.info("Share folder '{}' with user B giving write permission.", sharedFolderA.getName());
+		logger.info("Share folder '{}' with user B giving read permission.", sharedFolderA.getName());
 		UseCaseTestUtil.shareFolder(nodeA, sharedFolderA, userB.getUserId(), PermissionType.READ);
 		sharedFolderB = new File(rootB, sharedFolderA.getName());
 		waitTillSynchronizedAdding(sharedFolderB);

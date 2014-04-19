@@ -388,6 +388,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 		// check write access
 		Assert.assertTrue(indexA.canWrite());
+		// user B has no write access
 		Assert.assertFalse(indexB.canWrite());
 
 		// check user permissions at A
