@@ -2,8 +2,11 @@ package org.hive2hive.core.network.data.download.direct.process;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.SendFailedException;
@@ -27,6 +30,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	private final DownloadDirectContext context;
 	private final PublicKeyManager keyManager;
 	private final IFileConfiguration config;
+	private final CountDownLatch responseLatch;
 
 	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager,
 			PublicKeyManager keyManager, IFileConfiguration config) {
@@ -34,6 +38,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		this.context = context;
 		this.keyManager = keyManager;
 		this.config = config;
+		this.responseLatch = new CountDownLatch(1);
 	}
 
 	@Override
@@ -54,19 +59,25 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		RequestChunkMessage request = new RequestChunkMessage(context.getSelectedPeer(), context.getTask()
 				.getFileKey(), metaChunk.getIndex(), config.getChunkSize(), metaChunk.getChunkHash());
 		try {
+			logger.debug("Requesting chunk {} from peer {}", metaChunk.getIndex(), context.getSelectedPeer());
 			sendDirect(request, receiverPublicKey);
+			responseLatch.await(H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS, TimeUnit.MILLISECONDS);
 		} catch (SendFailedException e) {
-			logger.error("Cannot send message to {}. Removing from the candidate list and ask other peer",
-					context.getSelectedPeer());
-			context.getTask().removeAddress(context.getSelectedPeer());
+			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
+			rerunProcess();
+		} catch (InterruptedException e) {
+			logger.warn("Cannot wait until the peer {} responded", context.getSelectedPeer());
+			rerunProcess();
 		}
 	}
 
 	@Override
 	public void handleResponseMessage(ResponseMessage responseMessage) {
+		MetaChunk metaChunk = context.getMetaChunk();
+
 		// check the response
 		if (responseMessage.getContent() == null) {
-			logger.error("Peer {} did not send the chunk", context.getSelectedPeer());
+			logger.error("Peer {} did not send the chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
 			rerunProcess();
 			return;
 		}
@@ -75,10 +86,12 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 
 		// verify the md5 hash
 		byte[] respondedHash = EncryptionUtil.generateMD5Hash(chunk.getData());
-		if (H2HEncryptionUtil.compareMD5(respondedHash, context.getMetaChunk().getChunkHash())) {
-			logger.debug("Peer {} sent a valid content. MD5 verified.", context.getSelectedPeer());
+		if (H2HEncryptionUtil.compareMD5(respondedHash, metaChunk.getChunkHash())) {
+			logger.debug("Peer {} sent a valid content for chunk {}. MD5 verified.",
+					context.getSelectedPeer(), metaChunk.getIndex());
 		} else {
-			logger.error("Peer {} sent an invalid content", context.getSelectedPeer());
+			logger.error("Peer {} sent an invalid content for chunk {}.", context.getSelectedPeer(),
+					metaChunk.getIndex());
 			rerunProcess();
 			return;
 		}
@@ -88,13 +101,16 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 			FileUtils.writeByteArrayToFile(context.getTempDestination(), chunk.getData());
 			logger.debug("Wrote chunk {} to temporary file {}", context.getMetaChunk().getIndex(),
 					context.getTempDestination());
+
+			// finalize the sub-process
+			context.getTask().setDownloaded(context.getMetaChunk().getIndex(), context.getTempDestination());
 		} catch (IOException e) {
 			context.getTask().abortDownload("Cannot write the chunk to the temporary file");
 			return;
+		} finally {
+			// release the lock such that the process can finish correctly
+			responseLatch.countDown();
 		}
-
-		// finalize the sub-process
-		context.getTask().setDownloaded(context.getMetaChunk().getIndex(), context.getTempDestination());
 	}
 
 	/**
@@ -106,8 +122,12 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		context.getTask().removeAddress(context.getSelectedPeer());
 
 		// select another peer
-		logger.debug("Re-run the process: select another peer and ask him");
+		logger.debug("Re-run the process: select another peer and ask him for chunk {}", context
+				.getMetaChunk().getIndex());
 		getParent().add(new SelectPeerForDownloadStep(context));
 		getParent().add(new AskForChunkStep(context, messageManager, keyManager, config));
+
+		// continue with the currently initialized process steps
+		responseLatch.countDown();
 	}
 }

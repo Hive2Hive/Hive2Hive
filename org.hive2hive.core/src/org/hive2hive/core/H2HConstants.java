@@ -67,6 +67,9 @@ public interface H2HConstants {
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final int CONTACT_PEERS_AWAIT_MS = 10000;
 
+	// maximum delay to wait until a peer candidate replies whether a direct download is possible or not
+	public static final int DIRECT_DOWNLOAD_AWAIT_MS = 10000;
+
 	public static final String USER_PROFILE_TASK_DOMAIN = "USER-PROFILE-TASK";
 
 	// default key used in the TomP2P framework
