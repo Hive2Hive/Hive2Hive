@@ -16,6 +16,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -99,11 +100,13 @@ public class NetworkTestUtil {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
 					node.getDataManager());
-			DownloadManager downloadManager = new DownloadManager(node.getDataManager());
+			IFileConfiguration config = FileConfiguration.createDefault();
+			DownloadManager downloadManager = new DownloadManager(node.getDataManager(),
+					node.getMessageManager(), keyManager, config);
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(profileManager, keyManager, downloadManager, null, root.toPath());
+				session = new H2HSession(profileManager, keyManager, downloadManager, config, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -125,11 +128,13 @@ public class NetworkTestUtil {
 			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
 					node.getDataManager());
-			DownloadManager downloadManager = new DownloadManager(node.getDataManager());
+			IFileConfiguration config = FileConfiguration.createDefault();
+			DownloadManager downloadManager = new DownloadManager(node.getDataManager(),
+					node.getMessageManager(), keyManager, config);
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			try {
-				session = new H2HSession(profileManager, keyManager, downloadManager, null, root.toPath());
+				session = new H2HSession(profileManager, keyManager, downloadManager, config, root.toPath());
 				node.setSession(session);
 			} catch (IOException e) {
 				e.printStackTrace();

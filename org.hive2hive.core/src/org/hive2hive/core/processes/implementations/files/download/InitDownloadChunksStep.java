@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.implementations.files.download;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -89,8 +90,9 @@ public class InitDownloadChunksStep extends ProcessStep {
 		// TODO support versioning at large files as well
 
 		try {
-			DownloadTaskDirect task = new DownloadTaskDirect(metaFile.getMetaChunks(), metaFile.getId(),
-					destination, session.getUserId(), ownPeerAddress);
+			Set<String> users = context.consumeIndex().getCalculatedUserList();
+			DownloadTaskDirect task = new DownloadTaskDirect(metaFile.getMetaChunks(), destination,
+					metaFile.getId(), session.getUserId(), ownPeerAddress, users);
 			session.getDownloadManager().submit(task);
 			task.join();
 		} catch (InterruptedException e) {

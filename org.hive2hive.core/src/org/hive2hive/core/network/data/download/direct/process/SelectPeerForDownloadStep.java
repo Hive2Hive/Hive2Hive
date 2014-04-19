@@ -30,7 +30,14 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		DownloadTaskDirect task = context.getTask();
+		logger.debug("Getting the locations to download {} in a blocking manner.", task.getDestinationName());
 		List<Locations> locations = task.consumeLocationsBlocking();
+		logger.debug("Got the locations to download {}.", task.getDestinationName());
+
+		if (task.isAborted()) {
+			logger.warn("Not executing step because task is aborted");
+			return;
+		}
 
 		// prefer own user name
 		PeerAddress selectedOwnPeer = null;
@@ -51,7 +58,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		Random rnd = new Random();
 		while (!locations.isEmpty()) {
 			Locations randomLocation = locations.get(rnd.nextInt(locations.size()));
-			ArrayList<PeerAddress> addresses = new ArrayList<>(randomLocation.getPeerAddresses());
+			ArrayList<PeerAddress> addresses = new ArrayList<PeerAddress>(randomLocation.getPeerAddresses());
 			if (addresses.isEmpty()) {
 				// does not contain any addresses, kick it
 				locations.remove(randomLocation);
@@ -60,6 +67,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 						task.getDestinationName());
 				PeerAddress rndAddress = addresses.get(rnd.nextInt(addresses.size()));
 				context.setSelectedPeer(rndAddress, randomLocation.getUserId());
+				return;
 			}
 		}
 

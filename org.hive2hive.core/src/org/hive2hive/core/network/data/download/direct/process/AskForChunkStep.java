@@ -38,6 +38,11 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		if (context.getTask().isAborted()) {
+			logger.warn("Not executing step because task is aborted");
+			return;
+		}
+
 		PublicKey receiverPublicKey;
 		try {
 			receiverPublicKey = keyManager.getPublicKey(context.getUserName());

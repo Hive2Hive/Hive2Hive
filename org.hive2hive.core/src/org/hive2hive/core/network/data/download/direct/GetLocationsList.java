@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data.download.direct;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,6 +12,8 @@ import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gets a list of all locations (using the internal process framework
@@ -20,13 +23,13 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IProvideL
  */
 public class GetLocationsList implements Runnable {
 
+	private final static Logger logger = LoggerFactory.getLogger(GetLocationsList.class);
+
 	private final DownloadTaskDirect task;
-	private final Set<String> users;
 	private final IDataManager dataManager;
 
-	public GetLocationsList(DownloadTaskDirect task, Set<String> users, IDataManager dataManager) {
+	public GetLocationsList(DownloadTaskDirect task, IDataManager dataManager) {
 		this.task = task;
-		this.users = users;
 		this.dataManager = dataManager;
 	}
 
@@ -35,18 +38,22 @@ public class GetLocationsList implements Runnable {
 		ProvideUserLocationsContext context = new ProvideUserLocationsContext();
 
 		SequentialProcess process = new SequentialProcess();
-		for (String user : users) {
+		for (String user : task.getUsers()) {
 			GetUserLocationsStep step = new GetUserLocationsStep(user, context, dataManager);
 			process.add(new AsyncComponent(step));
 		}
 
 		try {
+			logger.debug("Started getting the list of locations to download {}", task.getDestinationName());
 			process.start().await();
 		} catch (InvalidProcessStateException | InterruptedException e) {
+			task.provideLocations(new HashSet<Locations>());
 			task.abortDownload(e.getMessage());
 			return;
 		}
 
+		logger.debug("Got {} candidate locations too download {}", context.getLocations().size(),
+				task.getDestinationName());
 		task.provideLocations(context.getLocations());
 	}
 

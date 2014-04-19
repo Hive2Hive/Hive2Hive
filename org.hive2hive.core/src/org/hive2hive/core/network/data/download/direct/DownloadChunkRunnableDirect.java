@@ -31,14 +31,17 @@ public class DownloadChunkRunnableDirect implements Runnable {
 	private final PublicKeyManager keyManager;
 	private final IFileConfiguration config;
 
-	public DownloadChunkRunnableDirect(DownloadTaskDirect task, MetaChunk chunk, File tempDestination,
+	public DownloadChunkRunnableDirect(DownloadTaskDirect task, MetaChunk chunk,
 			IMessageManager messageManager, PublicKeyManager keyManager, IFileConfiguration config) {
 		this.task = task;
 		this.metaChunk = chunk;
-		this.tempDestination = tempDestination;
 		this.keyManager = keyManager;
 		this.messageManager = messageManager;
 		this.config = config;
+
+		// create temporary file
+		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-"
+				+ chunk.getIndex());
 	}
 
 	@Override

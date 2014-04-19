@@ -23,16 +23,18 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private final PublicKey fileKey; // the key of the file
 	private final String ownUserName; // the user name of the downloader
 	private final PeerAddress ownAddress; // the peer address of the downloader
+	private final Set<String> users; // users having access to this file
 
 	private CountDownLatch locationLocker;
 	private volatile Set<Locations> locations;
 
-	public DownloadTaskDirect(List<MetaChunk> metaChunks, PublicKey fileKey, File destination,
-			String ownUserName, PeerAddress ownAddress) {
+	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey,
+			String ownUserName, PeerAddress ownAddress, Set<String> users) {
 		super(metaChunks, destination);
 		this.fileKey = fileKey;
 		this.ownUserName = ownUserName;
 		this.ownAddress = ownAddress;
+		this.users = users;
 		this.locationLocker = new CountDownLatch(1);
 	}
 
@@ -51,6 +53,10 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 
 	public PublicKey getFileKey() {
 		return fileKey;
+	}
+
+	public Set<String> getUsers() {
+		return users;
 	}
 
 	/**
