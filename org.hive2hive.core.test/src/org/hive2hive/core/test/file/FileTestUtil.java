@@ -27,4 +27,8 @@ public class FileTestUtil {
 
 		return file;
 	}
+
+	public static File getTempDirectory() {
+		return new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+	}
 }

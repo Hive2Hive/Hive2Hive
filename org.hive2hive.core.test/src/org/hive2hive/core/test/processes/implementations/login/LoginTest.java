@@ -22,6 +22,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
@@ -51,7 +52,7 @@ public class LoginTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		UseCaseTestUtil.register(userCredentials, network.get(0));
-		root = NetworkTestUtil.getTempDirectory();
+		root = FileTestUtil.getTempDirectory();
 	}
 
 	@Test

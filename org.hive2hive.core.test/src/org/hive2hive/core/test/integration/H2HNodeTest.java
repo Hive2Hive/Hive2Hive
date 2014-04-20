@@ -18,6 +18,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
@@ -64,7 +65,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
 		UseCaseTestUtil.executeProcess(registerProcess);
 
-		rootDirectory = NetworkTestUtil.getTempDirectory();
+		rootDirectory = FileTestUtil.getTempDirectory();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
 		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials,
 				rootDirectory.toPath());
@@ -89,7 +90,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test(expected = IllegalFileLocation.class)
 	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation,
 			NoPeerConnectionException {
-		File testFile = new File(NetworkTestUtil.getTempDirectory(), "test-file");
+		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
 		loggedInNode.getFileManager().add(testFile);
@@ -118,7 +119,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// TODO wait for all async process to upload
 
 		// then start 2nd client and login
-		File rootUser2 = NetworkTestUtil.getTempDirectory();
+		File rootUser2 = FileTestUtil.getTempDirectory();
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
 
 		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, rootUser2.toPath());

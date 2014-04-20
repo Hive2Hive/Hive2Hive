@@ -42,6 +42,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IProvideU
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.implementations.userprofiletask.TestPutUserProfileTaskStep;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
@@ -133,7 +134,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, NetworkTestUtil.getTempDirectory()
+				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
 				.toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -160,7 +161,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, NetworkTestUtil.getTempDirectory()
+				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
 				.toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -181,7 +182,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, NetworkTestUtil.getTempDirectory()
+				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
 				.toPath()));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -215,7 +216,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, NetworkTestUtil.getTempDirectory()
+				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
 				.toPath()));
 
 		// IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
@@ -268,7 +269,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, NetworkTestUtil.getTempDirectory()
+				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
 				.toPath()));
 
 		// create some tasks

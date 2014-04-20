@@ -13,6 +13,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -76,7 +77,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
-		Path rootPah = NetworkTestUtil.getTempDirectory().toPath();
+		Path rootPah = FileTestUtil.getTempDirectory().toPath();
 
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {

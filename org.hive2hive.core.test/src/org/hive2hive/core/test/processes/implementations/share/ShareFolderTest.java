@@ -52,11 +52,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 		beforeClass();
 
 		network = NetworkTestUtil.createNetwork(networkSize);
-		rootA = NetworkTestUtil.getTempDirectory();
+		rootA = FileTestUtil.getTempDirectory();
 		userA = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
-		
-		rootB = NetworkTestUtil.getTempDirectory();
+
+		rootB = FileTestUtil.getTempDirectory();
 		userB = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 	}
@@ -69,14 +69,17 @@ public class ShareFolderTest extends H2HJUnitTest {
 		folderToShare.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
 
-		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1, folderToShare, config);
+		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1,
+				folderToShare, config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1);
-		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1, folderToShare, config);
+		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1,
+				folderToShare, config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2);
 		File subfolder = new File(folderToShare, "subfolder1");
 		subfolder.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subfolder);
-		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder, config);
+		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder,
+				config);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3);
 
 		// share the filled folder

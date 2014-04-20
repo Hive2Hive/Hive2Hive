@@ -67,11 +67,11 @@ public class PermissionsTest extends H2HJUnitTest {
 	 */
 	@Before
 	public void setup() throws NoSessionException, NoPeerConnectionException {
-		rootA = NetworkTestUtil.getTempDirectory();
+		rootA = FileTestUtil.getTempDirectory();
 		userA = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
-		rootB = NetworkTestUtil.getTempDirectory();
+		rootB = FileTestUtil.getTempDirectory();
 		userB = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 	}
@@ -98,7 +98,7 @@ public class PermissionsTest extends H2HJUnitTest {
 	@Test
 	public void testShareWithWritePermission() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		
+
 		logger.debug("1. Upload folder 'folder1' from A.");
 		File folder1AtA = new File(rootA, "folder1");
 		folder1AtA.mkdirs();
@@ -279,9 +279,9 @@ public class PermissionsTest extends H2HJUnitTest {
 		waitTillSynchronized(file2AtB, false);
 
 		logger.debug("12. Try to delete 'folder1' from B.");
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folder1AtB,
-				nodeB));
-		
+		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(
+				folder1AtB, nodeB));
+
 		logger.debug("13. Delete 'folder1' from A.");
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createDeleteFileProcess(
 				folder1AtA, nodeA));

@@ -17,6 +17,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
@@ -59,7 +60,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		client = network.get(new Random().nextInt(networkSize));
 
 		// register a user
-		root = NetworkTestUtil.getTempDirectory();
+		root = FileTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, client, root);
 
 		// add an intial file to the network

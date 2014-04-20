@@ -17,6 +17,7 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
@@ -69,12 +70,12 @@ public class NotificationTest extends H2HJUnitTest {
 		UseCaseTestUtil.register(userCCredentials, network.get(5));
 
 		// login all nodes
-		UseCaseTestUtil.login(userACredentials, network.get(0), NetworkTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userACredentials, network.get(1), NetworkTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userACredentials, network.get(2), NetworkTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userBCredentials, network.get(3), NetworkTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userBCredentials, network.get(4), NetworkTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userCCredentials, network.get(5), NetworkTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(0), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(1), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(2), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userBCredentials, network.get(3), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userBCredentials, network.get(4), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userCCredentials, network.get(5), FileTestUtil.getTempDirectory());
 	}
 
 	/**

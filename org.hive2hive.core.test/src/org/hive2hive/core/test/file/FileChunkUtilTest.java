@@ -1,7 +1,5 @@
 package org.hive2hive.core.test.file;
 
-import static org.junit.Assert.fail;
-
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -27,7 +25,6 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void test() {
-		fail();
+	public void testGetNumberOfChunksRandom() {
 	}
 }

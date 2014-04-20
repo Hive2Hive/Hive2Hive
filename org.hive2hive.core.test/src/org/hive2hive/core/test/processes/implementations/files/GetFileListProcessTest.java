@@ -18,6 +18,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
+import org.hive2hive.core.test.file.FileTestUtil;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
@@ -45,7 +46,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(2);
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
-		root = NetworkTestUtil.getTempDirectory();
+		root = FileTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(credentials, network.get(0), root);
 	}
 
