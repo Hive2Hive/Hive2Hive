@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data.download;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +21,15 @@ import org.hive2hive.core.processes.implementations.files.download.direct.GetLoc
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A download manager handling downloads. Downloading chunks happens concurrently. It is possible to download
+ * multiple files at a time. The number of concurrent downloads is configurable over the
+ * {@link H2HConstants#CONCURRENT_DOWNLOADS} field. <br>
+ * Downloaded chunks are stored in a temporary folder and assembled when all chunks are downloaded.
+ * 
+ * @author Nico
+ * 
+ */
 public class DownloadManager {
 
 	private final static Logger logger = LoggerFactory.getLogger(DownloadManager.class);
@@ -42,6 +52,9 @@ public class DownloadManager {
 		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
 	}
 
+	/**
+	 * Add a new task to download a file. The download is automatically started in the background
+	 */
 	public void submit(BaseDownloadTask task) {
 		logger.debug("Submitted to download {}", task.getDestinationName());
 
@@ -80,6 +93,9 @@ public class DownloadManager {
 		}
 	}
 
+	/**
+	 * Stop the downloads
+	 */
 	public void stopBackgroundProcesses() {
 		executor.shutdownNow();
 		while (!executor.isTerminated()) {
@@ -87,6 +103,9 @@ public class DownloadManager {
 		}
 	}
 
+	/**
+	 * Continue with the downloads
+	 */
 	public void continueBackgroundProcess() {
 		executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		for (BaseDownloadTask task : openTasks) {
@@ -94,8 +113,23 @@ public class DownloadManager {
 		}
 	}
 
+	/**
+	 * Return the task which are currently downloading or waiting for a download slot
+	 */
 	public Set<BaseDownloadTask> getOpenTasks() {
 		return openTasks;
+	}
+
+	/**
+	 * Indicates whether the download manager has already a task to download the given file
+	 */
+	public boolean isDownloading(File file) {
+		for (BaseDownloadTask openTask : openTasks) {
+			if (openTask.getDestination().equals(file))
+				return true;
+		}
+
+		return false;
 	}
 
 	/**

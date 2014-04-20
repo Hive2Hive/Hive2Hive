@@ -63,12 +63,17 @@ public abstract class BaseDownloadTask implements Serializable {
 	public List<MetaChunk> getOpenChunks() {
 		List<MetaChunk> openChunks = new ArrayList<MetaChunk>();
 		for (MetaChunk metaChunk : metaChunks) {
-			if (downloadedParts[metaChunk.getIndex()] == null) {
+			if (downloadedParts[metaChunk.getIndex()] == null
+					|| !downloadedParts[metaChunk.getIndex()].exists()) {
 				openChunks.add(metaChunk);
 			}
 		}
 
 		return openChunks;
+	}
+
+	public File getDestination() {
+		return destination;
 	}
 
 	public String getDestinationName() {
