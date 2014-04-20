@@ -48,8 +48,13 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
 
-		logger.trace("Start updating the user profile where adding the file '{}'.",
-				file.getName());
+		// pre-calculate the md5 hash because this may take a while
+		byte[] md5 = null;
+		if (file.isFile()) {
+			md5 = calculateHash(file);
+		}
+
+		logger.trace("Start updating the user profile where adding the file '{}'.", file.getName());
 		try {
 			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
 
@@ -68,20 +73,24 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			if (file.isDirectory()) {
 				context.provideIndex(new FolderIndex(parentNode, context.getMetaKeys(), file.getName()));
 			} else {
-				byte[] md5 = EncryptionUtil.generateMD5Hash(file);
 				context.provideIndex(new FileIndex(parentNode, context.getMetaKeys(), file.getName(), md5));
 			}
 
 			// put the updated user profile
 			profileManager.readyToPut(userProfile, getID());
 			modified = true;
-		} catch (IOException e) {
-			logger.error("Creating MD5 hash of file '{}' was not possible. Reason = '{}'.",
-					file.getName(), e.getMessage());
-			throw new ProcessExecutionException(String.format("Could not add file '%s' to the user profile.",
-					file.getName()), e);
 		} catch (PutFailedException | GetFailedException e) {
 			throw new ProcessExecutionException(e);
+		}
+	}
+
+	private byte[] calculateHash(File file) throws ProcessExecutionException {
+		try {
+			return EncryptionUtil.generateMD5Hash(file);
+		} catch (IOException e) {
+			logger.error("Creating MD5 hash of file '{}' was not possible.", file.getName(), e);
+			throw new ProcessExecutionException(String.format("Could not add file '%s' to the user profile.",
+					file.getName()), e);
 		}
 	}
 
