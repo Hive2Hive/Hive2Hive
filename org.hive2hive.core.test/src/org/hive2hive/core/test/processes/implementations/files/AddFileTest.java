@@ -7,7 +7,6 @@ import java.security.KeyPair;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -24,7 +23,6 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
@@ -43,9 +41,9 @@ import org.junit.Test;
  */
 public class AddFileTest extends H2HJUnitTest {
 
+	private final static int CHUNK_SIZE = 1024;
 	private final int networkSize = 3;
 	private List<NetworkManager> network;
-	private IFileConfiguration config = new TestFileConfiguration();
 	private UserCredentials userCredentials;
 
 	private File uploaderRoot;
@@ -76,7 +74,7 @@ public class AddFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
-		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, config);
+		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, CHUNK_SIZE);
 
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
 		verifyUpload(file, 1);
@@ -86,7 +84,7 @@ public class AddFileTest extends H2HJUnitTest {
 	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException,
 			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
 		// creates a file with length of at least 5 chunks
-		File file = FileTestUtil.createFileRandomContent(5, uploaderRoot, config);
+		File file = FileTestUtil.createFileRandomContent(5, uploaderRoot, CHUNK_SIZE);
 
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
 		verifyUpload(file, 5);
@@ -136,7 +134,7 @@ public class AddFileTest extends H2HJUnitTest {
 		// skip the login and continue with the newfile process
 		NetworkManager client = network.get(2);
 
-		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, config);
+		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, CHUNK_SIZE);
 		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);

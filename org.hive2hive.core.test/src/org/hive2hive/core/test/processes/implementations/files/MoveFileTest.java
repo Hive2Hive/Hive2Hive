@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -16,7 +15,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -35,7 +33,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	private static final int networkSize = 5;
 	private static List<NetworkManager> network;
-	private static IFileConfiguration config = new TestFileConfiguration();
+	private final static int CHUNK_SIZE = 1024;
 	private UserCredentials userCredentials;
 	private File root;
 
@@ -63,7 +61,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, client, root);
 
 		// add a file to the network
-		File file = FileTestUtil.createFileRandomContent(3, root, config);
+		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// add the target directory

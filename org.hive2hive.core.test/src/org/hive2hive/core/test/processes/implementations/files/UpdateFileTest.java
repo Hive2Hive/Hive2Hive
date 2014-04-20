@@ -28,7 +28,6 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.test.processes.util.TestProcessComponentListener;
@@ -49,7 +48,7 @@ import org.junit.Test;
 public class UpdateFileTest extends H2HJUnitTest {
 
 	private final int networkSize = 5;
-	private final IFileConfiguration config = new TestFileConfiguration();
+	private final static int CHUNK_SIZE = 1024;
 	private List<NetworkManager> network;
 	private UserCredentials userCredentials;
 	private Path uploaderRoot;
@@ -90,7 +89,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, rootUploader, config);
+		file = FileTestUtil.createFileRandomContent(3, rootUploader, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 

@@ -10,7 +10,6 @@ import net.tomp2p.futures.FutureGet;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,7 +25,6 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -44,7 +42,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	private static final int networkSize = 2;
 	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
-	private static final IFileConfiguration config = new TestFileConfiguration();
+	private final static int CHUNK_SIZE = 1024;
 	private static File root;
 	private static NetworkManager client;
 
@@ -66,7 +64,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException,
 			InterruptedException, NoPeerConnectionException, NoSessionException, InvalidProcessStateException {
-		File file = FileTestUtil.createFileRandomContent(3, root, config);
+		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// store the keys of the meta file to verify them later

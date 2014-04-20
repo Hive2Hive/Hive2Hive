@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -25,7 +24,6 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.H2HWaiter;
 import org.hive2hive.core.test.file.FileTestUtil;
-import org.hive2hive.core.test.integration.TestFileConfiguration;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.hive2hive.core.test.processes.util.UseCaseTestUtil;
 import org.junit.After;
@@ -43,7 +41,7 @@ import org.junit.Test;
  */
 public class PermissionsTest extends H2HJUnitTest {
 
-	private static final IFileConfiguration config = new TestFileConfiguration();
+	private final static int CHUNK_SIZE = 1024;
 	private static final int networkSize = 3;
 	private static List<NetworkManager> network;
 
@@ -111,7 +109,7 @@ public class PermissionsTest extends H2HJUnitTest {
 
 		logger.debug("3. Upload a new file 'folder1/file1' from A.");
 		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5), folder1AtA,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1AtA);
 		File file1AtB = new File(folder1AtB, file1AtA.getName());
 		waitTillSynchronized(file1AtB, true);
@@ -119,7 +117,7 @@ public class PermissionsTest extends H2HJUnitTest {
 
 		logger.debug("4. Upload a new file 'folder1/file2' from B.");
 		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtB,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file2AtB);
 		File file2AtA = new File(folder1AtA, file2AtB.getName());
 		waitTillSynchronized(file2AtA, true);
@@ -141,14 +139,14 @@ public class PermissionsTest extends H2HJUnitTest {
 
 		logger.debug("7. Upload a file 'folder1/subfolder2/file3' from A.");
 		File file3AtA = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5), subFolder2AtA,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3AtA);
 		File file3AtB = new File(subFolder2AtB, file3AtA.getName());
 		waitTillSynchronized(file3AtB, true);
 
 		logger.debug("8. Upload a file 'folder1/subfolder2/file4' from B.");
 		File file4AtB = FileTestUtil.createFileRandomContent("file4", new Random().nextInt(5), subFolder2AtB,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file4AtB);
 		File file4AtA = new File(subFolder2AtA, file4AtB.getName());
 		waitTillSynchronized(file4AtA, true);
@@ -219,7 +217,7 @@ public class PermissionsTest extends H2HJUnitTest {
 
 		logger.debug("3. Upload a new file 'folder1/file1' from A.");
 		File file1AtA = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5), folder1AtA,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(file1AtA,
 				nodeA));
 		File file1AtB = new File(folder1AtB, file1AtA.getName());
@@ -227,7 +225,7 @@ public class PermissionsTest extends H2HJUnitTest {
 
 		logger.debug("4. Try to upload a new file 'folder1/file2' from B.");
 		File file2AtB = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtB,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(file2AtB,
 				nodeB));
 		file2AtB.delete();
@@ -263,7 +261,7 @@ public class PermissionsTest extends H2HJUnitTest {
 
 		logger.debug("9. Upload a new file 'folder1/file2' from A.");
 		File file2AtA = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5), folder1AtA,
-				config);
+				CHUNK_SIZE);
 		UseCaseTestUtil.executeProcessTillSucceded(ProcessFactory.instance().createNewFileProcess(file2AtA,
 				nodeA));
 		file2AtB = new File(folder1AtB, file2AtA.getName());
