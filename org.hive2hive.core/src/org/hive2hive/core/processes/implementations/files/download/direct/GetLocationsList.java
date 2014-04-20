@@ -57,6 +57,12 @@ public class GetLocationsList implements Runnable {
 		task.provideLocations(context.getLocations());
 	}
 
+	/**
+	 * Local context for holding multiple locations
+	 * 
+	 * @author Nico
+	 * 
+	 */
 	private class ProvideUserLocationsContext implements IProvideLocations {
 
 		private Set<Locations> locations;

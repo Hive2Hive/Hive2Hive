@@ -1,7 +1,9 @@
 package org.hive2hive.core.processes.implementations.files.download;
 
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -54,10 +56,10 @@ public class FindInUserProfileStep extends ProcessStep {
 			try {
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaFileStep(context, context, dataManager));
+				PeerAddress ownPeerAddress = networkManager.getConnection().getPeer().getPeerAddress();
 				getParent().add(
-						new InitDownloadChunksStep(context, networkManager.getSession(), networkManager
-								.getConnection().getPeer().getPeerAddress()));
-			} catch (Hive2HiveException e) {
+						new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress));
+			} catch (NoPeerConnectionException | NoSessionException e) {
 				throw new ProcessExecutionException(e);
 			}
 		}

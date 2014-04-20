@@ -85,6 +85,8 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		if (ownInetAddress != null) {
 			for (PeerAddress peerAddress : addresses) {
 				if (ownInetAddress.equals(peerAddress.getInetAddress())) {
+					// internet addresses (external IP) match, prefer this address
+					// TODO: verify this assumption
 					return peerAddress;
 				}
 			}

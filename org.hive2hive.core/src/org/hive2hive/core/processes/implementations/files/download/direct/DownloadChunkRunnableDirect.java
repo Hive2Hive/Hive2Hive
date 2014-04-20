@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Downloads a chunk from the DHT and stores it into a temprary file
+ * Downloads a chunk from the DHT and stores it into a temporary file
  * 
  * @author Nico
  * 
