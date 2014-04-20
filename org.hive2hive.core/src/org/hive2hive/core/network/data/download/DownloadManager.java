@@ -72,7 +72,6 @@ public class DownloadManager {
 		if (task.isDirectDownload()) {
 			// first get the locations of all users having access to this file
 			DownloadTaskDirect directTask = (DownloadTaskDirect) task;
-			directTask.resetLocations();
 			// Hint: Run it in a separate thread (not in the thread pool) because the executor does not
 			// guarantee the in-order processing.
 			new Thread(new GetLocationsList(directTask, dataManager)).start();

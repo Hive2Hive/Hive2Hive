@@ -25,7 +25,7 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private final PeerAddress ownAddress; // the peer address of the downloader
 	private final Set<String> users; // users having access to this file
 
-	private CountDownLatch locationLocker;
+	private transient CountDownLatch locationLocker;
 	private volatile Set<Locations> locations;
 
 	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey,
@@ -85,7 +85,9 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 		locationLocker.countDown();
 	}
 
-	public void resetLocations() {
+	@Override
+	public void reinitializeAfterDeserialization() {
+		super.reinitializeAfterDeserialization();
 		this.locationLocker = new CountDownLatch(1);
 		this.locations = null;
 	}

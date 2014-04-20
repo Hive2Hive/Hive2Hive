@@ -9,6 +9,9 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.file.PersistentMetaData;
+import org.hive2hive.core.network.data.PublicKeyManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
+import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.test.H2HJUnitTest;
 import org.hive2hive.core.test.network.NetworkTestUtil;
 import org.junit.After;
@@ -56,7 +59,10 @@ public class FileUtilTest extends H2HJUnitTest {
 		File file = new File(root, fileName);
 		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
 
-		FileUtil.writePersistentMetaData(root.toPath(), null, null);
+		PublicKeyManager publicKeyManager = new PublicKeyManager("user", EncryptionUtil.generateRSAKeyPair(),
+				null);
+		DownloadManager downloadManager = new DownloadManager(null, null, publicKeyManager, null);
+		FileUtil.writePersistentMetaData(root.toPath(), publicKeyManager, downloadManager);
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());
 		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
 		Assert.assertTrue(fileTree.containsKey(fileName));

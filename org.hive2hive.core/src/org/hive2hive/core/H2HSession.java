@@ -1,11 +1,8 @@
 package org.hive2hive.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
-
-import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -22,15 +19,14 @@ public class H2HSession {
 	private final IFileConfiguration fileConfiguration;
 	private final Path root;
 
-	public H2HSession(SessionParameters params) throws IOException {
+	public H2HSession(SessionParameters params) {
 		this(params.getProfileManager(), params.getKeyManager(), params.getDownloadManager(), params
 				.getFileConfig(), params.getRoot());
 	}
 
 	// TODO remove constructor
 	public H2HSession(UserProfileManager profileManager, PublicKeyManager keyManager,
-			DownloadManager downloadManager, IFileConfiguration fileConfiguration, Path root)
-			throws IOException {
+			DownloadManager downloadManager, IFileConfiguration fileConfiguration, Path root) {
 		this.profileManager = profileManager;
 		this.keyManager = keyManager;
 		this.downloadManager = downloadManager;

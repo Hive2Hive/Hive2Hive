@@ -57,8 +57,9 @@ public class SessionCreationStep extends ProcessStep {
 					networkManager.getMessageManager(), keyManager, params.getFileConfig());
 
 			// read the cached downloads and add them to the download manager
-			for (BaseDownloadTask baseDownloadTask : metaData.getDownloads()) {
-				downloadManager.submit(baseDownloadTask);
+			for (BaseDownloadTask task : metaData.getDownloads()) {
+				task.reinitializeAfterDeserialization();
+				downloadManager.submit(task);
 			}
 			params.setDownloadManager(downloadManager);
 

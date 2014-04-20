@@ -53,6 +53,9 @@ public class DownloadChunkRunnableDHT implements Runnable {
 			logger.warn("Abort scheduled download of chunk {} of file {}", metaChunk.getIndex(),
 					task.getDestinationName());
 			return;
+		} else if (Thread.currentThread().isInterrupted()) {
+			logger.warn("Not terminate the download because thread is interrupted");
+			return;
 		}
 
 		logger.debug("Downloading chunk {} of file {} from the DHT", metaChunk.getIndex(),

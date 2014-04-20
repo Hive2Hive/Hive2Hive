@@ -29,8 +29,8 @@ public abstract class BaseDownloadTask implements Serializable {
 	private final File tempFolder;
 
 	private final File[] downloadedParts;
-	private final CountDownLatch finishedLatch; // when the download has finished
-	private final Set<IDownloadListener> listeners;
+	private transient CountDownLatch finishedLatch; // when the download has finished
+	private transient Set<IDownloadListener> listeners;
 	private final AtomicBoolean aborted;
 	private String reason;
 
@@ -153,6 +153,18 @@ public abstract class BaseDownloadTask implements Serializable {
 			} catch (IOException e) {
 				abortDownload("Cannot reassembly the file parts");
 			}
+		}
+	}
+
+	/**
+	 * Re-initialize transient variables after the serialization
+	 */
+	public void reinitializeAfterDeserialization() {
+		this.listeners = new HashSet<IDownloadListener>();
+		if (!isAborted() && !isDone()) {
+			finishedLatch = new CountDownLatch(1);
+		} else {
+			finishedLatch = new CountDownLatch(0);
 		}
 	}
 
