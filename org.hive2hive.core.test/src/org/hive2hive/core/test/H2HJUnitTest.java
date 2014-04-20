@@ -23,12 +23,12 @@ public class H2HJUnitTest {
 
 	@Before
 	public void beforeMethod() {
-		logger.debug(createMessage(name.getMethodName(), true));
+		logger.info(createMessage(name.getMethodName(), true));
 	}
 
 	@After
 	public void afterMethod() {
-		logger.debug(createMessage(name.getMethodName(), false));
+		logger.info(createMessage(name.getMethodName(), false));
 	}
 
 	public static final void beforeClass() throws Exception {
@@ -42,7 +42,7 @@ public class H2HJUnitTest {
 			logger.debug("");
 		}
 		logger.debug(bar);
-		logger.debug(createMessage(name, isStart));
+		logger.info(createMessage(name, isStart));
 		logger.debug(bar);
 		if (!isStart) {
 			logger.debug("");
