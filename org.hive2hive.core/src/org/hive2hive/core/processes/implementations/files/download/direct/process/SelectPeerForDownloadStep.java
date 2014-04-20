@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data.download.direct.process;
+package org.hive2hive.core.processes.implementations.files.download.direct.process;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.network.data.download.direct.DownloadTaskDirect;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.implementations.files.download.direct.DownloadTaskDirect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

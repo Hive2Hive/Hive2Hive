@@ -1,16 +1,16 @@
-package org.hive2hive.core.network.data.download.direct;
+package org.hive2hive.core.processes.implementations.files.download.direct;
 
 import java.io.File;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.network.data.download.direct.process.AskForChunkStep;
-import org.hive2hive.core.network.data.download.direct.process.DownloadDirectContext;
-import org.hive2hive.core.network.data.download.direct.process.SelectPeerForDownloadStep;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.files.download.direct.process.AskForChunkStep;
+import org.hive2hive.core.processes.implementations.files.download.direct.process.DownloadDirectContext;
+import org.hive2hive.core.processes.implementations.files.download.direct.process.SelectPeerForDownloadStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

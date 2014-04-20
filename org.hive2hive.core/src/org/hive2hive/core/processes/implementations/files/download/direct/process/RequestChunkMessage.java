@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data.download.direct.process;
+package org.hive2hive.core.processes.implementations.files.download.direct.process;
 
 import java.io.IOException;
 import java.nio.file.Path;

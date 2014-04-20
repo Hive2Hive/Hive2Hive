@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data.download.dht;
+package org.hive2hive.core.processes.implementations.files.download.dht;
 
 import java.io.File;
 import java.security.PrivateKey;

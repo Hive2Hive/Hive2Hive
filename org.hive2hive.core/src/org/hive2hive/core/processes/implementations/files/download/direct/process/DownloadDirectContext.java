@@ -1,11 +1,11 @@
-package org.hive2hive.core.network.data.download.direct.process;
+package org.hive2hive.core.processes.implementations.files.download.direct.process;
 
 import java.io.File;
 
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.network.data.download.direct.DownloadTaskDirect;
+import org.hive2hive.core.processes.implementations.files.download.direct.DownloadTaskDirect;
 
 public class DownloadDirectContext {
 

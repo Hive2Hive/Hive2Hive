@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data.download.direct;
+package org.hive2hive.core.processes.implementations.files.download.direct;
 
 import java.util.Collections;
 import java.util.HashSet;
