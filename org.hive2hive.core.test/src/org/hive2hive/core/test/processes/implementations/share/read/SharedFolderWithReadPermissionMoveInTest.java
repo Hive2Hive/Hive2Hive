@@ -39,7 +39,7 @@ import org.junit.Test;
  * 
  * @author Seppi
  */
-public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
+public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 
 	private static final IFileConfiguration config = new TestFileConfiguration();
 	private static final int maxNumChunks = 2;
@@ -65,7 +65,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 	 */
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = SharedFolderWithWritePermissionMoveInTest.class;
+		testClass = SharedFolderWithReadPermissionMoveInTest.class;
 		beforeClass();
 
 		logger.info("Setup network.");
