@@ -70,7 +70,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair();
 
 		// generate a fake chunk
-		Chunk chunk = new Chunk(proxy.getNodeId(), NetworkTestUtil.randomString().getBytes(), 0, 1);
+		Chunk chunk = new Chunk(proxy.getNodeId(), NetworkTestUtil.randomString().getBytes(), 0);
 		// encrypt the chunk
 		HybridEncryptedContent encryptedChunk = H2HEncryptionUtil.encryptHybrid(chunk,
 				encryptionKeys.getPublic());

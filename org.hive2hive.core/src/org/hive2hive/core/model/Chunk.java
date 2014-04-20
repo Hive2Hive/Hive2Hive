@@ -13,19 +13,17 @@ public class Chunk extends NetworkContent {
 	private static final long serialVersionUID = 1L;
 
 	private final String id;
-	private final int size;
 	private final byte[] data;
 	private final int order;
 
-	public Chunk(String id, byte[] data, int order, int size) {
+	public Chunk(String id, byte[] data, int order) {
 		this.id = id;
 		this.data = data;
 		this.order = order;
-		this.size = size;
 	}
 
 	public int getSize() {
-		return size;
+		return data.length;
 	}
 
 	public String getId() {

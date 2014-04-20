@@ -19,16 +19,25 @@ public class FileChunkUtil {
 	 * 
 	 * @param file the file to chunk
 	 * @param chunkSize the size of an individual chunk
-	 * @return the number of chunks, if the file is empty, 1 is returned
+	 * @return the number of chunks, if the file is empty, 1 is returned. If file is not existing, 0 is
+	 *         returned. In case the given chunkSize is smaller or equal to zero, 0 is returned
 	 */
 	public static int getNumberOfChunks(File file, int chunkSize) {
+		if (file == null || !file.exists()) {
+			// no chunk needed
+			return 0;
+		} else if (chunkSize <= 0) {
+			// don't divide by 0
+			return 0;
+		}
+
 		long fileSize = FileUtil.getFileSize(file);
 		if (fileSize == 0) {
 			// special case
 			return 1;
 		}
 
-		return (int) Math.ceil((double) fileSize / chunkSize);
+		return (int) Math.ceil((double) fileSize / Math.abs(chunkSize));
 	}
 
 	/**
@@ -45,6 +54,20 @@ public class FileChunkUtil {
 	 */
 	public static Chunk getChunk(File file, int chunkSize, int chunkNumber, String chunkId)
 			throws IOException {
+		if (file == null || !file.exists()) {
+			throw new IOException("File does not exist");
+		} else if (chunkSize <= 0) {
+			throw new IOException("Chunk size cannot be smaller or equal to 0");
+		} else if (chunkNumber < 0) {
+			throw new IOException("Chunk number cannot be smaller than 0");
+		}
+
+		if (FileUtil.getFileSize(file) == 0 && chunkNumber == 0) {
+			// special case: file exists but is empty.
+			// return an empty chunk
+			return new Chunk(chunkId, new byte[0], 0);
+		}
+
 		int read = 0;
 		long offset = chunkSize * chunkNumber;
 		byte[] data = new byte[chunkSize];
@@ -58,7 +81,7 @@ public class FileChunkUtil {
 		if (read > 0) {
 			// the byte-Array may contain many empty slots if last chunk. Truncate it
 			data = truncateData(data, read);
-			return new Chunk(chunkId, data, chunkNumber, read);
+			return new Chunk(chunkId, data, chunkNumber);
 		} else {
 			return null;
 		}
