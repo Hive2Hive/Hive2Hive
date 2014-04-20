@@ -713,7 +713,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		UserProfile userProfileB = network.get(1).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Index oldIndexAtB = userProfileA.getFileByPath(rootB.toPath().relativize(oldFileAtB.toPath()));
+		Index oldIndexAtB = userProfileB.getFileByPath(rootB.toPath().relativize(oldFileAtB.toPath()));
 		Index newIndexAtB = userProfileB.getFileByPath(rootB.toPath().relativize(newFileAtB.toPath()));
 
 		// check if old indexes have been removed
