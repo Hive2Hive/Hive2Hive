@@ -7,6 +7,8 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.framework.RollbackReason;
@@ -30,6 +32,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 	private final ShareProcessContext context;
 	private final UserProfileManager profileManager;
 	private final Path root;
+	private final String userId;
 
 	private boolean modified = false;
 
@@ -37,6 +40,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 		this.context = context;
 		this.profileManager = session.getProfileManager();
 		this.root = session.getRoot();
+		this.userId = session.getUserId();
 	}
 
 	@Override
@@ -73,7 +77,11 @@ public class UpdateUserProfileStep extends ProcessStep {
 				folderIndex.addUserPermissions(context.getUserPermission());
 			} else {
 				// make the node shared with the new protection keys
-				folderIndex.share(context.consumeNewProtectionKeys(), context.getUserPermission());
+				folderIndex.share(context.consumeNewProtectionKeys());
+				// add read/write user permission of friend
+				folderIndex.addUserPermissions(context.getUserPermission());
+				// add write user permission of user itself
+				folderIndex.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 			}
 
 			// upload modified profile

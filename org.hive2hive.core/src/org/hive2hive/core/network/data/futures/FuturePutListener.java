@@ -10,7 +10,6 @@ import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.futures.FuturePut;
 import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.p2p.builder.DigestBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
@@ -158,26 +157,11 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	}
 
 	/**
-	 * Get the digest under the given location, domain and content key. Digest contains all version keys.
-	 * 
-	 * @return future with the digest request
-	 */
-	private FutureDigest getDigest() {
-		DigestBuilder digestBuilder = dataManager.getDigest(parameters.getLKey());
-		digestBuilder.from(
-				new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO)).to(
-				new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE));
-		return digestBuilder.start();
-	}
-
-	/**
 	 * Loads digest and triggers a check.
 	 */
 	private void verifyPut() {
 		// get data to verify if everything went correct
-		FutureDigest digestFuture = getDigest();
+		FutureDigest digestFuture = dataManager.getDigestUnblocked(parameters);
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {

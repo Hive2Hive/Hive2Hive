@@ -2,6 +2,7 @@ package org.hive2hive.core.network.data;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.NavigableMap;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -9,6 +10,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
+
+import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -41,25 +45,25 @@ public class UserProfileManager {
 
 	private final NetworkManager networkManager;
 	private final UserCredentials credentials;
+	private final SecretKey userProfileEncryptionKey;
 
 	private final Object queueWaiter = new Object();
+	private final QueueWorker worker = new QueueWorker();
+	private final Queue<QueueEntry> readOnlyQueue = new ConcurrentLinkedQueue<QueueEntry>();
+	private final Queue<PutQueueEntry> modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
 
-	private final QueueWorker worker;
-	private boolean running = true;
-
-	private final Queue<QueueEntry> readOnlyQueue;
-	private final Queue<PutQueueEntry> modifyQueue;
 	private volatile PutQueueEntry modifying;
 
+	private boolean running = true;
 	private KeyPair defaultProtectionKey = null;
 
 	public UserProfileManager(NetworkManager networkManager, UserCredentials credentials) {
 		this.networkManager = networkManager;
 		this.credentials = credentials;
-		readOnlyQueue = new ConcurrentLinkedQueue<QueueEntry>();
-		modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
+		// needs to be done only once
+		this.userProfileEncryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
+				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 
-		worker = new QueueWorker();
 		Thread thread = new Thread(worker);
 		thread.setName("UP queue");
 		thread.start();
@@ -164,6 +168,8 @@ public class UserProfileManager {
 
 	private class QueueWorker implements Runnable {
 
+		private UserProfile cachedUserProfile = null;
+
 		@Override
 		public void run() {
 			while (running) { // run forever
@@ -177,13 +183,13 @@ public class UserProfileManager {
 						}
 					}
 				} else if (modifyQueue.isEmpty()) {
-					logger.debug("{} process(es) are waiting for read-only access.", readOnlyQueue.size());
+					logger.trace("{} process(es) are waiting for read-only access.", readOnlyQueue.size());
 					// a process wants to read
 					QueueEntry entry = readOnlyQueue.peek();
 
 					get(entry);
 
-					logger.debug("Notifying {} processes that newest profile is ready.", readOnlyQueue.size());
+					logger.trace("Notifying {} processes that newest profile is ready.", readOnlyQueue.size());
 					// notify all read only processes
 					while (!readOnlyQueue.isEmpty()) {
 						// copy user profile and errors to other entries
@@ -195,9 +201,10 @@ public class UserProfileManager {
 				} else {
 					// a process wants to modify
 					modifying = modifyQueue.poll();
-					logger.debug("Process {} is waiting to make profile modifications.", modifying.getPid());
+					logger.trace("Process {} is waiting to make profile modifications.", modifying.getPid());
 					get(modifying);
-					logger.debug("Notifying {} processes (inclusive process {}) to get newest profile.", readOnlyQueue.size() + 1, modifying.getPid());
+					logger.trace("Notifying {} processes (inclusive process {}) to get newest profile.",
+							readOnlyQueue.size() + 1, modifying.getPid());
 
 					modifying.notifyGet();
 					// notify all read only processes
@@ -223,11 +230,12 @@ public class UserProfileManager {
 
 					if (modifying.isReadyToPut()) {
 						// is ready to put
-						logger.debug("Process {} made modifcations and uploads them now.", modifying.getPid());
+						logger.trace("Process {} made modifcations and uploads them now.", modifying.getPid());
 						put(modifying);
 					} else if (!modifying.isAborted()) {
 						// request is not ready to put and has not been aborted
-						logger.error("Process {} never finished doing modifications. Abort the put request.", modifying.getPid());
+						logger.warn("Process {} never finished doing modifications. Abort the put request.",
+								modifying.getPid());
 						modifying.abort();
 						modifying.setPutError(new PutFailedException("Too long modification. Only "
 								+ MAX_MODIFICATION_TIME + "ms are allowed."));
@@ -236,14 +244,15 @@ public class UserProfileManager {
 				}
 			}
 
-			logger.debug("Queue worker stopped.");
+			logger.debug("Queue worker stopped. user id = '{}'", credentials.getUserId());
 		}
 
 		/**
 		 * Performs a get call (blocking) and decrypts the received user profile.
 		 */
 		private void get(QueueEntry entry) {
-			logger.debug("Getting the user profile from the DHT.");
+			logger.debug("Get user profile. user id = '{}'", credentials.getUserId());
+
 			DataManager dataManager;
 			try {
 				dataManager = networkManager.getDataManager();
@@ -254,21 +263,59 @@ public class UserProfileManager {
 
 			IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
 					.setContentKey(H2HConstants.USER_PROFILE);
-			NetworkContent content = dataManager.get(parameters);
-			entry.processGetResult(content);
+
+			// load the current digest list from network
+			NavigableMap<Number640, Number160> digest = dataManager.getDigest(parameters);
+			// compare the current user profile's version key with the cached one
+			if (cachedUserProfile != null
+					&& digest.firstEntry().getKey().getVersionKey().equals(cachedUserProfile.getVersionKey())) {
+				// no need for fetching user profile from network
+				entry.setUserProfile(cachedUserProfile);
+			} else {
+				// load latest user profile from network
+				NetworkContent content = dataManager.get(parameters);
+				if (content == null) {
+					logger.warn("Did not find user profile. user id = '{}'", credentials.getUserId());
+					entry.setGetError(new GetFailedException("User profile not found. Got null."));
+				} else {
+					try {
+						logger.trace(
+								"Decrypting user profile with 256-bit AES key from password. user id = '{}'",
+								credentials.getUserId());
+						EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
+						NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted,
+								userProfileEncryptionKey);
+						UserProfile userProfile = (UserProfile) decrypted;
+						userProfile.setVersionKey(content.getVersionKey());
+						userProfile.setBasedOnKey(content.getBasedOnKey());
+
+						// cache user profile
+						cachedUserProfile = userProfile;
+						// provide loaded user profile
+						entry.setUserProfile(userProfile);
+					} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+						logger.error("Cannot decrypt the user profile. reason = '{}'", e.getMessage());
+						entry.setGetError(new GetFailedException(String.format(
+								"Cannot decrypt the user profile. reason = '%'", e.getMessage())));
+					} catch (Exception e) {
+						logger.error("Cannot get the user profile. reason = '{}'", e.getMessage());
+						entry.setGetError(new GetFailedException(String.format(
+								"Cannot get the user profile. reason = '%'", e.getMessage())));
+					}
+				}
+			}
 		}
 
 		/**
 		 * Encrypts the modified user profile and puts it (blocking).
 		 */
 		private void put(PutQueueEntry entry) {
-			logger.debug("Encrypting user profile with 256bit AES key from password.");
+			logger.debug("Put user profile. user id = '{}'", credentials.getUserId());
 			try {
-				SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-						credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
+				logger.trace("Encrypting user profile with 256bit AES key from password. user id ='{}'",
+						credentials.getUserId());
 				EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(
-						entry.getUserProfile(), encryptionKey);
-				logger.debug("Putting user profile into the DHT.");
+						entry.getUserProfile(), userProfileEncryptionKey);
 
 				DataManager dataManager = networkManager.getDataManager();
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
@@ -278,11 +325,15 @@ public class UserProfileManager {
 						.setProtectionKeys(entry.getUserProfile().getProtectionKeys())
 						.setTTL(entry.getUserProfile().getTimeToLive());
 				boolean success = dataManager.put(parameters);
-				if (!success)
+				if (!success) {
 					entry.setPutError(new PutFailedException("Put failed."));
+				} else {
+					// cache user profile
+					cachedUserProfile = entry.getUserProfile();
+				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
-				logger.error("Cannot encrypt the user profile.", e);
-				entry.setPutError(new PutFailedException("Cannot encrypt the user profile."));
+				logger.error("Cannot encrypt the user profile. reason = '{}'", e.getMessage());
+				entry.setPutError(new PutFailedException(String.format("Cannot encrypt the user profile. reason = '%s'", e.getMessage())));
 			} catch (NoPeerConnectionException e) {
 				entry.setPutError(new PutFailedException("Node is not connected to the network."));
 			} finally {
@@ -292,14 +343,16 @@ public class UserProfileManager {
 	}
 
 	private class QueueEntry {
+
 		private final String pid;
-		private final CountDownLatch getWaiter;
+
+		private final CountDownLatch getWaiter = new CountDownLatch(1);
+
 		private UserProfile userProfile; // got from DHT
 		private GetFailedException getFailedException;
 
 		public QueueEntry(String pid) {
 			this.pid = pid;
-			this.getWaiter = new CountDownLatch(1);
 		}
 
 		public String getPid() {
@@ -345,50 +398,18 @@ public class UserProfileManager {
 		public boolean equals(String pid) {
 			return this.pid.equals(pid);
 		}
-
-		public void processGetResult(NetworkContent content) {
-			try {
-				if (content == null) {
-					logger.warn("Did not find user profile.");
-					setGetError(new GetFailedException("User profile not found."));
-				} else {
-					// decrypt it
-					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
-
-					logger.debug("Decrypting user profile with 256-bit AES key from password.");
-
-					SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(
-							credentials.getPassword(), credentials.getPin(),
-							H2HConstants.KEYLENGTH_USER_PROFILE);
-
-					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, encryptionKey);
-					UserProfile userProfile = (UserProfile) decrypted;
-					userProfile.setVersionKey(content.getVersionKey());
-					userProfile.setBasedOnKey(content.getBasedOnKey());
-					setUserProfile(userProfile);
-				}
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
-				logger.error("Cannot decrypt the user profile.", e);
-				setGetError(new GetFailedException("Cannot decrypt the user profile."));
-			} catch (Exception e) {
-				logger.error("Cannot get the user profile. Reason: {}.", e.getMessage());
-				setGetError(new GetFailedException(e.getMessage()));
-			}
-		}
 	}
 
 	private class PutQueueEntry extends QueueEntry {
 
-		private final AtomicBoolean readyToPut;
-		private final AtomicBoolean abort;
-		private final CountDownLatch putWaiter;
+		private final AtomicBoolean readyToPut = new AtomicBoolean(false);
+		private final AtomicBoolean abort = new AtomicBoolean(false);
+		private final CountDownLatch putWaiter = new CountDownLatch(1);
+
 		private PutFailedException putFailedException;
 
 		public PutQueueEntry(String pid) {
 			super(pid);
-			putWaiter = new CountDownLatch(1);
-			readyToPut = new AtomicBoolean(false);
-			abort = new AtomicBoolean(false);
 		}
 
 		public boolean isReadyToPut() {

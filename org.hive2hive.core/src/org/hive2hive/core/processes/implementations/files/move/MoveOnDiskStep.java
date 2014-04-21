@@ -40,13 +40,15 @@ public class MoveOnDiskStep extends ProcessStep {
 		try {
 			verifyFiles();
 		} catch (NoSessionException | IllegalArgumentException e) {
-			throw new ProcessExecutionException("File verification failed.", e);
+			throw new ProcessExecutionException(String.format("File verification failed. reason = '%s'",
+					e.getMessage()), e);
 		}
 
 		try {
 			getFileKeys();
 		} catch (GetFailedException | NoSessionException | IllegalStateException e) {
-			throw new ProcessExecutionException("File keys could not be fetched.", e);
+			throw new ProcessExecutionException(String.format(
+					"File keys could not be fetched. reason = '%s'", e.getMessage()), e);
 		}
 
 		try {

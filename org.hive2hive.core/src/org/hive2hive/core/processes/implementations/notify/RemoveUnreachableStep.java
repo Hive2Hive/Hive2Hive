@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
  * Removes all locations that are unreachable and puts the reduced locations back into the DHT
  * 
  * @author Nico
- * 
  */
 public class RemoveUnreachableStep extends BasePutProcessStep {
 
@@ -45,7 +44,7 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 		Set<PeerAddress> unreachablePeers = context.getUnreachablePeers();
 
 		if (unreachablePeers.isEmpty()) {
-			logger.info("No locations to remove. Skip the cleanup.");
+			logger.debug("No locations to remove. Skip the cleanup.");
 			return;
 		}
 

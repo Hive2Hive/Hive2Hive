@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.implementations.share;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.model.FolderIndex;
@@ -49,21 +48,19 @@ public class PrepareNotificationsStep extends ProcessStep {
 		}
 
 		// copy all user permissions
-		List<UserPermission> userPermissions = fileNode.getUserPermissions();
-		UserPermission[] permissionArray = new UserPermission[userPermissions.size() + 1];
-		permissionArray = userPermissions.toArray(permissionArray);
-		// add the own permission
-		permissionArray[permissionArray.length - 1] = new UserPermission(userId, PermissionType.WRITE);
+		for (UserPermission userPermission : fileNode.getUserPermissions()) {
+			sharedNode.addUserPermissions(userPermission);
+		}
 
 		// if the friend receives write access, he gets the protection key
 		if (context.getPermissionType() == PermissionType.WRITE) {
 			logger.debug("Friend '{}' gets WRITE access to the shared folder '{}'.", context.getFriendId(),
 					context.getFolder().getName());
-			sharedNode.share(context.consumeNewProtectionKeys(), permissionArray);
+			sharedNode.share(context.consumeNewProtectionKeys());
 		} else {
 			logger.debug(String.format("Friend '{}' gets READ access to the shared folder '{}'.",
 					context.getFriendId(), context.getFolder().getName()));
-			sharedNode.share(null, permissionArray);
+			sharedNode.share(null);
 		}
 
 		// remove the parent and only send the sub-tree

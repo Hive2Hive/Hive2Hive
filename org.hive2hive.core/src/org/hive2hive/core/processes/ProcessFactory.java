@@ -232,8 +232,8 @@ public final class ProcessFactory {
 		H2HSession session = networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
-		// TODO validate if the user has write permission
 		process.add(new ValidateFileSizeStep(context, session.getFileConfiguration(), false));
+		process.add(new CheckWriteAccessStep(context, session.getProfileManager(), session.getRoot()));
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
