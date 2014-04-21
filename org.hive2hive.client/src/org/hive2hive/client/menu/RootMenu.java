@@ -9,7 +9,6 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 
 public final class RootMenu extends H2HConsoleMenu {
 
-	// TODO when executing processes, check for exceptions/rollbacks
 	public RootMenu(MenuContainer menus) {
 		super(menus);
 	}
@@ -22,7 +21,6 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 		});
 
-		// TODO following menu items only if connected
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
 			protected void checkPreconditions() {
@@ -46,7 +44,6 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 		});
 
-		// TODO following menu items only if logged in
 		add(new H2HConsoleMenuItem("Logout") {
 			protected void execute() throws Exception {
 

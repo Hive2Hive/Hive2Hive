@@ -54,22 +54,20 @@ public final class NodeMenu extends H2HConsoleMenu {
 					port = awaitStringParameter();
 				}
 				if (port.equalsIgnoreCase("default")) {
-					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
+					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
 				} else {
-					createNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
+					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
 				}
-
-				exit();
+				
+				connectNode();
 			}
 		};
 
 		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
 
-				String nodeID = askNodeID();
-				createNode(NetworkConfiguration.create(nodeID));
-
-				exit();
+				buildNode(NetworkConfiguration.create(askNodeID()));
+				connectNode();
 			}
 		};
 	}
@@ -140,14 +138,22 @@ public final class NodeMenu extends H2HConsoleMenu {
 		}
 	}
 
-	private void createNode(INetworkConfiguration networkConfig) {
+	private void buildNode(INetworkConfiguration networkConfig) {
 		node = H2HNode.createNode(networkConfig,
 				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
 		node.getUserManager().configureAutostart(false);
 		node.getFileManager().configureAutostart(false);
-		node.connect();
 	}
 
+	private void connectNode() {
+		if (node.connect()) {
+			print("Network connection successfully established.");
+			exit();
+		} else {
+			print("Network connection could not be established.");
+		}
+	}
+	
 	private String askNodeID() {
 		String nodeID = UUID.randomUUID().toString();
 		if (isExpertMode) {
