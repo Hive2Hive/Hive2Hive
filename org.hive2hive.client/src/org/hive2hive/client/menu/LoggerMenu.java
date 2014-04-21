@@ -11,7 +11,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 
 public class LoggerMenu extends ConsoleMenu {
@@ -63,14 +62,7 @@ public class LoggerMenu extends ConsoleMenu {
 		fileAppender.start();
 
 		Logger logbackLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
-
-		// TODO test
-		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
-		consoleAppender.setContext(loggerContext);
-		consoleAppender.start();
-		logbackLogger.addAppender(consoleAppender);
 		logbackLogger.addAppender(fileAppender);
-
 		logbackLogger.setLevel(Level.DEBUG);
 		logbackLogger.setAdditive(false);
 
