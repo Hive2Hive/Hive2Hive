@@ -20,7 +20,6 @@
   
   	<modules>
 		<module>org.hive2hive.core</module>
-		<module>org.hive2hive.core.test</module>
 		<module>org.hive2hive.client</module>
 	</modules>
 	
@@ -51,7 +50,6 @@
 	</properties>
 
 	<build>
-		<!-- <sourceDirectory>src</sourceDirectory> -->
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
