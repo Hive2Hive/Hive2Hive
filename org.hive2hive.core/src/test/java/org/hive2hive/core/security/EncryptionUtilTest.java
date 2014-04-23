@@ -29,6 +29,7 @@ import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EncryptionUtilTest extends H2HJUnitTest {
@@ -345,6 +346,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
+	@Ignore
 	public void testBug() throws IOException, InvalidKeyException, IllegalBlockSizeException,
 			BadPaddingException, DataLengthException, IllegalStateException, InvalidCipherTextException {
 		// serialize an test object
@@ -358,7 +360,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 
 		// generate IV where first entry is 0
-		byte[] initVector = { 10, 0, 12, 127, 35, 58, 87, 56, -6, 73, 10, -13, -78, 4, -122, -61 };
+		byte[] initVector = { 0, 122, 12, 127, 35, 58, 87, 56, -6, 73, 10, -13, -78, 4, -122, -61 };
 
 		// encrypt data with AES
 		byte[] encryptedData = EncryptionUtil.encryptAES(data, aesKey, initVector);
