@@ -12,7 +12,8 @@ import org.hive2hive.core.network.data.NetworkContent;
  */
 public class UserPublicKey extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 6707545248946917053L;
+
 	private final PublicKey publicKey;
 
 	public UserPublicKey(PublicKey publicKey) {

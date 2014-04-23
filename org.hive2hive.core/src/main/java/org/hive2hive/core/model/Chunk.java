@@ -10,7 +10,7 @@ import org.hive2hive.core.network.data.NetworkContent;
  */
 public class Chunk extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 6880686784324242531L;
 
 	private final String id;
 	private final byte[] data;

@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseMessage implements Runnable, Serializable {
 
-	private static final Logger logger = LoggerFactory.getLogger(BaseMessage.class);
+	private static final long serialVersionUID = 2885498439522219441L;
 
-	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(BaseMessage.class);
 
 	protected NetworkManager networkManager;
 	protected MessageManager messageManager;

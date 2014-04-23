@@ -19,7 +19,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  */
 public class UserProfile extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -8089242126512434561L;
 
 	private final String userId;
 	private final KeyPair encryptionKeys;

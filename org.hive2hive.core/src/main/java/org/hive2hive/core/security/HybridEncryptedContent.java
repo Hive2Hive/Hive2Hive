@@ -12,7 +12,8 @@ import org.hive2hive.core.network.data.NetworkContent;
  */
 public final class HybridEncryptedContent extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -1612926603789157681L;
+
 	private final byte[] encryptedParameters;
 	private final byte[] encryptedData;
 	private int timeToLive = TimeToLiveStore.convertDaysToSeconds(365);
