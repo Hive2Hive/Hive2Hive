@@ -267,7 +267,7 @@ public class UserProfileManager {
 			// load the current digest list from network
 			NavigableMap<Number640, Number160> digest = dataManager.getDigest(parameters);
 			// compare the current user profile's version key with the cached one
-			if (cachedUserProfile != null
+			if (cachedUserProfile != null && digest.firstEntry() != null
 					&& digest.firstEntry().getKey().getVersionKey().equals(cachedUserProfile.getVersionKey())) {
 				// no need for fetching user profile from network
 				entry.setUserProfile(cachedUserProfile);
@@ -317,23 +317,29 @@ public class UserProfileManager {
 				EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(
 						entry.getUserProfile(), userProfileEncryptionKey);
 
-				DataManager dataManager = networkManager.getDataManager();
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
+
 				IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
-						.setContentKey(H2HConstants.USER_PROFILE).setData(encryptedUserProfile)
+						.setContentKey(H2HConstants.USER_PROFILE)
+						.setVersionKey(encryptedUserProfile.getVersionKey()).setData(encryptedUserProfile)
 						.setProtectionKeys(entry.getUserProfile().getProtectionKeys())
 						.setTTL(entry.getUserProfile().getTimeToLive());
+
+				DataManager dataManager = networkManager.getDataManager();
 				boolean success = dataManager.put(parameters);
 				if (!success) {
 					entry.setPutError(new PutFailedException("Put failed."));
 				} else {
 					// cache user profile
 					cachedUserProfile = entry.getUserProfile();
+					cachedUserProfile.setBasedOnKey(encryptedUserProfile.getBasedOnKey());
+					cachedUserProfile.setVersionKey(encryptedUserProfile.getVersionKey());
 				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 				logger.error("Cannot encrypt the user profile. reason = '{}'", e.getMessage());
-				entry.setPutError(new PutFailedException(String.format("Cannot encrypt the user profile. reason = '%s'", e.getMessage())));
+				entry.setPutError(new PutFailedException(String.format(
+						"Cannot encrypt the user profile. reason = '%s'", e.getMessage())));
 			} catch (NoPeerConnectionException e) {
 				entry.setPutError(new PutFailedException("Node is not connected to the network."));
 			} finally {

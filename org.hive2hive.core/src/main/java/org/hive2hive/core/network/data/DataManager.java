@@ -251,7 +251,7 @@ public class DataManager implements IDataManager {
 				.contentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey())
 				.keyPair(parameters.getProtectionKeys()).start();
 	}
-	
+
 	public NavigableMap<Number640, Number160> getDigest(IParameters parameters) {
 		FutureDigest futureDigest = getDigestUnblocked(parameters);
 		FutureDigestListener listener = new FutureDigestListener(parameters);
@@ -261,16 +261,12 @@ public class DataManager implements IDataManager {
 
 	public FutureDigest getDigestUnblocked(IParameters parameters) {
 		logger.debug("Get digest. {}", parameters.toString());
-		if (parameters.getVersionKey().equals(H2HConstants.TOMP2P_DEFAULT_KEY)) {
-			return getPeer().digest(parameters.getLKey()).setDomainKey(parameters.getDKey())
-					.setContentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey()).start();
-		} else {
-			return getPeer()
-					.digest(parameters.getLKey())
-					.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-							Number160.ZERO))
-					.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-							Number160.MAX_VALUE)).start();
-		}
+		return getPeer()
+				.digest(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.MAX_VALUE)).start();
+
 	}
 }

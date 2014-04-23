@@ -68,13 +68,6 @@ public interface IParameters {
 	public Number160 getVersionKey();
 
 	/**
-	 * Some data can base on other data. The based on key is the version key of the basing on data.
-	 * 
-	 * @return a based on key
-	 */
-	public Number160 getBasedOnKey();
-
-	/**
 	 * Get the key containing all four <code>TomP2P</code> key dimensions.
 	 * 
 	 * @return key containing the location, domain, content and version key

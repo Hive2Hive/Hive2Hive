@@ -22,7 +22,6 @@ public class Parameters implements IParameters {
 	private Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 cKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 vKey = H2HConstants.TOMP2P_DEFAULT_KEY;
-	private Number160 bKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private NetworkContent data;
 	private KeyPair protectionKeys;
 	private KeyPair newProtectionKeys;
@@ -117,16 +116,6 @@ public class Parameters implements IParameters {
 	public Number640 getKey() {
 		return new Number640(lKey, dKey, cKey, vKey);
 	}
-	
-	public Parameters setBasedOnKey(Number160 basedOnKey) {
-		this.bKey = basedOnKey;
-		return this;
-	}
-
-	@Override
-	public Number160 getBasedOnKey() {
-		return bKey;
-	}
 
 	public Parameters setTTL(int ttl) {
 		this.ttl = ttl;
@@ -184,8 +173,6 @@ public class Parameters implements IParameters {
 			builder.append("content key = '").append(cKey).append("' ");
 		if (!vKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY))
 			builder.append("version key = '").append(vKey).append("' ");
-		if (!bKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY))
-			builder.append("based on key = '").append(bKey).append("' ");
 		if (ttl != -1)
 			builder.append("ttl = '").append(ttl).append("' ");
 		if (protectionKeys != null)
