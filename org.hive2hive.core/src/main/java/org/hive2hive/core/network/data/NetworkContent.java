@@ -27,7 +27,7 @@ import net.tomp2p.peers.Number160;
  */
 public abstract class NetworkContent implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 5320162170420290193L;
 
 	/**
 	 * Some data has a version key (used to differentiate versions). Default value.

@@ -16,15 +16,20 @@ import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
+import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EncryptionUtilTest extends H2HJUnitTest {
@@ -334,6 +339,72 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		assertEquals(data, deserializedData);
 	}
 
+	@Test
+	public void testIVGeneration() {
+		for (int i = 0; i < 100000; i++)
+			Assert.assertNotEquals(0, EncryptionUtil.generateIV()[0]);
+	}
+
+	@Test
+	@Ignore
+	public void testBug() throws IOException, InvalidKeyException, IllegalBlockSizeException,
+			BadPaddingException, DataLengthException, IllegalStateException, InvalidCipherTextException {
+		// serialize an test object
+		byte[] data = EncryptionUtil.serializeObject(new H2HTestData("test"));
+
+		// generate AES key
+		SecretKey aesKey = EncryptionUtil.generateAESKey(AES_KEYLENGTH.BIT_256);
+		byte[] encodedAesKey = aesKey.getEncoded();
+
+		// generate RSA keys
+		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+
+		// generate IV where first entry is 0
+		byte[] initVector = { 0, 122, 12, 127, 35, 58, 87, 56, -6, 73, 10, -13, -78, 4, -122, -61 };
+
+		// encrypt data with AES
+		byte[] encryptedData = EncryptionUtil.encryptAES(data, aesKey, initVector);
+
+		// concatenate symmetric encryption parameters
+		byte[] params = new byte[initVector.length + encodedAesKey.length];
+		System.arraycopy(initVector, 0, params, 0, initVector.length);
+		System.arraycopy(encodedAesKey, 0, params, initVector.length, encodedAesKey.length);
+
+		logger.debug("length initVector = '{}' encodedAesKey = '{}'", initVector.length, encodedAesKey.length);
+		logger.debug("initVector = '{}' encodedAesKey = '{}'", initVector, encodedAesKey);
+		logger.debug("params = '{}'", params);
+		logger.debug("params length = '{}'", params.length);
+
+		// encrypt parameters asymmetrically
+		byte[] rsaEncryptedParams = EncryptionUtil.encryptRSA(params, keyPair.getPublic());
+
+		// decrypt parameters asymmetrically
+		byte[] paramsAfterRSA = EncryptionUtil.decryptRSA(rsaEncryptedParams, keyPair.getPrivate());
+
+		// split symmetric encryption parameters
+		byte[] initVectorAfterRSA = Arrays.copyOfRange(paramsAfterRSA, 0, initVector.length);
+		byte[] encodedAesKeyAfterRSA = Arrays.copyOfRange(params, initVector.length, params.length);
+
+		logger.debug("length initVector = '{}' encodedAesKey = '{}'", initVectorAfterRSA.length,
+				encodedAesKeyAfterRSA.length);
+		logger.debug("initVector = '{}' encodedAesKey = '{}'", initVectorAfterRSA, encodedAesKeyAfterRSA);
+		logger.debug("params = '{}'", paramsAfterRSA);
+		logger.debug("params length = '{}'", paramsAfterRSA.length);
+
+		Assert.assertTrue(Arrays.equals(params, paramsAfterRSA));
+		Assert.assertTrue(Arrays.equals(initVector, initVectorAfterRSA));
+		Assert.assertTrue(Arrays.equals(encodedAesKey, encodedAesKeyAfterRSA));
+
+		// generate AES key out of parameters
+		SecretKey aesKeyAfterRSA = new SecretKeySpec(encodedAesKeyAfterRSA, 0, encodedAesKeyAfterRSA.length,
+				"AES");
+
+		// decrypt data with AES
+		byte[] decryptedData = EncryptionUtil.decryptAES(encryptedData, aesKeyAfterRSA, initVectorAfterRSA);
+
+		assertTrue(Arrays.equals(data, decryptedData));
+	}
+
 	public static AES_KEYLENGTH[] getAESKeySizes() {
 		AES_KEYLENGTH[] sizes = new AES_KEYLENGTH[AES_KEYLENGTH.values().length];
 		for (int i = 0; i < sizes.length; i++) {
@@ -348,5 +419,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			sizes[i] = RSA_KEYLENGTH.values()[i];
 		}
 		return sizes;
+	}
+
+	@AfterClass
+	public static void endTest() throws Exception {
+		afterClass();
 	}
 }

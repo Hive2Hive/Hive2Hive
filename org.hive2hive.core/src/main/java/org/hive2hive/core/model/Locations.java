@@ -17,7 +17,7 @@ import org.hive2hive.core.network.data.NetworkContent;
  */
 public class Locations extends NetworkContent {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3538720256521250650L;
 
 	private final String userId;
 	private final Set<PeerAddress> addresses;
