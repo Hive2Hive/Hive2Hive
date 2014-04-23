@@ -75,7 +75,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			KeyPair keys = session.getKeyPair();
 			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, keys.getPrivate());
 		} catch (Exception e) {
-			logger.warn("Decryption of message failed.");
+			logger.warn("Decryption of message failed.", e);
 			return AcceptanceReply.FAILURE_DECRYPTION;
 		}
 
