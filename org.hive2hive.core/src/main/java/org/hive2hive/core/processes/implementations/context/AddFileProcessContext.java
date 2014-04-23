@@ -28,7 +28,7 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 
 	private final File file;
 
-	private KeyPair metaKeys;
+	private KeyPair metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
 	private KeyPair chunkEncryptionKeys;
@@ -59,9 +59,6 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 	}
 
 	public KeyPair getMetaKeys() {
-		if (metaKeys == null)
-			// generate them when not existing
-			metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		return metaKeys;
 	}
 
