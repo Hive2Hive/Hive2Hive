@@ -1,7 +1,7 @@
 package org.hive2hive.core.events.util;
 
 import org.hive2hive.core.events.INetworkEvent;
-import org.hive2hive.core.events.INetworkEventListener;
+import org.hive2hive.core.events.listeners.INetworkEventListener;
 
 public class TestNetworkEventListener implements INetworkEventListener {
 

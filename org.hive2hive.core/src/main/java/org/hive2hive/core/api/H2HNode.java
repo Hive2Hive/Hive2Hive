@@ -7,7 +7,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.events.INetworkEventListener;
+import org.hive2hive.core.events.listeners.INetworkEventListener;
 import org.hive2hive.core.network.NetworkManager;
 
 /**

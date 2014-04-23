@@ -1,4 +1,6 @@
-package org.hive2hive.core.events;
+package org.hive2hive.core.events.listeners;
+
+import org.hive2hive.core.events.INetworkEvent;
 
 public interface INetworkEventListener extends IEventListener {
 
