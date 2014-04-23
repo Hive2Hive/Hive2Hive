@@ -108,7 +108,9 @@ public final class EncryptionUtil {
 	public static byte[] generateIV() {
 		SecureRandom random = new SecureRandom();
 		byte[] iv = new byte[IV_LENGTH];
-		random.nextBytes(iv);
+		do {
+			random.nextBytes(iv);
+		} while (iv[0] == 0);
 		return iv;
 	}
 
