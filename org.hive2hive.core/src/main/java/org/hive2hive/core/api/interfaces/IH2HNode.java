@@ -1,5 +1,7 @@
 package org.hive2hive.core.api.interfaces;
 
+import org.hive2hive.core.events.INetworkEventGenerator;
+
 import net.tomp2p.p2p.Peer;
 
 /**
@@ -12,7 +14,7 @@ import net.tomp2p.p2p.Peer;
  * @author Christian, Nico, Seppi
  * 
  */
-public interface IH2HNode {
+public interface IH2HNode extends INetworkEventGenerator {
 
 	/**
 	 * Connect to the network. The connection kind is dependent on {@link INetworkConfiguration}.
