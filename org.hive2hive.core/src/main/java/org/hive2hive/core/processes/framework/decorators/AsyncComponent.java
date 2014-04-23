@@ -36,9 +36,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AsyncComponent extends ProcessDecorator implements Callable<RollbackReason> {
 
-	// TODO this class could hold a static thread pool to limit and manage all
-	// asynchronous processes
-
 	private static final Logger logger = LoggerFactory.getLogger(AsyncComponent.class);
 
 	private final ExecutorService asyncExecutor;
@@ -69,8 +66,7 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 			Thread.currentThread().setName("async proc");
 		} catch (SecurityException e) {
 			logger.error("Async thread cannot be renamed.", e);
-		}
-		;
+		};
 
 		// starts and rolls back itself if needed (component knows nothing about the composite of which the
 		// AsyncComponent is part of)
