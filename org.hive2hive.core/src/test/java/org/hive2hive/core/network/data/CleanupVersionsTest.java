@@ -42,50 +42,6 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanUpFreshVersion() throws InterruptedException, IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
-
-		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setDomainKey(NetworkTestUtil.randomString()).setContentKey(NetworkTestUtil.randomString())
-				.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
-
-		int numVersions = H2HConstants.MAX_VERSIONS_HISTORY + random.nextInt(5) + 1;
-		List<H2HTestData> versions = new ArrayList<H2HTestData>();
-		List<H2HTestData> newerVersions = new ArrayList<H2HTestData>();
-
-		H2HTestData last = null;
-		for (int i = 0; i < numVersions; i++) {
-			H2HTestData testData = generateTestData(new Date().getTime());
-			if (last != null)
-				testData.setBasedOnKey(last.getVersionKey());
-			last = testData;
-			versions.add(testData);
-			synchronized (this) {
-				Thread.sleep(10);
-			}
-		}
-
-		long timeDiff = versions.get(numVersions - 1).getVersionKey().timestamp()
-				- versions.get(0).getVersionKey().timestamp();
-		if (timeDiff < H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS)
-			Assert.fail("H2H constant is too low to generate appropriate time stamps.");
-
-		for (H2HTestData testData : versions) {
-			parameters.setVersionKey(testData.getVersionKey()).setData(testData);
-			node.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
-		}
-
-		FutureDigest futureDigest = node.getDataManager().getDigestUnblocked(parameters);
-		futureDigest.awaitUninterruptibly();
-
-		assertEquals(versions.size(), futureDigest.getDigest().keyDigest().size());
-		int i = 0;
-		for (Number160 storedVersion : futureDigest.getDigest().keyDigest().values()) {
-			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
-		}
-	}
-
-	@Test
 	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException,
 			NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
