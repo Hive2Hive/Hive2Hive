@@ -19,9 +19,5 @@ public interface IProcessComponentListener {
 	 * Executed if the observed process component failed.
 	 */
 	void onFailed(RollbackReason reason);
-
-	/**
-	 * Executed if the observed process component finished.
-	 */
-	void onFinished();
+	
 }

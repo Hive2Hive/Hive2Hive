@@ -1,13 +1,20 @@
 package org.hive2hive.core.network;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
+import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
+import org.hive2hive.core.events.implementations.ConnectionEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.messages.MessageManager;
 
-public class NetworkManager {
+public class NetworkManager implements INetworkEventGenerator {
 
 	// TODO this class needs heavy refactoring! many man-in-the-middle delegations and methods that do not
 	// belong here
@@ -19,12 +26,16 @@ public class NetworkManager {
 	private final MessageManager messageManager;
 	private H2HSession session;
 
+	private List<INetworkEventListener> eventListeners;
+
 	public NetworkManager(INetworkConfiguration networkConfiguration) {
 		this.networkConfiguration = networkConfiguration;
 
 		connection = new Connection(networkConfiguration.getNodeID(), this);
 		dataManager = new DataManager(this);
 		messageManager = new MessageManager(this);
+
+		eventListeners = new ArrayList<INetworkEventListener>();
 	}
 
 	/**
@@ -33,14 +44,17 @@ public class NetworkManager {
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect() {
+		boolean success = false;
 		if (networkConfiguration.isInitialPeer()) {
-			return connection.connect();
+			success = connection.connect();
 		} else if (networkConfiguration.getBootstrapPort() == -1) {
-			return connection.connect(networkConfiguration.getBootstrapAddress());
+			success = connection.connect(networkConfiguration.getBootstrapAddress());
 		} else {
-			return connection.connect(networkConfiguration.getBootstrapAddress(),
+			success = connection.connect(networkConfiguration.getBootstrapAddress(),
 					networkConfiguration.getBootstrapPort());
 		}
+		notifyConnectionStatus(success);
+		return success;
 	}
 
 	/**
@@ -52,7 +66,9 @@ public class NetworkManager {
 		if (session != null && session.getProfileManager() != null)
 			session.getProfileManager().stopQueueWorker();
 
-		return connection.disconnect();
+		boolean success = connection.disconnect();
+		notifyDisconnectionStatus(success);
+		return success;
 	}
 
 	/**
@@ -115,5 +131,35 @@ public class NetworkManager {
 			throw new NoPeerConnectionException();
 		}
 		return messageManager;
+	}
+
+	@Override
+	public synchronized void addEventListener(INetworkEventListener listener) {
+		eventListeners.add(listener);
+	}
+
+	@Override
+	public synchronized void removeEventListener(INetworkEventListener listener) {
+		eventListeners.remove(listener);
+	}
+
+	private void notifyConnectionStatus(boolean isSuccessful) {
+		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
+		while (iterator.hasNext()) {
+			if (isSuccessful)
+				iterator.next().onConnectionSuccess(new ConnectionEvent(networkConfiguration));
+			else
+				iterator.next().onConnectionFailure(new ConnectionEvent(networkConfiguration));
+		}
+	}
+	
+	private void notifyDisconnectionStatus(boolean isSuccessful) {
+		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
+		while (iterator.hasNext()) {
+			if (isSuccessful)
+				iterator.next().onDisconnectionSuccess(new ConnectionEvent(networkConfiguration));
+			else
+				iterator.next().onDisconnectionFailure(new ConnectionEvent(networkConfiguration));
+		}
 	}
 }

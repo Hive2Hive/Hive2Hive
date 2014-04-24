@@ -319,6 +319,21 @@ public final class ProcessFactory {
 		return process;
 	}
 
+	public ProcessComponent createShareProcess(File folder, UserPermission permission,
+			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
+		ShareProcessContext context = new ShareProcessContext(folder, permission);
+	
+		SequentialProcess process = new SequentialProcess();
+		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission
+				.getUserId()));
+		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
+		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
+		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
+		process.add(createNotificationProcess(context, networkManager));
+	
+		return process;
+	}
+
 	/**
 	 * Creates and returns a file list process.
 	 * 
@@ -367,21 +382,6 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager
 				.getDataManager()));
 		process.add(new RemoveUnreachableStep(context, networkManager));
-
-		return process;
-	}
-
-	public ProcessComponent createShareProcess(File folder, UserPermission permission,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
-		ShareProcessContext context = new ShareProcessContext(folder, permission);
-
-		SequentialProcess process = new SequentialProcess();
-		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission
-				.getUserId()));
-		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
-		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
-		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
-		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
 	}

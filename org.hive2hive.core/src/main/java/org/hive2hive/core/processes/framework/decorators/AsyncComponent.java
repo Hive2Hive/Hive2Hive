@@ -18,18 +18,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A process component decorator that executes, and if necessary rollbacks, the wrapped component in an
- * asynchronous manner.</br>
- * <b>Note:</b></br>
- * An asynchronous component is executed in an own thread and therefore independent of all other
- * components in a process composite. </br>
+ * A {@link ProcessDecorator} that executes, and if necessary rollbacks, the wrapped {@link IProcessComponent}
+ * in an asynchronous manner. </br>
+ * <b>Note: </b></br>
+ * An asynchronous component is executed in an own thread and therefore independent of all other components in
+ * a process composite. </br>
  * If existing, the parent container component of an {@link AsyncComponent} is responsible to await the result
  * of the asynchronous component. Therefore, the usage of {@link SequentialProcess} is highly recommended.
  * </br>
- * In case of a failure within the asynchronous component, it rollbacks
- * itself in its own thread and returns the resulting {@link RollbackReason}. In case the
- * {@link AsyncComponent} needs to be cancelled due to a failure in another place in the whole composite, the
- * wrapped component (if necessary) is rolled back in the detecting thread.
+ * In case of a failure within the asynchronous component, it rollbacks itself in its own thread and returns
+ * the resulting {@link RollbackReason}. In case the {@link AsyncComponent} needs to be cancelled due to a
+ * failure in another place in the whole composite, the wrapped component (if necessary) is rolled back in the
+ * detecting thread.
  * 
  * @author Christian
  * 
@@ -66,7 +66,8 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 			Thread.currentThread().setName("async proc");
 		} catch (SecurityException e) {
 			logger.error("Async thread cannot be renamed.", e);
-		};
+		}
+		;
 
 		// starts and rolls back itself if needed (component knows nothing about the composite of which the
 		// AsyncComponent is part of)
@@ -97,11 +98,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 					}
 				}
 			}
-
-			@Override
-			public void onFinished() {
-				// ignore
-			}
 		});
 
 		// sync execution
@@ -111,23 +107,26 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 	}
 
 	@Override
-	protected void doPause() {
-		// attention: component might be in any state!!!
+	protected void doPause() throws InvalidProcessStateException {
+		// mind: async component might be in any state!
+		decoratedComponent.pause();
 	}
 
 	@Override
 	protected void doResumeExecution() throws InvalidProcessStateException {
-		// attention: component might be in any state!!!
+		// mind: async component might be in any state!
+		decoratedComponent.resume();
 	}
 
 	@Override
-	protected void doResumeRollback() {
-		// attention: component might be in any state!!!
+	protected void doResumeRollback() throws InvalidProcessStateException {
+		// mind: async component might be in any state!
+		decoratedComponent.resume();
 	}
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		// attention: component might be in any state!!!
+		// mind: async component might be in any state!
 
 		try {
 			decoratedComponent.cancel(reason);

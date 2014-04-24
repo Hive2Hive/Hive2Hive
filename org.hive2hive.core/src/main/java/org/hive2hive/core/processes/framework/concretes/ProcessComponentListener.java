@@ -20,18 +20,15 @@ public class ProcessComponentListener implements IProcessComponentListener {
 	@Override
 	public void onSucceeded() {
 		hasSucceeded = true;
+		hasFinished = true;
 		rollbackReason = null;
 	}
 
 	@Override
 	public void onFailed(RollbackReason reason) {
 		hasFailed = true;
-		rollbackReason = reason;
-	}
-
-	@Override
-	public void onFinished() {
 		hasFinished = true;
+		rollbackReason = reason;
 	}
 
 	public boolean hasSucceeded() {

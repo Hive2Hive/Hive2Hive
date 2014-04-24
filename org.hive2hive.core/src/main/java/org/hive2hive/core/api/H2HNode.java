@@ -7,6 +7,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
+import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
 import org.hive2hive.core.network.NetworkManager;
 
 /**
@@ -87,5 +88,15 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public Peer getPeer() {
 		return networkManager.getConnection().getPeer();
+	}
+
+	@Override
+	public synchronized void addEventListener(INetworkEventListener listener) {
+		networkManager.addEventListener(listener);
+	}
+
+	@Override
+	public synchronized void removeEventListener(INetworkEventListener listener) {
+		networkManager.removeEventListener(listener);
 	}
 }
