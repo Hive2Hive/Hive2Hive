@@ -34,22 +34,14 @@ public class ProcessListenerTest extends H2HJUnitTest {
 		listener.onSucceeded();
 		assertTrue(listener.hasSucceeded());
 		assertFalse(listener.hasFailed());
-		assertFalse(listener.hasFinished());
-
+		assertTrue(listener.hasFinished());
 		listener.reset();
 		
 		listener.onFailed(new RollbackReason("Test fail."));
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
-		assertFalse(listener.hasFinished());
-		
-		listener.reset();
-		
-		listener.onFinished();
-		assertFalse(listener.hasSucceeded());
-		assertFalse(listener.hasFailed());
 		assertTrue(listener.hasFinished());
-		
+		listener.reset();
 	}
 	
 	@Test
@@ -62,7 +54,6 @@ public class ProcessListenerTest extends H2HJUnitTest {
 		
 		listener.onSucceeded();
 		listener.onFailed(new RollbackReason("Test fail."));
-		listener.onFinished();
 		assertTrue(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
 		assertTrue(listener.hasFinished());

@@ -97,11 +97,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 					}
 				}
 			}
-
-			@Override
-			public void onFinished() {
-				// ignore
-			}
 		});
 
 		// sync execution

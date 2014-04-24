@@ -233,22 +233,20 @@ public abstract class ProcessComponent implements IProcessComponent {
 		return state;
 	}
 
-	public void attachListener(IProcessComponentListener listener) {
+	public synchronized void attachListener(IProcessComponentListener listener) {
 		this.listener.add(listener);
 
 		// TODO check if correct
 		// if process component completed already
 		if (state == ProcessState.SUCCEEDED) {
 			listener.onSucceeded();
-			listener.onFinished();
 		}
 		if (state == ProcessState.FAILED) {
 			listener.onFailed(reason);
-			listener.onFinished();
 		}
 	}
 
-	public void detachListener(IProcessComponentListener listener) {
+	public synchronized void detachListener(IProcessComponentListener listener) {
 		this.listener.remove(listener);
 	}
 
@@ -280,19 +278,11 @@ public abstract class ProcessComponent implements IProcessComponent {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onSucceeded();
 		}
-		notifyFinished();
 	}
 
 	private void notifyFailed(RollbackReason reason) {
 		for (IProcessComponentListener listener : this.listener) {
 			listener.onFailed(reason);
-		}
-		notifyFinished();
-	}
-
-	private void notifyFinished() {
-		for (IProcessComponentListener listener : this.listener) {
-			listener.onFinished();
 		}
 	}
 
