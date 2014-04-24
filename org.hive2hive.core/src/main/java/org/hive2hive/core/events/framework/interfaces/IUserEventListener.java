@@ -2,6 +2,7 @@ package org.hive2hive.core.events.framework.interfaces;
 
 import org.hive2hive.core.events.framework.IEventListener;
 import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
+import org.hive2hive.core.events.framework.interfaces.user.ILogoutEvent;
 import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 
 public interface IUserEventListener extends IEventListener {
@@ -14,8 +15,8 @@ public interface IUserEventListener extends IEventListener {
 
 	void onLoginFailure(ILoginEvent event);
 
-	void onLogoutSuccess(IUserEvent event);
+	void onLogoutSuccess(ILogoutEvent event);
 
-	void onLogoutFailure(IUserEvent event);
+	void onLogoutFailure(ILogoutEvent event);
 
 }

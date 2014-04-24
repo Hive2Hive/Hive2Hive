@@ -9,8 +9,10 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
 import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
+import org.hive2hive.core.events.framework.interfaces.user.ILogoutEvent;
 import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 import org.hive2hive.core.events.implementations.LoginEvent;
+import org.hive2hive.core.events.implementations.LogoutEvent;
 import org.hive2hive.core.events.implementations.RegisterEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -56,7 +58,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	public IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException {
 		ProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
 
-		CompletionHandleComponent eventComponent = new CompletionHandleComponent(registerProcess, createRegisterHandle(credentials));
+		CompletionHandleComponent eventComponent = new CompletionHandleComponent(registerProcess,
+				createRegisterHandle(credentials));
 
 		AsyncComponent asyncProcess = new AsyncComponent(eventComponent);
 
@@ -74,7 +77,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 
-		CompletionHandleComponent eventComponent = new CompletionHandleComponent(loginProcess, createLoginHandle(credentials, rootPath));
+		CompletionHandleComponent eventComponent = new CompletionHandleComponent(loginProcess, createLoginHandle(
+				credentials, rootPath));
 
 		AsyncComponent asyncProcess = new AsyncComponent(eventComponent);
 
@@ -86,7 +90,10 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	public IProcessComponent logout() throws NoPeerConnectionException, NoSessionException {
 		IProcessComponent logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
 
-		AsyncComponent asyncProcess = new AsyncComponent(logoutProcess);
+		CompletionHandleComponent eventComponent = new CompletionHandleComponent(logoutProcess,
+				createLogoutHandle(networkManager.getSession().getCredentials()));
+
+		AsyncComponent asyncProcess = new AsyncComponent(eventComponent);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
@@ -119,54 +126,82 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	public synchronized void removeEventListener(IUserEventListener listener) {
 		eventListeners.remove(listener);
 	}
-	
+
 	private ICompletionHandle createRegisterHandle(UserCredentials credentials) {
-		
+
 		final IRegisterEvent registerEvent = new RegisterEvent(credentials);
-		
+
 		return new ICompletionHandle() {
 			public void onCompletionSuccess() {
 				notifyRegisterStatus(true, registerEvent);
 			}
+
 			public void onCompletionFailure(RollbackReason reason) {
 				registerEvent.setRollbackReason(reason);
 				notifyRegisterStatus(false, registerEvent);
 			}
 		};
 	}
-	
+
 	private ICompletionHandle createLoginHandle(UserCredentials credentials, Path rootPath) {
-		
+
 		final ILoginEvent loginEvent = new LoginEvent(credentials, rootPath);
-		
+
 		return new ICompletionHandle() {
 			public void onCompletionSuccess() {
 				notifyLoginStatus(true, loginEvent);
 			}
+
 			public void onCompletionFailure(RollbackReason reason) {
 				loginEvent.setRollbackReason(reason);
 				notifyLoginStatus(false, loginEvent);
 			}
 		};
 	}
-	
+
+	private ICompletionHandle createLogoutHandle(UserCredentials credentials) {
+
+		final ILogoutEvent logoutEvent = new LogoutEvent(credentials);
+
+		return new ICompletionHandle() {
+			public void onCompletionSuccess() {
+				notifyLogoutStatus(true, logoutEvent);
+			}
+
+			public void onCompletionFailure(RollbackReason reason) {
+				logoutEvent.setRollbackReason(reason);
+				notifyLogoutStatus(false, logoutEvent);
+			}
+		};
+	}
+
 	private void notifyRegisterStatus(boolean success, IRegisterEvent event) {
 		Iterator<IUserEventListener> iterator = eventListeners.iterator();
-		while (iterator.hasNext()){
+		while (iterator.hasNext()) {
 			if (success)
 				iterator.next().onRegisterSuccess(event);
 			else
 				iterator.next().onRegisterFailure(event);
 		}
 	}
-	
+
 	private void notifyLoginStatus(boolean success, ILoginEvent event) {
 		Iterator<IUserEventListener> iterator = eventListeners.iterator();
-		while (iterator.hasNext()){
+		while (iterator.hasNext()) {
 			if (success)
 				iterator.next().onLoginSuccess(event);
 			else
 				iterator.next().onLoginFailure(event);
+		}
+	}
+
+	private void notifyLogoutStatus(boolean success, ILogoutEvent event) {
+		Iterator<IUserEventListener> iterator = eventListeners.iterator();
+		while (iterator.hasNext()) {
+			if (success)
+				iterator.next().onLogoutSuccess(event);
+			else
+				iterator.next().onLogoutFailure(event);
 		}
 	}
 }

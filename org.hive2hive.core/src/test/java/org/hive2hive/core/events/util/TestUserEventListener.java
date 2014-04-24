@@ -1,8 +1,8 @@
 package org.hive2hive.core.events.util;
 
-import org.hive2hive.core.events.framework.interfaces.IUserEvent;
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
 import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
+import org.hive2hive.core.events.framework.interfaces.user.ILogoutEvent;
 import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 
 public abstract class TestUserEventListener implements IUserEventListener {
@@ -35,12 +35,12 @@ public abstract class TestUserEventListener implements IUserEventListener {
 	}
 
 	@Override
-	public void onLogoutSuccess(IUserEvent event) {
+	public void onLogoutSuccess(ILogoutEvent event) {
 		logoutSuccess = true;
 	}
 
 	@Override
-	public void onLogoutFailure(IUserEvent event) {
+	public void onLogoutFailure(ILogoutEvent event) {
 		logoutFailure = true;
 	}
 
