@@ -1,6 +1,6 @@
 package org.hive2hive.core.api.interfaces;
 
-import org.hive2hive.core.events.generators.INetworkEventGenerator;
+import org.hive2hive.core.events.interfaces.INetworkEventGenerator;
 
 import net.tomp2p.p2p.Peer;
 

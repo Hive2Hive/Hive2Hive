@@ -1,4 +1,4 @@
-package org.hive2hive.core.events;
+package org.hive2hive.core.events.interfaces;
 
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 

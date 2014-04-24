@@ -1,6 +1,5 @@
-package org.hive2hive.core.events.generators;
+package org.hive2hive.core.events.interfaces;
 
-import org.hive2hive.core.events.listeners.INetworkEventListener;
 
 public interface INetworkEventGenerator extends IEventGenerator {
 
