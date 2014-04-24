@@ -2,7 +2,7 @@ package org.hive2hive.core.api.interfaces;
 
 import java.nio.file.Path;
 
-import org.hive2hive.core.events.interfaces.IUserEventGenerator;
+import org.hive2hive.core.events.framework.interfaces.IUserEventGenerator;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;

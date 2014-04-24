@@ -1,9 +1,9 @@
-package org.hive2hive.core.events;
+package org.hive2hive.core.events.framework.abstracts;
 
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.events.interfaces.INetworkEvent;
+import org.hive2hive.core.events.framework.interfaces.INetworkEvent;
 
-public class NetworkEvent implements INetworkEvent {
+public abstract class NetworkEvent implements INetworkEvent {
 
 	private final INetworkConfiguration networkConfiguration;
 

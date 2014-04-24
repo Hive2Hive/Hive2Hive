@@ -1,6 +1,7 @@
-package org.hive2hive.core.events.interfaces;
+package org.hive2hive.core.events.framework.interfaces;
 
-import org.hive2hive.core.events.IRegisterEvent;
+import org.hive2hive.core.events.framework.IEventListener;
+import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 
 public interface IUserEventListener extends IEventListener {
 

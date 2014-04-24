@@ -1,8 +1,8 @@
 package org.hive2hive.core.events.util;
 
-import org.hive2hive.core.events.IRegisterEvent;
-import org.hive2hive.core.events.interfaces.IUserEvent;
-import org.hive2hive.core.events.interfaces.IUserEventListener;
+import org.hive2hive.core.events.framework.interfaces.IUserEvent;
+import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
+import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 
 public abstract class TestUserEventListener implements IUserEventListener {
 

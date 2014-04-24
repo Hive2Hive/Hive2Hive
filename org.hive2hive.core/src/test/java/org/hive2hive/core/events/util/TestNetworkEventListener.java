@@ -1,7 +1,7 @@
 package org.hive2hive.core.events.util;
 
-import org.hive2hive.core.events.interfaces.INetworkEvent;
-import org.hive2hive.core.events.interfaces.INetworkEventListener;
+import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
+import org.hive2hive.core.events.framework.interfaces.network.IConnectionEvent;
 
 public class TestNetworkEventListener implements INetworkEventListener {
 
@@ -11,22 +11,22 @@ public class TestNetworkEventListener implements INetworkEventListener {
 	public boolean disconnectionFailed;
 	
 	@Override
-	public void onConnectionSuccess(INetworkEvent event) {
+	public void onConnectionSuccess(IConnectionEvent event) {
 		connectionSucceeded = true;
 	}
 
 	@Override
-	public void onConnectionFailure(INetworkEvent event) {
+	public void onConnectionFailure(IConnectionEvent event) {
 		connectionFailed = true;
 	}
 
 	@Override
-	public void onDisconnectionSuccess(INetworkEvent event) {
+	public void onDisconnectionSuccess(IConnectionEvent event) {
 		disconnectionSucceeded = true;
 	}
 
 	@Override
-	public void onDisconnectionFailure(INetworkEvent event) {
+	public void onDisconnectionFailure(IConnectionEvent event) {
 		disconnectionFailed = true;
 	}
 

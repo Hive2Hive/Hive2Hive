@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.events.NetworkEvent;
-import org.hive2hive.core.events.interfaces.INetworkEventGenerator;
-import org.hive2hive.core.events.interfaces.INetworkEventListener;
+import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
+import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
+import org.hive2hive.core.events.implementations.ConnectionEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
@@ -147,9 +147,9 @@ public class NetworkManager implements INetworkEventGenerator {
 		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
 		while (iterator.hasNext()) {
 			if (isSuccessful)
-				iterator.next().onConnectionSuccess(new NetworkEvent(networkConfiguration));
+				iterator.next().onConnectionSuccess(new ConnectionEvent(networkConfiguration));
 			else
-				iterator.next().onConnectionFailure(new NetworkEvent(networkConfiguration));
+				iterator.next().onConnectionFailure(new ConnectionEvent(networkConfiguration));
 		}
 	}
 	
@@ -157,9 +157,9 @@ public class NetworkManager implements INetworkEventGenerator {
 		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
 		while (iterator.hasNext()) {
 			if (isSuccessful)
-				iterator.next().onDisconnectionSuccess(new NetworkEvent(networkConfiguration));
+				iterator.next().onDisconnectionSuccess(new ConnectionEvent(networkConfiguration));
 			else
-				iterator.next().onDisconnectionFailure(new NetworkEvent(networkConfiguration));
+				iterator.next().onDisconnectionFailure(new ConnectionEvent(networkConfiguration));
 		}
 	}
 }

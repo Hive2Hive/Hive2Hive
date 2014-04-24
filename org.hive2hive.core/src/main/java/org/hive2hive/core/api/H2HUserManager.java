@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.events.IRegisterEvent;
-import org.hive2hive.core.events.concretes.RegisterEvent;
-import org.hive2hive.core.events.interfaces.IUserEventListener;
+import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
+import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
+import org.hive2hive.core.events.implementations.RegisterEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
@@ -117,6 +117,21 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 	
 	private ICompletionHandle createRegisterHandle(UserCredentials credentials) {
+		
+		final IRegisterEvent registerEvent = new RegisterEvent(credentials);
+		
+		return new ICompletionHandle() {
+			public void onCompletionSuccess() {
+				notifyRegisterStatus(true, registerEvent);
+			}
+			public void onCompletionFailure(RollbackReason reason) {
+				registerEvent.setRollbackReason(reason);
+				notifyRegisterStatus(false, registerEvent);
+			}
+		};
+	}
+	
+	private ICompletionHandle createLoginHandle(UserCredentials credentials) {
 		
 		final IRegisterEvent registerEvent = new RegisterEvent(credentials);
 		

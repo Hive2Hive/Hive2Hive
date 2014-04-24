@@ -13,6 +13,7 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.IUserManager;
+import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 import org.hive2hive.core.events.util.TestUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkTestUtil;

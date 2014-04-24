@@ -1,10 +1,11 @@
-package org.hive2hive.core.events.interfaces;
+package org.hive2hive.core.events.framework.interfaces;
 
 import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.core.security.UserCredentials;
 
 public interface IUserEvent {
 
-	String getUserID();
+	UserCredentials getUserCredentials();
 	
 	void setRollbackReason(RollbackReason reason);
 	
