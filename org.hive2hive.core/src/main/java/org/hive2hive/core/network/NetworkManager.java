@@ -7,7 +7,6 @@ import java.util.List;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.NetworkEvent;
-import org.hive2hive.core.events.interfaces.INetworkEvent;
 import org.hive2hive.core.events.interfaces.INetworkEventGenerator;
 import org.hive2hive.core.events.interfaces.INetworkEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;

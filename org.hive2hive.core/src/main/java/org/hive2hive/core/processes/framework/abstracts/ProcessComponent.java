@@ -81,6 +81,8 @@ public abstract class ProcessComponent implements IProcessComponent {
 		if (state != ProcessState.PAUSED) {
 			throw new InvalidProcessStateException(state);
 		}
+		// TODO don't distinguish between running and rollback state, each component should be able to decide
+		// itself (decorators must implement both methods but cannot decide, they can just forward resume())
 		if (!isRollbacking) {
 			state = ProcessState.RUNNING;
 			doResumeExecution();
@@ -103,8 +105,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 			// no parent, or called from parent
 			state = ProcessState.ROLLBACKING;
-			logger.warn("Rolling back '{}'. Reason: '{}'.", this.getClass().getSimpleName(),
-					reason.getHint());
+			logger.warn("Rolling back '{}'. Reason: '{}'.", this.getClass().getSimpleName(), reason.getHint());
 
 			doRollback(reason);
 		}
@@ -125,7 +126,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	/**
 	 * Template method responsible for the {@link ProcessComponent} pausing.
 	 */
-	protected abstract void doPause();
+	protected abstract void doPause() throws InvalidProcessStateException;
 
 	/**
 	 * Template method responsible for the {@link ProcessComponent} execution resume.
@@ -137,7 +138,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 	/**
 	 * Template method responsible for the {@link ProcessComponent} rollback resume.
 	 */
-	protected abstract void doResumeRollback();
+	protected abstract void doResumeRollback() throws InvalidProcessStateException;
 
 	/**
 	 * Template method responsible for the {@link ProcessComponent} rollback.
