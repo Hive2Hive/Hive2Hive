@@ -2,6 +2,7 @@ package org.hive2hive.core.events.util;
 
 import org.hive2hive.core.events.framework.interfaces.IUserEvent;
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
+import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
 import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 
 public abstract class TestUserEventListener implements IUserEventListener {
@@ -24,12 +25,12 @@ public abstract class TestUserEventListener implements IUserEventListener {
 	}
 
 	@Override
-	public void onLoginSuccess(IUserEvent event) {
+	public void onLoginSuccess(ILoginEvent event) {
 		loginSuccess = true;
 	}
 
 	@Override
-	public void onLoginFailure(IUserEvent event) {
+	public void onLoginFailure(ILoginEvent event) {
 		loginFailure = true;
 	}
 

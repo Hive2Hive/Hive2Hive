@@ -8,7 +8,9 @@ import java.util.List;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
+import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
 import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
+import org.hive2hive.core.events.implementations.LoginEvent;
 import org.hive2hive.core.events.implementations.RegisterEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -72,7 +74,9 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 
-		AsyncComponent asyncProcess = new AsyncComponent(loginProcess);
+		CompletionHandleComponent eventComponent = new CompletionHandleComponent(loginProcess, createLoginHandle(credentials, rootPath));
+
+		AsyncComponent asyncProcess = new AsyncComponent(eventComponent);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
@@ -131,17 +135,17 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		};
 	}
 	
-	private ICompletionHandle createLoginHandle(UserCredentials credentials) {
+	private ICompletionHandle createLoginHandle(UserCredentials credentials, Path rootPath) {
 		
-		final IRegisterEvent registerEvent = new RegisterEvent(credentials);
+		final ILoginEvent loginEvent = new LoginEvent(credentials, rootPath);
 		
 		return new ICompletionHandle() {
 			public void onCompletionSuccess() {
-				notifyRegisterStatus(true, registerEvent);
+				notifyLoginStatus(true, loginEvent);
 			}
 			public void onCompletionFailure(RollbackReason reason) {
-				registerEvent.setRollbackReason(reason);
-				notifyRegisterStatus(false, registerEvent);
+				loginEvent.setRollbackReason(reason);
+				notifyLoginStatus(false, loginEvent);
 			}
 		};
 	}
@@ -156,4 +160,13 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		}
 	}
 	
+	private void notifyLoginStatus(boolean success, ILoginEvent event) {
+		Iterator<IUserEventListener> iterator = eventListeners.iterator();
+		while (iterator.hasNext()){
+			if (success)
+				iterator.next().onLoginSuccess(event);
+			else
+				iterator.next().onLoginFailure(event);
+		}
+	}
 }
