@@ -16,9 +16,11 @@ import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
+import org.hive2hive.core.events.framework.interfaces.user.ILogoutEvent;
 import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 import org.hive2hive.core.events.util.TestUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -33,6 +35,7 @@ public class UserEventsTest extends H2HJUnitTest {
 	private IH2HNode node;
 	private IUserManager userManager;
 	private UserCredentials credentials;
+	private Path rootPath;
 	private H2HWaiter waiter = new H2HWaiter(20);
 	
 	@BeforeClass
@@ -52,6 +55,7 @@ public class UserEventsTest extends H2HJUnitTest {
 		node.connect();
 		userManager = node.getUserManager();
 		credentials = NetworkTestUtil.generateRandomCredentials();
+		rootPath = FileTestUtil.getTempDirectory().toPath();
 	}
 
 	@After
@@ -100,8 +104,6 @@ public class UserEventsTest extends H2HJUnitTest {
 	@Test
 	public void loginEventsTest() throws NoPeerConnectionException, InterruptedException {
 		
-		final Path rootPath = FileTestUtil.getTempDirectory().toPath();
-		
 		// test failure (i.e., login before register)
 		TestUserEventListener listener = new TestUserEventListener() {
 			@Override
@@ -139,6 +141,33 @@ public class UserEventsTest extends H2HJUnitTest {
 		}
 		assertTrue(listener.loginSuccess);
 		assertFalse(listener.loginFailure);
+		
+	}
+	
+	@Test
+	public void logoutEventsTest() throws NoPeerConnectionException, InterruptedException, NoSessionException {
+		
+		// TODO test failure
+		
+		// test success
+		userManager.register(credentials).await();
+		userManager.login(credentials, rootPath).await();
+		
+		TestUserEventListener listener = new TestUserEventListener() {
+			@Override
+			public void onLogoutSuccess(ILogoutEvent event) {
+				assertEquals(credentials, event.getUserCredentials());
+				assertNull(event.getRollbackReason());
+				super.onLogoutSuccess(event);
+			}
+		};
+		userManager.addEventListener(listener);
+		userManager.logout();
+		while (!listener.logoutSuccess) {
+			waiter.tickASecond();
+		}
+		assertTrue(listener.logoutSuccess);
+		assertFalse(listener.logoutFailure);
 		
 	}
 }
