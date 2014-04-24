@@ -31,14 +31,14 @@ public class UserManagerTest extends H2HJUnitTest {
 		beforeClass();
 	}
 
-	@Before
-	public void before() {
-		network = NetworkTestUtil.createH2HNetwork(5);
-	}
-
 	@AfterClass
 	public static void endTest() {
 		afterClass();
+	}
+	
+	@Before
+	public void before() {
+		network = NetworkTestUtil.createH2HNetwork(5);
 	}
 
 	@After

@@ -17,7 +17,7 @@ import org.hive2hive.core.security.UserCredentials;
 public interface IUserManager extends IManager, IUserEventGenerator {
 
 	/**
-	 * Each user must be registered in the Hive2Hive network. This call creates a new UserProfile for the
+	 * Each user must be registered in the network. This call creates a new UserProfile for the
 	 * given user credentials.
 	 * 
 	 * @param credentials the user credentials. Note that the user id must be unique, the password and pin

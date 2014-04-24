@@ -11,10 +11,10 @@ import static org.junit.Assert.fail;
  */
 public class H2HWaiter {
 	private int counter = 0;
-	private final int maxAmoutOfTicks;
+	private final int maxSeconds;
 
-	public H2HWaiter(int anAmountOfAcceptableTicks) {
-		maxAmoutOfTicks = anAmountOfAcceptableTicks;
+	public H2HWaiter(int maxSeconds) {
+		this.maxSeconds = maxSeconds;
 	}
 
 	public void tickASecond() {
@@ -25,8 +25,8 @@ public class H2HWaiter {
 			}
 		}
 		counter++;
-		if (counter >= maxAmoutOfTicks) {
-			fail(String.format("We waited for %d seconds. This is simply to long!", counter));
+		if (counter >= maxSeconds) {
+			fail(String.format("We waited for %s seconds. This is simply to long!", counter));
 		}
 	}
 }
