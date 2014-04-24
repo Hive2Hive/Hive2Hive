@@ -2,6 +2,7 @@ package org.hive2hive.core.api.interfaces;
 
 import java.nio.file.Path;
 
+import org.hive2hive.core.events.interfaces.IUserEventGenerator;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
@@ -13,7 +14,7 @@ import org.hive2hive.core.security.UserCredentials;
  * @author Christian, Nico, Seppi
  * 
  */
-public interface IUserManager extends IManager {
+public interface IUserManager extends IManager, IUserEventGenerator {
 
 	/**
 	 * Each user must be registered in the Hive2Hive network. This call creates a new UserProfile for the
