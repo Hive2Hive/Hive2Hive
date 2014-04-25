@@ -23,12 +23,12 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Nico, Seppi
  */
-public class AddFileProcessContext implements IProvideHash, IConsumeNotificationFactory,
-		IProvideProtectionKeys, IProvideMetaFile {
+public class AddFileProcessContext implements IProvideHash, IConsumeNotificationFactory, IProvideProtectionKeys,
+		IProvideMetaFile {
 
 	private final File file;
 
-	private KeyPair metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+	private KeyPair metaKeys;
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
 	private KeyPair chunkEncryptionKeys;
@@ -59,6 +59,8 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 	}
 
 	public KeyPair getMetaKeys() {
+		if (metaKeys == null)
+			metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		return metaKeys;
 	}
 
