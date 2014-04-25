@@ -38,14 +38,14 @@ public class CreateMetaFileStep extends ProcessStep {
 
 		MetaFile metaFile = null;
 		if (context.isLargeFile()) {
-			metaFile = new MetaFileLarge(context.getMetaKeys().getPublic(), context.getMetaChunks());
+			metaFile = new MetaFileLarge(context.generateOrGetMetaKeys().getPublic(), context.getMetaChunks());
 		} else {
 			// create new meta file with new version
 			FileVersion version = new FileVersion(0, FileUtil.getFileSize(file), System.currentTimeMillis(),
 					context.getMetaChunks());
 			List<FileVersion> versions = new ArrayList<FileVersion>(1);
 			versions.add(version);
-			metaFile = new MetaFileSmall(context.getMetaKeys().getPublic(), versions,
+			metaFile = new MetaFileSmall(context.generateOrGetMetaKeys().getPublic(), versions,
 					context.consumeChunkKeys());
 
 		}

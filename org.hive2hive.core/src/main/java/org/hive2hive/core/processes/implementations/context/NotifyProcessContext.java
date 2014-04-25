@@ -14,8 +14,7 @@ import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeN
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
-public class NotifyProcessContext implements IConsumeNotificationFactory, IConsumeLocations,
-		IProvideLocations {
+public class NotifyProcessContext implements IConsumeNotificationFactory, IConsumeLocations, IProvideLocations {
 
 	private final IConsumeNotificationFactory providerContext;
 	private final Set<PeerAddress> unreachablePeers;
@@ -52,17 +51,6 @@ public class NotifyProcessContext implements IConsumeNotificationFactory, IConsu
 
 	public Map<String, List<PeerAddress>> getAllLocations() {
 		return allLocations;
-	}
-
-	/**
-	 * Add own peers to this list when they are unreachable. Thus, they can be removed in a next step
-	 */
-	public void addUnreachableLocation(PeerAddress peerAddress) {
-		unreachablePeers.add(peerAddress);
-	}
-
-	public Set<PeerAddress> getUnreachablePeers() {
-		return unreachablePeers;
 	}
 
 	@Override

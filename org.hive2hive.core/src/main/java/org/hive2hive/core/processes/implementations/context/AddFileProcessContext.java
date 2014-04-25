@@ -58,7 +58,7 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 		return largeFile;
 	}
 
-	public KeyPair getMetaKeys() {
+	public KeyPair generateOrGetMetaKeys() {
 		if (metaKeys == null)
 			metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		return metaKeys;

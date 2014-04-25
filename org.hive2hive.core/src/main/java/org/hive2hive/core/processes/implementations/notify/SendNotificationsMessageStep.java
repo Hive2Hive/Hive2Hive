@@ -1,8 +1,10 @@
 package org.hive2hive.core.processes.implementations.notify;
 
 import java.security.PublicKey;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -10,9 +12,11 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
 import org.slf4j.Logger;
@@ -23,12 +27,14 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	private final static Logger logger = LoggerFactory.getLogger(SendNotificationsMessageStep.class);
 	private final NotifyProcessContext context;
 	private final NetworkManager networkManager;
+	private final Set<PeerAddress> unreachablePeers;
 
 	public SendNotificationsMessageStep(NotifyProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		super(networkManager.getMessageManager());
 		this.context = context;
 		this.networkManager = networkManager;
+		this.unreachablePeers = new HashSet<PeerAddress>();
 	}
 
 	@Override
@@ -45,8 +51,13 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 				notifyMyPeers(peerAddresses, messageFactory, publicKey);
 			} else {
 				// send to the initial node of another client
-				notifyInitialPeer(peerAddresses, messageFactory, user, publicKey);
+				notifyMasterPeer(peerAddresses, messageFactory, user, publicKey);
 			}
+		}
+
+		if (!unreachablePeers.isEmpty()) {
+			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
+			initCleanupUnreachablePeers();
 		}
 	}
 
@@ -69,16 +80,15 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 					sendDirect(message, ownPublicKey);
 				}
 			} catch (SendFailedException e) {
-				// add to the unreachable list, such that the next process can cleanup those
-				// locations
-				context.addUnreachableLocation(peerAddress);
+				// add to the unreachable list, such that the next step can cleanup those locations
+				unreachablePeers.add(peerAddress);
 				// continue anyhow
 			}
 		}
 	}
 
-	private void notifyInitialPeer(List<PeerAddress> peerList, BaseNotificationMessageFactory messageFactory,
-			String userId, PublicKey publicKey) {
+	private void notifyMasterPeer(List<PeerAddress> peerList, BaseNotificationMessageFactory messageFactory, String userId,
+			PublicKey publicKey) {
 		boolean success = false;
 		while (!success && !peerList.isEmpty()) {
 			PeerAddress initial = NetworkUtils.choseFirstPeerAddress(peerList);
@@ -98,6 +108,16 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			logger.info("All clients of user '{}' are currently offline or unreachable.", userId);
 		} else {
 			logger.debug("Successfully notified the initial peer of user '{}' that it should check its UP tasks.", userId);
+		}
+	}
+
+	private void initCleanupUnreachablePeers() {
+		try {
+			DataManager dataManager = networkManager.getDataManager();
+			getParent().add(new GetUserLocationsStep(networkManager.getUserId(), context, dataManager));
+			getParent().add(new RemoveUnreachableStep(context, unreachablePeers, networkManager));
+		} catch (NoPeerConnectionException e) {
+			logger.error("No connection to the network. Failed to cleanup unreachable peers");
 		}
 	}
 

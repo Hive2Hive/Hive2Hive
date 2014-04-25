@@ -66,7 +66,6 @@ import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessa
 import org.hive2hive.core.processes.implementations.notify.GetAllLocationsStep;
 import org.hive2hive.core.processes.implementations.notify.GetPublicKeysStep;
 import org.hive2hive.core.processes.implementations.notify.PutAllUserProfileTasksStep;
-import org.hive2hive.core.processes.implementations.notify.RemoveUnreachableStep;
 import org.hive2hive.core.processes.implementations.notify.SendNotificationsMessageStep;
 import org.hive2hive.core.processes.implementations.notify.VerifyNotificationFactoryStep;
 import org.hive2hive.core.processes.implementations.register.CheckIsUserRegisteredStep;
@@ -148,8 +147,7 @@ public final class ProcessFactory {
 
 		process.add(new GetUserProfileStep(credentials, context, dataManager));
 		process.add(new SessionCreationStep(params, context, networkManager));
-		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager
-				.getDataManager()));
+		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager.getDataManager()));
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new PutUserLocationsStep(context, context, dataManager));
 		process.add(new SynchronizeFilesStep(context, networkManager));
@@ -175,8 +173,8 @@ public final class ProcessFactory {
 	 * @throws NoPeerConnectionException
 	 * @throws NoSessionException
 	 */
-	public ProcessComponent createLogoutProcess(NetworkManager networkManager)
-			throws NoPeerConnectionException, NoSessionException {
+	public ProcessComponent createLogoutProcess(NetworkManager networkManager) throws NoPeerConnectionException,
+			NoSessionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
 		LogoutProcessContext context = new LogoutProcessContext(session);
@@ -187,8 +185,7 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
-		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager(), session
-				.getDownloadManager()));
+		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager(), session.getDownloadManager()));
 		process.add(new DeleteSessionStep(networkManager));
 
 		// TODO to be implemented:
@@ -202,8 +199,8 @@ public final class ProcessFactory {
 	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
 	 * tree.
 	 */
-	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException, NoPeerConnectionException {
+	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+			NoPeerConnectionException {
 		H2HSession session = networkManager.getSession();
 		DataManager dataManager = networkManager.getDataManager();
 		AddFileProcessContext context = new AddFileProcessContext(file);
@@ -224,8 +221,8 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException, IllegalArgumentException, NoPeerConnectionException {
+	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+			IllegalArgumentException, NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
 		UpdateFileProcessContext context = new UpdateFileProcessContext(file);
 
@@ -253,16 +250,15 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
 			throws NoSessionException {
-		return createDownloadFileProcess(fileKey, DownloadFileContext.NEWEST_VERSION_INDEX, null,
-				networkManager);
+		return createDownloadFileProcess(fileKey, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
 	}
 
 	/**
 	 * Process for downloading with some extra parameters. This can for example be used to restore a file. The
 	 * version and the filename are only effective for files, not for folders.
 	 */
-	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, int versionToDownload,
-			File destination, NetworkManager networkManager) throws NoSessionException {
+	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, int versionToDownload, File destination,
+			NetworkManager networkManager) throws NoSessionException {
 		// precondition: session is existent
 		networkManager.getSession();
 
@@ -277,8 +273,8 @@ public final class ProcessFactory {
 	 * Deletes the specified file. Note that this is only valid for a single file or an empty folder
 	 * (non-recursive)
 	 */
-	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException, NoPeerConnectionException {
+	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+			NoPeerConnectionException {
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
 
 		// process composition
@@ -296,8 +292,7 @@ public final class ProcessFactory {
 
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		MoveFileProcessContext context = new MoveFileProcessContext(source, destination,
-				networkManager.getUserId());
+		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, networkManager.getUserId());
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new MoveOnDiskStep(context, networkManager));
@@ -309,8 +304,8 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
+	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector, NetworkManager networkManager)
+			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
@@ -319,18 +314,17 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createShareProcess(File folder, UserPermission permission,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
+	public ProcessComponent createShareProcess(File folder, UserPermission permission, NetworkManager networkManager)
+			throws NoSessionException, NoPeerConnectionException {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
-	
+
 		SequentialProcess process = new SequentialProcess();
-		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission
-				.getUserId()));
+		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission.getUserId()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
 		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
-	
+
 		return process;
 	}
 
@@ -368,8 +362,7 @@ public final class ProcessFactory {
 	}
 
 	private ProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
-			NetworkManager networkManager) throws IllegalArgumentException, NoPeerConnectionException,
-			NoSessionException {
+			NetworkManager networkManager) throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		SequentialProcess process = new SequentialProcess();
@@ -378,10 +371,6 @@ public final class ProcessFactory {
 		process.add(new PutAllUserProfileTasksStep(context, networkManager));
 		process.add(new GetAllLocationsStep(context, networkManager.getDataManager()));
 		process.add(new SendNotificationsMessageStep(context, networkManager));
-		// cleanup my own locations
-		process.add(new GetUserLocationsStep(networkManager.getUserId(), context, networkManager
-				.getDataManager()));
-		process.add(new RemoveUnreachableStep(context, networkManager));
 
 		return process;
 	}

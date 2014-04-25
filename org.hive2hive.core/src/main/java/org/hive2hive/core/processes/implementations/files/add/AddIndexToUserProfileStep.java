@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.implementations.files.add;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -37,8 +38,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	private PublicKey parentKey; // used for rollback
 	private boolean modified = false;
 
-	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager,
-			Path root) {
+	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager, Path root) {
 		this.context = context;
 		this.profileManager = profileManager;
 		this.root = root;
@@ -47,6 +47,9 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.getFile();
+
+		// pre-calculate the meta keys because this may take a while
+		KeyPair metaKeys = context.generateOrGetMetaKeys();
 
 		// pre-calculate the md5 hash because this may take a while
 		byte[] md5 = null;
@@ -63,17 +66,18 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 			// validate the write protection
 			if (!parentNode.canWrite()) {
-				throw new ProcessExecutionException(
-						"This directory is write protected (and we don't have the keys).");
+				throw new ProcessExecutionException("This directory is write protected (and we don't have the keys).");
 			}
 
 			// create a file tree node in the user profile
 			parentKey = parentNode.getFilePublicKey();
 			// use the file keys generated above is stored
 			if (file.isDirectory()) {
-				context.provideIndex(new FolderIndex(parentNode, context.getMetaKeys(), file.getName()));
+				FolderIndex folderIndex = new FolderIndex(parentNode, metaKeys, file.getName());
+				context.provideIndex(folderIndex);
 			} else {
-				context.provideIndex(new FileIndex(parentNode, context.getMetaKeys(), file.getName(), md5));
+				FileIndex fileIndex = new FileIndex(parentNode, metaKeys, file.getName(), md5);
+				context.provideIndex(fileIndex);
 			}
 
 			// put the updated user profile
@@ -89,8 +93,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			return EncryptionUtil.generateMD5Hash(file);
 		} catch (IOException e) {
 			logger.error("Creating MD5 hash of file '{}' was not possible.", file.getName(), e);
-			throw new ProcessExecutionException(String.format("Could not add file '%s' to the user profile.",
-					file.getName()), e);
+			throw new ProcessExecutionException(
+					String.format("Could not add file '%s' to the user profile.", file.getName()), e);
 		}
 	}
 
@@ -109,10 +113,10 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			parentNode.removeChild(childNode);
 			try {
 				profileManager.readyToPut(userProfile, getID());
+				modified = false;
 			} catch (PutFailedException e) {
-				return;
+				// ignore
 			}
-			modified = false;
 		}
 	}
 }

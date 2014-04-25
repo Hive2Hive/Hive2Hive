@@ -30,18 +30,19 @@ public class RemoveUnreachableStep extends BasePutProcessStep {
 
 	private final NotifyProcessContext context;
 	private final NetworkManager networkManager;
+	private final Set<PeerAddress> unreachablePeers;
 
-	public RemoveUnreachableStep(NotifyProcessContext context, NetworkManager networkManager)
-			throws NoPeerConnectionException {
+	public RemoveUnreachableStep(NotifyProcessContext context, Set<PeerAddress> unreachablePeers,
+			NetworkManager networkManager) throws NoPeerConnectionException {
 		super(networkManager.getDataManager());
 		this.context = context;
+		this.unreachablePeers = unreachablePeers;
 		this.networkManager = networkManager;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
 		Locations locations = context.consumeLocations();
-		Set<PeerAddress> unreachablePeers = context.getUnreachablePeers();
 
 		if (unreachablePeers.isEmpty()) {
 			logger.debug("No locations to remove. Skip the cleanup.");
