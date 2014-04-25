@@ -42,8 +42,8 @@ public class DownloadManager {
 
 	private ExecutorService executor;
 
-	public DownloadManager(IDataManager dataManager, IMessageManager messageManager,
-			PublicKeyManager keyManager, IFileConfiguration fileConfig) {
+	public DownloadManager(IDataManager dataManager, IMessageManager messageManager, PublicKeyManager keyManager,
+			IFileConfiguration fileConfig) {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;
 		this.keyManager = keyManager;
@@ -75,18 +75,17 @@ public class DownloadManager {
 			// Hint: Run it in a separate thread (not in the thread pool) because the executor does not
 			// guarantee the in-order processing.
 			new Thread(new GetLocationsList(directTask, dataManager)).start();
-		}
 
-		// submit each chunk as a separate thread
-		for (MetaChunk chunk : task.getOpenChunks()) {
-			if (task.isDirectDownload()) {
-				// then download all chunks
-				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(
-						(DownloadTaskDirect) task, chunk, messageManager, keyManager, fileConfig);
+			// then download all chunks in separate threads
+			for (MetaChunk chunk : task.getOpenChunks()) {
+				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(directTask, chunk, messageManager,
+						keyManager, fileConfig);
 				executor.submit(runnable);
-			} else {
-				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task,
-						chunk, dataManager);
+			}
+		} else {
+			// submit each chunk as a separate thread
+			for (MetaChunk chunk : task.getOpenChunks()) {
+				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task, chunk, dataManager);
 				executor.submit(runnable);
 			}
 		}
