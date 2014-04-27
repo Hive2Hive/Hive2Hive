@@ -95,7 +95,7 @@ Using Hive2Hive is very simple and has several advantages:
   - Reliability & Fault-Tolerance
 - runs on Windows, OS X and Linux
 - headless deployment possible (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))  
-   Try our [Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library `.jar`.
+   Try our console-based [`org.hive2hive.client`](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library `.jar`.
 - free & open-source
 - freely configurable
 - highly extendable
@@ -129,12 +129,12 @@ There are several things - from simple to complex - you can do to help:
 - participate in the [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
 - help us with the implementation of (your) features
 - fork the project and send your pull requests
-- help the community by answering questions on StackOverflow (tagged with [hive2hive](http://stackoverflow.com/questions/tagged/hive2hive))
+- help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
 
 Also, if you are a professional cryptographer with interest in this project, any feedback on the project is very welcome.
 
 ## Contact
 
-If you have any questions, feel uncomfortable or uncertain about an issue or your changes, feel free to reach us via email at [info@hive2hive.com](mailto:info@hive2hive.com). Please consider posting your question on StackOverflow (using the [hive2hive](http://stackoverflow.com/questions/tagged/hive2hive) tag) in case it is a technical question that might interest other developers, too.
+If you have any questions, feel uncomfortable or uncertain about an issue or your changes, feel free to reach us via email at [info@hive2hive.com](mailto:info@hive2hive.com). Please consider posting your question on StackOverflow (using the [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive) tag) in case it is a technical question that might interest other developers, too.
 
 We provide you with all information you need and will happily help you via email, Skype, remote pairing or whatever you are comfortable with.
