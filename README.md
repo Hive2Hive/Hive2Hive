@@ -1,6 +1,6 @@
 Hive2Hive
 =========
-Hive2Hive is an open-source library, written in Java, for distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](http://tomp2p.net/), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
+[Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](http://tomp2p.net/), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
 Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
 
@@ -103,20 +103,26 @@ And there is even more to come:
 
 Documentation
 -------------
-For the full project documentation, please visit http://www.hive2hive.com/.
+For more details and documentation about the project, please visit http://www.hive2hive.com/.
 
 The source code itself is thoroughly documented using JavaDoc.
 
-Contribute
-----------
+Contribution
+------------
 The library is intended to be improved and extended so that we all profit from its capabilities. Unlike many other “*secure*” services, Hive2Hive discloses its implementation and is open for any sort of contribution and constructive criticism.
 
-**We believe that everyone can contribute to make Hive2Hive even better!** Do you have a suggestion for improvement or an idea for extension? Then you are entirely welcome! Just fork the project and send your pull requests!
+**We believe that everyone can contribute to make Hive2Hive even better!** 
 
-As a starting point, you might check the [open issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) or just open a new issue to start a discussion around a feature idea or bug.
+There are several things - from simple to complex - you can do to help:
+- [watch](https://github.com/Hive2Hive/Hive2Hive/watchers) and/or [star](https://github.com/Hive2Hive/Hive2Hive/stargazers) the project
+- suggest and post your ideas about improvements or extensions on the [issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) page
+- participate in the [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
+- help us with the implementation of (your) features
+- fork the project and send your pull requests
+- help the community by answering questions on StackOverflow (tagged with [hive2hive](http://stackoverflow.com/questions/tagged/hive2hive))
 
 Contact
 -------
-If you have any questions, feel uncomfortable or uncertain about an issue or your changes, feel free to reach us via email at [info@hive2hive.com](mailto:info@hive2hive.com).
+If you have any questions, feel uncomfortable or uncertain about an issue or your changes, feel free to reach us via email at [info@hive2hive.com](mailto:info@hive2hive.com). Please consider posting your question on StackOverflow (using the [hive2hive](http://stackoverflow.com/questions/tagged/hive2hive) tag) in case it is a technical question that might interest other developers, too.
 
 We provide you with all information you need and will happily help you via email, Skype, remote pairing or whatever you are comfortable with.
