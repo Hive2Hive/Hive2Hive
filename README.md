@@ -76,7 +76,7 @@ See [here](http://hive2hive.com/?page_id=429) for more detailed information abou
 
 ## Features & Advantages
 
-Hive2Hive offers the same basic functionality known from popular synchronization services. (e.g., [Dropbox](http://www.dropbox.com))
+Hive2Hive offers the same basic functionality known from popular synchronization services. (e.g., [Dropbox](http://www.dropbox.com))  
 On top of that, Hive2Hive provides additional features such as security or versioning.
 
 - File Synchronization (folder based)
@@ -102,6 +102,7 @@ Using Hive2Hive is very simple and has several advantages:
 - detailed documentation
 
 And there is even more to come:
+- A demonstrative GUI client is waiting in the wings ([see more](https://github.com/Hive2Hive/RCP_Client))
 - REST API ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/68))
 - Secure Bootstrapping ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/61))
 - LAN Synchronization ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/77))
