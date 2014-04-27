@@ -4,7 +4,7 @@
 
 Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
 
-**The Hive2Hive library addresses these issues by providing a free, distributed solution that focuses on maximum security and privacy of both users and data. It supports the whole feature set known from similar centralized approaches, such as Dropbox or Google Drive, all packed in a clean, extendable API.**
+**The Hive2Hive library addresses these issues by providing a free, distributed solution that focuses on maximum security and privacy of both users and data. It supports the whole feature set known from similar centralized approaches, such as Dropbox or Google Drive, all packed in a clean API.**
 
 ### Table of Contents
 
@@ -129,6 +129,8 @@ There are several things - from simple to complex - you can do to help:
 - help us with the implementation of (your) features
 - fork the project and send your pull requests
 - help the community by answering questions on StackOverflow (tagged with [hive2hive](http://stackoverflow.com/questions/tagged/hive2hive))
+
+Also, if you are a professional cryptographer with interest in this project, any feedback on the project is very welcome.
 
 ## Contact
 
