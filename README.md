@@ -1,4 +1,4 @@
-# Hive2Hive
+# ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive
 
 [Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](http://tomp2p.net/), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
@@ -12,8 +12,7 @@ Although many well-known synchronization and sharing services exist, most of the
 **[Features & Advantages](#features--advantages)**  
 **[Documentation](#documentation)**  
 **[Contribution](#contribution)**  
-**[Contact](#contact)**  
-
+**[Contact](#contact)**
 
 ## API Demonstration
 
@@ -96,7 +95,7 @@ Using Hive2Hive is very simple and has several advantages:
   - Reliability & Fault-Tolerance
 - runs on Windows, OS X and Linux
 - headless deployment possible (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))  
-   Try our [Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library JAR.
+   Try our [Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library `.jar`.
 - free & open-source
 - freely configurable
 - highly extendable
