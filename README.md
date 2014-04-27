@@ -86,18 +86,20 @@ Using Hive2Hive is very simple and has several advantages:
   - Heterogeneity
   - Reliability & Fault-Tolerance
 - runs on Windows, OS X and Linux
-- headless deployment possible, e.g., on a [Raspberry Pi](http://www.raspberrypi.org/) (try our [Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library JAR)
+- headless deployment possible (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))  
+   Try our [Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library JAR.
 - free & open-source
 - freely configurable
 - highly extendable
 - detailed documentation
 
-You might want to .
-
 And there is even more to come:
 - REST API ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/68))
 - Secure Bootstrapping ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/61))
 - LAN Synchronization ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/77))
+- Large File Alternatives ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/73))
+- Same Network - Different Applications ([see more](https://github.com/Hive2Hive/Hive2Hive/issues/80))
+- and [more](https://github.com/Hive2Hive/Hive2Hive/issues?labels=future+work&page=1&state=open)
 
 Documentation
 -------------
