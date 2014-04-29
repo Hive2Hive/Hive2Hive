@@ -3,7 +3,6 @@ package org.hive2hive.core.model;
 import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Raw data part of a file that is added to the DHT.

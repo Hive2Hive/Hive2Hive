@@ -1,6 +1,6 @@
 package org.hive2hive.core;
 
-import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.model.NetworkContent;
 
 public class H2HTestData extends NetworkContent {
 

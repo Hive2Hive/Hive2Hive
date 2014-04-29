@@ -6,7 +6,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.model.NetworkContent;
 
 /**
  * A parameter class for {@link DataManager}'s methods.

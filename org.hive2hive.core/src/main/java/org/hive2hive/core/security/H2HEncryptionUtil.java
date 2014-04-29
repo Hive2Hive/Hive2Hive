@@ -15,7 +15,7 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.model.NetworkContent;
 
 public final class H2HEncryptionUtil {
 

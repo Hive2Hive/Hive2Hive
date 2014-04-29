@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.futures.FutureGet;
 
-import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
