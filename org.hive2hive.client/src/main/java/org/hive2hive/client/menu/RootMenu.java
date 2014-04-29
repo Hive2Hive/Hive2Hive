@@ -1,5 +1,6 @@
 package org.hive2hive.client.menu;
 
+import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.MenuContainer;
@@ -23,16 +24,31 @@ public final class RootMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Login") {
 			@Override
-			protected void checkPreconditions() {
-				menus.getNodeMenu().forceNetwork();
-				menus.getUserMenu().forceUserCredentials();
-				menus.getFileMenu().forceRootDirectory();
+			protected boolean checkPreconditions() {
+				if (!menus.getNodeMenu().createNetwork()) {
+					printAbortion(displayText, "Node not connected.");
+					return false;
+				}
+				if (!menus.getUserMenu().createUserCredentials()) {
+					printAbortion(displayText, "User credentials not specified.");
+					return false;
+				}
+				if (!menus.getFileMenu().createRootDirectory()) {
+					printAbortion(displayText, "Root directory not specified.");
+					return false;
+				}
+				if (!register()) {
+					printAbortion(displayText, "Registering failed.");
+					return false;
+				}
+
+				return true;
 			}
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
 					InvalidProcessStateException {
 
-				forceRegistration();
+				register();
 
 				IProcessComponent loginProcess = menus
 						.getNodeMenu()
@@ -40,7 +56,13 @@ public final class RootMenu extends H2HConsoleMenu {
 						.getUserManager()
 						.login(menus.getUserMenu().getUserCredentials(),
 								menus.getFileMenu().getRootDirectory().toPath());
-				executeBlocking(loginProcess, displayText);
+
+				// TODO find a cleaner way to handle login failures
+				boolean success = executeBlocking(loginProcess, displayText);
+				if (!success) {
+					menus.getUserMenu().reset();
+					menus.getFileMenu().reset();
+				}
 			}
 		});
 
@@ -68,14 +90,17 @@ public final class RootMenu extends H2HConsoleMenu {
 		return "Please select an option:";
 	}
 
-	private void forceRegistration() throws InvalidProcessStateException, InterruptedException,
-			NoPeerConnectionException {
-		while (!menus.getNodeMenu().getNode().getUserManager()
+	private boolean register() throws NoPeerConnectionException, InvalidProcessStateException, InterruptedException {
+
+		if (menus.getNodeMenu().getNode().getUserManager()
 				.isRegistered(menus.getUserMenu().getUserCredentials().getUserId())) {
-			H2HConsoleMenuItem.printPreconditionError("You are not registered.");
+			return true;
+		} else {
+			H2HConsoleMenuItem
+					.printPrecondition("You are not registered to the network. This will now happen automatically.");
 			IProcessComponent registerProcess = menus.getNodeMenu().getNode().getUserManager()
 					.register(menus.getUserMenu().getUserCredentials());
-			executeBlocking(registerProcess, "Register");
+			return executeBlocking(registerProcess, "Register");
 		}
 	}
 
@@ -85,7 +110,7 @@ public final class RootMenu extends H2HConsoleMenu {
 				|| menus.getUserMenu().getUserCredentials() == null
 				|| !menus.getNodeMenu().getNode().getUserManager()
 						.isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
-			H2HConsoleMenuItem.printPreconditionError("You are not logged in.");
+			H2HConsoleMenuItem.printAbortion("You are not logged in.");
 			return false;
 		}
 		return true;

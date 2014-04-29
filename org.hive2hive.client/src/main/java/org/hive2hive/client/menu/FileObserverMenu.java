@@ -33,8 +33,8 @@ public class FileObserverMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Start File Observer") {
 			protected void checkPreconditions() {
-				menus.getNodeMenu().forceNetwork();
-				menus.getFileMenu().forceRootDirectory();
+				menus.getNodeMenu().createNetwork();
+				menus.getFileMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Exception {

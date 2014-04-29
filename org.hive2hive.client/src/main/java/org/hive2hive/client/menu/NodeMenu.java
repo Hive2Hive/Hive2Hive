@@ -58,7 +58,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 				} else {
 					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
 				}
-				
+
 				connectNode();
 			}
 		};
@@ -129,13 +129,14 @@ public final class NodeMenu extends H2HConsoleMenu {
 		return node;
 	}
 
-	public void forceNetwork() {
+	public boolean createNetwork() {
 
-		while (getNode() == null) {
+		if (getNode() == null) {
 			H2HConsoleMenuItem
-					.printPreconditionError("You are not connected to a network. Connect to a network first.");
+					.printPrecondition("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
 		}
+		return getNode() == null;
 	}
 
 	private void buildNode(INetworkConfiguration networkConfig) {
@@ -153,7 +154,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 			print("Network connection could not be established.");
 		}
 	}
-	
+
 	private String askNodeID() {
 		String nodeID = UUID.randomUUID().toString();
 		if (isExpertMode) {

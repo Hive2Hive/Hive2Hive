@@ -17,19 +17,25 @@ public abstract class ConsoleMenuItem {
 
 	public void invoke() {
 
-		checkPreconditions();
-		initialize();
 		try {
-			execute();
+			if (checkPreconditions()) {
+				initialize();
+				try {
+					execute();
+				} catch (Exception e) {
+					ConsoleMenu.printError(e);
+				} finally {
+					end();
+				}
+			}
 		} catch (Exception e) {
 			ConsoleMenu.printError(e);
-		} finally {
-			end();
 		}
 	}
 
-	protected void checkPreconditions() {
+	protected boolean checkPreconditions() {
 		// nothing by default
+		return true;
 	}
 
 	protected abstract void initialize();

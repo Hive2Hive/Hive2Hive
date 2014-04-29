@@ -28,9 +28,13 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	private void printSelection() {
 		ConsoleMenu.print(String.format("Selected Option: %s", displayText));
 	}
+	
+	public static void printPrecondition(String message) {
+		ConsoleMenu.print(message);
+	}
 
-	public static void printPreconditionError(String message) {
-		ConsoleMenu.print(String.format("Unsatisfied Precondition: %s", message));
+	public static void printAbortion(String menuName, String message) {
+		ConsoleMenu.print(String.format("'%s' aborted: %s", menuName, message));
 	}
 	
 	private void printExecuted() {

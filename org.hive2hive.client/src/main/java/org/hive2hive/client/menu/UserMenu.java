@@ -1,6 +1,7 @@
 package org.hive2hive.client.menu;
 
 import org.hive2hive.client.ConsoleClient;
+import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.MenuContainer;
@@ -41,9 +42,23 @@ public final class UserMenu extends H2HConsoleMenu {
 	protected String getInstruction() {
 		return "Please select a user configuration option:";
 	}
+	
+	@Override
+	public void reset() {
+		userCredentials = null;
+		ConsoleMenu.print("User credentials have been reset.");
+	}
 
 	public UserCredentials getUserCredentials() {
 		return userCredentials;
+	}
+
+	public boolean createUserCredentials() {
+		while (getUserCredentials() == null) {
+			CreateUserCredentials.invoke();
+		}
+		// at this point, credentials have always been specified
+		return true;
 	}
 
 	private String askUsedId() {
@@ -59,11 +74,5 @@ public final class UserMenu extends H2HConsoleMenu {
 	private String askPin() {
 		print("Specify the user PIN:");
 		return awaitStringParameter().trim();
-	}
-
-	public void forceUserCredentials() {
-		while (getUserCredentials() == null) {
-			CreateUserCredentials.invoke();
-		}
 	}
 }
