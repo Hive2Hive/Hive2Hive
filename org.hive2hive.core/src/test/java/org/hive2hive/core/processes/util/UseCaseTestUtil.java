@@ -96,10 +96,8 @@ public class UseCaseTestUtil {
 		}
 	}
 
-	public static void register(UserCredentials credentials, NetworkManager networkManager)
-			throws NoPeerConnectionException {
-		IProcessComponent process = ProcessFactory.instance().createRegisterProcess(credentials,
-				networkManager);
+	public static void register(UserCredentials credentials, NetworkManager networkManager) throws NoPeerConnectionException {
+		IProcessComponent process = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
 		executeProcess(process);
 	}
 
@@ -108,9 +106,9 @@ public class UseCaseTestUtil {
 		SessionParameters sessionParameters = new SessionParameters();
 		sessionParameters.setFileConfig(new TestFileConfiguration());
 		sessionParameters.setRoot(root.toPath());
-		sessionParameters.setProfileManager(new UserProfileManager(networkManager, credentials));
-		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials,
-				sessionParameters, networkManager);
+		sessionParameters.setProfileManager(new UserProfileManager(networkManager.getDataManager(), credentials));
+		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials, sessionParameters,
+				networkManager);
 		executeProcess(process);
 	}
 
@@ -121,8 +119,8 @@ public class UseCaseTestUtil {
 	}
 
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials)
-			throws GetFailedException {
-		UserProfileManager manager = new UserProfileManager(networkManager, credentials);
+			throws GetFailedException, NoPeerConnectionException {
+		UserProfileManager manager = new UserProfileManager(networkManager.getDataManager(), credentials);
 		return manager.getUserProfile(UUID.randomUUID().toString(), false);
 	}
 
@@ -138,14 +136,12 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
-	public static File downloadFile(NetworkManager networkManager, PublicKey fileKey)
-			throws NoSessionException, GetFailedException {
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey,
-				networkManager);
+	public static File downloadFile(NetworkManager networkManager, PublicKey fileKey) throws NoSessionException,
+			GetFailedException, NoPeerConnectionException {
+		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
 		executeProcess(process);
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
-		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey))
-				.toFile();
+		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey)).toFile();
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,
@@ -154,23 +150,21 @@ public class UseCaseTestUtil {
 		executeProcess(process);
 	}
 
-	public static void moveFile(NetworkManager networkManager, File source, File destination)
-			throws NoSessionException, NoPeerConnectionException {
-		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination,
-				networkManager);
+	public static void moveFile(NetworkManager networkManager, File source, File destination) throws NoSessionException,
+			NoPeerConnectionException {
+		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination, networkManager);
 		executeProcess(process);
 	}
 
-	public static void shareFolder(NetworkManager networkManager, File folder, String friendId,
-			PermissionType permission) throws IllegalFileLocation, IllegalArgumentException,
-			NoSessionException, NoPeerConnectionException {
+	public static void shareFolder(NetworkManager networkManager, File folder, String friendId, PermissionType permission)
+			throws IllegalFileLocation, IllegalArgumentException, NoSessionException, NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder,
 				new UserPermission(friendId, permission), networkManager);
 		executeProcess(process);
 	}
 
-	public static MetaFile getMetaFile(NetworkManager networkManager, KeyPair keys)
-			throws NoPeerConnectionException, InvalidProcessStateException {
+	public static MetaFile getMetaFile(NetworkManager networkManager, KeyPair keys) throws NoPeerConnectionException,
+			InvalidProcessStateException {
 		return getMetaFile(networkManager, keys, true);
 	}
 
@@ -190,8 +184,7 @@ public class UseCaseTestUtil {
 		}
 	}
 
-	public static Locations getLocations(NetworkManager networkManager, String userId)
-			throws NoPeerConnectionException {
+	public static Locations getLocations(NetworkManager networkManager, String userId) throws NoPeerConnectionException {
 		GetUserLocationsContext context = new GetUserLocationsContext();
 		GetUserLocationsStep step = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
 		executeProcess(step);
@@ -200,8 +193,8 @@ public class UseCaseTestUtil {
 
 	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoSessionException,
 			InvalidProcessStateException {
-		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance()
-				.createFileListProcess(networkManager);
+		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(
+				networkManager);
 		TestResultProcessComponentListener<List<FileTaste>> listener = new TestResultProcessComponentListener<List<FileTaste>>();
 		fileListProcess.attachListener(listener);
 		fileListProcess.start();

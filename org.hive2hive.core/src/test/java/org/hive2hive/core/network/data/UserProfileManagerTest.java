@@ -59,38 +59,40 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetOnly() throws GetFailedException, InterruptedException, InvalidProcessStateException {
+	public void testGetOnly() throws GetFailedException, InterruptedException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		executeProcesses(Operation.GET, Operation.GET, Operation.GET, Operation.GET);
 	}
 
 	@Test
-	public void testPutSingle() throws GetFailedException, InterruptedException, InvalidProcessStateException {
+	public void testPutSingle() throws GetFailedException, InterruptedException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		executeProcesses(Operation.GET, Operation.PUT, Operation.GET);
 	}
 
 	@Test
-	public void testPutMultiple() throws GetFailedException, InterruptedException,
-			InvalidProcessStateException {
+	public void testPutMultiple() throws GetFailedException, InterruptedException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		executeProcesses(Operation.PUT, Operation.PUT, Operation.PUT);
 	}
 
 	@Test
-	public void testModifySingle() throws GetFailedException, InterruptedException,
-			InvalidProcessStateException {
+	public void testModifySingle() throws GetFailedException, InterruptedException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		executeProcesses(Operation.PUT, Operation.MODIFY, Operation.PUT);
 	}
 
 	@Test
-	public void testModifyMultiple() throws GetFailedException, InterruptedException,
-			InvalidProcessStateException {
+	public void testModifyMultiple() throws GetFailedException, InterruptedException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		executeProcesses(Operation.MODIFY, Operation.MODIFY, Operation.MODIFY);
 	}
 
 	@Test
-	public void testAllMixed() throws GetFailedException, InterruptedException, InvalidProcessStateException {
-		executeProcesses(Operation.PUT, Operation.GET, Operation.MODIFY, Operation.GET, Operation.PUT,
-				Operation.MODIFY, Operation.MODIFY, Operation.GET, Operation.GET, Operation.PUT,
-				Operation.PUT, Operation.GET);
+	public void testAllMixed() throws GetFailedException, InterruptedException, InvalidProcessStateException,
+			NoPeerConnectionException {
+		executeProcesses(Operation.PUT, Operation.GET, Operation.MODIFY, Operation.GET, Operation.PUT, Operation.MODIFY,
+				Operation.MODIFY, Operation.GET, Operation.GET, Operation.PUT, Operation.PUT, Operation.GET);
 	}
 
 	/**
@@ -98,14 +100,14 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	 * small delay, but in the same order as the parameters. The method blocks until all processes are done.
 	 * 
 	 * @throws InvalidProcessStateException
+	 * @throws NoPeerConnectionException
 	 */
 	private void executeProcesses(Operation... operations) throws GetFailedException, InterruptedException,
-			InvalidProcessStateException {
-		UserProfileManager manager = new UserProfileManager(client, userCredentials);
+			InvalidProcessStateException, NoPeerConnectionException {
+		UserProfileManager manager = new UserProfileManager(client.getDataManager(), userCredentials);
 
 		List<IProcessComponent> processes = new ArrayList<IProcessComponent>(operations.length);
-		List<TestProcessComponentListener> listeners = new ArrayList<TestProcessComponentListener>(
-				operations.length);
+		List<TestProcessComponentListener> listeners = new ArrayList<TestProcessComponentListener>(operations.length);
 
 		for (int i = 0; i < operations.length; i++) {
 			TestUserProfileStep proc = new TestUserProfileStep(manager, operations[i]);
