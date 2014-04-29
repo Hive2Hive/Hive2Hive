@@ -84,7 +84,9 @@ On top of that, Hive2Hive provides additional features such as security or versi
 - File Sharing
 - File Versioning (including conflict detection)
 - File Observation (automated, configurable)
-- Security / Encryption ([more](http://hive2hive.com/security-aspects/))
+- Security (configurable, [see more](http://hive2hive.com/security-aspects/))
+  - Encryption of files and network communication
+  - Authenticity of data and messages
 - Users may use multiple clients (simulatenously)
 - Multiple users may use the same machine (simultaneously)
 
@@ -95,12 +97,13 @@ On top of that, Hive2Hive provides additional features such as security or versi
   - Reliability & Fault-Tolerance
 - no file size limits (configurable)
 - runs on Windows, OS X and Linux
-- headless deployment possible (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))  
-   Try our console-based [`org.hive2hive.client`](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library `.jar`.
+- headless deployment possible<sup>*</sup> (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))  
 - free & open-source
 - freely configurable
 - highly extendable
 - detailed documentation
+
+<sup>*</sup> Try our console-based [`org.hive2hive.client`](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client) by just executing the library `.jar`.
 
 **And there is even more to come:**
 - A demonstrative GUI client is waiting in the wings ([see more](https://github.com/Hive2Hive/RCP_Client))
