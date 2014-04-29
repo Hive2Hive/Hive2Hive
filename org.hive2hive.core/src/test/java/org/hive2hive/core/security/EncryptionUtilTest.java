@@ -8,21 +8,33 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.security.SignatureException;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
+import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
+import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -347,62 +359,40 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 	@Test
 	@Ignore
-	public void testBug() throws IOException, InvalidKeyException, IllegalBlockSizeException,
-			BadPaddingException, DataLengthException, IllegalStateException, InvalidCipherTextException {
-		// serialize an test object
-		byte[] data = EncryptionUtil.serializeObject(new H2HTestData("test"));
+	public void testPureLightweightBouncyCastle() throws IOException, InvalidKeyException, IllegalBlockSizeException,
+			BadPaddingException, DataLengthException, IllegalStateException, InvalidCipherTextException,
+			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException,
+			InvalidAlgorithmParameterException {
 
-		// generate AES key
-		SecretKey aesKey = EncryptionUtil.generateAESKey(AES_KEYLENGTH.BIT_256);
-		byte[] encodedAesKey = aesKey.getEncoded();
+		long startTime = System.currentTimeMillis();
+
+		Security.addProvider(new BouncyCastleProvider());
 
 		// generate RSA keys
-		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+		RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
+		gen.init(new RSAKeyGenerationParameters(new BigInteger("10001", 16), new SecureRandom(), 2048, 80));
+		AsymmetricCipherKeyPair keyPair = gen.generateKeyPair();
 
-		// generate IV where first entry is 0
-		byte[] initVector = { 0, 122, 12, 127, 35, 58, 87, 56, -6, 73, 10, -13, -78, 4, -122, -61 };
+		// some data where first entry is 0
+		byte[] data = { 10, 122, 12, 127, 35, 58, 87, 56, -6, 73, 10, -13, -78, 4, -122, -61 };
 
-		// encrypt data with AES
-		byte[] encryptedData = EncryptionUtil.encryptAES(data, aesKey, initVector);
+		// encrypt data asymmetrically
+		AsymmetricBlockCipher cipher = new RSAEngine();
+		cipher = new PKCS1Encoding(cipher);
+		cipher.init(true, keyPair.getPublic());
+		byte[] rsaEncryptedData = cipher.processBlock(data, 0, data.length);
 
-		// concatenate symmetric encryption parameters
-		byte[] params = new byte[initVector.length + encodedAesKey.length];
-		System.arraycopy(initVector, 0, params, 0, initVector.length);
-		System.arraycopy(encodedAesKey, 0, params, initVector.length, encodedAesKey.length);
+		Assert.assertFalse(Arrays.equals(data, rsaEncryptedData));
 
-		logger.debug("length initVector = '{}' encodedAesKey = '{}'", initVector.length, encodedAesKey.length);
-		logger.debug("initVector = '{}' encodedAesKey = '{}'", initVector, encodedAesKey);
-		logger.debug("params = '{}'", params);
-		logger.debug("params length = '{}'", params.length);
+		// decrypt data asymmetrically
+		cipher.init(false, keyPair.getPrivate());
+		byte[] dataBack = cipher.processBlock(rsaEncryptedData, 0, rsaEncryptedData.length);
 
-		// encrypt parameters asymmetrically
-		byte[] rsaEncryptedParams = EncryptionUtil.encryptRSA(params, keyPair.getPublic());
+		assertTrue(Arrays.equals(data, dataBack));
 
-		// decrypt parameters asymmetrically
-		byte[] paramsAfterRSA = EncryptionUtil.decryptRSA(rsaEncryptedParams, keyPair.getPrivate());
-
-		// split symmetric encryption parameters
-		byte[] initVectorAfterRSA = Arrays.copyOfRange(paramsAfterRSA, 0, initVector.length);
-		byte[] encodedAesKeyAfterRSA = Arrays.copyOfRange(params, initVector.length, params.length);
-
-		logger.debug("length initVector = '{}' encodedAesKey = '{}'", initVectorAfterRSA.length,
-				encodedAesKeyAfterRSA.length);
-		logger.debug("initVector = '{}' encodedAesKey = '{}'", initVectorAfterRSA, encodedAesKeyAfterRSA);
-		logger.debug("params = '{}'", paramsAfterRSA);
-		logger.debug("params length = '{}'", paramsAfterRSA.length);
-
-		Assert.assertTrue(Arrays.equals(params, paramsAfterRSA));
-		Assert.assertTrue(Arrays.equals(initVector, initVectorAfterRSA));
-		Assert.assertTrue(Arrays.equals(encodedAesKey, encodedAesKeyAfterRSA));
-
-		// generate AES key out of parameters
-		SecretKey aesKeyAfterRSA = new SecretKeySpec(encodedAesKeyAfterRSA, 0, encodedAesKeyAfterRSA.length,
-				"AES");
-
-		// decrypt data with AES
-		byte[] decryptedData = EncryptionUtil.decryptAES(encryptedData, aesKeyAfterRSA, initVectorAfterRSA);
-
-		assertTrue(Arrays.equals(data, decryptedData));
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		logger.debug("elapsed time = {}", elapsedTime);
 	}
 
 	public static AES_KEYLENGTH[] getAESKeySizes() {
