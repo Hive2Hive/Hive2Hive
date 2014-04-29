@@ -4,6 +4,7 @@ import java.security.KeyPair;
 
 import net.tomp2p.peers.Number160;
 
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 

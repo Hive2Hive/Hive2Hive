@@ -3,7 +3,6 @@ package org.hive2hive.core.model;
 import java.security.PublicKey;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * Base class for holding meta data for either a large or a small file

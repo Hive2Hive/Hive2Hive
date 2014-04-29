@@ -70,8 +70,8 @@ public class NetworkTestUtil {
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
 			try {
-				INetworkConfiguration otherNetConfig = NetworkConfiguration.create(
-						String.format("Node %s", ++letter), InetAddress.getLocalHost());
+				INetworkConfiguration otherNetConfig = NetworkConfiguration.create(String.format("Node %s", ++letter),
+						InetAddress.getLocalHost());
 				NetworkManager node = new NetworkManager(otherNetConfig);
 				node.connect();
 				nodes.add(node);
@@ -94,12 +94,11 @@ public class NetworkTestUtil {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = generateRandomCredentials();
-			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
-			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
-					node.getDataManager());
+			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
 			IFileConfiguration config = FileConfiguration.createDefault();
-			DownloadManager downloadManager = new DownloadManager(node.getDataManager(),
-					node.getMessageManager(), keyManager, config);
+			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
+					keyManager, config);
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			session = new H2HSession(profileManager, keyManager, downloadManager, config, root.toPath());
@@ -118,12 +117,11 @@ public class NetworkTestUtil {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
-			UserProfileManager profileManager = new UserProfileManager(node, userCredentials);
-			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair,
-					node.getDataManager());
+			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
 			IFileConfiguration config = FileConfiguration.createDefault();
-			DownloadManager downloadManager = new DownloadManager(node.getDataManager(),
-					node.getMessageManager(), keyManager, config);
+			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
+					keyManager, config);
 			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 			H2HSession session;
 			session = new H2HSession(profileManager, keyManager, downloadManager, config, root.toPath());
@@ -161,8 +159,7 @@ public class NetworkTestUtil {
 		// TODO the initial peer has an autostart, whereas the others dont
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"),
-				FileConfiguration.createDefault());
+		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"), FileConfiguration.createDefault());
 		initial.connect();
 		initial.getFileManager().configureAutostart(false);
 		initial.getUserManager().configureAutostart(false);
@@ -172,8 +169,7 @@ public class NetworkTestUtil {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(
-						NetworkConfiguration.create("node " + i, bootstrapAddress),
+				IH2HNode node = H2HNode.createNode(NetworkConfiguration.create("node " + i, bootstrapAddress),
 						FileConfiguration.createDefault());
 				node.connect();
 				node.getFileManager().configureAutostart(false);

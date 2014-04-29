@@ -16,9 +16,9 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.DigestResult;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
@@ -88,7 +89,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDownload() throws IOException, NoSessionException, GetFailedException {
+	public void testDownload() throws IOException, NoSessionException, GetFailedException, NoPeerConnectionException {
 		UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
 
 		// the downloaded file should now be on the disk
@@ -104,8 +105,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 			InvalidProcessStateException {
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-				wrongKeys.getPublic(), downloader);
+		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(), downloader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();
@@ -115,7 +115,8 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 	@Test
 	// should overwrite the existing file
-	public void testDownloadFileAlreadyExisting() throws IOException, NoSessionException, GetFailedException {
+	public void testDownloadFileAlreadyExisting() throws IOException, NoSessionException, GetFailedException,
+			NoPeerConnectionException {
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, "existing content");
@@ -143,8 +144,8 @@ public class DownloadFileTest extends H2HJUnitTest {
 		FileUtils.write(existing, testContent);
 		long lastModifiedBefore = existing.lastModified();
 
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-				fileNode.getFilePublicKey(), downloader);
+		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
+				downloader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();

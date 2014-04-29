@@ -9,8 +9,8 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;

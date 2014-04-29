@@ -43,8 +43,8 @@ public class UserProfileManagerExceptionHandlingTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetException() {
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+	public void testGetException() throws NoPeerConnectionException {
+		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);
 		try {
 			profileManager.getUserProfile("abc", false);
 			Assert.fail();
@@ -56,7 +56,7 @@ public class UserProfileManagerExceptionHandlingTest extends H2HJUnitTest {
 	@Test
 	public void testPutException() throws GetFailedException, IOException, NoPeerConnectionException {
 		UseCaseTestUtil.register(userCredentials, client);
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);
 		UserProfile userProfile = profileManager.getUserProfile("abc", true);
 
 		// modify the version key to trigger a version conflict (wrong based on key)

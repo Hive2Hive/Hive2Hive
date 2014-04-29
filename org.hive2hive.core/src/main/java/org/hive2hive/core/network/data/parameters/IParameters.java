@@ -5,8 +5,8 @@ import java.security.KeyPair;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * An interface for the {@link DataManager} methods.

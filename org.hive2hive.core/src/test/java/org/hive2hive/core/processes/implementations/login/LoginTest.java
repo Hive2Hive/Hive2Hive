@@ -67,8 +67,7 @@ public class LoginTest extends H2HJUnitTest {
 
 		// verify the locations map
 		FutureGet futureGet = client.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(
-						H2HConstants.USER_LOCATIONS));
+				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 
 		Locations locations = (Locations) futureGet.getData().object();
@@ -76,40 +75,40 @@ public class LoginTest extends H2HJUnitTest {
 	}
 
 	@Test(expected = NoSessionException.class)
-	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException, ProcessExecutionException {
-		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
-				NetworkTestUtil.randomString(), userCredentials.getPin());
+	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException,
+			ProcessExecutionException {
+		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), NetworkTestUtil.randomString(),
+				userCredentials.getPin());
 
 		loginAndWaitToFail(wrongCredentials);
 	}
 
 	@Test(expected = NoSessionException.class)
-	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException, ProcessExecutionException {
-		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(),
-				userCredentials.getPassword(), NetworkTestUtil.randomString());
+	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException,
+			ProcessExecutionException {
+		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), userCredentials.getPassword(),
+				NetworkTestUtil.randomString());
 
 		loginAndWaitToFail(wrongCredentials);
 	}
 
 	@Test(expected = NoSessionException.class)
-	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException, ProcessExecutionException {
+	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException,
+			ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(),
 				userCredentials.getPassword(), userCredentials.getPin());
 
 		loginAndWaitToFail(wrongCredentials);
 	}
 
-	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials)
-			throws InvalidProcessStateException, NoSessionException, NoPeerConnectionException {
+	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials) throws InvalidProcessStateException,
+			NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
 		SessionParameters sessionParameters = new SessionParameters();
-		sessionParameters.setProfileManager(new UserProfileManager(client, wrongCredentials));
+		sessionParameters.setProfileManager(new UserProfileManager(client.getDataManager(), wrongCredentials));
 
-		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(wrongCredentials,
-				sessionParameters, client);
+		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(wrongCredentials, sessionParameters,
+				client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		loginProcess.attachListener(listener);
 		loginProcess.start();

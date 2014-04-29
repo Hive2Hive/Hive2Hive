@@ -6,7 +6,6 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkContent;
 
 /**
  * A list of unique addresses of peers that are currently online. Holding these addresses is necessary to

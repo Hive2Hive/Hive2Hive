@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data;
+package org.hive2hive.core.model;
 
 import java.io.IOException;
 import java.io.Serializable;

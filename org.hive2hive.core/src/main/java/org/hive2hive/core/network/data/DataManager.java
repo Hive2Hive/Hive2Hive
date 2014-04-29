@@ -14,6 +14,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
 import org.hive2hive.core.network.data.futures.FutureDigestListener;

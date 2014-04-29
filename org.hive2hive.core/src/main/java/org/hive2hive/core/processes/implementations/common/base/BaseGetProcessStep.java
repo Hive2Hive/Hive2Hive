@@ -2,8 +2,8 @@ package org.hive2hive.core.processes.implementations.common.base;
 
 import java.security.PublicKey;
 
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;

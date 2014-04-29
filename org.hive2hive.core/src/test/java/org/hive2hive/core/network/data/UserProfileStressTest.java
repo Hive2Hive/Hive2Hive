@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.file.FileTestUtil;
@@ -48,8 +49,9 @@ public class UserProfileStressTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void test() throws NoSessionException, GetFailedException, PutFailedException, IOException {
-		UserProfileManager profileManager = new UserProfileManager(client, userCredentials);
+	public void test() throws NoSessionException, GetFailedException, PutFailedException, IOException,
+			NoPeerConnectionException {
+		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);
 		Random random = new Random();
 
 		while (true) {

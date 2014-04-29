@@ -8,7 +8,6 @@ import java.security.PublicKey;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**

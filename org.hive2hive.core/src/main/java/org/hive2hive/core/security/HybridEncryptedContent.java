@@ -1,7 +1,7 @@
 package org.hive2hive.core.security;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.network.data.NetworkContent;
+import org.hive2hive.core.model.NetworkContent;
 
 /**
  * This class contains the result of a hybrid encryption. It holds the RSA encrypted parameters and the AES

@@ -57,8 +57,8 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
 
 		// add them already to the DHT
-		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
+		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(),
+				H2HConstants.KEYLENGTH_USER_PROFILE);
 		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
 		FuturePut putGlobal = putter.getDataManager().putUnblocked(
 				new Parameters().setLocationKey(credentials.getProfileLocationKey())
@@ -72,7 +72,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepSuccessWithNoUserProfile() {
+	public void testStepSuccessWithNoUserProfile() throws NoPeerConnectionException {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		try {
