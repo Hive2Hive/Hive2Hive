@@ -23,14 +23,14 @@ A short demonstration of the API and its basic usage are given here. ([see more]
 **Create P2P Network**  
 Configuring and setting up a new P2P network is very easy. Just specify the configurations and setup an initial node.
 
-1. `NetworkConfiguration` and `FileConfiguration` factory classes may help to easily specify your configurations
+1. `NetworkConfiguration` and `FileConfiguration` factory classes may help to specify your configurations
 2. create the initial node and connect it
 
 ```java
 INetworkConfiguration netConfig = NetworkConfiguration.create("first");
-IFileConfiguration fileCongif = FileConfiguration.createDefault();
+IFileConfiguration fileConfig = FileConfiguration.createDefault();
 
-IH2HNode node = H2HNode.createNode(netConfig, fileCongif);
+IH2HNode node = H2HNode.createNode(netConfig, fileConfig);
 node.connect();
 ```
 
@@ -42,7 +42,7 @@ You may want to add other nodes to your created network. Any node can join by bo
 
 ```java
 INetworkConfiguration netConfig2 = NetworkConfiguration.create("second", InetAddress.getByName("192.168.1.100"));
-IH2HNode node2 = H2HNode.createNode(netConfig2, fileCongif);
+IH2HNode node2 = H2HNode.createNode(netConfig2, fileConfig);
 node2.connect();
 ```
 
@@ -118,7 +118,7 @@ Hive2Hive offers the same basic functionality known from popular synchronization
 On top of that, Hive2Hive provides additional features such as security and versioning.
 
 - File Synchronization
-- File Sharing
+- File Sharing (including user permissions (*write*, *read-only*))
 - File Versioning (including conflict detection)
 - File Watchdog / Change Detection (automated, configurable)
 - Security (configurable, [see more](http://hive2hive.com/security-aspects/))
