@@ -1,7 +1,7 @@
 # ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive
 
-[Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for distributed, P2P-based file synchronization and sharing.  
-It is built on top of [TomP2P](http://tomp2p.net/), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
+[Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing.  
+It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
 Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
 
@@ -79,17 +79,18 @@ See [here](http://hive2hive.com/?page_id=429) for more detailed information abou
 ## Features & Advantages
 
 Hive2Hive offers the same basic functionality known from popular synchronization services. (e.g., [Dropbox](http://www.dropbox.com))  
-On top of that, Hive2Hive provides additional features such as security or versioning.
+On top of that, Hive2Hive provides additional features such as security and versioning.
 
-- File Synchronization (folder based)
+- File Synchronization
 - File Sharing
 - File Versioning (including conflict detection)
-- File Observation (automated, configurable)
+- File Watchdog / change detection (automated, configurable)
 - Security (configurable, [see more](http://hive2hive.com/security-aspects/))
-  - Encryption of files and network communication
+  - Encryption of files
+  - Encryption of messages
   - Authenticity of data and messages
-- Users may use multiple clients (simulatenously)
-- Multiple users may use the same machine (simultaneously)
+- Users can use multiple clients (simulatenously)
+- Multiple users can use the same machine (simultaneously)
 
 **Using the Hive2Hive library is very simple and has several advantages:**
 - P2P Decentralization
@@ -97,10 +98,10 @@ On top of that, Hive2Hive provides additional features such as security or versi
   - Heterogeneity
   - Reliability & Fault-Tolerance
 - no file size limits (configurable)
-- runs on Windows, OS X and Linux
+- platform independent (JVM)
 - headless deployment possible<sup>*</sup> (e.g., on a [Raspberry Pi](http://www.raspberrypi.org/))  
 - free & open-source
-- freely configurable
+- generously configurable & customizable
 - highly extendable
 - detailed documentation
 
