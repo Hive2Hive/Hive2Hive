@@ -1,7 +1,6 @@
 # ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive
 
-[Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing.  
-It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
+[Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
 Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
 
@@ -38,7 +37,7 @@ node.connect();
 **Join Existing P2P Network**  
 You may want to add other nodes to your created network. Any node can join by bootstrapping to another node that is already part of the network.
 
-1. specify the network configuration for the joining node (i.e., provide bootstrap address of another (initial) node)
+1. specify the network configuration for the joining node (i.e., provide bootstrap address of another node)
 2. create the new node and connect it (it will bootstrap according to its network configuration)
 
 ```java
