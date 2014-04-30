@@ -24,6 +24,7 @@ A short demonstration of the API and its basic usage are given here. For more de
 
 **Create P2P Network**  
 Configuring and setting up a new P2P network is very easy. Just specify the configurations and setup an initial node.
+
 1. the `NetworkConfiguration` and `FileConfiguration` factory classes may help to easily specify your configurations
 2. create the initial node and connect it
 
@@ -37,6 +38,7 @@ node.connect();
 
 **Join Existing P2P Network**  
 You may want to add other nodes to your created network. Any node can join by bootstrapping to another node that is already part of the network.
+
 1. specify the network configuration for the joining node (i.e., provide bootstrap address of another (initial) node)
 2. create the new node and connect it (it will bootstrap according to its network configuration)
 
@@ -49,6 +51,7 @@ node2.connect();
 ### User Management
 
 As soon as a node is connected to a network, users can interact with it. For this, each node provides a user management interface.
+
 1. user has to provide its credentials
 2. login user (if a user is new to the network, she has to register on her first visit)
 3. user can interact with the network (i.e., file management is enabled)
@@ -100,7 +103,7 @@ fileManager.recover(file, versionSelector);
 fileManager.move(folder, new File("other-folder"));
 
 fileManager.delete(file);
-```java
+```
 
 ### File Watchdog
 
