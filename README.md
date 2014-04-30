@@ -91,10 +91,7 @@ IVersionSelector versionSelector = new IVersionSelector() {
 	public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
 		return availableVersions.get(0);
 	}
-        @Override
-	public String getRecoveredFileName(String fullName, String name, String extension) {
-		return fullName;
-	};
+};
 fileManager.recover(file, versionSelector);
 
 fileManager.move(folder, new File("other-folder"));
