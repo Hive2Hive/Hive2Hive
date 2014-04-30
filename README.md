@@ -18,63 +18,102 @@ Although many well-known synchronization and sharing services exist, most of the
 
 ## API Demonstration
 
-Configuring and setting up a P2P network is very easy.
-```java
-// define configuration objects
-INetworkConfiguration nodeConfig = NetworkConfiguration.create("nodeID", InetAddress.getByName("192.168.1.100"));
-IFileConfiguration fileConfig = FileConfiguration.createDefault();
+A short demonstration of the API and its basic usage are given here. For more detailed information about the API, [see here](http://hive2hive.com/?page_id=429).
 
-// create peer
-IH2HNode node = H2HNode.createNode(nodeConfig, fileConfig);
+### Network Management
+
+**Create P2P Network**  
+Configuring and setting up a new P2P network is very easy. Just specify the configurations and setup an initial node.
+1. the `NetworkConfiguration` and `FileConfiguration` factory classes may help to easily specify your configurations
+2. create the initial node and connect it
+
+```java
+INetworkConfiguration netConfig = NetworkConfiguration.create("first");
+IFileConfiguration fileCongif = FileConfiguration.createDefault();
+
+IH2HNode node = H2HNode.createNode(netConfig, fileCongif);
 node.connect();
 ```
-Users can then be announced to the created P2P network. Once announced, they can login/logout to/from the network whenever they want and with whatever client they use. For security reasons, each user has to provide his/her credentials for these operations.
+
+**Join Existing P2P Network**  
+You may want to add other nodes to your created network. Any node can join by bootstrapping to another node that is already part of the network.
+1. specify the network configuration for the joining node (i.e., provide bootstrap address of another (initial) node)
+2. create the new node and connect it (it will bootstrap according to its network configuration)
+
+```java
+INetworkConfiguration netConfig2 = NetworkConfiguration.create("second", InetAddress.getByName("192.168.1.100"));
+IH2HNode node2 = H2HNode.createNode(netConfig2, fileCongif);
+node2.connect();
+```
+
+### User Management
+
+As soon as a node is connected to a network, users can interact with it. For this, each node provides a user management interface.
+1. user has to provide its credentials
+2. login user (if a user is new to the network, she has to register on her first visit)
+3. user can interact with the network (i.e., file management is enabled)
+
 ```java
 IUserManager userManager = node.getUserManager();
 
-UserCredentials credentials = new UserCredentials("userID", "password", "pin");
+UserCredentials credentials = new UserCredentials("userId", "password", "pin");
+Path rootDirectory = Paths.get("C:/User/XYZ/...");
 
-// announce the user
-userManager.register(credentials);
-        
-// login the user and provide the local root directory path
-userManager.login(credentials, Paths.get("C:\User\XYZ\..."));
+if (!userManager.isRegistered(credentials.getUserId())) {
+	userManager.register(credentials).await();
+}
+userManager.login(credentials, rootDirectory).await();
 ```
 
-File synchronization and sharing operations can then be made use of.
+### File Management
+
+As soon as a user is logged in to the network, her files are automatically synchronized with the current node. Many further file operations are available. For this, each node provides a file management interface.
+- **add** / **delete** file
+- **update** / **recover** file
+- **share** file with another user
+- **move** file
+
 ```java
 IFileManager fileManager = node.getFileManager();
-        
-File folder = new File("demo-folder");
-File file = new File(folder, "demo-file");
-        
-// add a file
-fileManager.add(file);
-        
-// share a folder with another user (write permission)
-fileManager.share(folder, "otherUser", PermissionType.WRITE);
-        
-// update a file
-fileManager.update(file);
-        
-// recover a file's other version
-IVersionSelector versionSelector = new IVersionSelector() {
-    @Override
-    public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
-        return availableVersions.get(0);
-    }
-};
-fileManager.recover(file, versionSelector);
- 
-// move a file in the file hierarchy
-File otherFolder = new File("other-demo-folder");
-fileManager.move(folder, otherFolder);
- 
-// delete a file
-fileManager.delete(file);
-```
 
-See [here](http://hive2hive.com/?page_id=429) for more detailed information about the API.
+File folder = new File("folderpath");
+File file = new File(folder, "filepath");
+
+fileManager.add(file);
+
+fileManager.update(file);
+
+fileManager.share(folder, "other-userId", PermissionType.WRITE);
+
+IVersionSelector versionSelector = new IVersionSelector() {
+	@Override
+	public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
+		return availableVersions.get(0);
+	}
+        @Override
+	public String getRecoveredFileName(String fullName, String name, String extension) {
+		return fullName;
+	}
+	;
+fileManager.recover(file, versionSelector);
+
+fileManager.move(folder, new File("other-folder"));
+
+fileManager.delete(file);
+```java
+
+### File Watchdog
+
+In order to keep track of changes in the local file system, a file observer is needed. This observer then notifies its attached listeners on all file system events. You can either use the provided `H2HFileObserver` and `H2HFileObserverListener` or implement your own adhering to the `IFileObserver` and `IFileObserverListener` interfaces.  
+The `H2HFileObserverListener` automatically synchronizes the Hive2Hive root folder with the network.
+
+```java
+IFileObserverListener listener = new H2HFileObserverListener(fileManager);
+
+IFileObserver observer = new H2HFileObserver(rootDirectory.toFile());
+observer.addFileObserverListener(listener);
+observer.start();
+```
 
 ## Features & Advantages
 
