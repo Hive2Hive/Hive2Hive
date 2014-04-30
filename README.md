@@ -18,14 +18,13 @@ Although many well-known synchronization and sharing services exist, most of the
 
 ## API Demonstration
 
-A short demonstration of the API and its basic usage are given here. For more detailed information about the API, [see here](http://hive2hive.com/?page_id=429).
-
+A short demonstration of the API and its basic usage are given here. ([see more](http://hive2hive.com/?page_id=429))
 ### Network Management
 
 **Create P2P Network**  
 Configuring and setting up a new P2P network is very easy. Just specify the configurations and setup an initial node.
 
-1. the `NetworkConfiguration` and `FileConfiguration` factory classes may help to easily specify your configurations
+1. `NetworkConfiguration` and `FileConfiguration` factory classes may help to easily specify your configurations
 2. create the initial node and connect it
 
 ```java
@@ -50,7 +49,7 @@ node2.connect();
 
 ### User Management
 
-As soon as a node is connected to a network, users can interact with it. For this, each node provides a user management interface.
+Once a node is connected to a network, users can interact with it. For this, each node provides a user management interface.
 
 1. user has to provide its credentials
 2. login user (if a user is new to the network, she has to register on her first visit)
@@ -96,8 +95,7 @@ IVersionSelector versionSelector = new IVersionSelector() {
         @Override
 	public String getRecoveredFileName(String fullName, String name, String extension) {
 		return fullName;
-	}
-	;
+	};
 fileManager.recover(file, versionSelector);
 
 fileManager.move(folder, new File("other-folder"));
@@ -126,7 +124,7 @@ On top of that, Hive2Hive provides additional features such as security and vers
 - File Synchronization
 - File Sharing
 - File Versioning (including conflict detection)
-- File Watchdog / change detection (automated, configurable)
+- File Watchdog / Change Detection (automated, configurable)
 - Security (configurable, [see more](http://hive2hive.com/security-aspects/))
   - Encryption of files
   - Encryption of messages
