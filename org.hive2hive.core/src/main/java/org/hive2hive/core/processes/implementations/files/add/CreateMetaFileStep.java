@@ -32,7 +32,7 @@ public class CreateMetaFileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 
 		logger.trace("Creating new meta file for file '{}'.", file.getName());
 

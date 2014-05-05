@@ -84,7 +84,7 @@ import org.hive2hive.core.security.UserCredentials;
  * Factory class for the creation of specific process components and composites that represent basic
  * operations of the Hive2Hive project.
  * 
- * @author Christian, Nico
+ * @author Christian, Nico, Seppi
  * 
  */
 public final class ProcessFactory {
@@ -212,7 +212,7 @@ public final class ProcessFactory {
 			// file needs to upload the chunks and a meta file
 			process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 			process.add(new CreateMetaFileStep(context));
-			process.add(new PutMetaFileStep(context, dataManager));
+			process.add(new PutMetaFileStep(context, context, context, context, dataManager));
 		}
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		process.add(new PrepareNotificationStep(context));
@@ -234,7 +234,7 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
-		process.add(new PutMetaFileStep(context, dataManager));
+		process.add(new PutMetaFileStep(context, context, context, context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
@@ -327,6 +327,16 @@ public final class ProcessFactory {
 
 		return process;
 	}
+	
+//	public ProcessComponent createUnshareProcess(File folder, NetworkManager networkManager)
+//			throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+//		UnshareProcessContext context = new UnshareProcessContext(folder);
+//		
+//		SequentialProcess process = new SequentialProcess();
+//		process.add(new CheckSharedFolderStep(context, networkManager.getSession()));
+//		process.add(createNotificationProcess(context, networkManager));
+//		return process;
+//	}
 
 	/**
 	 * Creates and returns a file list process.

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * Gets a {@link MetaFile} from the DHT and decrypts it.
  * 
  * @author Nico
- * 
  */
 public class GetMetaFileStep extends BaseGetProcessStep {
 
@@ -51,7 +50,6 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 			logger.warn("Meta file not found.");
 			throw new ProcessExecutionException("Meta file not found.");
 		} else {
-
 			// decrypt meta document
 			HybridEncryptedContent encryptedContent = (HybridEncryptedContent) loadedContent;
 
@@ -70,6 +68,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 			metaContext.provideMetaFile(metaFile);
 			metaContext.provideEncryptedMetaFile(encryptedContent);
+			
 			logger.debug("Got and decrypted the meta file.");
 		}
 	}

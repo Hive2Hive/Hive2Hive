@@ -48,8 +48,8 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		// create a new version and add it to the meta file
 		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
-		newVersion = new FileVersion(metaFileSmall.getVersions().size(), FileUtil.getFileSize(context
-				.getFile()), System.currentTimeMillis(), context.getMetaChunks());
+		newVersion = new FileVersion(metaFileSmall.getVersions().size(), FileUtil.getFileSize(context.consumeFile()),
+				System.currentTimeMillis(), context.getMetaChunks());
 		metaFileSmall.getVersions().add(newVersion);
 
 		initiateCleanup();

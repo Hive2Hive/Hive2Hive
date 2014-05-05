@@ -10,7 +10,10 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
+import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideHash;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
@@ -23,8 +26,8 @@ import org.hive2hive.core.security.HybridEncryptedContent;
  * 
  * @author Nico, Seppi
  */
-public class AddFileProcessContext implements IProvideHash, IConsumeNotificationFactory, IProvideProtectionKeys,
-		IProvideMetaFile {
+public class AddFileProcessContext implements IConsumeFile, IConsumeMetaFile, IConsumeProtectionKeys,
+		IConsumeNotificationFactory, IProvideHash, IProvideProtectionKeys, IProvideMetaFile {
 
 	private final File file;
 
@@ -46,8 +49,39 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 		this.file = file;
 	}
 
-	public File getFile() {
+	@Override
+	public File consumeFile() {
 		return file;
+	}
+	
+	@Override
+	public MetaFile consumeMetaFile() {
+		return metaFile;
+	}
+	
+	@Override
+	public KeyPair consumeProtectionKeys() {
+		return protectionKeys;
+	}
+	
+	@Override
+	public BaseNotificationMessageFactory consumeMessageFactory() {
+		return messageFactory;
+	}
+	
+	@Override
+	public void provideHash(byte[] hash) {
+		this.hash = hash;
+	}
+	
+	@Override
+	public void provideProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+	
+	@Override
+	public void provideMetaFile(MetaFile metaFile) {
+		this.metaFile = metaFile;
 	}
 
 	public void setLargeFile(boolean largeFile) {
@@ -76,31 +110,8 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 		return chunkEncryptionKeys;
 	}
 
-	public MetaFile consumeMetaFile() {
-		return metaFile;
-	}
-
-	@Override
-	public void provideMetaFile(MetaFile metaFile) {
-		this.metaFile = metaFile;
-	}
-
-	@Override
-	public void provideHash(byte[] hash) {
-		this.hash = hash;
-	}
-
 	public byte[] consumeHash() {
 		return hash;
-	}
-
-	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
-	}
-
-	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
 	}
 
 	public void provideIndex(Index index) {
@@ -113,11 +124,6 @@ public class AddFileProcessContext implements IProvideHash, IConsumeNotification
 
 	public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
-	}
-
-	@Override
-	public BaseNotificationMessageFactory consumeMessageFactory() {
-		return messageFactory;
 	}
 
 	public void provideUsersToNotify(Set<String> users) {

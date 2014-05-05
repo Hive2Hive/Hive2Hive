@@ -41,7 +41,7 @@ public class InitializeChunksStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 
 		// only continue if the file has content
 		if (file.isDirectory()) {

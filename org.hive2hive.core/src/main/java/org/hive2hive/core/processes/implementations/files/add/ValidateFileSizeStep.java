@@ -35,7 +35,7 @@ public class ValidateFileSizeStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 		if (file.isDirectory()) {
 			// ok
 			return;

@@ -46,7 +46,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 
 		// pre-calculate the meta keys because this may take a while
 		KeyPair metaKeys = context.generateOrGetMetaKeys();
@@ -109,7 +109,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 				return;
 			}
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
-			Index childNode = parentNode.getChildByName(context.getFile().getName());
+			Index childNode = parentNode.getChildByName(context.consumeFile().getName());
 			parentNode.removeChild(childNode);
 			try {
 				profileManager.readyToPut(userProfile, getID());

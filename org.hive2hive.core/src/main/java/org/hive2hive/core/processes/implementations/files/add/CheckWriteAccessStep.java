@@ -37,7 +37,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 
 		logger.trace("Check write access in folder '{}' to add file '{}'.", file
 				.getParentFile().getName(), file.getName());

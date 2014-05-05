@@ -51,7 +51,7 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 
 		Chunk chunk;
 		try {
