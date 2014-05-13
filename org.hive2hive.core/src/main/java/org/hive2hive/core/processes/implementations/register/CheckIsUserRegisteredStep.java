@@ -6,24 +6,28 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CheckIsUserRegisteredStep extends GetUserLocationsStep {
 
-	private final RegisterProcessContext context;
-	private final String userId;
+	private final static Logger logger = LoggerFactory.getLogger(CheckIsUserRegisteredStep.class);
 
-	public CheckIsUserRegisteredStep(String userId, RegisterProcessContext context, IDataManager dataManager) {
-		super(userId, context, dataManager);
-		this.userId = userId;
+	private final RegisterProcessContext context;
+
+	public CheckIsUserRegisteredStep(RegisterProcessContext context, IDataManager dataManager) {
+		super(context, dataManager);
 		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		String userId = context.consumeUserId();
+		logger.trace("Checking if user is already registerd. user id ='{}'", userId);
 		super.doExecute();
-
-		if (context.consumeLocations() != null) {
+		if (context.consumeUserLocations() != null) {
 			throw new ProcessExecutionException(new UserAlreadyRegisteredException(userId));
 		}
 	}
+
 }

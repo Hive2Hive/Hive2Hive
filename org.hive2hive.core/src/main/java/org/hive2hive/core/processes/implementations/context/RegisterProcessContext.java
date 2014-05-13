@@ -4,41 +4,51 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfile;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutUserLocationsContext;
+import org.hive2hive.core.security.UserCredentials;
 
-public final class RegisterProcessContext implements IProvideLocations, IConsumeLocations,
-		IConsumeProtectionKeys, IConsumeUserProfile, IProvideUserProfile {
+public final class RegisterProcessContext implements IGetUserLocationsContext, IPutUserLocationsContext {
+
+	private final UserCredentials userCredentials;
 
 	private Locations locations;
 	private UserProfile profile;
 
-	@Override
-	public Locations consumeLocations() {
-		return locations;
+	public RegisterProcessContext(UserCredentials userCredentials) {
+		this.userCredentials = userCredentials;
+	}
+
+	public UserCredentials getUserCredentials() {
+		return userCredentials;
 	}
 
 	@Override
-	public void provideLocations(Locations locations) {
+	public String consumeUserId() {
+		return userCredentials.getUserId();
+	}
+
+	@Override
+	public void provideUserLocations(Locations locations) {
 		this.locations = locations;
 	}
 
 	@Override
-	public KeyPair consumeProtectionKeys() {
-		return profile.getProtectionKeys();
+	public Locations consumeUserLocations() {
+		return locations;
 	}
 
-	@Override
 	public void provideUserProfile(UserProfile profile) {
 		this.profile = profile;
 	}
 
-	@Override
 	public UserProfile consumeUserProfile() {
 		return profile;
+	}
+
+	@Override
+	public KeyPair consumeUserLocationsProtectionKeys() {
+		return profile.getProtectionKeys();
 	}
 
 }

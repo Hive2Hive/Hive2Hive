@@ -34,7 +34,7 @@ import org.hive2hive.core.processes.implementations.context.RegisterProcessConte
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IConsumeNotificationFactory;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
@@ -113,16 +113,16 @@ public final class ProcessFactory {
 	public ProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
-		RegisterProcessContext context = new RegisterProcessContext();
+		RegisterProcessContext context = new RegisterProcessContext(credentials);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new CheckIsUserRegisteredStep(credentials.getUserId(), context, dataManager));
-		process.add(new LocationsCreationStep(credentials.getUserId(), context));
-		process.add(new UserProfileCreationStep(credentials.getUserId(), context));
-		process.add(new AsyncComponent(new PutUserProfileStep(credentials, context, dataManager)));
-		process.add(new AsyncComponent(new PutUserLocationsStep(context, context, dataManager)));
+		process.add(new CheckIsUserRegisteredStep(context, dataManager));
+		process.add(new LocationsCreationStep(context));
+		process.add(new UserProfileCreationStep(context));
+		process.add(new AsyncComponent(new PutUserProfileStep(context, dataManager)));
+		process.add(new AsyncComponent(new PutUserLocationsStep(context, dataManager)));
 		process.add(new AsyncComponent(new PutPublicKeyStep(context, dataManager)));
 
 		return process;
@@ -140,16 +140,16 @@ public final class ProcessFactory {
 	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
-		LoginProcessContext context = new LoginProcessContext();
+		LoginProcessContext context = new LoginProcessContext(credentials);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserProfileStep(credentials, context, dataManager));
+		process.add(new GetUserProfileStep(context, dataManager));
 		process.add(new SessionCreationStep(params, context, networkManager));
-		process.add(new GetUserLocationsStep(credentials.getUserId(), context, networkManager.getDataManager()));
+		process.add(new GetUserLocationsStep(context, networkManager.getDataManager()));
 		process.add(new ContactOtherClientsStep(context, networkManager));
-		process.add(new PutUserLocationsStep(context, context, dataManager));
+		process.add(new PutUserLocationsStep(context, dataManager));
 		process.add(new SynchronizeFilesStep(context, networkManager));
 
 		return process;
@@ -212,7 +212,7 @@ public final class ProcessFactory {
 			// file needs to upload the chunks and a meta file
 			process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 			process.add(new CreateMetaFileStep(context));
-			process.add(new PutMetaFileStep(context, context, context, context, dataManager));
+			process.add(new PutMetaFileStep(context, context, context, dataManager));
 		}
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
 		process.add(new PrepareNotificationStep(context));
@@ -234,7 +234,7 @@ public final class ProcessFactory {
 		process.add(new File2MetaFileComponent(file, context, context, networkManager));
 		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
 		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
-		process.add(new PutMetaFileStep(context, context, context, context, dataManager));
+		process.add(new PutMetaFileStep(context, context, context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
@@ -308,7 +308,7 @@ public final class ProcessFactory {
 			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
-		process.add(new File2MetaFileComponent(file, context, context, networkManager));
+		process.add(new File2MetaFileComponent(file, context, networkManager));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
 		return process;
@@ -327,16 +327,16 @@ public final class ProcessFactory {
 
 		return process;
 	}
-	
-//	public ProcessComponent createUnshareProcess(File folder, NetworkManager networkManager)
-//			throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
-//		UnshareProcessContext context = new UnshareProcessContext(folder);
-//		
-//		SequentialProcess process = new SequentialProcess();
-//		process.add(new CheckSharedFolderStep(context, networkManager.getSession()));
-//		process.add(createNotificationProcess(context, networkManager));
-//		return process;
-//	}
+
+	// public ProcessComponent createUnshareProcess(File folder, NetworkManager networkManager)
+	// throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+	// UnshareProcessContext context = new UnshareProcessContext(folder);
+	//
+	// SequentialProcess process = new SequentialProcess();
+	// process.add(new CheckSharedFolderStep(context, networkManager.getSession()));
+	// process.add(createNotificationProcess(context, networkManager));
+	// return process;
+	// }
 
 	/**
 	 * Creates and returns a file list process.
