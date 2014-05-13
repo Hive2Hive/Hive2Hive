@@ -57,7 +57,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 			throw new ProcessExecutionException("No session yet");
 		}
 
-		Locations locations = context.consumeLocations();
+		Locations locations = context.consumeUserLocations();
 		waitForResponses = new CountDownLatch(locations.getPeerAddresses().size());
 		if (!locations.getPeerAddresses().isEmpty()) {
 			for (PeerAddress address : locations.getPeerAddresses()) {
@@ -111,9 +111,9 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 	private void updateLocations() {
 		isUpdated = true;
 
-		Locations updatedLocations = new Locations(context.consumeLocations().getUserId());
-		updatedLocations.setBasedOnKey(context.consumeLocations().getBasedOnKey());
-		updatedLocations.setVersionKey(context.consumeLocations().getVersionKey());
+		Locations updatedLocations = new Locations(context.consumeUserLocations().getUserId());
+		updatedLocations.setBasedOnKey(context.consumeUserLocations().getBasedOnKey());
+		updatedLocations.setVersionKey(context.consumeUserLocations().getVersionKey());
 
 		// add addresses that responded and self
 		for (PeerAddress address : responses.keySet()) {
@@ -122,7 +122,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 			}
 		}
 		updatedLocations.addPeerAddress(networkManager.getConnection().getPeer().getPeerAddress());
-		context.provideLocations(updatedLocations);
+		context.provideUserLocations(updatedLocations);
 
 		// evaluate if initial
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());

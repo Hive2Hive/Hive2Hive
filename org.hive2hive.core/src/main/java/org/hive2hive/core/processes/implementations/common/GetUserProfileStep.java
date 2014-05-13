@@ -13,7 +13,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfile;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -21,18 +21,17 @@ import org.hive2hive.core.security.UserCredentials;
 
 public class GetUserProfileStep extends BaseGetProcessStep {
 
-	private final UserCredentials credentials;
-	private final IProvideUserProfile context;
+	private final IGetUserProfileContext context;
 
-	public GetUserProfileStep(UserCredentials credentials, IProvideUserProfile context,
+	public GetUserProfileStep(IGetUserProfileContext context,
 			IDataManager dataManager) {
 		super(dataManager);
-		this.credentials = credentials;
 		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		UserCredentials credentials = context.consumeUserCredentials();
 
 		NetworkContent loadedContent = get(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 
