@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.implementations.common;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -20,10 +19,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideHash;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutMetaFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
@@ -38,28 +34,20 @@ public class PutMetaFileStep extends BasePutProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(PutMetaFileStep.class);
 
-	private final IConsumeMetaFile metaFileContext;
-	private final IConsumeProtectionKeys protectionKeysContext;
-	private final IConsumeFile fileContext;
-	private final IProvideHash hashContext;
+	private final IPutMetaFileContext context;
 
-	public PutMetaFileStep(IConsumeMetaFile metaFileContext, IConsumeProtectionKeys protectionKeysContext,
-			IConsumeFile fileContext, IProvideHash hashContext, IDataManager dataManager) {
+	public PutMetaFileStep(IPutMetaFileContext context, IDataManager dataManager) {
 		super(dataManager);
-		this.metaFileContext = metaFileContext;
-		this.protectionKeysContext = protectionKeysContext;
-		this.fileContext = fileContext;
-		this.hashContext = hashContext;
+		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
-			MetaFile metaFile = metaFileContext.consumeMetaFile();
-			KeyPair protectionKeys = protectionKeysContext.consumeProtectionKeys();
-			File file = fileContext.consumeFile();
+			MetaFile metaFile = context.consumeMetaFile();
+			KeyPair protectionKeys = context.consumeMetaFileProtectionKeys();
 
-			logger.trace("Encrypting meta file of file '{}' in a hybrid manner.", file.getName());
+			logger.trace("Encrypting meta file in a hybrid manner.");
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaFile, metaFile.getId());
 			encrypted.setBasedOnKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();
@@ -72,7 +60,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			// put the encrypted meta file into the network
 			put(parameters);
 			// store the hash
-			hashContext.provideHash(parameters.getHash());
+			context.provideMetaFileHash(parameters.getHash());
 
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
@@ -87,6 +75,6 @@ public class PutMetaFileStep extends BasePutProcessStep {
 		super.doRollback(reason);
 
 		// remove provided hash
-		hashContext.provideHash(null);
+		context.provideMetaFileHash(null);
 	}
 }
