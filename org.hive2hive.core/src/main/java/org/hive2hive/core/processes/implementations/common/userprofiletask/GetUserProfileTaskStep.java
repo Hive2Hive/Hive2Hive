@@ -18,7 +18,7 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfileTask;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IUserProfileTaskContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
@@ -33,12 +33,12 @@ public class GetUserProfileTaskStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(GetUserProfileTaskStep.class);
 
-	private final IProvideUserProfileTask context;
+	private final IUserProfileTaskContext context;
 	private String userId;
 
 	private final NetworkManager networkManager;
 
-	public GetUserProfileTaskStep(IProvideUserProfileTask context, NetworkManager networkManager) {
+	public GetUserProfileTaskStep(IUserProfileTaskContext context, NetworkManager networkManager) {
 		this.networkManager = networkManager;
 		if (context == null)
 			throw new IllegalArgumentException("Context can't be null.");
