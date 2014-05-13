@@ -32,17 +32,11 @@ import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfileTask;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IUserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.userprofiletask.TestPutUserProfileTaskStep;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -94,34 +88,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertNotNull(futureGet.getData());
 	}
 
-	// TODO: how to test this?
 	@Ignore
 	@Test
-	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException,
-			ProcessExecutionException {
-		String userId = NetworkTestUtil.randomString();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
-
-		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask,
-				key.getPublic(), node);
-
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		AsyncComponent component = new AsyncComponent(putStep);
-		component.attachListener(listener);
-
-		// start and cancel immediately
-		component.start();
-		putStep.cancel(new RollbackReason("Testing whether rollback works."));
-		UseCaseTestUtil.waitTillFailed(listener, 10);
-
-		Parameters parameters = new Parameters().setLocationKey(userId)
-				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
-				.setContentKey(userProfileTask.getContentKey());
-		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+	public void testPutRollback() {
+		// TODO: how to test this?
 	}
 
 	@Test
@@ -149,27 +119,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 				((TestUserProfileTask) context.consumeUserProfileTask()).getId());
 	}
 
-	// TODO how to test this?
 	@Ignore
 	@Test
 	public void testPutGetRollback() throws IOException, NoPeerConnectionException {
-		String userId = NetworkTestUtil.randomString();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
-		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
-				.toPath()));
-
-		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
-
-		SequentialProcess process = new SequentialProcess();
-		process.add(new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node));
-		process.add(new GetUserProfileTaskStep(context, node));
-
-		UseCaseTestUtil.executeProcess(process);
+		// TODO how to test this?
 	}
 
 	@Test
@@ -202,60 +155,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 	}
 
-	// TODO how to test this?
 	@Test
 	@Ignore
-	public void testRemoveRollback() throws DataLengthException, InvalidKeyException, IllegalStateException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException,
-			ClassNotFoundException, IOException, NoPeerConnectionException {
-		String userId = NetworkTestUtil.randomString();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
-		node.setSession(new H2HSession(new UserProfileManager(node, new UserCredentials(userId, "password",
-				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node
-				.getMessageManager(), publicKeyManager, config), config, FileTestUtil.getTempDirectory()
-				.toPath()));
-
-		// IGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
-		// HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask,
-		// key.getPublic());
-		// context.setEncryptedUserProfileTask(encrypted);
-		// context.setUserProfileTask(userProfileTask);
-		//
-		// Number160 lKey = Number160.createHash(userId);
-		// Number160 dKey = Number160.createHash(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-		// FuturePut futurePut = node.getDataManager().put(lKey, dKey, userProfileTask.getContentKey(),
-		// userProfileTask, null);
-		// futurePut.awaitUninterruptibly();
-		//
-		// RemoveUserProfileTaskStep removeStep = new RemoveUserProfileTaskStep(context, null);
-		//
-		// Process process = new Process(node) {
-		// };
-		// process.setNextStep(removeStep);
-		// TestProcessListener listener = new TestProcessListener();
-		// process.addListener(listener);
-		// process.start();
-		// ProcessTestUtil.waitTillSucceded(listener, 10);
-		//
-		// FutureGet futureGet = node.getDataManager().get(lKey, dKey, userProfileTask.getContentKey());
-		// futureGet.awaitUninterruptibly();
-		//
-		// assertNull(futureGet.getData());
-		//
-		// listener.reset();
-		// process.stop("On purpose triggered rollbacking for test.");
-		//
-		// ProcessTestUtil.waitTillFailed(listener, 10);
-		//
-		// futureGet = node.getDataManager().get(lKey, dKey, userProfileTask.getContentKey());
-		// futureGet.awaitUninterruptibly();
-		// assertNotNull(futureGet.getData());
-		// TestUserProfileTask decrypted = (TestUserProfileTask) H2HEncryptionUtil.decryptHybrid(
-		// (HybridEncryptedContent) futureGet.getData().object(), key.getPrivate());
-		// assertEquals(userProfileTask.getId(), decrypted.getId());
+	public void testRemoveRollback() {
+		// TODO how to test this?
 	}
 
 	@Test
@@ -323,7 +226,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class SimpleGetUserProfileTaskContext implements IProvideUserProfileTask, IConsumeUserProfileTask {
+	private class SimpleGetUserProfileTaskContext implements IUserProfileTaskContext{
 
 		private UserProfileTask userProfileTask;
 
