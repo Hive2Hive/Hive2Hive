@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.implementations.context.interfaces;
+package org.hive2hive.core.processes.implementations.context.interfaces.common;
 
 import java.util.Set;
 
