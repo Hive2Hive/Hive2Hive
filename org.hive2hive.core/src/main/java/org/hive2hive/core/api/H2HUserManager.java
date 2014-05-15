@@ -101,8 +101,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public boolean isRegistered(String userId) throws NoPeerConnectionException {
-		IsRegisteredContext context = new IsRegisteredContext();
-		IProcessComponent checkProcess = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
+		IsRegisteredContext context = new IsRegisteredContext(userId);
+		IProcessComponent checkProcess = new GetUserLocationsStep(context, networkManager.getDataManager());
 		executeProcess(checkProcess);
 
 		return context.isRegistered();
