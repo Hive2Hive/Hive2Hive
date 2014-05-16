@@ -6,14 +6,14 @@ import java.util.Set;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
 
 public class VerifyNotificationFactoryStep extends ProcessStep {
 
-	private final IConsumeNotificationFactory context;
+	private final INotifyContext context;
 	private final String userId;
 
-	public VerifyNotificationFactoryStep(IConsumeNotificationFactory context, String userId) {
+	public VerifyNotificationFactoryStep(INotifyContext context, String userId) {
 		this.context = context;
 		this.userId = userId; // own User id
 	}

@@ -114,7 +114,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	private void initCleanupUnreachablePeers() {
 		try {
 			DataManager dataManager = networkManager.getDataManager();
-			getParent().add(new GetUserLocationsStep(networkManager.getUserId(), context, dataManager));
+			getParent().add(new GetUserLocationsStep(context, dataManager));
 			getParent().add(new RemoveUnreachableStep(context, unreachablePeers, networkManager));
 		} catch (NoPeerConnectionException e) {
 			logger.error("No connection to the network. Failed to cleanup unreachable peers");
