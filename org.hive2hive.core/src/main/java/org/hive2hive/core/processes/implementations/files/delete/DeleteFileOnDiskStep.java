@@ -8,6 +8,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,20 +16,21 @@ import org.slf4j.LoggerFactory;
  * Deletes a file on the disk (if it exists)
  * 
  * @author Nico
- * 
  */
 public class DeleteFileOnDiskStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteFileOnDiskStep.class);
 
-	private final File file;
+	private final DeleteFileProcessContext context;
 
-	public DeleteFileOnDiskStep(File file) {
-		this.file = file;
+	public DeleteFileOnDiskStep(DeleteFileProcessContext context) {
+		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
+		File file = context.consumeFile();
+		
 		if (file.exists()) {
 			logger.debug("Deleting file '{}' on disk.", file.getAbsolutePath());
 
@@ -46,6 +48,7 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+		File file = context.consumeFile();
 		File trashFile = new File(H2HConstants.TRASH_DIRECTORY, file.getName());
 
 		if (trashFile.exists()) {

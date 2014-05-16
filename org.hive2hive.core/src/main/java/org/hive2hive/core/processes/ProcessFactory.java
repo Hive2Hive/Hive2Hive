@@ -19,6 +19,7 @@ import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.GetUserProfileStep;
+import org.hive2hive.core.processes.implementations.common.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.implementations.common.PutMetaFileStep;
 import org.hive2hive.core.processes.implementations.common.PutUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
@@ -76,7 +77,6 @@ import org.hive2hive.core.processes.implementations.register.UserProfileCreation
 import org.hive2hive.core.processes.implementations.share.PrepareNotificationsStep;
 import org.hive2hive.core.processes.implementations.share.UpdateUserProfileStep;
 import org.hive2hive.core.processes.implementations.share.VerifyFriendIdStep;
-import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -275,15 +275,15 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file.isDirectory());
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
 		// hint: this step automatically adds additional process steps when the meta file and the chunks need
 		// to be deleted
-		process.add(new DeleteFromUserProfileStep(file, context, networkManager));
-		process.add(new DeleteFileOnDiskStep(file)); // TODO make asynchronous
+		process.add(new DeleteFromUserProfileStep(context, networkManager));
+		process.add(new DeleteFileOnDiskStep(context)); // TODO make asynchronous
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 

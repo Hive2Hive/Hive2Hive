@@ -1,18 +1,21 @@
 package org.hive2hive.core.processes.implementations.context;
 
+import java.io.File;
 import java.security.KeyPair;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
 import org.hive2hive.core.processes.implementations.context.interfaces.common.IFile2MetaContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DeleteFileProcessContext implements IFile2MetaContext, INotifyContext {
+
+	private final File file;
 
 	private KeyPair protectionKeys;
 	private KeyPair encryptionKeys;
@@ -20,6 +23,14 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 	private Index index;
 	private DeleteNotifyMessageFactory deleteNotifyMessageFactory;
 	private HashSet<String> users;
+
+	public DeleteFileProcessContext(File file) {
+		this.file = file;
+	}
+	
+	public File consumeFile() {
+		return file;
+	}
 
 	@Override
 	public void provideProtectionKeys(KeyPair protectionKeys) {

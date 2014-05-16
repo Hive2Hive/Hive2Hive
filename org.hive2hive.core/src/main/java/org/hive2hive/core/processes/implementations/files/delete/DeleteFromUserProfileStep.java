@@ -36,7 +36,6 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteFromUserProfileStep.class);
 
 	private final DeleteFileProcessContext context;
-	private final File file;
 	private final UserProfileManager profileManager;
 	private DataManager dataManager;
 	private final Path root;
@@ -44,10 +43,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	private Index index;
 	private PublicKey parentIndexKey;
 
-	public DeleteFromUserProfileStep(File file, DeleteFileProcessContext context,
-			NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
+	public DeleteFromUserProfileStep(DeleteFileProcessContext context, NetworkManager networkManager)
+			throws NoPeerConnectionException, NoSessionException {
 		super(networkManager.getDataManager());
-		this.file = file;
 		this.context = context;
 		this.dataManager = networkManager.getDataManager();
 		this.profileManager = networkManager.getSession().getProfileManager();
@@ -56,6 +54,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		File file = context.consumeFile();
+		
 		// get user profile
 		UserProfile profile = null;
 		try {
@@ -87,7 +87,6 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 		// store for later
 		context.provideIndex(index);
-		context.setParentNode(parentIndex);
 
 		// store for rollback
 		this.parentIndexKey = parentIndex.getFilePublicKey();
@@ -102,8 +101,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			/**
 			 * Delete the meta file and all chunks
 			 */
-			File2MetaFileComponent file2Meta = new File2MetaFileComponent(index, context, context,
-					dataManager);
+			File2MetaFileComponent file2Meta = new File2MetaFileComponent(index, context, dataManager);
 			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
 			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
 
