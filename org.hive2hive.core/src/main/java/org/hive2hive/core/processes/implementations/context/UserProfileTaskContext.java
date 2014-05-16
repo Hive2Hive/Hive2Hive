@@ -1,10 +1,9 @@
 package org.hive2hive.core.processes.implementations.context;
 
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfileTask;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IUserProfileTaskContext;
 
-public class UserProfileTaskContext implements IProvideUserProfileTask, IConsumeUserProfileTask {
+public class UserProfileTaskContext implements IUserProfileTaskContext {
 
 	private UserProfileTask profileTask;
 

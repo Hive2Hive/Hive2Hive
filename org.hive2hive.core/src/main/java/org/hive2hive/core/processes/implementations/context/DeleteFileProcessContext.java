@@ -1,37 +1,39 @@
 package org.hive2hive.core.processes.implementations.context;
 
 import java.security.KeyPair;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IFile2MetaContext;
+import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaFile, IProvideProtectionKeys,
-		IConsumeProtectionKeys, IProvideNotificationFactory, IConsumeNotificationFactory, IProvideIndex,
-		IConsumeIndex {
+public class DeleteFileProcessContext implements IFile2MetaContext, INotifyContext {
 
-	private final boolean isDirectory;
-
-	private MetaFile metaFile;
 	private KeyPair protectionKeys;
-	private HybridEncryptedContent encryptedMetaFile;
-	private Index deletedIndex;
-	private Index parentNode;
-	private Set<String> users;
-	private BaseNotificationMessageFactory messageFactory;
+	private KeyPair encryptionKeys;
+	private MetaFile metaFile;
+	private Index index;
+	private DeleteNotifyMessageFactory deleteNotifyMessageFactory;
+	private HashSet<String> users;
 
-	public DeleteFileProcessContext(boolean isDirectory) {
-		this.isDirectory = isDirectory;
+	@Override
+	public void provideProtectionKeys(KeyPair protectionKeys) {
+		this.protectionKeys = protectionKeys;
+	}
+
+	@Override
+	public void provideMetaFileEncryptionKeys(KeyPair encryptionKeys) {
+		this.encryptionKeys = encryptionKeys;
+	}
+
+	@Override
+	public KeyPair consumeMetaFileEncryptionKeys() {
+		return encryptionKeys;
 	}
 
 	@Override
@@ -40,44 +42,13 @@ public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaF
 	}
 
 	@Override
-	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
-		this.encryptedMetaFile = encryptedMetaDocument;
-	}
-
-	public HybridEncryptedContent consumeEncryptedMetaFile() {
-		return encryptedMetaFile;
-	}
-
-	@Override
-	public MetaFile consumeMetaFile() {
-		return metaFile;
-	}
-
-	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
-	}
-
-	@Override
-	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
-	}
-
-	public boolean isDirectory() {
-		return isDirectory;
-	}
-
-	public void setParentNode(Index parentNode) {
-		this.parentNode = parentNode;
-	}
-
-	public Index getParentNode() {
-		return parentNode;
+	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaFile) {
+		// not used here
 	}
 
 	@Override
 	public BaseNotificationMessageFactory consumeMessageFactory() {
-		return messageFactory;
+		return deleteNotifyMessageFactory;
 	}
 
 	@Override
@@ -85,23 +56,32 @@ public class DeleteFileProcessContext implements IProvideMetaFile, IConsumeMetaF
 		return users;
 	}
 
-	@Override
-	public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
-		this.messageFactory = messageFactory;
+	public void provideMessageFactory(DeleteNotifyMessageFactory deleteNotifyMessageFactory) {
+		this.deleteNotifyMessageFactory = deleteNotifyMessageFactory;
 	}
 
-	@Override
-	public void provideUsersToNotify(Set<String> users) {
+	public void provideUsersToNotify(HashSet<String> users) {
 		this.users = users;
 	}
 
-	@Override
-	public Index consumeIndex() {
-		return deletedIndex;
+	public void provideIndex(Index index) {
+		this.index = index;
 	}
 
-	@Override
-	public void provideIndex(Index deletedIndex) {
-		this.deletedIndex = deletedIndex;
+	public Index consumeIndex() {
+		return index;
 	}
+
+	public MetaFile consumeMetaFile() {
+		return metaFile;
+	}
+
+	public KeyPair consumeProtectionKeys() {
+		return protectionKeys;
+	}
+
+	public KeyPair consumeEncryptedMetaFile() {
+		return encryptionKeys;
+	}
+
 }
