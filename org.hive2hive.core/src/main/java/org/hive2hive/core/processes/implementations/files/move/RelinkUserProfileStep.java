@@ -18,6 +18,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.implementations.common.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;
@@ -25,7 +26,6 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
 import org.hive2hive.core.processes.implementations.context.MoveUpdateProtectionKeyContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
-import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

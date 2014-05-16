@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.implementations.share.pkupdate;
+package org.hive2hive.core.processes.implementations.common;
 
 import java.util.List;
 
@@ -14,9 +14,10 @@ import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.IUpdateFileProtectionKey;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.IInitializeMetaUpdateContext;
+import org.hive2hive.core.processes.implementations.share.pkupdate.ChangeProtectionKeysStep;
+import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeChunkUpdateStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +31,10 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(InitializeMetaUpdateStep.class);
 
-	private final IUpdateFileProtectionKey context;
+	private final IInitializeMetaUpdateContext context;
 	private final IDataManager dataManager;
 
-	public InitializeMetaUpdateStep(IUpdateFileProtectionKey context, IDataManager dataManager) {
+	public InitializeMetaUpdateStep(IInitializeMetaUpdateContext context, IDataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
 	}
@@ -68,22 +69,19 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 	}
 
 	private void initForFile(FileIndex fileIndex) throws NoSessionException, NoPeerConnectionException {
-		logger.debug("Initialize to change the protection keys of meta document of index '{}'.",
-				fileIndex.getName());
+		logger.debug("Initialize to change the protection keys of meta document of index '{}'.", fileIndex.getName());
 		// create the process and make wrap it to make it asynchronous
 		getParent().add(new AsyncComponent(buildProcess(fileIndex)));
 	}
 
-	private ProcessComponent buildProcess(FileIndex index) throws NoSessionException,
-			NoPeerConnectionException {
+	private ProcessComponent buildProcess(FileIndex index) throws NoSessionException, NoPeerConnectionException {
 		// create a new sub-process
 		SequentialProcess sequential = new SequentialProcess();
 
 		// each meta document gets own context
-		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(
-				context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys(),
-				index.getFilePublicKey(), index);
-		sequential.add(new File2MetaFileComponent(index, metaContext, metaContext, dataManager));
+		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(context.consumeOldProtectionKeys(),
+				context.consumeNewProtectionKeys(), index.getFilePublicKey(), index);
+		sequential.add(new File2MetaFileComponent(index, metaContext, dataManager));
 		sequential.add(new ChangeProtectionKeysStep(metaContext, dataManager));
 		sequential.add(new InitializeChunkUpdateStep(metaContext, dataManager));
 		return sequential;
