@@ -34,7 +34,7 @@ import org.hive2hive.core.processes.implementations.context.RegisterProcessConte
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IConsumeNotificationFactory;
+import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.add.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
@@ -182,7 +182,7 @@ public final class ProcessFactory {
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserLocationsStep(session.getCredentials().getUserId(), context, dataManager));
+		process.add(new GetUserLocationsStep(context, dataManager));
 		process.add(new RemoveOwnLocationsStep(context, networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
 		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager(), session.getDownloadManager()));
@@ -203,18 +203,18 @@ public final class ProcessFactory {
 			NoPeerConnectionException {
 		H2HSession session = networkManager.getSession();
 		DataManager dataManager = networkManager.getDataManager();
-		AddFileProcessContext context = new AddFileProcessContext(file);
+		AddFileProcessContext context = new AddFileProcessContext(file, session);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new ValidateFileSizeStep(context, session.getFileConfiguration(), true));
-		process.add(new CheckWriteAccessStep(context, session.getProfileManager(), session.getRoot()));
+		process.add(new ValidateFileSizeStep(context));
+		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
-			process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
+			process.add(new InitializeChunksStep(context, dataManager));
 			process.add(new CreateMetaFileStep(context));
-			process.add(new PutMetaFileStep(context, context, context, dataManager));
+			process.add(new PutMetaFileStep(context, dataManager));
 		}
-		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager(), session.getRoot()));
+		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager()));
 		process.add(new PrepareNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
@@ -356,7 +356,7 @@ public final class ProcessFactory {
 			final Set<String> usersToNotify, NetworkManager networkManager) throws IllegalArgumentException,
 			NoPeerConnectionException, NoSessionException {
 		// create a context here to provide the necessary data
-		IConsumeNotificationFactory context = new IConsumeNotificationFactory() {
+		INotifyContext context = new INotifyContext() {
 
 			@Override
 			public Set<String> consumeUsersToNotify() {
@@ -371,9 +371,9 @@ public final class ProcessFactory {
 		return createNotificationProcess(context, networkManager);
 	}
 
-	private ProcessComponent createNotificationProcess(IConsumeNotificationFactory providerContext,
-			NetworkManager networkManager) throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
-		NotifyProcessContext context = new NotifyProcessContext(providerContext);
+	private ProcessComponent createNotificationProcess(INotifyContext providerContext, NetworkManager networkManager)
+			throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+		NotifyProcessContext context = new NotifyProcessContext(providerContext, networkManager.getUserId());
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));

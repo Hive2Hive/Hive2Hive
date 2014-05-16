@@ -55,7 +55,7 @@ public class FindInUserProfileStep extends ProcessStep {
 			logger.info("Initalize the process for downloading file '{}'.", index.getFullPath());
 			try {
 				IDataManager dataManager = networkManager.getDataManager();
-				getParent().add(new GetMetaFileStep(context, context, dataManager));
+				getParent().add(new GetMetaFileStep(context, dataManager));
 				PeerAddress ownPeerAddress = networkManager.getConnection().getPeer().getPeerAddress();
 				getParent().add(
 						new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress));
