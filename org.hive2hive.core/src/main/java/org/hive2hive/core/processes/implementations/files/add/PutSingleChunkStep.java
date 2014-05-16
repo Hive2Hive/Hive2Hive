@@ -37,21 +37,20 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 
 	private final int index;
 	private final AddFileProcessContext context;
-	private final IFileConfiguration config;
 	private final String chunkId;
 
 	public PutSingleChunkStep(AddFileProcessContext context, int index, String chunkId,
-			IDataManager dataManager, IFileConfiguration config) {
+			IDataManager dataManager) {
 		super(dataManager);
 		this.index = index;
 		this.context = context;
 		this.chunkId = chunkId;
-		this.config = config;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
+		IFileConfiguration config = context.consumeFileConfiguration();
 
 		Chunk chunk;
 		try {

@@ -33,20 +33,19 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
-	private final Path root;
 
 	private PublicKey parentKey; // used for rollback
 	private boolean modified = false;
 
-	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager, Path root) {
+	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
 		this.context = context;
 		this.profileManager = profileManager;
-		this.root = root;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
+		Path root = context.consumeRoot();
 
 		// pre-calculate the meta keys because this may take a while
 		KeyPair metaKeys = context.generateOrGetMetaKeys();

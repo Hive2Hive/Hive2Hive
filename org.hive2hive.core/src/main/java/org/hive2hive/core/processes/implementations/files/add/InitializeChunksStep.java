@@ -28,15 +28,13 @@ import org.slf4j.LoggerFactory;
 public class InitializeChunksStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
+	
 	private final AddFileProcessContext context;
-	private final IFileConfiguration config;
 	private final IDataManager dataManager;
 
-	public InitializeChunksStep(AddFileProcessContext context, IDataManager dataManager,
-			IFileConfiguration config) {
+	public InitializeChunksStep(AddFileProcessContext context, IDataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
-		this.config = config;
 	}
 
 	@Override
@@ -63,12 +61,13 @@ public class InitializeChunksStep extends ProcessStep {
 		}
 
 		// create put chunks steps
+		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace("{} chunks to upload for file '{}'.", Integer.toString(chunks), file.getName());
 		ProcessComponent prev = this;
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();
-			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager, config);
+			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager);
 
 			// insert just after this step
 			getParent().insertNext(putChunkStep, prev);
@@ -78,6 +77,7 @@ public class InitializeChunksStep extends ProcessStep {
 
 	private void initLargeFile(File file) throws ProcessExecutionException {
 		// init the large file chunks
+		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
 

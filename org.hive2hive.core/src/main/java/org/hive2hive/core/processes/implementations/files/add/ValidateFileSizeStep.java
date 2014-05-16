@@ -23,14 +23,9 @@ public class ValidateFileSizeStep extends ProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(ValidateFileSizeStep.class);
 
 	private final AddFileProcessContext context;
-	private final IFileConfiguration config;
-	private final boolean allowLargeFile;
 
-	public ValidateFileSizeStep(AddFileProcessContext context, IFileConfiguration config,
-			boolean allowLargeFile) {
+	public ValidateFileSizeStep(AddFileProcessContext context) {
 		this.context = context;
-		this.config = config;
-		this.allowLargeFile = allowLargeFile;
 	}
 
 	@Override
@@ -40,13 +35,11 @@ public class ValidateFileSizeStep extends ProcessStep {
 			// ok
 			return;
 		}
-
+		
 		// validate the file size
+		IFileConfiguration config = context.consumeFileConfiguration();
 		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {
 			logger.debug("File " + file.getName() + " is a 'large file'.");
-			if (!allowLargeFile) {
-				throw new ProcessExecutionException("Large files are not allowed (" + file.getName() + ").");
-			}
 			context.setLargeFile(true);
 		} else {
 			logger.debug("File " + file.getName() + " is a 'small file'.");

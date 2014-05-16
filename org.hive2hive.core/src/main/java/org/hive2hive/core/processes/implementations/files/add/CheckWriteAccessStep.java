@@ -27,17 +27,16 @@ public class CheckWriteAccessStep extends ProcessStep {
 
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
-	private final Path root;
 
-	public CheckWriteAccessStep(AddFileProcessContext context, UserProfileManager profileManager, Path root) {
+	public CheckWriteAccessStep(AddFileProcessContext context, UserProfileManager profileManager) {
 		this.context = context;
 		this.profileManager = profileManager;
-		this.root = root;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
+		Path root = context.consumeRoot();
 
 		logger.trace("Check write access in folder '{}' to add file '{}'.", file
 				.getParentFile().getName(), file.getName());
