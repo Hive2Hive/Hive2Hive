@@ -237,8 +237,8 @@ public class UserProfileManager {
 						logger.warn("Process {} never finished doing modifications. Abort the put request.",
 								modifying.getPid());
 						modifying.abort();
-						modifying.setPutError(new PutFailedException("Too long modification. Only "
-								+ MAX_MODIFICATION_TIME + "ms are allowed."));
+						modifying.setPutError(new PutFailedException("Too long modification. Only " + MAX_MODIFICATION_TIME
+								+ "ms are allowed."));
 						modifying.notifyPut();
 					}
 				}
@@ -261,47 +261,48 @@ public class UserProfileManager {
 				return;
 			}
 
-			IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
-					.setContentKey(H2HConstants.USER_PROFILE);
+			IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey()).setContentKey(
+					H2HConstants.USER_PROFILE);
 
-			// load the current digest list from network
-			NavigableMap<Number640, Number160> digest = dataManager.getDigest(parameters);
-			// compare the current user profile's version key with the cached one
-			if (cachedUserProfile != null && digest.firstEntry() != null
-					&& digest.firstEntry().getKey().getVersionKey().equals(cachedUserProfile.getVersionKey())) {
-				// no need for fetching user profile from network
-				entry.setUserProfile(cachedUserProfile);
+			if (cachedUserProfile != null) {
+				// load the current digest list from network
+				NavigableMap<Number640, Number160> digest = dataManager.getDigestLatest(parameters);
+				// compare the current user profile's version key with the cached one
+				if (digest.firstEntry() != null
+						&& digest.firstEntry().getKey().getVersionKey().equals(cachedUserProfile.getVersionKey())) {
+					// no need for fetching user profile from network
+					entry.setUserProfile(cachedUserProfile);
+					return;
+				}
+			}
+
+			// load latest user profile from network
+			NetworkContent content = dataManager.get(parameters);
+			if (content == null) {
+				logger.warn("Did not find user profile. user id = '{}'", credentials.getUserId());
+				entry.setGetError(new GetFailedException("User profile not found. Got null."));
 			} else {
-				// load latest user profile from network
-				NetworkContent content = dataManager.get(parameters);
-				if (content == null) {
-					logger.warn("Did not find user profile. user id = '{}'", credentials.getUserId());
-					entry.setGetError(new GetFailedException("User profile not found. Got null."));
-				} else {
-					try {
-						logger.trace(
-								"Decrypting user profile with 256-bit AES key from password. user id = '{}'",
-								credentials.getUserId());
-						EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
-						NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted,
-								userProfileEncryptionKey);
-						UserProfile userProfile = (UserProfile) decrypted;
-						userProfile.setVersionKey(content.getVersionKey());
-						userProfile.setBasedOnKey(content.getBasedOnKey());
+				try {
+					logger.trace("Decrypting user profile with 256-bit AES key from password. user id = '{}'",
+							credentials.getUserId());
+					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
+					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, userProfileEncryptionKey);
+					UserProfile userProfile = (UserProfile) decrypted;
+					userProfile.setVersionKey(content.getVersionKey());
+					userProfile.setBasedOnKey(content.getBasedOnKey());
 
-						// cache user profile
-						cachedUserProfile = userProfile;
-						// provide loaded user profile
-						entry.setUserProfile(userProfile);
-					} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
-						logger.error("Cannot decrypt the user profile. reason = '{}'", e.getMessage());
-						entry.setGetError(new GetFailedException(String.format(
-								"Cannot decrypt the user profile. reason = '%s'", e.getMessage())));
-					} catch (Exception e) {
-						logger.error("Cannot get the user profile. reason = '{}'", e.getMessage());
-						entry.setGetError(new GetFailedException(String.format(
-								"Cannot get the user profile. reason = '%s'", e.getMessage())));
-					}
+					// cache user profile
+					cachedUserProfile = userProfile;
+					// provide loaded user profile
+					entry.setUserProfile(userProfile);
+				} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+					logger.error("Cannot decrypt the user profile. reason = '{}'", e.getMessage());
+					entry.setGetError(new GetFailedException(String.format("Cannot decrypt the user profile. reason = '%s'",
+							e.getMessage())));
+				} catch (Exception e) {
+					logger.error("Cannot get the user profile. reason = '{}'", e.getMessage());
+					entry.setGetError(new GetFailedException(String.format("Cannot get the user profile. reason = '%s'",
+							e.getMessage())));
 				}
 			}
 		}
@@ -314,16 +315,16 @@ public class UserProfileManager {
 			try {
 				logger.trace("Encrypting user profile with 256bit AES key from password. user id ='{}'",
 						credentials.getUserId());
-				EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(
-						entry.getUserProfile(), userProfileEncryptionKey);
+
+				EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(entry.getUserProfile(),
+						userProfileEncryptionKey);
 
 				encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());
 				encryptedUserProfile.generateVersionKey();
 
 				IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey())
-						.setContentKey(H2HConstants.USER_PROFILE)
-						.setVersionKey(encryptedUserProfile.getVersionKey()).setData(encryptedUserProfile)
-						.setProtectionKeys(entry.getUserProfile().getProtectionKeys())
+						.setContentKey(H2HConstants.USER_PROFILE).setVersionKey(encryptedUserProfile.getVersionKey())
+						.setData(encryptedUserProfile).setProtectionKeys(entry.getUserProfile().getProtectionKeys())
 						.setTTL(entry.getUserProfile().getTimeToLive());
 
 				DataManager dataManager = networkManager.getDataManager();
@@ -338,8 +339,8 @@ public class UserProfileManager {
 				}
 			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 				logger.error("Cannot encrypt the user profile. reason = '{}'", e.getMessage());
-				entry.setPutError(new PutFailedException(String.format(
-						"Cannot encrypt the user profile. reason = '%s'", e.getMessage())));
+				entry.setPutError(new PutFailedException(String.format("Cannot encrypt the user profile. reason = '%s'",
+						e.getMessage())));
 			} catch (NoPeerConnectionException e) {
 				entry.setPutError(new PutFailedException("Node is not connected to the network."));
 			} finally {
