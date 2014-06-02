@@ -264,6 +264,7 @@ public class UserProfileManager {
 			IParameters parameters = new Parameters().setLocationKey(credentials.getProfileLocationKey()).setContentKey(
 					H2HConstants.USER_PROFILE);
 
+			// avoid digest call before first get
 			if (cachedUserProfile != null) {
 				// load the current digest list from network
 				NavigableMap<Number640, Number160> digest = dataManager.getDigestLatest(parameters);
