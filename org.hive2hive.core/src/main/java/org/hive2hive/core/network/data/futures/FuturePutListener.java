@@ -101,7 +101,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 						case FAILED:
 						case FAILED_NOT_ABSENT:
 						case FAILED_SECURITY:
-							logger.warn("A node denied putting data. Reason = '%s'. '{}'",
+							logger.warn("A node denied putting data. Reason = '{}'. '{}'",
 									PutStatusH2H.values()[status], parameters.toString());
 							fail.add(peeradress);
 							break;
