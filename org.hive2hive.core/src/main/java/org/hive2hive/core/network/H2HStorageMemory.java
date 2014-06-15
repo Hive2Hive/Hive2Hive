@@ -44,7 +44,7 @@ public class H2HStorageMemory extends StorageLayer {
 	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
 			boolean domainProtection) {
 		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
-			logger.trace("Start put verification. Location key = '%s', Content key = '%s', Version key = '%s'.",
+			logger.trace("Start put verification. Location key = '{}', Content key = '{}', Version key = '{}'.",
 					key.getLocationKey(), key.getContentKey(), key.getVersionKey());
 
 			if (isProtectionKeyChange(newData)) {

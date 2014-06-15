@@ -45,7 +45,7 @@ public class GetPublicKeysStep extends ProcessStep {
 				PublicKey key = keyManager.getPublicKey(user);
 				keys.put(user, key);
 			} catch (GetFailedException e) {
-				logger.error("Could not get the key for user " + user);
+				logger.error("Could not get the key for user {}", user);
 			}
 		}
 

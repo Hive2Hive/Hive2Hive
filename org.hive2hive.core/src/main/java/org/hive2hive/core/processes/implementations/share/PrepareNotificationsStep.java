@@ -58,8 +58,8 @@ public class PrepareNotificationsStep extends ProcessStep {
 					context.getFolder().getName());
 			sharedNode.share(context.consumeNewProtectionKeys());
 		} else {
-			logger.debug(String.format("Friend '{}' gets READ access to the shared folder '{}'.",
-					context.getFriendId(), context.getFolder().getName()));
+			logger.debug("Friend '{}' gets READ access to the shared folder '{}'.",
+					context.getFriendId(), context.getFolder().getName());
 			sharedNode.share(null);
 		}
 

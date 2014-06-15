@@ -15,7 +15,6 @@ import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
@@ -25,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class RequestChunkMessage extends DirectRequestMessage {
 
 	private static final long serialVersionUID = 3591235525796608138L;
-	private static final Logger logger = LoggerFactory.getLogger(ContactPeerMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(RequestChunkMessage.class);
 
 	private final PublicKey fileKey;
 	private final int chunkNumber; // the index / order number of the chunk
