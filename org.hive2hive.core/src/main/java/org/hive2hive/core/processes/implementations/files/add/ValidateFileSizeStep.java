@@ -43,13 +43,13 @@ public class ValidateFileSizeStep extends ProcessStep {
 
 		// validate the file size
 		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {
-			logger.debug("File " + file.getName() + " is a 'large file'.");
+			logger.debug("File {} is a 'large file'.", file.getName());
 			if (!allowLargeFile) {
 				throw new ProcessExecutionException("Large files are not allowed (" + file.getName() + ").");
 			}
 			context.setLargeFile(true);
 		} else {
-			logger.debug("File " + file.getName() + " is a 'small file'.");
+			logger.debug("File {} is a 'small file'.", file.getName());
 			context.setLargeFile(false);
 		}
 	}

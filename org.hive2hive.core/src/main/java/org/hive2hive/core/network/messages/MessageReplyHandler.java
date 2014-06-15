@@ -139,7 +139,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 				return false;
 			}
 		} catch (GetFailedException | InvalidKeyException | SignatureException | NoSessionException e) {
-			logger.error("Verifying message from user '{}' failed. Reason = '%s'.", senderId, e.getMessage());
+			logger.error("Verifying message from user '{}' failed. Reason = '{}'.", senderId, e.getMessage());
 			return false;
 		}
 	}
