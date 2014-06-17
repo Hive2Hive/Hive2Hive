@@ -1,6 +1,7 @@
 package org.hive2hive.core.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.hive2hive.core.security.H2HEncryptionUtil;
 
@@ -54,7 +55,7 @@ public class MetaChunk implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return chunkHash.hashCode();
+		return Arrays.hashCode(chunkHash);
 	}
 
 	@Override
