@@ -16,12 +16,16 @@ import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
 import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.core.processes.implementations.common.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.GetUserProfileStep;
+import org.hive2hive.core.processes.implementations.common.InitializeChunksStep;
 import org.hive2hive.core.processes.implementations.common.InitializeMetaUpdateStep;
+import org.hive2hive.core.processes.implementations.common.PrepareNotificationStep;
 import org.hive2hive.core.processes.implementations.common.PutMetaFileStep;
 import org.hive2hive.core.processes.implementations.common.PutUserLocationsStep;
+import org.hive2hive.core.processes.implementations.common.ValidateFileSizeStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
@@ -35,13 +39,9 @@ import org.hive2hive.core.processes.implementations.context.RegisterProcessConte
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.implementations.files.add.AddIndexToUserProfileStep;
-import org.hive2hive.core.processes.implementations.files.add.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.files.add.CreateMetaFileStep;
-import org.hive2hive.core.processes.implementations.files.add.InitializeChunksStep;
-import org.hive2hive.core.processes.implementations.files.add.PrepareNotificationStep;
-import org.hive2hive.core.processes.implementations.files.add.ValidateFileSizeStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.delete.PrepareDeleteNotificationStep;
@@ -85,7 +85,6 @@ import org.hive2hive.core.security.UserCredentials;
  * operations of the Hive2Hive project.
  * 
  * @author Christian, Nico, Seppi
- * 
  */
 public final class ProcessFactory {
 
@@ -201,6 +200,9 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
+		if (file == null) {
+			throw new IllegalArgumentException("File can't be null.");
+		}
 		H2HSession session = networkManager.getSession();
 		DataManager dataManager = networkManager.getDataManager();
 		AddFileProcessContext context = new AddFileProcessContext(file, session);
@@ -224,17 +226,17 @@ public final class ProcessFactory {
 	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			IllegalArgumentException, NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
-		UpdateFileProcessContext context = new UpdateFileProcessContext(file);
-
 		H2HSession session = networkManager.getSession();
 
+		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session);
+
 		SequentialProcess process = new SequentialProcess();
-		process.add(new ValidateFileSizeStep(context, session.getFileConfiguration(), false));
-		process.add(new CheckWriteAccessStep(context, session.getProfileManager(), session.getRoot()));
-		process.add(new File2MetaFileComponent(file, context, context, networkManager));
-		process.add(new InitializeChunksStep(context, dataManager, session.getFileConfiguration()));
-		process.add(new CreateNewVersionStep(context, session.getFileConfiguration()));
-		process.add(new PutMetaFileStep(context, context, context, dataManager));
+		process.add(new ValidateFileSizeStep(context));
+		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
+		process.add(new File2MetaFileComponent(context, networkManager));
+		process.add(new InitializeChunksStep(context, dataManager));
+		process.add(new CreateNewVersionStep(context));
+		process.add(new PutMetaFileStep(context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
 
 		// TODO: cleanup can be made async because user operation does not depend on it
@@ -264,6 +266,7 @@ public final class ProcessFactory {
 
 		SequentialProcess process = new SequentialProcess();
 		DownloadFileContext context = new DownloadFileContext(fileKey, destination, versionToDownload);
+
 		process.add(new FindInUserProfileStep(context, networkManager));
 
 		return process;
@@ -308,7 +311,7 @@ public final class ProcessFactory {
 			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
-		process.add(new File2MetaFileComponent(file, context, networkManager));
+		process.add(new File2MetaFileComponent(context, networkManager));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
 		return process;
