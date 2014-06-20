@@ -17,6 +17,18 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	protected String name;
 	protected FolderIndex parent;
 
+	/**
+	 * Constructor for root node.
+	 * 
+	 * @param fileKeys
+	 * @param name
+	 */
+	public Index(KeyPair fileKeys, String name) {
+		this.fileKeys = fileKeys;
+		this.name = name;
+		this.parent = null;
+	}
+
 	public Index(KeyPair fileKeys, String name, FolderIndex parent) {
 		this.fileKeys = fileKeys;
 		this.name = name;
@@ -67,7 +79,13 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * @param parent
 	 */
 	public void setParent(FolderIndex parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent can't be null.");
 		this.parent = parent;
+	}
+
+	public void decoupleFromParent() {
+		this.parent = null;
 	}
 
 	/**
@@ -249,5 +267,5 @@ public abstract class Index implements Comparable<Index>, Serializable {
 
 		return digest;
 	}
-	
+
 }

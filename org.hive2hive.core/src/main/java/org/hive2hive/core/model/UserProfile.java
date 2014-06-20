@@ -32,7 +32,7 @@ public class UserProfile extends NetworkContent {
 		this.encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		// create the root node
-		root = new FolderIndex(null, encryptionKeys, null);
+		root = new FolderIndex(encryptionKeys, null);
 		root.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
