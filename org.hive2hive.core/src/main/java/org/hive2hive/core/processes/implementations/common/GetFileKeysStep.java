@@ -22,18 +22,18 @@ public class GetFileKeysStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(GetFileKeysStep.class);
 
-	private final File file;
 	private final IGetFileKeysContext context;
 	private final H2HSession session;
 
-	public GetFileKeysStep(File file, IGetFileKeysContext context, H2HSession session) {
-		this.file = file;
+	public GetFileKeysStep(IGetFileKeysContext context, H2HSession session) {
 		this.context = context;
 		this.session = session;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		File file = context.consumeFile();
+
 		// file node can be null or already present
 		logger.info("Getting the corresponding file node for file '{}'.", file.getName());
 
@@ -47,8 +47,7 @@ public class GetFileKeysStep extends ProcessStep {
 
 		Index fileNode = profile.getFileByPath(file, session.getRoot());
 		if (fileNode == null) {
-			throw new ProcessExecutionException(
-					"File does not exist in user profile. Consider uploading a new file.");
+			throw new ProcessExecutionException("File does not exist in user profile. Consider uploading a new file.");
 		}
 
 		// set the corresponding content protection keys

@@ -55,6 +55,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			Parameters parameters = new Parameters().setLocationKey(H2HEncryptionUtil.key2String(metaFile.getId()))
 					.setContentKey(H2HConstants.META_FILE).setVersionKey(encrypted.getVersionKey()).setData(encrypted)
 					.setProtectionKeys(protectionKeys).setTTL(metaFile.getTimeToLive());
+
 			// data manager has to produce the hash, which gets used for signing
 			parameters.setHashFlag(true);
 			// put the encrypted meta file into the network

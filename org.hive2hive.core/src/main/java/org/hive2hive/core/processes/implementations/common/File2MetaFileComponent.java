@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.implementations.common;
 
-import java.io.File;
-
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
@@ -17,10 +15,10 @@ import org.hive2hive.core.processes.implementations.context.interfaces.common.IF
  */
 public class File2MetaFileComponent extends SequentialProcess {
 
-	public File2MetaFileComponent(File file, IFile2MetaContext context, NetworkManager networkManager)
+	public File2MetaFileComponent(IFile2MetaContext context, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		// first get the file keys, then get the meta file and protection keys
-		add(new GetFileKeysStep(file, context, networkManager.getSession()));
+		add(new GetFileKeysStep(context, networkManager.getSession()));
 		add(new GetMetaFileStep(context, networkManager.getDataManager()));
 	}
 
