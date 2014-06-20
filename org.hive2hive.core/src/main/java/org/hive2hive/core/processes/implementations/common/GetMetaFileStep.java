@@ -41,6 +41,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		KeyPair keyPair = context.consumeMetaFileEncryptionKeys();
+
 		NetworkContent loadedContent = get(keyPair.getPublic(), H2HConstants.META_FILE);
 
 		if (loadedContent == null) {
@@ -53,9 +54,8 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 			NetworkContent decryptedContent = null;
 			try {
 				decryptedContent = H2HEncryptionUtil.decryptHybrid(encryptedContent, keyPair.getPrivate());
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
-					| BadPaddingException | IllegalStateException | InvalidCipherTextException
-					| ClassNotFoundException | IOException e) {
+			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
+					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
 				throw new ProcessExecutionException("Meta file could not be decrypted.", e);
 			}
 
@@ -65,7 +65,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 			context.provideMetaFile(metaFile);
 			context.provideEncryptedMetaFile(encryptedContent);
-			
+
 			logger.debug("Got and decrypted the meta file.");
 		}
 	}

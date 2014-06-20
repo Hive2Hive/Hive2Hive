@@ -87,8 +87,7 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 
 	@Override
 	public KeyPair consumeMetaFileEncryptionKeys() {
-		// not used here
-		return null;
+		return fileIndex.getFileKeys();
 	}
 
 	@Override
