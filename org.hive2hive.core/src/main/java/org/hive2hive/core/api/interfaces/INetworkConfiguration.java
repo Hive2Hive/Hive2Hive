@@ -2,13 +2,14 @@ package org.hive2hive.core.api.interfaces;
 
 import java.net.InetAddress;
 
+import net.tomp2p.p2p.Peer;
+
 import org.hive2hive.core.H2HConstants;
 
 /**
  * Configuration of the network settings for a Hive2Hive node.
  * 
  * @author Christian, Nico, Seppi
- * 
  */
 public interface INetworkConfiguration {
 
@@ -20,7 +21,8 @@ public interface INetworkConfiguration {
 	String getNodeID();
 
 	/**
-	 * Returns whether this peer is initial. When a peer is initial, it is the first one in the network and does
+	 * Returns whether this peer is initial. When a peer is initial, it is the first one in the network and
+	 * does
 	 * not try to bootstrap anywhere. In each network, only one initial peer needs to exist. When other peers
 	 * have joined, the initial peer can also go offline.
 	 * 
@@ -34,6 +36,20 @@ public interface INetworkConfiguration {
 	 * @return the internet address to boostrap to. Make sure the given address is reachable (firewalls).
 	 */
 	InetAddress getBootstrapAddress();
+
+	/**
+	 * Returns whether this peer is bootstrapping to a local peer.
+	 * 
+	 * @return <code>true</code> when peer is bootstrapping to a local peer
+	 */
+	boolean isBootstrappingLocaly();
+
+	/**
+	 * If this peer is bootstrapping to a local peer, it needs a peer reference.
+	 * 
+	 * @return the local peer to bootstrap to.
+	 */
+	Peer getBootstapPeer();
 
 	/**
 	 * The port to bootstrap to. This depends on the configuration of the network and possibly of

@@ -3,20 +3,22 @@ package org.hive2hive.core.api.configs;
 import java.net.InetAddress;
 import java.util.UUID;
 
+import net.tomp2p.p2p.Peer;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 
 /**
  * Configures the network settings of the peer.
  * 
- * @author Nico, Chris
- * 
+ * @author Nico, Chris, Seppi
  */
 public class NetworkConfiguration implements INetworkConfiguration {
 
 	private String nodeID;
 	private boolean isInitialPeer;
 	private InetAddress bootstrapAddress;
+	private Peer bootstrapPeer;
 	private int bootstrapPort;
 
 	/**
@@ -26,13 +28,14 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @param isInitialPeer true when the peer is the first one in the network
 	 * @param bootstrapAddress the address to bootstrap to
 	 * @param bootstrapPort the port to bootstrap and to listen to
+	 * @param masterPeer the local peer to bootstrap
 	 */
-	private NetworkConfiguration(String nodeID, boolean isInitialPeer, InetAddress bootstrapAddress,
-			int bootstrapPort) {
+	private NetworkConfiguration(String nodeID, boolean isInitialPeer, InetAddress bootstrapAddress, int bootstrapPort, Peer masterPeer) {
 		this.nodeID = nodeID;
 		this.isInitialPeer = isInitialPeer;
 		this.bootstrapAddress = bootstrapAddress;
 		this.bootstrapPort = bootstrapPort;
+		this.bootstrapPeer = masterPeer;
 	}
 
 	/**
@@ -51,7 +54,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration
 	 */
 	public static INetworkConfiguration create(String nodeID) {
-		return new NetworkConfiguration(nodeID, true, null, -1);
+		return new NetworkConfiguration(nodeID, true, null, -1, null);
 	}
 
 	/**
@@ -77,7 +80,11 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration
 	 */
 	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
-		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort);
+		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort, null);
+	}
+	
+	public static INetworkConfiguration create(String nodeID, Peer masterPeer) {
+		return new NetworkConfiguration(nodeID, false, null, -1, masterPeer);
 	}
 
 	@Override
@@ -93,6 +100,16 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	@Override
 	public InetAddress getBootstrapAddress() {
 		return bootstrapAddress;
+	}
+
+	@Override
+	public boolean isBootstrappingLocaly() {
+		return bootstrapPeer != null;
+	}
+
+	@Override
+	public Peer getBootstapPeer() {
+		return bootstrapPeer;
 	}
 
 	@Override
