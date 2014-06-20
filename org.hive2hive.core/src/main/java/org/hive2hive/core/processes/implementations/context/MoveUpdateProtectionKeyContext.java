@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.implementations.context;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IInitializeMetaUpdateContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeMetaUpdateContext;
 
 public class MoveUpdateProtectionKeyContext implements IInitializeMetaUpdateContext {
 

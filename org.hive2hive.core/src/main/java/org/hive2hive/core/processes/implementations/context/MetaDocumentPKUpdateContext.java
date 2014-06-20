@@ -1,5 +1,6 @@
 package org.hive2hive.core.processes.implementations.context;
 
+import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
@@ -9,7 +10,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IFile2MetaContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
@@ -86,6 +87,12 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 
 	@Override
 	public KeyPair consumeMetaFileEncryptionKeys() {
+		// not used here
+		return null;
+	}
+
+	@Override
+	public File consumeFile() {
 		// not used here
 		return null;
 	}

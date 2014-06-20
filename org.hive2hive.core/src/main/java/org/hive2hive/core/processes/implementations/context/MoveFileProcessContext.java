@@ -6,17 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFile, IProvideProtectionKeys,
-		IConsumeProtectionKeys {
+public class MoveFileProcessContext {
 
 	private final File source;
 	private final File destination;
@@ -57,30 +50,21 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 		return destination;
 	}
 
-	@Override
 	public KeyPair consumeProtectionKeys() {
 		return protectionKeys;
 	}
 
-	@Override
 	public void provideProtectionKeys(KeyPair protectionKeys) {
 		this.protectionKeys = protectionKeys;
 
 	}
 
-	@Override
 	public MetaFile consumeMetaFile() {
 		return metaFile;
 	}
 
-	@Override
 	public void provideMetaFile(MetaFile metaFile) {
 		this.metaFile = metaFile;
-	}
-
-	@Override
-	public void provideEncryptedMetaFile(HybridEncryptedContent encryptedMetaDocument) {
-		// ignore because only used for deletion
 	}
 
 	public void setFileNodeKeys(KeyPair fileNodeKeys) {
@@ -106,7 +90,7 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 	/**
 	 * for users having before and after access to the file
 	 */
-	public class MoveNotificationContext implements IConsumeNotificationFactory, IProvideNotificationFactory {
+	public class MoveNotificationContext implements INotifyContext {
 		private BaseNotificationMessageFactory messageFactory;
 		private Set<String> users;
 
@@ -120,12 +104,10 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 			return users;
 		}
 
-		@Override
 		public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
 			this.messageFactory = messageFactory;
 		}
 
-		@Override
 		public void provideUsersToNotify(Set<String> users) {
 			this.users = users;
 		}
@@ -134,8 +116,7 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 	/**
 	 * for users not having access anymore
 	 */
-	public class DeleteNotificationContext implements IConsumeNotificationFactory,
-			IProvideNotificationFactory {
+	public class DeleteNotificationContext implements INotifyContext {
 		private BaseNotificationMessageFactory messageFactory;
 		private Set<String> users;
 
@@ -149,12 +130,10 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 			return users;
 		}
 
-		@Override
 		public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
 			this.messageFactory = messageFactory;
 		}
 
-		@Override
 		public void provideUsersToNotify(Set<String> users) {
 			this.users = users;
 		}
@@ -163,7 +142,7 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 	/**
 	 * for users now having access
 	 */
-	public class AddNotificationContext implements IConsumeNotificationFactory, IProvideNotificationFactory {
+	public class AddNotificationContext implements INotifyContext {
 		private BaseNotificationMessageFactory messageFactory;
 		private Set<String> users;
 
@@ -177,12 +156,10 @@ public class MoveFileProcessContext implements IProvideMetaFile, IConsumeMetaFil
 			return users;
 		}
 
-		@Override
 		public void provideMessageFactory(BaseNotificationMessageFactory messageFactory) {
 			this.messageFactory = messageFactory;
 		}
 
-		@Override
 		public void provideUsersToNotify(Set<String> users) {
 			this.users = users;
 		}

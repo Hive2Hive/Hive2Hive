@@ -14,8 +14,12 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutMetaFileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.ICheckWriteAccessContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeChunksStepContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPrepareNotificationContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutMetaFileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IValidateFileSizeContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -25,7 +29,8 @@ import org.hive2hive.core.security.EncryptionUtil;
  * 
  * @author Nico, Seppi
  */
-public class AddFileProcessContext implements IPutMetaFileContext, INotifyContext {
+public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWriteAccessContext, IInitializeChunksStepContext,
+		IPutMetaFileContext, IPrepareNotificationContext, INotifyContext {
 
 	private final File file;
 	private final H2HSession session;
@@ -46,38 +51,47 @@ public class AddFileProcessContext implements IPutMetaFileContext, INotifyContex
 		this.session = session;
 	}
 
+	@Override
 	public File consumeFile() {
 		return file;
 	}
 
+	@Override
 	public void setLargeFile(boolean largeFile) {
 		this.largeFile = largeFile;
 	}
 
+	@Override
 	public IFileConfiguration consumeFileConfiguration() {
 		return session.getFileConfiguration();
 	}
 
+	@Override
 	public Path consumeRoot() {
 		return session.getRoot();
 	}
 
+	@Override
 	public void provideProtectionKeys(KeyPair protectionKeys) {
 		this.protectionKeys = protectionKeys;
 	}
 
+	@Override
 	public boolean isLargeFile() {
 		return largeFile;
 	}
 
+	@Override
 	public KeyPair consumeChunkKeys() {
 		return chunkKeys;
 	}
 
+	@Override
 	public void provideChunkKeys(KeyPair chunkKeys) {
 		this.chunkKeys = chunkKeys;
 	}
 
+	@Override
 	public List<MetaChunk> getMetaChunks() {
 		return metaChunks;
 	}
@@ -91,8 +105,9 @@ public class AddFileProcessContext implements IPutMetaFileContext, INotifyContex
 	}
 
 	public KeyPair generateOrGetMetaKeys() {
-		if (metaKeys == null)
+		if (metaKeys == null) {
 			metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		}
 		return metaKeys;
 	}
 
@@ -115,14 +130,17 @@ public class AddFileProcessContext implements IPutMetaFileContext, INotifyContex
 		this.index = index;
 	}
 
+	@Override
 	public Index consumeIndex() {
 		return index;
 	}
 
+	@Override
 	public void provideUsersToNotify(HashSet<String> users) {
 		this.usersToNotify = users;
 	}
 
+	@Override
 	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
@@ -135,6 +153,11 @@ public class AddFileProcessContext implements IPutMetaFileContext, INotifyContex
 	@Override
 	public Set<String> consumeUsersToNotify() {
 		return usersToNotify;
+	}
+
+	@Override
+	public boolean allowLargeFile() {
+		return true;
 	}
 
 }

@@ -4,8 +4,8 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
 import org.hive2hive.core.security.UserCredentials;
 
 public final class RegisterProcessContext implements IGetUserLocationsContext, IPutUserLocationsContext {

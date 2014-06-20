@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IFile2MetaContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IFile2MetaContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.HybridEncryptedContent;

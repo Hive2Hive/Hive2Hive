@@ -4,7 +4,7 @@ import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IFile2MetaContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class RecoverFileContext implements IFile2MetaContext {
@@ -17,7 +17,8 @@ public class RecoverFileContext implements IFile2MetaContext {
 		this.file = file;
 	}
 
-	public File getFile() {
+	@Override
+	public File consumeFile() {
 		return file;
 	}
 

@@ -6,7 +6,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetMetaFileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DownloadFileContext implements IGetMetaFileContext {

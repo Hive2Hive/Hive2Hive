@@ -8,8 +8,8 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
 public class NotifyProcessContext implements INotifyContext, IGetUserLocationsContext {
