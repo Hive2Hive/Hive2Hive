@@ -6,7 +6,7 @@ import java.util.Set;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.INotifyContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
 
 public class VerifyNotificationFactoryStep extends ProcessStep {
 
