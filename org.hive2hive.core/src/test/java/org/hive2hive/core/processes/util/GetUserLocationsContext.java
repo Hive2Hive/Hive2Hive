@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.util;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 
 public class GetUserLocationsContext implements IGetUserLocationsContext {
 

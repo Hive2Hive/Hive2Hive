@@ -12,7 +12,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;

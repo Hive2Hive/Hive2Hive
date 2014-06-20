@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.util;
 import java.security.KeyPair;
 
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetMetaFileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**

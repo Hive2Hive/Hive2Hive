@@ -20,7 +20,7 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.DenyingPutTestStorage;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;

@@ -35,7 +35,7 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IUserProfileTaskContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.userprofiletask.TestPutUserProfileTaskStep;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
