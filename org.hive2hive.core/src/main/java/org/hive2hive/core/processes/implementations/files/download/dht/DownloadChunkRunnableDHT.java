@@ -43,23 +43,20 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		this.dataManager = dataManager;
 
 		// create temporary file
-		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-"
-				+ chunk.getIndex());
+		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-" + chunk.getIndex());
 	}
 
 	@Override
 	public void run() {
 		if (task.isAborted()) {
-			logger.warn("Abort scheduled download of chunk {} of file {}", metaChunk.getIndex(),
-					task.getDestinationName());
+			logger.warn("Abort scheduled download of chunk {} of file {}", metaChunk.getIndex(), task.getDestinationName());
 			return;
 		} else if (Thread.currentThread().isInterrupted()) {
 			logger.warn("Not terminate the download because thread is interrupted");
 			return;
 		}
 
-		logger.debug("Downloading chunk {} of file {} from the DHT", metaChunk.getIndex(),
-				task.getDestinationName());
+		logger.debug("Downloading chunk {} of file {} from the DHT", metaChunk.getIndex(), task.getDestinationName());
 		IParameters parameters = new Parameters().setLocationKey(metaChunk.getChunkId()).setContentKey(
 				H2HConstants.FILE_CHUNK);
 		NetworkContent content = dataManager.get(parameters);
@@ -74,10 +71,10 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		try {
 			NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, task.getDecryptionKey());
 			chunk = (Chunk) decrypted;
-		} catch (ClassNotFoundException | InvalidKeyException | DataLengthException
-				| IllegalBlockSizeException | BadPaddingException | IllegalStateException
-				| InvalidCipherTextException | IllegalArgumentException | IOException e) {
-			task.abortDownload("Decryption of the chunk failed");
+		} catch (ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
+				| BadPaddingException | IllegalStateException | InvalidCipherTextException | IllegalArgumentException
+				| IOException e) {
+			task.abortDownload(String.format("Decryption of the chunk failed. reason = '%s'", e.getMessage()));
 			return;
 		}
 

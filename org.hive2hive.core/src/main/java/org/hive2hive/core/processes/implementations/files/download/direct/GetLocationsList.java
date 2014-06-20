@@ -11,7 +11,7 @@ import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
