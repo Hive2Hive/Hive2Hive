@@ -4,9 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.FolderIndex;
-import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
@@ -33,42 +31,25 @@ public class PrepareNotificationsStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException {
-		logger.debug(
-				"Preparing a notification message to the friend '{}' and all other sharers of the shared folder '{}'.",
+		logger.debug("Preparing a notification message to the friend '{}' and all other sharers of the shared folder '{}'.",
 				context.getFriendId(), context.getFolder().getName());
 
-		FolderIndex fileNode = (FolderIndex) context.consumeIndex();
+		FolderIndex folderIndex = (FolderIndex) context.consumeIndex();
 
 		// create a subtree containing all children
-		FolderIndex sharedNode = new FolderIndex(fileNode.getParent(), fileNode.getFileKeys(),
-				fileNode.getName());
-		for (Index child : fileNode.getChildren()) {
-			sharedNode.addChild(child);
-			child.setParent(sharedNode);
-		}
+		FolderIndex sharedNode = new FolderIndex(folderIndex);
 
-		// copy all user permissions
-		for (UserPermission userPermission : fileNode.getUserPermissions()) {
-			sharedNode.addUserPermissions(userPermission);
-		}
-
-		// if the friend receives write access, he gets the protection key
-		if (context.getPermissionType() == PermissionType.WRITE) {
-			logger.debug("Friend '{}' gets WRITE access to the shared folder '{}'.", context.getFriendId(),
-					context.getFolder().getName());
-			sharedNode.share(context.consumeNewProtectionKeys());
-		} else {
-			logger.debug(String.format("Friend '{}' gets READ access to the shared folder '{}'.",
-					context.getFriendId(), context.getFolder().getName()));
-			sharedNode.share(null);
+		// remove content protection key in case of read permission
+		if (context.getPermissionType().equals(PermissionType.READ)) {
+			sharedNode.setProtectionKeys(null);
 		}
 
 		// remove the parent and only send the sub-tree
-		sharedNode.setParent(null);
+		sharedNode.decoupleFromParent();
 
 		// notify all users of the shared node
 		Set<String> friends = new HashSet<String>();
-		friends.addAll(fileNode.getCalculatedUserList());
+		friends.addAll(folderIndex.getCalculatedUserList());
 		friends.remove(userId); // skip to notify myself
 
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode,
