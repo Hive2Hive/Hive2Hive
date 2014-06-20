@@ -31,9 +31,9 @@ public interface INetworkConfiguration {
 	boolean isInitialPeer();
 
 	/**
-	 * If this peer is not initial, it needs to boostrap anywhere to connect to the p2p network.
+	 * If this peer is not initial, it needs to bootstrap anywhere to connect to the p2p network.
 	 * 
-	 * @return the internet address to boostrap to. Make sure the given address is reachable (firewalls).
+	 * @return the internet address to bootstrap to. Make sure the given address is reachable (firewalls).
 	 */
 	InetAddress getBootstrapAddress();
 
@@ -43,6 +43,13 @@ public interface INetworkConfiguration {
 	 * @return <code>true</code> when peer is bootstrapping to a local peer
 	 */
 	boolean isBootstrappingLocaly();
+	
+	/**
+	 * Returns whether this peer running locally or not.
+	 * 
+	 * @return <code>true</code> when peer is locally running
+	 */
+	boolean isLocal();
 
 	/**
 	 * If this peer is bootstrapping to a local peer, it needs a peer reference.

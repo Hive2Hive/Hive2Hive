@@ -61,7 +61,7 @@ public class NetworkTestUtil {
 		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
-		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
+		INetworkConfiguration netConfig = NetworkConfiguration.createLocalMasterPeer("Node A");
 		NetworkManager initial = new NetworkManager(netConfig);
 		initial.connect();
 		nodes.add(initial);
@@ -69,8 +69,8 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			INetworkConfiguration otherNetConfig = NetworkConfiguration.create(String.format("Node %s", ++letter), initial
-					.getConnection().getPeer());
+			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
+					initial.getConnection().getPeer());
 			NetworkManager node = new NetworkManager(otherNetConfig);
 			node.connect();
 			nodes.add(node);
