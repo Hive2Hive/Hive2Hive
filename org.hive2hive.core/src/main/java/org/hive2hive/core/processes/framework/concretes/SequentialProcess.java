@@ -132,6 +132,7 @@ public class SequentialProcess extends Process {
 				try {
 					checkAsyncComponentsForFail(asyncHandles);
 				} catch (ProcessExecutionException e) {
+					e.printStackTrace();
 					exception = e;
 					latch.countDown();
 					return;
@@ -176,8 +177,8 @@ public class SequentialProcess extends Process {
 				result = handle.get();
 			} catch (InterruptedException e) {
 				logger.error("Error while checking async component.", e);
-				e.printStackTrace();
 			} catch (ExecutionException e) {
+				logger.error("AsyncComponent threw an exception.", e.getCause());
 				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
 			}
 
