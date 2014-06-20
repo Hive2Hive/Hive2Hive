@@ -7,7 +7,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 
 public class GetUserLocationsStep extends BaseGetProcessStep {
 

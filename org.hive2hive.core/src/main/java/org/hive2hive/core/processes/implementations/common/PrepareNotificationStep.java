@@ -9,6 +9,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPrepareNotificationContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 
 /**

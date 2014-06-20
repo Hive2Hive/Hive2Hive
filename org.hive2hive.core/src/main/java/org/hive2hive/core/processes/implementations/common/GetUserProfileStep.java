@@ -13,7 +13,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetUserProfileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;

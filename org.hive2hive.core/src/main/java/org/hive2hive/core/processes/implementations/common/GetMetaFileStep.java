@@ -16,7 +16,7 @@ import org.hive2hive.core.network.data.NetworkContent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IGetMetaFileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;

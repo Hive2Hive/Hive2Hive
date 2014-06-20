@@ -15,7 +15,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IInitializeChunksStepContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeChunksStepContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -9,7 +9,7 @@ import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
 
 public class PutUserLocationsStep extends BasePutProcessStep {
 

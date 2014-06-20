@@ -11,7 +11,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.ICheckWriteAccessContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.ICheckWriteAccessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

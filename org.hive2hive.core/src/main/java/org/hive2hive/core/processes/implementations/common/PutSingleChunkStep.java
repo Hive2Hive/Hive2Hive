@@ -20,7 +20,7 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutSingleChunkContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutSingleChunkContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;

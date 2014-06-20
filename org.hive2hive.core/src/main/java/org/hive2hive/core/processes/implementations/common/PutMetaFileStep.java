@@ -19,7 +19,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IPutMetaFileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutMetaFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;

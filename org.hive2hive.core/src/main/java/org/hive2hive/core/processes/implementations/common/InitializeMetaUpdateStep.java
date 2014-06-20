@@ -15,7 +15,7 @@ import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
-import org.hive2hive.core.processes.implementations.context.interfaces.common.IInitializeMetaUpdateContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeMetaUpdateContext;
 import org.hive2hive.core.processes.implementations.share.pkupdate.ChangeProtectionKeysStep;
 import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeChunkUpdateStep;
 import org.slf4j.Logger;
