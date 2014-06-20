@@ -47,7 +47,6 @@ public class CreateMetaFileStep extends ProcessStep {
 			versions.add(version);
 			metaFile = new MetaFileSmall(context.generateOrGetMetaKeys().getPublic(), versions,
 					context.consumeChunkKeys());
-
 		}
 		context.provideMetaFile(metaFile);
 	}
