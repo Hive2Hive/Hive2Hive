@@ -1,6 +1,6 @@
 package org.hive2hive.client.menu;
 
-import org.hive2hive.client.console.ConsoleMenu;
+import org.hive2hive.client.console.ConsoleMenuItem;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.MenuContainer;
@@ -23,8 +23,8 @@ public final class RootMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Login") {
-			@Override
-			protected boolean checkPreconditions() {
+			protected boolean checkPreconditions() throws NoPeerConnectionException,
+					InvalidProcessStateException, InterruptedException {
 				if (!menus.getNodeMenu().createNetwork()) {
 					printAbortion(displayText, "Node not connected.");
 					return false;
@@ -41,7 +41,6 @@ public final class RootMenu extends H2HConsoleMenu {
 					printAbortion(displayText, "Registering failed.");
 					return false;
 				}
-
 				return true;
 			}
 
@@ -67,20 +66,25 @@ public final class RootMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Logout") {
+			protected boolean checkPreconditions() throws Exception {
+				return checkLogin();
+			}
+
 			protected void execute() throws Exception {
 
-				if (checkLogin()) {
-					IProcessComponent logoutProcess = menus.getNodeMenu().getNode().getUserManager().logout();
-					executeBlocking(logoutProcess, displayText);
-				}
+				IProcessComponent logoutProcess = menus.getNodeMenu().getNode().getUserManager().logout();
+				executeBlocking(logoutProcess, displayText);
 			}
 		});
 
 		add(new H2HConsoleMenuItem("File Menu") {
+			@Override
+			protected boolean checkPreconditions() throws Exception {
+				return checkLogin();
+			}
+
 			protected void execute() throws Exception {
-				if (checkLogin()) {
-					menus.getFileMenu().open(isExpertMode);
-				}
+				menus.getFileMenu().open(isExpertMode);
 			}
 		});
 	}
@@ -90,7 +94,8 @@ public final class RootMenu extends H2HConsoleMenu {
 		return "Please select an option:";
 	}
 
-	private boolean register() throws NoPeerConnectionException, InvalidProcessStateException, InterruptedException {
+	private boolean register() throws NoPeerConnectionException, InvalidProcessStateException,
+			InterruptedException {
 
 		if (menus.getNodeMenu().getNode().getUserManager()
 				.isRegistered(menus.getUserMenu().getUserCredentials().getUserId())) {
@@ -106,11 +111,18 @@ public final class RootMenu extends H2HConsoleMenu {
 
 	private boolean checkLogin() throws NoPeerConnectionException {
 
-		if (menus.getNodeMenu().getNode() == null
-				|| menus.getUserMenu().getUserCredentials() == null
-				|| !menus.getNodeMenu().getNode().getUserManager()
-						.isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
-			H2HConsoleMenuItem.printAbortion("You are not logged in.");
+		if (menus.getNodeMenu().getNode() == null) {
+			H2HConsoleMenuItem
+					.printPrecondition("You are not logged in. Node is not connected to a network.");
+			return false;
+		}
+		if (menus.getUserMenu().getUserCredentials() == null) {
+			H2HConsoleMenuItem.printPrecondition("You are not logged in. No user credentials specified.");
+			return false;
+		}
+		if (!menus.getNodeMenu().getNode().getUserManager()
+				.isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
+			H2HConsoleMenuItem.printPrecondition("You are not logged in.");
 			return false;
 		}
 		return true;
