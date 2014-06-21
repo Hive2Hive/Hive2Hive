@@ -1,3 +1,8 @@
+# IntelliJ#
+.idea/
+*.iml
+*.iws
+
 *.class
 
 # Package Files #
