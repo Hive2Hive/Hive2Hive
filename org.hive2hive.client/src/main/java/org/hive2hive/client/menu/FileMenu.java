@@ -77,8 +77,8 @@ public class FileMenu extends H2HConsoleMenu {
 	protected void addMenuItems() {
 
 		add(new H2HConsoleMenuItem("Add File") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException {
@@ -93,8 +93,8 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Update File") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException {
@@ -108,8 +108,8 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Move File") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException {
@@ -127,8 +127,8 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Delete File") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException {
@@ -143,8 +143,8 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Recover File") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, FileNotFoundException, IllegalArgumentException,
@@ -179,8 +179,8 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Share File") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
@@ -228,8 +228,8 @@ public class FileMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("File Observer") {
-			protected void checkPreconditions() {
-				createRootDirectory();
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
 			}
 
 			protected void execute() throws Exception {

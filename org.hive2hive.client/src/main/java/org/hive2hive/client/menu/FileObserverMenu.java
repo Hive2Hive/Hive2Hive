@@ -32,9 +32,12 @@ public class FileObserverMenu extends H2HConsoleMenu {
 		}
 
 		add(new H2HConsoleMenuItem("Start File Observer") {
-			protected void checkPreconditions() {
-				menus.getNodeMenu().createNetwork();
-				menus.getFileMenu().createRootDirectory();
+			protected boolean checkPreconditions() {
+				if (menus.getNodeMenu().createNetwork()) {
+					return menus.getFileMenu().createRootDirectory();
+				} else {
+					return false;
+				}
 			}
 
 			protected void execute() throws Exception {
@@ -59,19 +62,21 @@ public class FileObserverMenu extends H2HConsoleMenu {
 				exit();
 			}
 		});
+
 	}
 
 	@Override
 	protected String getInstruction() {
 
 		String rootPath = menus.getFileMenu().getRootDirectory().toString();
-		
-		if (isExpertMode)
+
+		if (isExpertMode) {
 			return String.format("Configure and start/stop the file observer for '%s':", rootPath);
-		else
+		} else {
 			return String.format("Start/stop the file observer for '%s':", rootPath);
+		}
 	}
-	
+
 	public IFileObserver getFileObserver() {
 		return fileObserver;
 	}

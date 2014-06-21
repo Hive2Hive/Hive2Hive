@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * An abstract console menu to be used with a {@link UIConsole}.
+ * An abstract console menu.
  * 
  * @author Christian
  * 

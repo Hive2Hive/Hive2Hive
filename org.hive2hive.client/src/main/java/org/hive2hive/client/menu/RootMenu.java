@@ -47,8 +47,6 @@ public final class RootMenu extends H2HConsoleMenu {
 			protected void execute() throws NoPeerConnectionException, InterruptedException,
 					InvalidProcessStateException {
 
-				register();
-
 				IProcessComponent loginProcess = menus
 						.getNodeMenu()
 						.getNode()
