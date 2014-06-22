@@ -44,8 +44,7 @@ public class FileObserverMenu extends H2HConsoleMenu {
 
 				fileObserver = new H2HFileObserver(menus.getFileMenu().getRootDirectory(), interval);
 
-				IFileObserverListener listener = new H2HFileObserverListener(menus.getNodeMenu().getNode()
-						.getFileManager());
+				IFileObserverListener listener = new H2HFileObserverListener(menus.getNodeMenu().getNode().getFileManager());
 
 				fileObserver.addFileObserverListener(listener);
 

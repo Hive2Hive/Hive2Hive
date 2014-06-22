@@ -5,6 +5,8 @@ import org.hive2hive.core.api.interfaces.IManager;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for all managers of the Hive2Hive project.
@@ -13,6 +15,8 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
  * 
  */
 public abstract class H2HManager implements IManager {
+
+	private static final Logger logger = LoggerFactory.getLogger(H2HManager.class);
 
 	protected final NetworkManager networkManager;
 
@@ -32,7 +36,7 @@ public abstract class H2HManager implements IManager {
 			processComponent.start();
 		} catch (InvalidProcessStateException e) {
 			// should not happen
-			e.printStackTrace();
+			logger.error("Cannot execute the process", e);
 		}
 	}
 

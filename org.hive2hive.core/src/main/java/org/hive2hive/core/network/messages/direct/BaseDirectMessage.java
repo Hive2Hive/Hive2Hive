@@ -55,8 +55,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 *            flag which indicates if this message should be rerouted if a direct sending
 	 *            to the {@link PeerAddress} fails
 	 */
-	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetAddress,
-			boolean needsRedirectedSend) {
+	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetAddress, boolean needsRedirectedSend) {
 		super(messageID, targetKey);
 		this.targetAddress = targetAddress;
 		this.needsRedirectedSend = needsRedirectedSend;
@@ -132,8 +131,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		logger.debug("Have to handle a sending failure. Reply = '{}'.", reply);
 		switch (reply) {
 			case WRONG_TARGET:
-				logger.error(
-						"Wrong node responded while sending this message directly using the peer address '{}'.",
+				logger.error("Wrong node responded while sending this message directly using the peer address '{}'.",
 						getTargetAddress());
 			case FAILURE:
 			case FUTURE_FAILURE:
@@ -145,8 +143,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 					return false;
 				}
 			case FAILURE_DECRYPTION:
-				logger.warn(
-						"Message not accepted by the target. Decryption on target node failed. Peer address = '{}'.",
+				logger.warn("Message not accepted by the target. Decryption on target node failed. Peer address = '{}'.",
 						getTargetAddress());
 				return false;
 			case FAILURE_SIGNATURE:
@@ -158,8 +155,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
 			default:
 				logger.error("Unkown AcceptanceReply argument: {}.", reply);
-				throw new IllegalArgumentException(
-						String.format("Unkown AcceptanceReply argument: %s", reply));
+				throw new IllegalArgumentException(String.format("Unkown AcceptanceReply argument: %s", reply));
 		}
 	}
 

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Connection {
 
 	private static final Logger logger = LoggerFactory.getLogger(Connection.class);
+	private static final int MAX_PORT = 65535;
 
 	private final String nodeID;
 	private final NetworkManager networkManager;
@@ -73,15 +74,15 @@ public class Connection {
 	 * @return True, if peer creation and bootstrapping was successful, false otherwise.
 	 */
 	public boolean connect(InetAddress bootstrapAddress, int port) {
-		if (!connect())
+		if (!connect()) {
 			return false;
+		}
 
 		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapAddress).ports(port).start();
 		futureDiscover.awaitUninterruptibly();
 
 		if (futureDiscover.isSuccess()) {
-			logger.debug("Discovery successful: Outside address is '{}'.",
-					futureDiscover.getPeerAddress());
+			logger.debug("Discovery successful: Outside address is '{}'.", futureDiscover.getPeerAddress());
 		} else {
 			logger.warn("Discovery failed: {}.", futureDiscover.getFailedReason());
 			peer.shutdown();
@@ -89,13 +90,11 @@ public class Connection {
 			return false;
 		}
 
-		FutureBootstrap futureBootstrap = peer.bootstrap().setInetAddress(bootstrapAddress).setPorts(port)
-				.start();
+		FutureBootstrap futureBootstrap = peer.bootstrap().setInetAddress(bootstrapAddress).setPorts(port).start();
 		futureBootstrap.awaitUninterruptibly();
 
 		if (futureBootstrap.isSuccess()) {
-			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.",
-					bootstrapAddress.getHostAddress());
+			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", bootstrapAddress.getHostAddress());
 			return true;
 		} else {
 			logger.warn("Bootstrapping failed: {}.", futureBootstrap.getFailedReason());
@@ -117,10 +116,11 @@ public class Connection {
 			isDisconnected = peer.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			isConnected = !isDisconnected;
 
-			if (isDisconnected)
+			if (isDisconnected) {
 				logger.debug("Peer successfully disconnected.");
-			else
+			} else {
 				logger.warn("Peer disconnection failed.");
+			}
 		} else {
 			logger.warn("Peer disconnection failed. Peer is not connected.");
 		}
@@ -144,8 +144,16 @@ public class Connection {
 
 	private boolean createPeer() {
 		int port = H2HConstants.H2H_PORT;
-		while (NetworkUtils.isPortAvailable(port) == false)
+		logger.debug("Start searching for a free port");
+		while (!NetworkUtils.isPortAvailable(port)) {
+			if (port > MAX_PORT) {
+				logger.error("Could not find any free port");
+				return false;
+			}
+
 			port++;
+		}
+		logger.debug("Found free port {}.", port);
 
 		// configure the thread handling internally, callback can be blocking
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
@@ -160,8 +168,7 @@ public class Connection {
 
 		try {
 			peer = new PeerMaker(Number160.createHash(nodeID)).ports(port).setEnableIndirectReplication(true)
-					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
-					.makeAndListen();
+					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig).makeAndListen();
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
@@ -174,5 +181,4 @@ public class Connection {
 
 		return true;
 	}
-	
 }

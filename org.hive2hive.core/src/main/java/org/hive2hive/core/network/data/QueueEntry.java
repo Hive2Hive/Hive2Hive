@@ -58,7 +58,20 @@ class QueueEntry {
 		this.userProfile = userProfile;
 	}
 
-	public boolean equals(String pid) {
-		return this.pid.equals(pid);
+	@Override
+	public int hashCode() {
+		return pid.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object otherPid) {
+		if (otherPid instanceof String) {
+			String pidString = (String) otherPid;
+			return pid.equals(pidString);
+		} else if (otherPid instanceof QueueEntry) {
+			QueueEntry otherEntry = (QueueEntry) otherPid;
+			return pid.equals(otherEntry.getPid());
+		}
+		return false;
 	}
 }

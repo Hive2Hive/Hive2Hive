@@ -21,8 +21,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 		this.fileKeys = fileKeys;
 		this.name = name;
 		this.parent = parent;
-		if (parent != null)
+		if (parent != null) {
 			parent.addChild(this);
+		}
 	}
 
 	/**
@@ -124,9 +125,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 			for (Index child : children) {
 				if (child.isFolder()) {
 					FolderIndex subfolder = (FolderIndex) child;
-					if (subfolder.getSharedFlag()) {
-						return true;
-					}
+					return subfolder.getSharedFlag();
 				}
 			}
 		}
@@ -200,9 +199,25 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof String) {
+			String otherPath = (String) obj;
+			return getFullPath().equals(otherPath);
+		} else if (obj instanceof KeyPair) {
+			KeyPair otherKey = (KeyPair) obj;
+			return fileKeys.equals(otherKey);
+		} else if (obj instanceof Index) {
+			Index otherIndex = (Index) obj;
+			return fileKeys.equals(otherIndex.getFileKeys());
+		}
+		return false;
+	}
+
+	@Override
 	public int hashCode() {
-		if (fileKeys != null)
+		if (fileKeys != null) {
 			return fileKeys.hashCode();
+		}
 		return super.hashCode();
 	}
 
@@ -249,5 +264,5 @@ public abstract class Index implements Comparable<Index>, Serializable {
 
 		return digest;
 	}
-	
+
 }

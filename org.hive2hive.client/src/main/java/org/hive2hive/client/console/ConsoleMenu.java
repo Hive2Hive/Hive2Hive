@@ -13,7 +13,7 @@ public abstract class ConsoleMenu {
 
 	private final ArrayList<ConsoleMenuItem> items;
 
-	private final String exitToken = "Q";
+	private static final String EXIT_TOKEN = "Q";
 	private boolean exited;
 
 	public ConsoleMenu() {
@@ -68,7 +68,7 @@ public abstract class ConsoleMenu {
 		}
 
 		// print exit item
-		print(String.format("\n\t[%s]  %s", exitToken, getExitItemText()));
+		print(String.format("\n\t[%s]  %s", EXIT_TOKEN, getExitItemText()));
 
 		// evaluate input
 		String input;
@@ -76,15 +76,14 @@ public abstract class ConsoleMenu {
 
 		while (!validInput) {
 			input = awaitStringParameter();
-			if (input.equalsIgnoreCase(exitToken)) {
+			if (input.equalsIgnoreCase(EXIT_TOKEN)) {
 				validInput = true;
 				exit();
 			} else {
 				try {
 					int chosen = Integer.valueOf(input);
 					if (chosen > items.size() || chosen < 1) {
-						printError(String.format("Invalid option. Please select an option from 1 to %s.",
-								items.size()));
+						printError(String.format("Invalid option. Please select an option from 1 to %s.", items.size()));
 						validInput = false;
 					} else {
 						items.get(chosen - 1).invoke();
@@ -93,7 +92,7 @@ public abstract class ConsoleMenu {
 				} catch (NumberFormatException e) {
 					printError(String
 							.format("This was not a valid input. Please select an option from 1 to %s or press '%s' to exit this menu.",
-									items.size(), exitToken));
+									items.size(), EXIT_TOKEN));
 					validInput = false;
 				}
 			}
@@ -113,7 +112,7 @@ public abstract class ConsoleMenu {
 				parameter = input.next();
 				success = true;
 			} catch (Exception e) {
-				printError("Exception while parsing the parameter.");
+				printError("Exception while parsing the parameter: " + e.getMessage());
 			}
 		}
 
@@ -148,7 +147,6 @@ public abstract class ConsoleMenu {
 
 	public static void printError(Throwable error) {
 		printError(String.format("An exception has been thrown: ", error.getMessage()));
-		error.printStackTrace(System.err);
 	}
 
 	public static void printError(String errorMsg) {
