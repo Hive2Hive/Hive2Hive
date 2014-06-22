@@ -37,7 +37,6 @@ public class FileSynchronizer {
 	private final Map<String, byte[]> before;
 	private Map<String, byte[]> now;
 
-
 	public FileSynchronizer(Path rootDirectory, UserProfile userProfile) throws ClassNotFoundException, IOException {
 		this.root = rootDirectory;
 		this.userProfile = userProfile;
@@ -51,7 +50,7 @@ public class FileSynchronizer {
 			Files.walkFileTree(root, visitor);
 			now = visitor.getFileTree();
 		} catch (IOException e) {
-			logger.error("Cannot walk the current tree.");
+			logger.error("Cannot walk the current tree.", e);
 			now = new HashMap<String, byte[]>(0);
 		}
 	}
@@ -232,10 +231,8 @@ public class FileSynchronizer {
 			FileIndex fileIndex = (FileIndex) index;
 			if (before.containsKey(fileIndex.getFullPath().toString())
 					&& now.containsKey(fileIndex.getFullPath().toString())) {
-				if (!H2HEncryptionUtil.compareMD5(fileIndex.getMD5(),
-						now.get(fileIndex.getFullPath().toString()))
-						&& !H2HEncryptionUtil.compareMD5(fileIndex.getMD5(),
-								before.get(fileIndex.getFullPath().toString()))) {
+				if (!H2HEncryptionUtil.compareMD5(fileIndex.getMD5(), now.get(fileIndex.getFullPath().toString()))
+						&& !H2HEncryptionUtil.compareMD5(fileIndex.getMD5(), before.get(fileIndex.getFullPath().toString()))) {
 					// different md5 hashes than 'before' and 'now'
 					logger.debug("File '{}' has been updated remotely during absence.", fileIndex.getFullPath());
 					updatedRemotely.add(fileIndex);

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class SelectPeerForDownloadStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(SelectPeerForDownloadStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectPeerForDownloadStep.class);
 
 	private final DownloadDirectContext context;
 
@@ -58,21 +58,19 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		Random rnd = new Random();
 		while (!locations.isEmpty()) {
 			Locations randomLocation = locations.get(rnd.nextInt(locations.size()));
-			ArrayList<PeerAddress> addresses = new ArrayList<PeerAddress>(randomLocation.getPeerAddresses());
+			List<PeerAddress> addresses = new ArrayList<PeerAddress>(randomLocation.getPeerAddresses());
 			if (addresses.isEmpty()) {
 				// does not contain any addresses, kick it
 				locations.remove(randomLocation);
 			} else {
-				logger.debug("Found peer of foreign user to contact for the file {}",
-						task.getDestinationName());
+				logger.debug("Found peer of foreign user to contact for the file {}", task.getDestinationName());
 				PeerAddress rndAddress = addresses.get(rnd.nextInt(addresses.size()));
 				context.setSelectedPeer(rndAddress, randomLocation.getUserId());
 				return;
 			}
 		}
 
-		logger.warn("No online peer found that could be contacted to get the file {}",
-				task.getDestinationName());
+		logger.warn("No online peer found that could be contacted to get the file {}", task.getDestinationName());
 		throw new ProcessExecutionException("No online peer found that could be contacted");
 	}
 
@@ -94,11 +92,11 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 
 		// shuffle and return the first or null, if no other peer address has been found
 		List<PeerAddress> copy = new ArrayList<PeerAddress>(addresses);
-		if (copy.size() > 0) {
+		if (copy.isEmpty()) {
+			return null;
+		} else {
 			Collections.shuffle(copy);
 			return copy.get(0);
-		} else {
-			return null;
 		}
 	}
 }
