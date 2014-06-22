@@ -285,6 +285,13 @@ public class FolderIndex extends Index {
 	}
 
 	@Override
+	public int hashCode() {
+		if (fileKeys != null)
+			return fileKeys.hashCode();
+		return super.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
 			return false;

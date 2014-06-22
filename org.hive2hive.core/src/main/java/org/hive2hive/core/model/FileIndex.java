@@ -55,13 +55,19 @@ public class FileIndex extends Index {
 	}
 
 	@Override
+	public int hashCode() {
+		if (fileKeys != null)
+			return fileKeys.hashCode();
+		return super.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
 			return false;
 		} else if (obj instanceof Index) {
 			Index other = (Index) obj;
-			return getFilePublicKey().equals(other.getFilePublicKey())
-					&& getName().equalsIgnoreCase(other.getName());
+			return getFilePublicKey().equals(other.getFilePublicKey()) && getName().equalsIgnoreCase(other.getName());
 		} else if (obj instanceof PublicKey) {
 			PublicKey publicKey = (PublicKey) obj;
 			return getFilePublicKey().equals(publicKey);
@@ -86,7 +92,8 @@ public class FileIndex extends Index {
 	}
 
 	/**
-	 * Set the hash of the corresponding {@link MetaFileSmall} of this {@link FileIndex}, which gets stored in the
+	 * Set the hash of the corresponding {@link MetaFileSmall} of this {@link FileIndex}, which gets stored in
+	 * the
 	 * user profile. The hash gets created while signing the data in front of a put into the network.
 	 * 
 	 * @param metaFileHash hash of the corresponding {@link MetaFileSmall}
@@ -96,7 +103,8 @@ public class FileIndex extends Index {
 	}
 
 	/**
-	 * Get the hash of the corresponding {@link MetaFileSmall} of this {@link FileIndex}. The hash gets created
+	 * Get the hash of the corresponding {@link MetaFileSmall} of this {@link FileIndex}. The hash gets
+	 * created
 	 * while signing the {@link MetaFileSmall} in front of a put into the network.
 	 * 
 	 * @return hash of the corresponding meta file
