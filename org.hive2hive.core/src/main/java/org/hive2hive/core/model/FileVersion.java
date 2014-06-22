@@ -59,21 +59,22 @@ public class FileVersion implements Serializable, IFileVersion {
 
 	@Override
 	public String toString() {
-		return String.format("Version %s [%s] (%s Bytes)", index, DateFormat.getDateTimeInstance().format(new Date(date)), size);
+		return String.format("Version %s [%s] (%s Bytes)", index, DateFormat.getDateTimeInstance().format(new Date(date)),
+				size);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null)
+		if (obj == null) {
 			return false;
-		if (obj == this)
+		} else if (obj == this) {
 			return true;
-		if (!(obj instanceof FileVersion))
+		} else if (!(obj instanceof FileVersion)) {
 			return false;
+		}
 
 		FileVersion fv = (FileVersion) obj;
-		return fv.index == index && fv.date == date && fv.size == size
-				&& fv.metaChunks.size() == metaChunks.size();
+		return fv.index == index && fv.date == date && fv.size == size && fv.metaChunks.size() == metaChunks.size();
 	}
 
 	@Override

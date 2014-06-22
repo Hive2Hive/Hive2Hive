@@ -65,8 +65,9 @@ public class MetaFileSmall extends MetaFile {
 		}
 
 		for (FileVersion version : versions) {
-			if (version.getIndex() == index)
+			if (version.getIndex() == index) {
 				return version;
+			}
 		}
 
 		return null;

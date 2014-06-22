@@ -26,18 +26,18 @@ import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil
 
 /**
  * Default implementation of {@link IFileManager}.
+ * 
  * @author Christian, Nico
- *
+ * 
  */
 public class H2HFileManager extends H2HManager implements IFileManager {
 
 	public H2HFileManager(NetworkManager networkManager) {
 		super(networkManager);
 	}
-	
+
 	@Override
-	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException,
-			IllegalFileLocation {
+	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation {
 		// verify the argument
 		H2HSession session = networkManager.getSession();
 		if (file == null) {
@@ -54,8 +54,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// add the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE,
-					networkManager);
+			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE, networkManager);
 		} else {
 			// add single file
 			addProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
@@ -78,8 +77,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
-		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file,
-				networkManager);
+		IProcessComponent updateProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 		AsyncComponent asyncProcess = new AsyncComponent(updateProcess);
 
 		submitProcess(asyncProcess);
@@ -88,8 +86,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent move(File source, File destination) throws NoSessionException,
-			NoPeerConnectionException {
+	public IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException {
 		// TODO support the file listener that already moved the file
 		if (!source.exists()) {
 			throw new IllegalArgumentException("Source file not found");
@@ -101,8 +98,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
 		}
 
-		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
-				networkManager);
+		IProcessComponent moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination, networkManager);
 
 		AsyncComponent asyncProcess = new AsyncComponent(moveProcess);
 
@@ -133,9 +129,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent recover(File file, IVersionSelector versionSelector)
-			throws FileNotFoundException, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
+	public IProcessComponent recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
+			IllegalArgumentException, NoSessionException, NoPeerConnectionException {
 		// do some verifications
 		if (file.isDirectory()) {
 			throw new IllegalArgumentException("A foler has only one version");
@@ -143,8 +138,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new FileNotFoundException("File does not exist");
 		}
 
-		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file,
-				versionSelector, networkManager);
+		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file, versionSelector,
+				networkManager);
 
 		AsyncComponent asyncProcess = new AsyncComponent(recoverProcess);
 
@@ -153,25 +148,28 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent share(File folder, String userId, PermissionType permission)
-			throws IllegalFileLocation, IllegalArgumentException, NoSessionException,
-			NoPeerConnectionException {
+	public IProcessComponent share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
+			IllegalArgumentException, NoSessionException, NoPeerConnectionException {
 		// verify
-		if (!folder.isDirectory())
+		if (!folder.isDirectory()) {
 			throw new IllegalArgumentException("File has to be a folder.");
-		if (!folder.exists())
+		}
+		if (!folder.exists()) {
 			throw new IllegalFileLocation("Folder does not exist.");
+		}
 
 		H2HSession session = networkManager.getSession();
 		Path root = session.getRoot();
 
 		// folder must be in the given root directory
-		if (!folder.toPath().toString().startsWith(root.toString()))
+		if (!folder.toPath().toString().startsWith(root.toString())) {
 			throw new IllegalFileLocation("Folder must be in root of the H2H directory.");
+		}
 
 		// sharing root folder is not allowed
-		if (folder.toPath().toString().equals(root.toString()))
+		if (folder.toPath().toString().equals(root.toString())) {
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
+		}
 
 		IProcessComponent shareProcess = ProcessFactory.instance().createShareProcess(folder,
 				new UserPermission(userId, permission), networkManager);
@@ -184,11 +182,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IResultProcessComponent<List<FileTaste>> getFileList() throws NoSessionException {
-		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance()
-				.createFileListProcess(networkManager);
+		IResultProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(
+				networkManager);
 
-		AsyncResultComponent<List<FileTaste>> asyncProcess = new AsyncResultComponent<List<FileTaste>>(
-				fileListProcess);
+		AsyncResultComponent<List<FileTaste>> asyncProcess = new AsyncResultComponent<List<FileTaste>>(fileListProcess);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;

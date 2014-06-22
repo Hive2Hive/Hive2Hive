@@ -27,8 +27,9 @@ public abstract class H2HManager implements IManager {
 	}
 
 	protected void submitProcess(IProcessComponent processComponent) {
-		if (isAutostart)
+		if (isAutostart) {
 			executeProcess(processComponent);
+		}
 	}
 
 	protected void executeProcess(IProcessComponent processComponent) {
