@@ -22,7 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A process component container that executes and rollbacks its process components in a sequential manner. In presence
+ * A process component container that executes and rollbacks its process components in a sequential manner. In
+ * presence
  * of asynchronous child components, this container waits for all asynchronous operations to complete before
  * continuing.
  * 
@@ -44,8 +45,7 @@ public class SequentialProcess extends Process {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 
 		// execute all child components
-		while (!components.isEmpty() && executionIndex < components.size()
-				&& getState() == ProcessState.RUNNING) {
+		while (!components.isEmpty() && executionIndex < components.size() && getState() == ProcessState.RUNNING) {
 
 			checkAsyncComponentsForFail(asyncHandles);
 			rollbackIndex = executionIndex;
@@ -152,7 +152,6 @@ public class SequentialProcess extends Process {
 			latch.await();
 		} catch (InterruptedException e) {
 			logger.error("Exception while waiting for async components.", e);
-			e.printStackTrace();
 		}
 		handle.cancel(true);
 
@@ -161,8 +160,7 @@ public class SequentialProcess extends Process {
 		}
 	}
 
-	private static void checkAsyncComponentsForFail(List<Future<RollbackReason>> handles)
-			throws ProcessExecutionException {
+	private static void checkAsyncComponentsForFail(List<Future<RollbackReason>> handles) throws ProcessExecutionException {
 
 		if (handles.isEmpty())
 			return;
@@ -177,7 +175,6 @@ public class SequentialProcess extends Process {
 				result = handle.get();
 			} catch (InterruptedException e) {
 				logger.error("Error while checking async component.", e);
-				e.printStackTrace();
 			} catch (ExecutionException e) {
 				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
 			}

@@ -94,7 +94,6 @@ public class AsyncComponent extends ProcessDecorator implements Callable<Rollbac
 						cancel(reason);
 					} catch (InvalidProcessStateException e) {
 						logger.error("Asynchronous component could not be cancelled.", e);
-						e.printStackTrace();
 					}
 				}
 			}

@@ -190,8 +190,8 @@ public final class EncryptionUtil {
 	 * @param initVector The initialization vector (IV) with which the data shall be encrypted.
 	 * @return Returns the encrypted data.
 	 */
-	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws DataLengthException,
+			IllegalStateException, InvalidCipherTextException {
 
 		return processAESCiphering(true, data, secretKey, initVector);
 	}
@@ -204,8 +204,8 @@ public final class EncryptionUtil {
 	 * @param initVector The initialization vector (IV) with which the data shall be decrypted.
 	 * @return Returns the decrypted data.
 	 */
-	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws DataLengthException,
+			IllegalStateException, InvalidCipherTextException {
 
 		return processAESCiphering(false, data, secretKey, initVector);
 	}
@@ -221,8 +221,8 @@ public final class EncryptionUtil {
 	 * @throws BadPaddingException
 	 * @throws IllegalBlockSizeException
 	 */
-	public static byte[] encryptRSA(byte[] data, PublicKey publicKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+	public static byte[] encryptRSA(byte[] data, PublicKey publicKey) throws InvalidKeyException, IllegalBlockSizeException,
+			BadPaddingException {
 
 		installBCProvider();
 
@@ -261,7 +261,6 @@ public final class EncryptionUtil {
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
 			logger.error("Exception while RSA encryption:", e);
-			e.printStackTrace();
 		}
 		return null;
 
@@ -285,9 +284,9 @@ public final class EncryptionUtil {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey,
-			AES_KEYLENGTH aesKeyLength) throws DataLengthException, IllegalStateException,
-			InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey, AES_KEYLENGTH aesKeyLength)
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException, InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException {
 
 		// generate AES key
 		SecretKey aesKey = generateAESKey(aesKeyLength);
@@ -326,9 +325,9 @@ public final class EncryptionUtil {
 	 * @throws IllegalStateException
 	 * @throws InvalidCipherTextException
 	 */
-	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DataLengthException,
-			IllegalStateException, InvalidCipherTextException {
+	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, DataLengthException, IllegalStateException,
+			InvalidCipherTextException {
 
 		// decrypt parameters asymmetrically
 		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey);
@@ -351,8 +350,7 @@ public final class EncryptionUtil {
 	 * @throws InvalidKeyException
 	 * @throws SignatureException
 	 */
-	public static byte[] sign(byte[] data, PrivateKey privateKey) throws InvalidKeyException,
-			SignatureException {
+	public static byte[] sign(byte[] data, PrivateKey privateKey) throws InvalidKeyException, SignatureException {
 
 		installBCProvider();
 
@@ -380,8 +378,8 @@ public final class EncryptionUtil {
 	 * @throws InvalidKeyException
 	 * @throws SignatureException
 	 */
-	public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey)
-			throws InvalidKeyException, SignatureException {
+	public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey) throws InvalidKeyException,
+			SignatureException {
 
 		installBCProvider();
 
@@ -537,8 +535,8 @@ public final class EncryptionUtil {
 		}
 	}
 
-	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key,
-			byte[] initVector) throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key, byte[] initVector)
+			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
 		// set up engine, block cipher mode and padding
 		AESEngine aesEngine = new AESEngine();
