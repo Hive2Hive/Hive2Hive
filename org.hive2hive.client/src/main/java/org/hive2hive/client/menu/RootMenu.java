@@ -1,12 +1,13 @@
 package org.hive2hive.client.menu;
 
-import org.hive2hive.client.console.ConsoleMenuItem;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.MenuContainer;
+import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.core.security.UserCredentials;
 
 public final class RootMenu extends H2HConsoleMenu {
 
@@ -54,8 +55,8 @@ public final class RootMenu extends H2HConsoleMenu {
 						.login(menus.getUserMenu().getUserCredentials(),
 								menus.getFileMenu().getRootDirectory().toPath());
 
-				// TODO find a cleaner way to handle login failures
 				boolean success = executeBlocking(loginProcess, displayText);
+				// reset user configs as they might be wrong
 				if (!success) {
 					menus.getUserMenu().reset();
 					menus.getFileMenu().reset();
@@ -95,14 +96,15 @@ public final class RootMenu extends H2HConsoleMenu {
 	private boolean register() throws NoPeerConnectionException, InvalidProcessStateException,
 			InterruptedException {
 
-		if (menus.getNodeMenu().getNode().getUserManager()
-				.isRegistered(menus.getUserMenu().getUserCredentials().getUserId())) {
+		IUserManager userManager = menus.getNodeMenu().getNode().getUserManager();
+		UserCredentials userCredentials = menus.getUserMenu().getUserCredentials();
+
+		if (userManager.isRegistered(userCredentials.getUserId())) {
 			return true;
 		} else {
 			H2HConsoleMenuItem
 					.printPrecondition("You are not registered to the network. This will now happen automatically.");
-			IProcessComponent registerProcess = menus.getNodeMenu().getNode().getUserManager()
-					.register(menus.getUserMenu().getUserCredentials());
+			IProcessComponent registerProcess = userManager.register(userCredentials);
 			return executeBlocking(registerProcess, "Register");
 		}
 	}

@@ -71,7 +71,7 @@ public abstract class ConsoleMenu {
 		print(String.format("\n\t[%s]  %s", exitToken, getExitItemText()));
 
 		// evaluate input
-		String input = exitToken;
+		String input;
 		boolean validInput = false;
 
 		while (!validInput) {

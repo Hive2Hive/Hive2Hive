@@ -24,8 +24,8 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
  */
 public final class NodeMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 	public H2HConsoleMenuItem CreateNetworkMenuItem;
+	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
 
 	private IH2HNode node;
 
@@ -40,6 +40,14 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void createItems() {
+		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
+			protected void execute() {
+
+				buildNode(NetworkConfiguration.create(askNodeID()));
+				connectNode();
+			}
+		};
+
 		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
 
@@ -59,14 +67,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
 				}
 
-				connectNode();
-			}
-		};
-
-		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
-			protected void execute() {
-
-				buildNode(NetworkConfiguration.create(askNodeID()));
 				connectNode();
 			}
 		};
@@ -136,7 +136,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 					.printPrecondition("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
 		}
-		return getNode() == null;
+		return getNode() != null;
 	}
 
 	private void buildNode(INetworkConfiguration networkConfig) {
