@@ -200,6 +200,21 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof String) {
+			String otherPath = (String) obj;
+			return getFullPath().equals(otherPath);
+		} else if (obj instanceof KeyPair) {
+			KeyPair otherKey = (KeyPair) obj;
+			return fileKeys.equals(otherKey);
+		} else if (obj instanceof Index) {
+			Index otherIndex = (Index) obj;
+			return fileKeys.equals(otherIndex.getFileKeys());
+		}
+		return false;
+	}
+
+	@Override
 	public abstract String toString();
 
 	/**

@@ -104,10 +104,10 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			}
 		}
 
-		if (success == false) {
-			logger.info("All clients of user '{}' are currently offline or unreachable.", userId);
-		} else {
+		if (success) {
 			logger.debug("Successfully notified the initial peer of user '{}' that it should check its UP tasks.", userId);
+		} else {
+			logger.info("All clients of user '{}' are currently offline or unreachable.", userId);
 		}
 	}
 

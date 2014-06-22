@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
  * @author Seppi
  */
 public class H2HSignatureFactory implements SignatureFactory {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(H2HSignatureFactory.class);
-	
+
 	/**
 	 * @return The signature mechanism
 	 */
@@ -74,7 +74,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 			return PeerMaker.EMPTY_PUBLICKEY;
 		}
 
-		byte me[] = new byte[len];
+		byte[] me = new byte[len];
 		buf.readBytes(me);
 		return decodePublicKey(me);
 	}
@@ -85,10 +85,10 @@ public class H2HSignatureFactory implements SignatureFactory {
 		buf.writeShort(data.length);
 		buf.writeBytes(data);
 	}
-	
+
 	@Override
-	public SignatureCodec sign(PrivateKey privateKey, ByteBuf buf) throws InvalidKeyException,
-			SignatureException, IOException {
+	public SignatureCodec sign(PrivateKey privateKey, ByteBuf buf) throws InvalidKeyException, SignatureException,
+			IOException {
 		Signature signature = signatureInstance();
 		signature.initSign(privateKey);
 		ByteBuffer[] byteBuffers = buf.nioBuffers();
@@ -97,7 +97,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 			ByteBuffer buffer = byteBuffers[i];
 			signature.update(buffer);
 		}
-		
+
 		byte[] signatureData = signature.sign();
 
 		SignatureCodec decodedSignature = new H2HSignatureCodec();
@@ -106,8 +106,8 @@ public class H2HSignatureFactory implements SignatureFactory {
 	}
 
 	@Override
-	public boolean verify(PublicKey publicKey, ByteBuf buf, SignatureCodec signatureEncoded)
-			throws SignatureException, InvalidKeyException, IOException {
+	public boolean verify(PublicKey publicKey, ByteBuf buf, SignatureCodec signatureEncoded) throws SignatureException,
+			InvalidKeyException, IOException {
 		Signature signature = signatureInstance();
 		signature.initVerify(publicKey);
 		ByteBuffer[] byteBuffers = buf.nioBuffers();
@@ -121,8 +121,8 @@ public class H2HSignatureFactory implements SignatureFactory {
 	}
 
 	@Override
-	public Signature update(PublicKey receivedPublicKey, ByteBuffer[] byteBuffers)
-			throws InvalidKeyException, SignatureException {
+	public Signature update(PublicKey receivedPublicKey, ByteBuffer[] byteBuffers) throws InvalidKeyException,
+			SignatureException {
 		Signature signature = signatureInstance();
 		signature.initVerify(receivedPublicKey);
 		int arrayLength = byteBuffers.length;
@@ -133,7 +133,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 	}
 
 	@Override
-    public SignatureCodec signatureCodec() {
-	    return new H2HSignatureCodec();
-    }
+	public SignatureCodec signatureCodec() {
+		return new H2HSignatureCodec();
+	}
 }

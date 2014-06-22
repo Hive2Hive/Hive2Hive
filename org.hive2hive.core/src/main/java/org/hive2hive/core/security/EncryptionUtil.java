@@ -232,7 +232,6 @@ public final class EncryptionUtil {
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
 			logger.error("Exception while RSA encryption:", e);
-			e.printStackTrace();
 		}
 		return null;
 
