@@ -17,19 +17,30 @@ public abstract class ConsoleMenuItem {
 
 	public void invoke() {
 
-		checkPreconditions();
-		initialize();
+		boolean satisfied = false;
 		try {
-			execute();
+			satisfied = checkPreconditions();
 		} catch (Exception e) {
+			ConsoleMenu.printError("Exception during precondition check.");
 			ConsoleMenu.printError(e);
-		} finally {
-			end();
+		}
+				
+		if (satisfied) {
+			initialize();
+			try {
+				execute();
+			} catch (Exception e) {
+				ConsoleMenu.printError("Exception during menu item execution.");
+				ConsoleMenu.printError(e);
+			} finally {
+				end();
+			}
 		}
 	}
 
-	protected void checkPreconditions() {
+	protected boolean checkPreconditions() throws Exception {
 		// nothing by default
+		return true;
 	}
 
 	protected abstract void initialize();

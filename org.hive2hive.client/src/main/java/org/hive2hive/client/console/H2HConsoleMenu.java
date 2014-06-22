@@ -20,8 +20,12 @@ public abstract class H2HConsoleMenu extends ConsoleMenu {
 		this.isExpertMode = isExpertMode;
 		open();
 	}
+	
+	public void reset() {
+		// do nothing by default
+	}
 
-	protected void executeBlocking(IProcessComponent process, String itemName) throws InterruptedException,
+	protected boolean executeBlocking(IProcessComponent process, String itemName) throws InterruptedException,
 			InvalidProcessStateException {
 
 		print(String.format("Executing '%s'...", itemName));
@@ -33,7 +37,8 @@ public abstract class H2HConsoleMenu extends ConsoleMenu {
 
 		if (listener.hasFailed()) {
 			RollbackReason reason = listener.getRollbackReason();
-			print(String.format("The process has failed%s", reason != null ? reason.getHint() : "."));
+			print(String.format("The process has failed%s", reason != null ? ": " + reason.getHint() : "."));
 		}
+		return listener.hasSucceeded();
 	}
 }

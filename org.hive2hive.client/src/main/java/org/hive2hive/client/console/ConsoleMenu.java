@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * An abstract console menu to be used with a {@link UIConsole}.
+ * An abstract console menu.
  * 
  * @author Christian
  * 
@@ -71,7 +71,7 @@ public abstract class ConsoleMenu {
 		print(String.format("\n\t[%s]  %s", exitToken, getExitItemText()));
 
 		// evaluate input
-		String input = exitToken;
+		String input;
 		boolean validInput = false;
 
 		while (!validInput) {

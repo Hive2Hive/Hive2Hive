@@ -17,6 +17,7 @@ import org.hive2hive.core.network.NetworkManager;
  */
 public class H2HNode implements IH2HNode {
 
+	// TODO remove manager singletons
 	// TODO atm, this class is just a wrapper for the NetworkManager
 	private final INetworkConfiguration networkConfiguration;
 	private final IFileConfiguration fileConfiguration;

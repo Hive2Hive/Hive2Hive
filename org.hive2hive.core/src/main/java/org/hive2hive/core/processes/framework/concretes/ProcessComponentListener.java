@@ -11,9 +11,9 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListen
  */
 public class ProcessComponentListener implements IProcessComponentListener {
 
-	protected boolean hasSucceeded;
-	protected boolean hasFailed;
-	protected boolean hasFinished;
+	protected boolean hasSucceeded = false;
+	protected boolean hasFailed = false;
+	protected boolean hasFinished = false;
 	
 	protected RollbackReason rollbackReason;
 
