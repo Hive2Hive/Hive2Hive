@@ -286,8 +286,6 @@ public class FolderIndex extends Index {
 
 	@Override
 	public int hashCode() {
-		if (fileKeys != null)
-			return fileKeys.hashCode();
 		return super.hashCode();
 	}
 
