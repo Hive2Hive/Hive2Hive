@@ -26,7 +26,7 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 
 public class FileMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem CreateRootDirectory;
+	private H2HConsoleMenuItem CreateRootDirectory;
 
 	private File rootDirectory;
 
@@ -48,9 +48,8 @@ public class FileMenu extends H2HConsoleMenu {
 
 					String input = awaitStringParameter();
 
-					if (!input.equalsIgnoreCase("ok")) {
+					if (!"ok".equalsIgnoreCase(input)) {
 						while (!Files.exists(new File(input).toPath(), LinkOption.NOFOLLOW_LINKS)) {
-
 							printError("This directory does not exist. Please retry.");
 							input = awaitStringParameter();
 						}
@@ -83,8 +82,9 @@ public class FileMenu extends H2HConsoleMenu {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 
 				File file = askForFile(true);
-				if (file == null)
+				if (file == null) {
 					return;
+				}
 
 				IProcessComponent addFileProcess = menus.getNodeMenu().getNode().getFileManager().add(file);
 				executeBlocking(addFileProcess, displayText);
@@ -99,8 +99,9 @@ public class FileMenu extends H2HConsoleMenu {
 			protected void execute() throws Hive2HiveException, InterruptedException {
 
 				File file = askForFile(true);
-				if (file == null)
+				if (file == null) {
 					return;
+				}
 				IProcessComponent updateFileProcess = menus.getNodeMenu().getNode().getFileManager().update(file);
 				executeBlocking(updateFileProcess, displayText);
 			}
@@ -113,12 +114,15 @@ public class FileMenu extends H2HConsoleMenu {
 
 			protected void execute() throws Hive2HiveException, InterruptedException {
 				File source = askForFile("Specify the relative path of the source file to the root directory '%s'.", true);
-				if (source == null)
+				if (source == null) {
 					return;
+				}
+
 				File destination = askForFile(
 						"Specify the relative path of the destination file to the root directory '%s'.", false);
-				if (destination == null)
+				if (destination == null) {
 					return;
+				}
 
 				IProcessComponent moveFileProcess = menus.getNodeMenu().getNode().getFileManager().move(source, destination);
 				executeBlocking(moveFileProcess, displayText);
@@ -131,10 +135,10 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException {
-
 				File file = askForFile(true);
-				if (file == null)
+				if (file == null) {
 					return;
+				}
 
 				IProcessComponent deleteFileProcess = menus.getNodeMenu().getNode().getFileManager().delete(file);
 				executeBlocking(deleteFileProcess, displayText);
@@ -150,8 +154,9 @@ public class FileMenu extends H2HConsoleMenu {
 					InterruptedException {
 
 				File file = askForFile(true);
-				if (file == null)
+				if (file == null) {
 					return;
+				}
 
 				IVersionSelector versionSelector = new IVersionSelector() {
 					public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
@@ -164,10 +169,11 @@ public class FileMenu extends H2HConsoleMenu {
 								.format("Specify the new name for the recovered file '%s' or enter 'default' to take the default values:",
 										fullName));
 						String input = awaitStringParameter();
-						if (input.equalsIgnoreCase("default"))
+						if ("default".equalsIgnoreCase(input)) {
 							return null;
-						else
+						} else {
 							return input;
+						}
 					}
 				};
 
@@ -187,15 +193,17 @@ public class FileMenu extends H2HConsoleMenu {
 
 				File folderToShare = askForFolder(
 						"Specify the relative path of the folder you want to share to the root directory '%s'.", true);
-				if (folderToShare == null)
+				if (folderToShare == null) {
 					return;
+				}
 
 				print("Specify the user ID of the user you want to share with.");
 				String friendID = awaitStringParameter();
 
 				PermissionType permission = askForPermission(folderToShare.getAbsolutePath(), friendID);
-				if (permission == null)
+				if (permission == null) {
 					return;
+				}
 
 				IProcessComponent shareProcess;
 				try {
@@ -262,8 +270,9 @@ public class FileMenu extends H2HConsoleMenu {
 
 			String input = awaitStringParameter();
 
-			if (input.equalsIgnoreCase("cancel"))
+			if ("cancel".equalsIgnoreCase(input)) {
 				return null;
+			}
 
 			file = new File(rootDirectory, input);
 			if (expectExistence && !file.exists()) {

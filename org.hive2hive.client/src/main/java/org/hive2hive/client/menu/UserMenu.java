@@ -14,8 +14,7 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public final class UserMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem CreateUserCredentials;
-
+	private H2HConsoleMenuItem CreateUserCredentials;
 	private UserCredentials userCredentials;
 
 	public UserMenu(MenuContainer menus) {

@@ -24,8 +24,8 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
  */
 public final class NodeMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
-	public H2HConsoleMenuItem CreateNetworkMenuItem;
+	private H2HConsoleMenuItem ConnectToExistingNetworkItem;
+	private H2HConsoleMenuItem CreateNetworkMenuItem;
 
 	private IH2HNode node;
 
@@ -58,7 +58,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 				} else {
 					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
 				}
-				
+
 				connectNode();
 			}
 		};
@@ -119,10 +119,11 @@ public final class NodeMenu extends H2HConsoleMenu {
 	@Override
 	public String getInstruction() {
 
-		if (isExpertMode)
+		if (isExpertMode) {
 			return "Configure and set up your own network or connect to an existing one.";
-		else
+		} else {
 			return "Do you want to create a new network or connect to an existing one?";
+		}
 	}
 
 	public IH2HNode getNode() {
@@ -132,8 +133,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 	public void forceNetwork() {
 
 		while (getNode() == null) {
-			H2HConsoleMenuItem
-					.printPreconditionError("You are not connected to a network. Connect to a network first.");
+			H2HConsoleMenuItem.printPreconditionError("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
 		}
 	}
@@ -153,7 +153,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 			print("Network connection could not be established.");
 		}
 	}
-	
+
 	private String askNodeID() {
 		String nodeID = UUID.randomUUID().toString();
 		if (isExpertMode) {
