@@ -7,6 +7,7 @@ import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.network.data.DataManager;
 
 /**
  * A parameter class for {@link DataManager}'s methods.
@@ -147,13 +148,13 @@ public class Parameters implements IParameters {
 	public boolean getHashFlag() {
 		return hashFlag;
 	}
-	
+
 	@Override
 	public Parameters setHash(byte[] hash) {
 		this.hash = hash;
 		return this;
 	}
-	
+
 	@Override
 	public byte[] getHash() {
 		return hash;
@@ -162,23 +163,38 @@ public class Parameters implements IParameters {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		if (data != null)
+		if (data != null) {
 			builder.append("content = '").append(data.getClass().getSimpleName()).append("' ");
+		}
+
 		builder.append("location key = '").append(locationKey).append("' ");
-		if (domainKey != null)
+
+		if (domainKey != null) {
 			builder.append("domain key = '").append(domainKey).append("' ");
-		if (contentKey != null)
+		}
+
+		if (contentKey != null) {
 			builder.append("content key = '").append(contentKey).append("' ");
-		else
+		} else {
 			builder.append("content key = '").append(cKey).append("' ");
-		if (!vKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY))
+		}
+
+		if (!vKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY)) {
 			builder.append("version key = '").append(vKey).append("' ");
-		if (ttl != -1)
+		}
+
+		if (ttl != -1) {
 			builder.append("ttl = '").append(ttl).append("' ");
-		if (protectionKeys != null)
+		}
+
+		if (protectionKeys != null) {
 			builder.append("protected = 'true' ");
-		if (hashFlag)
+		}
+
+		if (hashFlag) {
 			builder.append("hashFlag = 'true'");
+		}
+
 		return builder.toString();
 	}
 

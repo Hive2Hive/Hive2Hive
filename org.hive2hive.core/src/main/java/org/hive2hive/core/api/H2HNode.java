@@ -12,8 +12,9 @@ import org.hive2hive.core.network.NetworkManager;
 
 /**
  * Default implementation of {@link IH2HNode}.
+ * 
  * @author Christian, Nico
- *
+ * 
  */
 public class H2HNode implements IH2HNode {
 
@@ -42,8 +43,7 @@ public class H2HNode implements IH2HNode {
 	 * @param fileConfiguration the file configuration
 	 * @return
 	 */
-	public static IH2HNode createNode(INetworkConfiguration networkConfiguration,
-			IFileConfiguration fileConfiguration) {
+	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration) {
 		return new H2HNode(networkConfiguration, fileConfiguration);
 	}
 
@@ -64,15 +64,17 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public IUserManager getUserManager() {
-		if (userManager == null)
+		if (userManager == null) {
 			userManager = new H2HUserManager(networkManager, fileConfiguration);
+		}
 		return userManager;
 	}
 
 	@Override
 	public IFileManager getFileManager() {
-		if (fileManager == null)
+		if (fileManager == null) {
 			fileManager = new H2HFileManager(networkManager);
+		}
 		return fileManager;
 	}
 

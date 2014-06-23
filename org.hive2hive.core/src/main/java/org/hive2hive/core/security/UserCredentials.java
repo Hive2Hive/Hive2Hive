@@ -56,8 +56,5 @@ public final class UserCredentials {
 
 		// Note: Do this as hex to support all platforms
 		return EncryptionUtil.byteToHex(locationKey);
-
-		// String location = new String(locationKey, H2HConstants.ENCODING_CHARSET);
-		// return location;
 	}
 }
