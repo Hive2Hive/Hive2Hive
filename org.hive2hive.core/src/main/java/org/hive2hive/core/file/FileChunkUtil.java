@@ -7,8 +7,13 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.network.data.download.BaseDownloadTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileChunkUtil {
+
+	private static final Logger logger = LoggerFactory.getLogger(FileChunkUtil.class);
 
 	private FileChunkUtil() {
 		// only static methods
@@ -52,8 +57,7 @@ public class FileChunkUtil {
 	 * @return the chunk or null if no data could be read with the given parameter
 	 * @throws IOException if the file cannot be read
 	 */
-	public static Chunk getChunk(File file, int chunkSize, int chunkNumber, String chunkId)
-			throws IOException {
+	public static Chunk getChunk(File file, int chunkSize, int chunkNumber, String chunkId) throws IOException {
 		if (file == null || !file.exists()) {
 			throw new IOException("File does not exist");
 		} else if (chunkSize <= 0) {
@@ -113,32 +117,37 @@ public class FileChunkUtil {
 	 * 
 	 * @param fileParts the sorted file parts.
 	 * @param destination the destination
-	 * @param removeParts whether to remove copied file parts
 	 * @throws IOException in case the files could not be read or written.
 	 */
-	public static void reassembly(List<File> fileParts, File destination, boolean removeParts)
-			throws IOException {
+	public static void reassembly(List<File> fileParts, File destination) throws IOException {
 		if (fileParts == null || fileParts.isEmpty()) {
-			// nothing to reassembly
+			logger.error("File parts can't be null.");
 			return;
-		}
-
-		if (destination == null) {
-			// don't know where to reassembly
+		} else if (fileParts.isEmpty()) {
+			logger.error("File parts can't be empty.");
+			return;
+		} else if (destination == null) {
+			logger.error("Destination can't be null");
 			return;
 		}
 
 		if (destination.exists()) {
 			// overwrite
-			destination.delete();
+			if (destination.delete()) {
+				logger.debug("Destination gets overwritten. destination = '{}'", destination);
+			} else {
+				logger.error("Couldn't overwrite destination. destination = '{}'", destination);
+				return;
+			}
 		}
 
 		for (File filePart : fileParts) {
 			// copy file parts to the new location, append
 			FileUtils.writeByteArrayToFile(destination, FileUtils.readFileToByteArray(filePart), true);
 
-			if (removeParts)
-				filePart.delete();
+			if (!filePart.delete()) {
+				logger.warn("Couldn't delete temporary file part. filePart = '{}'", filePart);
+			}
 		}
 	}
 }

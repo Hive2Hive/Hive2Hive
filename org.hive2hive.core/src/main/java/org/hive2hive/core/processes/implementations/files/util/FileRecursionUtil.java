@@ -58,8 +58,7 @@ public class FileRecursionUtil {
 			if (action == FileProcessAction.NEW_FILE)
 				uploadProcess = ProcessFactory.instance().createNewFileProcess(file.toFile(), networkManager);
 			else
-				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file.toFile(),
-						networkManager);
+				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file.toFile(), networkManager);
 
 			Path parentFile = file.getParent();
 			if (sameParents.containsKey(parentFile)) {
@@ -110,8 +109,8 @@ public class FileRecursionUtil {
 		// asynchronous components, we simply delete them all in the same thread (reverse preorder of course)
 		Collections.reverse(files);
 		for (Path file : files) {
-			ProcessComponent deletionProcess = ProcessFactory.instance().createDeleteFileProcess(
-					file.toFile(), networkManager);
+			ProcessComponent deletionProcess = ProcessFactory.instance().createDeleteFileProcess(file.toFile(),
+					networkManager);
 			rootProcess.add(deletionProcess);
 		}
 
@@ -129,8 +128,8 @@ public class FileRecursionUtil {
 	 * @throws NoPeerConnectionException
 	 */
 	@Deprecated
-	public static ProcessComponent buildDeletionProcessFromNodelist(List<Index> files,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
+	public static ProcessComponent buildDeletionProcessFromNodelist(List<Index> files, NetworkManager networkManager)
+			throws NoSessionException, NoPeerConnectionException {
 		List<Path> filesToDelete = new ArrayList<Path>();
 		for (Index documentIndex : files) {
 			filesToDelete.add(FileUtil.getPath(networkManager.getSession().getRoot(), documentIndex));
@@ -158,8 +157,7 @@ public class FileRecursionUtil {
 
 		for (Index file : files) {
 			PublicKey fileKey = file.getFilePublicKey();
-			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey,
-					networkManager);
+			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
 			if (file.isFolder()) {
 				// when a directory, the process may have multiple children, thus we need a sequential process
 				SequentialProcess folderProcess = new SequentialProcess();

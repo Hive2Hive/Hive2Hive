@@ -63,8 +63,7 @@ public abstract class BaseDownloadTask implements Serializable {
 	public List<MetaChunk> getOpenChunks() {
 		List<MetaChunk> openChunks = new ArrayList<MetaChunk>();
 		for (MetaChunk metaChunk : metaChunks) {
-			if (downloadedParts[metaChunk.getIndex()] == null
-					|| !downloadedParts[metaChunk.getIndex()].exists()) {
+			if (downloadedParts[metaChunk.getIndex()] == null || !downloadedParts[metaChunk.getIndex()].exists()) {
 				openChunks.add(metaChunk);
 			}
 		}
@@ -140,12 +139,17 @@ public abstract class BaseDownloadTask implements Serializable {
 			try {
 				// reassembly
 				List<File> fileParts = Arrays.asList(downloadedParts);
-				FileChunkUtil.reassembly(fileParts, destination, true);
+				FileChunkUtil.reassembly(fileParts, destination);
 				logger.debug("File {} has successfully been reassembled", getDestinationName());
 
 				// notify listeners
 				for (IDownloadListener listener : listeners) {
 					listener.downloadFinished(this);
+				}
+
+				// delete the temporary download folder
+				if (!tempFolder.delete()) {
+					logger.warn("Couldn't delete temporary download folder '{}'.", tempFolder);
 				}
 
 				// release the lock

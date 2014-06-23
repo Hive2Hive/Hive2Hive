@@ -60,24 +60,21 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareFilledFolderTest() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InterruptedException, NoPeerConnectionException {
+	public void shareFilledFolderTest() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
-		File folderToShare = new File(rootA, NetworkTestUtil.randomString());
+		File folderToShare = new File(rootA, "sharedFolder");
 		folderToShare.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
 
-		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1,
-				folderToShare, CHUNK_SIZE);
+		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1, folderToShare, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1);
-		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1,
-				folderToShare, CHUNK_SIZE);
+		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1, folderToShare, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2);
 		File subfolder = new File(folderToShare, "subfolder1");
 		subfolder.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subfolder);
-		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder,
-				CHUNK_SIZE);
+		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3);
 
 		// share the filled folder
@@ -95,17 +92,17 @@ public class ShareFolderTest extends H2HJUnitTest {
 		waitTillSynchronized(file2AtB, true);
 		Assert.assertEquals(file2.length(), file2AtB.length());
 
-		File file3AtB = new File(sharedFolderAtB, file3.getName());
-		waitTillSynchronized(file3AtB, true);
-		Assert.assertEquals(file3.length(), file3AtB.length());
-
 		File subfolderAtB = new File(sharedFolderAtB, subfolder.getName());
 		waitTillSynchronized(subfolderAtB, true);
+
+		File file3AtB = new File(subfolderAtB, file3.getName());
+		waitTillSynchronized(file3AtB, true);
+		Assert.assertEquals(file3.length(), file3AtB.length());
 	}
 
 	@Test
-	public void shareEmptyFolder() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InterruptedException, NoPeerConnectionException {
+	public void shareEmptyFolder() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File sharedFolderAtA = new File(rootA, NetworkTestUtil.randomString());
 		sharedFolderAtA.mkdirs();
@@ -121,7 +118,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
-		H2HWaiter waiter = new H2HWaiter(40);
+		H2HWaiter waiter = new H2HWaiter(1000);
 		if (appearing) {
 			do {
 				waiter.tickASecond();

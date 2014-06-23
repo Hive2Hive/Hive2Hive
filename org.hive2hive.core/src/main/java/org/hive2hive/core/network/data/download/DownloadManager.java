@@ -42,8 +42,8 @@ public class DownloadManager {
 
 	private ExecutorService executor;
 
-	public DownloadManager(IDataManager dataManager, IMessageManager messageManager,
-			PublicKeyManager keyManager, IFileConfiguration fileConfig) {
+	public DownloadManager(IDataManager dataManager, IMessageManager messageManager, PublicKeyManager keyManager,
+			IFileConfiguration fileConfig) {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;
 		this.keyManager = keyManager;
@@ -81,12 +81,11 @@ public class DownloadManager {
 		for (MetaChunk chunk : task.getOpenChunks()) {
 			if (task.isDirectDownload()) {
 				// then download all chunks
-				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(
-						(DownloadTaskDirect) task, chunk, messageManager, keyManager, fileConfig);
+				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect((DownloadTaskDirect) task, chunk,
+						messageManager, keyManager, fileConfig);
 				executor.submit(runnable);
 			} else {
-				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task,
-						chunk, dataManager);
+				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task, chunk, dataManager);
 				executor.submit(runnable);
 			}
 		}
@@ -140,14 +139,14 @@ public class DownloadManager {
 		public void downloadFinished(BaseDownloadTask task) {
 			// remove it from the task list
 			openTasks.remove(task);
-			logger.debug("Task for downloading {} finished", task.getDestinationName());
+			logger.debug("Task for downloading '{}' finished.", task.getDestinationName());
 		}
 
 		@Override
 		public void downloadFailed(BaseDownloadTask task, String reason) {
 			// remove it from the task anyway
 			openTasks.remove(task);
-			logger.debug("Task for downloading {} failed", task.getDestinationName());
+			logger.debug("Task for downloading '{}' failed.", task.getDestinationName());
 		}
 
 	}
