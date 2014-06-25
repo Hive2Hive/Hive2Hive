@@ -9,6 +9,8 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.IH2HEncryption;
 
 /**
  * Default implementation of {@link IH2HNode}.
@@ -27,11 +29,12 @@ public class H2HNode implements IH2HNode {
 	private IUserManager userManager;
 	private IFileManager fileManager;
 
-	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration) {
+	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
+			IH2HEncryption encryption) {
 		this.networkConfiguration = networkConfiguration;
 		this.fileConfiguration = fileConfiguration;
 
-		networkManager = new NetworkManager(networkConfiguration);
+		networkManager = new NetworkManager(networkConfiguration, encryption);
 	}
 
 	/**
@@ -44,7 +47,22 @@ public class H2HNode implements IH2HNode {
 	 * @return
 	 */
 	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration) {
-		return new H2HNode(networkConfiguration, fileConfiguration);
+		return new H2HNode(networkConfiguration, fileConfiguration, new H2HDefaultEncryption());
+	}
+
+	/**
+	 * Same as {@link H2HNode#createNode(INetworkConfiguration, IFileConfiguration)}, but with additional
+	 * capability to provide an own encryption implementation
+	 * 
+	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
+	 *            to listen to.
+	 * @param fileConfiguration the file configuration
+	 * @param encryption and decryption implementation
+	 * @return
+	 */
+	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
+			IH2HEncryption encryption) {
+		return new H2HNode(networkConfiguration, fileConfiguration, encryption);
 	}
 
 	@Override

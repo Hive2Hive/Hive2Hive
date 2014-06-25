@@ -20,7 +20,6 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +46,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 		this.networkManager = networkManager;
 	}
 
-	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey)
-			throws PutFailedException, InvalidProcessStateException {
+	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey) throws PutFailedException,
+			InvalidProcessStateException {
 		if (userId == null)
 			throw new IllegalArgumentException("user id can be not null");
 		if (userProfileTask == null)
@@ -63,7 +62,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			this.contentKey = userProfileTask.getContentKey();
 			this.protectionKey = userProfileTask.getProtectionKey();
 			DataManager dataManager = networkManager.getDataManager();
-			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(userProfileTask, publicKey);
+			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(userProfileTask, publicKey);
 			encrypted.setTimeToLive(userProfileTask.getTimeToLive());
 			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
@@ -90,20 +89,18 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
-			logger.warn(
-					"Rollback of user profile task put failed. No connection. User ID = '{}', Content key = '{}'.",
+			logger.warn("Rollback of user profile task put failed. No connection. User ID = '{}', Content key = '{}'.",
 					userId, contentKey);
 			return;
 		}
 
 		boolean success = dataManager.removeUserProfileTask(userId, contentKey, protectionKey);
 		if (success) {
-			logger.debug("Rollback of user profile task put succeeded. User ID = '{}', Content key = '{}'.",
-					userId, contentKey);
+			logger.debug("Rollback of user profile task put succeeded. User ID = '{}', Content key = '{}'.", userId,
+					contentKey);
 		} else {
-			logger.warn(
-					"Rollback of user profile put failed. Remove failed. User ID = '{}', Content key = '{}'.",
-					userId, contentKey);
+			logger.warn("Rollback of user profile put failed. Remove failed. User ID = '{}', Content key = '{}'.", userId,
+					contentKey);
 		}
 	}
 }

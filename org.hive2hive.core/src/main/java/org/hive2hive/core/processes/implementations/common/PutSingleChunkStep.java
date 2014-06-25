@@ -21,7 +21,6 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IPutSingleChunkContext;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +61,8 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 		if (chunk != null) {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
-				HybridEncryptedContent encryptedContent = H2HEncryptionUtil.encryptHybrid(chunk, context.consumeChunkKeys()
-						.getPublic());
+				HybridEncryptedContent encryptedContent = dataManager.getEncryption().encryptHybrid(chunk,
+						context.consumeChunkKeys().getPublic());
 
 				logger.debug("Uploading chunk {} of file {}.", chunk.getOrder(), file.getName());
 				Parameters parameters = new Parameters().setLocationKey(chunk.getId())

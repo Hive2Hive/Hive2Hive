@@ -23,7 +23,7 @@ import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -138,7 +138,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 		Assert.assertEquals(testContent, content);
 
 		// the content of the existing file is modified
-		Assert.assertFalse(H2HEncryptionUtil.compareMD5(downloadedFile, md5Before));
+		Assert.assertFalse(H2HDefaultEncryption.compareMD5(downloadedFile, md5Before));
 	}
 
 	@Test

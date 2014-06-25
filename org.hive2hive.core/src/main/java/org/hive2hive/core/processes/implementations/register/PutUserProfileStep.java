@@ -15,7 +15,6 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.slf4j.Logger;
@@ -27,8 +26,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	private final RegisterProcessContext context;
 
-	public PutUserProfileStep(RegisterProcessContext context,
-			IDataManager dataManager) {
+	public PutUserProfileStep(RegisterProcessContext context, IDataManager dataManager) {
 		super(dataManager);
 		this.context = context;
 	}
@@ -36,19 +34,19 @@ public class PutUserProfileStep extends BasePutProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		UserCredentials credentials = context.getUserCredentials();
-		
+
 		logger.debug("Starting to encrypt and put the user profile for user '{}'.", credentials.getUserId());
 
 		// consume the profile from the context
 		UserProfile userProfile = context.consumeUserProfile();
 
 		// encrypt user profile
-		SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
+		SecretKey encryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(),
+				H2HConstants.KEYLENGTH_USER_PROFILE);
 
 		EncryptedNetworkContent encryptedProfile = null;
 		try {
-			encryptedProfile = H2HEncryptionUtil.encryptAES(userProfile, encryptionKey);
+			encryptedProfile = dataManager.getEncryption().encryptAES(userProfile, encryptionKey);
 		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
 			throw new ProcessExecutionException("User profile could not be encrypted.");
 		}
@@ -61,7 +59,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 		// assign ttl value
 		encryptedProfile.setTimeToLive(userProfile.getTimeToLive());
-		
+
 		// put encrypted user profile
 		try {
 			put(credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE, encryptedProfile,

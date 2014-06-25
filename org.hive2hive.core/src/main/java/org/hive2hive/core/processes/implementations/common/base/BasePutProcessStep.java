@@ -11,7 +11,7 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(BasePutProcessStep.class);
 
-	private final IDataManager dataManager;
+	protected final IDataManager dataManager;
 	protected boolean putPerformed;
 
 	private IParameters parameters;
@@ -35,7 +35,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	protected void put(PublicKey locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
 			throws PutFailedException {
-		put(H2HEncryptionUtil.key2String(locationKey), contentKey, content, protectionKey);
+		put(H2HDefaultEncryption.key2String(locationKey), contentKey, content, protectionKey);
 	}
 
 	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKeys)

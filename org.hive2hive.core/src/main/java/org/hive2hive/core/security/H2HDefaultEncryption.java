@@ -17,26 +17,11 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
 
-public final class H2HEncryptionUtil {
+public final class H2HDefaultEncryption implements IH2HEncryption {
 
-	private H2HEncryptionUtil() {
-	}
-
-	/**
-	 * Symmetrically encrypts content inheriting from {@link NetworkContent} by means of the AES algorithm.
-	 * The content first gets serialized, then encrypted.
-	 * 
-	 * @param content the content to be encrypted. Can be of any type that extends {@link NetworkContent}.
-	 * @param aesKey The symmetric key with which the content will be encrypted.
-	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization
-	 *         vector (IV).
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalStateException
-	 * @throws DataLengthException
-	 * @throws IOException
-	 */
-	public static EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey)
-			throws InvalidCipherTextException, IOException {
+	@Override
+	public EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
+			IOException {
 		byte[] serialized = EncryptionUtil.serializeObject(content);
 		byte[] initVector = EncryptionUtil.generateIV();
 		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector);
@@ -46,44 +31,16 @@ public final class H2HEncryptionUtil {
 		return encryptedNetworkContent;
 	}
 
-	/**
-	 * Symmetrically decrypts a prior content inheriting from {@link NetworkContent} by means of the AES
-	 * algorithm. The content gets deserialized after the decryption.
-	 * 
-	 * @param content The EncryptedContent to be decrypted.
-	 * @param aesKey The symmetric key with which the content will be decrypted.
-	 * @return decrypted object
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalStateException
-	 * @throws DataLengthException
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
-	public static NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
-			throws InvalidCipherTextException, ClassNotFoundException, IOException {
+	@Override
+	public NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
+			ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector());
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
 	}
 
-	/**
-	 * Asymmetrically encrypts content inheriting from {@link NetworkContent}. A default key length will be
-	 * used.
-	 * 
-	 * @param content the content to be encrypted.
-	 * @param publicKey The asymmetric public key with which the content will be encrypted
-	 * @param keyLength the strength of the encryption
-	 * @return the encrypted content
-	 * @throws DataLengthException
-	 * @throws InvalidKeyException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws IOException
-	 */
-	public static HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey)
-			throws InvalidKeyException, InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException,
-			IOException {
+	@Override
+	public HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey) throws InvalidKeyException,
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
 		byte[] serialized = EncryptionUtil.serializeObject(content);
 
 		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey,
@@ -107,9 +64,8 @@ public final class H2HEncryptionUtil {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public static NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException,
-			ClassNotFoundException, IOException {
+	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
 	}

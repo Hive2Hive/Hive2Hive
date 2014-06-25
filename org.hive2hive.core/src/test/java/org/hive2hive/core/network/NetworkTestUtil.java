@@ -22,6 +22,8 @@ import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.H2HDummyEncryption;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.UserCredentials;
 
 // TODO NetworkTestUtil#createNetwork and NetwortTestUtil#createH2HNetwork seem to be redundant!! remove!
@@ -35,15 +37,31 @@ import org.hive2hive.core.security.UserCredentials;
 public class NetworkTestUtil {
 
 	/**
-	 * Creates a single node which is initial.
-	 * 
-	 * @return a node
+	 * Same as {@link NetworkTestUtil#createNetwork(int)} but with own encryption implementation (instead of
+	 * standard one)
 	 */
-	public static NetworkManager createSingleNode() {
+	public static List<NetworkManager> createNetwork(int numberOfNodes, IH2HEncryption encryption) {
+		if (numberOfNodes < 1)
+			throw new IllegalArgumentException("invalid size of network");
+		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
+
+		// create the first node (initial)
 		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
-		NetworkManager node = new NetworkManager(netConfig);
-		node.connect();
-		return node;
+		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption());
+		initial.connect();
+		nodes.add(initial);
+
+		// create the other nodes and bootstrap them to the initial peer
+		char letter = 'A';
+		for (int i = 1; i < numberOfNodes; i++) {
+			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
+					initial.getConnection().getPeer());
+			NetworkManager node = new NetworkManager(otherNetConfig, encryption);
+			node.connect();
+			nodes.add(node);
+		}
+
+		return nodes;
 	}
 
 	/**
@@ -56,27 +74,7 @@ public class NetworkTestUtil {
 	 * @return list containing all nodes where the first one is the bootstrapping node (initial)
 	 */
 	public static List<NetworkManager> createNetwork(int numberOfNodes) {
-		if (numberOfNodes < 1)
-			throw new IllegalArgumentException("invalid size of network");
-		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
-
-		// create the first node (initial)
-		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
-		NetworkManager initial = new NetworkManager(netConfig);
-		initial.connect();
-		nodes.add(initial);
-
-		// create the other nodes and bootstrap them to the initial peer
-		char letter = 'A';
-		for (int i = 1; i < numberOfNodes; i++) {
-			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
-					initial.getConnection().getPeer());
-			NetworkManager node = new NetworkManager(otherNetConfig);
-			node.connect();
-			nodes.add(node);
-		}
-
-		return nodes;
+		return createNetwork(numberOfNodes, new H2HDummyEncryption());
 	}
 
 	/**
@@ -86,7 +84,7 @@ public class NetworkTestUtil {
 	 *            list containing all nodes which have different key pairs
 	 * @throws NoPeerConnectionException
 	 */
-	public static void createKeyPairs(List<NetworkManager> network) throws NoPeerConnectionException {
+	public static void setDifferentSessions(List<NetworkManager> network) throws NoPeerConnectionException {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = generateRandomCredentials();
@@ -109,7 +107,7 @@ public class NetworkTestUtil {
 	 *            list containing all nodes which need to have the same key pair
 	 * @throws NoPeerConnectionException
 	 */
-	public static void createSameKeyPair(List<NetworkManager> network) throws NoPeerConnectionException {
+	public static void setSameSession(List<NetworkManager> network) throws NoPeerConnectionException {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
@@ -139,15 +137,9 @@ public class NetworkTestUtil {
 	}
 
 	/**
-	 * Creates a <code>Hive2Hive</code> network with the given number of nodes. First node in the list is the
-	 * initial node where all other nodes bootstrapped to him.</br>
-	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
-	 * 
-	 * @param numberOfNodes
-	 *            size of the network (has to be larger than one)
-	 * @return list containing all Hive2Hive nodes where the first one is the bootstrapping node (initial)
+	 * Same as {@link NetworkTestUtil#createH2HNetwork(int)} but with own encryption implementation
 	 */
-	public static List<IH2HNode> createH2HNetwork(int numberOfNodes) {
+	public static List<IH2HNode> createH2HNetwork(int numberOfNodes, IH2HEncryption encryption) {
 		if (numberOfNodes < 1)
 			throw new IllegalArgumentException("Invalid network size.");
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
@@ -155,7 +147,8 @@ public class NetworkTestUtil {
 		// TODO the initial peer has an autostart, whereas the others dont
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"), FileConfiguration.createDefault());
+		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"), FileConfiguration.createDefault(),
+				encryption);
 		initial.connect();
 		initial.getFileManager().configureAutostart(false);
 		initial.getUserManager().configureAutostart(false);
@@ -166,7 +159,7 @@ public class NetworkTestUtil {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
 				IH2HNode node = H2HNode.createNode(NetworkConfiguration.create("node " + i, bootstrapAddress),
-						FileConfiguration.createDefault());
+						FileConfiguration.createDefault(), encryption);
 				node.connect();
 				node.getFileManager().configureAutostart(false);
 				node.getUserManager().configureAutostart(false);
@@ -177,6 +170,19 @@ public class NetworkTestUtil {
 		}
 
 		return nodes;
+	}
+
+	/**
+	 * Creates a <code>Hive2Hive</code> network with the given number of nodes. First node in the list is the
+	 * initial node where all other nodes bootstrapped to him.</br>
+	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
+	 * 
+	 * @param numberOfNodes
+	 *            size of the network (has to be larger than one)
+	 * @return list containing all Hive2Hive nodes where the first one is the bootstrapping node (initial)
+	 */
+	public static List<IH2HNode> createH2HNetwork(int numberOfNodes) {
+		return createH2HNetwork(numberOfNodes, new H2HDummyEncryption());
 	}
 
 	/**

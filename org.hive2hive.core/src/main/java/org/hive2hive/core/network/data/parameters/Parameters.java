@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data.parameters;
 
 import java.security.KeyPair;
+import java.security.PublicKey;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
@@ -8,6 +9,7 @@ import net.tomp2p.peers.Number640;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 
 /**
  * A parameter class for {@link DataManager}'s methods.
@@ -34,6 +36,10 @@ public class Parameters implements IParameters {
 		this.locationKey = locationKey;
 		this.lKey = Number160.createHash(locationKey);
 		return this;
+	}
+
+	public Parameters setLocationKey(PublicKey key) {
+		return setLocationKey(H2HDefaultEncryption.key2String(key));
 	}
 
 	@Override

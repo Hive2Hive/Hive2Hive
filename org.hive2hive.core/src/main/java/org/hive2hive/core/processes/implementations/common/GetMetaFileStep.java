@@ -17,7 +17,6 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IGetMetaFileContext;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 			NetworkContent decryptedContent = null;
 			try {
-				decryptedContent = H2HEncryptionUtil.decryptHybrid(encryptedContent, keyPair.getPrivate());
+				decryptedContent = dataManager.getEncryption().decryptHybrid(encryptedContent, keyPair.getPrivate());
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
 					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
 				throw new ProcessExecutionException("Meta file could not be decrypted.", e);

@@ -50,7 +50,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
 		// assign to each node the same key pair (simulating same user)
-		NetworkTestUtil.createSameKeyPair(network);
+		NetworkTestUtil.setSameSession(network);
 		// assign to a subset of the client nodes a rejecting message reply handler
 		network.get(4).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 		network.get(5).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());

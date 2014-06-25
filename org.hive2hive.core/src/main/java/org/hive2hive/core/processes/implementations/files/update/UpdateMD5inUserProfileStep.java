@@ -14,7 +14,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 
 			// store for backup
 			originalMD5 = index.getMD5();
-			if (H2HEncryptionUtil.compareMD5(originalMD5, newMD5)) {
+			if (H2HDefaultEncryption.compareMD5(originalMD5, newMD5)) {
 				throw new ProcessExecutionException("Try to create new version with same content.");
 			}
 

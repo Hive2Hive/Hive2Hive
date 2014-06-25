@@ -7,6 +7,7 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.core.security.IH2HEncryption;
 
 /**
  * This class offers an interface for putting, getting and removing data from the network. All calls are
@@ -17,6 +18,8 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
  * @author Seppi, Nico
  */
 public interface IDataManager {
+
+	IH2HEncryption getEncryption();
 
 	/**
 	 * Put some content to the DHT
@@ -44,8 +47,7 @@ public interface IDataManager {
 	 * @param protectionKeys heavily recommended thus no other user can delete or overwrite the task
 	 * @return the success of the put
 	 */
-	boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
-			KeyPair protectionKeys);
+	boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKeys);
 
 	/**
 	 * Gets some content from the DHT, which is the newest version.
@@ -54,7 +56,7 @@ public interface IDataManager {
 	 * @return an encrypted or unencrypted content or null if no content was found
 	 */
 	NetworkContent get(IParameters parameters);
-	
+
 	/**
 	 * Gets a specific version of some content from the DHT.
 	 * 

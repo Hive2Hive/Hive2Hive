@@ -19,7 +19,6 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.interfaces.IUserProfileTaskContext;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +57,8 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 			throw new ProcessExecutionException("User profile task in context is null.");
 		}
 
-		boolean success = dataManager.removeUserProfileTask(userId, context.consumeUserProfileTask()
-				.getContentKey(), context.consumeUserProfileTask().getProtectionKey());
+		boolean success = dataManager.removeUserProfileTask(userId, context.consumeUserProfileTask().getContentKey(),
+				context.consumeUserProfileTask().getProtectionKey());
 		removePerformed = true;
 
 		if (!success) {
@@ -83,23 +82,22 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		}
 
 		UserProfileTask upTask = context.consumeUserProfileTask();
-		HybridEncryptedContent encrypted;
-		try {
-			encrypted = H2HEncryptionUtil.encryptHybrid(upTask, session.getKeyPair().getPublic());
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | IOException e) {
-			logger.error("Could not encrypt the user profile task while rollback.");
-			return;
-		}
-
 		String userId = networkManager.getUserId();
 		DataManager dataManager;
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
-			logger.warn(
-					"Rollback of remove user profile task failed. No connection. User ID = '{}', Content key = '{}'.",
+			logger.warn("Rollback of remove user profile task failed. No connection. User ID = '{}', Content key = '{}'.",
 					userId, upTask.getContentKey());
+			return;
+		}
+
+		HybridEncryptedContent encrypted;
+		try {
+			encrypted = dataManager.getEncryption().encryptHybrid(upTask, session.getKeyPair().getPublic());
+		} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
+				| IllegalBlockSizeException | BadPaddingException | IOException e) {
+			logger.error("Could not encrypt the user profile task while rollback.");
 			return;
 		}
 
@@ -107,12 +105,10 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		boolean success = dataManager.putUserProfileTask(userId, upTask.getContentKey(), encrypted,
 				upTask.getProtectionKey());
 		if (success) {
-			logger.debug(
-					"Rollback of removing user profile task succeeded. User ID = '{}', Content key = '{}'.",
-					userId, upTask.getContentKey());
+			logger.debug("Rollback of removing user profile task succeeded. User ID = '{}', Content key = '{}'.", userId,
+					upTask.getContentKey());
 		} else {
-			logger.warn(
-					"Rollback of removing user profile task failed. Re-put failed. User ID = '{}', Content key = '{}'.",
+			logger.warn("Rollback of removing user profile task failed. Re-put failed. User ID = '{}', Content key = '{}'.",
 					userId, upTask.getContentKey());
 		}
 	}

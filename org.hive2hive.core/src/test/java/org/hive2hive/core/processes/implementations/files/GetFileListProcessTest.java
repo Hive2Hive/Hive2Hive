@@ -19,7 +19,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -82,7 +82,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		assertEquals(1, fileList.size());
 
 		assertEquals(child1, fileList.get(0).getFile());
-		assertTrue(H2HEncryptionUtil.compareMD5(EncryptionUtil.generateMD5Hash(child1), fileList.get(0)
+		assertTrue(H2HDefaultEncryption.compareMD5(EncryptionUtil.generateMD5Hash(child1), fileList.get(0)
 				.getMd5()));
 
 		// add dir1 to the network

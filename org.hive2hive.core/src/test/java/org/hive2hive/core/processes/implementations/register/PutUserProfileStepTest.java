@@ -25,7 +25,8 @@ import org.hive2hive.core.processes.implementations.context.RegisterProcessConte
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDummyEncryption;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
@@ -40,20 +41,22 @@ import org.junit.Test;
  */
 public class PutUserProfileStepTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
 	private static final int networkSize = 2;
+	private static List<NetworkManager> network;
+	private static IH2HEncryption encryption;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = PutUserProfileStepTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		encryption = new H2HDummyEncryption();
+		network = NetworkTestUtil.createNetwork(networkSize, encryption);
 	}
 
 	@Test
-	public void testStepSuccessful() throws InterruptedException, InvalidKeySpecException,
-			DataLengthException, IllegalStateException, InvalidCipherTextException, ClassNotFoundException,
-			IOException, NoPeerConnectionException {
+	public void testStepSuccessful() throws InterruptedException, InvalidKeySpecException, DataLengthException,
+			IllegalStateException, InvalidCipherTextException, ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		NetworkManager putter = network.get(0); // where the process runs
 		NetworkManager client = network.get(1); // where the user profile is stored
 
@@ -70,25 +73,24 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 		// get the user profile which should be stored at the proxy
 		FutureGet global = client.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(credentials.getProfileLocationKey()).setContentKey(
-						H2HConstants.USER_PROFILE));
+				new Parameters().setLocationKey(credentials.getProfileLocationKey())
+						.setContentKey(H2HConstants.USER_PROFILE));
 		global.awaitUninterruptibly();
 		global.getFutureRequests().awaitUninterruptibly();
 		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
 		Assert.assertNotNull(found);
 
 		// decrypt it using the same password as set above
-		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
-				credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
-		UserProfile decrypted = (UserProfile) H2HEncryptionUtil.decryptAES(found, decryptionKeys);
+		SecretKey decryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(),
+				H2HConstants.KEYLENGTH_USER_PROFILE);
+		UserProfile decrypted = (UserProfile) encryption.decryptAES(found, decryptionKeys);
 
 		// verify if both objects are the same
 		Assert.assertEquals(credentials.getUserId(), decrypted.getUserId());
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException, NoPeerConnectionException,
-			InvalidProcessStateException {
+	public void testStepRollback() throws InterruptedException, NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored

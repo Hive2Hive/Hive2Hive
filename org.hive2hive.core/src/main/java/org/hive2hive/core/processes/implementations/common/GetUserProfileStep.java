@@ -15,7 +15,7 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 
@@ -23,8 +23,7 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 
 	private final IGetUserProfileContext context;
 
-	public GetUserProfileStep(IGetUserProfileContext context,
-			IDataManager dataManager) {
+	public GetUserProfileStep(IGetUserProfileContext context, IDataManager dataManager) {
 		super(dataManager);
 		this.context = context;
 	}
@@ -45,10 +44,11 @@ public class GetUserProfileStep extends BaseGetProcessStep {
 					credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE);
 
 			NetworkContent decryptedContent = null;
+			IH2HEncryption encryptionTool = dataManager.getEncryption();
 			try {
-				decryptedContent = H2HEncryptionUtil.decryptAES(encryptedContent, decryptionKey);
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException
-					| ClassNotFoundException | IOException e) {
+				decryptedContent = encryptionTool.decryptAES(encryptedContent, decryptionKey);
+			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | ClassNotFoundException
+					| IOException e) {
 				throw new ProcessExecutionException("User profile could not be decrypted.");
 			}
 

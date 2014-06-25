@@ -23,6 +23,7 @@ import org.hive2hive.core.network.data.futures.FuturePutListener;
 import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +35,14 @@ public class DataManager implements IDataManager {
 	private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
 
 	private final NetworkManager networkManager;
+	private final IH2HEncryption encryptionTool;
 
 	// private final SignatureFactory signatureFactory;
 	// private final SignatureCodec signatureCodec;
 
-	public DataManager(NetworkManager networkManager) {
+	public DataManager(NetworkManager networkManager, IH2HEncryption encryptionTool) {
 		this.networkManager = networkManager;
+		this.encryptionTool = encryptionTool;
 		// this.signatureFactory = new H2HSignatureFactory();
 		// this.signatureCodec = new H2HSignatureCodec();
 	}
@@ -51,6 +54,11 @@ public class DataManager implements IDataManager {
 	 */
 	private Peer getPeer() {
 		return networkManager.getConnection().getPeer();
+	}
+
+	@Override
+	public IH2HEncryption getEncryption() {
+		return encryptionTool;
 	}
 
 	@Override
@@ -78,11 +86,10 @@ public class DataManager implements IDataManager {
 	}
 
 	@Override
-	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content,
-			KeyPair protectionKey) {
+	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKey) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(contentKey)
-				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setData(content)
-				.setProtectionKeys(protectionKey).setTTL(content.getTimeToLive());
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setData(content).setProtectionKeys(protectionKey)
+				.setTTL(content.getTimeToLive());
 		FuturePut putFuture = putUnblocked(parameters);
 		if (putFuture == null) {
 			return false;
@@ -179,15 +186,12 @@ public class DataManager implements IDataManager {
 
 	@Override
 	public NetworkContent getUserProfileTask(String userId) {
-		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(
-				H2HConstants.USER_PROFILE_TASK_DOMAIN);
+		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 
-		FutureGet futureGet = getPeer()
-				.get(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.ZERO,
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.MAX_VALUE,
-						Number160.MAX_VALUE)).ascending().returnNr(1).start();
+		FutureGet futureGet = getPeer().get(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.ZERO, Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.MAX_VALUE, Number160.MAX_VALUE))
+				.ascending().returnNr(1).start();
 		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
@@ -195,18 +199,16 @@ public class DataManager implements IDataManager {
 
 	public FutureGet getUnblocked(IParameters parameters) {
 		logger.debug("Get. {}", parameters.toString());
-		return getPeer()
-				.get(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE)).descending().returnNr(1).start();
+		return getPeer().get(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
+				.descending().returnNr(1).start();
 	}
 
 	public FutureGet getVersionUnblocked(IParameters parameters) {
 		logger.debug("Get version. {}", parameters.toString());
-		return getPeer().get(parameters.getLKey()).setDomainKey(parameters.getDKey())
-				.setContentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey()).start();
+		return getPeer().get(parameters.getLKey()).setDomainKey(parameters.getDKey()).setContentKey(parameters.getCKey())
+				.setVersionKey(parameters.getVersionKey()).start();
 	}
 
 	@Override
@@ -227,9 +229,8 @@ public class DataManager implements IDataManager {
 
 	@Override
 	public boolean removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey) {
-		IParameters parameters = new Parameters().setLocationKey(userId)
-				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setContentKey(contentKey)
-				.setProtectionKeys(protectionKey);
+		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
+				.setContentKey(contentKey).setProtectionKeys(protectionKey);
 		FutureRemove futureRemove = removeUnblocked(parameters);
 		FutureRemoveListener listener = new FutureRemoveListener(parameters, true, this);
 		futureRemove.addListener(listener);
@@ -238,22 +239,20 @@ public class DataManager implements IDataManager {
 
 	public FutureRemove removeUnblocked(IParameters parameters) {
 		logger.debug("Remove. {}", parameters.toString());
-		return getPeer()
-				.remove(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE)).keyPair(parameters.getProtectionKeys()).start();
+		return getPeer().remove(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
+				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
 		logger.debug("Remove version. {}", parameters.toString());
-		return getPeer().remove(parameters.getLKey()).setDomainKey(parameters.getDKey())
-				.contentKey(parameters.getCKey()).setVersionKey(parameters.getVersionKey())
-				.keyPair(parameters.getProtectionKeys()).start();
+		return getPeer().remove(parameters.getLKey()).setDomainKey(parameters.getDKey()).contentKey(parameters.getCKey())
+				.setVersionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 	}
 
 	public NavigableMap<Number640, Number160> getDigestLatest(IParameters parameters) {
+		logger.debug("Get digest (latest). {}", parameters.toString());
 		FutureDigest futureDigest = getDigestLatestUnblocked(parameters);
 		FutureDigestListener listener = new FutureDigestListener(parameters);
 		futureDigest.addListener(listener);
@@ -261,23 +260,19 @@ public class DataManager implements IDataManager {
 	}
 
 	public FutureDigest getDigestLatestUnblocked(IParameters parameters) {
-		logger.debug("Get digest. {}", parameters.toString());
-		return getPeer()
-				.digest(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE)).descending().returnNr(1).start();
-	}	
+		logger.debug("Get digest (latest, unblocked). {}", parameters.toString());
+		return getPeer().digest(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
+				.descending().returnNr(1).start();
+	}
 
 	public FutureDigest getDigestUnblocked(IParameters parameters) {
-		logger.debug("Get digest. {}", parameters.toString());
-		return getPeer()
-				.digest(parameters.getLKey())
-				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.ZERO))
-				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-						Number160.MAX_VALUE)).start();
+		logger.debug("Get digest (unblocked). {}", parameters.toString());
+		return getPeer().digest(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
+				.start();
 
 	}
 }

@@ -19,7 +19,6 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.interfaces.IUserProfileTaskContext;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +73,9 @@ public class GetUserProfileTaskStep extends ProcessStep {
 			}
 			NetworkContent decrypted = null;
 			try {
-				decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, key);
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
-					| BadPaddingException | IllegalStateException | InvalidCipherTextException
-					| ClassNotFoundException | IOException e) {
+				decrypted = dataManager.getEncryption().decryptHybrid(encrypted, key);
+			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
+					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
 				throw new ProcessExecutionException("Could not decrypt user profile task.", e);
 			}
 			context.provideUserProfileTask((UserProfileTask) decrypted);

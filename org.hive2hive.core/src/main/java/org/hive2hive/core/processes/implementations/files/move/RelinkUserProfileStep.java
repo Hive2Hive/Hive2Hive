@@ -26,7 +26,7 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
 import org.hive2hive.core.processes.implementations.context.MoveUpdateProtectionKeyContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 			logger.debug("Successfully relinked the moved file in the user profile.");
 
 			// check if the protection key needs to be updated
-			if (!H2HEncryptionUtil.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
+			if (!H2HDefaultEncryption.compare(oldParent.getProtectionKeys(), newParent.getProtectionKeys())) {
 				// update the protection key of the meta file and eventually all chunks
 				logger.info("Required to update the protection key of the moved file(s)/folder(s).");
 				initPKUpdateStep(movedNode, oldParent.getProtectionKeys(), newParent.getProtectionKeys());

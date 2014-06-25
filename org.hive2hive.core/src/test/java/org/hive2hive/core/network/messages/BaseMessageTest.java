@@ -34,7 +34,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		testClass = BaseMessageTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
-		NetworkTestUtil.createSameKeyPair(network);
+		NetworkTestUtil.setSameSession(network);
 	}
 
 	/**

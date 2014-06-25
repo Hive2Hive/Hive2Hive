@@ -11,7 +11,7 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.processes.implementations.context.interfaces.IFile2MetaContext;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
@@ -53,7 +53,7 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 
 	@Override
 	public String getLocationKey() {
-		return H2HEncryptionUtil.key2String(fileKey);
+		return H2HDefaultEncryption.key2String(fileKey);
 	}
 
 	@Override

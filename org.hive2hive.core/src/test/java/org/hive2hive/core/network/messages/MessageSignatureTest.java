@@ -41,7 +41,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 	@Test
 	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException, NoSessionException {
-		NetworkTestUtil.createSameKeyPair(network);
+		NetworkTestUtil.setSameSession(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 
@@ -59,7 +59,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 	@Test
 	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException, NoSessionException {
-		NetworkTestUtil.createKeyPairs(network);
+		NetworkTestUtil.setDifferentSessions(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 
@@ -78,7 +78,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 	@Test
 	public void testMessageWithWrongSignature() throws NoPeerConnectionException, NoSessionException {
-		NetworkTestUtil.createKeyPairs(network);
+		NetworkTestUtil.setDifferentSessions(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
 

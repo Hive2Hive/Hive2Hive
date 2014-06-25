@@ -20,7 +20,6 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IPutMetaFileContext;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +47,13 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			KeyPair protectionKeys = context.consumeMetaFileProtectionKeys();
 
 			logger.trace("Encrypting meta file in a hybrid manner.");
-			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaFile, metaFile.getId());
+			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(metaFile, metaFile.getId());
 			encrypted.setBasedOnKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();
 
-			Parameters parameters = new Parameters().setLocationKey(H2HEncryptionUtil.key2String(metaFile.getId()))
-					.setContentKey(H2HConstants.META_FILE).setVersionKey(encrypted.getVersionKey()).setData(encrypted)
-					.setProtectionKeys(protectionKeys).setTTL(metaFile.getTimeToLive());
+			Parameters parameters = new Parameters().setLocationKey(metaFile.getId()).setContentKey(H2HConstants.META_FILE)
+					.setVersionKey(encrypted.getVersionKey()).setData(encrypted).setProtectionKeys(protectionKeys)
+					.setTTL(metaFile.getTimeToLive());
 
 			// data manager has to produce the hash, which gets used for signing
 			parameters.setHashFlag(true);

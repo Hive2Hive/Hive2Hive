@@ -13,7 +13,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 				try {
 					// check for MD5 hashes, if equal, skip the file
 					byte[] fileHash = EncryptionUtil.generateMD5Hash(file);
-					if (H2HEncryptionUtil.compareMD5(fileHash, fileTaste.getMd5())) {
+					if (H2HDefaultEncryption.compareMD5(fileHash, fileTaste.getMd5())) {
 						// hashes are equal, no need to upload it to the DHT
 						toDelete.add(file);
 					}

@@ -17,7 +17,6 @@ import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,7 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		Chunk chunk;
 
 		try {
-			NetworkContent decrypted = H2HEncryptionUtil.decryptHybrid(encrypted, task.getDecryptionKey());
+			NetworkContent decrypted = dataManager.getEncryption().decryptHybrid(encrypted, task.getDecryptionKey());
 			chunk = (Chunk) decrypted;
 		} catch (ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
 				| BadPaddingException | IllegalStateException | InvalidCipherTextException | IllegalArgumentException

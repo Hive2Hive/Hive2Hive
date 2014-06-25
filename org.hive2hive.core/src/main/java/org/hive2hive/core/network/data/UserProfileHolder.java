@@ -18,7 +18,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.slf4j.Logger;
@@ -29,6 +29,7 @@ public class UserProfileHolder {
 	private final static Logger logger = LoggerFactory.getLogger(UserProfileHolder.class);
 	private final UserCredentials credentials;
 	private final DataManager dataManager;
+	private final IH2HEncryption encryptionTool;
 
 	// needs to be done only once
 	private final SecretKey userProfileEncryptionKey;
@@ -38,6 +39,7 @@ public class UserProfileHolder {
 	public UserProfileHolder(UserCredentials credentials, DataManager dataManager) {
 		this.credentials = credentials;
 		this.dataManager = dataManager;
+		this.encryptionTool = dataManager.getEncryption();
 
 		// needs to be done only once
 		this.userProfileEncryptionKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(),
@@ -71,7 +73,7 @@ public class UserProfileHolder {
 					logger.trace("Decrypting user profile with 256-bit AES key from password. user id = '{}'",
 							credentials.getUserId());
 					EncryptedNetworkContent encrypted = (EncryptedNetworkContent) content;
-					NetworkContent decrypted = H2HEncryptionUtil.decryptAES(encrypted, userProfileEncryptionKey);
+					NetworkContent decrypted = encryptionTool.decryptAES(encrypted, userProfileEncryptionKey);
 					UserProfile userProfile = (UserProfile) decrypted;
 					userProfile.setVersionKey(content.getVersionKey());
 					userProfile.setBasedOnKey(content.getBasedOnKey());
@@ -100,7 +102,7 @@ public class UserProfileHolder {
 		logger.debug("Put user profile. user id = '{}'", credentials.getUserId());
 		try {
 			logger.trace("Encrypting user profile with 256bit AES key from password. user id ='{}'", credentials.getUserId());
-			EncryptedNetworkContent encryptedUserProfile = H2HEncryptionUtil.encryptAES(entry.getUserProfile(),
+			EncryptedNetworkContent encryptedUserProfile = encryptionTool.encryptAES(entry.getUserProfile(),
 					userProfileEncryptionKey);
 
 			encryptedUserProfile.setBasedOnKey(entry.getUserProfile().getVersionKey());

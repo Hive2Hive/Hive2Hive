@@ -13,6 +13,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.messages.MessageManager;
+import org.hive2hive.core.security.IH2HEncryption;
 
 public class NetworkManager implements INetworkEventGenerator {
 
@@ -28,11 +29,11 @@ public class NetworkManager implements INetworkEventGenerator {
 
 	private List<INetworkEventListener> eventListeners;
 
-	public NetworkManager(INetworkConfiguration networkConfiguration) {
+	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption) {
 		this.networkConfiguration = networkConfiguration;
 
 		connection = new Connection(networkConfiguration.getNodeID(), this);
-		dataManager = new DataManager(this);
+		dataManager = new DataManager(this, encryption);
 		messageManager = new MessageManager(this);
 
 		eventListeners = new ArrayList<INetworkEventListener>();

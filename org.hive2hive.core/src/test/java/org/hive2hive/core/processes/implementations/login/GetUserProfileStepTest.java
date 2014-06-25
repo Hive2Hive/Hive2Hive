@@ -20,7 +20,7 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptedNetworkContent;
-import org.hive2hive.core.security.H2HEncryptionUtil;
+import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
@@ -59,7 +59,7 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		// add them already to the DHT
 		SecretKey encryptionKeys = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(),
 				H2HConstants.KEYLENGTH_USER_PROFILE);
-		EncryptedNetworkContent encrypted = H2HEncryptionUtil.encryptAES(testProfile, encryptionKeys);
+		EncryptedNetworkContent encrypted = new H2HDummyEncryption().encryptAES(testProfile, encryptionKeys);
 		FuturePut putGlobal = putter.getDataManager().putUnblocked(
 				new Parameters().setLocationKey(credentials.getProfileLocationKey())
 						.setContentKey(H2HConstants.USER_PROFILE).setData(encrypted));
@@ -71,16 +71,11 @@ public class GetUserProfileStepTest extends H2HJUnitTest {
 		Assert.assertEquals(credentials.getUserId(), profile.getUserId());
 	}
 
-	@Test
-	public void testStepSuccessWithNoUserProfile() throws NoPeerConnectionException {
+	@Test(expected = GetFailedException.class)
+	public void testStepSuccessWithNoUserProfile() throws NoPeerConnectionException, GetFailedException {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
-		try {
-			UseCaseTestUtil.getUserProfile(network.get(0), credentials);
-			Assert.fail("Should have triggered a GetFailedException");
-		} catch (GetFailedException e) {
-			// has to be triggered here
-		}
+		UseCaseTestUtil.getUserProfile(network.get(0), credentials);
 	}
 
 	@AfterClass
