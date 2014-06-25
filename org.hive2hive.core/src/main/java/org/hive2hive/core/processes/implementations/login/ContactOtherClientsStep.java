@@ -1,7 +1,9 @@
 package org.hive2hive.core.processes.implementations.login;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -57,23 +59,29 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 			throw new ProcessExecutionException("No session yet");
 		}
 
+		PublicKey ownPublicKey = keyManager.getOwnPublicKey();
 		Locations locations = context.consumeUserLocations();
-		waitForResponses = new CountDownLatch(locations.getPeerAddresses().size());
-		if (!locations.getPeerAddresses().isEmpty()) {
-			for (PeerAddress address : locations.getPeerAddresses()) {
-				// contact all other clients (exclude self)
-				if (!address.equals(networkManager.getConnection().getPeer().getPeerAddress())) {
-					String evidence = UUID.randomUUID().toString();
-					evidences.put(address, evidence);
+		if (locations != null && locations.getPeerAddresses() != null) {
+			sendBlocking(locations.getPeerAddresses(), ownPublicKey);
+		}
+		updateLocations();
+	}
 
-					ContactPeerMessage message = new ContactPeerMessage(address, evidence);
-					message.setCallBackHandler(this);
+	private void sendBlocking(Set<PeerAddress> peerAddresses, PublicKey ownPublicKey) {
+		waitForResponses = new CountDownLatch(peerAddresses.size());
+		for (PeerAddress address : peerAddresses) {
+			// contact all other clients (exclude self)
+			if (!address.equals(networkManager.getConnection().getPeer().getPeerAddress())) {
+				String evidence = UUID.randomUUID().toString();
+				evidences.put(address, evidence);
 
-					// TODO this is blocking, should be parallel (asynchronous)
-					boolean success = messageManager.sendDirect(message, keyManager.getOwnPublicKey());
-					if (!success) {
-						responses.put(address, false);
-					}
+				ContactPeerMessage message = new ContactPeerMessage(address, evidence);
+				message.setCallBackHandler(this);
+
+				// TODO this is blocking, should be parallel (asynchronous)
+				boolean success = messageManager.sendDirect(message, ownPublicKey);
+				if (!success) {
+					responses.put(address, false);
 				}
 			}
 		}
@@ -84,15 +92,13 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		} catch (InterruptedException e) {
 			logger.error("Could not wait the given time for the clients to respond.", e);
 		}
-		updateLocations();
 	}
 
 	@Override
 	public void handleResponseMessage(ResponseMessage responseMessage) {
 		if (isUpdated) {
 			// TODO notify delayed response client nodes about removing him from location map
-			logger.warn(
-					"Received a delayed contact peer response message, which gets ignored. Peer address = '{}'.",
+			logger.warn("Received a delayed contact peer response message, which gets ignored. Peer address = '{}'.",
 					responseMessage.getSenderAddress());
 			return;
 		}
