@@ -13,6 +13,8 @@ import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.PeerMap;
+import net.tomp2p.peers.PeerMapConfiguration;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
@@ -20,6 +22,12 @@ import org.hive2hive.core.security.H2HSignatureFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates a <code>TomP2P</code> peer. Provides methods for discovering and bootstrapping to other peers as
+ * well as shutdown.
+ * 
+ * @author Seppi
+ */
 public class Connection {
 
 	private static final Logger logger = LoggerFactory.getLogger(Connection.class);
@@ -180,5 +188,114 @@ public class Connection {
 		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
 
 		return true;
+	}
+	
+		/**
+	 * Create a local master peer. <b>Important:</b> This is only for testing purposes!
+	 * 
+	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
+	 */
+	public boolean createLocalPeer() {
+		int port = H2HConstants.H2H_PORT;
+		while (NetworkUtils.isPortAvailable(port) == false)
+			port++;
+
+		// configure the thread handling internally, callback can be blocking
+		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
+
+		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
+		clientConfig.signatureFactory(new H2HSignatureFactory());
+		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
+		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
+		serverConfig.signatureFactory(new H2HSignatureFactory());
+		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
+		// create a new peer id
+		Number160 peerId = Number160.createHash(nodeID);
+		// disable peer verification (faster mutual acceptance)
+		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(peerId);
+		peerMapConfiguration.peerVerification(false);
+		PeerMap peerMap = new PeerMap(peerMapConfiguration);
+
+		try {
+			peer = new PeerMaker(peerId).ports(port).setEnableIndirectReplication(true)
+					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig).peerMap(peerMap)
+					.makeAndListen();
+		} catch (IOException e) {
+			logger.error("Exception while creating a peer: ", e);
+			isConnected = false;
+			return false;
+		}
+
+		// override the put method for validation tasks
+		peer.getPeerBean().storage(new H2HStorageMemory());
+		// attach a reply handler for messages
+		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
+
+		isConnected = true;
+		return true;
+	}
+
+	/**
+	 * Create a local peer. Bootstrap to local master peer. <b>Important:</b> This is only for testing
+	 * purposes!
+	 * 
+	 * @param masterPeer
+	 *            the newly created peer bootstraps to given local master peer
+	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
+	 */
+	public boolean createLocalPeerAndBootstrap(Peer masterPeer) {
+		int port = H2HConstants.H2H_PORT;
+		while (NetworkUtils.isPortAvailable(port) == false)
+			port++;
+
+		// configure the thread handling internally, callback can be blocking
+		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
+
+		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
+		clientConfig.signatureFactory(new H2HSignatureFactory());
+		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
+		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
+		serverConfig.signatureFactory(new H2HSignatureFactory());
+		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+
+		// create a new peer id
+		Number160 peerId = Number160.createHash(nodeID);
+		// disable peer verification (faster mutual acceptance)
+		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(peerId);
+		peerMapConfiguration.peerVerification(false);
+		PeerMap peerMap = new PeerMap(peerMapConfiguration);
+
+		try {
+			peer = new PeerMaker(peerId).ports(port).setEnableIndirectReplication(true)
+					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
+					.masterPeer(masterPeer).peerMap(peerMap).makeAndListen();
+		} catch (IOException e) {
+			logger.error("Exception while creating a peer: ", e);
+			return false;
+		}
+
+		// override the put method for validation tasks
+		peer.getPeerBean().storage(new H2HStorageMemory());
+		// attach a reply handler for messages
+		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
+
+		// bootstrap to master peer
+		FutureBootstrap futureBootstrap = peer.bootstrap().setPeerAddress(masterPeer.getPeerAddress()).start();
+		futureBootstrap.awaitUninterruptibly();
+
+		if (futureBootstrap.isSuccess()) {
+			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.getPeerAddress());
+			isConnected = true;
+			return true;
+		} else {
+			logger.warn("Bootstrapping failed: {}.", futureBootstrap.getFailedReason());
+			peer.shutdown();
+			isConnected = false;
+			return false;
+		}
+
 	}
 }

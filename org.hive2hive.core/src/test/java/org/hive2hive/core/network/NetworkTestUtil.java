@@ -69,15 +69,11 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			try {
-				INetworkConfiguration otherNetConfig = NetworkConfiguration.create(String.format("Node %s", ++letter),
-						InetAddress.getLocalHost());
-				NetworkManager node = new NetworkManager(otherNetConfig);
-				node.connect();
-				nodes.add(node);
-			} catch (UnknownHostException e) {
-				// should not happen
-			}
+			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
+					initial.getConnection().getPeer());
+			NetworkManager node = new NetworkManager(otherNetConfig);
+			node.connect();
+			nodes.add(node);
 		}
 
 		return nodes;

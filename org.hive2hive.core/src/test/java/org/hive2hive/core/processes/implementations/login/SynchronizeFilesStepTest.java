@@ -51,8 +51,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void setupFiles() throws IOException, IllegalFileLocation, NoSessionException,
-			NoPeerConnectionException {
+	public void setupFiles() throws IOException, IllegalFileLocation, NoSessionException, NoPeerConnectionException {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkManager uploader = network.get(0);
 
@@ -94,8 +93,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testNothingChanged() throws NoSessionException, InvalidProcessStateException,
-			NoPeerConnectionException {
+	public void testNothingChanged() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException {
 		UseCaseTestUtil.login(userCredentials, network.get(1), root1);
 
 		// check if the size is still the same
@@ -103,8 +101,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testAdditionsDeletions() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InvalidProcessStateException, NoPeerConnectionException {
+	public void testAdditionsDeletions() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+			InvalidProcessStateException, NoPeerConnectionException {
 		/** do some modifications on client **/
 		// add a file
 		FileUtils.write(new File(root1, "added-file"), NetworkTestUtil.randomString());
@@ -144,9 +142,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testModifications() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+	public void testModifications() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		/** do some modifications on client **/
 		// modify file 1
 		File file1 = new File(root1, "file 1");

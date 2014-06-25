@@ -7,7 +7,6 @@ import java.io.Serializable;
  * to identify users rights (and undertake necessary actions in case user leaves or wants to change rights).
  * 
  * @author Nico
- * 
  */
 public class UserPermission implements Serializable {
 
@@ -19,6 +18,11 @@ public class UserPermission implements Serializable {
 	public UserPermission(String userId, PermissionType permission) {
 		this.userId = userId;
 		this.setPermission(permission);
+	}
+
+	public UserPermission(UserPermission userPermission) {
+		this.userId = userPermission.userId;
+		this.permission = userPermission.permission;
 	}
 
 	public void setPermission(PermissionType permission) {

@@ -18,6 +18,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.core.processes.implementations.common.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.core.processes.implementations.context.MoveFileProcessContext.DeleteNotificationContext;
@@ -25,7 +26,6 @@ import org.hive2hive.core.processes.implementations.context.MoveFileProcessConte
 import org.hive2hive.core.processes.implementations.context.MoveUpdateProtectionKeyContext;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteNotifyMessageFactory;
-import org.hive2hive.core.processes.implementations.share.pkupdate.InitializeMetaUpdateStep;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,14 +67,9 @@ public class RelinkUserProfileStep extends ProcessStep {
 			FolderIndex oldParent = movedNode.getParent();
 			oldParentKey = oldParent.getFileKeys().getPublic();
 
-			// source's parent needs to be updated, no matter if it's root or not
-			oldParent.removeChild(movedNode);
-
-			// add to the new parent
-			FolderIndex newParent = (FolderIndex) userProfile.getFileByPath(context.getDestination()
-					.getParentFile(), networkManager.getSession().getRoot());
-			movedNode.setParent(newParent);
-			newParent.addChild(movedNode);
+			// get the new parent
+			FolderIndex newParent = (FolderIndex) userProfile.getFileByPath(context.getDestination().getParentFile(),
+					networkManager.getSession().getRoot());
 
 			// validate
 			if (!oldParent.canWrite()) {
@@ -82,6 +77,13 @@ public class RelinkUserProfileStep extends ProcessStep {
 			} else if (!newParent.canWrite()) {
 				throw new ProcessExecutionException("No write access to the destination directory");
 			}
+
+			// source's parent needs to be updated, no matter if it's root or not
+			oldParent.removeChild(movedNode);
+
+			// relink them
+			movedNode.setParent(newParent);
+			newParent.addChild(movedNode);
 
 			// update in DHT
 			profileManager.readyToPut(userProfile, getID());
@@ -105,10 +107,9 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys)
 			throws NoPeerConnectionException {
-		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode,
-				oldProtectionKeys, newProtectionKeys);
-		getParent().insertNext(
-				new InitializeMetaUpdateStep(pkUpdateContext, networkManager.getDataManager()), this);
+		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode, oldProtectionKeys,
+				newProtectionKeys);
+		getParent().insertNext(new InitializeMetaUpdateStep(pkUpdateContext, networkManager.getDataManager()), this);
 	}
 
 	/**
@@ -143,24 +144,23 @@ public class RelinkUserProfileStep extends ProcessStep {
 		logger.debug("Inform {} users that a file has been moved.", common.size());
 		PublicKey newParentKey = movedNode.getParent().getFilePublicKey();
 		MoveNotificationContext moveContext = context.getMoveNotificationContext();
-		moveContext.provideMessageFactory(new MoveNotificationMessageFactory(sourceName, destName,
-				oldParentKey, newParentKey));
+		moveContext.provideMessageFactory(new MoveNotificationMessageFactory(sourceName, destName, oldParentKey,
+				newParentKey));
 		moveContext.provideUsersToNotify(common);
 
 		// inform users that don't have access to the new destination anymore
 		logger.debug("Inform {} users that a file has been removed (after movement).", usersAtSource.size());
 		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
-		deleteContext
-				.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, oldParentKey, sourceName));
+		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, oldParentKey, sourceName));
 		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file
 		logger.debug("Inform {} users that a file has been added (after movement).", usersAtDestination.size());
 		usersAtDestination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
-		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode
-				.getParent().getFilePublicKey()));
+		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode.getParent()
+				.getFilePublicKey()));
 		addContext.provideUsersToNotify(usersAtDestination);
 	}
 
@@ -182,7 +182,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 				// update in DHT
 				profileManager.readyToPut(userProfile, getID());
 			} catch (NoSessionException | GetFailedException | PutFailedException e) {
-				// ignore
+				logger.error("Rollbacking a step failed.", e);
 			}
 		}
 	}

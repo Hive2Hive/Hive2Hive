@@ -171,7 +171,7 @@ public class UseCaseTestUtil {
 	public static MetaFile getMetaFile(NetworkManager networkManager, KeyPair keys, boolean expectSuccess)
 			throws NoPeerConnectionException, InvalidProcessStateException {
 		GetMetaFileContext context = new GetMetaFileContext(keys);
-		GetMetaFileStep step = new GetMetaFileStep(context, context, networkManager.getDataManager());
+		GetMetaFileStep step = new GetMetaFileStep(context, networkManager.getDataManager());
 		if (expectSuccess) {
 			executeProcess(step);
 			return context.metaFile;
@@ -185,10 +185,10 @@ public class UseCaseTestUtil {
 	}
 
 	public static Locations getLocations(NetworkManager networkManager, String userId) throws NoPeerConnectionException {
-		GetUserLocationsContext context = new GetUserLocationsContext();
-		GetUserLocationsStep step = new GetUserLocationsStep(userId, context, networkManager.getDataManager());
+		GetUserLocationsContext context = new GetUserLocationsContext(userId);
+		GetUserLocationsStep step = new GetUserLocationsStep(context, networkManager.getDataManager());
 		executeProcess(step);
-		return context.locations;
+		return context.consumeUserLocations();
 	}
 
 	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoSessionException,

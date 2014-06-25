@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * continuing.
  * 
  * @author Christian
- * 
  */
 public class SequentialProcess extends Process {
 
@@ -115,7 +114,7 @@ public class SequentialProcess extends Process {
 		if (getState() != ProcessState.RUNNING)
 			return;
 
-		logger.debug("Awaiting async components for completion.");
+		logger.trace("Awaiting async components for completion.");
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
@@ -133,6 +132,7 @@ public class SequentialProcess extends Process {
 				try {
 					checkAsyncComponentsForFail(asyncHandles);
 				} catch (ProcessExecutionException e) {
+					e.printStackTrace();
 					exception = e;
 					latch.countDown();
 					return;
@@ -176,6 +176,7 @@ public class SequentialProcess extends Process {
 			} catch (InterruptedException e) {
 				logger.error("Error while checking async component.", e);
 			} catch (ExecutionException e) {
+				logger.error("AsyncComponent threw an exception.", e.getCause());
 				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
 			}
 

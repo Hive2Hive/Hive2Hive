@@ -42,10 +42,9 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 		byte[] newMD5;
 		try {
-			newMD5 = EncryptionUtil.generateMD5Hash(context.getFile());
+			newMD5 = EncryptionUtil.generateMD5Hash(context.consumeFile());
 		} catch (IOException e) {
-			throw new ProcessExecutionException(
-					"The new MD5 hash for the user profile could not be generated.", e);
+			throw new ProcessExecutionException("The new MD5 hash for the user profile could not be generated.", e);
 		}
 
 		try {

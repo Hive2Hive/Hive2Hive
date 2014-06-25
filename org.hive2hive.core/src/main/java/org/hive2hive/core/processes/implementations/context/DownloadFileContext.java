@@ -6,15 +6,10 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeKeyPair;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeMetaFile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideIndex;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideMetaFile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
-public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaFile, IConsumeMetaFile,
-		IConsumeIndex, IProvideIndex {
+public class DownloadFileContext implements IGetMetaFileContext {
 
 	// set -1 for default
 	public static final int NEWEST_VERSION_INDEX = -1;
@@ -51,11 +46,10 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaFile, I
 	}
 
 	@Override
-	public KeyPair consumeKeyPair() {
+	public KeyPair consumeMetaFileEncryptionKeys() {
 		return index.getFileKeys();
 	}
 
-	@Override
 	public MetaFile consumeMetaFile() {
 		return metaFile;
 	}
@@ -82,12 +76,10 @@ public class DownloadFileContext implements IConsumeKeyPair, IProvideMetaFile, I
 		return versionToDownload == NEWEST_VERSION_INDEX;
 	}
 
-	@Override
 	public void provideIndex(Index index) {
 		this.index = index;
 	}
 
-	@Override
 	public Index consumeIndex() {
 		return index;
 	}

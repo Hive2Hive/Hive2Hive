@@ -11,7 +11,7 @@ import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
  * Gets a list of all locations (using the internal process framework
  * 
  * @author Nico
- * 
  */
 public class GetLocationsList implements Runnable {
 
@@ -39,7 +38,8 @@ public class GetLocationsList implements Runnable {
 
 		SequentialProcess process = new SequentialProcess();
 		for (String user : task.getUsers()) {
-			GetUserLocationsStep step = new GetUserLocationsStep(user, context, dataManager);
+			context.setUserId(user);
+			GetUserLocationsStep step = new GetUserLocationsStep(context, dataManager);
 			process.add(new AsyncComponent(step));
 		}
 
@@ -63,8 +63,9 @@ public class GetLocationsList implements Runnable {
 	 * @author Nico
 	 * 
 	 */
-	private class ProvideUserLocationsContext implements IProvideLocations {
+	private class ProvideUserLocationsContext implements IGetUserLocationsContext{
 
+		private String userId;
 		private Set<Locations> locations;
 
 		public ProvideUserLocationsContext() {
@@ -72,12 +73,22 @@ public class GetLocationsList implements Runnable {
 		}
 
 		@Override
-		public void provideLocations(Locations locations) {
+		public void provideUserLocations(Locations locations) {
 			this.locations.add(locations);
 		}
 
 		public Set<Locations> getLocations() {
 			return locations;
 		}
+
+		@Override
+		public String consumeUserId() {
+			return userId;
+		}
+		
+		public void setUserId(String userId) {
+			this.userId = userId;
+		}
+
 	}
 }

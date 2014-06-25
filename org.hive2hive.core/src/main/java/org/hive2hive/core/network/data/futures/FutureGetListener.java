@@ -50,7 +50,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	public void operationComplete(FutureGet future) throws Exception {
 		if (future == null || future.isFailed() || future.getData() == null) {
 			result = null;
-			logger.warn("Got null. '{}'", parameters.toString());
+			logger.debug("Got null. '{}'", parameters.toString());
 		} else {
 			// set the result
 			result = (NetworkContent) future.getData().object();

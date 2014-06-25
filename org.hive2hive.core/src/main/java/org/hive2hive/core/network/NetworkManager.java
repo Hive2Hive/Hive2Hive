@@ -45,13 +45,19 @@ public class NetworkManager implements INetworkEventGenerator {
 	 */
 	public boolean connect() {
 		boolean success = false;
-		if (networkConfiguration.isInitialPeer()) {
+		if (networkConfiguration.isLocal()) {
+			if (networkConfiguration.isBootstrappingLocaly()) {
+				success = connection.createLocalPeerAndBootstrap(networkConfiguration.getBootstapPeer());
+			} else {
+				success = connection.createLocalPeer();
+			}
+		} else if (networkConfiguration.isInitialPeer()) {
 			success = connection.connect();
 		} else if (networkConfiguration.getBootstrapPort() == -1) {
 			success = connection.connect(networkConfiguration.getBootstrapAddress());
 		} else {
-			success = connection.connect(networkConfiguration.getBootstrapAddress(),
-					networkConfiguration.getBootstrapPort());
+			success = connection
+					.connect(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
 		}
 		notifyConnectionStatus(success);
 		return success;
@@ -152,7 +158,7 @@ public class NetworkManager implements INetworkEventGenerator {
 				iterator.next().onConnectionFailure(new ConnectionEvent(networkConfiguration));
 		}
 	}
-	
+
 	private void notifyDisconnectionStatus(boolean isSuccessful) {
 		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
 		while (iterator.hasNext()) {

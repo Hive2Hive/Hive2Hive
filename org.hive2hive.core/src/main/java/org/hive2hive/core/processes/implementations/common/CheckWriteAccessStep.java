@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.implementations.files.add;
+package org.hive2hive.core.processes.implementations.common;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -11,7 +11,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.ICheckWriteAccessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,19 +25,18 @@ public class CheckWriteAccessStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(CheckWriteAccessStep.class);
 
-	private final AddFileProcessContext context;
+	private final ICheckWriteAccessContext context;
 	private final UserProfileManager profileManager;
-	private final Path root;
 
-	public CheckWriteAccessStep(AddFileProcessContext context, UserProfileManager profileManager, Path root) {
+	public CheckWriteAccessStep(ICheckWriteAccessContext context, UserProfileManager profileManager) {
 		this.context = context;
 		this.profileManager = profileManager;
-		this.root = root;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
+		Path root = context.consumeRoot();
 
 		logger.trace("Check write access in folder '{}' to add file '{}'.", file
 				.getParentFile().getName(), file.getName());

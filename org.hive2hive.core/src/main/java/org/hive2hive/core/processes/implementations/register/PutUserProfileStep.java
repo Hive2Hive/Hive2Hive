@@ -13,7 +13,7 @@ import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
+import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.PasswordUtil;
@@ -25,18 +25,18 @@ public class PutUserProfileStep extends BasePutProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(PutUserProfileStep.class);
 
-	private final UserCredentials credentials;
-	private final IConsumeUserProfile context;
+	private final RegisterProcessContext context;
 
-	public PutUserProfileStep(UserCredentials credentials, IConsumeUserProfile context,
+	public PutUserProfileStep(RegisterProcessContext context,
 			IDataManager dataManager) {
 		super(dataManager);
-		this.credentials = credentials;
 		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		UserCredentials credentials = context.getUserCredentials();
+		
 		logger.debug("Starting to encrypt and put the user profile for user '{}'.", credentials.getUserId());
 
 		// consume the profile from the context

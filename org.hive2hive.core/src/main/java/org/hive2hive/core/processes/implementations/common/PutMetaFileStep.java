@@ -19,7 +19,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutMetaFileContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
@@ -34,9 +34,9 @@ public class PutMetaFileStep extends BasePutProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(PutMetaFileStep.class);
 
-	private final AddFileProcessContext context;
+	private final IPutMetaFileContext context;
 
-	public PutMetaFileStep(AddFileProcessContext context, IDataManager dataManager) {
+	public PutMetaFileStep(IPutMetaFileContext context, IDataManager dataManager) {
 		super(dataManager);
 		this.context = context;
 	}
@@ -45,23 +45,23 @@ public class PutMetaFileStep extends BasePutProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			MetaFile metaFile = context.consumeMetaFile();
-			KeyPair protectionKeys = context.consumeProtectionKeys();
+			KeyPair protectionKeys = context.consumeMetaFileProtectionKeys();
 
-			logger.trace("Encrypting meta file of file '{}' in a hybrid manner.", context.getFile().getName());
+			logger.trace("Encrypting meta file in a hybrid manner.");
 			HybridEncryptedContent encrypted = H2HEncryptionUtil.encryptHybrid(metaFile, metaFile.getId());
 			encrypted.setBasedOnKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();
 
-			Parameters parameters = new Parameters()
-					.setLocationKey(H2HEncryptionUtil.key2String(metaFile.getId()))
-					.setContentKey(H2HConstants.META_FILE).setVersionKey(encrypted.getVersionKey())
-					.setData(encrypted).setProtectionKeys(protectionKeys).setTTL(metaFile.getTimeToLive());
+			Parameters parameters = new Parameters().setLocationKey(H2HEncryptionUtil.key2String(metaFile.getId()))
+					.setContentKey(H2HConstants.META_FILE).setVersionKey(encrypted.getVersionKey()).setData(encrypted)
+					.setProtectionKeys(protectionKeys).setTTL(metaFile.getTimeToLive());
+
 			// data manager has to produce the hash, which gets used for signing
 			parameters.setHashFlag(true);
 			// put the encrypted meta file into the network
 			put(parameters);
 			// store the hash
-			context.provideHash(parameters.getHash());
+			context.provideMetaFileHash(parameters.getHash());
 
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
@@ -76,6 +76,6 @@ public class PutMetaFileStep extends BasePutProcessStep {
 		super.doRollback(reason);
 
 		// remove provided hash
-		context.provideHash(null);
+		context.provideMetaFileHash(null);
 	}
 }

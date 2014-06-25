@@ -2,11 +2,9 @@ package org.hive2hive.core.processes.implementations.context;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeSession;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 
-public class LogoutProcessContext implements IProvideLocations, IConsumeLocations, IConsumeSession {
+public class LogoutProcessContext implements IGetUserLocationsContext {
 
 	private final H2HSession session;
 	private Locations locations;
@@ -16,16 +14,19 @@ public class LogoutProcessContext implements IProvideLocations, IConsumeLocation
 	}
 
 	@Override
-	public void provideLocations(Locations locations) {
+	public String consumeUserId() {
+		return session.getUserId();
+	}
+
+	@Override
+	public void provideUserLocations(Locations locations) {
 		this.locations = locations;
 	}
 
-	@Override
-	public Locations consumeLocations() {
+	public Locations consumeUserLocations() {
 		return locations;
 	}
 
-	@Override
 	public H2HSession consumeSession() {
 		return session;
 	}

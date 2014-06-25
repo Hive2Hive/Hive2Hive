@@ -1,15 +1,30 @@
 package org.hive2hive.core.processes.util;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 
-public class GetUserLocationsContext implements IProvideLocations {
+public class GetUserLocationsContext implements IGetUserLocationsContext {
 
-	public Locations locations;
+	private final String userId;
+
+	private Locations locations;
+
+	public GetUserLocationsContext(String userId) {
+		this.userId = userId;
+	}
 
 	@Override
-	public void provideLocations(Locations locations) {
+	public String consumeUserId() {
+		return userId;
+	}
+
+	@Override
+	public void provideUserLocations(Locations locations) {
 		this.locations = locations;
+	}
+
+	public Locations consumeUserLocations() {
+		return locations;
 	}
 
 }

@@ -27,6 +27,7 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -49,6 +50,7 @@ public class UserProfileStressTest extends H2HJUnitTest {
 	}
 
 	@Test
+	@Ignore
 	public void test() throws NoSessionException, GetFailedException, PutFailedException, IOException,
 			NoPeerConnectionException {
 		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);

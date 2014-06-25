@@ -39,8 +39,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfileTask;
+import org.hive2hive.core.processes.implementations.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.userprofiletask.TestPutUserProfileTaskStep;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
@@ -92,7 +91,6 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertNotNull(futureGet.getData());
 	}
 
-	// TODO: how to test this?
 	@Ignore
 	@Test
 	public void testPutRollback() throws InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
@@ -142,7 +140,6 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertEquals(userProfileTask.getId(), ((TestUserProfileTask) context.consumeUserProfileTask()).getId());
 	}
 
-	// TODO how to test this?
 	@Ignore
 	@Test
 	public void testPutGetRollback() throws IOException, NoPeerConnectionException {
@@ -160,8 +157,6 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		SequentialProcess process = new SequentialProcess();
 		process.add(new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node));
 		process.add(new GetUserProfileTaskStep(context, node));
-
-		UseCaseTestUtil.executeProcess(process);
 	}
 
 	@Test
@@ -192,14 +187,12 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 	}
 
-	// TODO how to test this?
 	@Test
 	@Ignore
 	public void testRemoveRollback() throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException,
 			NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
@@ -310,7 +303,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class SimpleGetUserProfileTaskContext implements IProvideUserProfileTask, IConsumeUserProfileTask {
+	private class SimpleGetUserProfileTaskContext implements IUserProfileTaskContext{
 
 		private UserProfileTask userProfileTask;
 

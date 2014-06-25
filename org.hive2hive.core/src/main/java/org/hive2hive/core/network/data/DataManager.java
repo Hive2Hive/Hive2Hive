@@ -253,12 +253,22 @@ public class DataManager implements IDataManager {
 				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
-	public NavigableMap<Number640, Number160> getDigest(IParameters parameters) {
-		FutureDigest futureDigest = getDigestUnblocked(parameters);
+	public NavigableMap<Number640, Number160> getDigestLatest(IParameters parameters) {
+		FutureDigest futureDigest = getDigestLatestUnblocked(parameters);
 		FutureDigestListener listener = new FutureDigestListener(parameters);
 		futureDigest.addListener(listener);
 		return listener.awaitAndGet();
 	}
+
+	public FutureDigest getDigestLatestUnblocked(IParameters parameters) {
+		logger.debug("Get digest. {}", parameters.toString());
+		return getPeer()
+				.digest(parameters.getLKey())
+				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.ZERO))
+				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+						Number160.MAX_VALUE)).descending().returnNr(1).start();
+	}	
 
 	public FutureDigest getDigestUnblocked(IParameters parameters) {
 		logger.debug("Get digest. {}", parameters.toString());

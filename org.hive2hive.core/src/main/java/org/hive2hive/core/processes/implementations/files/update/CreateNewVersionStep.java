@@ -26,15 +26,13 @@ public class CreateNewVersionStep extends ProcessStep {
 	private final static Logger logger = LoggerFactory.getLogger(CreateNewVersionStep.class);
 
 	private final UpdateFileProcessContext context;
-	private final IFileConfiguration config;
 
 	// used for rollback
 	private FileVersion newVersion;
 	private final List<FileVersion> deletedFileVersions;
 
-	public CreateNewVersionStep(UpdateFileProcessContext context, IFileConfiguration config) {
+	public CreateNewVersionStep(UpdateFileProcessContext context) {
 		this.context = context;
-		this.config = config;
 		this.deletedFileVersions = new ArrayList<FileVersion>();
 	}
 
@@ -48,14 +46,15 @@ public class CreateNewVersionStep extends ProcessStep {
 
 		// create a new version and add it to the meta file
 		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
-		newVersion = new FileVersion(metaFileSmall.getVersions().size(), FileUtil.getFileSize(context
-				.getFile()), System.currentTimeMillis(), context.getMetaChunks());
+		newVersion = new FileVersion(metaFileSmall.getVersions().size(), FileUtil.getFileSize(context.consumeFile()),
+				System.currentTimeMillis(), context.getMetaChunks());
 		metaFileSmall.getVersions().add(newVersion);
 
 		initiateCleanup();
 	}
 
 	private void initiateCleanup() {
+		IFileConfiguration config = context.consumeFileConfiguration();
 		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 
 		// remove files when the number of allowed versions is exceeded or when the total file size (sum

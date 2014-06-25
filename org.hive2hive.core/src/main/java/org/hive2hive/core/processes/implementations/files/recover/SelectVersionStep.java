@@ -38,8 +38,7 @@ public class SelectVersionStep extends ProcessStep {
 	private final IVersionSelector selector;
 	private final NetworkManager networkManager;
 
-	public SelectVersionStep(RecoverFileContext context, IVersionSelector selector,
-			NetworkManager networkManager) {
+	public SelectVersionStep(RecoverFileContext context, IVersionSelector selector, NetworkManager networkManager) {
 		this.context = context;
 		this.selector = selector;
 		this.networkManager = networkManager;
@@ -66,8 +65,7 @@ public class SelectVersionStep extends ProcessStep {
 			versions.add(version);
 		}
 
-		logger.debug(
-				"Start with the selection of the version by the user. The user has choice between {} versions.",
+		logger.debug("Start with the selection of the version by the user. The user has choice between {} versions.",
 				versions.size());
 		IFileVersion selected = selector.selectVersion(versions);
 		if (selected == null) {
@@ -88,8 +86,8 @@ public class SelectVersionStep extends ProcessStep {
 			throw new ProcessExecutionException("Invalid version index selected.");
 		}
 
-		logger.debug("Selected version {} where {} is newest.", selected.getIndex(), metaFileSmall
-				.getNewestVersion().getIndex());
+		logger.debug("Selected version {} where {} is newest.", selected.getIndex(), metaFileSmall.getNewestVersion()
+				.getIndex());
 
 		// 1. download the file with new name <filename>_<date>
 		// 2. add the file with an AddFileProcess (which also notifies other clients)
@@ -103,7 +101,7 @@ public class SelectVersionStep extends ProcessStep {
 			}
 
 			// ask the user for the new file name
-			String originalFileName = context.getFile().getName();
+			String originalFileName = context.consumeFile().getName();
 			String noSuffix = FilenameUtils.removeExtension(originalFileName);
 			String extension = FilenameUtils.getExtension(originalFileName);
 			String recoveredFileName = selector.getRecoveredFileName(originalFileName, noSuffix, extension);
@@ -116,7 +114,7 @@ public class SelectVersionStep extends ProcessStep {
 			}
 
 			logger.debug("Starting to download the restored file under the name '{}'.", recoveredFileName);
-			File destination = new File(context.getFile().getParentFile(), recoveredFileName);
+			File destination = new File(context.consumeFile().getParentFile(), recoveredFileName);
 
 			// add the process to download the file
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(
@@ -124,8 +122,7 @@ public class SelectVersionStep extends ProcessStep {
 			getParent().add(downloadProcess);
 
 			// add the process to upload the file
-			ProcessComponent addProcess = ProcessFactory.instance().createNewFileProcess(destination,
-					networkManager);
+			ProcessComponent addProcess = ProcessFactory.instance().createNewFileProcess(destination, networkManager);
 			getParent().add(addProcess);
 		} catch (Hive2HiveException e) {
 			throw new ProcessExecutionException(e);

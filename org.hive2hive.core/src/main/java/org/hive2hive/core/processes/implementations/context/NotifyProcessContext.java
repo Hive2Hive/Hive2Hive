@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.implementations.context;
 
 import java.security.PublicKey;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,22 +8,22 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeNotificationFactory;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 
-public class NotifyProcessContext implements IConsumeNotificationFactory, IConsumeLocations, IProvideLocations {
+public class NotifyProcessContext implements INotifyContext, IGetUserLocationsContext {
 
-	private final IConsumeNotificationFactory providerContext;
-	private final Set<PeerAddress> unreachablePeers;
+	private final INotifyContext providerContext;
+	private final String userId;
+
 	private Map<String, PublicKey> userPublicKeys;
 	private Map<String, List<PeerAddress>> allLocations;
 	private Locations locations;
 
-	public NotifyProcessContext(IConsumeNotificationFactory providerContext) {
+	public NotifyProcessContext(INotifyContext providerContext, String userId) {
 		this.providerContext = providerContext;
-		this.unreachablePeers = new HashSet<PeerAddress>();
+		this.userId = userId;
 	}
 
 	public void setUserPublicKeys(Map<String, PublicKey> keys) {
@@ -54,13 +53,17 @@ public class NotifyProcessContext implements IConsumeNotificationFactory, IConsu
 	}
 
 	@Override
-	public void provideLocations(Locations locations) {
+	public void provideUserLocations(Locations locations) {
 		this.locations = locations;
-
 	}
 
 	@Override
+	public String consumeUserId() {
+		return userId;
+	}
+
 	public Locations consumeLocations() {
 		return locations;
 	}
+
 }

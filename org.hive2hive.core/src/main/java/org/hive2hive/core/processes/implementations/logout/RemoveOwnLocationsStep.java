@@ -29,7 +29,7 @@ public class RemoveOwnLocationsStep extends BasePutProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 
-		Locations locations = context.consumeLocations();
+		Locations locations = context.consumeUserLocations();
 
 		if (locations == null) {
 			throw new ProcessExecutionException("Locations not found.");

@@ -28,6 +28,12 @@ public class FileIndex extends Index {
 		this.md5LatestVersion = md5LatestVersion;
 	}
 
+	public FileIndex(FileIndex fileIndex) {
+		super(fileIndex.fileKeys, fileIndex.name, fileIndex.parent);
+		this.md5LatestVersion = fileIndex.md5LatestVersion;
+		this.metaFileHash = fileIndex.metaFileHash;
+	}
+
 	@Override
 	public boolean isFolder() {
 		return false;

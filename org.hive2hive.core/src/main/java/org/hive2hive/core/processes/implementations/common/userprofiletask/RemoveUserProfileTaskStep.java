@@ -18,7 +18,7 @@ import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfileTask;
+import org.hive2hive.core.processes.implementations.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
@@ -33,12 +33,12 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUserProfileTaskStep.class);
 
-	private final IConsumeUserProfileTask context;
+	private final IUserProfileTaskContext context;
 
 	private boolean removePerformed = false;
 	private NetworkManager networkManager;
 
-	public RemoveUserProfileTaskStep(IConsumeUserProfileTask context, NetworkManager networkManager) {
+	public RemoveUserProfileTaskStep(IUserProfileTaskContext context, NetworkManager networkManager) {
 		this.context = context;
 		this.networkManager = networkManager;
 	}

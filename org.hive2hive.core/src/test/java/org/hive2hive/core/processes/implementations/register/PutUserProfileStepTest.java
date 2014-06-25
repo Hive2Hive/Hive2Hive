@@ -21,7 +21,7 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.DenyingPutTestStorage;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
+import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptedNetworkContent;
@@ -61,10 +61,11 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
-		IConsumeUserProfile context = new ConsumeProfileContext(testProfile);
+		RegisterProcessContext context = new RegisterProcessContext(credentials);
+		context.provideUserProfile(testProfile);
 
 		// initialize the process and the one and only step to test
-		PutUserProfileStep step = new PutUserProfileStep(credentials, context, putter.getDataManager());
+		PutUserProfileStep step = new PutUserProfileStep(context, putter.getDataManager());
 		UseCaseTestUtil.executeProcess(step);
 
 		// get the user profile which should be stored at the proxy
@@ -96,10 +97,11 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		UserProfile testProfile = new UserProfile(credentials.getUserId());
-		IConsumeUserProfile context = new ConsumeProfileContext(testProfile);
+		RegisterProcessContext context = new RegisterProcessContext(credentials);
+		context.provideUserProfile(testProfile);
 
 		// initialize the process and the one and only step to test
-		PutUserProfileStep step = new PutUserProfileStep(credentials, context, putter.getDataManager());
+		PutUserProfileStep step = new PutUserProfileStep(context, putter.getDataManager());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		step.attachListener(listener);
 		step.start();
@@ -120,18 +122,4 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class ConsumeProfileContext implements IConsumeUserProfile {
-
-		private final UserProfile profile;
-
-		public ConsumeProfileContext(UserProfile profile) {
-			this.profile = profile;
-		}
-
-		@Override
-		public UserProfile consumeUserProfile() {
-			return profile;
-		}
-
-	}
 }

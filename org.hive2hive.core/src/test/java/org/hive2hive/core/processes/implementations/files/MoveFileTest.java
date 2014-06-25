@@ -10,7 +10,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -19,53 +18,51 @@ import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * Tests moving a file.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class MoveFileTest extends H2HJUnitTest {
 
-	private static final int networkSize = 5;
+	private final static int networkSize = 2;
+
 	private static List<NetworkManager> network;
-	private final static int CHUNK_SIZE = 1024;
-	private UserCredentials userCredentials;
-	private File root;
+	private static NetworkManager client;
+	private static UserCredentials userCredentials;
+	private static File root;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = MoveFileTest.class;
 		beforeClass();
 
+		// setup a network
 		network = NetworkTestUtil.createNetwork(networkSize);
-	}
+		client = network.get(1);
 
-	@Before
-	public void register() throws NoPeerConnectionException {
+		// create a user
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-
-		// register a user
-		UseCaseTestUtil.register(userCredentials, network.get(0));
+		// register user
+		UseCaseTestUtil.register(userCredentials, client);
 		root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		// login user
+		UseCaseTestUtil.login(userCredentials, client, root);
 	}
 
 	@Test
 	public void testRootToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
 			InterruptedException, NoSessionException, NoPeerConnectionException {
-		NetworkManager client = network.get(1);
-		UseCaseTestUtil.login(userCredentials, client, root);
-
-		// add a file to the network
-		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
+		// add a file to the root
+		File file = new File(root, "test-file-from-root-to-folder");
+		FileUtils.write(file, NetworkTestUtil.randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// add the target directory
-		File folder = new File(root, "folder");
+		File folder = new File(root, "from-root-to-target-folder");
 		folder.mkdir();
 		UseCaseTestUtil.uploadNewFile(client, folder);
 
@@ -87,16 +84,13 @@ public class MoveFileTest extends H2HJUnitTest {
 	@Test
 	public void testDirectoryToRoot() throws IOException, IllegalFileLocation, GetFailedException,
 			InterruptedException, NoSessionException, NoPeerConnectionException {
-		NetworkManager client = network.get(1);
-		UseCaseTestUtil.login(userCredentials, client, root);
-
 		// add the source folder
-		File folder = new File(root, "folder");
+		File folder = new File(root, "from-source-folder-to-root");
 		folder.mkdir();
 		UseCaseTestUtil.uploadNewFile(client, folder);
 
 		// add a file to the folder
-		File file = new File(folder, "test-file");
+		File file = new File(folder, "test-file-from-folder-to-root");
 		FileUtils.write(file, NetworkTestUtil.randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
@@ -113,17 +107,11 @@ public class MoveFileTest extends H2HJUnitTest {
 		Index fileNode = userProfile.getFileByPath(destination, root.toPath());
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(userProfile.getRoot(), fileNode.getParent());
-
-		// root contains moved file and empty folder as file
-		Assert.assertEquals(2, userProfile.getRoot().getChildren().size());
 	}
 
 	@Test
 	public void testDirectoryToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
 			InterruptedException, NoSessionException, NoPeerConnectionException {
-		NetworkManager client = network.get(1);
-		UseCaseTestUtil.login(userCredentials, client, root);
-
 		// add the source folder
 		File sourceFolder = new File(root, "source-folder");
 		sourceFolder.mkdir();
@@ -161,12 +149,12 @@ public class MoveFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, client, root);
 
 		// add a file to the network
-		File file = new File(root, "test-file");
+		File file = new File(root, "test-file-to-rename");
 		FileUtils.write(file, NetworkTestUtil.randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// don't move, only rename
-		File destination = new File(root, "test-file-moved");
+		File destination = new File(root, "test-file-renamed");
 
 		// move the file
 		UseCaseTestUtil.moveFile(client, file, destination);
@@ -184,6 +172,7 @@ public class MoveFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
+		FileUtils.deleteDirectory(root);
 		afterClass();
 	}
 }

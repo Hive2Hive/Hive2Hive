@@ -12,7 +12,7 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -23,7 +23,6 @@ import org.junit.Test;
  * Tests the generic step that puts the location into the DHT
  * 
  * @author Nico, Seppi
- * 
  */
 public class GetLocationStepTest extends H2HJUnitTest {
 
@@ -53,8 +52,8 @@ public class GetLocationStepTest extends H2HJUnitTest {
 						new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)
 								.setData(newLocations)).awaitUninterruptibly();
 
-		GetLocationsContext context = new GetLocationsContext();
-		GetUserLocationsStep step = new GetUserLocationsStep(userId, context, getter.getDataManager());
+		GetLocationsContext context = new GetLocationsContext(userId);
+		GetUserLocationsStep step = new GetUserLocationsStep(context, getter.getDataManager());
 		UseCaseTestUtil.executeProcess(step);
 
 		// verify if both objects are the same
@@ -72,8 +71,8 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// create the needed objects, put no locations
 		String userId = proxy.getNodeId();
 
-		GetLocationsContext context = new GetLocationsContext();
-		GetUserLocationsStep step = new GetUserLocationsStep(userId, context, getter.getDataManager());
+		GetLocationsContext context = new GetLocationsContext(userId);
+		GetUserLocationsStep step = new GetUserLocationsStep(context, getter.getDataManager());
 		UseCaseTestUtil.executeProcess(step);
 
 		Assert.assertNull(context.locations);
@@ -85,13 +84,23 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class GetLocationsContext implements IProvideLocations {
+	private class GetLocationsContext implements IGetUserLocationsContext {
 
-		public Locations locations;
+		private final String userId;
+		private Locations locations;
+
+		public GetLocationsContext(String userId) {
+			this.userId = userId;
+		}
 
 		@Override
-		public void provideLocations(Locations locations) {
+		public void provideUserLocations(Locations locations) {
 			this.locations = locations;
+		}
+
+		@Override
+		public String consumeUserId() {
+			return userId;
 		}
 
 	}

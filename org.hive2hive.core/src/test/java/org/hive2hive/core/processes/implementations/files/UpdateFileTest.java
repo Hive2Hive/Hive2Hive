@@ -32,46 +32,37 @@ import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HEncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * Tests uploading a new version of a file.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class UpdateFileTest extends H2HJUnitTest {
 
-	private final int networkSize = 5;
+	private final static int networkSize = 3;
 	private final static int CHUNK_SIZE = 1024;
-	private List<NetworkManager> network;
-	private UserCredentials userCredentials;
-	private Path uploaderRoot;
-	private File file;
 
-	private NetworkManager uploader;
-	private NetworkManager downloader;
+	private static List<NetworkManager> network;
+	private static UserCredentials userCredentials;
+	private static Path uploaderRoot;
+	private static File file;
+	private static NetworkManager uploader;
+	private static NetworkManager downloader;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = UpdateFileTest.class;
 		beforeClass();
 
-	}
-
-	@Before
-	public void createProfileUploadBaseFile() throws IOException, IllegalFileLocation, NoSessionException,
-			NoPeerConnectionException {
 		network = NetworkTestUtil.createNetwork(networkSize);
-		NetworkManager registrar = network.get(0);
+		NetworkManager registrer = network.get(0);
 		uploader = network.get(1);
 		downloader = network.get(2);
-
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// make the two clients ignore each other
@@ -84,7 +75,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		File rootDownloader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
 
 		// register a user
-		UseCaseTestUtil.register(userCredentials, registrar);
+		UseCaseTestUtil.register(userCredentials, registrer);
 		UseCaseTestUtil.login(userCredentials, uploader, rootUploader);
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
@@ -94,8 +85,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadNewVersion() throws IOException, GetFailedException, NoSessionException,
-			NoPeerConnectionException {
+	public void testUploadNewVersion() throws IOException, GetFailedException, NoSessionException, NoPeerConnectionException {
 		// overwrite the content in the file
 		String newContent = NetworkTestUtil.randomString();
 		FileUtils.write(file, newContent, false);
@@ -117,9 +107,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException,
-			NoSessionException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException {
+	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException, NoSessionException,
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, uploader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
@@ -135,11 +124,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		FileIndex fileNode = (FileIndex) userProfile.getFileByPath(file, uploaderRoot);
 		Assert.assertTrue(H2HEncryptionUtil.compareMD5(file, fileNode.getMD5()));
-
-		// verify that only one version was created
-		MetaFileSmall metaDocument = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader,
-				fileNode.getFileKeys());
-		Assert.assertEquals(1, metaDocument.getVersions().size());
 	}
 
 	@Test
@@ -181,14 +165,13 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, uploaderRoot);
-		MetaFileSmall metaFileSmall = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader,
-				fileNode.getFileKeys());
+		MetaFileSmall metaFileSmall = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaFileSmall.getVersions().size());
 	}
 
 	@Test
-	public void testCleanupMaxSize() throws IOException, GetFailedException, NoSessionException,
-			IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException {
+	public void testCleanupMaxSize() throws IOException, GetFailedException, NoSessionException, IllegalArgumentException,
+			NoPeerConnectionException, InvalidProcessStateException {
 		// overwrite config and set the currently max limit
 		final long fileSize = file.length();
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
@@ -227,19 +210,14 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		Index fileNode = userProfile.getFileByPath(file, uploaderRoot);
-		MetaFileSmall metaFileSmall = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader,
-				fileNode.getFileKeys());
+		MetaFileSmall metaFileSmall = (MetaFileSmall) UseCaseTestUtil.getMetaFile(downloader, fileNode.getFileKeys());
 		Assert.assertEquals(1, metaFileSmall.getVersions().size());
-	}
-
-	@After
-	public void deleteAndShutdown() throws IOException {
-		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderRoot.toFile());
 	}
 
 	@AfterClass
 	public static void endTest() throws IOException {
+		NetworkTestUtil.shutdownNetwork(network);
+		FileUtils.deleteDirectory(uploaderRoot.toFile());
 		afterClass();
 	}
 }

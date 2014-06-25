@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.implementations.files.add;
+package org.hive2hive.core.processes.implementations.common;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeChunksStepContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +28,18 @@ import org.slf4j.LoggerFactory;
 public class InitializeChunksStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
-	private final AddFileProcessContext context;
-	private final IFileConfiguration config;
+	
+	private final IInitializeChunksStepContext context;
 	private final IDataManager dataManager;
 
-	public InitializeChunksStep(AddFileProcessContext context, IDataManager dataManager,
-			IFileConfiguration config) {
+	public InitializeChunksStep(IInitializeChunksStepContext context, IDataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
-		this.config = config;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File file = context.getFile();
+		File file = context.consumeFile();
 
 		// only continue if the file has content
 		if (file.isDirectory()) {
@@ -63,12 +61,13 @@ public class InitializeChunksStep extends ProcessStep {
 		}
 
 		// create put chunks steps
+		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace("{} chunks to upload for file '{}'.", Integer.toString(chunks), file.getName());
 		ProcessComponent prev = this;
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();
-			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager, config);
+			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager);
 
 			// insert just after this step
 			getParent().insertNext(putChunkStep, prev);
@@ -78,6 +77,7 @@ public class InitializeChunksStep extends ProcessStep {
 
 	private void initLargeFile(File file) throws ProcessExecutionException {
 		// init the large file chunks
+		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
 

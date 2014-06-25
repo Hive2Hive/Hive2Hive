@@ -4,31 +4,54 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeUserProfile;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideUserProfile;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserProfileContext;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
+import org.hive2hive.core.security.UserCredentials;
 
-public class LoginProcessContext implements IProvideUserProfile, IConsumeUserProfile, IProvideLocations,
-		IConsumeLocations, IConsumeProtectionKeys {
+public class LoginProcessContext implements IGetUserProfileContext, IGetUserLocationsContext, IPutUserLocationsContext {
+
+	private final UserCredentials credentials;
 
 	private UserProfile profile;
 	private Locations locations;
 	private boolean isInitial;
+
+	public LoginProcessContext(UserCredentials credentials) {
+		this.credentials = credentials;
+	}
+
+	@Override
+	public UserCredentials consumeUserCredentials() {
+		return credentials;
+	}
+
+	@Override
+	public String consumeUserId() {
+		return credentials.getUserId();
+	}
 
 	@Override
 	public void provideUserProfile(UserProfile profile) {
 		this.profile = profile;
 	}
 
+	public UserProfile consumeUserProfile() {
+		return profile;
+	}
+
 	@Override
-	public void provideLocations(Locations locations) {
+	public KeyPair consumeUserLocationsProtectionKeys() {
+		return profile.getProtectionKeys();
+	}
+
+	@Override
+	public void provideUserLocations(Locations locations) {
 		this.locations = locations;
 	}
 
 	@Override
-	public Locations consumeLocations() {
+	public Locations consumeUserLocations() {
 		return locations;
 	}
 
@@ -38,16 +61,6 @@ public class LoginProcessContext implements IProvideUserProfile, IConsumeUserPro
 
 	public boolean getIsInitial() {
 		return isInitial;
-	}
-
-	@Override
-	public KeyPair consumeProtectionKeys() {
-		return profile.getProtectionKeys();
-	}
-
-	@Override
-	public UserProfile consumeUserProfile() {
-		return profile;
 	}
 
 }

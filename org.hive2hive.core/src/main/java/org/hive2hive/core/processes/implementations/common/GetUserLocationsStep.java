@@ -7,33 +7,31 @@ import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideLocations;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
 
 public class GetUserLocationsStep extends BaseGetProcessStep {
 
-	private final String userId;
-	private final IProvideLocations context;
+	private final IGetUserLocationsContext context;
 
-	public GetUserLocationsStep(String userId, IProvideLocations context, IDataManager dataManager) {
+	public GetUserLocationsStep(IGetUserLocationsContext context, IDataManager dataManager) {
 		super(dataManager);
-		this.userId = userId;
 		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		String userId = context.consumeUserId();
 		NetworkContent loadedContent = get(userId, H2HConstants.USER_LOCATIONS);
 
 		if (loadedContent == null) {
-			context.provideLocations(null);
+			context.provideUserLocations(null);
 		} else {
 			Locations locations = (Locations) loadedContent;
 			if (!locations.getUserId().equalsIgnoreCase(userId))
 				throw new ProcessExecutionException(String.format(
-						"The wrong locations have been loaded. Required: %s. Got: %s.", userId,
-						locations.getUserId()));
+						"The wrong locations have been loaded. Required: %s. Got: %s.", userId, locations.getUserId()));
 
-			context.provideLocations(locations);
+			context.provideUserLocations(locations);
 		}
 	}
 }

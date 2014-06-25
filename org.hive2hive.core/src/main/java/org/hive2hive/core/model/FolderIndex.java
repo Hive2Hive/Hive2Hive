@@ -19,11 +19,20 @@ public class FolderIndex extends Index {
 
 	private static final long serialVersionUID = 3798065400562165454L;
 
-	private final Set<Index> children = new HashSet<Index>();
-	private final Set<UserPermission> userPermissions = new HashSet<UserPermission>();
-
+	private Set<Index> children = new HashSet<Index>();
+	private Set<UserPermission> userPermissions = new HashSet<UserPermission>();
 	private KeyPair protectionKeys = null;
 	private boolean isShared = false;
+
+	/**
+	 * Constructor for the root folder.
+	 * 
+	 * @param keyPair
+	 * @param name
+	 */
+	public FolderIndex(KeyPair keyPair, String name) {
+		super(keyPair, name);
+	}
 
 	/**
 	 * Constructor for child nodes of type 'folder'
@@ -36,6 +45,24 @@ public class FolderIndex extends Index {
 	// TODO keypair can be generated here, no need to hand over as parameter
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
+	}
+
+	public FolderIndex(FolderIndex folderIndex) {
+		super(folderIndex.fileKeys, folderIndex.name, folderIndex.parent);
+		this.children = new HashSet<Index>();
+		for (Index child : folderIndex.children) {
+			if (child.isFolder()) {
+				this.children.add(new FolderIndex((FolderIndex) child));
+			} else {
+				this.children.add(new FileIndex((FileIndex) child));
+			}
+		}
+		this.userPermissions = new HashSet<UserPermission>();
+		for (UserPermission userPermission : folderIndex.userPermissions) {
+			this.userPermissions.add(new UserPermission(userPermission));
+		}
+		this.isShared = folderIndex.isShared;
+		this.protectionKeys = folderIndex.protectionKeys;
 	}
 
 	/**

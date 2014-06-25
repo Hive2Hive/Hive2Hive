@@ -54,7 +54,7 @@ public class UserProfileHolder {
 				H2HConstants.USER_PROFILE);
 
 		// load the current digest list from network
-		NavigableMap<Number640, Number160> digest = dataManager.getDigest(parameters);
+		NavigableMap<Number640, Number160> digest = dataManager.getDigestLatest(parameters);
 		// compare the current user profile's version key with the cached one
 		if (cachedUserProfile != null && digest.firstEntry() != null
 				&& digest.firstEntry().getKey().getVersionKey().equals(cachedUserProfile.getVersionKey())) {

@@ -49,7 +49,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public IProcessComponent start() throws InvalidProcessStateException {
-		logger.debug("Executing '{}'.", this.getClass().getSimpleName());
+		logger.trace("Executing '{}'.", this.getClass().getSimpleName());
 
 		if (state != ProcessState.READY) {
 			throw new InvalidProcessStateException(state);

@@ -9,24 +9,20 @@ import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
 
 public class PutUserLocationsStep extends BasePutProcessStep {
 
-	private final IConsumeLocations locationsContext;
-	private final IConsumeProtectionKeys protectionKeyContext;
+	private final IPutUserLocationsContext context;
 
-	public PutUserLocationsStep(IConsumeLocations locationsContext,
-			IConsumeProtectionKeys protectionKeyContext, IDataManager dataManager) {
+	public PutUserLocationsStep(IPutUserLocationsContext context, IDataManager dataManager) {
 		super(dataManager);
-		this.locationsContext = locationsContext;
-		this.protectionKeyContext = protectionKeyContext;
+		this.context = context;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		Locations locations = locationsContext.consumeLocations();
+		Locations locations = context.consumeUserLocations();
 
 		locations.setBasedOnKey(locations.getVersionKey());
 		try {
@@ -36,8 +32,7 @@ public class PutUserLocationsStep extends BasePutProcessStep {
 		}
 
 		try {
-			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations,
-					protectionKeyContext.consumeProtectionKeys());
+			put(locations.getUserId(), H2HConstants.USER_LOCATIONS, locations, context.consumeUserLocationsProtectionKeys());
 		} catch (PutFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

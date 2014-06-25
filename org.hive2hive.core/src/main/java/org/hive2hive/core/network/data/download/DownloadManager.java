@@ -139,14 +139,14 @@ public class DownloadManager {
 		public void downloadFinished(BaseDownloadTask task) {
 			// remove it from the task list
 			openTasks.remove(task);
-			logger.debug("Task for downloading {} finished", task.getDestinationName());
+			logger.debug("Task for downloading '{}' finished.", task.getDestinationName());
 		}
 
 		@Override
 		public void downloadFailed(BaseDownloadTask task, String reason) {
 			// remove it from the task anyway
 			openTasks.remove(task);
-			logger.debug("Task for downloading {} failed", task.getDestinationName());
+			logger.debug("Task for downloading '{}' failed.", task.getDestinationName());
 		}
 
 	}

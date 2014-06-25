@@ -9,8 +9,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideKeyPair;
-import org.hive2hive.core.processes.implementations.context.interfaces.IProvideProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IGetFileKeysContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,27 +17,23 @@ import org.slf4j.LoggerFactory;
  * Gets the file keys (and their protection keys)
  * 
  * @author Nico
- * 
  */
 public class GetFileKeysStep extends ProcessStep {
 
 	private final static Logger logger = LoggerFactory.getLogger(GetFileKeysStep.class);
 
-	private final File file;
-	private final IProvideProtectionKeys protectionContext;
-	private final IProvideKeyPair keyPairContext;
+	private final IGetFileKeysContext context;
 	private final H2HSession session;
 
-	public GetFileKeysStep(File file, IProvideProtectionKeys protectionContext,
-			IProvideKeyPair keyPairContext, H2HSession session) {
-		this.file = file;
-		this.protectionContext = protectionContext;
-		this.keyPairContext = keyPairContext;
+	public GetFileKeysStep(IGetFileKeysContext context, H2HSession session) {
+		this.context = context;
 		this.session = session;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		File file = context.consumeFile();
+
 		// file node can be null or already present
 		logger.info("Getting the corresponding file node for file '{}'.", file.getName());
 
@@ -52,12 +47,11 @@ public class GetFileKeysStep extends ProcessStep {
 
 		Index fileNode = profile.getFileByPath(file, session.getRoot());
 		if (fileNode == null) {
-			throw new ProcessExecutionException(
-					"File does not exist in user profile. Consider uploading a new file.");
+			throw new ProcessExecutionException("File does not exist in user profile. Consider uploading a new file.");
 		}
 
 		// set the corresponding content protection keys
-		protectionContext.provideProtectionKeys(fileNode.getProtectionKeys());
-		keyPairContext.provideKeyPair(fileNode.getFileKeys());
+		context.provideProtectionKeys(fileNode.getProtectionKeys());
+		context.provideMetaFileEncryptionKeys(fileNode.getFileKeys());
 	}
 }

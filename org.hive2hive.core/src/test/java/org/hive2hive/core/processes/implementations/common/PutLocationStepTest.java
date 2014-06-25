@@ -20,8 +20,7 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.base.DenyingPutTestStorage;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeLocations;
-import org.hive2hive.core.processes.implementations.context.interfaces.IConsumeProtectionKeys;
+import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -71,7 +70,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 
 		// initialize the process and the one and only step to test
 		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);
-		PutUserLocationsStep step = new PutUserLocationsStep(context, context, putter.getDataManager());
+		PutUserLocationsStep step = new PutUserLocationsStep(context, putter.getDataManager());
 		UseCaseTestUtil.executeProcess(step);
 
 		// get the locations
@@ -104,7 +103,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 
 		// initialize the process and the one and only step to test
 		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);
-		PutUserLocationsStep step = new PutUserLocationsStep(context, context, putter.getDataManager());
+		PutUserLocationsStep step = new PutUserLocationsStep(context, putter.getDataManager());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		step.attachListener(listener);
 		step.start();
@@ -131,7 +130,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class PutLocationContext implements IConsumeProtectionKeys, IConsumeLocations {
+	private class PutLocationContext implements IPutUserLocationsContext {
 
 		private final KeyPair protectionKeys;
 		private final Locations locations;
@@ -142,12 +141,12 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		public Locations consumeLocations() {
+		public Locations consumeUserLocations() {
 			return locations;
 		}
 
 		@Override
-		public KeyPair consumeProtectionKeys() {
+		public KeyPair consumeUserLocationsProtectionKeys() {
 			return protectionKeys;
 		}
 	}
