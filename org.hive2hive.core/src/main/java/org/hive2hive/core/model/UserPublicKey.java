@@ -16,8 +16,9 @@ public class UserPublicKey extends NetworkContent {
 	private final PublicKey publicKey;
 
 	public UserPublicKey(PublicKey publicKey) {
-		if (publicKey == null)
+		if (publicKey == null) {
 			throw new IllegalArgumentException("Public key can't be null.");
+		}
 		this.publicKey = publicKey;
 	}
 

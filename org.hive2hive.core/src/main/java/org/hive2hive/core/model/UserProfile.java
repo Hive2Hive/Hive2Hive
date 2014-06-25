@@ -25,8 +25,7 @@ public class UserProfile extends NetworkContent {
 	private final FolderIndex root;
 
 	public UserProfile(String userId) {
-		if (userId == null)
-			throw new IllegalArgumentException("User id can't be null.");
+		assert userId != null;
 		this.userId = userId;
 		this.encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 

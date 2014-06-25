@@ -143,9 +143,9 @@ public final class EncryptionUtil {
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
-
 		int strength = keyLength.value();
-		BigInteger publicExp = new BigInteger("10001", 16); // Fermat F4, largest known fermat prime
+		// Fermat F4, largest known fermat prime
+		BigInteger publicExp = new BigInteger("10001", 16);
 
 		try {
 			JDKKeyPairGenerator gen = new JDKKeyPairGenerator.RSA();
@@ -153,17 +153,9 @@ public final class EncryptionUtil {
 			gen.initialize(params, new SecureRandom());
 			return gen.generateKeyPair();
 		} catch (InvalidAlgorithmParameterException e) {
-			logger.error("Exception whil RSA key pair generation:", e);
+			logger.error("Exception while generation of RSA key pair of length {}:", keyLength, e);
 		}
 		return null;
-
-		// RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
-		// KeyGenerationParameters parameters = new RSAKeyGenerationParameters(publicExp, new SecureRandom(),
-		// strength, certainty);
-		// kpg.init(parameters);
-		//
-		// AsymmetricCipherKeyPair keyPair = kpg.generateKeyPair();
-		// return keyPair;
 	}
 
 	/**
@@ -176,7 +168,7 @@ public final class EncryptionUtil {
 		try {
 			gen = KeyPairGenerator.getInstance("RSA");
 		} catch (NoSuchAlgorithmException e) {
-			logger.error("Exception whil RSA key pair generation:", e);
+			logger.error("Exception while RSA key pair generation:", e);
 			return null;
 		}
 		return gen.generateKeyPair();
@@ -190,9 +182,7 @@ public final class EncryptionUtil {
 	 * @param initVector The initialization vector (IV) with which the data shall be encrypted.
 	 * @return Returns the encrypted data.
 	 */
-	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws DataLengthException,
-			IllegalStateException, InvalidCipherTextException {
-
+	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws InvalidCipherTextException {
 		return processAESCiphering(true, data, secretKey, initVector);
 	}
 
@@ -204,9 +194,7 @@ public final class EncryptionUtil {
 	 * @param initVector The initialization vector (IV) with which the data shall be decrypted.
 	 * @return Returns the decrypted data.
 	 */
-	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws DataLengthException,
-			IllegalStateException, InvalidCipherTextException {
-
+	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws InvalidCipherTextException {
 		return processAESCiphering(false, data, secretKey, initVector);
 	}
 
@@ -234,8 +222,6 @@ public final class EncryptionUtil {
 			logger.error("Exception while RSA encryption:", e);
 		}
 		return null;
-
-		// return processRSACiphering(true, data, publicKey);
 	}
 
 	/**
@@ -259,11 +245,9 @@ public final class EncryptionUtil {
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
-			logger.error("Exception while RSA encryption:", e);
+			logger.error("Exception while RSA decryption:", e);
 		}
 		return null;
-
-		// return processRSACiphering(false, data, privateKey);
 	}
 
 	/**
@@ -284,8 +268,7 @@ public final class EncryptionUtil {
 	 * @throws BadPaddingException
 	 */
 	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey, AES_KEYLENGTH aesKeyLength)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException, InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+			throws InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
 		// generate AES key
 		SecretKey aesKey = generateAESKey(aesKeyLength);
@@ -325,8 +308,7 @@ public final class EncryptionUtil {
 	 * @throws InvalidCipherTextException
 	 */
 	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, DataLengthException, IllegalStateException,
-			InvalidCipherTextException {
+			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException {
 
 		// decrypt parameters asymmetrically
 		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey);
@@ -363,8 +345,6 @@ public final class EncryptionUtil {
 		}
 
 		return null;
-
-		// return setupSigner(true, data, privateKey).generateSignature();
 	}
 
 	/**
@@ -388,12 +368,10 @@ public final class EncryptionUtil {
 			signEngine.update(data);
 			return signEngine.verify(signature);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-			logger.error("Exception while signing:", e);
+			logger.error("Exception while verifying signature:", e);
 		}
 
 		return false;
-
-		// return setupSigner(false, data, publicKey).verifySignature(signature);
 	}
 
 	/**
@@ -434,6 +412,7 @@ public final class EncryptionUtil {
 			// open the stream
 			fis = new FileInputStream(file);
 		} catch (FileNotFoundException e) {
+			logger.error("File {} not found to generate the hash", file, e);
 			return null;
 		}
 
@@ -469,10 +448,12 @@ public final class EncryptionUtil {
 			throw e;
 		} finally {
 			try {
-				if (oos != null)
+				if (oos != null) {
 					oos.close();
-				if (baos != null)
+				}
+				if (baos != null) {
 					baos.close();
+				}
 			} catch (IOException e) {
 				logger.error("Exception while closing serialization process.");
 				throw e;
@@ -494,10 +475,12 @@ public final class EncryptionUtil {
 			throw e;
 		} finally {
 			try {
-				if (ois != null)
+				if (ois != null) {
 					ois.close();
-				if (bais != null)
+				}
+				if (bais != null) {
 					bais.close();
+				}
 			} catch (IOException e) {
 				logger.error("Exception while closing deserialization process.");
 				throw e;
@@ -514,9 +497,8 @@ public final class EncryptionUtil {
 	 * @return The hex converted byte array.
 	 */
 	public static String toHex(byte[] data) {
-
 		final String digits = "0123456789abcdef";
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 
 		for (int i = 0; i != data.length; i++) {
 			int v = data[i] & 0xff;
@@ -535,7 +517,7 @@ public final class EncryptionUtil {
 	}
 
 	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key, byte[] initVector)
-			throws DataLengthException, IllegalStateException, InvalidCipherTextException {
+			throws InvalidCipherTextException {
 
 		// set up engine, block cipher mode and padding
 		AESEngine aesEngine = new AESEngine();
@@ -564,54 +546,4 @@ public final class EncryptionUtil {
 		}
 		return sb.toString();
 	}
-
-	// private static byte[] processRSACiphering(boolean isEncrypting, byte[] data, CipherParameters key)
-	// throws InvalidCipherTextException {
-	//
-	// // set up engine and padding
-	// RSAEngine rsaEngine = new RSAEngine();
-	// AsymmetricBlockCipher cipher = new PKCS1Encoding(rsaEngine);
-	//
-	// // apply parameters
-	// cipher.init(isEncrypting, key);
-	//
-	// // process ciphering
-	// int position = 0;
-	// int inputBlockSize = cipher.getInputBlockSize();
-	// byte[] result = new byte[0];
-	// while (position < data.length) {
-	// if (position + inputBlockSize > data.length)
-	// inputBlockSize = data.length - position;
-	//
-	// byte[] hexEncodedCipher = cipher.processBlock(data, position, inputBlockSize);
-	// result = combine(result, hexEncodedCipher);
-	// position += cipher.getInputBlockSize();
-	// }
-	// return result;
-	// }
-
-	// private static RSADigestSigner setupSigner(boolean forSigning, byte[] data, CipherParameters key) {
-	//
-	// // set up digester / hash function (e.g. SHA-1)
-	// SHA1Digest digester = new SHA1Digest();
-	//
-	// // set up signature mode (e.g. RSA)
-	// RSADigestSigner signer = new RSADigestSigner(digester);
-	//
-	// // apply parameters
-	// signer.init(forSigning, key);
-	// signer.update(data, 0, data.length);
-	//
-	// return signer;
-	// }
-
-	// private static byte[] combine(byte[] one, byte[] two) {
-	//
-	// byte[] combined = new byte[one.length + two.length];
-	//
-	// System.arraycopy(one, 0, combined, 0, one.length);
-	// System.arraycopy(two, 0, combined, one.length, two.length);
-	//
-	// return combined;
-	// }
 }

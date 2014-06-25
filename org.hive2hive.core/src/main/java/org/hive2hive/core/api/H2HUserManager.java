@@ -178,30 +178,33 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	private void notifyRegisterStatus(boolean success, IRegisterEvent event) {
 		Iterator<IUserEventListener> iterator = eventListeners.iterator();
 		while (iterator.hasNext()) {
-			if (success)
+			if (success) {
 				iterator.next().onRegisterSuccess(event);
-			else
+			} else {
 				iterator.next().onRegisterFailure(event);
+			}
 		}
 	}
 
 	private void notifyLoginStatus(boolean success, ILoginEvent event) {
 		Iterator<IUserEventListener> iterator = eventListeners.iterator();
 		while (iterator.hasNext()) {
-			if (success)
+			if (success) {
 				iterator.next().onLoginSuccess(event);
-			else
+			} else {
 				iterator.next().onLoginFailure(event);
+			}
 		}
 	}
 
 	private void notifyLogoutStatus(boolean success, ILogoutEvent event) {
 		Iterator<IUserEventListener> iterator = eventListeners.iterator();
 		while (iterator.hasNext()) {
-			if (success)
+			if (success) {
 				iterator.next().onLogoutSuccess(event);
-			else
+			} else {
 				iterator.next().onLogoutFailure(event);
+			}
 		}
 	}
 }

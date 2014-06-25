@@ -90,8 +90,9 @@ public class FolderIndex extends Index {
 	 */
 	public void addChild(Index child) {
 		// only add once
-		if (getChildByName(child.getName()) == null)
+		if (getChildByName(child.getName()) == null) {
 			children.add(child);
+		}
 	}
 
 	/**
@@ -132,9 +133,9 @@ public class FolderIndex extends Index {
 	 *            null.
 	 */
 	public void share(KeyPair protectionKeys) throws IllegalStateException {
-		if (isRoot())
+		if (isRoot()) {
 			throw new IllegalStateException("Root node can't be shared.");
-		else if (isSharedOrHasSharedChildren()) {
+		} else if (isSharedOrHasSharedChildren()) {
 			throw new IllegalStateException("This folder or any child is already shared");
 		}
 
@@ -195,8 +196,9 @@ public class FolderIndex extends Index {
 	 */
 	public Set<UserPermission> getCalculatedUserPermissions() {
 		// if there is a parent and no user permissions, ask parent
-		if (parent != null && userPermissions.isEmpty())
+		if (parent != null && userPermissions.isEmpty()) {
 			return parent.getCalculatedUserPermissions();
+		}
 
 		// if there is no parent or user permission list is not empty
 		return userPermissions;
@@ -211,8 +213,9 @@ public class FolderIndex extends Index {
 		}
 
 		// combine with parent user list (recursion)
-		if (parent != null)
+		if (parent != null) {
 			users.addAll(parent.getCalculatedUserList());
+		}
 
 		return users;
 	}
