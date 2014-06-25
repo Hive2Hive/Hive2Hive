@@ -117,27 +117,37 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 	private void updateLocations() {
 		isUpdated = true;
 
-		Locations updatedLocations = new Locations(context.consumeUserLocations().getUserId());
-		updatedLocations.setBasedOnKey(context.consumeUserLocations().getBasedOnKey());
-		updatedLocations.setVersionKey(context.consumeUserLocations().getVersionKey());
+		Locations oldLocations = context.consumeUserLocations();
+		Locations updatedLocations;
+		if (oldLocations == null) {
+			// TODO check if based-on key can be omitted!
+			updatedLocations = new Locations(networkManager.getUserId());
+		} else {
+			updatedLocations = new Locations(oldLocations.getUserId());
+			updatedLocations.setBasedOnKey(oldLocations.getBasedOnKey());
+			updatedLocations.setVersionKey(oldLocations.getVersionKey());
+		}
 
-		// add addresses that responded and self
+		// add addresses that responded
 		for (PeerAddress address : responses.keySet()) {
 			if (responses.get(address)) {
 				updatedLocations.addPeerAddress(address);
 			}
 		}
+
+		// add self
 		updatedLocations.addPeerAddress(networkManager.getConnection().getPeer().getPeerAddress());
+
+		// update context for future use
 		context.provideUserLocations(updatedLocations);
 
 		// evaluate if initial
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
-
 		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
 				networkManager.getConnection().getPeer().getPeerAddress())) {
-			context.setIsInitial(true);
+			context.setIsMaster(true);
 		} else {
-			context.setIsInitial(false);
+			context.setIsMaster(false);
 		}
 	}
 

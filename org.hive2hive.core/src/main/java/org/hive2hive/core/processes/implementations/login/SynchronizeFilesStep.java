@@ -82,15 +82,15 @@ public class SynchronizeFilesStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		if (context.getIsInitial()) {
-			// if is initial, process the user profile queue
+		if (context.getIsMaster()) {
+			// if is master, process the user profile queue
 			logger.debug("Starting to process all user tasks.");
 			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}
 	}
 
-	private void synchronizeFiles(FileSynchronizer synchronizer) throws NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException {
+	private void synchronizeFiles(FileSynchronizer synchronizer) throws NoSessionException, InvalidProcessStateException,
+			NoPeerConnectionException {
 		/*
 		 * - add the uploadProcessNewFiles
 		 * - add the uploadProcessNewVersions
@@ -106,8 +106,8 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		// upload the locally added files
 		List<Path> toUploadNewFiles = synchronizer.getAddedLocally();
-		ProcessComponent addProcess = FileRecursionUtil.buildUploadProcess(toUploadNewFiles,
-				FileProcessAction.NEW_FILE, networkManager);
+		ProcessComponent addProcess = FileRecursionUtil.buildUploadProcess(toUploadNewFiles, FileProcessAction.NEW_FILE,
+				networkManager);
 		getParent().add(addProcess);
 
 		// upload the locally updated files
@@ -118,8 +118,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 
 		// remove files from the DHT that have been deleted locally
 		List<Index> toDeleteInDHT = synchronizer.getDeletedLocally();
-		ProcessComponent deletionProcess = FileRecursionUtil.buildDeletionProcessFromNodelist(toDeleteInDHT,
-				networkManager);
+		ProcessComponent deletionProcess = FileRecursionUtil.buildDeletionProcessFromNodelist(toDeleteInDHT, networkManager);
 		getParent().add(deletionProcess);
 
 		// delete the remotely deleted files (is done directly here)

@@ -15,7 +15,7 @@ public class LoginProcessContext implements IGetUserProfileContext, IGetUserLoca
 
 	private UserProfile profile;
 	private Locations locations;
-	private boolean isInitial;
+	private boolean isMaster;
 
 	public LoginProcessContext(UserCredentials credentials) {
 		this.credentials = credentials;
@@ -55,12 +55,12 @@ public class LoginProcessContext implements IGetUserProfileContext, IGetUserLoca
 		return locations;
 	}
 
-	public void setIsInitial(boolean isInitial) {
-		this.isInitial = isInitial;
+	public void setIsMaster(boolean isMaster) {
+		this.isMaster = isMaster;
 	}
 
-	public boolean getIsInitial() {
-		return isInitial;
+	public boolean getIsMaster() {
+		return isMaster;
 	}
 
 }

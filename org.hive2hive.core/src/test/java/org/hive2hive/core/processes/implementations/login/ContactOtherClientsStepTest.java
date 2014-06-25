@@ -209,7 +209,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	private Locations runProcessStep(Locations fakedLocations, final boolean isInitial)
+	private Locations runProcessStep(Locations fakedLocations, final boolean isMaster)
 			throws NoSessionException, NoPeerConnectionException {
 		// initialize the process and the one and only step to test
 
@@ -218,7 +218,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		ContactOtherClientsStep processStep = new ContactOtherClientsStep(context, network.get(0));
 		UseCaseTestUtil.executeProcess(processStep);
 
-		Assert.assertEquals(isInitial, context.getIsInitial());
+		Assert.assertEquals(isMaster, context.getIsMaster());
 		return context.consumeUserLocations();
 	}
 
