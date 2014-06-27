@@ -58,8 +58,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
-	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey,
-			MessageManager messageManager) {
+	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey, MessageManager messageManager) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
 		this.messageManager = messageManager;
@@ -115,8 +114,9 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			} else {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
-					logger.warn("Sending direct message failed. Using normal routed sending as fallback. Target key = '{}', Target address = '{}'.",
-									message.getTargetKey(), message.getTargetAddress());
+					logger.warn(
+							"Sending direct message failed. Using normal routed sending as fallback. Target key = '{}', Target address = '{}'.",
+							message.getTargetKey(), message.getTargetAddress());
 					// re-send the message (routed)
 					state = DeliveryState.RESEND_ROUTED;
 					latch.countDown();
@@ -146,16 +146,14 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 				if (responseObject == null) {
 					errorReason = "Returned object is null";
 				} else if (responseObject instanceof AcceptanceReply) {
-					AcceptanceReply reply = (AcceptanceReply) responseObject;
-					return reply;
+					return (AcceptanceReply) responseObject;
 				} else {
 					errorReason = "The returned object was not of type AcceptanceReply!";
 				}
 			} catch (Exception e) {
 				errorReason = "Exception occured while getting the object.";
 			}
-			logger.error("A failure while sending a message occured. Reason = '{}'.",
-					errorReason);
+			logger.error("A failure while sending a message occured. Reason = '{}'.", errorReason);
 			return AcceptanceReply.FAILURE;
 		} else {
 			logger.error("Future not successful. Reason = '{}'.", future.getFailedReason());

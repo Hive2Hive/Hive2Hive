@@ -151,17 +151,10 @@ public class Connection {
 	}
 
 	private boolean createPeer() {
-		int port = H2HConstants.H2H_PORT;
-		logger.debug("Start searching for a free port");
-		while (!NetworkUtils.isPortAvailable(port)) {
-			if (port > MAX_PORT) {
-				logger.error("Could not find any free port");
-				return false;
-			}
-
-			port++;
+		int port = searchFreePort();
+		if (port < 0) {
+			return false;
 		}
-		logger.debug("Found free port {}.", port);
 
 		// configure the thread handling internally, callback can be blocking
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
@@ -189,16 +182,17 @@ public class Connection {
 
 		return true;
 	}
-	
-		/**
+
+	/**
 	 * Create a local master peer. <b>Important:</b> This is only for testing purposes!
 	 * 
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
 	public boolean createLocalPeer() {
-		int port = H2HConstants.H2H_PORT;
-		while (NetworkUtils.isPortAvailable(port) == false)
-			port++;
+		int port = searchFreePort();
+		if (port < 0) {
+			return false;
+		}
 
 		// configure the thread handling internally, callback can be blocking
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
@@ -223,7 +217,7 @@ public class Connection {
 					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig).peerMap(peerMap)
 					.makeAndListen();
 		} catch (IOException e) {
-			logger.error("Exception while creating a peer: ", e);
+			logger.error("Exception while creating a local peer: ", e);
 			isConnected = false;
 			return false;
 		}
@@ -246,9 +240,10 @@ public class Connection {
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
 	public boolean createLocalPeerAndBootstrap(Peer masterPeer) {
-		int port = H2HConstants.H2H_PORT;
-		while (NetworkUtils.isPortAvailable(port) == false)
-			port++;
+		int port = searchFreePort();
+		if (port < 0) {
+			return false;
+		}
 
 		// configure the thread handling internally, callback can be blocking
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
@@ -273,7 +268,7 @@ public class Connection {
 					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
 					.masterPeer(masterPeer).peerMap(peerMap).makeAndListen();
 		} catch (IOException e) {
-			logger.error("Exception while creating a peer: ", e);
+			logger.error("Exception while creating a local peer: ", e);
 			return false;
 		}
 
@@ -296,6 +291,20 @@ public class Connection {
 			isConnected = false;
 			return false;
 		}
+	}
 
+	private int searchFreePort() {
+		int port = H2HConstants.H2H_PORT;
+		logger.debug("Start searching for a free port");
+		while (!NetworkUtils.isPortAvailable(port)) {
+			if (port > MAX_PORT) {
+				logger.error("Could not find any free port");
+				return -1;
+			}
+
+			port++;
+		}
+		logger.debug("Found free port {}.", port);
+		return port;
 	}
 }

@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.model.Chunk;
-import org.hive2hive.core.network.data.download.BaseDownloadTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

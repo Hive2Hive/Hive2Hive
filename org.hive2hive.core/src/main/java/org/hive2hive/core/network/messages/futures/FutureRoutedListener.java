@@ -52,8 +52,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	 * @param networkManager
 	 *            reference needed for re-sending)
 	 */
-	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey,
-			MessageManager messageManager) {
+	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey, MessageManager messageManager) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
 		this.messageManager = messageManager;
@@ -92,7 +91,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	@Override
 	public void operationComplete(FutureSend future) throws Exception {
 		AcceptanceReply reply = extractAcceptanceReply(future);
-		if (reply == AcceptanceReply.OK  || reply == AcceptanceReply.OK_PROVISIONAL) {
+		if (reply == AcceptanceReply.OK || reply == AcceptanceReply.OK_PROVISIONAL) {
 			// notify the listener about the success of sending the message
 			state = DeliveryState.SUCCESS;
 			latch.countDown();
@@ -134,14 +133,12 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 				if (firstReturnedObject == null) {
 					errorReason = "First returned object is null.";
 				} else if (firstReturnedObject instanceof AcceptanceReply) {
-					AcceptanceReply reply = (AcceptanceReply) firstReturnedObject;
-					return reply;
+					return (AcceptanceReply) firstReturnedObject;
 				} else {
 					errorReason = "The returned object was not of type AcceptanceReply!";
 				}
 			}
-			logger.error("A failure while sending a message occured. Reason = '{}'",
-					errorReason);
+			logger.error("A failure while sending a message occured. Reason = '{}'", errorReason);
 			return AcceptanceReply.FAILURE;
 		} else {
 			logger.error("Future not successful. Reason = '{}'.", future.getFailedReason());
