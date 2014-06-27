@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -41,7 +42,7 @@ public final class MessageManager implements IMessageManager {
 	private static final Logger logger = LoggerFactory.getLogger(MessageManager.class);
 
 	private final NetworkManager networkManager;
-	private final HashMap<String, IResponseCallBackHandler> callBackHandlers;
+	private final Map<String, IResponseCallBackHandler> callBackHandlers;
 
 	public MessageManager(NetworkManager networkManager) {
 		this.networkManager = networkManager;
@@ -65,9 +66,8 @@ public final class MessageManager implements IMessageManager {
 			return false;
 
 		// send message to the peer which is responsible for the given key
-		FutureSend futureSend = networkManager.getConnection().getPeer()
-				.send(Number160.createHash(message.getTargetKey())).setObject(encryptedMessage)
-				.setRequestP2PConfiguration(createSendingConfiguration()).start();
+		FutureSend futureSend = networkManager.getConnection().getPeer().send(Number160.createHash(message.getTargetKey()))
+				.setObject(encryptedMessage).setRequestP2PConfiguration(createSendingConfiguration()).start();
 
 		// attach a future listener to log, handle and notify events
 		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this);
@@ -75,11 +75,11 @@ public final class MessageManager implements IMessageManager {
 		boolean success = listener.await();
 
 		if (success) {
-			logger.debug("Message sent. Target key = '{}', Message ID = '{}'.",
-					message.getTargetKey(), message.getMessageID());
+			logger.debug("Message sent. Target key = '{}', Message ID = '{}'.", message.getTargetKey(),
+					message.getMessageID());
 		} else {
-			logger.error("Message could not be sent. Target key = '{}', Message ID = '{}'.",
-					message.getTargetKey(), message.getMessageID());
+			logger.error("Message could not be sent. Target key = '{}', Message ID = '{}'.", message.getTargetKey(),
+					message.getMessageID());
 		}
 		return success;
 	}
@@ -101,8 +101,8 @@ public final class MessageManager implements IMessageManager {
 			return false;
 
 		// send message directly to the peer with the given peer address
-		FutureDirect futureDirect = networkManager.getConnection().getPeer()
-				.sendDirect(message.getTargetAddress()).setObject(encryptedMessage).start();
+		FutureDirect futureDirect = networkManager.getConnection().getPeer().sendDirect(message.getTargetAddress())
+				.setObject(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
 		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this);
 		futureDirect.addListener(listener);
@@ -112,7 +112,8 @@ public final class MessageManager implements IMessageManager {
 			logger.debug("Message (direct) sent. Message ID = '{}', Target address = '{}', Sender address = '{}'.",
 					message.getMessageID(), message.getTargetAddress(), message.getSenderAddress());
 		} else {
-			logger.error("Message (direct) could not be sent. Message ID = '{}', Target address = '{}', Sender address = '{}'.",
+			logger.error(
+					"Message (direct) could not be sent. Message ID = '{}', Target address = '{}', Sender address = '{}'.",
 					message.getMessageID(), message.getTargetAddress(), message.getSenderAddress());
 		}
 		return success;
@@ -188,24 +189,22 @@ public final class MessageManager implements IMessageManager {
 		try {
 			// asymmetrically encrypt message
 			byte[] messageBytes = EncryptionUtil.serializeObject(message);
-			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes,
-					targetPublicKey, H2HConstants.KEYLENGTH_HYBRID_AES);
+			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes, targetPublicKey,
+					H2HConstants.KEYLENGTH_HYBRID_AES);
 
 			// create signature
 			try {
 				byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate());
 				encryptedMessage.setSignature(session.getUserId(), signature);
 			} catch (InvalidKeyException | SignatureException e1) {
-				logger.error("An exception occured while signing the message. The message will not be sent.",
-						e1);
+				logger.error("An exception occured while signing the message. The message will not be sent.", e1);
 				return null;
 			}
 
 			return encryptedMessage;
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | IOException e) {
-			logger.error("An exception occured while encrypting the message. The message will not be sent.",
-					e);
+		} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
+				| IllegalBlockSizeException | BadPaddingException | IOException e) {
+			logger.error("An exception occured while encrypting the message. The message will not be sent.", e);
 			return null;
 		}
 	}

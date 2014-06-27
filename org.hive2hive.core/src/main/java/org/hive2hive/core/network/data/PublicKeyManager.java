@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PublicKeyManager {
 
-	private final static Logger logger = LoggerFactory.getLogger(PublicKeyManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(PublicKeyManager.class);
 
 	private final String userId;
 	private final KeyPair usersKeyPair;
@@ -90,20 +90,17 @@ public class PublicKeyManager {
 			// check the cache
 			return publicKeyCache.get(userId);
 
-		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(
-				H2HConstants.USER_PUBLIC_KEY);
+		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY);
 		NetworkContent content = dataManager.get(parameters);
 		return evaluateResult(content, userId);
 	}
 
-	private PublicKey evaluateResult(NetworkContent content, String requestingUserId)
-			throws GetFailedException {
+	private PublicKey evaluateResult(NetworkContent content, String requestingUserId) throws GetFailedException {
 		if (content == null) {
 			logger.warn("Did not find the public key of user '{}'.", requestingUserId);
 			throw new GetFailedException("No public key found.");
 		} else if (!(content instanceof UserPublicKey)) {
-			logger.error(
-					"The received content is not a user public key. Did not find the public key of user '{}'.",
+			logger.error("The received content is not a user public key. Did not find the public key of user '{}'.",
 					requestingUserId);
 			throw new GetFailedException("Received unkown content.");
 		} else {

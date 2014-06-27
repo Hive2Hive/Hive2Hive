@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ChangeProtectionKeysStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(ChangeProtectionKeysStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(ChangeProtectionKeysStep.class);
 
 	private final BasePKUpdateContext context;
 	private final IDataManager dataManager;
@@ -34,9 +34,8 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		parameters = new Parameters().setLocationKey(context.getLocationKey())
-				.setContentKey(context.getContentKey()).setVersionKey(context.getVersionKey())
-				.setProtectionKeys(context.consumeOldProtectionKeys())
+		parameters = new Parameters().setLocationKey(context.getLocationKey()).setContentKey(context.getContentKey())
+				.setVersionKey(context.getVersionKey()).setProtectionKeys(context.consumeOldProtectionKeys())
 				.setNewProtectionKeys(context.consumeNewProtectionKeys()).setTTL(context.getTTL())
 				.setHash(context.getHash());
 
@@ -64,11 +63,9 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 
 		boolean success = dataManager.changeProtectionKey(rollbackParameters);
 		if (success) {
-			logger.debug("Rollback of change protection key succeeded. '{}'",
-					parameters.toString());
+			logger.debug("Rollback of change protection key succeeded. '{}'", parameters.toString());
 		} else {
-			logger.warn("Rollback of change protection key failed. Remove failed. '{}'",
-					parameters.toString());
+			logger.warn("Rollback of change protection key failed. Remove failed. '{}'", parameters.toString());
 		}
 	}
 }

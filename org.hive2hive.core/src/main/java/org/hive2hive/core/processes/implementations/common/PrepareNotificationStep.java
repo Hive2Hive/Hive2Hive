@@ -2,6 +2,7 @@ package org.hive2hive.core.processes.implementations.common;
 
 import java.security.PublicKey;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
@@ -31,7 +32,7 @@ public class PrepareNotificationStep extends ProcessStep {
 		Index index = context.consumeIndex();
 
 		// get the users belonging to that index
-		HashSet<String> users = new HashSet<String>();
+		Set<String> users = new HashSet<String>();
 		users.addAll(index.getCalculatedUserList());
 		context.provideUsersToNotify(users);
 

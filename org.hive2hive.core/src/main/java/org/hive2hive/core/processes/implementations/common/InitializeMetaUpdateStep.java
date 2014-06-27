@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InitializeMetaUpdateStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(InitializeMetaUpdateStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitializeMetaUpdateStep.class);
 
 	private final IInitializeMetaUpdateContext context;
 	private final IDataManager dataManager;

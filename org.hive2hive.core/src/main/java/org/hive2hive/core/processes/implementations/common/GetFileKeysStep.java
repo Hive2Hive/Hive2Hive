@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GetFileKeysStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(GetFileKeysStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(GetFileKeysStep.class);
 
 	private final IGetFileKeysContext context;
 	private final H2HSession session;

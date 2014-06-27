@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class LocationsCreationStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(LocationsCreationStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(LocationsCreationStep.class);
 
 	private final RegisterProcessContext context;
 

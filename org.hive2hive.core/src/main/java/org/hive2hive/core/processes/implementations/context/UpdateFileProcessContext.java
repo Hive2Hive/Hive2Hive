@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +40,7 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	private MetaFile metaFile;
 	private byte[] hash;
 	private Index index;
-	private HashSet<String> users;
+	private Set<String> users;
 	private UploadNotificationMessageFactory messageFactory;
 
 	public UpdateFileProcessContext(File file, H2HSession session) {
@@ -163,7 +162,7 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	}
 
 	@Override
-	public void provideUsersToNotify(HashSet<String> users) {
+	public void provideUsersToNotify(Set<String> users) {
 		this.users = users;
 	}
 

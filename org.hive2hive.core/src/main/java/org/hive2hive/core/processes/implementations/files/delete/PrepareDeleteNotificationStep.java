@@ -2,6 +2,7 @@ package org.hive2hive.core.processes.implementations.files.delete;
 
 import java.security.PublicKey;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
@@ -29,10 +30,10 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 		PublicKey parentKey = fileNode.getParent().getFilePublicKey();
 
 		// provide the message factory
-		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), parentKey,
-				fileNode.getName()));
+		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), parentKey, fileNode
+				.getName()));
 
-		HashSet<String> users = new HashSet<String>();
+		Set<String> users = new HashSet<String>();
 		users.addAll(fileNode.getCalculatedUserList());
 
 		// provide the user list

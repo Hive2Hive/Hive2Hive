@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.implementations.login;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,8 +35,8 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 	private static final Logger logger = LoggerFactory.getLogger(ContactOtherClientsStep.class);
 
-	private final ConcurrentHashMap<PeerAddress, String> evidences = new ConcurrentHashMap<PeerAddress, String>();
-	private final ConcurrentHashMap<PeerAddress, Boolean> responses = new ConcurrentHashMap<PeerAddress, Boolean>();
+	private final Map<PeerAddress, String> evidences = new ConcurrentHashMap<PeerAddress, String>();
+	private final Map<PeerAddress, Boolean> responses = new ConcurrentHashMap<PeerAddress, Boolean>();
 	private CountDownLatch waitForResponses;
 	private boolean isUpdated = false;
 

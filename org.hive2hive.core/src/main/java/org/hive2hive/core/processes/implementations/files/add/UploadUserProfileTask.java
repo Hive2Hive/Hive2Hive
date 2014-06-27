@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 public class UploadUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -4568985873058024202L;
-	
-	private final static Logger logger = LoggerFactory.getLogger(UploadUserProfileTask.class);
+	private static final Logger logger = LoggerFactory.getLogger(UploadUserProfileTask.class);
+
 	private final Index index;
 	private final PublicKey parentKey;
 
@@ -89,8 +89,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 
 	private void startDownload() {
 		try {
-			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-					index.getFilePublicKey(), networkManager);
+			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(index.getFilePublicKey(),
+					networkManager);
 			logger.debug("Start downloading the file '{}'.", index.getFullPath());
 			process.start();
 		} catch (NoSessionException | InvalidProcessStateException e) {
@@ -102,8 +102,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 		try {
 			notifyOtherClients(new UploadNotificationMessageFactory(index, parentKey));
 			logger.debug("Notified other clients that a file has been updated by another user.");
-		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
-				| NoSessionException e) {
+		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the new file.", e);
 		}
 	}

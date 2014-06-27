@@ -26,16 +26,16 @@ import org.slf4j.LoggerFactory;
 public class MoveUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = 2182278170922295626L;
-	
-	private final static Logger logger = LoggerFactory.getLogger(MoveUserProfileTask.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(MoveUserProfileTask.class);
 
 	private final String sourceFileName;
 	private final String destFileName;
 	private final PublicKey oldParentKey;
 	private final PublicKey newParentKey;
 
-	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName,
-			PublicKey oldParentKey, PublicKey newParentKey) {
+	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName, PublicKey oldParentKey,
+			PublicKey newParentKey) {
 		super(sender);
 		this.sourceFileName = sourceFileName;
 		this.destFileName = destFileName;

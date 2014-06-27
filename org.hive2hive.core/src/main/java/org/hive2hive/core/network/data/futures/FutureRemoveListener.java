@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 
-	private final static Logger logger = LoggerFactory.getLogger(FutureRemoveListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FutureRemoveListener.class);
 
 	// used to count remove retries
 	private int removeTries = 0;
@@ -80,16 +80,15 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	 */
 	private void retryRemove() {
 		if (removeTries++ < H2HConstants.REMOVE_RETRIES) {
-			logger.warn("Remove verification failed. Data is not null. Try #{}. '{}'",
-					removeTries, parameters.toString());
+			logger.warn("Remove verification failed. Data is not null. Try #{}. '{}'", removeTries, parameters.toString());
 			if (!versionRemove) {
 				dataManager.removeUnblocked(parameters).addListener(this);
 			} else {
 				dataManager.removeVersionUnblocked(parameters).addListener(this);
 			}
 		} else {
-			logger.error("Remove verification failed. Data is not null after {} tries. '{}'",
-					removeTries - 1, parameters.toString());
+			logger.error("Remove verification failed. Data is not null after {} tries. '{}'", removeTries - 1,
+					parameters.toString());
 			success = false;
 			latch.countDown();
 		}

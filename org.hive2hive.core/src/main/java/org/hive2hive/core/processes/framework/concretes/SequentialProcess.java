@@ -107,7 +107,6 @@ public class SequentialProcess extends Process {
 	}
 
 	private void awaitAsync() throws ProcessExecutionException {
-
 		if (asyncHandles.isEmpty())
 			return;
 
@@ -132,7 +131,7 @@ public class SequentialProcess extends Process {
 				try {
 					checkAsyncComponentsForFail(asyncHandles);
 				} catch (ProcessExecutionException e) {
-					e.printStackTrace();
+					logger.error("Cannot await until the process finished", e);
 					exception = e;
 					latch.countDown();
 					return;

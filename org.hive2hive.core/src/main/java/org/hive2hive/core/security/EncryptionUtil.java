@@ -455,8 +455,7 @@ public final class EncryptionUtil {
 					baos.close();
 				}
 			} catch (IOException e) {
-				logger.error("Exception while closing serialization process.");
-				throw e;
+				logger.error("Exception while closing serialization process.", e);
 			}
 		}
 		return result;
@@ -482,8 +481,7 @@ public final class EncryptionUtil {
 					bais.close();
 				}
 			} catch (IOException e) {
-				logger.error("Exception while closing deserialization process.");
-				throw e;
+				logger.error("Exception while closing deserialization process.", e);
 			}
 		}
 

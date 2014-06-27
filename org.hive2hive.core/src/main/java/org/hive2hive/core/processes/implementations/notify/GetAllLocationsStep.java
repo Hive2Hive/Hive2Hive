@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 // TODO: do parallel for faster processing
 public class GetAllLocationsStep extends BaseGetProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(GetAllLocationsStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(GetAllLocationsStep.class);
 	private final NotifyProcessContext context;
 
 	public GetAllLocationsStep(NotifyProcessContext context, IDataManager dataManager) {

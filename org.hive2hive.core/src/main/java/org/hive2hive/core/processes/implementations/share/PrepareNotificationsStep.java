@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PrepareNotificationsStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(PrepareNotificationsStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(PrepareNotificationsStep.class);
 
 	private final ShareProcessContext context;
 	private final String userId;
@@ -50,7 +50,8 @@ public class PrepareNotificationsStep extends ProcessStep {
 		// notify all users of the shared node
 		Set<String> friends = new HashSet<String>();
 		friends.addAll(folderIndex.getCalculatedUserList());
-		friends.remove(userId); // skip to notify myself
+		// skip to notify myself
+		friends.remove(userId);
 
 		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode,
 				context.getUserPermission());

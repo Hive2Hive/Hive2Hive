@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GetLocationsList implements Runnable {
 
-	private final static Logger logger = LoggerFactory.getLogger(GetLocationsList.class);
+	private static final Logger logger = LoggerFactory.getLogger(GetLocationsList.class);
 
 	private final DownloadTaskDirect task;
 	private final IDataManager dataManager;
@@ -52,8 +52,7 @@ public class GetLocationsList implements Runnable {
 			return;
 		}
 
-		logger.debug("Got {} candidate locations to download {}", context.getLocations().size(),
-				task.getDestinationName());
+		logger.debug("Got {} candidate locations to download {}", context.getLocations().size(), task.getDestinationName());
 		task.provideLocations(context.getLocations());
 	}
 
@@ -63,7 +62,7 @@ public class GetLocationsList implements Runnable {
 	 * @author Nico
 	 * 
 	 */
-	private class ProvideUserLocationsContext implements IGetUserLocationsContext{
+	private class ProvideUserLocationsContext implements IGetUserLocationsContext {
 
 		private String userId;
 		private Set<Locations> locations;
@@ -85,7 +84,7 @@ public class GetLocationsList implements Runnable {
 		public String consumeUserId() {
 			return userId;
 		}
-		
+
 		public void setUserId(String userId) {
 			this.userId = userId;
 		}

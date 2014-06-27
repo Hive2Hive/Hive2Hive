@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CreateNewVersionStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(CreateNewVersionStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(CreateNewVersionStep.class);
 
 	private final UpdateFileProcessContext context;
 

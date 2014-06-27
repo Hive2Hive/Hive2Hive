@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileUtil {
 
-	private final static Logger logger = LoggerFactory.getLogger(FileUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
 	private FileUtil() {
 		// only static methods
@@ -37,8 +37,8 @@ public class FileUtil {
 	 * 
 	 * @throws IOException
 	 */
-	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager,
-			DownloadManager downloadManager) throws IOException {
+	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager, DownloadManager downloadManager)
+			throws IOException {
 		assert root != null;
 
 		// generate the new persistent meta data
@@ -61,8 +61,7 @@ public class FileUtil {
 		}
 
 		byte[] encoded = EncryptionUtil.serializeObject(metaData);
-		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(),
-				encoded);
+		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(), encoded);
 	}
 
 	/**
@@ -74,8 +73,7 @@ public class FileUtil {
 	 */
 	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException {
 		try {
-			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(),
-					H2HConstants.META_FILE_NAME).toFile());
+			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
 			return (PersistentMetaData) EncryptionUtil.deserializeObject(content);
 		} catch (Exception e) {
 			return new PersistentMetaData();
@@ -141,8 +139,8 @@ public class FileUtil {
 	 * @param fileManager the {@link FileManager} of the user
 	 * @throws IOException when moving went wrong
 	 */
-	public static void moveFile(Path root, String sourceName, String destName, Index oldParent,
-			Index newParent) throws IOException {
+	public static void moveFile(Path root, String sourceName, String destName, Index oldParent, Index newParent)
+			throws IOException {
 		// find the file of this user on the disc
 		File oldParentFile = FileUtil.getPath(root, oldParent).toFile();
 		File toMoveSource = new File(oldParentFile, sourceName);
@@ -156,8 +154,7 @@ public class FileUtil {
 		File toMoveDest = new File(newParentFile, destName);
 
 		if (toMoveDest.exists()) {
-			logger.warn("Overwriting '{}' because file has been moved remotely.",
-					toMoveDest.getAbsolutePath());
+			logger.warn("Overwriting '{}' because file has been moved remotely.", toMoveDest.getAbsolutePath());
 		}
 
 		// move the file

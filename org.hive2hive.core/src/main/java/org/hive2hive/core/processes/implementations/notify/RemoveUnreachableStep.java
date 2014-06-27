@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RemoveUnreachableStep extends BasePutProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(RemoveUnreachableStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUnreachableStep.class);
 
 	private final NotifyProcessContext context;
 	private final NetworkManager networkManager;

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UserProfileManager {
 
-	private final static Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
 	private static final long MAX_MODIFICATION_TIME = 1000;
 
 	private final UserProfileHolder profileHolder;

@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.implementations.context;
 
 import java.io.File;
 import java.security.KeyPair;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
@@ -22,12 +21,12 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 	private MetaFile metaFile;
 	private Index index;
 	private DeleteNotifyMessageFactory deleteNotifyMessageFactory;
-	private HashSet<String> users;
+	private Set<String> users;
 
 	public DeleteFileProcessContext(File file) {
 		this.file = file;
 	}
-	
+
 	public File consumeFile() {
 		return file;
 	}
@@ -71,7 +70,7 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 		this.deleteNotifyMessageFactory = deleteNotifyMessageFactory;
 	}
 
-	public void provideUsersToNotify(HashSet<String> users) {
+	public void provideUsersToNotify(Set<String> users) {
 		this.users = users;
 	}
 

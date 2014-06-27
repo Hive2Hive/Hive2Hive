@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PutSingleChunkStep extends BasePutProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(PutSingleChunkStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(PutSingleChunkStep.class);
 
 	private final int index;
 	private final IPutSingleChunkContext context;

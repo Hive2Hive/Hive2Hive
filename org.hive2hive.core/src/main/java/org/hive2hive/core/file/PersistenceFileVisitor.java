@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -19,7 +20,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  */
 public class PersistenceFileVisitor extends SimpleFileVisitor<Path> {
 
-	private final HashMap<String, byte[]> fileTree;
+	private final Map<String, byte[]> fileTree;
 	private final Path root;
 	private final Path configFilePath;
 
@@ -55,12 +56,12 @@ public class PersistenceFileVisitor extends SimpleFileVisitor<Path> {
 	private void addToMap(Path path) throws IOException {
 		// add to fileTree
 		Path relativePath = root.relativize(path);
-		
+
 		byte[] md5 = EncryptionUtil.generateMD5Hash(path.toFile());
 		fileTree.put(relativePath.toString(), md5);
 	}
 
-	public HashMap<String, byte[]> getFileTree() {
+	public Map<String, byte[]> getFileTree() {
 		return fileTree;
 	}
 }

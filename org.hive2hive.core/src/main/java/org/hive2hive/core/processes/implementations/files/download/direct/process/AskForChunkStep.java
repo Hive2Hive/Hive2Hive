@@ -25,15 +25,15 @@ import org.slf4j.LoggerFactory;
 
 public class AskForChunkStep extends BaseDirectMessageProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(AskForChunkStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(AskForChunkStep.class);
 
 	private final DownloadDirectContext context;
 	private final PublicKeyManager keyManager;
 	private final IFileConfiguration config;
 	private final CountDownLatch responseLatch;
 
-	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager,
-			PublicKeyManager keyManager, IFileConfiguration config) {
+	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager, PublicKeyManager keyManager,
+			IFileConfiguration config) {
 		super(messageManager);
 		this.context = context;
 		this.keyManager = keyManager;
@@ -56,8 +56,8 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		}
 
 		MetaChunk metaChunk = context.getMetaChunk();
-		RequestChunkMessage request = new RequestChunkMessage(context.getSelectedPeer(), context.getTask()
-				.getFileKey(), metaChunk.getIndex(), config.getChunkSize(), metaChunk.getChunkHash());
+		RequestChunkMessage request = new RequestChunkMessage(context.getSelectedPeer(), context.getTask().getFileKey(),
+				metaChunk.getIndex(), config.getChunkSize(), metaChunk.getChunkHash());
 		try {
 			logger.debug("Requesting chunk {} from peer {}", metaChunk.getIndex(), context.getSelectedPeer());
 			sendDirect(request, receiverPublicKey);
@@ -87,11 +87,10 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		// verify the md5 hash
 		byte[] respondedHash = EncryptionUtil.generateMD5Hash(chunk.getData());
 		if (H2HDefaultEncryption.compareMD5(respondedHash, metaChunk.getChunkHash())) {
-			logger.debug("Peer {} sent a valid content for chunk {}. MD5 verified.",
-					context.getSelectedPeer(), metaChunk.getIndex());
-		} else {
-			logger.error("Peer {} sent an invalid content for chunk {}.", context.getSelectedPeer(),
+			logger.debug("Peer {} sent a valid content for chunk {}. MD5 verified.", context.getSelectedPeer(),
 					metaChunk.getIndex());
+		} else {
+			logger.error("Peer {} sent an invalid content for chunk {}.", context.getSelectedPeer(), metaChunk.getIndex());
 			rerunProcess();
 			return;
 		}
@@ -122,8 +121,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		context.getTask().removeAddress(context.getSelectedPeer());
 
 		// select another peer
-		logger.debug("Re-run the process: select another peer and ask him for chunk {}", context
-				.getMetaChunk().getIndex());
+		logger.debug("Re-run the process: select another peer and ask him for chunk {}", context.getMetaChunk().getIndex());
 		getParent().add(new SelectPeerForDownloadStep(context));
 		getParent().add(new AskForChunkStep(context, messageManager, keyManager, config));
 

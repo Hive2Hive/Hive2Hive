@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class RelinkUserProfileStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(RelinkUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(RelinkUserProfileStep.class);
 
 	private final MoveFileProcessContext context;
 	private final NetworkManager networkManager;

@@ -24,9 +24,8 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
  */
 public final class NodeMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem CreateNetworkMenuItem;
-	public H2HConsoleMenuItem ConnectToExistingNetworkItem;
-
+	private H2HConsoleMenuItem createNetworkMenuItem;
+	private H2HConsoleMenuItem connectToExistingNetworkItem;
 	private IH2HNode node;
 
 	private BigInteger maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
@@ -40,7 +39,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		CreateNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
+		createNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
 
 				buildNode(NetworkConfiguration.create(askNodeID()));
@@ -48,7 +47,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 			}
 		};
 
-		ConnectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
+		connectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
 
 				String nodeID = askNodeID();
@@ -112,8 +111,8 @@ public final class NodeMenu extends H2HConsoleMenu {
 			});
 		}
 
-		add(CreateNetworkMenuItem);
-		add(ConnectToExistingNetworkItem);
+		add(createNetworkMenuItem);
+		add(connectToExistingNetworkItem);
 	}
 
 	@Override
@@ -132,8 +131,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 	public boolean createNetwork() {
 
 		if (getNode() == null) {
-			H2HConsoleMenuItem
-					.printPrecondition("You are not connected to a network. Connect to a network first.");
+			H2HConsoleMenuItem.printPrecondition("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
 		}
 		return getNode() != null;

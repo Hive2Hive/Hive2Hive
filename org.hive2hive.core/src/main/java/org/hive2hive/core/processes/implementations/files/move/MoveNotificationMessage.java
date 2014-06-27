@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 public class MoveNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 2855700202146422905L;
-	
-	private final static Logger logger = LoggerFactory.getLogger(MoveNotificationMessage.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(MoveNotificationMessage.class);
 	private final String sourceFileName;
 	private final String destFileName;
 	private final PublicKey oldParentKey;

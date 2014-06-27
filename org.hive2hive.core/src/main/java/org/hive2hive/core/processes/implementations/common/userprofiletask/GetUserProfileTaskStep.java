@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GetUserProfileTaskStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(GetUserProfileTaskStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(GetUserProfileTaskStep.class);
 
 	private final IUserProfileTaskContext context;
 	private String userId;

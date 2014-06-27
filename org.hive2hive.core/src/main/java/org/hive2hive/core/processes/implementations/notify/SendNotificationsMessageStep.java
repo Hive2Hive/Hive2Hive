@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(SendNotificationsMessageStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(SendNotificationsMessageStep.class);
 	private final NotifyProcessContext context;
 	private final NetworkManager networkManager;
 	private final Set<PeerAddress> unreachablePeers;

@@ -1,6 +1,7 @@
 package org.hive2hive.client.console;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Scanner;
  */
 public abstract class ConsoleMenu {
 
-	private final ArrayList<ConsoleMenuItem> items;
+	private final List<ConsoleMenuItem> items;
 
 	private static final String EXIT_TOKEN = "Q";
 	private boolean exited;

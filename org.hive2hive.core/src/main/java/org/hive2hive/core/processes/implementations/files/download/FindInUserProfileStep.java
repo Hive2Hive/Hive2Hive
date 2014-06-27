@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class FindInUserProfileStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(FindInUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(FindInUserProfileStep.class);
 
 	private final DownloadFileContext context;
 	private final NetworkManager networkManager;
@@ -56,8 +56,7 @@ public class FindInUserProfileStep extends ProcessStep {
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaFileStep(context, dataManager));
 				PeerAddress ownPeerAddress = networkManager.getConnection().getPeer().getPeerAddress();
-				getParent().add(
-						new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress));
+				getParent().add(new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress));
 			} catch (NoPeerConnectionException | NoSessionException e) {
 				throw new ProcessExecutionException(e);
 			}

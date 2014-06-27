@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DownloadChunkRunnableDirect implements Runnable {
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadChunkRunnableDirect.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadChunkRunnableDirect.class);
 
 	private final DownloadTaskDirect task;
 	private final MetaChunk metaChunk;
@@ -31,8 +31,8 @@ public class DownloadChunkRunnableDirect implements Runnable {
 	private final PublicKeyManager keyManager;
 	private final IFileConfiguration config;
 
-	public DownloadChunkRunnableDirect(DownloadTaskDirect task, MetaChunk chunk,
-			IMessageManager messageManager, PublicKeyManager keyManager, IFileConfiguration config) {
+	public DownloadChunkRunnableDirect(DownloadTaskDirect task, MetaChunk chunk, IMessageManager messageManager,
+			PublicKeyManager keyManager, IFileConfiguration config) {
 		this.task = task;
 		this.metaChunk = chunk;
 		this.keyManager = keyManager;
@@ -40,15 +40,13 @@ public class DownloadChunkRunnableDirect implements Runnable {
 		this.config = config;
 
 		// create temporary file
-		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-"
-				+ chunk.getIndex());
+		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-" + chunk.getIndex());
 	}
 
 	@Override
 	public void run() {
 		if (task.isAborted()) {
-			logger.warn("Abort scheduled download of chunk {} of file {}", metaChunk.getIndex(),
-					task.getDestinationName());
+			logger.warn("Abort scheduled download of chunk {} of file {}", metaChunk.getIndex(), task.getDestinationName());
 			return;
 		} else if (Thread.currentThread().isInterrupted()) {
 			logger.warn("Not terminate the download because thread is interrupted");

@@ -23,12 +23,11 @@ import org.slf4j.LoggerFactory;
 // TODO get the keys in parallel
 public class GetPublicKeysStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(GetPublicKeysStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(GetPublicKeysStep.class);
 	private final NotifyProcessContext context;
 	private final PublicKeyManager keyManager;
 
-	public GetPublicKeysStep(NotifyProcessContext context, PublicKeyManager keyManager)
-			throws NoPeerConnectionException {
+	public GetPublicKeysStep(NotifyProcessContext context, PublicKeyManager keyManager) throws NoPeerConnectionException {
 		this.context = context;
 		this.keyManager = keyManager;
 	}

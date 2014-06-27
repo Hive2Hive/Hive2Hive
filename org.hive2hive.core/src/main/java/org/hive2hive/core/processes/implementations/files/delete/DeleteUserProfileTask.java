@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DeleteUserProfileTask extends UserProfileTask {
 
-	private final static Logger logger = LoggerFactory.getLogger(DeleteUserProfileTask.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeleteUserProfileTask.class);
 
 	private static final long serialVersionUID = 4580106953301162049L;
 	private final PublicKey fileKey;
@@ -69,8 +69,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * @param profileManager
 	 * @return the removed node
 	 */
-	private Index updateUserProfile(UserProfileManager profileManager) throws GetFailedException,
-			PutFailedException {
+	private Index updateUserProfile(UserProfileManager profileManager) throws GetFailedException, PutFailedException {
 		String randomPID = UUID.randomUUID().toString();
 
 		UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
@@ -131,12 +130,11 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * @throws IllegalArgumentException
 	 * @throws NoSessionException
 	 */
-	private void startNotification(Index toDelete) throws IllegalArgumentException,
-			NoPeerConnectionException, InvalidProcessStateException, NoSessionException {
+	private void startNotification(Index toDelete) throws IllegalArgumentException, NoPeerConnectionException,
+			InvalidProcessStateException, NoSessionException {
 		PublicKey parentFileKey = toDelete.getParent().getFileKeys().getPublic();
 		String fileName = toDelete.getName();
-		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(fileKey, parentFileKey,
-				fileName);
+		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(fileKey, parentFileKey, fileName);
 		notifyOtherClients(messageFactory);
 		logger.debug("Started to notify other clients about the file having been deleted by another user.");
 	}

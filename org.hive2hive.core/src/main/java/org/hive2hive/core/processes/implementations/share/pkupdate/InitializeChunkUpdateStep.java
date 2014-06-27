@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InitializeChunkUpdateStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(InitializeChunkUpdateStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitializeChunkUpdateStep.class);
 
 	private final MetaDocumentPKUpdateContext context;
 	private final IDataManager dataManager;
@@ -42,14 +42,13 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 		}
 
 		MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
-		logger.debug("Initialize updating all chunks for file '{}' in a shared folder.",
-				context.getFileName());
+		logger.debug("Initialize updating all chunks for file '{}' in a shared folder.", context.getFileName());
 		int counter = 0;
 		for (FileVersion version : metaFileSmall.getVersions()) {
 			for (MetaChunk metaChunk : version.getMetaChunks()) {
 				// each chunk gets an own context
-				ChunkPKUpdateContext chunkContext = new ChunkPKUpdateContext(
-						context.consumeOldProtectionKeys(), context.consumeNewProtectionKeys(), metaChunk);
+				ChunkPKUpdateContext chunkContext = new ChunkPKUpdateContext(context.consumeOldProtectionKeys(),
+						context.consumeNewProtectionKeys(), metaChunk);
 
 				// create the step and wrap it to run asynchronous, attach it to the parent process
 				ChangeProtectionKeysStep changeStep = new ChangeProtectionKeysStep(chunkContext, dataManager);
@@ -58,7 +57,6 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 			}
 		}
 
-		logger.debug("{} chunks of file '{}' need to update their protection keys.", counter,
-				context.getFileName());
+		logger.debug("{} chunks of file '{}' need to update their protection keys.", counter, context.getFileName());
 	}
 }

@@ -15,7 +15,7 @@ import org.hive2hive.core.security.UserCredentials;
  */
 public final class UserMenu extends H2HConsoleMenu {
 
-	private H2HConsoleMenuItem CreateUserCredentials;
+	private H2HConsoleMenuItem createUserCredentials;
 	private UserCredentials userCredentials;
 
 	public UserMenu(MenuContainer menus) {
@@ -24,7 +24,7 @@ public final class UserMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		CreateUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
+		createUserCredentials = new H2HConsoleMenuItem("Create User Credentials") {
 			protected void execute() throws Exception {
 				userCredentials = new UserCredentials(askUsedId(), askPassword(), askPin());
 				exit();
@@ -34,7 +34,7 @@ public final class UserMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		add(CreateUserCredentials);
+		add(createUserCredentials);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public final class UserMenu extends H2HConsoleMenu {
 
 	public boolean createUserCredentials() {
 		while (getUserCredentials() == null) {
-			CreateUserCredentials.invoke();
+			createUserCredentials.invoke();
 		}
 		// at this point, credentials have always been specified
 		return true;

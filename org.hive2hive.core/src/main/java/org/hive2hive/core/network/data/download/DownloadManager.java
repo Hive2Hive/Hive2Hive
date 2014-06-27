@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DownloadManager {
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadManager.class);
 
 	private final IDataManager dataManager;
 	private final IMessageManager messageManager;

@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
 public class ShareFolderUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -2476009828696898562L;
-
-	private final static Logger logger = LoggerFactory.getLogger(ShareFolderUserProfileTask.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShareFolderUserProfileTask.class);
 
 	private final FolderIndex sharedIndex;
 	private final UserPermission addedFriend;

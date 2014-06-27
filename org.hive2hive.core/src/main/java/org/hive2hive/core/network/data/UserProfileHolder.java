@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class UserProfileHolder {
 
-	private final static Logger logger = LoggerFactory.getLogger(UserProfileHolder.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserProfileHolder.class);
 	private final UserCredentials credentials;
 	private final DataManager dataManager;
 	private final IH2HEncryption encryptionTool;

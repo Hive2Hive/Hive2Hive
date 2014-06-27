@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MoveOnDiskStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(MoveOnDiskStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(MoveOnDiskStep.class);
 	private final MoveFileProcessContext context;
 	private final NetworkManager networkManager;
 
@@ -40,21 +40,19 @@ public class MoveOnDiskStep extends ProcessStep {
 		try {
 			verifyFiles();
 		} catch (NoSessionException | IllegalArgumentException e) {
-			throw new ProcessExecutionException(String.format("File verification failed. reason = '%s'",
-					e.getMessage()), e);
+			throw new ProcessExecutionException(String.format("File verification failed. reason = '%s'", e.getMessage()), e);
 		}
 
 		try {
 			getFileKeys();
 		} catch (GetFailedException | NoSessionException | IllegalStateException e) {
-			throw new ProcessExecutionException(String.format(
-					"File keys could not be fetched. reason = '%s'", e.getMessage()), e);
+			throw new ProcessExecutionException(String.format("File keys could not be fetched. reason = '%s'",
+					e.getMessage()), e);
 		}
 
 		try {
 			// move the file
-			Files.move(context.getSource().toPath(), context.getDestination().toPath(),
-					StandardCopyOption.ATOMIC_MOVE);
+			Files.move(context.getSource().toPath(), context.getDestination().toPath(), StandardCopyOption.ATOMIC_MOVE);
 			logger.debug("Moved the file from '{}' to '{}'.", context.getSource().getAbsolutePath(), context
 					.getDestination().getAbsolutePath());
 		} catch (IOException e) {
@@ -78,8 +76,7 @@ public class MoveOnDiskStep extends ProcessStep {
 
 		if (!source.getAbsolutePath().startsWith(networkManager.getSession().getRoot().toString())) {
 			throw new IllegalArgumentException("Source file is not in Hive2Hive directory. Use 'add'.");
-		} else if (!destination.getAbsolutePath()
-				.startsWith(networkManager.getSession().getRoot().toString())) {
+		} else if (!destination.getAbsolutePath().startsWith(networkManager.getSession().getRoot().toString())) {
 			throw new IllegalArgumentException("Destination file is not in Hive2Hive directory.");
 		}
 	}
@@ -90,8 +87,7 @@ public class MoveOnDiskStep extends ProcessStep {
 		UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 
 		// get the keys for the file to move
-		Index fileNode = userProfile
-				.getFileByPath(context.getSource(), networkManager.getSession().getRoot());
+		Index fileNode = userProfile.getFileByPath(context.getSource(), networkManager.getSession().getRoot());
 		if (fileNode == null) {
 			throw new IllegalStateException("File to move is not in user profile");
 		}
@@ -103,8 +99,7 @@ public class MoveOnDiskStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		try {
-			Files.move(context.getDestination().toPath(), context.getSource().toPath(),
-					StandardCopyOption.ATOMIC_MOVE);
+			Files.move(context.getDestination().toPath(), context.getSource().toPath(), StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
 			// ignore
 		}

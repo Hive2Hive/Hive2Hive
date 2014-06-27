@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class HandleUserProfileTaskStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(HandleUserProfileTaskStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(HandleUserProfileTaskStep.class);
 
 	private final UserProfileTaskContext context;
 	private final NetworkManager networkManager;
@@ -36,8 +36,8 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 			return;
 		}
 
-		logger.debug("Executing a '{}' user profile task. User ID = '{}'.", userProfileTask.getClass()
-				.getSimpleName(), userId);
+		logger.debug("Executing a '{}' user profile task. User ID = '{}'.", userProfileTask.getClass().getSimpleName(),
+				userId);
 		// give the network manager reference to be able to run
 		userProfileTask.setNetworkManager(networkManager);
 		// run the user profile task in own thread

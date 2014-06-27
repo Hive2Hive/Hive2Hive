@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(PutAllUserProfileTasksStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(PutAllUserProfileTasksStep.class);
 	private final NotifyProcessContext context;
 
 	public PutAllUserProfileTasksStep(NotifyProcessContext context, NetworkManager networkManager) {

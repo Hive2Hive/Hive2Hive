@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SelectVersionStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(SelectVersionStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectVersionStep.class);
 	private final RecoverFileContext context;
 	private final IVersionSelector selector;
 	private final NetworkManager networkManager;

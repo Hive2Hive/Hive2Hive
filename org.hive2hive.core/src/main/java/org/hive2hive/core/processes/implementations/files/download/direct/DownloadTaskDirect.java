@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class DownloadTaskDirect extends BaseDownloadTask {
 
 	private static final long serialVersionUID = 5219300641521251051L;
-	private final static Logger logger = LoggerFactory.getLogger(DownloadTaskDirect.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadTaskDirect.class);
 
 	private final PublicKey fileKey; // the key of the file
 	private final String ownUserName; // the user name of the downloader
@@ -28,8 +28,8 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private transient CountDownLatch locationLocker;
 	private volatile Set<Locations> locations;
 
-	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey,
-			String ownUserName, PeerAddress ownAddress, Set<String> users) {
+	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey, String ownUserName,
+			PeerAddress ownAddress, Set<String> users) {
 		super(metaChunks, destination);
 		this.fileKey = fileKey;
 		this.ownUserName = ownUserName;

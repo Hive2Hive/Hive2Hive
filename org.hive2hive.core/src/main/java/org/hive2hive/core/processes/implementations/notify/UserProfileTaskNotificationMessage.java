@@ -18,8 +18,7 @@ import org.slf4j.LoggerFactory;
 public class UserProfileTaskNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 1614762764885721467L;
-
-	private final static Logger logger = LoggerFactory.getLogger(UserProfileTaskNotificationMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserProfileTaskNotificationMessage.class);
 
 	private final String senderId;
 

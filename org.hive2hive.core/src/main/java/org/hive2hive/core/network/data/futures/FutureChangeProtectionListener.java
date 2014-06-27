@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut> {
 
-	private final static Logger logger = LoggerFactory.getLogger(FutureChangeProtectionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FutureChangeProtectionListener.class);
 
 	private final IParameters parameters;
 	private final CountDownLatch latch;
@@ -38,8 +38,8 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			logger.error("Could not wait until the protection key change has finished. Reason = '{}'. '{}'",
-					e.getMessage(), parameters.toString());
+			logger.error("Could not wait until the protection key change has finished. Reason = '{}'. '{}'", e.getMessage(),
+					parameters.toString());
 		}
 
 		return success;

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class CheckIsUserRegisteredStep extends GetUserLocationsStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(CheckIsUserRegisteredStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckIsUserRegisteredStep.class);
 
 	private final RegisterProcessContext context;
 

@@ -32,7 +32,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
  * 
  * @author Seppi, Nico
  */
-abstract public class BaseMessageProcessStep extends ProcessStep implements IResponseCallBackHandler {
+public abstract class BaseMessageProcessStep extends ProcessStep implements IResponseCallBackHandler {
 
 	protected final IMessageManager messageManager;
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DownloadChunkRunnableDHT implements Runnable {
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadChunkRunnableDHT.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadChunkRunnableDHT.class);
 
 	private final DownloadTaskDHT task;
 	private final MetaChunk metaChunk;

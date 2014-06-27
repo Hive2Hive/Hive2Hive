@@ -29,14 +29,13 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
  * 
  * @author Seppi, Nico
  */
-abstract public class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
+public abstract class BaseDirectMessageProcessStep extends BaseMessageProcessStep {
 
 	public BaseDirectMessageProcessStep(IMessageManager messageManager) {
 		super(messageManager);
 	}
 
-	protected void sendDirect(BaseDirectMessage message, PublicKey receiverPublicKey)
-			throws SendFailedException {
+	protected void sendDirect(BaseDirectMessage message, PublicKey receiverPublicKey) throws SendFailedException {
 		if (message instanceof IRequestMessage) {
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			requestMessage.setCallBackHandler(this);

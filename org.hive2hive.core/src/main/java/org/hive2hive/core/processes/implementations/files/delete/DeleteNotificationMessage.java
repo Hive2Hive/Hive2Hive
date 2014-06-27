@@ -27,7 +27,7 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = 5518489264065301800L;
 
-	private final static Logger logger = LoggerFactory.getLogger(DeleteNotificationMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeleteNotificationMessage.class);
 	private final PublicKey parentFileKey;
 	private final String fileName;
 

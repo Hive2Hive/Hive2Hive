@@ -9,7 +9,6 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 public abstract class H2HConsoleMenu extends ConsoleMenu {
 
 	protected final MenuContainer menus;
-
 	protected boolean isExpertMode;
 
 	public H2HConsoleMenu(MenuContainer menus) {
@@ -20,7 +19,7 @@ public abstract class H2HConsoleMenu extends ConsoleMenu {
 		this.isExpertMode = isExpertMode;
 		open();
 	}
-	
+
 	public void reset() {
 		// do nothing by default
 	}

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class InitDownloadChunksStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(InitDownloadChunksStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitDownloadChunksStep.class);
 
 	private final DownloadFileContext context;
 	private final H2HSession session;
@@ -71,14 +71,12 @@ public class InitDownloadChunksStep extends ProcessStep {
 		}
 
 		if (!validateDestination()) {
-			throw new ProcessExecutionException(
-					"File already exists on disk. Content does match; no download needed.");
+			throw new ProcessExecutionException("File already exists on disk. Content does match; no download needed.");
 		}
 
 		try {
 			// start the download
-			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFile.getChunkKey()
-					.getPrivate());
+			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFile.getChunkKey().getPrivate());
 			session.getDownloadManager().submit(task);
 			task.join();
 		} catch (InterruptedException e) {
@@ -91,8 +89,8 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 		try {
 			Set<String> users = context.consumeIndex().getCalculatedUserList();
-			DownloadTaskDirect task = new DownloadTaskDirect(metaFile.getMetaChunks(), destination,
-					metaFile.getId(), session.getUserId(), ownPeerAddress, users);
+			DownloadTaskDirect task = new DownloadTaskDirect(metaFile.getMetaChunks(), destination, metaFile.getId(),
+					session.getUserId(), ownPeerAddress, users);
 			session.getDownloadManager().submit(task);
 			task.join();
 		} catch (InterruptedException e) {

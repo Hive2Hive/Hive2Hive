@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class PutUserProfileStep extends BasePutProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(PutUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(PutUserProfileStep.class);
 
 	private final RegisterProcessContext context;
 

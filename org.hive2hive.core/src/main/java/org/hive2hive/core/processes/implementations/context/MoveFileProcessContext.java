@@ -18,8 +18,8 @@ public class MoveFileProcessContext {
 	private MetaFile metaFile;
 	private KeyPair fileNodeKeys;
 
-	private final HashSet<String> usersToNotifySource;
-	private final HashSet<String> usersToNotifyDestination;
+	private final Set<String> usersToNotifySource;
+	private final Set<String> usersToNotifyDestination;
 
 	// three context objects because we need to send three different types of notifications:
 	// 1. users that had access before and after move

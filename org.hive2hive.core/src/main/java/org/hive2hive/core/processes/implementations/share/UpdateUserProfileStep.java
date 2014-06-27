@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UpdateUserProfileStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(UpdateUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(UpdateUserProfileStep.class);
 
 	private final ShareProcessContext context;
 	private final UserProfileManager profileManager;
@@ -52,8 +52,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 			FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
 			if (!folderIndex.canWrite()) {
-				throw new ProcessExecutionException(String.format(
-						"Cannot share folder '%s' with read-only access.", folderIndex.getName()));
+				throw new ProcessExecutionException(String.format("Cannot share folder '%s' with read-only access.",
+						folderIndex.getName()));
 			} else if (!folderIndex.getSharedFlag() && folderIndex.isSharedOrHasSharedChildren()) {
 				// restriction that disallows sharing folders within other shared folders
 				throw new ProcessExecutionException(String.format(
@@ -62,9 +62,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 			// check if the folder is already shared with this user
 			if (folderIndex.getCalculatedUserList().contains(context.getFriendId())) {
-				throw new ProcessExecutionException(String.format(
-						"Friend '%s' already has access to folder '%s'.", context.getFriendId(),
-						folderIndex.getName()));
+				throw new ProcessExecutionException(String.format("Friend '%s' already has access to folder '%s'.",
+						context.getFriendId(), folderIndex.getName()));
 			}
 
 			// store for the notification
@@ -72,8 +71,8 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 			if (folderIndex.getSharedFlag()) {
 				// this if-clause allows sharing with multiple users and omits the next if-clause
-				logger.debug("Sharing an already shared folder '{}' with friend '{}'.",
-						folderIndex.getName(), context.getFriendId());
+				logger.debug("Sharing an already shared folder '{}' with friend '{}'.", folderIndex.getName(),
+						context.getFriendId());
 				folderIndex.addUserPermissions(context.getUserPermission());
 			} else {
 				// make the node shared with the new protection keys
@@ -100,8 +99,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 			// return to original domain key and put the userProfile
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FolderIndex folderNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile()
-						.getId());
+				FolderIndex folderNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile().getId());
 
 				// unshare the fileNode
 				folderNode.unshare();
@@ -111,8 +109,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 				// reset flag
 				modified = false;
 			} catch (Exception e) {
-				logger.warn("Rollback of updating user profile (sharing a folder) failed. Exception = '{}'.",
-						e.getMessage());
+				logger.warn("Rollback of updating user profile (sharing a folder) failed. Exception = '{}'.", e.getMessage());
 			}
 		}
 	}

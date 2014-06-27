@@ -27,8 +27,7 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
 
 public class FileMenu extends H2HConsoleMenu {
 
-	public H2HConsoleMenuItem CreateRootDirectory;
-
+	private H2HConsoleMenuItem createRootDirectory;
 	private File rootDirectory;
 
 	public FileMenu(MenuContainer menus) {
@@ -37,7 +36,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void createItems() {
-		CreateRootDirectory = new H2HConsoleMenuItem("Create Root Directory") {
+		createRootDirectory = new H2HConsoleMenuItem("Create Root Directory") {
 			protected void execute() throws Exception {
 
 				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_"
@@ -261,10 +260,10 @@ public class FileMenu extends H2HConsoleMenu {
 		rootDirectory = null;
 		ConsoleMenu.print("Root directory path has been reset.");
 	}
-	
+
 	public boolean createRootDirectory() {
 		while (getRootDirectory() == null) {
-			CreateRootDirectory.invoke();
+			createRootDirectory.invoke();
 		}
 		// at this point, a root directory has always been specified
 		return true;
@@ -283,21 +282,21 @@ public class FileMenu extends H2HConsoleMenu {
 	}
 
 	private File askFor(String msg, boolean expectExistence, boolean requireDirectory) {
-	
+
 		// TODO find better way to exit this menu
 		// TODO be more flexible with inputs, e.g. files with whitespaces in name
-	
+
 		File file = null;
 		do {
 			print(String.format(msg.concat(expectExistence ? String.format(" The %s at this path must exist.",
 					requireDirectory ? "folder" : "file") : ""), rootDirectory.getAbsolutePath()));
 			print("Or enter 'cancel' in order to go back.");
-	
+
 			String input = awaitStringParameter();
-	
+
 			if (input.equalsIgnoreCase("cancel"))
 				return null;
-	
+
 			file = new File(rootDirectory, input);
 			if (expectExistence && !file.exists()) {
 				printError(String.format("The specified %s '%s' does not exist. Try again.", requireDirectory ? "folder"
@@ -312,15 +311,15 @@ public class FileMenu extends H2HConsoleMenu {
 	}
 
 	private PermissionType askForPermission(String folder, String userID) {
-	
+
 		List<PermissionType> permissionTypes = new ArrayList<PermissionType>();
 		permissionTypes.add(PermissionType.WRITE);
 		permissionTypes.add(PermissionType.READ);
-	
+
 		List<String> displayTexts = new ArrayList<String>();
 		displayTexts.add("Read and Write");
 		displayTexts.add("Read Only");
-	
+
 		return new SelectionMenu<PermissionType>(permissionTypes, displayTexts, String.format(
 				"Specify the permissions of folder '%s' for the user '%s'.", folder, userID)).openAndSelect();
 	}

@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
  */
 public class InitializeChunksStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
-	
+	private static final Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
+
 	private final IInitializeChunksStepContext context;
 	private final IDataManager dataManager;
 

@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class UploadNotificationMessage extends BaseDirectMessage {
 
 	private static final long serialVersionUID = -695268345354561544L;
-	
-	private final static Logger logger = LoggerFactory.getLogger(UploadNotificationMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(UploadNotificationMessage.class);
+
 	private final Index index;
 
 	public UploadNotificationMessage(PeerAddress targetAddress, Index index) {
@@ -49,8 +49,8 @@ public class UploadNotificationMessage extends BaseDirectMessage {
 	private void downloadSingle() {
 		try {
 			logger.debug("Got notified and start to download the file '{}'.", index.getName());
-			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(
-					index.getFilePublicKey(), networkManager);
+			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(index.getFilePublicKey(),
+					networkManager);
 			process.start();
 		} catch (Exception e) {
 			logger.error("Got notified but cannot download the file.", e);

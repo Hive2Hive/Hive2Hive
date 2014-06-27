@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class UserProfileCreationStep extends ProcessStep {
 
-	private final static Logger logger = LoggerFactory.getLogger(UserProfileCreationStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserProfileCreationStep.class);
 
 	private final RegisterProcessContext context;
 

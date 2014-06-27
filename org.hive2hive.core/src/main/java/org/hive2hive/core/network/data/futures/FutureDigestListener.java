@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 
-	private final static Logger logger = LoggerFactory.getLogger(FutureDigestListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FutureDigestListener.class);
 
 	private final IParameters parameters;
 	private final CountDownLatch latch;
@@ -65,8 +65,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 
 	@Override
 	public void exceptionCaught(Throwable t) throws Exception {
-		logger.error(
-				String.format("Exception caught during get digest. %s reason = '{}'", parameters.toString()),
+		logger.error(String.format("Exception caught during get digest. %s reason = '{}'", parameters.toString()),
 				t.getMessage());
 		operationComplete(null);
 	}

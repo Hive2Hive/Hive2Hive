@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
-	private final static Logger logger = LoggerFactory.getLogger(FutureGetListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FutureGetListener.class);
 
 	private final IParameters parameters;
 	private final CountDownLatch latch;
@@ -62,8 +62,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	@Override
 	public void exceptionCaught(Throwable t) throws Exception {
-		logger.error(String.format("Exception caught during get. %s reason = '{}'", parameters.toString()),
-				t.getMessage());
+		logger.error(String.format("Exception caught during get. %s reason = '{}'", parameters.toString()), t.getMessage());
 		operationComplete(null);
 	}
 

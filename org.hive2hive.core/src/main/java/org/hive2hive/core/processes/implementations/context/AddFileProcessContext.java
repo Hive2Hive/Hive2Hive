@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,8 +28,8 @@ import org.hive2hive.core.security.EncryptionUtil;
  * 
  * @author Nico, Seppi
  */
-public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWriteAccessContext, IInitializeChunksStepContext,
-		IPutMetaFileContext, IPrepareNotificationContext, INotifyContext {
+public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWriteAccessContext,
+		IInitializeChunksStepContext, IPutMetaFileContext, IPrepareNotificationContext, INotifyContext {
 
 	private final File file;
 	private final H2HSession session;
@@ -43,7 +42,7 @@ public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWr
 	private MetaFile metaFile;
 	private KeyPair metaKeys;
 	private Index index;
-	private HashSet<String> usersToNotify;
+	private Set<String> usersToNotify;
 	private UploadNotificationMessageFactory messageFactory;
 
 	public AddFileProcessContext(File file, H2HSession session) {
@@ -136,7 +135,7 @@ public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWr
 	}
 
 	@Override
-	public void provideUsersToNotify(HashSet<String> users) {
+	public void provideUsersToNotify(Set<String> users) {
 		this.usersToNotify = users;
 	}
 
