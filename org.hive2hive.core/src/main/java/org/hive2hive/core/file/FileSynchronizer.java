@@ -15,7 +15,7 @@ import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class FileSynchronizer {
 					} else {
 						// check the MD5 value to not delete a modified file
 						FileIndex fileNode = (FileIndex) node;
-						if (H2HDefaultEncryption.compareMD5(fileNode.getMD5(), before.get(path))) {
+						if (HashUtil.compare(fileNode.getMD5(), before.get(path))) {
 							// file has not been modified remotely, delete it
 							logger.debug("File '{}' has been deleted locally during absence.", path);
 							deletedLocally.add(node);
@@ -107,7 +107,7 @@ public class FileSynchronizer {
 			Path path = Paths.get(p);
 			if (before.containsKey(p) && userProfile.getFileByPath(path) == null) {
 				// is on disk but deleted in the user profile
-				if (H2HDefaultEncryption.compareMD5(before.get(p), now.get(p))) {
+				if (HashUtil.compare(before.get(p), now.get(p))) {
 					// only delete the file, if it was not modified locally
 					deletedRemotely.add(Paths.get(root.toString(), path.toString()));
 				}
@@ -184,7 +184,7 @@ public class FileSynchronizer {
 				continue;
 			}
 
-			if (H2HDefaultEncryption.compareMD5(before.get(path), now.get(path))) {
+			if (HashUtil.compare(before.get(path), now.get(path))) {
 				// md5 before and after match --> nothing changed
 				continue;
 			}
@@ -200,8 +200,8 @@ public class FileSynchronizer {
 
 			// has been modified --> check if profile has same md5 as 'before'. If not, there are three
 			// different versions. Thus, the profile wins.
-			if (H2HDefaultEncryption.compareMD5(fileNode.getMD5(), before.get(path))
-					&& !H2HDefaultEncryption.compareMD5(fileNode.getMD5(), now.get(path))) {
+			if (HashUtil.compare(fileNode.getMD5(), before.get(path))
+					&& !HashUtil.compare(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File '{}' has been updated locally during absence.", path);
 				updatedLocally.add(FileUtil.getPath(root, fileNode));
 			}
@@ -231,8 +231,8 @@ public class FileSynchronizer {
 			FileIndex fileIndex = (FileIndex) index;
 			if (before.containsKey(fileIndex.getFullPath().toString())
 					&& now.containsKey(fileIndex.getFullPath().toString())) {
-				if (!H2HDefaultEncryption.compareMD5(fileIndex.getMD5(), now.get(fileIndex.getFullPath().toString()))
-						&& !H2HDefaultEncryption.compareMD5(fileIndex.getMD5(), before.get(fileIndex.getFullPath().toString()))) {
+				if (!HashUtil.compare(fileIndex.getMD5(), now.get(fileIndex.getFullPath().toString()))
+						&& !HashUtil.compare(fileIndex.getMD5(), before.get(fileIndex.getFullPath().toString()))) {
 					// different md5 hashes than 'before' and 'now'
 					logger.debug("File '{}' has been updated remotely during absence.", fileIndex.getFullPath());
 					updatedRemotely.add(fileIndex);

@@ -18,7 +18,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
-import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.After;
@@ -183,11 +182,11 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(network.get(1), userCredentials);
 		FileIndex file1Node = (FileIndex) userProfile.getFileByPath(Paths.get("file 1"));
 		// modifications have been uploaded
-		Assert.assertTrue(H2HDefaultEncryption.compareMD5(newMD5File1, file1Node.getMD5()));
+		Assert.assertTrue(HashUtil.compare(newMD5File1, file1Node.getMD5()));
 
 		/** verify the file that has been modified remotely and locally **/
 		FileIndex file3Node = (FileIndex) userProfile.getFileByPath(Paths.get("folder 1", "file 3"));
-		Assert.assertTrue(H2HDefaultEncryption.compareMD5(newMD5File3, file3Node.getMD5()));
+		Assert.assertTrue(HashUtil.compare(newMD5File3, file3Node.getMD5()));
 	}
 
 	@After

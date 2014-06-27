@@ -1,12 +1,10 @@
 package org.hive2hive.core.security;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -53,47 +51,6 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
 		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
-	}
-
-	/**
-	 * Compares if the file md5 matches a given md5 hash
-	 * 
-	 * @param file
-	 * @param expectedMD5
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean compareMD5(File file, byte[] expectedMD5) throws IOException {
-		if (!file.exists() && expectedMD5 == null) {
-			// both do not exist
-			return true;
-		} else if (file.isDirectory()) {
-			// directories always match
-			return true;
-		}
-
-		byte[] md5Hash = HashUtil.hash(file);
-		return compareMD5(md5Hash, expectedMD5);
-	}
-
-	/**
-	 * Compares if the given md5 matches another md5 hash. This method works symmetrically and is not
-	 * dependent on the parameter order
-	 * 
-	 * @param md5 the hash to test
-	 * @param expectedMD5 the expected md5 hash
-	 * @return
-	 */
-	public static boolean compareMD5(byte[] md5, byte[] expectedMD5) {
-		// both null values is ok
-		if (md5 == null) {
-			return expectedMD5 == null;
-		} else if (expectedMD5 == null) {
-			return md5 == null;
-		}
-
-		// calculate the MD5 hash and compare it
-		return Arrays.equals(md5, expectedMD5);
 	}
 
 	public static String key2String(PublicKey key) {

@@ -20,7 +20,7 @@ import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionExcepti
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.core.processes.implementations.files.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.implementations.files.download.direct.DownloadTaskDirect;
-import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,7 @@ public class InitDownloadChunksStep extends ProcessStep {
 			try {
 				// can be cast because only files are downloaded
 				FileIndex fileIndex = (FileIndex) context.consumeIndex();
-				if (H2HDefaultEncryption.compareMD5(destination, fileIndex.getMD5())) {
+				if (HashUtil.compare(destination, fileIndex.getMD5())) {
 					return false;
 				} else {
 					logger.warn("File already exists on disk. It will be overwritten.");

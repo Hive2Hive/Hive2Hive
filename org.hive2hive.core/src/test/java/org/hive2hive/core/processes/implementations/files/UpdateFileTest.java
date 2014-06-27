@@ -29,7 +29,6 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
-import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
@@ -103,7 +102,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
 
 		// check the md5 hash
-		Assert.assertTrue(H2HDefaultEncryption.compareMD5(downloaded, md5UpdatedFile));
+		Assert.assertTrue(HashUtil.compare(downloaded, md5UpdatedFile));
 	}
 
 	@Test
@@ -123,7 +122,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// verify if the md5 hash did not change
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		FileIndex fileNode = (FileIndex) userProfile.getFileByPath(file, uploaderRoot);
-		Assert.assertTrue(H2HDefaultEncryption.compareMD5(file, fileNode.getMD5()));
+		Assert.assertTrue(HashUtil.compare(file, fileNode.getMD5()));
 	}
 
 	@Test

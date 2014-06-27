@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.PublicKey;
+import java.util.Arrays;
 
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.io.DigestInputStream;
@@ -71,5 +73,46 @@ public class HashUtil {
 		digest.doFinal(md5, 0);
 
 		return md5;
+	}
+
+	/**
+	 * Compares if the file md5 matches a given md5 hash
+	 * 
+	 * @param file
+	 * @param expectedMD5
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean compare(File file, byte[] expectedMD5) throws IOException {
+		if (!file.exists() && expectedMD5 == null) {
+			// both do not exist
+			return true;
+		} else if (file.isDirectory()) {
+			// directories always match
+			return true;
+		}
+
+		byte[] md5Hash = HashUtil.hash(file);
+		return compare(md5Hash, expectedMD5);
+	}
+
+	/**
+	 * Compares if the given md5 matches another md5 hash. This method works symmetrically and is not
+	 * dependent on the parameter order
+	 * 
+	 * @param md5 the hash to test
+	 * @param expectedMD5 the expected md5 hash
+	 * @return
+	 */
+	public static boolean compare(byte[] md5, byte[] expectedMD5) {
+		// both null values is ok
+		if (md5 == null) {
+			return expectedMD5 == null;
+		} else if (expectedMD5 == null) {
+			return md5 == null;
+		}
+
+		// calculate the MD5 hash and compare it
+		return Arrays.equals(md5, expectedMD5);
 	}
 }

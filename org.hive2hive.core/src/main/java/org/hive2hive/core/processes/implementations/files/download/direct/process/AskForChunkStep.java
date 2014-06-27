@@ -18,7 +18,6 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
-import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +85,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 
 		// verify the md5 hash
 		byte[] respondedHash = HashUtil.hash(chunk.getData());
-		if (H2HDefaultEncryption.compareMD5(respondedHash, metaChunk.getChunkHash())) {
+		if (HashUtil.compare(respondedHash, metaChunk.getChunkHash())) {
 			logger.debug("Peer {} sent a valid content for chunk {}. MD5 verified.", context.getSelectedPeer(),
 					metaChunk.getIndex());
 		} else {
@@ -104,8 +103,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 			// finalize the sub-process
 			context.getTask().setDownloaded(context.getMetaChunk().getIndex(), context.getTempDestination());
 		} catch (IOException e) {
-			context.getTask().abortDownload("Cannot write the chunk to the temporary file");
-			return;
+			context.getTask().abortDownload("Cannot write the chunk to the temporary file. Reason: " + e.getMessage());
 		} finally {
 			// release the lock such that the process can finish correctly
 			responseLatch.countDown();

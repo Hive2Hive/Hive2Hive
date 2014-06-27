@@ -16,7 +16,6 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
-import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +94,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 
 		// verify the chunk hash
 		byte[] md5Hash = HashUtil.hash(chunk.getData());
-		if (H2HDefaultEncryption.compareMD5(md5Hash, chunkHash)) {
+		if (HashUtil.compare(md5Hash, chunkHash)) {
 			logger.debug("MD5 hash of the chunk {} has been verified, returning the chunk", chunkNumber);
 
 			// return the content of the file part
