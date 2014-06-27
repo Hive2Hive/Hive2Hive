@@ -3,12 +3,14 @@ package org.hive2hive.core.security;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.ruedigermoeller.serialization.FSTConfiguration;
+import de.ruedigermoeller.serialization.FSTObjectInput;
+import de.ruedigermoeller.serialization.FSTObjectOutput;
 
 /**
  * Provides serialization and deserialization of objects
@@ -20,27 +22,29 @@ public class SerializationUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SerializationUtil.class);
 
+	// thread safe usage of FST
+	private static final FSTConfiguration FST = FSTConfiguration.createDefaultConfiguration();
+
 	private SerializationUtil() {
 		// only static methods
 	}
 
+	/**
+	 * Serializes an object to a byte array which can be sent over the network
+	 */
 	public static byte[] serialize(Serializable object) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = null;
+		FSTObjectOutput fstOut = FST.getObjectOutput(baos);
 		byte[] result = null;
 
 		try {
-			oos = new ObjectOutputStream(baos);
-			oos.writeObject(object);
+			fstOut.writeObject(object);
 			result = baos.toByteArray();
 		} catch (IOException e) {
 			logger.error("Exception while serializing object:", e);
 			throw e;
 		} finally {
 			try {
-				if (oos != null) {
-					oos.close();
-				}
 				if (baos != null) {
 					baos.close();
 				}
@@ -51,6 +55,9 @@ public class SerializationUtil {
 		return result;
 	}
 
+	/**
+	 * Deserializes an object from a byte array. The object type is not yet specific
+	 */
 	public static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
 		if (bytes == null || bytes.length == 0) {
 			// nothing to deserialize
@@ -58,20 +65,16 @@ public class SerializationUtil {
 		}
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = null;
+		FSTObjectInput fstIn = FST.getObjectInput(bais);
 		Object result = null;
 
 		try {
-			ois = new ObjectInputStream(bais);
-			result = ois.readObject();
+			result = fstIn.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Exception while deserializing object.");
 			throw e;
 		} finally {
 			try {
-				if (ois != null) {
-					ois.close();
-				}
 				if (bais != null) {
 					bais.close();
 				}

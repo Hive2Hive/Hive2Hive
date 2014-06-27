@@ -85,7 +85,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		try {
 			message = SerializationUtil.deserialize(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
-			logger.error("Message could not be deserialized. Reason = '{}'.", e.getMessage());
+			logger.error("Message could not be deserialized.", e);
 		}
 
 		if (message != null && message instanceof BaseMessage) {
@@ -93,14 +93,15 @@ public class MessageReplyHandler implements ObjectDataReply {
 
 			// verify the signature
 			if (session.getKeyManager().containsPublicKey(senderId)) {
-				if (!verifySignature(senderId, decryptedMessage, signature))
+				if (!verifySignature(senderId, decryptedMessage, signature)) {
 					return AcceptanceReply.FAILURE_SIGNATURE;
+				}
 
 				// give a network manager reference to work (verify, handle)
 				try {
 					receivedMessage.setNetworkManager(networkManager);
 				} catch (NoPeerConnectionException e) {
-					logger.error("Cannot process the message because the peer is not connected.");
+					logger.error("Cannot process the message because the peer is not connected.", e);
 					return AcceptanceReply.FAILURE;
 				}
 
@@ -139,7 +140,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 				return false;
 			}
 		} catch (GetFailedException | InvalidKeyException | SignatureException | NoSessionException e) {
-			logger.error("Verifying message from user '{}' failed. Reason = '{}'.", senderId, e.getMessage());
+			logger.error("Verifying message from user '{}' failed.", senderId, e);
 			return false;
 		}
 	}
@@ -167,7 +168,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			try {
 				message.setNetworkManager(networkManager);
 			} catch (NoPeerConnectionException e) {
-				logger.error("Cannot process the message because the peer is not connected.");
+				logger.error("Cannot process the message because the peer is not connected.", e);
 				return;
 			}
 

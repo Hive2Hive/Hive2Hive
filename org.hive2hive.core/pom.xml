@@ -1,27 +1,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
 		<groupId>org.hive2hive</groupId>
 		<artifactId>org.hive2hive.parent</artifactId>
 		<version>1.1.1-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>org.hive2hive.core</artifactId>
 	<packaging>jar</packaging>
-	
+
 	<name>Hive2Hive Core</name>
 	<url>http://www.hive2hive.org</url>
 	<description>The core project of the Hive2Hive library.</description>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-core</artifactId>
 			<version>5.0-Alpha4</version>
 			<scope>compile</scope>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -35,6 +35,12 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>de.ruedigermoeller</groupId>
+			<artifactId>fst</artifactId>
+			<version>1.58</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
@@ -42,7 +48,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<repositories>
 		<repository>
 			<id>tomp2p.net</id>
@@ -50,5 +56,5 @@
 			<url>http://tomp2p.net/dev/mvn/</url>
 		</repository>
 	</repositories>
-	
+
 </project>

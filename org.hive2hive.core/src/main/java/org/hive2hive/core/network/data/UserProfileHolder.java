@@ -83,11 +83,11 @@ public class UserProfileHolder {
 					// provide loaded user profile
 					entry.setUserProfile(userProfile);
 				} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
-					logger.error("Cannot decrypt the user profile. reason = '{}'", e.getMessage());
+					logger.error("Cannot decrypt the user profile.", e);
 					entry.setGetError(new GetFailedException(String.format("Cannot decrypt the user profile. reason = '%s'",
 							e.getMessage())));
 				} catch (Exception e) {
-					logger.error("Cannot get the user profile. reason = '{}'", e.getMessage());
+					logger.error("Cannot get the user profile.", e);
 					entry.setGetError(new GetFailedException(String.format("Cannot get the user profile. reason = '%s'",
 							e.getMessage())));
 				}
