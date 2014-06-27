@@ -18,8 +18,8 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -148,7 +148,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// modify file 1
 		File file1 = new File(root1, "file 1");
 		FileUtils.write(file1, NetworkTestUtil.randomString());
-		byte[] newMD5File1 = EncryptionUtil.generateMD5Hash(file1);
+		byte[] newMD5File1 = HashUtil.hash(file1);
 
 		// modify file 3
 		File folder = new File(root1, "folder 1");
@@ -168,7 +168,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		folder = new File(root0, "folder 1");
 		file3 = new File(folder, "file 3");
 		FileUtils.write(file3, NetworkTestUtil.randomString());
-		byte[] newMD5File3 = EncryptionUtil.generateMD5Hash(file3);
+		byte[] newMD5File3 = HashUtil.hash(file3);
 		UseCaseTestUtil.uploadNewVersion(remoteClient, file3);
 
 		/** start sync **/

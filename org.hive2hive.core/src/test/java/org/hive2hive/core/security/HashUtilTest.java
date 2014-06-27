@@ -2,9 +2,11 @@ package org.hive2hive.core.security;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -23,6 +25,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
@@ -33,6 +36,7 @@ import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil.AES_KEYLENGTH;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.junit.AfterClass;
@@ -41,11 +45,11 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class EncryptionUtilTest extends H2HJUnitTest {
+public class HashUtilTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = EncryptionUtilTest.class;
+		testClass = HashUtilTest.class;
 		beforeClass();
 	}
 
@@ -296,6 +300,39 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			assertTrue(isVerified);
 		}
+	}
+
+	@Test
+	public void md5DataTest() {
+		String data = generateRandomString(1000);
+		byte[] md5 = HashUtil.hash(data.getBytes());
+		assertNotNull(md5);
+
+		// assert that hashing twice results in the same md5 hash
+		assertEquals(new String(md5), new String(HashUtil.hash(data.getBytes())));
+
+		// assert that different data is hashed to different md5 hashes
+		String data2 = generateRandomString(1000);
+		assertNotEquals(data, data2);
+		assertNotEquals(new String(md5), new String(HashUtil.hash(data2.getBytes())));
+	}
+
+	@Test
+	public void md5StreamTest() throws IOException {
+		String data = generateRandomString(5 * 1024);
+		File file = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file, data);
+
+		byte[] md5 = HashUtil.hash(file);
+		assertNotNull(md5);
+
+		// assert that hashing twice results in the same md5 hash
+		assertEquals(new String(md5), new String(HashUtil.hash(file)));
+
+		// assert that different data is hashed to different md5 hashes
+		String data2 = generateRandomString(1000);
+		assertNotEquals(data, data2);
+		assertNotEquals(new String(md5), new String(HashUtil.hash(data2.getBytes())));
 	}
 
 	@Test

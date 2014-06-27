@@ -17,6 +17,7 @@ import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateExce
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeChunksStepContext;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +93,7 @@ public class InitializeChunksStep extends ProcessStep {
 				throw new ProcessExecutionException("Cannot read the large file", e);
 			}
 
-			byte[] md5Hash = EncryptionUtil.generateMD5Hash(chunk.getData());
+			byte[] md5Hash = HashUtil.hash(chunk.getData());
 			context.getMetaChunks().add(new MetaChunk(chunkId, md5Hash, i));
 		}
 	}

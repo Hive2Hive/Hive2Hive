@@ -20,6 +20,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -42,8 +43,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException,
-			NoPeerConnectionException {
+	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException, NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
@@ -93,10 +93,9 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	private H2HTestData generateTestData(long timeStamp) throws IOException {
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 		// get a MD5 hash of the test data object itself
-		byte[] hash = EncryptionUtil.generateMD5Hash(EncryptionUtil.serializeObject(testData));
+		byte[] hash = HashUtil.hash(EncryptionUtil.serializeObject(testData));
 		// use time stamp value and the first part of the MD5 hash as version key
-		Number160 versionKey = new Number160(timeStamp, new Number160(Arrays.copyOf(hash,
-				Number160.BYTE_ARRAY_SIZE)));
+		Number160 versionKey = new Number160(timeStamp, new Number160(Arrays.copyOf(hash, Number160.BYTE_ARRAY_SIZE)));
 		// assign the version key to the test data
 		testData.setVersionKey(versionKey);
 		return testData;

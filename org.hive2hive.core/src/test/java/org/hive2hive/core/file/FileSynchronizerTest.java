@@ -16,6 +16,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -82,10 +83,10 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		userProfile = new UserProfile("test-user");
 		root = userProfile.getRoot();
 		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		node1f1 = new FileIndex(root, keys, "1f1", EncryptionUtil.generateMD5Hash(file1f1));
-		node1f2 = new FileIndex(root, keys, "1f2", EncryptionUtil.generateMD5Hash(file1f2));
+		node1f1 = new FileIndex(root, keys, "1f1", HashUtil.hash(file1f1));
+		node1f2 = new FileIndex(root, keys, "1f2", HashUtil.hash(file1f2));
 		node1d = new FolderIndex(root, keys, "1d");
-		node2f = new FileIndex(node1d, keys, "2f", EncryptionUtil.generateMD5Hash(file2f));
+		node2f = new FileIndex(node1d, keys, "2f", HashUtil.hash(file2f));
 		node2d = new FolderIndex(node1d, keys, "2d");
 
 		// write the meta data now. Before creating the synchronizer, modify the file system as desired first.
@@ -166,7 +167,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertTrue(updatedLocally.contains(file2f.toPath()));
 
 		// change file in user profile as well --> should not occur as updated locally
-		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
 
 		fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		updatedLocally = fileSynchronizer.getUpdatedLocally();
@@ -177,8 +178,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testUpdatedRemotely() throws IOException, ClassNotFoundException {
 		// change two files in the user profile; hashes on disk remain the same
-		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
-		node2f.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
+		node2f.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
@@ -222,7 +223,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		file1f2.delete();
 
 		// modify the same file remotely
-		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<Index> addedRemotely = fileSynchronizer.getAddedRemotely();
@@ -239,7 +240,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testConflictUpdateRemotelyAndLocally() throws IOException, ClassNotFoundException {
 		// change a file in the user profile
-		node1f2.setMD5(EncryptionUtil.generateMD5Hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
 
 		// change file on disk as well --> should occur as updated remotely since there is a conflict and the
 		// profile wins

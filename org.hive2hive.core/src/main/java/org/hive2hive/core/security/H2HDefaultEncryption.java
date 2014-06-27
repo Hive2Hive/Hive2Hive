@@ -12,7 +12,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
@@ -49,21 +48,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 		return encryptHybrid;
 	}
 
-	/**
-	 * Asymmetrically decrypts a prior content inheriting from {@link NetworkContent}.
-	 * 
-	 * @param content the encrypted content to be decrypted
-	 * @param privateKey the asymmetric private key that matches the public key at encryption
-	 * @return decrypted object
-	 * @throws InvalidKeyException
-	 * @throws DataLengthException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
+	@Override
 	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
@@ -87,7 +72,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 			return true;
 		}
 
-		byte[] md5Hash = EncryptionUtil.generateMD5Hash(file);
+		byte[] md5Hash = HashUtil.hash(file);
 		return compareMD5(md5Hash, expectedMD5);
 	}
 

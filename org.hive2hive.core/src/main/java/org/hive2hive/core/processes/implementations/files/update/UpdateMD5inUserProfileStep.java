@@ -13,8 +13,8 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 		MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 		byte[] newMD5;
 		try {
-			newMD5 = EncryptionUtil.generateMD5Hash(context.consumeFile());
+			newMD5 = HashUtil.hash(context.consumeFile());
 		} catch (IOException e) {
 			throw new ProcessExecutionException("The new MD5 hash for the user profile could not be generated.", e);
 		}

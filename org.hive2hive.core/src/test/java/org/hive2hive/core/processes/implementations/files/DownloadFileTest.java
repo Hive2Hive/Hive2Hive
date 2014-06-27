@@ -24,6 +24,7 @@ import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -72,8 +73,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 	public void testDownload() throws IOException, NoSessionException, GetFailedException, NoPeerConnectionException {
 		// upload a file
 		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot,
-				CHUNK_SIZE);
+		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
 		String testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
@@ -95,8 +95,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 			InvalidProcessStateException, NoPeerConnectionException {
 		// upload a file
 		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot,
-				CHUNK_SIZE);
+		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 
 		// create fake file keys
@@ -116,17 +115,16 @@ public class DownloadFileTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		// upload a file
 		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot,
-				CHUNK_SIZE);
+		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
 		String testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
 		Index fileNode = up.getRoot().getChildByName(fileName);
-		
+
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, "existing content");
-		byte[] md5Before = EncryptionUtil.generateMD5Hash(existing);
+		byte[] md5Before = HashUtil.hash(existing);
 
 		UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
 
@@ -147,13 +145,12 @@ public class DownloadFileTest extends H2HJUnitTest {
 			InvalidProcessStateException, NoPeerConnectionException, GetFailedException {
 		// upload a file
 		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot,
-				CHUNK_SIZE);
+		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
 		String testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
 		Index fileNode = up.getRoot().getChildByName(fileName);
-		
+
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, testContent);

@@ -24,6 +24,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -66,7 +67,7 @@ public class UserProfileStressTest extends H2HJUnitTest {
 				file = new File(root, NetworkTestUtil.randomString());
 				FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
 				keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-				md5Hash = EncryptionUtil.generateMD5Hash(file);
+				md5Hash = HashUtil.hash(file);
 			}
 
 			String pid = UUID.randomUUID().toString();

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 
 /**
  * Visits all files of a given path and collects the file tree which then can be stored as meta data to disc.
@@ -57,8 +57,8 @@ public class PersistenceFileVisitor extends SimpleFileVisitor<Path> {
 		// add to fileTree
 		Path relativePath = root.relativize(path);
 
-		byte[] md5 = EncryptionUtil.generateMD5Hash(path.toFile());
-		fileTree.put(relativePath.toString(), md5);
+		byte[] hash = HashUtil.hash(path.toFile());
+		fileTree.put(relativePath.toString(), hash);
 	}
 
 	public Map<String, byte[]> getFileTree() {

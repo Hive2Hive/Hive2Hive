@@ -18,7 +18,7 @@ import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
 
-	private PublicKey parentKey; // used for rollback
+	// used for rollback
+	private PublicKey parentKey;
 	private boolean modified = false;
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
@@ -89,7 +90,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 	private byte[] calculateHash(File file) throws ProcessExecutionException {
 		try {
-			return EncryptionUtil.generateMD5Hash(file);
+			return HashUtil.hash(file);
 		} catch (IOException e) {
 			logger.error("Creating MD5 hash of file '{}' was not possible.", file.getName(), e);
 			throw new ProcessExecutionException(

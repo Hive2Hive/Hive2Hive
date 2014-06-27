@@ -5,10 +5,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 
+import net.tomp2p.peers.Number160;
+
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
-
-import net.tomp2p.peers.Number160;
+import org.hive2hive.core.security.HashUtil;
 
 /**
  * All data of <code>Hive2Hive</code> which has to be stored in the DHT are
@@ -67,13 +68,14 @@ public abstract class NetworkContent implements Serializable {
 	/**
 	 * Call this method in front of a put into the network if the data is a new version or will have other
 	 * versions.
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
 	public void generateVersionKey() throws IOException {
 		// get the current time
 		long timestamp = new Date().getTime();
 		// get a MD5 hash of the object itself
-		byte[] hash = EncryptionUtil.generateMD5Hash(EncryptionUtil.serializeObject(this));
+		byte[] hash = HashUtil.hash(EncryptionUtil.serializeObject(this));
 		// use time stamp value and the first part of the MD5 hash as version key
 		versionKey = new Number160(timestamp, new Number160(Arrays.copyOf(hash, Number160.BYTE_ARRAY_SIZE)));
 	}

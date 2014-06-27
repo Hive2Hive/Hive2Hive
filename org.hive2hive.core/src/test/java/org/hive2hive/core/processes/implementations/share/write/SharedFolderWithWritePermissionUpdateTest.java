@@ -23,7 +23,7 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -97,10 +97,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddFileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' from A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
@@ -112,7 +112,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromAAtA);
+		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
@@ -122,10 +122,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileFromAUpdateAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddFileFromAUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' from A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
@@ -137,7 +137,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromAAtB.lastModified();
 		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromAAtB);
+		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
@@ -147,10 +147,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileFromBUpdateAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderB, CHUNK_SIZE);
+	public void testSynchronizeAddFileFromBUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderB, CHUNK_SIZE);
 		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
 		logger.info("Upload a new file '{}' from B.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
@@ -162,7 +162,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromBAtA.lastModified();
 		FileUtils.write(fileFromBAtA, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromBAtA);
+		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
@@ -172,10 +172,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileFromBUpdateAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderB, CHUNK_SIZE);
+	public void testSynchronizeAddFileFromBUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderB, CHUNK_SIZE);
 		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
 		logger.info("Upload a new file '{}' from B.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
@@ -187,7 +187,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromBAtB.lastModified();
 		FileUtils.write(fileFromBAtB, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromBAtB);
+		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
@@ -197,11 +197,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileFromAUpdateAtA() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
+				subFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' from A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
@@ -213,7 +212,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromAAtA);
+		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
@@ -223,11 +222,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileFromAUpdateAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileFromAUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
+				subFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' from A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
@@ -239,7 +237,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromAAtB.lastModified();
 		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromAAtB);
+		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
@@ -249,11 +247,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileFromBUpdateAtA() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB",
-				new Random().nextInt(maxNumChunks) + 1, subFolderB, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileFromBUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(maxNumChunks) + 1,
+				subFolderB, CHUNK_SIZE);
 		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
 		logger.info("Upload a new file '{}' from B.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
@@ -265,7 +262,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromBAtA.lastModified();
 		FileUtils.write(fileFromBAtA, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromBAtA);
+		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
@@ -275,11 +272,10 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileFromBUpdateAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB",
-				new Random().nextInt(maxNumChunks) + 1, subFolderB, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileFromBUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(maxNumChunks) + 1,
+				subFolderB, CHUNK_SIZE);
 		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
 		logger.info("Upload a new file '{}' from B.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
@@ -291,7 +287,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromBAtB.lastModified();
 		FileUtils.write(fileFromBAtB, NetworkTestUtil.randomString(), false);
-		byte[] newMD5 = EncryptionUtil.generateMD5Hash(fileFromBAtB);
+		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
@@ -335,8 +331,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
 	}
 
-	private static void checkFileIndex(Path relativePath, byte[] md5Hash) throws GetFailedException,
-			NoSessionException {
+	private static void checkFileIndex(Path relativePath, byte[] md5Hash) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
 		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(relativePath);
@@ -354,10 +349,8 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		Assert.assertTrue(Arrays.equals(indexB.getMD5(), md5Hash));
 
 		// check if content protection keys are the same
-		Assert.assertTrue(indexA.getProtectionKeys().getPrivate()
-				.equals(indexB.getProtectionKeys().getPrivate()));
-		Assert.assertTrue(indexA.getProtectionKeys().getPublic()
-				.equals(indexB.getProtectionKeys().getPublic()));
+		Assert.assertTrue(indexA.getProtectionKeys().getPrivate().equals(indexB.getProtectionKeys().getPrivate()));
+		Assert.assertTrue(indexA.getProtectionKeys().getPublic().equals(indexB.getProtectionKeys().getPublic()));
 
 		// check if isShared flag is set
 		Assert.assertTrue(indexA.isShared());

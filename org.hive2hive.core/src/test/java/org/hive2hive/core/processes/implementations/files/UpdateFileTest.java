@@ -29,8 +29,8 @@ import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -89,7 +89,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// overwrite the content in the file
 		String newContent = NetworkTestUtil.randomString();
 		FileUtils.write(file, newContent, false);
-		byte[] md5UpdatedFile = EncryptionUtil.generateMD5Hash(file);
+		byte[] md5UpdatedFile = HashUtil.hash(file);
 
 		// upload the new version
 		UseCaseTestUtil.uploadNewVersion(uploader, file);

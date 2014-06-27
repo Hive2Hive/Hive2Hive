@@ -18,8 +18,8 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		Chunk chunk = (Chunk) responseMessage.getContent();
 
 		// verify the md5 hash
-		byte[] respondedHash = EncryptionUtil.generateMD5Hash(chunk.getData());
+		byte[] respondedHash = HashUtil.hash(chunk.getData());
 		if (H2HDefaultEncryption.compareMD5(respondedHash, metaChunk.getChunkHash())) {
 			logger.debug("Peer {} sent a valid content for chunk {}. MD5 verified.", context.getSelectedPeer(),
 					metaChunk.getIndex());
