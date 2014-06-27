@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -158,8 +159,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// generate random sized content (max. (key size / 8) - 11 bytes)
 			byte[] data = generateRandomContent((sizes[s].value() / 8) - 11);
 
-			logger.debug("Testing RSA encryption of a sample {} byte file with a {} bit key.", data.length,
-					sizes[s].value());
+			logger.debug("Testing RSA encryption of a sample {} byte file with a {} bit key.", data.length, sizes[s].value());
 			printBytes("Original Data", data);
 
 			// generate RSA key pair
@@ -199,7 +199,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void encryptionHybridTest() {
-
+		Random rnd = new Random();
 		RSA_KEYLENGTH[] rsaSizes = getRSAKeySizes();
 		AES_KEYLENGTH[] aesSizes = getAESKeySizes();
 
@@ -209,8 +209,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// test all AES key sizes
 			for (int s2 = 0; s2 < aesSizes.length; s2++) {
 
-				// generate random content (50 MB)
-				byte[] data = generateFixedContent(52428800);
+				// generate random content (0-10 MB)
+				byte[] data = generateFixedContent((int) (rnd.nextDouble() * 10 * 1024 * 1024));
 
 				logger.debug(
 						"Testing hybrid encryption and decryption of a sample {} byte file with a {} bit RSA and a {} bit AES key.",
@@ -229,8 +229,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2]);
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Encryption Time: {} ms.", stop - start);
-				} catch (DataLengthException | InvalidKeyException | IllegalStateException
-						| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
+				} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
+						| IllegalBlockSizeException | BadPaddingException e) {
 					logger.error("Exception while testing hybrid encryption:", e);
 					e.printStackTrace();
 				}
@@ -247,8 +247,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate());
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Decryption Time: {} ms.", stop - start);
-				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException
-						| BadPaddingException | IllegalStateException | InvalidCipherTextException e) {
+				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
+						| IllegalStateException | InvalidCipherTextException e) {
 					logger.error("Exception while testing hybrid decryption:", e);
 					e.printStackTrace();
 				}
@@ -361,8 +361,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	@Ignore
 	public void testPureLightweightBouncyCastle() throws IOException, InvalidKeyException, IllegalBlockSizeException,
 			BadPaddingException, DataLengthException, IllegalStateException, InvalidCipherTextException,
-			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException {
+			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidAlgorithmParameterException {
 
 		long startTime = System.currentTimeMillis();
 

@@ -79,13 +79,12 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int s = 0; s < sizes.length; s++) {
 
 			// test various UserPasswords
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 3; i++) {
 
 				String randomPW = generateRandomString(20);
 				String randomPIN = generateRandomString(6);
 
-				logger.debug("Testing {}-bit AES key generation from user password and PIN:",
-						sizes[s].value());
+				logger.debug("Testing {}-bit AES key generation from user password and PIN:", sizes[s].value());
 				logger.debug("Random PW: {}.", randomPW);
 				logger.debug("Random PIN: {}.", randomPIN);
 
@@ -170,8 +169,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			password[i] = generateRandomString(20).toCharArray();
 			byte[] salt = PasswordUtil.generateRandomSalt();
 
-			logger.debug("Validating password '{}' with salt '{}'.", String.valueOf(password[i]),
-					EncryptionUtil.toHex(salt));
+			logger.debug("Validating password '{}' with salt '{}'.", String.valueOf(password[i]), EncryptionUtil.toHex(salt));
 
 			// generate hash
 			byte[] hash = PasswordUtil.generateHash(password[i], salt);
@@ -182,7 +180,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			assertTrue(isValid);
 
 			// test validation with wrong password, salt or hash
-			for (int j = 0; j < 10; j++) {
+			for (int j = 0; j < 3; j++) {
 
 				// assure new parameters
 				char[] otherPW;
