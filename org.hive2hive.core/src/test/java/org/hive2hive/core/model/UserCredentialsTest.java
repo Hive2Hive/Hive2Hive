@@ -34,6 +34,14 @@ public class UserCredentialsTest extends H2HJUnitTest {
 
 		// test if same result twice
 		Assert.assertEquals(credentials1.getProfileLocationKey(), credentials2.getProfileLocationKey());
+
+		// test whether the method does not return false positives
+		UserCredentials wrongCredentials1 = new UserCredentials(userName + "A", password, pin);
+		UserCredentials wrongCredentials2 = new UserCredentials(userName, password + "-B", pin);
+		UserCredentials wrongCredentials3 = new UserCredentials(userName, password, pin + "_C");
+		Assert.assertNotEquals(credentials1.getProfileLocationKey(), wrongCredentials1.getProfileLocationKey());
+		Assert.assertNotEquals(credentials1.getProfileLocationKey(), wrongCredentials2.getProfileLocationKey());
+		Assert.assertNotEquals(credentials1.getProfileLocationKey(), wrongCredentials3.getProfileLocationKey());
 	}
 
 	@AfterClass

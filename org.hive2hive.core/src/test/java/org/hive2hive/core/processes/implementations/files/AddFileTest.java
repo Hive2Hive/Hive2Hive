@@ -39,7 +39,7 @@ import org.junit.Test;
 public class AddFileTest extends H2HJUnitTest {
 
 	private final static int CHUNK_SIZE = 1024;
-	private final static int networkSize = 3;
+	private final static int NETWORK_SIZE = 3;
 
 	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
@@ -51,7 +51,7 @@ public class AddFileTest extends H2HJUnitTest {
 		testClass = AddFileTest.class;
 		beforeClass();
 		// setup network
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
 		// create some random user credentials
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		// register and login a user (peer 0)

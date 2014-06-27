@@ -36,7 +36,7 @@ import org.junit.Test;
  */
 public class NotificationTest extends H2HJUnitTest {
 
-	private static final int networkSize = 10;
+	private static final int NETWORK_SIZE = 6;
 	private List<NetworkManager> network;
 
 	private UserCredentials userACredentials;
@@ -51,22 +51,20 @@ public class NotificationTest extends H2HJUnitTest {
 
 	@Before
 	public void loginNodes() throws NoPeerConnectionException {
-		network = NetworkTestUtil.createNetwork(networkSize);
+		super.beforeMethod();
+		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
 
 		// create 10 nodes and login 5 of them:
 		// node 0-2: user A
 		// node 3-4: user B
 		// node 5: user C
-		userACredentials = new UserCredentials("User A", NetworkTestUtil.randomString(),
-				NetworkTestUtil.randomString());
+		userACredentials = new UserCredentials("User A", NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
 		UseCaseTestUtil.register(userACredentials, network.get(0));
 
-		userBCredentials = new UserCredentials("User B", NetworkTestUtil.randomString(),
-				NetworkTestUtil.randomString());
+		userBCredentials = new UserCredentials("User B", NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
 		UseCaseTestUtil.register(userBCredentials, network.get(3));
 
-		userCCredentials = new UserCredentials("User C", NetworkTestUtil.randomString(),
-				NetworkTestUtil.randomString());
+		userCCredentials = new UserCredentials("User C", NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
 		UseCaseTestUtil.register(userCCredentials, network.get(5));
 
 		// login all nodes
@@ -92,14 +90,17 @@ public class NotificationTest extends H2HJUnitTest {
 			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory,
-				new HashSet<String>(0), notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, new HashSet<String>(0),
+				notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();
 
 		// wait until all messages are sent
 		UseCaseTestUtil.waitTillSucceded(listener, 10);
+
+		Assert.assertEquals(0, msgFactory.getArrivedMessageCount());
+		Assert.assertEquals(0, msgFactory.getSentMessageCount());
 	}
 
 	/**
@@ -120,8 +121,8 @@ public class NotificationTest extends H2HJUnitTest {
 		Set<String> users = new HashSet<String>(1);
 		users.add(userACredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory,
-				new HashSet<String>(0), notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, new HashSet<String>(0),
+				notifier);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -149,8 +150,7 @@ public class NotificationTest extends H2HJUnitTest {
 		Set<String> users = new HashSet<String>(1);
 		users.add(userACredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users,
-				notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -172,9 +172,8 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws ProcessExecutionException
 	 */
 	@Test
-	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException,
-			NoSessionException {
+	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException, InvalidProcessStateException,
+			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(3);
@@ -182,8 +181,7 @@ public class NotificationTest extends H2HJUnitTest {
 		users.add(userBCredentials.getUserId());
 		users.add(userCCredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users,
-				notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		process.start();
 
 		H2HWaiter waiter = new H2HWaiter(20);
@@ -207,9 +205,8 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws ProcessExecutionException
 	 */
 	@Test
-	public void testNotifyUnfriendlyLogoutInitial() throws ClassNotFoundException, IOException,
-			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException, NoSessionException {
+	public void testNotifyUnfriendlyLogoutInitial() throws ClassNotFoundException, IOException, InterruptedException,
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -217,8 +214,7 @@ public class NotificationTest extends H2HJUnitTest {
 		users.add(userACredentials.getUserId());
 		users.add(userBCredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users,
-				notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
@@ -247,9 +243,8 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws ProcessExecutionException
 	 */
 	@Test
-	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException,
-			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException, NoSessionException {
+	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException, InterruptedException,
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -257,8 +252,7 @@ public class NotificationTest extends H2HJUnitTest {
 		users.add(userACredentials.getUserId());
 		users.add(userBCredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users,
-				notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
@@ -288,17 +282,15 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws ProcessExecutionException
 	 */
 	@Test
-	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException,
-			InterruptedException, InvalidProcessStateException, IllegalArgumentException,
-			NoPeerConnectionException, NoSessionException {
+	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException, InterruptedException,
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userACredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users,
-				notifier);
+		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
@@ -316,6 +308,14 @@ public class NotificationTest extends H2HJUnitTest {
 
 	@After
 	public void shutdown() {
+		afterMethod();
+		for (NetworkManager manager : network) {
+			try {
+				UseCaseTestUtil.logout(manager);
+			} catch (NoPeerConnectionException | NoSessionException e) {
+				// ignore
+			}
+		}
 		NetworkTestUtil.shutdownNetwork(network);
 	}
 

@@ -54,8 +54,8 @@ public class MoveFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRootToDirectory() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException, NoPeerConnectionException {
+	public void testRootToDirectory() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
+			NoSessionException, NoPeerConnectionException {
 		// add a file to the root
 		File file = new File(root, "test-file-from-root-to-folder");
 		FileUtils.write(file, NetworkTestUtil.randomString());
@@ -82,8 +82,8 @@ public class MoveFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDirectoryToRoot() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException, NoPeerConnectionException {
+	public void testDirectoryToRoot() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
+			NoSessionException, NoPeerConnectionException {
 		// add the source folder
 		File folder = new File(root, "from-source-folder-to-root");
 		folder.mkdir();
@@ -143,8 +143,8 @@ public class MoveFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRename() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException, NoPeerConnectionException {
+	public void testRename() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
+			NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(1);
 		UseCaseTestUtil.login(userCredentials, client, root);
 

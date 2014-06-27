@@ -15,6 +15,7 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
@@ -62,8 +63,8 @@ public class RegisterProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRegisterProcessSuccess() throws InvalidProcessStateException, ClassNotFoundException,
-			IOException, GetFailedException, NoPeerConnectionException {
+	public void testRegisterProcessSuccess() throws InvalidProcessStateException, ClassNotFoundException, IOException,
+			GetFailedException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 		NetworkManager otherClient = network.get(1);
 
@@ -78,8 +79,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 
 		// verify put locations
 		FutureGet getLocations = otherClient.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(
-						H2HConstants.USER_LOCATIONS));
+				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		getLocations.awaitUninterruptibly();
 		getLocations.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) getLocations.getData().object();
@@ -90,8 +90,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 
 		// verify put user public key
 		FutureGet getKey = otherClient.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(
-						H2HConstants.USER_PUBLIC_KEY));
+				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_PUBLIC_KEY));
 		getKey.awaitUninterruptibly();
 		getKey.getFutureRequests().awaitUninterruptibly();
 		UserPublicKey publicKey = (UserPublicKey) getKey.getData().object();
@@ -107,16 +106,14 @@ public class RegisterProcessTest extends H2HJUnitTest {
 
 		// already put a locations map
 		FuturePut putLocations = client.getDataManager().putUnblocked(
-				new Parameters().setLocationKey(credentials.getUserId())
-						.setContentKey(H2HConstants.USER_LOCATIONS)
+				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS)
 						.setData(new Locations(credentials.getUserId())));
 		putLocations.awaitUninterruptibly();
 		putLocations.getFutureRequests().awaitUninterruptibly();
 
 		assertTrue(putLocations.isSuccess());
 
-		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
-				client);
+		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, client);
 		ProcessComponentListener listener = new ProcessComponentListener();
 		registerProcess.attachListener(listener);
 		registerProcess.start();
@@ -125,5 +122,22 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasFailed());
+	}
+
+	@Test
+	public void testRegisterMultipleUsers() throws NoPeerConnectionException {
+		// register three users on two peers
+		UserCredentials credentials1 = NetworkTestUtil.generateRandomCredentials();
+		UseCaseTestUtil.register(credentials1, network.get(0));
+
+		UserCredentials credentials2 = NetworkTestUtil.generateRandomCredentials();
+		UseCaseTestUtil.register(credentials2, network.get(1));
+
+		UserCredentials credentials3 = NetworkTestUtil.generateRandomCredentials();
+		UseCaseTestUtil.register(credentials3, network.get(0));
+
+		// login two of them
+		UseCaseTestUtil.login(credentials2, network.get(0), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(credentials1, network.get(1), FileTestUtil.getTempDirectory());
 	}
 }

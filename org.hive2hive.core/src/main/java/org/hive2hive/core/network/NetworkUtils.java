@@ -31,6 +31,7 @@ public class NetworkUtils {
 			ds.setReuseAddress(true);
 			return true;
 		} catch (IOException e) {
+			return false;
 		} finally {
 			if (ds != null) {
 				ds.close();
@@ -43,8 +44,6 @@ public class NetworkUtils {
 				}
 			}
 		}
-
-		return false;
 	}
 
 	/**
@@ -56,8 +55,9 @@ public class NetworkUtils {
 	 *         the peer address with the lowest node id
 	 */
 	public static PeerAddress choseFirstPeerAddress(List<PeerAddress> list) {
-		if (list == null || list.isEmpty())
+		if (list == null || list.isEmpty()) {
 			return null;
+		}
 		Collections.sort(list, new PeerAddressComperator());
 		return list.get(0);
 	}

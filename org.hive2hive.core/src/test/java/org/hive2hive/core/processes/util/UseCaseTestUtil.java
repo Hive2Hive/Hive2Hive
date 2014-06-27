@@ -118,6 +118,11 @@ public class UseCaseTestUtil {
 		login(credentials, networkManager, root);
 	}
 
+	public static void logout(NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
+		ProcessComponent process = ProcessFactory.instance().createLogoutProcess(networkManager);
+		executeProcess(process);
+	}
+
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials)
 			throws GetFailedException, NoPeerConnectionException {
 		UserProfileManager manager = new UserProfileManager(networkManager.getDataManager(), credentials);

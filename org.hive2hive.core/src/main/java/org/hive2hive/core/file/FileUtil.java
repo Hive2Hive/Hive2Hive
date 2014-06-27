@@ -76,6 +76,7 @@ public class FileUtil {
 			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
 			return (PersistentMetaData) EncryptionUtil.deserializeObject(content);
 		} catch (Exception e) {
+			logger.warn("Cannot read the persistent meta data. It probably does not exist yet");
 			return new PersistentMetaData();
 		}
 	}
@@ -87,8 +88,9 @@ public class FileUtil {
 	 */
 	public static String getFileSep() {
 		String fileSep = System.getProperty("file.separator");
-		if (fileSep.equals("\\"))
+		if (fileSep.equals("\\")) {
 			fileSep = "\\\\";
+		}
 		return fileSep;
 	}
 
@@ -99,8 +101,9 @@ public class FileUtil {
 	 * @return the path to the file or null if the parameter is null
 	 */
 	public static Path getPath(Path root, Index fileToFind) {
-		if (fileToFind == null)
+		if (fileToFind == null) {
 			return null;
+		}
 		return Paths.get(root.toString(), fileToFind.getFullPath().toString());
 	}
 
@@ -118,11 +121,13 @@ public class FileUtil {
 			stream = url.openStream();
 			return stream.available();
 		} catch (IOException e) {
+			// just make it the traditional way
 			return file.length();
 		} finally {
 			try {
-				if (stream != null)
+				if (stream != null) {
 					stream.close();
+				}
 			} catch (IOException e) {
 				// ignore
 			}
