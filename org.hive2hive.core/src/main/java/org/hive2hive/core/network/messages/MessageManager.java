@@ -29,6 +29,7 @@ import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.core.security.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,7 +189,7 @@ public final class MessageManager implements IMessageManager {
 
 		try {
 			// asymmetrically encrypt message
-			byte[] messageBytes = EncryptionUtil.serializeObject(message);
+			byte[] messageBytes = SerializationUtil.serialize(message);
 			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes, targetPublicKey,
 					H2HConstants.KEYLENGTH_HYBRID_AES);
 

@@ -19,7 +19,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	@Override
 	public EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			IOException {
-		byte[] serialized = EncryptionUtil.serializeObject(content);
+		byte[] serialized = SerializationUtil.serialize(content);
 		byte[] initVector = EncryptionUtil.generateIV();
 		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector);
 
@@ -32,13 +32,13 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	public NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector());
-		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
+		return (NetworkContent) SerializationUtil.deserialize(decrypted);
 	}
 
 	@Override
 	public HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
-		byte[] serialized = EncryptionUtil.serializeObject(content);
+		byte[] serialized = SerializationUtil.serialize(content);
 
 		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey,
 				H2HConstants.KEYLENGTH_HYBRID_AES);
@@ -50,7 +50,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
-		return (NetworkContent) EncryptionUtil.deserializeObject(decrypted);
+		return (NetworkContent) SerializationUtil.deserialize(decrypted);
 	}
 
 	public static String key2String(PublicKey key) {

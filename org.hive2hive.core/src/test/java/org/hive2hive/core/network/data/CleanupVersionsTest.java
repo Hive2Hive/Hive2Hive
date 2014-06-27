@@ -21,6 +21,7 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
+import org.hive2hive.core.security.SerializationUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -93,7 +94,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 	private H2HTestData generateTestData(long timeStamp) throws IOException {
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 		// get a MD5 hash of the test data object itself
-		byte[] hash = HashUtil.hash(EncryptionUtil.serializeObject(testData));
+		byte[] hash = HashUtil.hash(SerializationUtil.serialize(testData));
 		// use time stamp value and the first part of the MD5 hash as version key
 		Number160 versionKey = new Number160(timeStamp, new Number160(Arrays.copyOf(hash, Number160.BYTE_ARRAY_SIZE)));
 		// assign the version key to the test data

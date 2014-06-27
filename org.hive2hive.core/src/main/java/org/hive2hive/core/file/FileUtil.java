@@ -20,7 +20,7 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class FileUtil {
 			metaData.setDownloads(downloadManager.getOpenTasks());
 		}
 
-		byte[] encoded = EncryptionUtil.serializeObject(metaData);
+		byte[] encoded = SerializationUtil.serialize(metaData);
 		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(), encoded);
 	}
 
@@ -74,7 +74,7 @@ public class FileUtil {
 	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException {
 		try {
 			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
-			return (PersistentMetaData) EncryptionUtil.deserializeObject(content);
+			return (PersistentMetaData) SerializationUtil.deserialize(content);
 		} catch (Exception e) {
 			logger.warn("Cannot read the persistent meta data. It probably does not exist yet");
 			return new PersistentMetaData();

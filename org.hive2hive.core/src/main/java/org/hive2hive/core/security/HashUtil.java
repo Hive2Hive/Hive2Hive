@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.PublicKey;
 import java.util.Arrays;
 
 import org.bouncycastle.crypto.digests.MD5Digest;
@@ -12,9 +11,19 @@ import org.bouncycastle.crypto.io.DigestInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Util for hashing and comparing hashes.
+ * 
+ * @author Nico, Chris
+ * 
+ */
 public class HashUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(HashUtil.class);
+
+	private HashUtil() {
+		// only static methods
+	}
 
 	/**
 	 * Generates a MD5 hash of a given data

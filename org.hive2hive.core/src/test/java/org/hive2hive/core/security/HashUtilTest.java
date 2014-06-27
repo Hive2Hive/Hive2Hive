@@ -342,11 +342,11 @@ public class HashUtilTest extends H2HJUnitTest {
 		logger.debug("Testing data serialization.");
 		logger.debug("Test String: {}.", data);
 
-		byte[] serializedData = EncryptionUtil.serializeObject(data);
+		byte[] serializedData = SerializationUtil.serialize(data);
 		assertNotNull(serializedData);
 		printBytes("Serialized Data:", serializedData);
 
-		String deserializedData = (String) EncryptionUtil.deserializeObject(serializedData);
+		String deserializedData = (String) SerializationUtil.deserialize(serializedData);
 		assertNotNull(deserializedData);
 		assertEquals(data, deserializedData);
 	}

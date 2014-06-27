@@ -1,6 +1,5 @@
 package org.hive2hive.core.security;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -296,22 +295,6 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			assertTrue(isVerified);
 		}
-	}
-
-	@Test
-	public void serializationTest() throws IOException, ClassNotFoundException {
-
-		String data = generateRandomString(1000);
-		logger.debug("Testing data serialization.");
-		logger.debug("Test String: {}.", data);
-
-		byte[] serializedData = EncryptionUtil.serializeObject(data);
-		assertNotNull(serializedData);
-		printBytes("Serialized Data:", serializedData);
-
-		String deserializedData = (String) EncryptionUtil.deserializeObject(serializedData);
-		assertNotNull(deserializedData);
-		assertEquals(data, deserializedData);
 	}
 
 	@Test

@@ -16,6 +16,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.core.security.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		// deserialize decrypted message
 		Object message = null;
 		try {
-			message = EncryptionUtil.deserializeObject(decryptedMessage);
+			message = SerializationUtil.deserialize(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Message could not be deserialized. Reason = '{}'.", e.getMessage());
 		}
@@ -107,12 +108,11 @@ public class MessageReplyHandler implements ObjectDataReply {
 				AcceptanceReply reply = receivedMessage.accept();
 				if (AcceptanceReply.OK == reply) {
 					// handle message in own thread
-					logger.debug("Received and accepted the message. Node ID = '{}'.",
-							networkManager.getNodeId());
+					logger.debug("Received and accepted the message. Node ID = '{}'.", networkManager.getNodeId());
 					new Thread(receivedMessage).start();
 				} else {
-					logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.",
-							reply, networkManager.getNodeId());
+					logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.", reply,
+							networkManager.getNodeId());
 				}
 
 				return reply;

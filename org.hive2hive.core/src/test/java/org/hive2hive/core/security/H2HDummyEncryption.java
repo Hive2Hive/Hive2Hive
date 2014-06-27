@@ -24,25 +24,25 @@ public class H2HDummyEncryption implements IH2HEncryption {
 	@Override
 	public EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			IOException {
-		return new EncryptedNetworkContent(EncryptionUtil.serializeObject(content), new byte[] {});
+		return new EncryptedNetworkContent(SerializationUtil.serialize(content), new byte[] {});
 	}
 
 	@Override
 	public NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			ClassNotFoundException, IOException {
-		return (NetworkContent) EncryptionUtil.deserializeObject(content.getCipherContent());
+		return (NetworkContent) SerializationUtil.deserialize(content.getCipherContent());
 	}
 
 	@Override
 	public HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
-		return new HybridEncryptedContent(new byte[] {}, EncryptionUtil.serializeObject(content));
+		return new HybridEncryptedContent(new byte[] {}, SerializationUtil.serialize(content));
 	}
 
 	@Override
 	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		return (NetworkContent) EncryptionUtil.deserializeObject(content.getEncryptedData());
+		return (NetworkContent) SerializationUtil.deserialize(content.getEncryptedData());
 	}
 
 }
