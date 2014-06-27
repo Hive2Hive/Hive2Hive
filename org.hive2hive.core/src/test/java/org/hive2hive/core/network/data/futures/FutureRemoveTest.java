@@ -63,8 +63,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		data.generateVersionKey();
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey())
-				.setData(data);
+				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey()).setData(data);
 
 		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 

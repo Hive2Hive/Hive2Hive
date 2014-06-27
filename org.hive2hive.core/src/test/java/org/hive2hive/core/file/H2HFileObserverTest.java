@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +39,7 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		CHILD
 	}
 
+	private File testDir;
 	private IFileObserver testObserver;
 	private static int WAIT = 2000;
 
@@ -51,12 +51,13 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 
 	@Before
 	public void createTestDirectory() throws Exception {
-		if (Files.exists(getTestDirectoryRoot().toPath(), LinkOption.NOFOLLOW_LINKS)) {
-			FileUtils.deleteDirectory(getTestDirectoryRoot());
+		testDir = FileTestUtil.getTempDirectory();
+		if (Files.exists(testDir.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+			FileUtils.deleteDirectory(testDir);
 		}
-		FileUtils.forceMkdir(getTestDirectoryRoot());
+		FileUtils.forceMkdir(testDir);
 
-		testObserver = new H2HFileObserver(getTestDirectoryRoot());
+		testObserver = new H2HFileObserver(testDir);
 	}
 
 	@After
@@ -67,14 +68,13 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		}
 		testObserver = null;
 
-		FileUtils.deleteDirectory(getTestDirectoryRoot());
+		FileUtils.deleteDirectory(testDir);
 	}
 
 	@Test
 	public void listenerTest() throws Exception {
 
-		final boolean[] notifiedEvent = new boolean[] { false, false, false, false, false, false, false,
-				false };
+		final boolean[] notifiedEvent = new boolean[] { false, false, false, false, false, false, false, false };
 
 		IFileObserverListener listener = new IFileObserverListener() {
 
@@ -122,15 +122,22 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		testObserver.start();
 
 		// trigger all events
-		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolderTest").toFile();
-		FileUtils.forceMkdir(subDirectory);
-		File file = new File(getTestDirectoryRoot(), "File.txt");
+		File subDirectory = new File(testDir, "SubFolderTest");
+		subDirectory.mkdir();
+		Thread.sleep(WAIT);
+
+		File file = new File(testDir, "File.txt");
 		file.createNewFile();
+		Thread.sleep(WAIT);
+
 		FileUtils.write(file, "write test");
+		Thread.sleep(WAIT);
+
 		FileUtils.moveFileToDirectory(file, subDirectory, true);
+		Thread.sleep(WAIT);
+
 		FileUtils.deleteQuietly(file);
 		FileUtils.deleteQuietly(subDirectory);
-
 		Thread.sleep(WAIT);
 
 		// check whether all events were triggered
@@ -150,7 +157,7 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.FILE_CREATED, Relation.SELF));
 
-		File fileToCreate = new File(getTestDirectoryRoot(), "CreatedFile.txt");
+		File fileToCreate = new File(testDir, "CreatedFile.txt");
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToCreate);
 		testObserver.addFileObserverListener(orderListener);
 		testObserver.start();
@@ -173,8 +180,10 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
 		expectedOrder.add(new EventCheck(Event.FILE_CREATED, Relation.SELF));
 
-		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
-		FileUtils.forceMkdir(subDirectory);
+		File subDirectory = new File(testDir, "SubFolder");
+		subDirectory.mkdir();
+		Thread.sleep(WAIT);
+
 		File fileToCreate = new File(subDirectory, "CreatedFile.txt");
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToCreate);
 		testObserver.addFileObserverListener(orderListener);
@@ -197,7 +206,7 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.FILE_DELETED, Relation.SELF));
 
-		File fileToDelete = new File(getTestDirectoryRoot(), "FileToDelete.txt");
+		File fileToDelete = new File(testDir, "FileToDelete.txt");
 		fileToDelete.createNewFile();
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToDelete);
 		testObserver.addFileObserverListener(orderListener);
@@ -221,16 +230,17 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
 		expectedOrder.add(new EventCheck(Event.FILE_DELETED, Relation.SELF));
 
-		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
-		FileUtils.forceMkdir(subDirectory);
+		File subDirectory = new File(testDir, "SubFolder");
+		subDirectory.mkdir();
 		File fileToDelete = new File(subDirectory, "FileToDelete.txt");
 		fileToDelete.createNewFile();
+		Thread.sleep(WAIT);
+
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToDelete);
 		testObserver.addFileObserverListener(orderListener);
 		testObserver.start();
 
 		FileUtils.deleteQuietly(fileToDelete);
-
 		Thread.sleep(WAIT);
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
@@ -246,7 +256,7 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.FILE_CHANGED, Relation.SELF));
 
-		File fileToChange = new File(getTestDirectoryRoot(), "FileToChange.txt");
+		File fileToChange = new File(testDir, "FileToChange.txt");
 		fileToChange.createNewFile();
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToChange);
 		testObserver.addFileObserverListener(orderListener);
@@ -270,16 +280,17 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.FILE_CHANGED, Relation.SELF));
 
-		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
-		FileUtils.forceMkdir(subDirectory);
+		File subDirectory = new File(testDir, "SubFolder");
+		subDirectory.mkdir();
 		File fileToChange = new File(subDirectory, "FileToChange.txt");
 		fileToChange.createNewFile();
+		Thread.sleep(WAIT);
+
 		FileEventOrderListener orderListener = new FileEventOrderListener(fileToChange);
 		testObserver.addFileObserverListener(orderListener);
 		testObserver.start();
 
 		FileUtils.write(fileToChange, "modified");
-
 		Thread.sleep(WAIT);
 
 		// assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
@@ -296,7 +307,7 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		List<EventCheck> expectedOrder = new ArrayList<EventCheck>();
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_CREATED, Relation.SELF));
 
-		File directoryToCreate = new File(getTestDirectoryRoot(), "CreatedDirectory");
+		File directoryToCreate = new File(testDir, "CreatedDirectory");
 		FileEventOrderListener orderListener = new FileEventOrderListener(directoryToCreate);
 		testObserver.addFileObserverListener(orderListener);
 		testObserver.start();
@@ -319,15 +330,16 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_CHANGED, Relation.PARENT));
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_CREATED, Relation.SELF));
 
-		File subDirectory = Paths.get(getTestDirectoryRoot().getAbsolutePath(), "SubFolder").toFile();
-		FileUtils.forceMkdir(subDirectory);
+		File subDirectory = new File(testDir, "SubFolder");
+		subDirectory.mkdir();
+		Thread.sleep(WAIT);
+
 		File directoryToCreate = new File(subDirectory, "CreatedDirectory");
 		FileEventOrderListener orderListener = new FileEventOrderListener(directoryToCreate);
 		testObserver.addFileObserverListener(orderListener);
 		testObserver.start();
 
-		FileUtils.forceMkdir(directoryToCreate);
-
+		directoryToCreate.mkdir();
 		Thread.sleep(WAIT);
 
 		assertTrue(validateOrder(expectedOrder, orderListener.getRealOrder()));
@@ -346,7 +358,7 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_DELETED, Relation.CHILD));
 		expectedOrder.add(new EventCheck(Event.DIRECTORY_DELETED, Relation.SELF));
 
-		File directoryToDelete = new File(getTestDirectoryRoot(), "DirectoryToDelete");
+		File directoryToDelete = new File(testDir, "DirectoryToDelete");
 		FileUtils.forceMkdir(directoryToDelete);
 		File childFile = new File(directoryToDelete, "ChildFile.txt");
 		childFile.createNewFile();
@@ -384,10 +396,6 @@ public class H2HFileObserverTest extends H2HJUnitTest {
 				return false;
 		}
 		return true;
-	}
-
-	private static File getTestDirectoryRoot() {
-		return Paths.get(FileUtils.getTempDirectoryPath(), "Hive2Hive Test").toFile();
 	}
 
 	private class EventCheck {
