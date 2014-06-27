@@ -55,7 +55,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 						toDelete.add(file);
 					}
 				} catch (IOException e) {
-					logger.warn("Could not generate the MD5 hash of the file to be able to compare against the file taste.");
+					logger.warn("Could not generate the hash of the file to be able to compare against the file taste.", e);
 				}
 			}
 		}
@@ -70,7 +70,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 				}
 			} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
 					| InvalidProcessStateException e) {
-				logger.error(e.getMessage());
+				logger.error("Cannot start a process to modify {}.", file.getName(), e);
 			}
 		}
 	}

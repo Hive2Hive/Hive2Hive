@@ -94,7 +94,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 				try {
 					fileList.start();
 				} catch (InvalidProcessStateException e) {
-					logger.error("Could not launch the process to get the file list.");
+					logger.error("Could not launch the process to get the file list.", e);
 				}
 			}
 		}

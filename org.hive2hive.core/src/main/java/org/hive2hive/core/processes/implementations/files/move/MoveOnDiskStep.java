@@ -46,7 +46,7 @@ public class MoveOnDiskStep extends ProcessStep {
 		try {
 			getFileKeys();
 		} catch (GetFailedException | NoSessionException | IllegalStateException e) {
-			throw new ProcessExecutionException(String.format("File keys could not be fetched. reason = '%s'",
+			throw new ProcessExecutionException(String.format("File keys could not be fetched. Reason = '%s'",
 					e.getMessage()), e);
 		}
 
@@ -60,7 +60,7 @@ public class MoveOnDiskStep extends ProcessStep {
 		}
 	}
 
-	private void verifyFiles() throws IllegalArgumentException, NoSessionException {
+	private void verifyFiles() throws NoSessionException {
 		File source = context.getSource();
 		File destination = context.getDestination();
 
@@ -81,8 +81,7 @@ public class MoveOnDiskStep extends ProcessStep {
 		}
 	}
 
-	private void getFileKeys() throws GetFailedException, InvalidProcessStateException, NoSessionException,
-			IllegalStateException {
+	private void getFileKeys() throws GetFailedException, InvalidProcessStateException, NoSessionException {
 		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 		UserProfile userProfile = profileManager.getUserProfile(getID(), false);
 

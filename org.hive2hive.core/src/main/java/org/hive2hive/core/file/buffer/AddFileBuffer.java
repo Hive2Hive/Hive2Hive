@@ -30,11 +30,11 @@ public class AddFileBuffer extends BaseFileBuffer {
 		for (File toAdd : fileBuffer) {
 			try {
 				IProcessComponent process = fileManager.add(toAdd);
-				if (!fileManager.isAutostart())
+				if (!fileManager.isAutostart()) {
 					process.start();
-			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation
-					| InvalidProcessStateException e) {
-				logger.error(e.getMessage());
+				}
+			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation | InvalidProcessStateException e) {
+				logger.error("Cannot start a process to add {}", toAdd.getName(), e);
 			}
 		}
 	}
@@ -54,7 +54,8 @@ public class AddFileBuffer extends BaseFileBuffer {
 			for (File possibleParent : fileBuffer) {
 				if (!bufferedFile.equals(possibleParent)
 						&& bufferedFile.getAbsolutePath().startsWith(possibleParent.getAbsolutePath())) {
-					logger.debug("Parent ({}) already in buffer, no need to add child ({}), too.", possibleParent.getAbsolutePath(), bufferedFile.getAbsolutePath());
+					logger.debug("Parent ({}) already in buffer, no need to add child ({}), too.",
+							possibleParent.getAbsolutePath(), bufferedFile.getAbsolutePath());
 					filtered.remove(bufferedFile);
 				}
 			}

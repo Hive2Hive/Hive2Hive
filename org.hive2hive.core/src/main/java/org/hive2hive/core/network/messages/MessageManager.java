@@ -182,8 +182,8 @@ public final class MessageManager implements IMessageManager {
 		H2HSession session;
 		try {
 			session = networkManager.getSession();
-		} catch (NoSessionException e2) {
-			logger.error("No logged in user / no session. The message will not be sent.");
+		} catch (NoSessionException e) {
+			logger.error("No logged in user / no session. The message will not be sent.", e);
 			return null;
 		}
 
@@ -197,8 +197,8 @@ public final class MessageManager implements IMessageManager {
 			try {
 				byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate());
 				encryptedMessage.setSignature(session.getUserId(), signature);
-			} catch (InvalidKeyException | SignatureException e1) {
-				logger.error("An exception occured while signing the message. The message will not be sent.", e1);
+			} catch (InvalidKeyException | SignatureException e) {
+				logger.error("An exception occured while signing the message. The message will not be sent.", e);
 				return null;
 			}
 

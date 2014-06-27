@@ -61,12 +61,12 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 			try {
 				logger.debug("Starting to delete buffered file {}.", toDelete);
 				IProcessComponent delete = fileManager.delete(toDelete);
-				if (!fileManager.isAutostart())
+				if (!fileManager.isAutostart()) {
 					delete.start();
+				}
 				delete.await(MAX_DELETION_PROCESS_DURATION_MS);
-			} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException
-					| InterruptedException e) {
-				logger.error(e.getMessage());
+			} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException e) {
+				logger.error("Cannot start the process to delete {}.", toDelete.getName(), e);
 			}
 		}
 
