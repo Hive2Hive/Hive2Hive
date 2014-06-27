@@ -32,7 +32,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			assertNotNull(salt[i]);
 			assertTrue(salt[i].length == PasswordUtil.SALT_BIT_SIZE / 8);
 
-			logger.debug("Generated Salt: {}.", EncryptionUtil.toHex(salt[i]));
+			logger.debug("Generated Salt: {}.", EncryptionUtil.byteToHex(salt[i]));
 
 			// test whether salts are random
 			for (int j = 0; j < i; j++) {
@@ -49,7 +49,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int i = 0; i < input.length; i++) {
 			input[i] = generateRandomString(15).getBytes();
 
-			logger.debug("Random Input: {}.", EncryptionUtil.toHex(input[i]));
+			logger.debug("Random Input: {}.", EncryptionUtil.byteToHex(input[i]));
 
 			byte[][] fixedSalt = new byte[10][];
 			for (int j = 0; j < fixedSalt.length; j++) {
@@ -60,7 +60,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				assertNotNull(fixedSalt[j]);
 				assertTrue(fixedSalt[j].length == PasswordUtil.SALT_BIT_SIZE / 8);
 
-				logger.debug("Generated Fixed Salt: {}.", EncryptionUtil.toHex(fixedSalt[j]));
+				logger.debug("Generated Fixed Salt: {}.", EncryptionUtil.byteToHex(fixedSalt[j]));
 
 				// test whether salts are equal
 				for (int k = 0; k < j; k++) {
@@ -100,7 +100,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 					assertTrue(aesKey[j].getEncoded().length == sizes[s].value() / 8);
 
 					logger.debug("Generated {}-bit AES key: {}.", sizes[s].value(),
-							EncryptionUtil.toHex(aesKey[j].getEncoded()));
+							EncryptionUtil.byteToHex(aesKey[j].getEncoded()));
 
 					// test whether generated AES passwords are equal
 					for (int k = 0; k < j; k++) {
@@ -131,7 +131,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			assertNotNull(hash);
 			assertTrue(hash.length == PasswordUtil.HASH_BIT_SIZE / 8);
 
-			logger.debug("Generated Salt: {}.", EncryptionUtil.toHex(hash));
+			logger.debug("Generated Salt: {}.", EncryptionUtil.byteToHex(hash));
 
 			// test if hash outcome stays always the same with the same password and salt
 			for (int j = 0; j < 10; j++) {
@@ -169,7 +169,8 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			password[i] = generateRandomString(20).toCharArray();
 			byte[] salt = PasswordUtil.generateRandomSalt();
 
-			logger.debug("Validating password '{}' with salt '{}'.", String.valueOf(password[i]), EncryptionUtil.toHex(salt));
+			logger.debug("Validating password '{}' with salt '{}'.", String.valueOf(password[i]),
+					EncryptionUtil.byteToHex(salt));
 
 			// generate hash
 			byte[] hash = PasswordUtil.generateHash(password[i], salt);

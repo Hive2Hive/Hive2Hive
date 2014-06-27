@@ -102,7 +102,6 @@ public class FileTaste {
 
 	@Override
 	public String toString() {
-
 		return String.format("%s: %s [%s] %s", isFile() ? "File" : "Folder", getPath(), getUserPermissions(),
 				isFile() ? String.format("(MD5: %s)", EncryptionUtil.byteToHex(getMd5())) : "");
 	}

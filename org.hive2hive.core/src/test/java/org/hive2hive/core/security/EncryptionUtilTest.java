@@ -62,7 +62,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			long start = System.currentTimeMillis();
 			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s]);
 			long stop = System.currentTimeMillis();
-			logger.debug("Generated AES key: {}.", EncryptionUtil.toHex(aesKey.getEncoded()));
+			logger.debug("Generated AES key: {}.", EncryptionUtil.byteToHex(aesKey.getEncoded()));
 			logger.debug("Time: {} ms.", stop - start);
 
 			assertNotNull(aesKey);
@@ -89,8 +89,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			assertNotNull(rsaKeyPair.getPrivate());
 			assertNotNull(rsaKeyPair.getPublic());
 
-			logger.debug("Private Key: {}.", EncryptionUtil.toHex(rsaKeyPair.getPrivate().getEncoded()));
-			logger.debug("Public Key: {}.", EncryptionUtil.toHex(rsaKeyPair.getPublic().getEncoded()));
+			logger.debug("Private Key: {}.", EncryptionUtil.byteToHex(rsaKeyPair.getPrivate().getEncoded()));
+			logger.debug("Public Key: {}.", EncryptionUtil.byteToHex(rsaKeyPair.getPublic().getEncoded()));
 			logger.debug("Time: {} ms.", stop - start);
 		}
 	}

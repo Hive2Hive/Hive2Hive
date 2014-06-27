@@ -121,7 +121,7 @@ public class H2HJUnitTest {
 
 	protected static void printBytes(String description, byte[] bytes) {
 		logger.debug(description);
-		logger.debug(EncryptionUtil.toHex(bytes));
+		logger.debug(EncryptionUtil.byteToHex(bytes));
 	}
 
 }

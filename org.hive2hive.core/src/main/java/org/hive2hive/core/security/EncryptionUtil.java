@@ -363,26 +363,6 @@ public final class EncryptionUtil {
 		return false;
 	}
 
-	/**
-	 * Converts the content of a byte array into a human readable form.
-	 * 
-	 * @param data The byte array to be converted.
-	 * @return The hex converted byte array.
-	 */
-	public static String toHex(byte[] data) {
-		final String digits = "0123456789abcdef";
-		StringBuilder buf = new StringBuilder();
-
-		for (int i = 0; i != data.length; i++) {
-			int v = data[i] & 0xff;
-
-			buf.append(digits.charAt(v >> 4));
-			buf.append(digits.charAt(v & 0xf));
-		}
-
-		return buf.toString();
-	}
-
 	private static void installBCProvider() {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
@@ -412,6 +392,12 @@ public final class EncryptionUtil {
 		return result;
 	}
 
+	/**
+	 * Converts the content of a byte array into a human readable form.
+	 * 
+	 * @param data The byte array to be converted.
+	 * @return The hex converted byte array.
+	 */
 	public static String byteToHex(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 		for (byte b : data) {
