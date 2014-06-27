@@ -41,8 +41,7 @@ public class H2HStorageMemory extends StorageLayer {
 	}
 
 	@Override
-	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
-			boolean domainProtection) {
+	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
 		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
 			logger.trace("Start put verification. Location key = '{}', Content key = '{}', Version key = '{}'.",
 					key.getLocationKey(), key.getContentKey(), key.getVersionKey());
@@ -61,9 +60,9 @@ public class H2HStorageMemory extends StorageLayer {
 				cleanupVersions(key, publicKey);
 			}
 
-			logger.trace(String.format(
-					"Put verification finished. Location key = '%s', Content key = '%s', Version key = '%s'.",
-					key.getLocationKey(), key.getContentKey(), key.getVersionKey()));
+			logger.trace(
+					"Put verification finished with status '{}'. Location key = '{}', Content key = '{}', Version key = '{}'.",
+					status, key.getLocationKey(), key.getContentKey(), key.getVersionKey());
 			return status;
 		} else {
 			logger.trace("Disabled the put verification strategy on the remote peer.");
@@ -129,8 +128,7 @@ public class H2HStorageMemory extends StorageLayer {
 
 		/** 2. check if previous exists **/
 		if (!history.lastKey().getVersionKey().equals(newData.basedOn())) {
-			logger.warn("New data is not based on previous version. Previous version key = '{}'.",
-					key.getVersionKey());
+			logger.warn("New data is not based on previous version. Previous version key = '{}'.", key.getVersionKey());
 			return PutStatusH2H.VERSION_CONFLICT;
 		}
 
@@ -166,9 +164,8 @@ public class H2HStorageMemory extends StorageLayer {
 	}
 
 	private NavigableMap<Number640, Number160> getHistoryOnStorage(Number640 key) {
-		return super.digest(
-				new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(), Number160.ZERO),
-				new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(),
-						Number160.MAX_VALUE), -1, true).getDigests();
+		return super.digest(new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(), Number160.ZERO),
+				new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(), Number160.MAX_VALUE), -1, true)
+				.getDigests();
 	}
 }

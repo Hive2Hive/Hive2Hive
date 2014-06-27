@@ -35,15 +35,17 @@ public class UserManagerTest extends H2HJUnitTest {
 	public static void endTest() {
 		afterClass();
 	}
-	
+
 	@Before
 	public void before() {
+		beforeMethod();
 		network = NetworkTestUtil.createH2HNetwork(5);
 	}
 
 	@After
 	public void after() {
 		NetworkTestUtil.shutdownH2HNetwork(network);
+		afterMethod();
 	}
 
 	@Test
@@ -53,7 +55,6 @@ public class UserManagerTest extends H2HJUnitTest {
 
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
-
 			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
 			assertFalse(isRegistered);
 		}
@@ -105,7 +106,6 @@ public class UserManagerTest extends H2HJUnitTest {
 
 		// logout
 		for (int i = 0; i < network.size(); i++) {
-
 			network.get(i).getUserManager().logout().await();
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
 			assertFalse(isLoggedIn);

@@ -107,11 +107,12 @@ public class SequentialProcess extends Process {
 	}
 
 	private void awaitAsync() throws ProcessExecutionException {
-		if (asyncHandles.isEmpty())
+		if (asyncHandles.isEmpty()) {
 			return;
-
-		if (getState() != ProcessState.RUNNING)
+		}
+		if (getState() != ProcessState.RUNNING) {
 			return;
+		}
 
 		logger.trace("Awaiting async components for completion.");
 
@@ -139,8 +140,9 @@ public class SequentialProcess extends Process {
 
 				// check for completion
 				for (Future<RollbackReason> handle : asyncHandles) {
-					if (!handle.isDone())
+					if (!handle.isDone()) {
 						return;
+					}
 				}
 				latch.countDown();
 			}
@@ -161,13 +163,15 @@ public class SequentialProcess extends Process {
 
 	private static void checkAsyncComponentsForFail(List<Future<RollbackReason>> handles) throws ProcessExecutionException {
 
-		if (handles.isEmpty())
+		if (handles.isEmpty()) {
 			return;
+		}
 
 		for (Future<RollbackReason> handle : handles) {
 
-			if (!handle.isDone())
+			if (!handle.isDone()) {
 				continue;
+			}
 
 			RollbackReason result = null;
 			try {
@@ -175,7 +179,7 @@ public class SequentialProcess extends Process {
 			} catch (InterruptedException e) {
 				logger.error("Error while checking async component.", e);
 			} catch (ExecutionException e) {
-				logger.error("AsyncComponent threw an exception.", e.getCause());
+				logger.error("AsyncComponent threw an exception.", e);
 				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
 			}
 
