@@ -225,7 +225,7 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
-			IllegalArgumentException, NoPeerConnectionException {
+			NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
 
@@ -333,7 +333,7 @@ public final class ProcessFactory {
 	}
 
 	// public ProcessComponent createUnshareProcess(File folder, NetworkManager networkManager)
-	// throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+	// throws NoPeerConnectionException, NoSessionException {
 	// UnshareProcessContext context = new UnshareProcessContext(folder);
 	//
 	// SequentialProcess process = new SequentialProcess();
@@ -357,8 +357,8 @@ public final class ProcessFactory {
 	}
 
 	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
-			final Set<String> usersToNotify, NetworkManager networkManager) throws IllegalArgumentException,
-			NoPeerConnectionException, NoSessionException {
+			final Set<String> usersToNotify, NetworkManager networkManager) throws NoPeerConnectionException,
+			NoSessionException {
 		// create a context here to provide the necessary data
 		INotifyContext context = new INotifyContext() {
 
@@ -376,7 +376,7 @@ public final class ProcessFactory {
 	}
 
 	private ProcessComponent createNotificationProcess(INotifyContext providerContext, NetworkManager networkManager)
-			throws IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			throws NoPeerConnectionException, NoSessionException {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext, networkManager.getUserId());
 
 		SequentialProcess process = new SequentialProcess();

@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
 public class DeleteFileBuffer extends BaseFileBuffer {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteFileBuffer.class);
-	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000; // timeout to omit blocks
+	// timeout to omit blocks
+	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000;
 
 	public DeleteFileBuffer(IFileManager fileManager) {
 		super(fileManager);

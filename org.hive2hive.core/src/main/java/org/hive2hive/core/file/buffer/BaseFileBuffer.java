@@ -70,6 +70,13 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 
 		@Override
 		public void run() {
+			// skip the file list
+			if (fileManager == null) {
+				fileBuffer.setSyncFiles(new HashSet<FileTaste>(0));
+				fileBuffer.setReady();
+				return;
+			}
+
 			IResultProcessComponent<List<FileTaste>> fileList = null;
 			try {
 				fileList = fileManager.getFileList();
