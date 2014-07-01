@@ -81,6 +81,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 				}
 			} catch (SendFailedException e) {
 				// add to the unreachable list, such that the next step can cleanup those locations
+				logger.debug("Cannot notify own peer {}. Will remove it from the locations soon.", peerAddress);
 				unreachablePeers.add(peerAddress);
 				// continue anyhow
 			}
@@ -98,7 +99,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 				success = true;
 			} catch (SendFailedException e) {
 				if (!peerList.isEmpty()) {
-					logger.error("Initial peer of user '{}' was offline. Try next in line.", userId);
+					logger.error("Initial peer of user '{}' was offline. Try next in line.", userId, e);
 					peerList.remove(0);
 				}
 			}

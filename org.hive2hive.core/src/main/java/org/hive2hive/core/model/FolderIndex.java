@@ -132,7 +132,7 @@ public class FolderIndex extends Index {
 	 * @param protectionKeys if the user has write access, the protection keys are != null, else, they can be
 	 *            null.
 	 */
-	public void share(KeyPair protectionKeys) throws IllegalStateException {
+	public void share(KeyPair protectionKeys) {
 		if (isRoot()) {
 			throw new IllegalStateException("Root node can't be shared.");
 		} else if (isSharedOrHasSharedChildren()) {

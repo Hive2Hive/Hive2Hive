@@ -55,7 +55,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
-		
+
 		// get user profile
 		UserProfile profile = null;
 		try {
@@ -94,6 +94,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		try {
 			profileManager.readyToPut(profile, getID());
 		} catch (PutFailedException e) {
+			logger.error("Cannot remove the file {} from the user profile", index.getFullPath(), e);
 			throw new ProcessExecutionException("Could not put user profile.");
 		}
 
@@ -121,7 +122,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			try {
 				profile = profileManager.getUserProfile(getID(), true);
 			} catch (GetFailedException e) {
-				logger.warn("Rollback failed: {}.", e.getMessage());
+				logger.warn("Rollback failed.", e);
 				return;
 			}
 
@@ -134,7 +135,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			try {
 				profileManager.readyToPut(profile, getID());
 			} catch (PutFailedException e) {
-				logger.warn("Rollback failed: {}.", e.getMessage());
+				logger.warn("Rollback failed.", e);
 			}
 		}
 	}

@@ -88,14 +88,16 @@ public class UserProfileManager {
 			entry.waitForGet();
 		} catch (GetFailedException e) {
 			// just stop the modification if an error occurs.
-			if (intendsToPut)
+			if (intendsToPut) {
 				stopModification(pid);
+			}
 			throw e;
 		}
 
 		UserProfile profile = entry.getUserProfile();
-		if (profile == null)
+		if (profile == null) {
 			throw new GetFailedException("User Profile not found");
+		}
 		return profile;
 	}
 
@@ -149,7 +151,8 @@ public class UserProfileManager {
 
 		@Override
 		public void run() {
-			while (running.get()) { // run forever
+			// run forever
+			while (running.get()) {
 				// modifying processes have advantage here because the read-only processes can profit
 				if (modifyQueue.isEmpty() && readOnlyQueue.isEmpty()) {
 					synchronized (queueWaiter) {

@@ -48,9 +48,8 @@ public class FileMenu extends H2HConsoleMenu {
 
 					String input = awaitStringParameter();
 
-					if (!input.equalsIgnoreCase("ok")) {
+					if (!"ok".equalsIgnoreCase(input)) {
 						while (!Files.exists(new File(input).toPath(), LinkOption.NOFOLLOW_LINKS)) {
-
 							printError("This directory does not exist. Please retry.");
 							input = awaitStringParameter();
 						}
@@ -151,8 +150,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, FileNotFoundException, IllegalArgumentException,
-					InterruptedException {
+			protected void execute() throws Hive2HiveException, FileNotFoundException, InterruptedException {
 
 				File file = askForFile(true);
 				if (file == null) {
@@ -240,7 +238,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Exception {
+			protected void execute() {
 				menus.getFileObserverMenu().open(isExpertMode);
 			}
 		});
@@ -294,8 +292,9 @@ public class FileMenu extends H2HConsoleMenu {
 
 			String input = awaitStringParameter();
 
-			if (input.equalsIgnoreCase("cancel"))
+			if ("cancel".equalsIgnoreCase(input)) {
 				return null;
+			}
 
 			file = new File(rootDirectory, input);
 			if (expectExistence && !file.exists()) {

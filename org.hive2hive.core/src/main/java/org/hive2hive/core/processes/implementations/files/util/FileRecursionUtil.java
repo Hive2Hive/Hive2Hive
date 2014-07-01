@@ -240,9 +240,10 @@ public class FileRecursionUtil {
 	private static void listFiles(Path path, List<Path> preorderList) {
 		preorderList.add(path);
 		File[] listFiles = path.toFile().listFiles();
-		if (listFiles != null)
+		if (listFiles != null) {
 			for (File child : listFiles) {
 				listFiles(child.toPath(), preorderList);
 			}
+		}
 	}
 }

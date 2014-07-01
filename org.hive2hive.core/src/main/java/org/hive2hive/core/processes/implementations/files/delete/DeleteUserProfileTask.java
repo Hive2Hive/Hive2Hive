@@ -50,8 +50,9 @@ public class DeleteUserProfileTask extends UserProfileTask {
 			// remove dead link from user profile
 			Index toDelete = updateUserProfile(session.getProfileManager());
 
-			if (toDelete == null)
+			if (toDelete == null) {
 				return;
+			}
 
 			// remove the file on disk
 			removeFileOnDisk(session.getRoot(), toDelete);
@@ -127,11 +128,10 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 * @param toDelete the {@link FolderIndex} that has been deleted
 	 * @throws InvalidProcessStateException
 	 * @throws NoPeerConnectionException
-	 * @throws IllegalArgumentException
 	 * @throws NoSessionException
 	 */
-	private void startNotification(Index toDelete) throws IllegalArgumentException, NoPeerConnectionException,
-			InvalidProcessStateException, NoSessionException {
+	private void startNotification(Index toDelete) throws NoPeerConnectionException, InvalidProcessStateException,
+			NoSessionException {
 		PublicKey parentFileKey = toDelete.getParent().getFileKeys().getPublic();
 		String fileName = toDelete.getName();
 		DeleteNotifyMessageFactory messageFactory = new DeleteNotifyMessageFactory(fileKey, parentFileKey, fileName);

@@ -67,8 +67,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent update(File file) throws NoSessionException, IllegalArgumentException,
-			NoPeerConnectionException {
+	public IProcessComponent update(File file) throws NoSessionException, NoPeerConnectionException {
 		if (file.isDirectory()) {
 			throw new IllegalArgumentException("A folder can have one version only");
 		} else if (!file.exists()) {
@@ -130,7 +129,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
-			IllegalArgumentException, NoSessionException, NoPeerConnectionException {
+			NoSessionException, NoPeerConnectionException {
 		// do some verifications
 		if (file.isDirectory()) {
 			throw new IllegalArgumentException("A foler has only one version");
@@ -149,7 +148,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
-			IllegalArgumentException, NoSessionException, NoPeerConnectionException {
+			NoSessionException, NoPeerConnectionException {
 		// verify
 		if (!folder.isDirectory()) {
 			throw new IllegalArgumentException("File has to be a folder.");

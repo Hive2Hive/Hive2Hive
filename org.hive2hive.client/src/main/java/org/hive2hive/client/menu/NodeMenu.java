@@ -60,7 +60,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 					print("Specify Bootstrap Port or enter 'default':");
 					port = awaitStringParameter();
 				}
-				if (port.equalsIgnoreCase("default")) {
+				if ("default".equalsIgnoreCase(port)) {
 					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
 				} else {
 					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
@@ -117,11 +117,11 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 	@Override
 	public String getInstruction() {
-
-		if (isExpertMode)
+		if (isExpertMode) {
 			return "Configure and set up your own network or connect to an existing one.";
-		else
+		} else {
 			return "Do you want to create a new network or connect to an existing one?";
+		}
 	}
 
 	public IH2HNode getNode() {

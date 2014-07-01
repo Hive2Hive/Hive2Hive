@@ -86,7 +86,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 		// analyze returned put status
 		final List<PeerAddress> versionConflict = new ArrayList<PeerAddress>();
-		List<PeerAddress> fail = new ArrayList<PeerAddress>();
+		final List<PeerAddress> fail = new ArrayList<PeerAddress>();
 		for (PeerAddress peeradress : future.getRawResult().keySet()) {
 			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
 			if (map == null) {
@@ -113,6 +113,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 									parameters.toString());
 							versionConflict.add(peeradress);
 							break;
+						default:
+							logger.warn("Got an unknown status: {}", PutStatusH2H.values()[status]);
 					}
 				}
 			}
@@ -142,8 +144,9 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 				@Override
 				public void operationComplete(FutureRemove future) {
-					if (future.isFailed())
+					if (future.isFailed()) {
 						logger.warn("Put retry: Could not delete the newly put content. '{}'", parameters.toString());
+					}
 
 					dataManager.putUnblocked(parameters).addListener(FuturePutListener.this);
 				}
@@ -294,8 +297,9 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
 			@Override
 			public void operationComplete(FutureRemove future) {
-				if (future.isFailed())
+				if (future.isFailed()) {
 					logger.warn("Put retry: Could not delete the newly put content. '{}'", parameters.toString());
+				}
 
 				success = false;
 				latch.countDown();

@@ -130,7 +130,7 @@ public class DataManager implements IDataManager {
 						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey()).start();
 			}
 		} catch (IOException e) {
-			logger.error("Put failed. {}. Exception = '{}'", parameters.toString(), e.getMessage());
+			logger.error("Put failed. {}.", parameters.toString(), e);
 			return null;
 		}
 	}
@@ -141,8 +141,9 @@ public class DataManager implements IDataManager {
 		Data data = new Data().setProtectedEntry();
 		// set new content protection keys
 		data.publicKey(parameters.getNewProtectionKeys().getPublic());
-		if (parameters.getTTL() != -1)
+		if (parameters.getTTL() != -1) {
 			data.ttlSeconds(parameters.getTTL());
+		}
 
 		// // sign the data
 		// try {

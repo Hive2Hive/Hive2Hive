@@ -200,8 +200,7 @@ public class FileSynchronizer {
 
 			// has been modified --> check if profile has same md5 as 'before'. If not, there are three
 			// different versions. Thus, the profile wins.
-			if (HashUtil.compare(fileNode.getMD5(), before.get(path))
-					&& !HashUtil.compare(fileNode.getMD5(), now.get(path))) {
+			if (HashUtil.compare(fileNode.getMD5(), before.get(path)) && !HashUtil.compare(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File '{}' has been updated locally during absence.", path);
 				updatedLocally.add(FileUtil.getPath(root, fileNode));
 			}
@@ -229,12 +228,12 @@ public class FileSynchronizer {
 			}
 
 			FileIndex fileIndex = (FileIndex) index;
-			if (before.containsKey(fileIndex.getFullPath().toString())
-					&& now.containsKey(fileIndex.getFullPath().toString())) {
-				if (!HashUtil.compare(fileIndex.getMD5(), now.get(fileIndex.getFullPath().toString()))
-						&& !HashUtil.compare(fileIndex.getMD5(), before.get(fileIndex.getFullPath().toString()))) {
+			String path = fileIndex.getFullPath().toString();
+			if (before.containsKey(path) && now.containsKey(path)) {
+				if (!HashUtil.compare(fileIndex.getMD5(), now.get(path))
+						&& !HashUtil.compare(fileIndex.getMD5(), before.get(path))) {
 					// different md5 hashes than 'before' and 'now'
-					logger.debug("File '{}' has been updated remotely during absence.", fileIndex.getFullPath());
+					logger.debug("File '{}' has been updated remotely during absence.", path);
 					updatedRemotely.add(fileIndex);
 				}
 			}
