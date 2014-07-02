@@ -17,7 +17,6 @@ import net.tomp2p.peers.Number160;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
@@ -29,6 +28,7 @@ import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +44,11 @@ public final class MessageManager implements IMessageManager {
 
 	private final NetworkManager networkManager;
 	private final Map<String, IResponseCallBackHandler> callBackHandlers;
+	private final IH2HEncryption encryption;
 
-	public MessageManager(NetworkManager networkManager) {
+	public MessageManager(NetworkManager networkManager, IH2HEncryption encryption) {
 		this.networkManager = networkManager;
+		this.encryption = encryption;
 		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
 	}
 
@@ -196,8 +198,7 @@ public final class MessageManager implements IMessageManager {
 		try {
 			// asymmetrically encrypt message
 			byte[] messageBytes = SerializationUtil.serialize(message);
-			HybridEncryptedContent encryptedMessage = EncryptionUtil.encryptHybrid(messageBytes, targetPublicKey,
-					H2HConstants.KEYLENGTH_HYBRID_AES);
+			HybridEncryptedContent encryptedMessage = encryption.encryptHybrid(messageBytes, targetPublicKey);
 
 			// create signature
 			try {

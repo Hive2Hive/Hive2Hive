@@ -40,19 +40,35 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
 		byte[] serialized = SerializationUtil.serialize(content);
 
-		HybridEncryptedContent encryptHybrid = EncryptionUtil.encryptHybrid(serialized, publicKey,
-				H2HConstants.KEYLENGTH_HYBRID_AES);
+		HybridEncryptedContent encryptHybrid = encryptHybrid(serialized, publicKey);
 		encryptHybrid.setTimeToLive(content.getTimeToLive());
 		return encryptHybrid;
 	}
 
 	@Override
-	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		byte[] decrypted = EncryptionUtil.decryptHybrid(content, privateKey);
-		return (NetworkContent) SerializationUtil.deserialize(decrypted);
+	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
+		return EncryptionUtil.encryptHybrid(content, publicKey, H2HConstants.KEYLENGTH_HYBRID_AES);
 	}
 
+	@Override
+	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
+		return (NetworkContent) SerializationUtil.deserialize(decryptHybridRaw(content, privateKey));
+	}
+
+	@Override
+	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
+		return EncryptionUtil.decryptHybrid(content, privateKey);
+	}
+
+	/**
+	 * The toString() method of a public key
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public static String key2String(PublicKey key) {
 		return EncryptionUtil.byteToHex(key.getEncoded());
 	}

@@ -67,6 +67,25 @@ public interface IH2HEncryption {
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException;
 
 	/**
+	 * Asymmetrically encrypts any content that is already serialized. A default key length will be
+	 * used.
+	 * 
+	 * @param content the content to be encrypted.
+	 * @param publicKey The asymmetric public key with which the content will be encrypted
+	 * @param keyLength the strength of the encryption
+	 * @return the encrypted content
+	 * @throws DataLengthException
+	 * @throws InvalidKeyException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws IOException
+	 */
+	HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException;
+
+	/**
 	 * Asymmetrically decrypts a prior content inheriting from {@link NetworkContent}.
 	 * 
 	 * @param content the encrypted content to be decrypted
@@ -82,6 +101,24 @@ public interface IH2HEncryption {
 	 * @throws ClassNotFoundException
 	 */
 	NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException;
+
+	/**
+	 * Asymmetrically decrypts any content
+	 * 
+	 * @param content the encrypted content to be decrypted
+	 * @param privateKey the asymmetric private key that matches the public key at encryption
+	 * @return decrypted object in the raw format
+	 * @throws InvalidKeyException
+	 * @throws DataLengthException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws IllegalStateException
+	 * @throws InvalidCipherTextException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException;
 
 }

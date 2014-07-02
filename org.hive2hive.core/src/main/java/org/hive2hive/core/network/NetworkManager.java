@@ -32,9 +32,9 @@ public class NetworkManager implements INetworkEventGenerator {
 	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption) {
 		this.networkConfiguration = networkConfiguration;
 
-		connection = new Connection(networkConfiguration.getNodeID(), this);
+		connection = new Connection(networkConfiguration.getNodeID(), this, encryption);
 		dataManager = new DataManager(this, encryption);
-		messageManager = new MessageManager(this);
+		messageManager = new MessageManager(this, encryption);
 
 		eventListeners = new ArrayList<INetworkEventListener>();
 	}

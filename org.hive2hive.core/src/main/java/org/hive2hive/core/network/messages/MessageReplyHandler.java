@@ -16,6 +16,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +36,11 @@ public class MessageReplyHandler implements ObjectDataReply {
 	private static final Logger logger = LoggerFactory.getLogger(MessageReplyHandler.class);
 
 	private final NetworkManager networkManager;
+	private final IH2HEncryption encryption;
 
-	public MessageReplyHandler(NetworkManager networkManager) {
+	public MessageReplyHandler(NetworkManager networkManager, IH2HEncryption encryption) {
 		this.networkManager = networkManager;
+		this.encryption = encryption;
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		byte[] decryptedMessage = null;
 		try {
 			KeyPair keys = session.getKeyPair();
-			decryptedMessage = EncryptionUtil.decryptHybrid(encryptedMessage, keys.getPrivate());
+			decryptedMessage = encryption.decryptHybridRaw(encryptedMessage, keys.getPrivate());
 		} catch (Exception e) {
 			logger.warn("Decryption of message failed.", e);
 			return AcceptanceReply.FAILURE_DECRYPTION;

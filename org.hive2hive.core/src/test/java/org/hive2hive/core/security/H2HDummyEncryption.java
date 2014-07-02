@@ -40,9 +40,21 @@ public class H2HDummyEncryption implements IH2HEncryption {
 	}
 
 	@Override
+	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
+			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
+		return new HybridEncryptedContent(new byte[] {}, content);
+	}
+
+	@Override
 	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
 		return (NetworkContent) SerializationUtil.deserialize(content.getEncryptedData());
+	}
+
+	@Override
+	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
+		return content.getEncryptedData();
 	}
 
 }

@@ -19,6 +19,7 @@ import net.tomp2p.peers.PeerMapConfiguration;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.security.H2HSignatureFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +36,16 @@ public class Connection {
 
 	private final String nodeID;
 	private final NetworkManager networkManager;
+	private final IH2HEncryption encryption;
 
 	private boolean isConnected;
 	private Peer peer;
 	private DefaultEventExecutorGroup eventExecutorGroup;
 
-	public Connection(String nodeID, NetworkManager networkManager) {
+	public Connection(String nodeID, NetworkManager networkManager, IH2HEncryption encryption) {
 		this.nodeID = nodeID;
 		this.networkManager = networkManager;
+		this.encryption = encryption;
 	}
 
 	/**
@@ -178,7 +181,7 @@ public class Connection {
 		// override the put method for validation tasks
 		peer.getPeerBean().storage(new H2HStorageMemory());
 		// attach a reply handler for messages
-		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
+		peer.setObjectDataReply(new MessageReplyHandler(networkManager, encryption));
 
 		return true;
 	}
@@ -225,7 +228,7 @@ public class Connection {
 		// override the put method for validation tasks
 		peer.getPeerBean().storage(new H2HStorageMemory());
 		// attach a reply handler for messages
-		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
+		peer.setObjectDataReply(new MessageReplyHandler(networkManager, encryption));
 
 		isConnected = true;
 		return true;
@@ -275,7 +278,7 @@ public class Connection {
 		// override the put method for validation tasks
 		peer.getPeerBean().storage(new H2HStorageMemory());
 		// attach a reply handler for messages
-		peer.setObjectDataReply(new MessageReplyHandler(networkManager));
+		peer.setObjectDataReply(new MessageReplyHandler(networkManager, encryption));
 
 		// bootstrap to master peer
 		FutureBootstrap futureBootstrap = peer.bootstrap().setPeerAddress(masterPeer.getPeerAddress()).start();
