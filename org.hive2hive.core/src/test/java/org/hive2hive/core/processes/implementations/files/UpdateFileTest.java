@@ -69,9 +69,9 @@ public class UpdateFileTest extends H2HJUnitTest {
 		downloader.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create the roots and the file manager
-		File rootUploader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		File rootUploader = FileTestUtil.getTempDirectory();
 		uploaderRoot = rootUploader.toPath();
-		File rootDownloader = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		File rootDownloader = FileTestUtil.getTempDirectory();
 
 		// register a user
 		UseCaseTestUtil.register(userCredentials, registrer);

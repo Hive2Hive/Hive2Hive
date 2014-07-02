@@ -21,6 +21,13 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
  */
 public interface IFileManager extends IManager {
 
+	/**
+	 * Synchronizes the files on disk with the files in the network, i.e. downloads necessary files, uploads
+	 * new files etc. It's recommended to run this after the logging in.
+	 * 
+	 * @return an observable process component
+	 * @throws NoSessionException no user has logged in
+	 */
 	IProcessComponent synchronize() throws NoSessionException;
 
 	/**

@@ -10,6 +10,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -48,7 +49,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 		// register user
 		UseCaseTestUtil.register(userCredentials, client);
-		root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		root = FileTestUtil.getTempDirectory();
 		// login user
 		UseCaseTestUtil.login(userCredentials, client, root);
 	}

@@ -11,6 +11,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.UserProfile;
@@ -55,8 +56,8 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		NetworkManager uploader = network.get(0);
 
 		// create two root directories
-		root0 = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-		root1 = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		root0 = FileTestUtil.getTempDirectory();
+		root1 = FileTestUtil.getTempDirectory();
 
 		// first, register and login a new user
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
@@ -94,6 +95,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 	@Test
 	public void testNothingChanged() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException {
 		UseCaseTestUtil.login(userCredentials, network.get(1), root1);
+		UseCaseTestUtil.synchronize(network.get(1));
 
 		// check if the size is still the same
 		Assert.assertEquals(FileUtils.sizeOfAsBigInteger(root0), FileUtils.sizeOfAsBigInteger(root1));
@@ -125,6 +127,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		/** start sync **/
 		UseCaseTestUtil.login(userCredentials, network.get(1), root1);
+		UseCaseTestUtil.synchronize(network.get(1));
 
 		/** verify if the remote changes are applied **/
 		file4 = new File(new File(root1, "folder 1"), "file 4");
@@ -172,6 +175,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		/** start sync **/
 		UseCaseTestUtil.login(userCredentials, network.get(1), root1);
+		UseCaseTestUtil.synchronize(network.get(1));
 
 		/** verify if the remote changes are applied **/
 		// modification of file 2 has been downloaded

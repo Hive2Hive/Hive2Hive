@@ -54,7 +54,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
-		root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		root = FileTestUtil.getTempDirectory();
 		client = network.get(0);
 
 		// register a user
@@ -62,16 +62,15 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoPeerConnectionException, NoSessionException, InvalidProcessStateException {
+	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
+			NoPeerConnectionException, NoSessionException, InvalidProcessStateException {
 		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// store the keys of the meta file to verify them later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPair = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaFileSmall metaDocumentBeforeDeletion = (MetaFileSmall) UseCaseTestUtil.getMetaFile(client,
-				metaKeyPair);
+		MetaFileSmall metaDocumentBeforeDeletion = (MetaFileSmall) UseCaseTestUtil.getMetaFile(client, metaKeyPair);
 		Assert.assertNotNull(metaDocumentBeforeDeletion);
 
 		// delete the file
@@ -87,8 +86,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
 			for (MetaChunk metaChunks : version.getMetaChunks()) {
 				FutureGet get = client.getDataManager().getUnblocked(
-						new Parameters().setLocationKey(metaChunks.getChunkId()).setContentKey(
-								H2HConstants.FILE_CHUNK));
+						new Parameters().setLocationKey(metaChunks.getChunkId()).setContentKey(H2HConstants.FILE_CHUNK));
 				get.awaitUninterruptibly();
 				get.getFutureRequests().awaitUninterruptibly();
 
@@ -119,8 +117,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation, GetFailedException,
-			InterruptedException, NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
+	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
+			NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
 		// add a folder to the network
 		File folder = new File(root, NetworkTestUtil.randomString());
 		folder.mkdir();
@@ -135,8 +133,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
 		KeyPair metaKeyPairFile = userProfileBeforeDeletion.getFileByPath(file, root).getFileKeys();
-		MetaFileSmall metaFileBeforeDeletion = (MetaFileSmall) UseCaseTestUtil.getMetaFile(client,
-				metaKeyPairFile);
+		MetaFileSmall metaFileBeforeDeletion = (MetaFileSmall) UseCaseTestUtil.getMetaFile(client, metaKeyPairFile);
 		Assert.assertNotNull(metaFileBeforeDeletion);
 
 		// delete the file
@@ -170,8 +167,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		// store some things to be able to test later
 		UserProfile userProfileBeforeDeletion = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		KeyPair metaKeyPairFolder = userProfileBeforeDeletion.getFileByPath(folder, root).getFileKeys();
-		KeyPair metaKeyPairInnerFolder = userProfileBeforeDeletion.getFileByPath(innerFolder, root)
-				.getFileKeys();
+		KeyPair metaKeyPairInnerFolder = userProfileBeforeDeletion.getFileByPath(innerFolder, root).getFileKeys();
 
 		// delete the inner folder
 		UseCaseTestUtil.deleteFile(client, innerFolder);

@@ -116,6 +116,12 @@ public class UseCaseTestUtil {
 		login(credentials, networkManager, root);
 	}
 
+	public static void registerLoginAndSynchronize(UserCredentials credentials, NetworkManager networkManager, File root)
+			throws NoPeerConnectionException {
+		registerAndLogin(credentials, networkManager, root);
+		synchronize(networkManager);
+	}
+
 	public static void logout(NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
 		ProcessComponent process = ProcessFactory.instance().createLogoutProcess(networkManager);
 		executeProcess(process);
@@ -125,6 +131,11 @@ public class UseCaseTestUtil {
 			throws GetFailedException, NoPeerConnectionException {
 		UserProfileManager manager = new UserProfileManager(networkManager.getDataManager(), credentials);
 		return manager.getUserProfile(UUID.randomUUID().toString(), false);
+	}
+
+	public static void synchronize(NetworkManager networkManager) {
+		ProcessComponent process = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
+		executeProcess(process);
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,

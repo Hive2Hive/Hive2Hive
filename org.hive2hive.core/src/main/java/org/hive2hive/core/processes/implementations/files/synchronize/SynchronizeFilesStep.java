@@ -70,6 +70,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 			throw new ProcessExecutionException("FileSynchronizer could not be instantiated.", e);
 		}
 		try {
+			logger.debug("Start synchronizing files");
 			synchronizeFiles(synchronizer);
 		} catch (NoSessionException e) {
 			throw new ProcessExecutionException(e);
