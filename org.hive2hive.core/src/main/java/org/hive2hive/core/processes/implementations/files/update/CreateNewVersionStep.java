@@ -64,8 +64,9 @@ public class CreateNewVersionStep extends ProcessStep {
 			// more versions than allowed or size is larger
 
 			// keep at least one version
-			if (metaFileSmall.getVersions().size() == 1)
+			if (metaFileSmall.getVersions().size() == 1) {
 				break;
+			}
 
 			// remove the version of the meta file
 			deletedFileVersions.add(metaFileSmall.getVersions().remove(0));

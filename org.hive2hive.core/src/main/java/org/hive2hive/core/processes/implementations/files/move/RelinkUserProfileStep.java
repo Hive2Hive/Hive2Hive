@@ -126,13 +126,15 @@ public class RelinkUserProfileStep extends ProcessStep {
 		Set<String> common = new HashSet<String>();
 
 		for (String user : usersAtSource) {
-			if (usersAtDestination.contains(user))
+			if (usersAtDestination.contains(user)) {
 				common.add(user);
+			}
 		}
 
 		for (String user : usersAtDestination) {
-			if (usersAtSource.contains(user))
+			if (usersAtSource.contains(user)) {
 				common.add(user);
+			}
 		}
 
 		// convenience fields

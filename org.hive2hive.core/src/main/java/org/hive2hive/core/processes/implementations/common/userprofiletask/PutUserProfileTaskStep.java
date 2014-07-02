@@ -48,12 +48,15 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 
 	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey) throws PutFailedException,
 			InvalidProcessStateException {
-		if (userId == null)
+		if (userId == null) {
 			throw new IllegalArgumentException("user id can be not null");
-		if (userProfileTask == null)
+		}
+		if (userProfileTask == null) {
 			throw new IllegalArgumentException("user profile task can be not null");
-		if (publicKey == null)
+		}
+		if (publicKey == null) {
 			throw new IllegalArgumentException("public key can be not null");
+		}
 
 		this.userId = userId;
 
@@ -72,7 +75,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			}
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new PutFailedException("Meta document could not be encrypted");
+			throw new PutFailedException("Meta document could not be encrypted. Reason: " + e.getMessage());
 		} catch (NoPeerConnectionException e) {
 			throw new PutFailedException(e.getMessage());
 		}
@@ -90,7 +93,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
 			logger.warn("Rollback of user profile task put failed. No connection. User ID = '{}', Content key = '{}'.",
-					userId, contentKey);
+					userId, contentKey, e);
 			return;
 		}
 

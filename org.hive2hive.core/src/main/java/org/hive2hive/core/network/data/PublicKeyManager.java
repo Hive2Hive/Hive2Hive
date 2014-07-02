@@ -83,12 +83,14 @@ public class PublicKeyManager {
 	 */
 	public PublicKey getPublicKey(String userId) throws GetFailedException {
 		logger.debug("Requested to get the public key of user '{}'.", userId);
-		if (this.userId.equals(userId))
+		if (this.userId.equals(userId)) {
 			// get the own public key
 			return usersKeyPair.getPublic();
-		if (publicKeyCache.containsKey(userId))
+		}
+		if (publicKeyCache.containsKey(userId)) {
 			// check the cache
 			return publicKeyCache.get(userId);
+		}
 
 		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY);
 		NetworkContent content = dataManager.get(parameters);

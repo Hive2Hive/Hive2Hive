@@ -52,10 +52,12 @@ public final class MessageManager implements IMessageManager {
 
 	@Override
 	public boolean send(BaseMessage message, PublicKey targetPublicKey) {
-		if (message.getTargetKey() == null)
+		if (message.getTargetKey() == null) {
 			throw new IllegalArgumentException("target key cannot be null");
-		if (targetPublicKey == null)
+		}
+		if (targetPublicKey == null) {
 			throw new IllegalArgumentException("target public key cannot be null");
+		}
 
 		// prepare message
 		prepareMessage(message);
@@ -63,8 +65,9 @@ public final class MessageManager implements IMessageManager {
 
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
-		if (encryptedMessage == null)
+		if (encryptedMessage == null) {
 			return false;
+		}
 
 		// send message to the peer which is responsible for the given key
 		FutureSend futureSend = networkManager.getConnection().getPeer().send(Number160.createHash(message.getTargetKey()))
@@ -87,10 +90,12 @@ public final class MessageManager implements IMessageManager {
 
 	@Override
 	public boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey) {
-		if (message.getTargetAddress() == null)
+		if (message.getTargetAddress() == null) {
 			throw new IllegalArgumentException("Target address cannot be null.");
-		if (targetPublicKey == null)
+		}
+		if (targetPublicKey == null) {
 			throw new IllegalArgumentException("Target public key cannot be null.");
+		}
 
 		// prepare message
 		prepareMessage(message);
@@ -98,8 +103,9 @@ public final class MessageManager implements IMessageManager {
 
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
-		if (encryptedMessage == null)
+		if (encryptedMessage == null) {
 			return false;
+		}
 
 		// send message directly to the peer with the given peer address
 		FutureDirect futureDirect = networkManager.getConnection().getPeer().sendDirect(message.getTargetAddress())
@@ -139,7 +145,7 @@ public final class MessageManager implements IMessageManager {
 	 * @return <code>true</code> if exists and not <code>null</code>
 	 */
 	public boolean checkIfCallbackHandlerExists(String messageId) {
-		return (callBackHandlers.get(messageId) != null);
+		return callBackHandlers.get(messageId) != null;
 	}
 
 	private void prepareMessage(BaseMessage message) {

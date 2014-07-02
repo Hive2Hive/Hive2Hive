@@ -39,8 +39,9 @@ public class GetUserProfileTaskStep extends ProcessStep {
 
 	public GetUserProfileTaskStep(IUserProfileTaskContext context, NetworkManager networkManager) {
 		this.networkManager = networkManager;
-		if (context == null)
+		if (context == null) {
 			throw new IllegalArgumentException("Context can't be null.");
+		}
 		this.context = context;
 	}
 

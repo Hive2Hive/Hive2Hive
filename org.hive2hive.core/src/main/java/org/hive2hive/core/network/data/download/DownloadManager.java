@@ -123,8 +123,9 @@ public class DownloadManager {
 	 */
 	public boolean isDownloading(File file) {
 		for (BaseDownloadTask openTask : openTasks) {
-			if (openTask.getDestination().equals(file))
+			if (openTask.getDestination().equals(file)) {
 				return true;
+			}
 		}
 
 		return false;

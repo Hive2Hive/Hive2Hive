@@ -21,8 +21,9 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 		this.context = context;
 		this.networkManager = networkManager;
 
-		if (context == null)
+		if (context == null) {
 			throw new IllegalArgumentException("Context can't be null.");
+		}
 	}
 
 	@Override

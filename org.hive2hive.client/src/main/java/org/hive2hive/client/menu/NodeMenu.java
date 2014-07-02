@@ -49,7 +49,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 		connectToExistingNetworkItem = new H2HConsoleMenuItem("Connect to Existing Network") {
 			protected void execute() throws UnknownHostException {
-
 				String nodeID = askNodeID();
 
 				print("Specify Bootstrap Address:");

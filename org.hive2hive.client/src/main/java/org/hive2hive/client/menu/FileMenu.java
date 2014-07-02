@@ -218,7 +218,6 @@ public class FileMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Print File List") {
 			@Override
 			protected void execute() throws Exception {
-
 				IResultProcessComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode().getFileManager()
 						.getFileList();
 				executeBlocking(fileListProcess, displayText);

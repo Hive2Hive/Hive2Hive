@@ -42,8 +42,9 @@ public abstract class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 		}
 
 		boolean success = messageManager.sendDirect(message, receiverPublicKey);
-		if (!success)
+		if (!success) {
 			throw new SendFailedException();
+		}
 	}
 
 	@Override

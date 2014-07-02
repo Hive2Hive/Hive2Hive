@@ -80,8 +80,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * @param parent
 	 */
 	public void setParent(FolderIndex parent) {
-		if (parent == null)
+		if (parent == null) {
 			throw new IllegalArgumentException("Parent can't be null.");
+		}
 		this.parent = parent;
 	}
 

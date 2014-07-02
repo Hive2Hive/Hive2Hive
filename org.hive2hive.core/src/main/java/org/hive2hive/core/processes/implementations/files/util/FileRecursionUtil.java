@@ -55,10 +55,11 @@ public class FileRecursionUtil {
 		for (Path file : files) {
 			// create the process which uploads or updates the file
 			ProcessComponent uploadProcess;
-			if (action == FileProcessAction.NEW_FILE)
+			if (action == FileProcessAction.NEW_FILE) {
 				uploadProcess = ProcessFactory.instance().createNewFileProcess(file.toFile(), networkManager);
-			else
+			} else {
 				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file.toFile(), networkManager);
+			}
 
 			Path parentFile = file.getParent();
 			if (sameParents.containsKey(parentFile)) {

@@ -49,8 +49,9 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (!changePerformed)
+		if (!changePerformed) {
 			return;
+		}
 
 		logger.debug("Rollbacking change of content protection key. '{}'", parameters.toString());
 

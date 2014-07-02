@@ -29,12 +29,12 @@ public class VerifyFriendIdStep extends ProcessStep {
 			// just get the public key. It does not produce any overhead since this call is cached or (if the
 			// first time), the result will be cached, making the notification faster.
 			PublicKey publicKey = keyManager.getPublicKey(friendId);
-			if (publicKey == null)
-				throw new GetFailedException(String.format("The friend '%s' does not seem to exist.",
-						friendId));
+			if (publicKey == null) {
+				throw new GetFailedException(String.format("The friend '%s' does not seem to exist.", friendId));
+			}
 		} catch (GetFailedException e) {
-			throw new ProcessExecutionException(String.format(
-					"The friend '%s' does not seem to exist. reason = '%s'", friendId, e.getMessage()));
+			throw new ProcessExecutionException(String.format("The friend '%s' does not seem to exist. reason = '%s'",
+					friendId, e.getMessage()));
 		}
 	}
 

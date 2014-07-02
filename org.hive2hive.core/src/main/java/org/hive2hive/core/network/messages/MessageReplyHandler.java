@@ -161,8 +161,9 @@ public class MessageReplyHandler implements ObjectDataReply {
 
 		@Override
 		public void run() {
-			if (!verifySignature(senderId, decryptedMessage, signature))
+			if (!verifySignature(senderId, decryptedMessage, signature)) {
 				return;
+			}
 
 			// give a network manager reference to work (verify, handle)
 			try {
