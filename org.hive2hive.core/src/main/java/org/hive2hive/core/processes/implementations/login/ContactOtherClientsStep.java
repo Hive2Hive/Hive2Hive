@@ -23,6 +23,7 @@ import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
@@ -146,9 +147,8 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
 		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
 				networkManager.getConnection().getPeer().getPeerAddress())) {
-			context.setIsMaster(true);
-		} else {
-			context.setIsMaster(false);
+			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
+			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}
 	}
 

@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.implementations.login;
+package org.hive2hive.core.processes.implementations.files.synchronize;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,12 +13,10 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
 import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
 import org.slf4j.Logger;
@@ -43,12 +41,9 @@ import org.slf4j.LoggerFactory;
 public class SynchronizeFilesStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(SynchronizeFilesStep.class);
-
-	private final LoginProcessContext context;
 	private final NetworkManager networkManager;
 
-	public SynchronizeFilesStep(LoginProcessContext context, NetworkManager networkManager) {
-		this.context = context;
+	public SynchronizeFilesStep(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 	}
 
@@ -71,7 +66,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		FileSynchronizer synchronizer;
 		try {
 			synchronizer = new FileSynchronizer(networkManager.getSession().getRoot(), profile);
-		} catch (ClassNotFoundException | NoSessionException | IOException e) {
+		} catch (NoSessionException | IOException e) {
 			throw new ProcessExecutionException("FileSynchronizer could not be instantiated.", e);
 		}
 		try {
@@ -80,12 +75,6 @@ public class SynchronizeFilesStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		} catch (NoPeerConnectionException e) {
 			throw new ProcessExecutionException(e);
-		}
-
-		if (context.getIsMaster()) {
-			// if is master, process the user profile queue
-			logger.debug("Starting to process all user tasks.");
-			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}
 	}
 

@@ -34,10 +34,12 @@ public class FileSynchronizer {
 	private final UserProfile userProfile;
 
 	private final FolderIndex profileRootNode;
+
+	// Map<file-path, file-hash>
 	private final Map<String, byte[]> before;
 	private Map<String, byte[]> now;
 
-	public FileSynchronizer(Path rootDirectory, UserProfile userProfile) throws ClassNotFoundException, IOException {
+	public FileSynchronizer(Path rootDirectory, UserProfile userProfile) throws IOException {
 		this.root = rootDirectory;
 		this.userProfile = userProfile;
 		this.profileRootNode = userProfile.getRoot();

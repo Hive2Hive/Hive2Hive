@@ -103,10 +103,8 @@ public class UseCaseTestUtil {
 
 	public static void login(UserCredentials credentials, NetworkManager networkManager, File root)
 			throws NoPeerConnectionException {
-		SessionParameters sessionParameters = new SessionParameters();
-		sessionParameters.setFileConfig(new TestFileConfiguration());
-		sessionParameters.setRoot(root.toPath());
-		sessionParameters.setProfileManager(new UserProfileManager(networkManager.getDataManager(), credentials));
+		UserProfileManager upManager = new UserProfileManager(networkManager.getDataManager(), credentials);
+		SessionParameters sessionParameters = new SessionParameters(root.toPath(), upManager, new TestFileConfiguration());
 		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials, sessionParameters,
 				networkManager);
 		executeProcess(process);

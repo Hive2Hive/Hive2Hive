@@ -9,11 +9,18 @@ import org.hive2hive.core.network.data.download.DownloadManager;
 
 public class SessionParameters {
 
-	private UserProfileManager profileManager;
-	private PublicKeyManager keyManager;
-	private IFileConfiguration fileConfig;
-	private Path root;
+	private final UserProfileManager profileManager;
+	private final IFileConfiguration fileConfig;
+	private final Path root;
+
 	private DownloadManager downloadManager;
+	private PublicKeyManager keyManager;
+
+	public SessionParameters(Path root, UserProfileManager profileManager, IFileConfiguration fileConfig) {
+		this.root = root;
+		this.profileManager = profileManager;
+		this.fileConfig = fileConfig;
+	}
 
 	public UserProfileManager getProfileManager() {
 		return profileManager;
@@ -21,18 +28,6 @@ public class SessionParameters {
 
 	public IFileConfiguration getFileConfig() {
 		return fileConfig;
-	}
-
-	public void setProfileManager(UserProfileManager profileManager) {
-		this.profileManager = profileManager;
-	}
-
-	public void setFileConfig(IFileConfiguration fileConfig) {
-		this.fileConfig = fileConfig;
-	}
-
-	public void setRoot(Path root) {
-		this.root = root;
 	}
 
 	public Path getRoot() {

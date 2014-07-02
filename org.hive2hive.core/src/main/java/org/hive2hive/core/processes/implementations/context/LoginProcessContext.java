@@ -54,13 +54,4 @@ public class LoginProcessContext implements IGetUserProfileContext, IGetUserLoca
 	public Locations consumeUserLocations() {
 		return locations;
 	}
-
-	public void setIsMaster(boolean isMaster) {
-		this.isMaster = isMaster;
-	}
-
-	public boolean getIsMaster() {
-		return isMaster;
-	}
-
 }

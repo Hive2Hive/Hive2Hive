@@ -28,7 +28,7 @@ public class PersistentMetaData implements Serializable {
 	public PersistentMetaData() {
 		fileTree = new HashMap<String, byte[]>(0);
 		publicKeyCache = new HashMap<String, PublicKey>(0);
-		setDownloads(new HashSet<BaseDownloadTask>(0));
+		downloads = new HashSet<BaseDownloadTask>(0);
 	}
 
 	public Map<String, byte[]> getFileTree() {

@@ -16,10 +16,10 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.NetworkUtils;
+import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -200,7 +200,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * Helper for running a process with a single {@link ContactOtherClientsStep} step. Method waits untill
+	 * Helper for running a process with a single {@link ContactOtherClientsStep} step. Method waits until
 	 * process successfully finishes.
 	 * 
 	 * @param fakedLocations
@@ -209,16 +209,17 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	private Locations runProcessStep(Locations fakedLocations, final boolean isMaster)
-			throws NoSessionException, NoPeerConnectionException {
+	private Locations runProcessStep(Locations fakedLocations, final boolean isMaster) throws NoSessionException,
+			NoPeerConnectionException {
 		// initialize the process and the one and only step to test
 
 		LoginProcessContext context = new LoginProcessContext(null);
 		context.provideUserLocations(fakedLocations);
 		ContactOtherClientsStep processStep = new ContactOtherClientsStep(context, network.get(0));
-		UseCaseTestUtil.executeProcess(processStep);
+		SequentialProcess process = new SequentialProcess();
+		process.add(processStep);
+		UseCaseTestUtil.executeProcess(process);
 
-		Assert.assertEquals(isMaster, context.getIsMaster());
 		return context.consumeUserLocations();
 	}
 

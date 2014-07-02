@@ -70,10 +70,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	@Override
 	public IProcessComponent login(UserCredentials credentials, Path rootPath) throws NoPeerConnectionException {
 		// TODO refactor
-		SessionParameters params = new SessionParameters();
-		params.setProfileManager(new UserProfileManager(networkManager.getDataManager(), credentials));
-		params.setRoot(rootPath);
-		params.setFileConfig(fileConfiguration);
+		UserProfileManager profileManager = new UserProfileManager(networkManager.getDataManager(), credentials);
+		SessionParameters params = new SessionParameters(rootPath, profileManager, fileConfiguration);
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 

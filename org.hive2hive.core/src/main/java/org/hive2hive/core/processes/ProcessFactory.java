@@ -52,13 +52,13 @@ import org.hive2hive.core.processes.implementations.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.implementations.files.move.RelinkUserProfileStep;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.recover.SelectVersionStep;
+import org.hive2hive.core.processes.implementations.files.synchronize.SynchronizeFilesStep;
 import org.hive2hive.core.processes.implementations.files.update.CleanupChunksStep;
 import org.hive2hive.core.processes.implementations.files.update.CreateNewVersionStep;
 import org.hive2hive.core.processes.implementations.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.implementations.login.ContactOtherClientsStep;
 import org.hive2hive.core.processes.implementations.login.SessionCreationStep;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
-import org.hive2hive.core.processes.implementations.login.SynchronizeFilesStep;
 import org.hive2hive.core.processes.implementations.logout.DeleteSessionStep;
 import org.hive2hive.core.processes.implementations.logout.RemoveOwnLocationsStep;
 import org.hive2hive.core.processes.implementations.logout.StopDownloadsStep;
@@ -150,7 +150,6 @@ public final class ProcessFactory {
 		process.add(new GetUserLocationsStep(context, networkManager.getDataManager()));
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new PutUserLocationsStep(context, dataManager));
-		process.add(new SynchronizeFilesStep(context, networkManager));
 
 		return process;
 	}
@@ -192,6 +191,12 @@ public final class ProcessFactory {
 		// // stop all running processes
 		// ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
+		return process;
+	}
+
+	public ProcessComponent createSynchronizeFilesProcess(NetworkManager networkManager) {
+		SequentialProcess process = new SequentialProcess();
+		process.add(new SynchronizeFilesStep(networkManager));
 		return process;
 	}
 

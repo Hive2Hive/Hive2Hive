@@ -37,6 +37,16 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
+	public IProcessComponent synchronize() throws NoSessionException {
+		H2HSession session = networkManager.getSession();
+		IProcessComponent syncProcess = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
+		AsyncComponent asyncProcess = new AsyncComponent(syncProcess);
+
+		submitProcess(asyncProcess);
+		return asyncProcess;
+	}
+
+	@Override
 	public IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation {
 		// verify the argument
 		H2HSession session = networkManager.getSession();

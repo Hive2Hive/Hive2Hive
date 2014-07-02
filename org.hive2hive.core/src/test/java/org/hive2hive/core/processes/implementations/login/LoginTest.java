@@ -13,6 +13,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
+import org.hive2hive.core.integration.TestFileConfiguration;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
@@ -104,8 +105,8 @@ public class LoginTest extends H2HJUnitTest {
 	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials) throws InvalidProcessStateException,
 			NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(new Random().nextInt(networkSize));
-		SessionParameters sessionParameters = new SessionParameters();
-		sessionParameters.setProfileManager(new UserProfileManager(client.getDataManager(), wrongCredentials));
+		UserProfileManager upManager = new UserProfileManager(client.getDataManager(), wrongCredentials);
+		SessionParameters sessionParameters = new SessionParameters(root.toPath(), upManager, new TestFileConfiguration());
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(wrongCredentials, sessionParameters,
 				client);

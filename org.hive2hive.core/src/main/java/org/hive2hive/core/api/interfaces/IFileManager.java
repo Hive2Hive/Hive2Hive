@@ -21,6 +21,8 @@ import org.hive2hive.core.processes.implementations.files.recover.IVersionSelect
  */
 public interface IFileManager extends IManager {
 
+	IProcessComponent synchronize() throws NoSessionException;
+
 	/**
 	 * Add a file or a folder. Note that the file must already be in the predefined Hive2Hive folder. If the
 	 * folder is not empty, all containing files are added to Hive2Hive as well.
