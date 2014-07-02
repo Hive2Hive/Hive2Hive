@@ -58,7 +58,7 @@ Once a node is connected to a network, users can interact with it. For this, eac
 IUserManager userManager = node.getUserManager();
 
 UserCredentials credentials = new UserCredentials("userId", "password", "pin");
-Path rootDirectory = Paths.get("C:/User/XYZ/...");
+Path rootDirectory = Paths.get("sample/path/to/file");
 
 if (!userManager.isRegistered(credentials.getUserId())) {
 	userManager.register(credentials).await();
