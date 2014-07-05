@@ -58,7 +58,7 @@ public class UserProfileHolder {
 		// load the current digest list from network
 		NavigableMap<Number640, Number160> digest = dataManager.getDigestLatest(parameters);
 		// compare the current user profile's version key with the cached one
-		if (cachedUserProfile != null && digest.firstEntry() != null
+		if (cachedUserProfile != null && digest != null && digest.firstEntry() != null
 				&& digest.firstEntry().getKey().getVersionKey().equals(cachedUserProfile.getVersionKey())) {
 			// no need for fetching user profile from network
 			entry.setUserProfile(cachedUserProfile);
