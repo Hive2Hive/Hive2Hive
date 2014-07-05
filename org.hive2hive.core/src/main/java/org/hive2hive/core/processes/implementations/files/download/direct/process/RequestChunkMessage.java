@@ -16,6 +16,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
+import org.hive2hive.core.processes.implementations.files.download.direct.process.ChunkMessageResponse.AnswerType;
 import org.hive2hive.core.security.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,13 +47,22 @@ public class RequestChunkMessage extends DirectRequestMessage {
 	public void run() {
 		logger.debug("Received request for a chunk from peer {}", senderAddress);
 
+		// check for free heap space before reading the file
+		long freeMemory = Runtime.getRuntime().freeMemory();
+		if (freeMemory < 1.5 * chunkLength) {
+			// not enough memory
+			logger.error("Cannot read the chunk because not enough memory available");
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.ASK_LATER)));
+			return;
+		}
+
 		// search user profile for this file
 		H2HSession session = null;
 		try {
 			session = networkManager.getSession();
 		} catch (NoSessionException e) {
 			logger.error("Cannot answer because session is invalid");
-			sendDirectResponse(createResponse(null));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 			return;
 		}
 
@@ -62,7 +72,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 			userProfile = profileManager.getUserProfile(messageID, false);
 		} catch (GetFailedException e) {
 			logger.error("Cannot get the user profile", e);
-			sendDirectResponse(createResponse(null));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 			return;
 		}
 
@@ -70,7 +80,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		Index index = userProfile.getFileById(fileKey);
 		if (index == null || index.isFolder()) {
 			logger.info("File not found in the user profile, cannot return a chunk");
-			sendDirectResponse(createResponse(null));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 			return;
 		}
 
@@ -78,7 +88,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		Path path = FileUtil.getPath(session.getRoot(), index);
 		if (path == null || !path.toFile().exists()) {
 			logger.info("File not found on disk, cannot return a chunk");
-			sendDirectResponse(createResponse(null));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 			return;
 		}
 
@@ -88,7 +98,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 			chunk = FileChunkUtil.getChunk(path.toFile(), chunkLength, chunkNumber, "chunk-" + chunkNumber);
 		} catch (IOException e) {
 			logger.error("Cannot read the chunk", e);
-			sendDirectResponse(createResponse(null));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 			return;
 		}
 
@@ -98,10 +108,10 @@ public class RequestChunkMessage extends DirectRequestMessage {
 			logger.debug("MD5 hash of the chunk {} has been verified, returning the chunk", chunkNumber);
 
 			// return the content of the file part
-			sendDirectResponse(createResponse(chunk));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(chunk)));
 		} else {
 			logger.warn("MD5 hash of the read chunk {} and of the expected file does not match", chunkNumber);
-			sendDirectResponse(createResponse(null));
+			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 		}
 	}
 }
