@@ -20,10 +20,14 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private static final long serialVersionUID = 5219300641521251051L;
 	private static final Logger logger = LoggerFactory.getLogger(DownloadTaskDirect.class);
 
-	private final PublicKey fileKey; // the key of the file
-	private final String ownUserName; // the user name of the downloader
-	private final PeerAddress ownAddress; // the peer address of the downloader
-	private final Set<String> users; // users having access to this file
+	// the key of the file
+	private final PublicKey fileKey;
+	// the user name of the downloader
+	private final String ownUserName;
+	// the peer address of the downloader
+	private final PeerAddress ownAddress;
+	// users having access to this file
+	private final Set<String> users;
 
 	private transient CountDownLatch locationLocker;
 	private volatile Set<Locations> locations;

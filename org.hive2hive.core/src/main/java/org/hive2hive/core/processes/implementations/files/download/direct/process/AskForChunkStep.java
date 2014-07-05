@@ -2,6 +2,7 @@ package org.hive2hive.core.processes.implementations.files.download.direct.proce
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -63,10 +64,10 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 			responseLatch.await(H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS, TimeUnit.MILLISECONDS);
 		} catch (SendFailedException e) {
 			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
-			rerunProcess();
+			rerunProcess(true);
 		} catch (InterruptedException e) {
 			logger.warn("Cannot wait until the peer {} responded", context.getSelectedPeer());
-			rerunProcess();
+			rerunProcess(false);
 		}
 	}
 
@@ -77,12 +78,41 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		// check the response
 		if (responseMessage.getContent() == null) {
 			logger.error("Peer {} did not send the chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
-			rerunProcess();
+			rerunProcess(true);
 			return;
 		}
 
-		Chunk chunk = (Chunk) responseMessage.getContent();
+		ChunkMessageResponse response = (ChunkMessageResponse) responseMessage.getContent();
+		switch (response.getAnswerType()) {
+			case DECLINED:
+				logger.error("Peer {} declined to send chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
+				rerunProcess(true);
+				break;
+			case ASK_LATER:
+				logger.error("Peer {} is alive but cannot send chunk {} at the moment", context.getSelectedPeer(),
+						metaChunk.getIndex());
+				sleepRandomTime();
+				rerunProcess(false);
+				break;
+			case OK:
+				verifyAndWriteChunk(metaChunk, response.getChunk());
+				break;
+			default:
+				break;
+		}
+	}
 
+	private void sleepRandomTime() {
+		try {
+			int sleep = new Random().nextInt(H2HConstants.DIRECT_DOWNLOAD_RETRY_MS);
+			logger.debug("Sleep {} ms before retrying to download", sleep);
+			Thread.sleep(sleep);
+		} catch (InterruptedException e) {
+			logger.warn("Cannot sleep before retrying");
+		}
+	}
+
+	private void verifyAndWriteChunk(MetaChunk metaChunk, Chunk chunk) {
 		// verify the md5 hash
 		byte[] respondedHash = HashUtil.hash(chunk.getData());
 		if (HashUtil.compare(respondedHash, metaChunk.getChunkHash())) {
@@ -90,7 +120,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 					metaChunk.getIndex());
 		} else {
 			logger.error("Peer {} sent an invalid content for chunk {}.", context.getSelectedPeer(), metaChunk.getIndex());
-			rerunProcess();
+			rerunProcess(true);
 			return;
 		}
 
@@ -113,10 +143,12 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	/**
 	 * Restarts the whole process, removing the currently selected peer from the candidate list
 	 */
-	private void rerunProcess() {
-		logger.debug("Removing peer address {} from the candidate list", context.getSelectedPeer());
-		// remove invalid peer
-		context.getTask().removeAddress(context.getSelectedPeer());
+	private void rerunProcess(boolean removeLastSelection) {
+		if (removeLastSelection) {
+			logger.debug("Removing peer address {} from the candidate list", context.getSelectedPeer());
+			// remove invalid peer
+			context.getTask().removeAddress(context.getSelectedPeer());
+		}
 
 		// select another peer
 		logger.debug("Re-run the process: select another peer and ask him for chunk {}", context.getMetaChunk().getIndex());

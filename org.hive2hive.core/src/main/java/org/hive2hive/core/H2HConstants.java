@@ -19,15 +19,14 @@ public interface H2HConstants {
 	static final BigInteger MEGABYTES = BigInteger.valueOf(1024 * 1024);
 	public static final BigInteger DEFAULT_MAX_FILE_SIZE = BigInteger.valueOf(25).multiply(MEGABYTES);// 25 MB
 	public static final int DEFAULT_MAX_NUM_OF_VERSIONS = 100; // 100 versions
-	public static final BigInteger DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE
-			.multiply(BigInteger.valueOf(DEFAULT_MAX_NUM_OF_VERSIONS));// max_size * max_num
+	public static final BigInteger DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE.multiply(BigInteger
+			.valueOf(DEFAULT_MAX_NUM_OF_VERSIONS));// max_size * max_num
 	public static final int DEFAULT_CHUNK_SIZE = MEGABYTES.intValue(); // 1 MB
 
 	public static final boolean DEFAULT_AUTOSTART_PROCESSES = true;
 	public static final boolean DEFAULT_IS_INITIAL_PEER = false;
 	public static final InetAddress DEFAULT_BOOTSTRAP_ADDRESS = null;
-	public static final String DEFAULT_ROOT_PATH = new File(System.getProperty("user.home"), "Hive2Hive")
-			.getAbsolutePath();
+	public static final String DEFAULT_ROOT_PATH = new File(System.getProperty("user.home"), "Hive2Hive").getAbsolutePath();
 
 	// standard port for the Hive2Hive network
 	public static final int H2H_PORT = 4622;
@@ -69,6 +68,8 @@ public interface H2HConstants {
 
 	// maximum delay to wait until a peer candidate replies whether a direct download is possible or not
 	public static final int DIRECT_DOWNLOAD_AWAIT_MS = 10000;
+	// maximum delay to wait when a peer candidate is currently overloaded
+	public static final int DIRECT_DOWNLOAD_RETRY_MS = 30000;
 
 	public static final String USER_PROFILE_TASK_DOMAIN = "USER-PROFILE-TASK";
 
