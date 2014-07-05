@@ -179,7 +179,7 @@ public class SequentialProcess extends Process {
 			} catch (InterruptedException e) {
 				logger.error("Error while checking async component.", e);
 			} catch (ExecutionException e) {
-				logger.error("AsyncComponent threw an exception.", e);
+				logger.error("AsyncComponent threw an exception.");
 				throw new ProcessExecutionException("AsyncComponent threw an exception.", e.getCause());
 			}
 
