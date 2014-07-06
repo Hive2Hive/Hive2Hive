@@ -8,8 +8,8 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.processes.implementations.files.list.FileTaste;
-import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
+import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 

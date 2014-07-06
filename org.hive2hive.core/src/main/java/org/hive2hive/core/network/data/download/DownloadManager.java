@@ -13,11 +13,11 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
-import org.hive2hive.core.processes.implementations.files.download.dht.DownloadChunkRunnableDHT;
-import org.hive2hive.core.processes.implementations.files.download.dht.DownloadTaskDHT;
-import org.hive2hive.core.processes.implementations.files.download.direct.DownloadChunkRunnableDirect;
-import org.hive2hive.core.processes.implementations.files.download.direct.DownloadTaskDirect;
-import org.hive2hive.core.processes.implementations.files.download.direct.GetLocationsList;
+import org.hive2hive.core.processes.files.download.dht.DownloadChunkRunnableDHT;
+import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
+import org.hive2hive.core.processes.files.download.direct.DownloadChunkRunnableDirect;
+import org.hive2hive.core.processes.files.download.direct.DownloadTaskDirect;
+import org.hive2hive.core.processes.files.download.direct.GetLocationsList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

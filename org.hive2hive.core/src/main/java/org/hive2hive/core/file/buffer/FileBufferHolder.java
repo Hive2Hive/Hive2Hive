@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileTaste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

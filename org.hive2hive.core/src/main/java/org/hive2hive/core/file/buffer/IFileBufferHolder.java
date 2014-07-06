@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileTaste;
 
 public interface IFileBufferHolder {
 

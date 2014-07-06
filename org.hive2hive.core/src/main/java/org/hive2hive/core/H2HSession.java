@@ -8,7 +8,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.processes.implementations.login.SessionParameters;
+import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HSession {

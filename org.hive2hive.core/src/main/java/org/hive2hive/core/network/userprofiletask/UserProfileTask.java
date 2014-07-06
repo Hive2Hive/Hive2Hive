@@ -15,7 +15,7 @@ import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
