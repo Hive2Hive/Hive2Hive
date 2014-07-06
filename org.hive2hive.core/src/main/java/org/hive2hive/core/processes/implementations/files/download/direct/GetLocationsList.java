@@ -52,7 +52,15 @@ public class GetLocationsList implements Runnable {
 			return;
 		}
 
-		logger.debug("Got {} candidate locations to download {}", collectingSet.size(), task.getDestinationName());
+		if (logger.isDebugEnabled()) {
+			int numPeerAddresses = 0;
+			for (Locations locations : collectingSet) {
+				numPeerAddresses += locations.getPeerAddresses().size();
+			}
+			logger.debug("Got {} candidate location(s) with {} peer address(es) to download {}", collectingSet.size(),
+					numPeerAddresses, task.getDestinationName());
+		}
+
 		task.provideLocations(collectingSet);
 	}
 
