@@ -34,11 +34,11 @@ public class GetLocationsList implements Runnable {
 
 	@Override
 	public void run() {
-		ProvideUserLocationsContext context = new ProvideUserLocationsContext();
+		Set<Locations> collectingSet = Collections.newSetFromMap(new ConcurrentHashMap<Locations, Boolean>());
 
 		SequentialProcess process = new SequentialProcess();
 		for (String user : task.getUsers()) {
-			context.setUserId(user);
+			ProvideUserLocationsContext context = new ProvideUserLocationsContext(collectingSet, user);
 			GetUserLocationsStep step = new GetUserLocationsStep(context, dataManager);
 			process.add(new AsyncComponent(step));
 		}
@@ -52,8 +52,8 @@ public class GetLocationsList implements Runnable {
 			return;
 		}
 
-		logger.debug("Got {} candidate locations to download {}", context.getLocations().size(), task.getDestinationName());
-		task.provideLocations(context.getLocations());
+		logger.debug("Got {} candidate locations to download {}", collectingSet.size(), task.getDestinationName());
+		task.provideLocations(collectingSet);
 	}
 
 	/**
@@ -64,30 +64,26 @@ public class GetLocationsList implements Runnable {
 	 */
 	private class ProvideUserLocationsContext implements IGetUserLocationsContext {
 
-		private String userId;
-		private Set<Locations> locations;
+		private final String userId;
+		private final Set<Locations> allLocationsCollection;
 
-		public ProvideUserLocationsContext() {
-			this.locations = Collections.newSetFromMap(new ConcurrentHashMap<Locations, Boolean>());
+		public ProvideUserLocationsContext(Set<Locations> allLocationsCollection, String userId) {
+			this.allLocationsCollection = allLocationsCollection;
+			this.userId = userId;
 		}
 
 		@Override
 		public void provideUserLocations(Locations locations) {
-			this.locations.add(locations);
-		}
-
-		public Set<Locations> getLocations() {
-			return locations;
+			if (locations != null) {
+				// forward the locations to the (thread-safe) super-collection
+				logger.debug("User {} has {} peers online to ask", userId, locations.getPeerAddresses().size());
+				allLocationsCollection.add(locations);
+			}
 		}
 
 		@Override
 		public String consumeUserId() {
 			return userId;
 		}
-
-		public void setUserId(String userId) {
-			this.userId = userId;
-		}
-
 	}
 }

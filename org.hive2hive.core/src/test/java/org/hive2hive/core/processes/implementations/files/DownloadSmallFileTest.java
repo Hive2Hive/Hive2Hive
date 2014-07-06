@@ -25,8 +25,10 @@ import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,7 +37,7 @@ import org.junit.Test;
  * 
  * @author Nico, Seppi
  */
-public class DownloadFileTest extends H2HJUnitTest {
+public class DownloadSmallFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 2;
 	private final static int CHUNK_SIZE = 1024;
@@ -47,9 +49,14 @@ public class DownloadFileTest extends H2HJUnitTest {
 	private static File uploaderRoot;
 	private static File downloaderRoot;
 
+	// new for every test method
+	private File uploadedFile;
+	private String testContent;
+	private Index fileNode;
+
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = DownloadFileTest.class;
+		testClass = DownloadSmallFileTest.class;
 		beforeClass();
 		// setup a network
 		network = NetworkTestUtil.createNetwork(networkSize);
@@ -68,16 +75,20 @@ public class DownloadFileTest extends H2HJUnitTest {
 		downloader.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 	}
 
-	@Test
-	public void testDownload() throws IOException, NoSessionException, GetFailedException, NoPeerConnectionException {
-		// upload a file
+	@Before
+	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
+		// upload a small file
 		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
-		String testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
+		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
+		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
-		Index fileNode = up.getRoot().getChildByName(fileName);
+		fileNode = up.getRoot().getChildByName(fileName);
+	}
 
+	@Test
+	public void testDownloadSmallFile() throws IOException, NoSessionException, GetFailedException,
+			NoPeerConnectionException {
 		// download file
 		UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
 
@@ -92,11 +103,6 @@ public class DownloadFileTest extends H2HJUnitTest {
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
 			InvalidProcessStateException, NoPeerConnectionException {
-		// upload a file
-		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
-
 		// create fake file keys
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
@@ -112,14 +118,6 @@ public class DownloadFileTest extends H2HJUnitTest {
 	// should overwrite the existing file
 	public void testDownloadFileAlreadyExisting() throws IOException, NoSessionException, GetFailedException,
 			NoPeerConnectionException {
-		// upload a file
-		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
-		String testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
-		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
-		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
-		Index fileNode = up.getRoot().getChildByName(fileName);
-
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, "existing content");
@@ -127,7 +125,7 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
 
-		// the downloaded file should still be on the disk
+		// the downloaded file should now be on the disk
 		File downloadedFile = new File(downloaderRoot, fileNode.getName());
 		Assert.assertTrue(downloadedFile.exists());
 
@@ -142,17 +140,9 @@ public class DownloadFileTest extends H2HJUnitTest {
 	// should NOT overwrite the existing file
 	public void testDownloadFileAlreadyExistingSameContent() throws IOException, NoSessionException,
 			InvalidProcessStateException, NoPeerConnectionException, GetFailedException {
-		// upload a file
-		String fileName = NetworkTestUtil.randomString();
-		File uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
-		String testContent = FileUtils.readFileToString(uploadedFile); // store for later tests
-		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
-		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
-		Index fileNode = up.getRoot().getChildByName(fileName);
-
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
-		FileUtils.write(existing, testContent);
+		FileUtils.write(existing, FileUtils.readFileToString(uploadedFile));
 		long lastModifiedBefore = existing.lastModified();
 
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
@@ -165,6 +155,11 @@ public class DownloadFileTest extends H2HJUnitTest {
 
 		// the existing file has already same content, should not have been downloaded
 		Assert.assertEquals(lastModifiedBefore, existing.lastModified());
+	}
+
+	@After
+	public void deleteFile() {
+		FileUtils.deleteQuietly(uploadedFile);
 	}
 
 	@AfterClass
