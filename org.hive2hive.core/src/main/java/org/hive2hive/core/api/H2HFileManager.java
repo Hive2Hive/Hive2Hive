@@ -15,14 +15,14 @@ import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil.FileProcessAction;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.decorators.AsyncResultComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 /**
  * Default implementation of {@link IFileManager}.

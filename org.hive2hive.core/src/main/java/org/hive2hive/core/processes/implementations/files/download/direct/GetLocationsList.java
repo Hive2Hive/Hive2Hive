@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
+import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

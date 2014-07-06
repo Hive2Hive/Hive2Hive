@@ -5,12 +5,12 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.ChunkPKUpdateContext;
 import org.hive2hive.core.processes.implementations.context.MetaDocumentPKUpdateContext;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

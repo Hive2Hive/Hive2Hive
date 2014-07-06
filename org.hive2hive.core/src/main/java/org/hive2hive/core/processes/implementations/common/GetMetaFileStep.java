@@ -13,11 +13,11 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

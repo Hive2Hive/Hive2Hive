@@ -8,12 +8,12 @@ import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.security.HashUtil;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

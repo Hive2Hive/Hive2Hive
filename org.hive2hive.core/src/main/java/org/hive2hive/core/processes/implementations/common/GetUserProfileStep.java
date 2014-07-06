@@ -10,14 +10,14 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserProfileContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class GetUserProfileStep extends BaseGetProcessStep {
 

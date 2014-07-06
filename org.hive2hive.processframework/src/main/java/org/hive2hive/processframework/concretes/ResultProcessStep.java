@@ -1,11 +1,11 @@
-package org.hive2hive.core.processes.framework.concretes;
+package org.hive2hive.processframework.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.interfaces.IProcessResultListener;
+import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 /**
  * A process step that intends to return a result.

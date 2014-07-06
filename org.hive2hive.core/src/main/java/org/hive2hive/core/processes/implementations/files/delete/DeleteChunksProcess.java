@@ -8,10 +8,10 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileSmall;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.DeleteFileProcessContext;
+import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class DeleteChunksProcess extends SequentialProcess {
 

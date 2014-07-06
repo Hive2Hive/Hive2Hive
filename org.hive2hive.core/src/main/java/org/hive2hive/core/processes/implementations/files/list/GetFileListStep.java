@@ -13,9 +13,9 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.framework.concretes.ResultProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.concretes.ResultProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 

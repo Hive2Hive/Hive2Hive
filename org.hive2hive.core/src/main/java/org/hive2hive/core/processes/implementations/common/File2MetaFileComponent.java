@@ -5,8 +5,8 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
 import org.hive2hive.core.processes.implementations.context.interfaces.IFile2MetaContext;
+import org.hive2hive.processframework.concretes.SequentialProcess;
 
 /**
  * Finds a given file in the user profile and gets the appropriate meta data.

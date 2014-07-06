@@ -1,8 +1,8 @@
 package org.hive2hive.core.api.interfaces;
 
-import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
-
 import net.tomp2p.p2p.Peer;
+
+import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
 
 /**
  * The starting point for the Hive2Hive node. From this class, you can perform user management (login, logout,

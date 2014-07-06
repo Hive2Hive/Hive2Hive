@@ -1,10 +1,10 @@
 package org.hive2hive.core.processes.implementations.logout;
 
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class StopDownloadsStep extends ProcessStep {
 

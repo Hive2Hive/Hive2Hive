@@ -6,9 +6,9 @@ import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
  * Abstract class for {@link ProcessStep}s that intend to GET content from the DHT.

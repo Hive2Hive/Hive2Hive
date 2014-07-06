@@ -8,10 +8,10 @@ import java.util.TimerTask;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.interfaces.IProcessResultListener;
+import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

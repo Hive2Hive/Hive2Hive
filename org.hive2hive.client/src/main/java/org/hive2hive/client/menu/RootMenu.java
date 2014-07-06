@@ -5,9 +5,9 @@ import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 public final class RootMenu extends H2HConsoleMenu {
 

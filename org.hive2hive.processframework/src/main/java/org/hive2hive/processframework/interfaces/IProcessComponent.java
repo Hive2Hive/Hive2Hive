@@ -1,8 +1,8 @@
-package org.hive2hive.core.processes.framework.interfaces;
+package org.hive2hive.processframework.interfaces;
 
 import java.util.List;
 
-import org.hive2hive.core.processes.framework.ProcessState;
+import org.hive2hive.processframework.ProcessState;
 
 /**
  * Basic interface defining all common functionalities and providing the public API for all

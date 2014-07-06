@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.framework.interfaces;
+package org.hive2hive.processframework.interfaces;
 
 /**
  * Listener interface for process components that deliver a result.

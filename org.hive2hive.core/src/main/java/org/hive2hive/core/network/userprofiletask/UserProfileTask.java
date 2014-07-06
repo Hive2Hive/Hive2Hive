@@ -15,10 +15,10 @@ import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
  * The base class of all {@link UserProfileTask}s.</br>
@@ -103,13 +103,12 @@ public abstract class UserProfileTask extends NetworkContent {
 	 * @throws InvalidProcessStateException
 	 * @throws NoSessionException
 	 */
-	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory)
-			throws IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException,
-			NoSessionException {
+	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory) throws NoPeerConnectionException,
+			InvalidProcessStateException, NoSessionException {
 		Set<String> onlyMe = new HashSet<String>(1);
 		onlyMe.add(networkManager.getUserId());
-		ProcessComponent notificationProcess = ProcessFactory.instance().createNotificationProcess(
-				messageFactory, onlyMe, networkManager);
+		ProcessComponent notificationProcess = ProcessFactory.instance().createNotificationProcess(messageFactory, onlyMe,
+				networkManager);
 		notificationProcess.start();
 	}
 }

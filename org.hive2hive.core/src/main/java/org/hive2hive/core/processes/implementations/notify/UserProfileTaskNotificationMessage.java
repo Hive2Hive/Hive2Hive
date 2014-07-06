@@ -4,8 +4,8 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

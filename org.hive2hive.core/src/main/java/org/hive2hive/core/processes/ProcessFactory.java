@@ -11,11 +11,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.decorators.AsyncResultComponent;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.common.CheckWriteAccessStep;
 import org.hive2hive.core.processes.implementations.common.File2MetaFileComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
@@ -79,6 +74,11 @@ import org.hive2hive.core.processes.implementations.share.UpdateUserProfileStep;
 import org.hive2hive.core.processes.implementations.share.VerifyFriendIdStep;
 import org.hive2hive.core.processes.implementations.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.decorators.AsyncResultComponent;
+import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 /**
  * Factory class for the creation of specific process components and composites that represent basic

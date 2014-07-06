@@ -19,11 +19,11 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
 import org.hive2hive.core.processes.implementations.files.list.FileTaste;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 public class FileMenu extends H2HConsoleMenu {
 
@@ -78,7 +78,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException {
+			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
 				IProcessComponent synchronizeProcess = menus.getNodeMenu().getNode().getFileManager().synchronize();
 				executeBlocking(synchronizeProcess, displayText);
 			}
@@ -89,7 +89,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException {
+			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
 
 				File file = askForFile(true);
 				if (file == null) {
@@ -106,7 +106,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException {
+			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
 
 				File file = askForFile(true);
 				if (file == null) {
@@ -122,7 +122,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException {
+			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
 				File source = askForFile("Specify the relative path of the source file to the root directory '%s'.", true);
 				if (source == null) {
 					return;
@@ -144,7 +144,7 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException {
+			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
 				File file = askForFile(true);
 				if (file == null) {
 					return;
@@ -160,7 +160,8 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, FileNotFoundException, InterruptedException {
+			protected void execute() throws Hive2HiveException, FileNotFoundException, InterruptedException,
+					InvalidProcessStateException {
 
 				File file = askForFile(true);
 				if (file == null) {

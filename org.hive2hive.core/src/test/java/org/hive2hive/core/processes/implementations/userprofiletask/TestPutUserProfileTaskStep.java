@@ -5,9 +5,9 @@ import java.security.PublicKey;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.userprofiletask.TestUserProfileTask;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.PutUserProfileTaskStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class TestPutUserProfileTaskStep extends PutUserProfileTaskStep {
 

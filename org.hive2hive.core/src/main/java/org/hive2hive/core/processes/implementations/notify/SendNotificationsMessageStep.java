@@ -15,10 +15,10 @@ import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

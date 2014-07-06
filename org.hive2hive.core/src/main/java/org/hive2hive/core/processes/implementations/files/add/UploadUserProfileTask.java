@@ -13,8 +13,8 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

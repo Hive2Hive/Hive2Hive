@@ -5,10 +5,10 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class PutPublicKeyStep extends BasePutProcessStep {
 

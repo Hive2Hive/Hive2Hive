@@ -1,6 +1,6 @@
-package org.hive2hive.core.processes.framework.interfaces;
+package org.hive2hive.processframework.interfaces;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.processframework.RollbackReason;
 
 /**
  * Basic process component listener interface.

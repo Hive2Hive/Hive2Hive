@@ -1,8 +1,8 @@
-package org.hive2hive.core.processes.framework.decorators;
+package org.hive2hive.processframework.decorators;
 
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
-import org.hive2hive.core.processes.framework.interfaces.IResultProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessResultListener;
+import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 /**
  * Decorator for asynchronous components that intend to return a result.

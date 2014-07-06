@@ -19,7 +19,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 
 			// notify others
 			startNotification(toDelete);
-		} catch (Hive2HiveException e) {
+		} catch (Hive2HiveException | InvalidProcessStateException e) {
 			logger.error("Could not execute the task.", e);
 		}
 	}

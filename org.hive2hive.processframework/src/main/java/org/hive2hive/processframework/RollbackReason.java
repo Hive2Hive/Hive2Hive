@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.framework;
+package org.hive2hive.processframework;
 
 /**
  * Represents the reason of a process component failure and might indicate why it got cancelled and rolled

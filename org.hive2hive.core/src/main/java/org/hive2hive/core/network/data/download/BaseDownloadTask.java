@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

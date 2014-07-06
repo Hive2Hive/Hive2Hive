@@ -2,11 +2,11 @@ package org.hive2hive.core.processes.implementations.userprofiletask;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.UserProfileTaskContext;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,10 @@
 package org.hive2hive.client.console;
 
 import org.hive2hive.client.util.MenuContainer;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.concretes.ProcessComponentListener;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 public abstract class H2HConsoleMenu extends ConsoleMenu {
 

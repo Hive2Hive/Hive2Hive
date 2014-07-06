@@ -3,8 +3,8 @@ package org.hive2hive.core.api;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IManager;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

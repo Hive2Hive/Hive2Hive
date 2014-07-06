@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.ShareProcessContext;
 import org.hive2hive.core.processes.implementations.notify.BaseNotificationMessageFactory;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

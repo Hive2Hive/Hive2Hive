@@ -14,13 +14,13 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.DownloadFileContext;
 import org.hive2hive.core.processes.implementations.files.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.implementations.files.download.direct.DownloadTaskDirect;
 import org.hive2hive.core.security.HashUtil;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

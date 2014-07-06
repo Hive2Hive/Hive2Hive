@@ -1,6 +1,6 @@
-package org.hive2hive.core.processes.framework.abstracts;
+package org.hive2hive.processframework.abstracts;
 
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Abstract base class for all process component decorators that provide additional behavior or state to

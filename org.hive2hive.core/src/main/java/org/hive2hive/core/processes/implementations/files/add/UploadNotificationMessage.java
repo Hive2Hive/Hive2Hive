@@ -8,8 +8,8 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

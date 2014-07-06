@@ -6,13 +6,13 @@ import java.util.List;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.implementations.files.delete.DeleteSingleChunkStep;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,10 +9,10 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.MetaFileLarge;
 import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.context.AddFileProcessContext;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

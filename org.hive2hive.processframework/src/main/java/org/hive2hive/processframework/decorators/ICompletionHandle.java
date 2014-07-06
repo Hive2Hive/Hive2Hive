@@ -1,6 +1,6 @@
-package org.hive2hive.core.processes.framework.decorators;
+package org.hive2hive.processframework.decorators;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.processframework.RollbackReason;
 
 public interface ICompletionHandle {
 

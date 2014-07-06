@@ -1,11 +1,11 @@
-package org.hive2hive.core.processes.framework.decorators;
+package org.hive2hive.processframework.decorators;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.abstracts.ProcessDecorator;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponentListener;
 
 /**
  * A {@link ProcessDecorator} that executes an event, defined in the {@link ICompletionHandle}, after completion of the

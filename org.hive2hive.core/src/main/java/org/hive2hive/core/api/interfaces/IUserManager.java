@@ -5,8 +5,8 @@ import java.nio.file.Path;
 import org.hive2hive.core.events.framework.interfaces.IUserEventGenerator;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Basic interface for all user operations.

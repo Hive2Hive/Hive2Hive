@@ -1,7 +1,7 @@
-package org.hive2hive.core.processes.framework.concretes;
+package org.hive2hive.processframework.concretes;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.interfaces.IProcessComponentListener;
 
 /**
  * A basic process component listener that is notified in case of a components success or fail.

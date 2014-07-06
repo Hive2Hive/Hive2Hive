@@ -1,6 +1,6 @@
-package org.hive2hive.core.processes.framework.exceptions;
+package org.hive2hive.processframework.exceptions;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
+import org.hive2hive.processframework.RollbackReason;
 
 /**
  * Exception that occurs during a process component execution in case of a failure. Leads to the whole process

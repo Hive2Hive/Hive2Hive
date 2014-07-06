@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.framework.abstracts;
+package org.hive2hive.processframework.abstracts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +9,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.hive2hive.core.processes.framework.ProcessState;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.processframework.ProcessState;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponentListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.framework.abstracts;
+package org.hive2hive.processframework.abstracts;
 
 import java.util.List;
 

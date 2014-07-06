@@ -1,7 +1,7 @@
-package org.hive2hive.core.processes.framework.abstracts;
+package org.hive2hive.processframework.abstracts;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
  * Abstract base class for all (leaf) process components that represent a specific operation and do not

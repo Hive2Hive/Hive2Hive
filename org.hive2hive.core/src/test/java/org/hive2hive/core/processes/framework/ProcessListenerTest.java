@@ -4,8 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.util.TestProcessComponentListener;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

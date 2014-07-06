@@ -1,6 +1,6 @@
-package org.hive2hive.core.processes.framework;
+package org.hive2hive.processframework;
 
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
 
 /**
  * State of a {@link ProcessComponent}.

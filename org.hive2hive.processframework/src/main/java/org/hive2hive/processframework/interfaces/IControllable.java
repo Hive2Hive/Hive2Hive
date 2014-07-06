@@ -1,7 +1,7 @@
-package org.hive2hive.core.processes.framework.interfaces;
+package org.hive2hive.processframework.interfaces;
 
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
  * Separate controlling interface used by the process framework to allow components to be started, paused,

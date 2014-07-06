@@ -17,10 +17,10 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 public class FileRecursionUtil {
 

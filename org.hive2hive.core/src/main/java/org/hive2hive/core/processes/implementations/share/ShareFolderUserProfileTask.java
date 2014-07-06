@@ -10,9 +10,10 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
 import org.hive2hive.core.processes.implementations.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.core.processes.implementations.files.util.FileRecursionUtil;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 				logger.debug("Other user shared folder with new user '{}'.", addedFriend);
 				processSharedWithOther();
 			}
-		} catch (Hive2HiveException e) {
+		} catch (Hive2HiveException | InvalidProcessStateException e) {
 			logger.error("Cannot execute the task.", e);
 		}
 
@@ -68,7 +69,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		profileManager.readyToPut(userProfile, pid);
 	}
 
-	private void processSharedWithMe() throws Hive2HiveException {
+	private void processSharedWithMe() throws Hive2HiveException, InvalidProcessStateException {
 		/** 1. add the tree to the root node in the user profile */
 		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 		String pid = UUID.randomUUID().toString();

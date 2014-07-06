@@ -1,7 +1,6 @@
-package org.hive2hive.core.processes.framework.exceptions;
+package org.hive2hive.processframework.exceptions;
 
-import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.processes.framework.ProcessState;
+import org.hive2hive.processframework.ProcessState;
 
 /**
  * Represents an exception that occurs when a process component is in an invalid state to be called for a
@@ -10,15 +9,14 @@ import org.hive2hive.core.processes.framework.ProcessState;
  * @author Christian
  * 
  */
-public class InvalidProcessStateException extends Hive2HiveException {
+public class InvalidProcessStateException extends Exception {
 
 	private static final long serialVersionUID = -570684360354374306L;
 
 	private final ProcessState current;
 
 	public InvalidProcessStateException(ProcessState current) {
-		super(String.format("Operation cannot be called. Process is currently in an invalid state: %s.",
-				current));
+		super(String.format("Operation cannot be called. Process is currently in an invalid state: %s.", current));
 		this.current = current;
 	}
 

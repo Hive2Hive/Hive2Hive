@@ -1,6 +1,6 @@
 package org.hive2hive.core.processes.util;
 
-import org.hive2hive.core.processes.framework.interfaces.IProcessResultListener;
+import org.hive2hive.processframework.interfaces.IProcessResultListener;
 
 public class TestResultProcessComponentListener<T> implements
 		IProcessResultListener<T> {

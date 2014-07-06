@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.util;
 
-import org.hive2hive.core.processes.framework.concretes.ProcessComponentListener;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.processframework.concretes.ProcessComponentListener;
+import org.hive2hive.processframework.interfaces.IProcessComponentListener;
 
 public class TestProcessComponentListener extends ProcessComponentListener implements IProcessComponentListener {
 

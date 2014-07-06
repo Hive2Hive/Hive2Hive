@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.framework.interfaces;
+package org.hive2hive.processframework.interfaces;
 
 /**
  * Interface for process components that intend to deliver a result.

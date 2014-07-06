@@ -1,8 +1,8 @@
 package org.hive2hive.core.events.framework.abstracts;
 
 import org.hive2hive.core.events.framework.interfaces.IUserEvent;
-import org.hive2hive.core.processes.framework.RollbackReason;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.RollbackReason;
 
 public class UserEvent implements IUserEvent {
 

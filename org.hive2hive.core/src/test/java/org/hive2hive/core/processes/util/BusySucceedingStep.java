@@ -1,6 +1,6 @@
 package org.hive2hive.core.processes.util;
 
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 public class BusySucceedingStep extends SucceedingProcessStep {
 

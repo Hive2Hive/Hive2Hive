@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.framework.decorators;
+package org.hive2hive.processframework.decorators;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -6,14 +6,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.hive2hive.core.processes.framework.ProcessState;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.Process;
-import org.hive2hive.core.processes.framework.abstracts.ProcessDecorator;
-import org.hive2hive.core.processes.framework.concretes.SequentialProcess;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponentListener;
+import org.hive2hive.processframework.ProcessState;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.abstracts.Process;
+import org.hive2hive.processframework.abstracts.ProcessDecorator;
+import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponentListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

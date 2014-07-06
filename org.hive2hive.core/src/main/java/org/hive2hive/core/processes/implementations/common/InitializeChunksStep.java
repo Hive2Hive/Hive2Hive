@@ -11,13 +11,13 @@ import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
 import org.hive2hive.core.processes.implementations.context.interfaces.IInitializeChunksStepContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

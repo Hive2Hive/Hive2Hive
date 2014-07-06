@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
 import org.hive2hive.core.processes.implementations.common.userprofiletask.PutUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.NotifyProcessContext;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

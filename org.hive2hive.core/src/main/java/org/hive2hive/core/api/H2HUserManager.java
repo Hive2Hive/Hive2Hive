@@ -19,16 +19,16 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.framework.RollbackReason;
-import org.hive2hive.core.processes.framework.abstracts.ProcessComponent;
-import org.hive2hive.core.processes.framework.decorators.AsyncComponent;
-import org.hive2hive.core.processes.framework.decorators.CompletionHandleComponent;
-import org.hive2hive.core.processes.framework.decorators.ICompletionHandle;
-import org.hive2hive.core.processes.framework.interfaces.IProcessComponent;
 import org.hive2hive.core.processes.implementations.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.implementations.context.IsRegisteredContext;
 import org.hive2hive.core.processes.implementations.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.processframework.abstracts.ProcessComponent;
+import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.decorators.CompletionHandleComponent;
+import org.hive2hive.processframework.decorators.ICompletionHandle;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Default implementation of {@link IUserManager}.

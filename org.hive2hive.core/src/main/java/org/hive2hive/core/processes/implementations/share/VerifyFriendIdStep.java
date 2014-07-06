@@ -4,9 +4,9 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.processes.framework.abstracts.ProcessStep;
-import org.hive2hive.core.processes.framework.exceptions.InvalidProcessStateException;
-import org.hive2hive.core.processes.framework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 /**
  * A step which loads the public key of the friend. No result is a sign for a non-existing friend.
