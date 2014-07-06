@@ -15,7 +15,6 @@ public class LoginProcessContext implements IGetUserProfileContext, IGetUserLoca
 
 	private UserProfile profile;
 	private Locations locations;
-	private boolean isMaster;
 
 	public LoginProcessContext(UserCredentials credentials) {
 		this.credentials = credentials;

@@ -38,7 +38,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent synchronize() throws NoSessionException {
-		H2HSession session = networkManager.getSession();
+		if (networkManager.getSession() == null) {
+			throw new NoSessionException();
+		}
+
 		IProcessComponent syncProcess = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
 		AsyncComponent asyncProcess = new AsyncComponent(syncProcess);
 

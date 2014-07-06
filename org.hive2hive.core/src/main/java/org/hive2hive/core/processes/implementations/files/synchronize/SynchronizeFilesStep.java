@@ -72,9 +72,7 @@ public class SynchronizeFilesStep extends ProcessStep {
 		try {
 			logger.debug("Start synchronizing files");
 			synchronizeFiles(synchronizer);
-		} catch (NoSessionException e) {
-			throw new ProcessExecutionException(e);
-		} catch (NoPeerConnectionException e) {
+		} catch (NoSessionException | NoPeerConnectionException e) {
 			throw new ProcessExecutionException(e);
 		}
 	}
