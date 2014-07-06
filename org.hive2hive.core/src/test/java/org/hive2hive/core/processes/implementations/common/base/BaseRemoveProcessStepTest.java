@@ -18,10 +18,10 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,16 +51,13 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// put some data to remove
-		network.get(0)
-				.getDataManager()
-				.putUnblocked(
-						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-								.setData(testData)).awaitUninterruptibly();
+		network.get(0).getDataManager()
+				.putUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(testData))
+				.awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0)
-				.getDataManager());
-		UseCaseTestUtil.executeProcess(putStep);
+		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0).getDataManager());
+		TestExecutionUtil.executeProcess(putStep);
 
 		FutureGet futureGet = network.get(0).getDataManager()
 				.getUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
@@ -69,23 +66,20 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemoveProcessStepRollBack() throws NoPeerConnectionException,
-			InvalidProcessStateException {
+	public void testRemoveProcessStepRollBack() throws NoPeerConnectionException, InvalidProcessStateException {
 		String locationKey = network.get(0).getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
-		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO,
-				Number160.createHash(contentKey), Number160.ZERO);
+		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+				Number160.ZERO);
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// manipulate the nodes, remove will not work
 		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(key));
 		network.get(1).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(key));
 		// put some data to remove
-		network.get(0)
-				.getDataManager()
-				.putUnblocked(
-						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-								.setData(testData)).awaitUninterruptibly();
+		network.get(0).getDataManager()
+				.putUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(testData))
+				.awaitUninterruptibly();
 
 		// initialize the process and the one and only step to test
 		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0)
@@ -93,7 +87,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		removeStep.attachListener(listener);
 		removeStep.start();
-		UseCaseTestUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.waitTillFailed(listener, 10);
 	}
 
 	@AfterClass

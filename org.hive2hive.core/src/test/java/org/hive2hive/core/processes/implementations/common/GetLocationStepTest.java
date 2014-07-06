@@ -13,7 +13,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.implementations.context.interfaces.IGetUserLocationsContext;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -54,7 +54,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 
 		GetLocationsContext context = new GetLocationsContext(userId);
 		GetUserLocationsStep step = new GetUserLocationsStep(context, getter.getDataManager());
-		UseCaseTestUtil.executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 
 		// verify if both objects are the same
 		Assert.assertEquals(userId, context.locations.getUserId());
@@ -73,7 +73,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 
 		GetLocationsContext context = new GetLocationsContext(userId);
 		GetUserLocationsStep step = new GetUserLocationsStep(context, getter.getDataManager());
-		UseCaseTestUtil.executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 
 		Assert.assertNull(context.locations);
 	}

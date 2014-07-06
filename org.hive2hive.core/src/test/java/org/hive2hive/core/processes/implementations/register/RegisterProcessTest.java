@@ -12,7 +12,6 @@ import net.tomp2p.futures.FuturePut;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.file.FileTestUtil;
@@ -28,6 +27,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.concretes.ProcessComponentListener;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

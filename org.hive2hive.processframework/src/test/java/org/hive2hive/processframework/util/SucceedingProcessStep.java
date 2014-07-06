@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.util;
+package org.hive2hive.processframework.util;
 
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;

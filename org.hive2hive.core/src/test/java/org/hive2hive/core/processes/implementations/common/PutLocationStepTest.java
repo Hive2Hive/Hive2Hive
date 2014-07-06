@@ -20,10 +20,10 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.implementations.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.processes.implementations.context.interfaces.IPutUserLocationsContext;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -71,7 +71,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		PutLocationContext context = new PutLocationContext(newLocations, protectionKeys);
 		PutUserLocationsStep step = new PutUserLocationsStep(context, putter.getDataManager());
-		UseCaseTestUtil.executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 
 		// get the locations
 		FutureGet future = proxy.getDataManager().getUnblocked(
@@ -88,8 +88,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testStepRollback() throws InterruptedException, NoPeerConnectionException,
-			InvalidProcessStateException {
+	public void testStepRollback() throws InterruptedException, NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
 		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
@@ -109,7 +108,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		step.start();
 
 		// wait for the process to finish
-		UseCaseTestUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.waitTillFailed(listener, 10);
 
 		// get the locations which should be stored at the proxy --> they should be null
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(

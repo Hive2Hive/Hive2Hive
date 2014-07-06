@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,6 +25,8 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -102,10 +103,10 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddFileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' at A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -125,11 +126,10 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileAtATryToDeleteAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddFileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' from A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -141,26 +141,23 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(relativePath, false);
 
 		logger.info("Try to delete file '{}' at B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(
-				fileFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(fileFromAAtB, nodeB));
 		checkIndex(relativePath, false);
 	}
 
 	@Test
-	public void testSynchronizeTryToAddFileAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderB, CHUNK_SIZE);
+	public void testSynchronizeTryToAddFileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderB, CHUNK_SIZE);
 		Path relativePath = rootB.toPath().relativize(fileAtB.toPath());
 		logger.info("Try to upload a new file '{}' from B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB,
-				nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB, nodeB));
 	}
 
 	@Test
-	public void testSynchronizeAddFolderFromADeleteFromA() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddFolderFromADeleteFromA() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder1FromA");
 		folderFromAAtA.mkdir();
 		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -182,9 +179,8 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFolderAtATryToDeleteAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddFolderAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder2FromA");
 		folderFromAAtA.mkdir();
 		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -198,27 +194,25 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(relativePath, false);
 
 		logger.info("Try to delete folder '{}' at B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(
-				folderFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folderFromAAtB, nodeB));
 		checkIndex(relativePath, false);
 	}
 
 	@Test
-	public void testSynchronizeTryToAddFolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	public void testSynchronizeTryToAddFolderAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(sharedFolderB, "folderFromB");
 		folderAtB.mkdir();
 		Path relativePath = rootB.toPath().relativize(folderAtB.toPath());
 		logger.info("Try to upload a new folder '{}' from B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB,
-				nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB, nodeB));
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
+				subFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' at A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -238,11 +232,10 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileAtATryToDeleteAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
+				subFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' from A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -254,26 +247,23 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(relativePath, false);
 
 		logger.info("Try to delete file '{}' at B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(
-				fileFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(fileFromAAtB, nodeB));
 		checkIndex(relativePath, false);
 	}
 
 	@Test
-	public void testSynchronizeTryToAddSubfileAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB",
-				new Random().nextInt(maxNumChunks) + 1, subFolderB, CHUNK_SIZE);
+	public void testSynchronizeTryToAddSubfileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(maxNumChunks) + 1,
+				subFolderB, CHUNK_SIZE);
 		Path relativePath = rootB.toPath().relativize(fileAtB.toPath());
 		logger.info("Try to upload a new file '{}' from B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB,
-				nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB, nodeB));
 	}
 
 	@Test
-	public void testSynchronizeAddSubfolderFromADeleteFromA() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddSubfolderFromADeleteFromA() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder1FromA");
 		folderFromAAtA.mkdir();
 		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -295,9 +285,8 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddSubfolderAtATryToDeleteAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddSubfolderAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder2FromA");
 		folderFromAAtA.mkdir();
 		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -311,20 +300,18 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(relativePath, false);
 
 		logger.info("Try to delete folder '{}' at B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(
-				folderFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folderFromAAtB, nodeB));
 		checkIndex(relativePath, false);
 	}
 
 	@Test
-	public void testSynchronizeTryToAddSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	public void testSynchronizeTryToAddSubfolderAtB() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(subFolderB, "subfolderFromB");
 		folderAtB.mkdir();
 		Path relativePath = rootB.toPath().relativize(folderAtB.toPath());
 		logger.info("Try to upload a new folder '{}' from B.", relativePath.toString());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB,
-				nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB, nodeB));
 	}
 
 	/**
@@ -355,8 +342,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndex(Path relativePath, boolean deleted) throws GetFailedException,
-			NoSessionException {
+	private static void checkIndex(Path relativePath, boolean deleted) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
 		Index indexA = userProfileA.getFileByPath(relativePath);
@@ -373,10 +359,8 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		}
 
 		// check if userA's content protection keys are other ones
-		Assert.assertFalse(indexA.getProtectionKeys().getPrivate()
-				.equals(userProfileA.getProtectionKeys().getPrivate()));
-		Assert.assertFalse(indexA.getProtectionKeys().getPublic()
-				.equals(userProfileA.getProtectionKeys().getPublic()));
+		Assert.assertFalse(indexA.getProtectionKeys().getPrivate().equals(userProfileA.getProtectionKeys().getPrivate()));
+		Assert.assertFalse(indexA.getProtectionKeys().getPublic().equals(userProfileA.getProtectionKeys().getPublic()));
 		// check if user B has no content protection keys
 		Assert.assertNull(indexB.getProtectionKeys());
 

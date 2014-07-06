@@ -18,6 +18,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -46,14 +47,12 @@ public class LogoutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException,
-			NoPeerConnectionException {
+	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 
 		// verify the locations map before logout
 		FutureGet futureGet = client.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(
-						H2HConstants.USER_LOCATIONS));
+				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 		futureGet.getFutureRequests().awaitUninterruptibly();
 		Locations locations = (Locations) futureGet.getData().object();
@@ -62,12 +61,11 @@ public class LogoutTest extends H2HJUnitTest {
 
 		// logout
 		IProcessComponent process = ProcessFactory.instance().createLogoutProcess(client);
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		// verify the locations map after logout
 		FutureGet futureGet2 = client.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(
-						H2HConstants.USER_LOCATIONS));
+				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet2.awaitUninterruptibly();
 		futureGet2.getFutureRequests().awaitUninterruptibly();
 		Locations locations2 = (Locations) futureGet2.getData().object();

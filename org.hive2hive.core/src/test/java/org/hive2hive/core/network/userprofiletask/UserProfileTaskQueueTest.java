@@ -36,8 +36,6 @@ import org.hive2hive.core.processes.implementations.common.userprofiletask.GetUs
 import org.hive2hive.core.processes.implementations.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.implementations.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.processes.implementations.userprofiletask.TestPutUserProfileTaskStep;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.RollbackReason;
@@ -45,6 +43,8 @@ import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -81,7 +81,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 
 		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node);
-		UseCaseTestUtil.executeProcess(putStep);
+		TestExecutionUtil.executeProcess(putStep);
 
 		Parameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
 				.setContentKey(userProfileTask.getContentKey());
@@ -108,7 +108,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		// start and cancel immediately
 		component.start();
 		putStep.cancel(new RollbackReason("Testing whether rollback works."));
-		UseCaseTestUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.waitTillFailed(listener, 10);
 
 		Parameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
 				.setContentKey(userProfileTask.getContentKey());
@@ -134,7 +134,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		process.add(new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node));
 		process.add(new GetUserProfileTaskStep(context, node));
 
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		assertNotNull(context.consumeUserProfileTask());
 		assertEquals(userProfileTask.getId(), ((TestUserProfileTask) context.consumeUserProfileTask()).getId());
@@ -177,7 +177,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		process.add(new GetUserProfileTaskStep(context, node));
 		process.add(new RemoveUserProfileTaskStep(context, node));
 
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		Parameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
 				.setContentKey(userProfileTask.getContentKey());
@@ -266,7 +266,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		Collections.shuffle(shuffledTasks);
 		for (TestUserProfileTask task : shuffledTasks) {
 			TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, task, key.getPublic(), node);
-			UseCaseTestUtil.executeProcess(putStep);
+			TestExecutionUtil.executeProcess(putStep);
 		}
 
 		// fetch task from network, respectively the implicit queue
@@ -274,13 +274,13 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 		while (true) {
 			GetUserProfileTaskStep getStep = new GetUserProfileTaskStep(context, node);
-			UseCaseTestUtil.executeProcess(getStep);
+			TestExecutionUtil.executeProcess(getStep);
 			if (context.consumeUserProfileTask() != null) {
 				TestUserProfileTask task = (TestUserProfileTask) context.consumeUserProfileTask();
 				downloadedTasks.add(task);
 				// remove successfully get user profile tasks
 				RemoveUserProfileTaskStep removeStep = new RemoveUserProfileTaskStep(context, node);
-				UseCaseTestUtil.executeProcess(removeStep);
+				TestExecutionUtil.executeProcess(removeStep);
 			} else {
 				break;
 			}
@@ -303,7 +303,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class SimpleGetUserProfileTaskContext implements IUserProfileTaskContext{
+	private class SimpleGetUserProfileTaskContext implements IUserProfileTaskContext {
 
 		private UserProfileTask userProfileTask;
 

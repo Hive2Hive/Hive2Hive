@@ -10,7 +10,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
+import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;

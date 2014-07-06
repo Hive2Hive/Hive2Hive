@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,6 +25,8 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -141,7 +142,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Try to update file '{}' at B.", relativePath);
 		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
 		checkFileIndex(relativePath, HashUtil.hash(fileFromAAtA));
 	}
 
@@ -185,7 +186,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Try to update file '{}' at B.", relativePath);
 		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
 		checkFileIndex(relativePath, HashUtil.hash(fileFromAAtA));
 	}
 

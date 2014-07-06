@@ -17,10 +17,10 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -57,7 +57,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
 				putter.getDataManager());
-		UseCaseTestUtil.executeProcess(putStep);
+		TestExecutionUtil.executeProcess(putStep);
 
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
@@ -84,7 +84,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		putStep.start();
 
 		// wait for the process to finish
-		UseCaseTestUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.waitTillFailed(listener, 10);
 
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
@@ -109,8 +109,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		private final String contentKey;
 		private final H2HTestData data;
 
-		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data,
-				IDataManager dataManager) {
+		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data, IDataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;

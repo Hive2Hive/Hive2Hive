@@ -17,8 +17,8 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.processes.implementations.context.LoginProcessContext;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -218,7 +218,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		ContactOtherClientsStep processStep = new ContactOtherClientsStep(context, network.get(0));
 		SequentialProcess process = new SequentialProcess();
 		process.add(processStep);
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		return context.consumeUserLocations();
 	}

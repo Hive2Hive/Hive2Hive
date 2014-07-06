@@ -1,43 +1,27 @@
-package org.hive2hive.core.processes.framework;
+package org.hive2hive.processframework;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.processes.util.BusyFailingStep;
-import org.hive2hive.core.processes.util.BusySucceedingStep;
-import org.hive2hive.core.processes.util.FailingProcessStep;
-import org.hive2hive.core.processes.util.FailingSequentialProcess;
-import org.hive2hive.core.processes.util.SucceedingProcessStep;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.TestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
-import org.hive2hive.processframework.ProcessState;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.hive2hive.processframework.util.BusyFailingStep;
+import org.hive2hive.processframework.util.BusySucceedingStep;
+import org.hive2hive.processframework.util.FailingProcessStep;
+import org.hive2hive.processframework.util.FailingSequentialProcess;
+import org.hive2hive.processframework.util.SucceedingProcessStep;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.Test;
 
-public class SequentialProcessTest extends H2HJUnitTest {
+public class SequentialProcessTest {
 
 	private final int MAX_ASYNC_WAIT = 5;
-	private final int WAIT_FOR_ASYNC = TestUtil.DEFAULT_WAITING_TIME + 1500;
-
-	@BeforeClass
-	public static void initTest() throws Exception {
-		testClass = SequentialProcessTest.class;
-		beforeClass();
-	}
-
-	@AfterClass
-	public static void endTest() {
-		afterClass();
-	}
+	private final int WAIT_FOR_ASYNC = TestExecutionUtil.DEFAULT_WAITING_TIME + 1500;
 
 	@Test
 	public void syncSuccessTest() throws InvalidProcessStateException {
@@ -97,7 +81,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		AsyncComponent asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
 
 		// sync components
@@ -107,7 +91,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess.start();
 		assertFalse(asyncProcess.getState() == ProcessState.SUCCEEDED);
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
 
 		// async components
@@ -117,7 +101,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess.start();
 		assertFalse(asyncProcess.getState() == ProcessState.SUCCEEDED);
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
 	}
 
@@ -129,7 +113,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		AsyncComponent asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
 
@@ -139,7 +123,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
 
@@ -149,7 +133,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
 	}
@@ -316,7 +300,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		successProcess.attachListener(listener);
 		successProcess.start();
 
-		UseCaseTestUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
 
 		assertTrue(listener.hasSucceeded());
 		assertFalse(listener.hasFailed());
@@ -333,7 +317,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess2.attachListener(listener);
 		asyncProcess2.start();
 
-		UseCaseTestUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
 
 		assertTrue(listener.hasSucceeded());
 		assertFalse(listener.hasFailed());
@@ -350,7 +334,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess3.attachListener(listener);
 		asyncProcess3.start();
 
-		UseCaseTestUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
 
 		assertTrue(listener.hasSucceeded());
 		assertFalse(listener.hasFailed());
@@ -372,7 +356,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess4.attachListener(listener);
 		asyncProcess4.start();
 
-		UseCaseTestUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillSucceded(listener, MAX_ASYNC_WAIT);
 
 		assertTrue(listener.hasSucceeded());
 		assertFalse(listener.hasFailed());
@@ -389,7 +373,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		failProcess.attachListener(listener);
 		failProcess.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
 
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
@@ -406,7 +390,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess2.attachListener(listener);
 		asyncProcess2.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
 
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
@@ -423,7 +407,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess3.attachListener(listener);
 		asyncProcess3.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
 
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
@@ -445,7 +429,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess4.attachListener(listener);
 		asyncProcess4.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
 
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
@@ -465,7 +449,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess5.attachListener(listener);
 		asyncProcess5.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
 
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
@@ -487,7 +471,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess6.attachListener(listener);
 		asyncProcess6.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
+		TestExecutionUtil.waitTillFailed(listener, MAX_ASYNC_WAIT);
 
 		assertFalse(listener.hasSucceeded());
 		assertTrue(listener.hasFailed());
@@ -647,7 +631,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 
 	@Test
 	public void asyncRollbackTest() throws InvalidProcessStateException {
-		
+
 		// sync components (level-1 fail)
 		SequentialProcess subProcess = new SequentialProcess();
 		ProcessStep subStep1 = new SucceedingProcessStep();
@@ -668,8 +652,8 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		AsyncComponent asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
 
-		TestUtil.wait(WAIT_FOR_ASYNC);
-		
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
+
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
 		assertTrue(step1.getState() == ProcessState.FAILED);
@@ -699,8 +683,8 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		process.add(step3);
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
-		
-		TestUtil.wait(WAIT_FOR_ASYNC);
+
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
@@ -733,8 +717,8 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		process.add(step4);
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
-		
-		TestUtil.wait(WAIT_FOR_ASYNC);
+
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
@@ -767,8 +751,8 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		process.add(step4);
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
-		
-		TestUtil.wait(WAIT_FOR_ASYNC);
+
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
@@ -801,8 +785,8 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		process.add(step3);
 		asyncProcess = new AsyncComponent(process);
 		asyncProcess.start();
-		
-		TestUtil.wait(WAIT_FOR_ASYNC);
+
+		TestExecutionUtil.wait(WAIT_FOR_ASYNC);
 
 		assertTrue(asyncProcess.getState() == ProcessState.FAILED);
 		assertTrue(process.getState() == ProcessState.FAILED);
@@ -815,10 +799,10 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		assertTrue(subStep3.getState() == ProcessState.READY);
 		assertTrue(step3.getState() == ProcessState.READY || step3.getState() == ProcessState.FAILED);
 	}
-	
+
 	@Test
 	public void awaitSyncTest() throws InvalidProcessStateException, InterruptedException {
-		
+
 		// succeeding process
 		SequentialProcess process = new SequentialProcess();
 		process.add(new BusySucceedingStep());
@@ -826,9 +810,9 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		process.await();
 		if (process.getState() != ProcessState.SUCCEEDED)
 			fail("Busy process should have finished. Await() did not block.");
-		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		TestExecutionUtil.wait(TestExecutionUtil.DEFAULT_WAITING_TIME);
 		assertTrue(process.getState() == ProcessState.SUCCEEDED);
-		
+
 		// failing process
 		SequentialProcess process2 = new SequentialProcess();
 		process2.add(new BusyFailingStep());
@@ -836,13 +820,13 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		process2.await();
 		if (process2.getState() != ProcessState.FAILED)
 			fail("Busy process should have finished. Await() did not block.");
-		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		TestExecutionUtil.wait(TestExecutionUtil.DEFAULT_WAITING_TIME);
 		assertTrue(process2.getState() == ProcessState.FAILED);
 	}
-	
+
 	@Test
 	public void awaitAsyncTest() throws InvalidProcessStateException, InterruptedException {
-		
+
 		// succeeding process
 		SequentialProcess process = new SequentialProcess();
 		process.add(new BusySucceedingStep());
@@ -851,9 +835,9 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess.await();
 		if (asyncProcess.getState() != ProcessState.SUCCEEDED)
 			fail("Busy process should have finished. Await() did not block.");
-		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		TestExecutionUtil.wait(TestExecutionUtil.DEFAULT_WAITING_TIME);
 		assertTrue(asyncProcess.getState() == ProcessState.SUCCEEDED);
-		
+
 		// failing process
 		SequentialProcess process2 = new SequentialProcess();
 		process2.add(new BusyFailingStep());
@@ -862,7 +846,7 @@ public class SequentialProcessTest extends H2HJUnitTest {
 		asyncProcess2.await();
 		if (asyncProcess2.getState() != ProcessState.FAILED)
 			fail("Busy process should have finished. Await() did not block.");
-		TestUtil.wait(TestUtil.DEFAULT_WAITING_TIME);
+		TestExecutionUtil.wait(TestExecutionUtil.DEFAULT_WAITING_TIME);
 		assertTrue(asyncProcess2.getState() == ProcessState.FAILED);
 	}
 }

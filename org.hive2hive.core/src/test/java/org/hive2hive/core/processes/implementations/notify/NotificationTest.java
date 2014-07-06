@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
@@ -15,13 +14,15 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.ProcessState;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -97,7 +98,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		UseCaseTestUtil.waitTillSucceded(listener, 10);
+		TestExecutionUtil.waitTillSucceded(listener, 10);
 
 		Assert.assertEquals(0, msgFactory.getArrivedMessageCount());
 		Assert.assertEquals(0, msgFactory.getSentMessageCount());
@@ -223,7 +224,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		UseCaseTestUtil.waitTillSucceded(listener, 20);
+		TestExecutionUtil.waitTillSucceded(listener, 20);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -262,7 +263,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		UseCaseTestUtil.waitTillSucceded(listener, 20);
+		TestExecutionUtil.waitTillSucceded(listener, 20);
 
 		H2HWaiter waiter = new H2HWaiter(10);
 		do {
@@ -299,7 +300,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.start();
 
 		// wait until all messages are sent
-		UseCaseTestUtil.waitTillSucceded(listener, 20);
+		TestExecutionUtil.waitTillSucceded(listener, 20);
 
 		// check the locations map; should have 2 entries only
 		Locations locations = UseCaseTestUtil.getLocations(network.get(0), userACredentials.getUserId());

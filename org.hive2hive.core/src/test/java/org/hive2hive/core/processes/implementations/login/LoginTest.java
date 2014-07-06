@@ -20,12 +20,13 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -114,7 +115,7 @@ public class LoginTest extends H2HJUnitTest {
 		loginProcess.attachListener(listener);
 		loginProcess.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.waitTillFailed(listener, 20);
 
 		return client.getSession();
 	}

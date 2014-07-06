@@ -10,10 +10,10 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -47,12 +47,11 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 		// put in the memory of 2nd peer
 		holder.getDataManager()
-				.putUnblocked(
-						new Parameters().setLocationKey(holder.getNodeId()).setContentKey(contentKey)
-								.setData(data)).awaitUninterruptibly();
+				.putUnblocked(new Parameters().setLocationKey(holder.getNodeId()).setContentKey(contentKey).setData(data))
+				.awaitUninterruptibly();
 
 		TestGetProcessStep getStep = new TestGetProcessStep(locationKey, contentKey, getter.getDataManager());
-		UseCaseTestUtil.executeProcess(getStep);
+		TestExecutionUtil.executeProcess(getStep);
 
 		Assert.assertEquals(data.getTestString(), ((H2HTestData) getStep.getContent()).getTestString());
 	}
@@ -72,7 +71,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		getStepRollBack.start();
 
 		// wait for the process to finish
-		UseCaseTestUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.waitTillFailed(listener, 10);
 
 		Assert.assertNull(getStepRollBack.getContent());
 	}

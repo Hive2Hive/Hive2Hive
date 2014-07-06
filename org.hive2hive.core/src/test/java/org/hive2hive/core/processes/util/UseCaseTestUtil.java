@@ -6,7 +6,6 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.UUID;
 
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -30,7 +29,9 @@ import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.interfaces.IResultProcessComponent;
-import org.junit.Assert;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 
 /**
  * Helper class for JUnit tests to get some documents from the DHT.
@@ -41,64 +42,13 @@ import org.junit.Assert;
  */
 public class UseCaseTestUtil {
 
-	public static final int MAX_PROCESS_WAIT_TIME = 120;
-
 	private UseCaseTestUtil() {
 		// only static methods
 	}
 
-	public static void waitTillSucceded(TestProcessComponentListener listener, int maxSeconds) {
-		H2HWaiter waiter = new H2HWaiter(maxSeconds);
-		do {
-			if (listener.hasFailed())
-				Assert.fail();
-			waiter.tickASecond();
-		} while (!listener.hasSucceeded());
-	}
-
-	public static void waitTillFailed(TestProcessComponentListener listener, int maxSeconds) {
-		H2HWaiter waiter = new H2HWaiter(maxSeconds);
-		do {
-			if (listener.hasSucceeded())
-				Assert.fail();
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
-	}
-
-	/**
-	 * Executes a process and waits until it's done. This is a simple helper method to reduce code
-	 * clones.
-	 */
-	public static void executeProcess(IProcessComponent process) {
-		executeProcessTillSucceded(process);
-	}
-
-	public static void executeProcessTillSucceded(IProcessComponent process) {
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		try {
-			process.start();
-			waitTillSucceded(listener, MAX_PROCESS_WAIT_TIME);
-		} catch (InvalidProcessStateException e) {
-			System.out.println("ERROR: Cannot wait until process is done.");
-			Assert.fail();
-		}
-	}
-
-	public static void executeProcessTillFailed(IProcessComponent process) {
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		try {
-			process.start();
-			waitTillFailed(listener, MAX_PROCESS_WAIT_TIME);
-		} catch (InvalidProcessStateException e) {
-			System.out.println("ERROR: Cannot wait until process is done.");
-		}
-	}
-
 	public static void register(UserCredentials credentials, NetworkManager networkManager) throws NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static void login(UserCredentials credentials, NetworkManager networkManager, File root)
@@ -107,7 +57,7 @@ public class UseCaseTestUtil {
 		SessionParameters sessionParameters = new SessionParameters(root.toPath(), upManager, new TestFileConfiguration());
 		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials, sessionParameters,
 				networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static void registerAndLogin(UserCredentials credentials, NetworkManager networkManager, File root)
@@ -124,7 +74,7 @@ public class UseCaseTestUtil {
 
 	public static void logout(NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
 		ProcessComponent process = ProcessFactory.instance().createLogoutProcess(networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials)
@@ -135,25 +85,25 @@ public class UseCaseTestUtil {
 
 	public static void synchronize(NetworkManager networkManager) {
 		ProcessComponent process = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException,
 			IllegalArgumentException, NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static File downloadFile(NetworkManager networkManager, PublicKey fileKey) throws NoSessionException,
 			GetFailedException, NoPeerConnectionException {
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
 		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey)).toFile();
 	}
@@ -161,20 +111,20 @@ public class UseCaseTestUtil {
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static void moveFile(NetworkManager networkManager, File source, File destination) throws NoSessionException,
 			NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createMoveFileProcess(source, destination, networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static void shareFolder(NetworkManager networkManager, File folder, String friendId, PermissionType permission)
 			throws IllegalFileLocation, IllegalArgumentException, NoSessionException, NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createShareProcess(folder,
 				new UserPermission(friendId, permission), networkManager);
-		executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	public static MetaFile getMetaFile(NetworkManager networkManager, KeyPair keys) throws NoPeerConnectionException,
@@ -187,13 +137,13 @@ public class UseCaseTestUtil {
 		GetMetaFileContext context = new GetMetaFileContext(keys);
 		GetMetaFileStep step = new GetMetaFileStep(context, networkManager.getDataManager());
 		if (expectSuccess) {
-			executeProcess(step);
+			TestExecutionUtil.executeProcess(step);
 			return context.metaFile;
 		} else {
 			TestProcessComponentListener listener = new TestProcessComponentListener();
 			step.attachListener(listener);
 			step.start();
-			waitTillFailed(listener, MAX_PROCESS_WAIT_TIME);
+			TestExecutionUtil.waitTillFailed(listener, TestExecutionUtil.MAX_PROCESS_WAIT_TIME);
 			return null;
 		}
 	}
@@ -201,7 +151,7 @@ public class UseCaseTestUtil {
 	public static Locations getLocations(NetworkManager networkManager, String userId) throws NoPeerConnectionException {
 		GetUserLocationsContext context = new GetUserLocationsContext(userId);
 		GetUserLocationsStep step = new GetUserLocationsStep(context, networkManager.getDataManager());
-		executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 		return context.consumeUserLocations();
 	}
 
@@ -213,7 +163,7 @@ public class UseCaseTestUtil {
 		fileListProcess.attachListener(listener);
 		fileListProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(MAX_PROCESS_WAIT_TIME);
+		H2HWaiter waiter = new H2HWaiter(TestExecutionUtil.MAX_PROCESS_WAIT_TIME);
 		do {
 			waiter.tickASecond();
 		} while (!listener.hasResultArrived());

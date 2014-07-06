@@ -11,7 +11,6 @@ import net.tomp2p.futures.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
@@ -19,6 +18,7 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.direct.TestDirectMessageWithReply.TestCallBackHandler;
 import org.hive2hive.core.network.messages.direct.TestDirectMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
+import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

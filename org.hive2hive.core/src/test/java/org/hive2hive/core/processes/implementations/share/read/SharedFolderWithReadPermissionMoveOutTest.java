@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,6 +25,8 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -102,10 +103,10 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSynchronizeAddFileAtAMoveOutAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddFileAtAMoveOutAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderA, CHUNK_SIZE);
 		Path relativePathOld = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' at A.", relativePathOld.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -119,18 +120,17 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		Path relativePathNew = rootA.toPath().relativize(movedFileFromAAtA.toPath());
 		UseCaseTestUtil.moveFile(nodeA, fileFromAAtA, movedFileFromAAtA);
 
-		logger.info("Wait till moving of file '{}' to '{}' gets synchronized with B.",
-				relativePathOld.toString(), relativePathNew.toString());
+		logger.info("Wait till moving of file '{}' to '{}' gets synchronized with B.", relativePathOld.toString(),
+				relativePathNew.toString());
 		waitTillSynchronized(fileFromAAtB, false);
 		checkIndexesAfterMoving(relativePathOld, relativePathNew);
 	}
 
 	@Test
-	public void testSynchronizeAddFileAtATryToMoveOutAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA",
-				new Random().nextInt(maxNumChunks) + 1, sharedFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddFileAtATryToMoveOutAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
+				sharedFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' at A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -141,17 +141,16 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Try to move file '{}' at B to root folder of B.", relativePath.toString());
 		File movingFileAtB = new File(rootB, fileFromAAtA.getName());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(
-				fileFromAAtB, movingFileAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(fileFromAAtB,
+				movingFileAtB, nodeB));
 		checkIndexAfterTryingMoving(relativePath);
 	}
 
 	@Test
-	public void testSynchronizeAddSubFileAtAMoveOutAtA() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddSubFileAtAMoveOutAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
+				subFolderA, CHUNK_SIZE);
 		Path relativePathOld = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' at A.", relativePathOld.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -165,18 +164,17 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		Path relativePathNew = rootA.toPath().relativize(movedFileFromAAtA.toPath());
 		UseCaseTestUtil.moveFile(nodeA, fileFromAAtA, movedFileFromAAtA);
 
-		logger.info("Wait till moving of file '{}' to '{}' gets synchronized with B.",
-				relativePathOld.toString(), relativePathNew.toString());
+		logger.info("Wait till moving of file '{}' to '{}' gets synchronized with B.", relativePathOld.toString(),
+				relativePathNew.toString());
 		waitTillSynchronized(fileFromAAtB, false);
 		checkIndexesAfterMoving(relativePathOld, relativePathNew);
 	}
 
 	@Test
-	public void testSynchronizeAddSubfileAtATryToMoveOutAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, CHUNK_SIZE);
+	public void testSynchronizeAddSubfileAtATryToMoveOutAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
+				subFolderA, CHUNK_SIZE);
 		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
 		logger.info("Upload a new file '{}' at A.", relativePath.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -187,14 +185,14 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Try to move file '{}' at B to root folder of B.", relativePath.toString());
 		File movingFileAtB = new File(rootB, fileFromAAtA.getName());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(
-				fileFromAAtB, movingFileAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(fileFromAAtB,
+				movingFileAtB, nodeB));
 		checkIndexAfterTryingMoving(relativePath);
 	}
 
 	@Test
-	public void testSynchronizeAddFolderAtAMoveOutAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	public void testSynchronizeAddFolderAtAMoveOutAtA() throws NoSessionException, NoPeerConnectionException, IOException,
+			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder1FromA");
 		folderFromAAtA.mkdir();
 		Path relativePathOld = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -210,16 +208,15 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		Path relativePathNew = rootA.toPath().relativize(movedFolderFromAAtA.toPath());
 		UseCaseTestUtil.moveFile(nodeA, folderFromAAtA, movedFolderFromAAtA);
 
-		logger.info("Wait till moving of folder '{}' to '{}' gets synchronized with B.",
-				relativePathOld.toString(), relativePathNew.toString());
+		logger.info("Wait till moving of folder '{}' to '{}' gets synchronized with B.", relativePathOld.toString(),
+				relativePathNew.toString());
 		waitTillSynchronized(folderFromAAtB, false);
 		checkIndexesAfterMoving(relativePathOld, relativePathNew);
 	}
 
 	@Test
-	public void testSynchronizeAddFolderAtATryToMoveOutAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddFolderAtATryToMoveOutAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder2FromA");
 		folderFromAAtA.mkdir();
 		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -232,15 +229,14 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Try to move folder '{}' at B to root folder of B.", relativePath.toString());
 		File movingFolderAtB = new File(rootB, folderFromAAtA.getName());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(
-				folderFromAAtB, movingFolderAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(folderFromAAtB,
+				movingFolderAtB, nodeB));
 		checkIndexAfterTryingMoving(relativePath);
 	}
 
 	@Test
-	public void testSynchronizeAddSubfolderAtAMoveOutAtA() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddSubfolderAtAMoveOutAtA() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder1FromA");
 		folderFromAAtA.mkdir();
 		Path relativePathOld = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -256,16 +252,15 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		Path relativePathNew = rootA.toPath().relativize(movedFolderFromAAtA.toPath());
 		UseCaseTestUtil.moveFile(nodeA, folderFromAAtA, movedFolderFromAAtA);
 
-		logger.info("Wait till moving of folder '{}' to '{}' gets synchronized with B.",
-				relativePathOld.toString(), relativePathNew.toString());
+		logger.info("Wait till moving of folder '{}' to '{}' gets synchronized with B.", relativePathOld.toString(),
+				relativePathNew.toString());
 		waitTillSynchronized(folderFromAAtB, false);
 		checkIndexesAfterMoving(relativePathOld, relativePathNew);
 	}
 
 	@Test
-	public void testSynchronizeAddSubfolderAtATryToMoveOutAtB() throws NoSessionException,
-			NoPeerConnectionException, IOException, IllegalFileLocation, IllegalArgumentException,
-			GetFailedException {
+	public void testSynchronizeAddSubfolderAtATryToMoveOutAtB() throws NoSessionException, NoPeerConnectionException,
+			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder2FromA");
 		folderFromAAtA.mkdir();
 		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
@@ -278,8 +273,8 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 
 		logger.info("Try to move folder '{}' at B to root folder of B.", relativePath.toString());
 		File movingFolderAtB = new File(rootB, folderFromAAtA.getName());
-		UseCaseTestUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(
-				folderFromAAtB, movingFolderAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createMoveFileProcess(folderFromAAtB,
+				movingFolderAtB, nodeB));
 		checkIndexAfterTryingMoving(relativePath);
 	}
 
@@ -304,8 +299,7 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndexesAfterMoving(Path oldPath, Path newPath) throws GetFailedException,
-			NoSessionException {
+	private static void checkIndexesAfterMoving(Path oldPath, Path newPath) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
 		Index indexOldA = userProfileA.getFileByPath(oldPath);
@@ -324,10 +318,8 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		// check isShared flag
 		Assert.assertFalse(indexNew.isShared());
 		// check if content protection keys are the default content protection key
-		Assert.assertTrue(indexNew.getProtectionKeys().getPrivate()
-				.equals(userProfileA.getProtectionKeys().getPrivate()));
-		Assert.assertTrue(indexNew.getProtectionKeys().getPublic()
-				.equals(userProfileA.getProtectionKeys().getPublic()));
+		Assert.assertTrue(indexNew.getProtectionKeys().getPrivate().equals(userProfileA.getProtectionKeys().getPrivate()));
+		Assert.assertTrue(indexNew.getProtectionKeys().getPublic().equals(userProfileA.getProtectionKeys().getPublic()));
 		// check write access
 		Assert.assertTrue(indexNew.canWrite());
 		// check user permissions
@@ -338,13 +330,11 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		if (indexNew.isFolder()) {
 			Set<UserPermission> permissions = ((FolderIndex) indexNew).getCalculatedUserPermissions();
 			Assert.assertEquals(1, permissions.size());
-			Assert.assertTrue(permissions.contains(new UserPermission(userProfileA.getUserId(),
-					PermissionType.WRITE)));
+			Assert.assertTrue(permissions.contains(new UserPermission(userProfileA.getUserId(), PermissionType.WRITE)));
 		}
 	}
 
-	private static void checkIndexAfterTryingMoving(Path relativePath) throws GetFailedException,
-			NoSessionException {
+	private static void checkIndexAfterTryingMoving(Path relativePath) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
 		Index indexA = userProfileA.getFileByPath(relativePath);
@@ -354,10 +344,8 @@ public class SharedFolderWithReadPermissionMoveOutTest extends H2HJUnitTest {
 		Index indexB = userProfileB.getFileByPath(relativePath);
 
 		// check if userA's content protection keys are other ones
-		Assert.assertFalse(indexA.getProtectionKeys().getPrivate()
-				.equals(userProfileA.getProtectionKeys().getPrivate()));
-		Assert.assertFalse(indexA.getProtectionKeys().getPublic()
-				.equals(userProfileA.getProtectionKeys().getPublic()));
+		Assert.assertFalse(indexA.getProtectionKeys().getPrivate().equals(userProfileA.getProtectionKeys().getPrivate()));
+		Assert.assertFalse(indexA.getProtectionKeys().getPublic().equals(userProfileA.getProtectionKeys().getPublic()));
 		// check if user B has no content protection keys
 		Assert.assertNull(indexB.getProtectionKeys());
 

@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.util;
+package org.hive2hive.processframework.util;
 
 import org.hive2hive.processframework.concretes.ProcessComponentListener;
 import org.hive2hive.processframework.interfaces.IProcessComponentListener;

@@ -18,13 +18,14 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -111,7 +112,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();
-		UseCaseTestUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.waitTillFailed(listener, 20);
 	}
 
 	@Test
@@ -151,7 +152,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		process.attachListener(listener);
 		process.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.waitTillFailed(listener, 20);
 
 		// the existing file has already same content, should not have been downloaded
 		Assert.assertEquals(lastModifiedBefore, existing.lastModified());

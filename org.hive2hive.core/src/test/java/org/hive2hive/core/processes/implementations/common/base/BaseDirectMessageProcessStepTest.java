@@ -15,7 +15,6 @@ import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
@@ -24,10 +23,11 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -80,8 +80,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection()
-				.getPeer().getPeerAddress(), contentKey, new H2HTestData(data), false);
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
+				.getPeerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -99,7 +99,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 				}
 			}
 		};
-		UseCaseTestUtil.executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
@@ -123,8 +123,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	 * @throws InvalidProcessStateException
 	 */
 	@Test
-	public void baseDirectMessageProcessStepTestOnFailure() throws NoPeerConnectionException,
-			InvalidProcessStateException {
+	public void baseDirectMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
 		final NetworkManager nodeB = network.remove(random.nextInt(network.size() / 2) + network.size() / 2);
@@ -142,8 +141,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection()
-				.getPeer().getPeerAddress(), contentKey, new H2HTestData(data), false);
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
+				.getPeerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -166,7 +165,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		step.attachListener(listener);
 		step.start();
 		// wait for the process to finish
-		UseCaseTestUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.waitTillFailed(listener, 10);
 
 		// check if selected location is still empty
 		futureGet = nodeB.getDataManager().getUnblocked(parameters);
@@ -183,17 +182,15 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void baseDirectMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException,
-			IOException, NoPeerConnectionException {
+	public void baseDirectMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		// select two random nodes
 		final NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
 		// generate a random content key
 		final String contentKey = NetworkTestUtil.randomString();
-		final Parameters parametersA = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(
-				contentKey);
-		final Parameters parametersB = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(
-				contentKey);
+		final Parameters parametersA = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey);
+		final Parameters parametersB = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey);
 
 		// check if selected locations are empty
 		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parametersA);
@@ -204,8 +201,8 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(futureGet.getData());
 
 		// create a message with target node B
-		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection()
-				.getPeer().getPeerAddress(), contentKey);
+		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer()
+				.getPeerAddress(), contentKey);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -230,7 +227,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 				}
 			}
 		};
-		UseCaseTestUtil.executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 
 		// wait till response message gets handled
 		H2HWaiter waiter = new H2HWaiter(10);

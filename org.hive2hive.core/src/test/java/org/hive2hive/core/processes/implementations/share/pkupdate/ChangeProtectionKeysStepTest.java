@@ -25,13 +25,13 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.implementations.context.BasePKUpdateContext;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -92,7 +92,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// create a change protection keys process step
 		ChangeProtectionKeysStep step = new ChangeProtectionKeysStep(context, getter.getDataManager());
 		// run process, should not fail
-		UseCaseTestUtil.executeProcessTillSucceded(step);
+		TestExecutionUtil.executeProcessTillSucceded(step);
 
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
@@ -153,7 +153,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// create a change protection keys process step
 		ChangeProtectionKeysStep step = new ChangeProtectionKeysStep(context, getter.getDataManager());
 		// run process, should not fail
-		UseCaseTestUtil.executeProcessTillSucceded(step);
+		TestExecutionUtil.executeProcessTillSucceded(step);
 
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)

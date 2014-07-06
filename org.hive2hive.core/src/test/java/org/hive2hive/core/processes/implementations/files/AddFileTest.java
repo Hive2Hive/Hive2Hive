@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -21,11 +20,13 @@ import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -132,7 +133,7 @@ public class AddFileTest extends H2HJUnitTest {
 		process.attachListener(listener);
 		process.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, 40);
+		TestExecutionUtil.waitTillFailed(listener, 40);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

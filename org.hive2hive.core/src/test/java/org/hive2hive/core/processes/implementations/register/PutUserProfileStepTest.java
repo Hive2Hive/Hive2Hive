@@ -21,14 +21,14 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.implementations.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.processes.implementations.context.RegisterProcessContext;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -69,7 +69,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 
 		// initialize the process and the one and only step to test
 		PutUserProfileStep step = new PutUserProfileStep(context, putter.getDataManager());
-		UseCaseTestUtil.executeProcess(step);
+		TestExecutionUtil.executeProcess(step);
 
 		// get the user profile which should be stored at the proxy
 		FutureGet global = client.getDataManager().getUnblocked(
@@ -108,7 +108,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 		step.attachListener(listener);
 		step.start();
 
-		UseCaseTestUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.waitTillFailed(listener, 20);
 
 		// get the locations which should be stored at the proxy --> they should be null
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(

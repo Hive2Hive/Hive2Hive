@@ -16,11 +16,12 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.implementations.files.recover.IVersionSelector;
-import org.hive2hive.core.processes.util.TestProcessComponentListener;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -69,8 +70,8 @@ public class RecoverFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(client, file);
 	}
 
-	private void uploadVersion(String content) throws IOException, NoSessionException,
-			IllegalArgumentException, NoPeerConnectionException {
+	private void uploadVersion(String content) throws IOException, NoSessionException, IllegalArgumentException,
+			NoPeerConnectionException {
 		FileUtils.write(file, content);
 		UseCaseTestUtil.uploadNewVersion(client, file);
 	}
@@ -90,7 +91,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();
-		UseCaseTestUtil.waitTillSucceded(listener, 120);
+		TestExecutionUtil.waitTillSucceded(listener, 120);
 
 		// to verify, find the restored file
 		File restoredFile = null;

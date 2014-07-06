@@ -18,9 +18,9 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -63,33 +63,30 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
 		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
-		UseCaseTestUtil.executeProcess(registerProcess);
+		TestExecutionUtil.executeProcess(registerProcess);
 
 		rootDirectory = FileTestUtil.getTempDirectory();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials,
-				rootDirectory.toPath());
-		UseCaseTestUtil.executeProcess(loginProcess);
+		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials, rootDirectory.toPath());
+		TestExecutionUtil.executeProcess(loginProcess);
 	}
 
 	@Test
-	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
-			NoPeerConnectionException {
+	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException, NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
 		File testFile = new File(rootDirectory, "test-file");
 		FileUtils.write(testFile, "Hello World");
 
 		IProcessComponent process = loggedInNode.getFileManager().add(testFile);
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		// is now added; delete it
 		process = loggedInNode.getFileManager().delete(testFile);
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 	}
 
 	@Test(expected = IllegalFileLocation.class)
-	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation,
-			NoPeerConnectionException {
+	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation, NoPeerConnectionException {
 		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
@@ -97,9 +94,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testAddFileTree() throws IOException, IllegalFileLocation, NoSessionException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
-			NoPeerConnectionException {
+	public void testAddFileTree() throws IOException, IllegalFileLocation, NoSessionException, NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
 		// /folder1/
 		// /folder1/test1.txt
 		// /folder1/folder2/test2.txt
@@ -114,7 +110,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		FileUtils.write(test2File, "Hello World 2");
 
 		IProcessComponent process = loggedInNode.getFileManager().add(folder1);
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		// TODO wait for all async process to upload
 
@@ -123,7 +119,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
 
 		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, rootUser2.toPath());
-		UseCaseTestUtil.executeProcess(loginProcess);
+		TestExecutionUtil.executeProcess(loginProcess);
 
 		// TODO wait for login process to download all files
 
@@ -156,7 +152,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@After
 	public void logoutAndUnregister() throws NoSessionException, NoPeerConnectionException {
 		IProcessComponent process = loggedInNode.getUserManager().logout();
-		UseCaseTestUtil.executeProcess(process);
+		TestExecutionUtil.executeProcess(process);
 
 		// TODO unregister
 	}

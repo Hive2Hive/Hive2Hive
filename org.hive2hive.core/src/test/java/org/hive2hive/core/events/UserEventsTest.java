@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 import java.nio.file.Path;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.H2HWaiter;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
@@ -24,6 +23,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
