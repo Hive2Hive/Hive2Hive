@@ -61,7 +61,11 @@ public class FileTaste {
 	 * @return true when the file is a file and not a folder.
 	 */
 	public boolean isFile() {
-		return file.isFile();
+		if (file.exists()) {
+			return file.isFile();
+		} else {
+			return md5 != null;
+		}
 	}
 
 	/**
