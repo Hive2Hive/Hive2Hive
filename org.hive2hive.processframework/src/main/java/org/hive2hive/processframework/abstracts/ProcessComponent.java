@@ -186,9 +186,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public void await(long timeout) throws InterruptedException {
-
-		if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED)
+		if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED) {
 			return;
+		}
 
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -196,8 +196,9 @@ public abstract class ProcessComponent implements IProcessComponent {
 		ScheduledFuture<?> handle = executor.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED)
+				if (state == ProcessState.SUCCEEDED || state == ProcessState.FAILED) {
 					latch.countDown();
+				}
 			}
 		}, 0, 100, TimeUnit.MILLISECONDS);
 
@@ -241,8 +242,7 @@ public abstract class ProcessComponent implements IProcessComponent {
 		// if process component completed already
 		if (state == ProcessState.SUCCEEDED) {
 			listener.onSucceeded();
-		}
-		if (state == ProcessState.FAILED) {
+		} else if (state == ProcessState.FAILED) {
 			listener.onFailed(reason);
 		}
 	}
@@ -258,12 +258,13 @@ public abstract class ProcessComponent implements IProcessComponent {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null)
+		if (obj == null) {
 			return false;
-		if (obj == this)
+		} else if (obj == this) {
 			return true;
-		if (!(obj instanceof ProcessComponent))
+		} else if (!(obj instanceof ProcessComponent)) {
 			return false;
+		}
 
 		ProcessComponent other = (ProcessComponent) obj;
 		return id.equals(other.getID());

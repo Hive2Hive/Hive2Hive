@@ -21,7 +21,7 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 
 	private final UserProfileManager profileManager;
 	private final File rootFile;
-	
+
 	private List<FileTaste> result = new ArrayList<FileTaste>();
 
 	public GetFileListStep(UserProfileManager profileManager, File root) {
@@ -57,7 +57,7 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 			byte[] md5Hash = null;
 			Set<UserPermission> userPermissions;
 			if (index.isFile()) {
-				FileIndex fileIndex = ((FileIndex) index);
+				FileIndex fileIndex = (FileIndex) index;
 				md5Hash = fileIndex.getMD5();
 				userPermissions = fileIndex.getParent().getCalculatedUserPermissions();
 			} else {
