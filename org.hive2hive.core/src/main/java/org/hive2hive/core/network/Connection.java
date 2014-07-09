@@ -153,11 +153,8 @@ public class Connection {
 		return peer;
 	}
 
-	private boolean createPeer() {
+	private PeerMaker preparePeerMaker() {
 		int port = searchFreePort();
-		if (port < 0) {
-			return false;
-		}
 
 		// configure the thread handling internally, callback can be blocking
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
@@ -170,9 +167,13 @@ public class Connection {
 		serverConfig.signatureFactory(new H2HSignatureFactory());
 		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
 
+		return new PeerMaker(Number160.createHash(nodeID)).ports(port).setEnableIndirectReplication(true)
+				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
+	}
+
+	private boolean createPeer() {
 		try {
-			peer = new PeerMaker(Number160.createHash(nodeID)).ports(port).setEnableIndirectReplication(true)
-					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig).makeAndListen();
+			peer = preparePeerMaker().makeAndListen();
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
@@ -192,33 +193,13 @@ public class Connection {
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
 	public boolean createLocalPeer() {
-		int port = searchFreePort();
-		if (port < 0) {
-			return false;
-		}
-
-		// configure the thread handling internally, callback can be blocking
-		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
-
-		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
-		clientConfig.signatureFactory(new H2HSignatureFactory());
-		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
-
-		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
-		serverConfig.signatureFactory(new H2HSignatureFactory());
-		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
-
-		// create a new peer id
-		Number160 peerId = Number160.createHash(nodeID);
 		// disable peer verification (faster mutual acceptance)
-		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(peerId);
+		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeID));
 		peerMapConfiguration.peerVerification(false);
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			peer = new PeerMaker(peerId).ports(port).setEnableIndirectReplication(true)
-					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig).peerMap(peerMap)
-					.makeAndListen();
+			peer = preparePeerMaker().peerMap(peerMap).makeAndListen();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			isConnected = false;
@@ -243,33 +224,13 @@ public class Connection {
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
 	public boolean createLocalPeerAndBootstrap(Peer masterPeer) {
-		int port = searchFreePort();
-		if (port < 0) {
-			return false;
-		}
-
-		// configure the thread handling internally, callback can be blocking
-		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
-
-		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
-		clientConfig.signatureFactory(new H2HSignatureFactory());
-		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
-
-		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
-		serverConfig.signatureFactory(new H2HSignatureFactory());
-		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
-
-		// create a new peer id
-		Number160 peerId = Number160.createHash(nodeID);
 		// disable peer verification (faster mutual acceptance)
-		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(peerId);
+		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeID));
 		peerMapConfiguration.peerVerification(false);
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			peer = new PeerMaker(peerId).ports(port).setEnableIndirectReplication(true)
-					.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig)
-					.masterPeer(masterPeer).peerMap(peerMap).makeAndListen();
+			peer = preparePeerMaker().masterPeer(masterPeer).peerMap(peerMap).makeAndListen();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			return false;
@@ -296,6 +257,11 @@ public class Connection {
 		}
 	}
 
+	/**
+	 * Searches for open ports, starting at {@link H2HConstants#H2H_PORT}.
+	 * 
+	 * @return the free port or -1 if none was found.
+	 */
 	private int searchFreePort() {
 		int port = H2HConstants.H2H_PORT;
 		logger.debug("Start searching for a free port");

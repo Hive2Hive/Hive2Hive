@@ -23,7 +23,6 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectAsInitial() {
-
 		INetworkConfiguration netConfig = NetworkConfiguration.create("initial node");
 
 		NetworkManager initialNode = new NetworkManager(netConfig, new H2HDummyEncryption());
@@ -33,7 +32,6 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectToOtherPeer() throws UnknownHostException {
-
 		INetworkConfiguration netConfigA = NetworkConfiguration.create("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());
 
