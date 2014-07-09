@@ -11,6 +11,10 @@ import net.tomp2p.peers.PeerAddress;
 
 public class NetworkUtils {
 
+	private NetworkUtils() {
+		// only static methods
+	}
+
 	/**
 	 * checks if a specific port is available.
 	 * 

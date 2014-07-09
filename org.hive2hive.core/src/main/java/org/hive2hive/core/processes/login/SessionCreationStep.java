@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.login;
 
-import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Map;
 
@@ -25,8 +24,7 @@ public class SessionCreationStep extends ProcessStep {
 	private final LoginProcessContext context;
 	private final NetworkManager networkManager;
 
-	public SessionCreationStep(SessionParameters params, LoginProcessContext context,
-			NetworkManager networkManager) {
+	public SessionCreationStep(SessionParameters params, LoginProcessContext context, NetworkManager networkManager) {
 		this.params = params;
 		this.context = context;
 		this.networkManager = networkManager;
@@ -42,8 +40,8 @@ public class SessionCreationStep extends ProcessStep {
 			PersistentMetaData metaData = FileUtil.readPersistentMetaData(params.getRoot());
 
 			// create the key manager
-			PublicKeyManager keyManager = new PublicKeyManager(userProfile.getUserId(),
-					userProfile.getEncryptionKeys(), networkManager.getDataManager());
+			PublicKeyManager keyManager = new PublicKeyManager(userProfile.getUserId(), userProfile.getEncryptionKeys(),
+					networkManager.getDataManager());
 
 			// read eventually cached keys and add them to the key manager
 			Map<String, PublicKey> publicKeyCache = metaData.getPublicKeyCache();
@@ -65,7 +63,7 @@ public class SessionCreationStep extends ProcessStep {
 
 			// create session
 			session = new H2HSession(params);
-		} catch (IOException | NoPeerConnectionException e) {
+		} catch (NoPeerConnectionException e) {
 			throw new ProcessExecutionException("Session could not be created.", e);
 		}
 

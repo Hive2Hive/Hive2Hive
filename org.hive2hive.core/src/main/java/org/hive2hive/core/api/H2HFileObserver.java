@@ -74,11 +74,11 @@ public class H2HFileObserver implements IFileObserver {
 	public void removeFileObserverListener(IFileObserverListener listener) {
 		observer.removeListener(listener);
 	}
-	
+
 	@Override
 	public List<IFileObserverListener> getFileObserverListeners() {
 		List<IFileObserverListener> listeners = new ArrayList<IFileObserverListener>();
-		
+
 		// TODO check if this interface casting is allowed
 		for (FileAlterationListener listener : observer.getListeners()) {
 			listeners.add((IFileObserverListener) listener);

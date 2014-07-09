@@ -195,24 +195,25 @@ public final class MessageManager implements IMessageManager {
 			return null;
 		}
 
+		byte[] messageBytes;
+		HybridEncryptedContent encryptedMessage;
 		try {
 			// asymmetrically encrypt message
-			byte[] messageBytes = SerializationUtil.serialize(message);
-			HybridEncryptedContent encryptedMessage = encryption.encryptHybrid(messageBytes, targetPublicKey);
-
-			// create signature
-			try {
-				byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate());
-				encryptedMessage.setSignature(session.getUserId(), signature);
-			} catch (InvalidKeyException | SignatureException e) {
-				logger.error("An exception occured while signing the message. The message will not be sent.", e);
-				return null;
-			}
-
-			return encryptedMessage;
+			messageBytes = SerializationUtil.serialize(message);
+			encryptedMessage = encryption.encryptHybrid(messageBytes, targetPublicKey);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
 				| IllegalBlockSizeException | BadPaddingException | IOException e) {
 			logger.error("An exception occured while encrypting the message. The message will not be sent.", e);
+			return null;
+		}
+
+		try {
+			// create signature
+			byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate());
+			encryptedMessage.setSignature(session.getUserId(), signature);
+			return encryptedMessage;
+		} catch (InvalidKeyException | SignatureException e) {
+			logger.error("An exception occured while signing the message. The message will not be sent.", e);
 			return null;
 		}
 	}

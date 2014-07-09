@@ -71,11 +71,11 @@ public class FileUtil {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public static PersistentMetaData readPersistentMetaData(Path root) throws IOException {
+	public static PersistentMetaData readPersistentMetaData(Path root) {
 		try {
 			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
 			return (PersistentMetaData) SerializationUtil.deserialize(content);
-		} catch (Exception e) {
+		} catch (IOException | ClassNotFoundException e) {
 			logger.warn("Cannot read the persistent meta data. It probably does not exist yet");
 			return new PersistentMetaData();
 		}
@@ -88,7 +88,7 @@ public class FileUtil {
 	 */
 	public static String getFileSep() {
 		String fileSep = System.getProperty("file.separator");
-		if (fileSep.equals("\\")) {
+		if ("\\".equals(fileSep)) {
 			fileSep = "\\\\";
 		}
 		return fileSep;
