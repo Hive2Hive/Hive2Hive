@@ -1,6 +1,7 @@
 package org.hive2hive.core.security;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -27,6 +28,7 @@ public class SerializationUtilTest extends H2HJUnitTest {
 
 		byte[] serializedData = SerializationUtil.serialize(data);
 		assertNotNull(serializedData);
+		assertNotEquals(0, serializedData.length);
 		printBytes("Serialized Data:", serializedData);
 
 		String deserializedData = (String) SerializationUtil.deserialize(serializedData);

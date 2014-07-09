@@ -35,7 +35,7 @@ public class UserProfileManager {
 
 	private volatile PutQueueEntry modifying;
 
-	private final AtomicBoolean running;;
+	private final AtomicBoolean running;
 	private KeyPair defaultProtectionKey = null;
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {

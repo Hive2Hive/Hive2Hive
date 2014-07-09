@@ -11,7 +11,8 @@ class QueueEntry {
 
 	private final CountDownLatch getWaiter = new CountDownLatch(1);
 
-	private UserProfile userProfile; // got from DHT
+	// got from DHT
+	private UserProfile userProfile;
 	private GetFailedException getFailedException;
 
 	public QueueEntry(String pid) {

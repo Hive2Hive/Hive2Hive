@@ -35,7 +35,7 @@ public class SerializationUtil {
 	public static byte[] serialize(Serializable object) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		FSTObjectOutput fstOut = FST.getObjectOutput(baos);
-		byte[] result = null;
+		byte[] result = new byte[0];
 
 		try {
 			fstOut.writeObject(object);

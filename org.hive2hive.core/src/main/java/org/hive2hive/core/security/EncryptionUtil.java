@@ -210,7 +210,7 @@ public final class EncryptionUtil {
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
 			logger.error("Exception while RSA encryption:", e);
 		}
-		return null;
+		return new byte[0];
 	}
 
 	/**
@@ -236,7 +236,8 @@ public final class EncryptionUtil {
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
 			logger.error("Exception while RSA decryption:", e);
 		}
-		return null;
+
+		return new byte[0];
 	}
 
 	/**
@@ -333,7 +334,7 @@ public final class EncryptionUtil {
 			logger.error("Exception while signing:", e);
 		}
 
-		return null;
+		return new byte[0];
 	}
 
 	/**

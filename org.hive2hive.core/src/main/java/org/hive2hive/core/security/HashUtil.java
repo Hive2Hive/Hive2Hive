@@ -93,7 +93,7 @@ public class HashUtil {
 	 * @throws IOException
 	 */
 	public static boolean compare(File file, byte[] expectedMD5) throws IOException {
-		if (!file.exists() && expectedMD5 == null) {
+		if (!file.exists() && (expectedMD5 == null || expectedMD5.length == 0)) {
 			// both do not exist
 			return true;
 		} else if (file.isDirectory()) {
@@ -114,14 +114,6 @@ public class HashUtil {
 	 * @return
 	 */
 	public static boolean compare(byte[] md5, byte[] expectedMD5) {
-		// both null values is ok
-		if (md5 == null) {
-			return expectedMD5 == null;
-		} else if (expectedMD5 == null) {
-			return md5 == null;
-		}
-
-		// calculate the MD5 hash and compare it
 		return Arrays.equals(md5, expectedMD5);
 	}
 }

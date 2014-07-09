@@ -1,6 +1,7 @@
 package org.hive2hive.core.security;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -171,6 +172,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			}
 
 			assertNotNull(encryptedData);
+			assertNotEquals(0, encryptedData.length);
 			assertFalse(Arrays.equals(data, encryptedData));
 
 			printBytes("Encrypted Data:", encryptedData);
@@ -186,6 +188,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			}
 
 			assertNotNull(decryptedData);
+			assertNotEquals(0, decryptedData.length);
 			assertTrue(Arrays.equals(data, decryptedData));
 
 			printBytes("Decrypted Data:", decryptedData);
