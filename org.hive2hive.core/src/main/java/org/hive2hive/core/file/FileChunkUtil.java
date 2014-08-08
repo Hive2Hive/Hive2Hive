@@ -69,7 +69,7 @@ public class FileChunkUtil {
 		}
 
 		int read = 0;
-		long offset = chunkSize * chunkNumber;
+		long offset = chunkSize * (long)chunkNumber;
 		byte[] data = new byte[chunkSize];
 
 		// read the next chunk of the file considering the offset
