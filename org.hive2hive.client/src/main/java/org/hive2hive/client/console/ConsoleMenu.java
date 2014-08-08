@@ -146,7 +146,7 @@ public abstract class ConsoleMenu {
 	}
 
 	public static void printError(Throwable error) {
-		printError(String.format("An exception has been thrown: ", error.getMessage()));
+		printError(String.format("An exception has been thrown: %s", error.getMessage()));
 	}
 
 	public static void printError(String errorMsg) {
