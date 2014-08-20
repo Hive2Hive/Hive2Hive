@@ -2,9 +2,9 @@ package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureDigest;
+import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDigest;
-import net.tomp2p.futures.FutureRemove;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.DataManager;
@@ -62,9 +62,9 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
-				if (future.getDigest() == null) {
+				if (future.digest() == null) {
 					retryRemove();
-				} else if (!future.getDigest().keyDigest().isEmpty()) {
+				} else if (!future.digest().keyDigest().isEmpty()) {
 					retryRemove();
 				} else {
 					logger.trace("Verification for remove completed. '{}'", parameters.toString());

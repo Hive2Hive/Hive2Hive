@@ -3,11 +3,11 @@ package org.hive2hive.core.network;
 import java.security.PublicKey;
 import java.util.NavigableMap;
 
+import net.tomp2p.dht.StorageLayer;
+import net.tomp2p.dht.StorageMemory;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
-import net.tomp2p.storage.StorageLayer;
-import net.tomp2p.storage.StorageMemory;
 
 import org.hive2hive.core.H2HConstants;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class H2HStorageMemory extends StorageLayer {
 	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
 		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
 			logger.trace("Start put verification. Location key = '{}', Content key = '{}', Version key = '{}'.",
-					key.getLocationKey(), key.getContentKey(), key.getVersionKey());
+					key.locationKey(), key.contentKey(), key.versionKey());
 
 			if (isProtectionKeyChange(newData)) {
 				logger.trace("Only chaning the protection key, no need to verify the versions.");
@@ -62,7 +62,7 @@ public class H2HStorageMemory extends StorageLayer {
 
 			logger.trace(
 					"Put verification finished with status '{}'. Location key = '{}', Content key = '{}', Version key = '{}'.",
-					status, key.getLocationKey(), key.getContentKey(), key.getVersionKey());
+					status, key.locationKey(), key.contentKey(), key.versionKey());
 			return status;
 		} else {
 			logger.trace("Disabled the put verification strategy on the remote peer.");
@@ -99,11 +99,11 @@ public class H2HStorageMemory extends StorageLayer {
 		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
 
 		/** 1. if version key is zero **/
-		if (key.getVersionKey().equals(Number160.ZERO)) {
+		if (key.versionKey().equals(Number160.ZERO)) {
 			if (history.isEmpty()) {
 				logger.trace("Initialy putting content with no version key.");
 				return PutStatusH2H.OK;
-			} else if (history.size() == 1 && history.firstKey().getVersionKey().equals(Number160.ZERO)) {
+			} else if (history.size() == 1 && history.firstKey().versionKey().equals(Number160.ZERO)) {
 				logger.trace("Overwriting content with no versioning.");
 				return PutStatusH2H.OK;
 			} else {
@@ -127,13 +127,13 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 
 		/** 2. check if previous exists **/
-		if (!history.lastKey().getVersionKey().equals(newData.basedOn())) {
-			logger.warn("New data is not based on previous version. Previous version key = '{}'.", key.getVersionKey());
+		if (!history.lastKey().versionKey().equals(newData.basedOn())) {
+			logger.warn("New data is not based on previous version. Previous version key = '{}'.", key.versionKey());
 			return PutStatusH2H.VERSION_CONFLICT;
 		}
 
 		/** 3. Check if previous version is latest one **/
-		if (newData.basedOn().timestamp() < key.getVersionKey().timestamp()) {
+		if (newData.basedOn().timestamp() < key.versionKey().timestamp()) {
 			// previous version is the latest one (continue).
 			logger.trace("New content is based on latest version.");
 			return PutStatusH2H.OK;
@@ -151,12 +151,12 @@ public class H2HStorageMemory extends StorageLayer {
 		// long now = System.currentTimeMillis();
 		while (history.size() > H2HConstants.MAX_VERSIONS_HISTORY) {
 			Number640 toRemove = history.firstKey();
-			// if (toRemove.getVersionKey().timestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS >
+			// if (toRemove.versionKey().timestamp() + H2HConstants.MIN_VERSION_AGE_BEFORE_REMOVAL_MS >
 			// now) {
 			// // stop removal because oldest version is too 'young'
 			// break;
 			// } else {
-			logger.trace("Removing an older version. Version key = '{}'.", key.getVersionKey());
+			logger.trace("Removing an older version. Version key = '{}'.", key.versionKey());
 			history.remove(toRemove);
 			super.remove(toRemove, publicKey, false);
 			// }
@@ -164,8 +164,8 @@ public class H2HStorageMemory extends StorageLayer {
 	}
 
 	private NavigableMap<Number640, Number160> getHistoryOnStorage(Number640 key) {
-		return super.digest(new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(), Number160.ZERO),
-				new Number640(key.getLocationKey(), key.getDomainKey(), key.getContentKey(), Number160.MAX_VALUE), -1, true)
+		return super.digest(new Number640(key.locationKey(), key.domainKey(), key.contentKey(), Number160.ZERO),
+				new Number640(key.locationKey(), key.domainKey(), key.contentKey(), Number160.MAX_VALUE), -1, true)
 				.getDigests();
 	}
 }

@@ -2,8 +2,8 @@ package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureListener;
-import net.tomp2p.futures.FutureGet;
 
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -48,12 +48,12 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	@Override
 	public void operationComplete(FutureGet future) throws Exception {
-		if (future == null || future.isFailed() || future.getData() == null) {
+		if (future == null || future.isFailed() || future.data() == null) {
 			result = null;
 			logger.debug("Got null. '{}'", parameters.toString());
 		} else {
 			// set the result
-			result = (NetworkContent) future.getData().object();
+			result = (NetworkContent) future.data().object();
 			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
 		}
 		// release the lock

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -43,16 +43,15 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testSendingDirectMessageWithRequest() throws ClassNotFoundException, IOException,
-			NoPeerConnectionException {
+	public void testSendingDirectMessageWithRequest() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
-		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer()
-				.getPeerAddress(), contentKey);
+		TestDirectMessageWithReply message = new TestDirectMessageWithReply(
+				nodeB.getConnection().getPeerDHT().peerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
@@ -68,20 +67,20 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 			futureGet = nodeB.getDataManager().getUnblocked(
 					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		futureGet = nodeB.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 
 	@Test
-	public void testSendingDirectMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException,
-			IOException, NoPeerConnectionException, NoSessionException {
+	public void testSendingDirectMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException, NoSessionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 		// receiver nodes should already know the public key of the senders
@@ -91,8 +90,8 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
-		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(nodeB
-				.getConnection().getPeer().getPeerAddress(), contentKey);
+		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(nodeB.getConnection()
+				.getPeerDHT().peerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
@@ -108,14 +107,14 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 			futureGet = nodeB.getDataManager().getUnblocked(
 					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		futureGet = nodeB.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 

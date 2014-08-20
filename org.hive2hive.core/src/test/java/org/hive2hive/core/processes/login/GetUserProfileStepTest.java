@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
-import net.tomp2p.futures.FuturePut;
+import net.tomp2p.dht.FuturePut;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;

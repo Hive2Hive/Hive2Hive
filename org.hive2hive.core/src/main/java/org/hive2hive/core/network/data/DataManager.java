@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.security.KeyPair;
 import java.util.NavigableMap;
 
-import net.tomp2p.futures.FutureDigest;
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.p2p.Peer;
+import net.tomp2p.dht.FutureDigest;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
+import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -48,12 +48,12 @@ public class DataManager implements IDataManager {
 	}
 
 	/**
-	 * Helper to get the <code>TomP2P</code> peer.
+	 * Helper to get the <code>TomP2P</code> DHT peer.
 	 * 
 	 * @return the current peer
 	 */
-	private Peer getPeer() {
-		return networkManager.getConnection().getPeer();
+	private PeerDHT getPeer() {
+		return networkManager.getConnection().getPeerDHT();
 	}
 
 	@Override
@@ -104,11 +104,11 @@ public class DataManager implements IDataManager {
 		logger.debug("Put. {}", parameters.toString());
 		try {
 			Data data = new Data(parameters.getData());
-			data.ttlSeconds(parameters.getTTL()).basedOn(parameters.getData().getBasedOnKey());
+			data.ttlSeconds(parameters.getTTL()).addBasedOn(parameters.getData().getBasedOnKey());
 
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				data.setProtectedEntry().publicKey(parameters.getProtectionKeys().getPublic());
+				data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
 
 				// sign the data
 				// data.sign(parameters.getProtectionKeys(), new RSASignatureFactory());
@@ -122,12 +122,11 @@ public class DataManager implements IDataManager {
 				// parameters.setHash(hash);
 				// }
 
-				return getPeer().put(parameters.getLKey()).setData(parameters.getCKey(), data)
-						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey())
-						.keyPair(parameters.getProtectionKeys()).start();
+				return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
+						.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 			} else {
-				return getPeer().put(parameters.getLKey()).setData(parameters.getCKey(), data)
-						.setDomainKey(parameters.getDKey()).setVersionKey(parameters.getVersionKey()).start();
+				return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
+						.domainKey(parameters.getVersionKey()).start();
 			}
 		} catch (IOException e) {
 			logger.error("Put failed. {}.", parameters.toString(), e);
@@ -138,7 +137,7 @@ public class DataManager implements IDataManager {
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
 		logger.debug("Change content protection key. {}", parameters.toString());
 		// create dummy object to change the protection key
-		Data data = new Data().setProtectedEntry();
+		Data data = new Data().protectEntry();
 		// set new content protection keys
 		data.publicKey(parameters.getNewProtectionKeys().getPublic());
 		if (parameters.getTTL() != -1) {
@@ -165,8 +164,8 @@ public class DataManager implements IDataManager {
 		data = data.duplicateMeta();
 
 		// change the protection key through a put meta
-		return getPeer().put(parameters.getLKey()).setDomainKey(parameters.getDKey()).putMeta()
-				.setData(parameters.getCKey(), data).setVersionKey(parameters.getVersionKey())
+		return getPeer().put(parameters.getLKey()).domainKey(parameters.getDKey()).putMeta()
+				.data(parameters.getCKey(), data).versionKey(parameters.getVersionKey())
 				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
@@ -208,8 +207,8 @@ public class DataManager implements IDataManager {
 
 	public FutureGet getVersionUnblocked(IParameters parameters) {
 		logger.debug("Get version. {}", parameters.toString());
-		return getPeer().get(parameters.getLKey()).setDomainKey(parameters.getDKey()).setContentKey(parameters.getCKey())
-				.setVersionKey(parameters.getVersionKey()).start();
+		return getPeer().get(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
+				.versionKey(parameters.getVersionKey()).start();
 	}
 
 	@Override
@@ -248,8 +247,8 @@ public class DataManager implements IDataManager {
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
 		logger.debug("Remove version. {}", parameters.toString());
-		return getPeer().remove(parameters.getLKey()).setDomainKey(parameters.getDKey()).contentKey(parameters.getCKey())
-				.setVersionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
+		return getPeer().remove(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
+				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 	}
 
 	public NavigableMap<Number640, Number160> getDigestLatest(IParameters parameters) {

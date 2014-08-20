@@ -65,8 +65,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
 
 		// make the two clients ignore each other
-		uploader.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
-		downloader.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		uploader.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
+		downloader.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 
 		// create the roots and the file manager
 		File rootUploader = FileTestUtil.getTempDirectory();

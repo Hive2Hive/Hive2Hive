@@ -25,7 +25,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.context.BasePKUpdateContext;
-import org.hive2hive.core.processes.share.pkupdate.ChangeProtectionKeysStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
@@ -85,7 +84,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		getter.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 
 		// verify put
-		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData());
+		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().data());
 
 		// initialize a fake process context
 		BasePKUpdateContext context = new TestChunkPKUpdateContext(protectionKeysOld, protectionKeysNew, chunk,
@@ -97,14 +96,14 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
 		step.cancel(new RollbackReason("Testing rollback."));
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 	}
 
 	@Test
@@ -146,7 +145,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		getter.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 
 		// verify put
-		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData());
+		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().data());
 
 		// initialize a fake process context
 		BasePKUpdateContext context = new TestMetaFilePKUpdateContext(protectionKeysOld, protectionKeysNew, metaFileSmall,
@@ -158,14 +157,14 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
 		step.cancel(new RollbackReason("Testing rollback."));
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 	}
 
 	@AfterClass

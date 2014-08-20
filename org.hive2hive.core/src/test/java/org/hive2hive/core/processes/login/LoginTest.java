@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
@@ -20,7 +20,6 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -73,7 +72,7 @@ public class LoginTest extends H2HJUnitTest {
 				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 
-		Locations locations = (Locations) futureGet.getData().object();
+		Locations locations = (Locations) futureGet.data().object();
 		Assert.assertEquals(1, locations.getPeerAddresses().size());
 	}
 

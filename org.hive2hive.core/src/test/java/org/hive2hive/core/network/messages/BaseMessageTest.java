@@ -9,7 +9,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -48,8 +48,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyToTargetNode() throws ClassNotFoundException,
-			IOException, NoPeerConnectionException {
+	public void testSendingAnAsynchronousMessageWithNoReplyToTargetNode() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -71,10 +71,10 @@ public class BaseMessageTest extends H2HJUnitTest {
 			futureGet = nodeB.getDataManager().getUnblocked(
 					new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// verify that data arrived
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String result = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}
@@ -90,8 +90,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * @throws NoSessionException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode()
-			throws ClassNotFoundException, IOException, NoPeerConnectionException, NoSessionException {
+	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException, NoSessionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -102,8 +102,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		String data = NetworkTestUtil.randomString();
 		// create a test message which gets rejected several times
-		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
-				new H2HTestData(data));
+		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
 		// send message
 		assertTrue(nodeA.getMessageManager().send(message, getPublicKey(nodeB)));
@@ -117,10 +116,10 @@ public class BaseMessageTest extends H2HJUnitTest {
 			futureGet = nodeB.getDataManager().getUnblocked(
 					new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// verify that data arrived
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String result = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}

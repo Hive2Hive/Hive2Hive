@@ -36,7 +36,7 @@ public class RemoveOwnLocationsStep extends BasePutProcessStep {
 		} else {
 
 			// remove peer
-			locations.removePeerAddress(networkManager.getConnection().getPeer().getPeerAddress());
+			locations.removePeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
 			locations.setBasedOnKey(locations.getVersionKey());
 			try {
 				locations.generateVersionKey();

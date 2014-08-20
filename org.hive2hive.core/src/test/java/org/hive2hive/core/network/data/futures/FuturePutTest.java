@@ -13,7 +13,7 @@ import java.util.NavigableMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -78,12 +78,11 @@ public class FuturePutTest extends H2HJUnitTest {
 		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
-		assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 	}
 
 	@Test
-	public void testPutMultipleVersions() throws ClassNotFoundException, IOException,
-			NoPeerConnectionException {
+	public void testPutMultipleVersions() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize));
 
@@ -100,14 +99,13 @@ public class FuturePutTest extends H2HJUnitTest {
 			}
 			content.add(data);
 
-			IParameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-					.setData(data);
+			IParameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(data);
 			boolean success = nodeB.getDataManager().put(parameters);
 			Assert.assertTrue(success);
 			FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
 
-			assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+			assertEquals(data.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 		}
 	}
 
@@ -117,8 +115,8 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(1);
 		NetworkManager nodeC = network.get(2);
 
-		nodeB.getConnection().getPeer().getPeerBean().storage(new TestPutFailureStorage());
-		nodeC.getConnection().getPeer().getPeerBean().storage(new TestPutFailureStorage());
+		nodeB.getConnection().getPeerDHT().peerBean().storage(new TestPutFailureStorage());
+		nodeC.getConnection().getPeerDHT().peerBean().storage(new TestPutFailureStorage());
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -129,7 +127,7 @@ public class FuturePutTest extends H2HJUnitTest {
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test
@@ -137,7 +135,7 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
-		nodeB.getConnection().getPeer().getPeerBean().storage(new TestPutFailureStorage());
+		nodeB.getConnection().getPeerDHT().peerBean().storage(new TestPutFailureStorage());
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -148,12 +146,11 @@ public class FuturePutTest extends H2HJUnitTest {
 		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
-		assertEquals(data.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 	}
 
 	@Test
-	public void testPutVersionConflictWin() throws ClassNotFoundException, IOException,
-			NoPeerConnectionException {
+	public void testPutVersionConflictWin() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
@@ -185,11 +182,11 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		FutureGet futureGet2A = nodeB.getDataManager().getUnblocked(parameters2A);
 		futureGet2A.awaitUninterruptibly();
-		assertEquals(data2A.getTestString(), ((H2HTestData) futureGet2A.getData().object()).getTestString());
+		assertEquals(data2A.getTestString(), ((H2HTestData) futureGet2A.data().object()).getTestString());
 
 		FutureGet futureGet2B = nodeA.getDataManager().getVersionUnblocked(parameters2B);
 		futureGet2B.awaitUninterruptibly();
-		assertNull(futureGet2B.getData());
+		assertNull(futureGet2B.data());
 	}
 
 	@Test
@@ -228,9 +225,8 @@ public class FuturePutTest extends H2HJUnitTest {
 		Number640 data2ANewerKey = new Number640(Number160.createHash(locationKey), Number160.ZERO,
 				Number160.createHash(contentKey), data2ANewer.getVersionKey());
 
-		TestFuturePutListener futurePutListener = new TestFuturePutListener(new Parameters()
-				.setLocationKey(locationKey).setContentKey(contentKey).setVersionKey(data2B.getVersionKey())
-				.setData(data2B), null);
+		TestFuturePutListener futurePutListener = new TestFuturePutListener(new Parameters().setLocationKey(locationKey)
+				.setContentKey(contentKey).setVersionKey(data2B.getVersionKey()).setData(data2B), null);
 		NavigableMap<Number640, Number160> dataMap = new ConcurrentSkipListMap<Number640, Number160>();
 
 		// empty map
@@ -277,8 +273,7 @@ public class FuturePutTest extends H2HJUnitTest {
 
 	private class TestPutFailureStorage extends H2HStorageMemory {
 		@Override
-		public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent,
-				boolean domainProtection) {
+		public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
 			return H2HStorageMemory.PutStatusH2H.FAILED;
 		}
 	}

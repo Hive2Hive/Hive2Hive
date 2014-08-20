@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 
-import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -236,32 +235,27 @@ public abstract class BaseMessage implements Runnable, Serializable {
 					if (routedSendingCounter < H2HConstants.MAX_MESSAGE_SENDING) {
 						return true;
 					} else {
-						logger.error(
-								"Message did not get accepted by the targets in {} tries. Target key = '{}'.",
+						logger.error("Message did not get accepted by the targets in {} tries. Target key = '{}'.",
 								routedSendingCounter, targetKey);
 						return false;
 					}
 				} else {
-					logger.warn("Message not accepted by the target after one try. Target key = '{}'.",
-							targetKey);
+					logger.warn("Message not accepted by the target after one try. Target key = '{}'.", targetKey);
 					return false;
 				}
 			case FAILURE_DECRYPTION:
-				logger.warn(
-						"Message not accepted by the target. Decryption on target node failed. Target key = '{}'.",
+				logger.warn("Message not accepted by the target. Decryption on target node failed. Target key = '{}'.",
 						targetKey);
 				return false;
 			case FAILURE_SIGNATURE:
-				logger.warn("Message not accepted by the target. Signature is wrong. Target key = '{}'.",
-						targetKey);
+				logger.warn("Message not accepted by the target. Signature is wrong. Target key = '{}'.", targetKey);
 				return false;
 			case OK:
 				logger.error("Trying to handle an AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");
 			default:
 				logger.error("Unkown AcceptanceReply argument: {}.", reply);
-				throw new IllegalArgumentException(
-						String.format("Unkown AcceptanceReply argument: %s.", reply));
+				throw new IllegalArgumentException(String.format("Unkown AcceptanceReply argument: %s.", reply));
 		}
 	}
 

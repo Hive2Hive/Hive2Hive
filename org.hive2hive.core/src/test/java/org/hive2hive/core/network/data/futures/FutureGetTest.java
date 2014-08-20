@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HJUnitTest;
@@ -63,7 +63,7 @@ public class FutureGetTest extends H2HJUnitTest {
 
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(parameters);
 		assertNull(result);
@@ -127,7 +127,7 @@ public class FutureGetTest extends H2HJUnitTest {
 
 		FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		H2HTestData result = (H2HTestData) nodeB.getDataManager().getVersion(parameters);
 		assertNull(result);

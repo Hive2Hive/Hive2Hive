@@ -55,7 +55,7 @@ public class NetworkTestUtil {
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
-					initial.getConnection().getPeer());
+					initial.getConnection().getPeerDHT().peer());
 			NetworkManager node = new NetworkManager(otherNetConfig, encryption);
 			node.connect();
 			nodes.add(node);

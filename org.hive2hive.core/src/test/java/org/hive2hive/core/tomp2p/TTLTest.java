@@ -7,11 +7,12 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 
-import net.tomp2p.futures.FutureDigest;
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.p2p.Peer;
-import net.tomp2p.p2p.PeerMaker;
+import net.tomp2p.dht.FutureDigest;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.PeerBuilderDHT;
+import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -41,14 +42,14 @@ public class TTLTest extends H2HJUnitTest {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
-		Peer p1 = new PeerMaker(Number160.createHash(1)).ports(4834).keyPair(keyPairPeer1)
-				.setEnableIndirectReplication(true).storageIntervalMillis(1).makeAndListen();
+		PeerDHT p1 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(1)).ports(5000).keyPair(keyPairPeer1).start())
+				.start();
 		KeyPair keyPairPeer2 = gen.generateKeyPair();
-		Peer p2 = new PeerMaker(Number160.createHash(2)).masterPeer(p1).keyPair(keyPairPeer2)
-				.setEnableIndirectReplication(true).storageIntervalMillis(1).makeAndListen();
+		PeerDHT p2 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(2)).masterPeer(p1.peer()).keyPair(keyPairPeer2)
+				.start()).start();
 
-		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
-		p1.bootstrap().setPeerAddress(p2.getPeerAddress()).start().awaitUninterruptibly();
+		p2.peer().bootstrap().peerAddress(p1.peerAddress()).start().awaitUninterruptibly();
+		p1.peer().bootstrap().peerAddress(p2.peerAddress()).start().awaitUninterruptibly();
 
 		KeyPair keyPair1 = gen.generateKeyPair();
 
@@ -61,12 +62,11 @@ public class TTLTest extends H2HJUnitTest {
 		int ttl = 4;
 
 		String testData = "data";
-		Data data = new Data(testData).setProtectedEntry();
-		data.ttlSeconds(ttl).basedOn(bKey);
+		Data data = new Data(testData).protectEntry();
+		data.ttlSeconds(ttl).addBasedOn(bKey);
 
 		// initial put
-		FuturePut futurePut = p1.put(lKey).setDomainKey(dKey).setData(cKey, data).setVersionKey(vKey)
-				.keyPair(keyPair1).start();
+		FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, data).versionKey(vKey).keyPair(keyPair1).start();
 		futurePut.awaitUninterruptibly();
 		Assert.assertTrue(futurePut.isSuccess());
 
@@ -74,25 +74,24 @@ public class TTLTest extends H2HJUnitTest {
 		Thread.sleep(2000);
 
 		// check decrement of ttl through a normal get
-		FutureGet futureGet = p1.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start();
+		FutureGet futureGet = p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start();
 		futureGet.awaitUninterruptibly();
 		Assert.assertTrue(futureGet.isSuccess());
-		Assert.assertTrue(ttl > futureGet.getData().ttlSeconds());
+		Assert.assertTrue(ttl > futureGet.data().ttlSeconds());
 
 		// check decrement of ttl through a get meta
-		FutureDigest futureDigest = p1.digest(lKey).setDomainKey(dKey).setContentKey(cKey)
-				.setVersionKey(vKey).returnMetaValues().start();
+		FutureDigest futureDigest = p1.digest(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).returnMetaValues()
+				.start();
 		futureDigest.awaitUninterruptibly();
 		Assert.assertTrue(futureDigest.isSuccess());
-		Data dataMeta = futureDigest.getDigest().dataMap().values().iterator().next();
+		Data dataMeta = futureDigest.digest().dataMap().values().iterator().next();
 		Assert.assertTrue(ttl > dataMeta.ttlSeconds());
 
 		// wait again a moment, till data gets expired
 		Thread.sleep(2000);
 
 		// check if data has been removed
-		Data retData = p2.get(lKey).setDomainKey(dKey).setContentKey(cKey).setVersionKey(vKey).start()
-				.awaitUninterruptibly().getData();
+		Data retData = p2.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start().awaitUninterruptibly().data();
 		Assert.assertNull(retData);
 
 		p1.shutdown().awaitUninterruptibly();

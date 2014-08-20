@@ -7,7 +7,7 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
@@ -18,7 +18,6 @@ import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.PutUserLocationsStep;
 import org.hive2hive.core.processes.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.processes.context.interfaces.IPutUserLocationsContext;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -59,14 +58,14 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	public void testStepSuccessful() throws InterruptedException, ClassNotFoundException, IOException,
 			NoPeerConnectionException {
 		NetworkManager putter = network.get(0); // where the process runs
-		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
+		putter.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
-		proxy.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
+		proxy.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		newLocations.addPeerAddress(putter.getConnection().getPeer().getPeerAddress());
+		newLocations.addPeerAddress(putter.getConnection().getPeerDHT().peerAddress());
 		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair();
 
 		// initialize the process and the one and only step to test
@@ -78,27 +77,27 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		FutureGet future = proxy.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS));
 		future.awaitUninterruptibly();
-		Assert.assertNotNull(future.getData());
-		Locations found = (Locations) future.getData().object();
+		Assert.assertNotNull(future.data());
+		Locations found = (Locations) future.data().object();
 
 		// verify if both objects are the same
 		Assert.assertEquals(userId, found.getUserId());
 
 		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(found.getPeerAddresses());
-		Assert.assertEquals(putter.getConnection().getPeer().getPeerAddress(), onlinePeers.get(0));
+		Assert.assertEquals(putter.getConnection().getPeerDHT().peerAddress(), onlinePeers.get(0));
 	}
 
 	@Test
 	public void testStepRollback() throws InterruptedException, NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
-		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		putter.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
-		proxy.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		proxy.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		newLocations.addPeerAddress(putter.getConnection().getPeer().getPeerAddress());
+		newLocations.addPeerAddress(putter.getConnection().getPeerDHT().peerAddress());
 		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair();
 
 		// initialize the process and the one and only step to test
@@ -115,7 +114,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Override

@@ -2,8 +2,8 @@ package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FuturePut;
 
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
 		if (future.isFailed()) {
-			logger.warn("Change was not successful. Reason = '{}'. '{}'", future.getFailedReason(), parameters.toString());
+			logger.warn("Change was not successful. Reason = '{}'. '{}'", future.failedReason(), parameters.toString());
 			success = false;
 			latch.countDown();
 		} else {

@@ -79,10 +79,10 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		addresses.remove(task.getOwnAddress());
 
 		// if possible, select the one with the same external IP (could be in same subnet)
-		InetAddress ownInetAddress = task.getOwnAddress().getInetAddress();
+		InetAddress ownInetAddress = task.getOwnAddress().inetAddress();
 		if (ownInetAddress != null) {
 			for (PeerAddress peerAddress : addresses) {
-				if (ownInetAddress.equals(peerAddress.getInetAddress())) {
+				if (ownInetAddress.equals(peerAddress.inetAddress())) {
 					// internet addresses (external IP) match, prefer this address
 					// TODO: verify this assumption
 					return peerAddress;

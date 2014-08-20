@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -17,7 +17,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.base.BasePutProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -47,9 +46,9 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void testPutProcessSuccess() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager putter = network.get(0);
-		putter.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
+		putter.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1);
-		proxy.getConnection().getPeer().getPeerBean().storage(new H2HStorageMemory());
+		proxy.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 
 		String locationKey = proxy.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -63,15 +62,15 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		assertEquals(data, ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data, ((H2HTestData) futureGet.data().object()).getTestString());
 	}
 
 	@Test
 	public void testPutProcessFailure() throws NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0);
-		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		putter.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1);
-		proxy.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		proxy.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 
 		String locationKey = proxy.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -90,7 +89,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		FutureGet futureGet = proxy.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@AfterClass

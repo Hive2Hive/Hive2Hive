@@ -8,7 +8,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
@@ -24,7 +24,6 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.TestMessage;
 import org.hive2hive.core.network.messages.TestMessageWithReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.common.base.BaseMessageProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.H2HWaiter;
@@ -77,7 +76,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected location is empty
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		// create a message with target node B
 		final TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
@@ -107,10 +106,10 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			w.tickASecond();
 			futureGet = nodeA.getDataManager().getUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// verify that data arrived
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String result = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertEquals(data, result);
 	}
 
@@ -134,10 +133,10 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected location is empty
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		// assign a denying message handler at target node
-		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		nodeB.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
 		final TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
@@ -170,7 +169,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected location is still empty
 		futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	/**
@@ -195,10 +194,10 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected locations are empty
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parametersB);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 		futureGet = nodeB.getDataManager().getUnblocked(parametersA);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		// create a message with target node B
 		final TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), contentKey);
@@ -235,13 +234,13 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 			futureGet = nodeA.getDataManager().getUnblocked(parametersA);
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		futureGet = nodeA.getDataManager().getUnblocked(parametersB);
 		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 
 		assertEquals(originalSecret, receivedSecret);
 	}

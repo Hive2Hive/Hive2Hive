@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.rpc.DigestInfo;
@@ -18,7 +18,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.IDataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.base.BaseRemoveProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -63,7 +62,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		FutureGet futureGet = network.get(0).getDataManager()
 				.getUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test
@@ -75,8 +74,8 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// manipulate the nodes, remove will not work
-		network.get(0).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(key));
-		network.get(1).getConnection().getPeer().getPeerBean().storage(new FakeGetTestStorage(key));
+		network.get(0).getConnection().getPeerDHT().peerBean().storage(new FakeGetTestStorage(key));
+		network.get(1).getConnection().getPeerDHT().peerBean().storage(new FakeGetTestStorage(key));
 		// put some data to remove
 		network.get(0).getDataManager()
 				.putUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(testData))

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -52,7 +52,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 		FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class FutureRemoveTest extends H2HJUnitTest {
 					.setVersionKey(data.getVersionKey()).setData(data);
 			FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
-			assertNull(futureGet.getData());
+			assertNull(futureGet.data());
 		}
 	}
 

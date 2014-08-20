@@ -17,7 +17,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.processes.context.LoginProcessContext;
-import org.hive2hive.core.processes.login.ContactOtherClientsStep;
 import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
@@ -53,8 +52,8 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		// assign to each node the same key pair (simulating same user)
 		NetworkTestUtil.setSameSession(network);
 		// assign to a subset of the client nodes a rejecting message reply handler
-		network.get(4).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
-		network.get(5).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		network.get(4).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
+		network.get(5).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 	}
 
 	private boolean isInitialClient(Locations locations, PeerAddress client) {
@@ -73,19 +72,19 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void allClientsAreAlive() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeerDHT().peerAddress());
 		// responding nodes
-		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(2).getConnection().getPeer().getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(3).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeerDHT().peerAddress());
+		fakedLocations.addPeerAddress(network.get(2).getConnection().getPeerDHT().peerAddress());
+		fakedLocations.addPeerAddress(network.get(3).getConnection().getPeerDHT().peerAddress());
 
 		Locations result = runProcessStep(fakedLocations,
-				isInitialClient(fakedLocations, network.get(0).getConnection().getPeer().getPeerAddress()));
+				isInitialClient(fakedLocations, network.get(0).getConnection().getPeerDHT().peerAddress()));
 
 		assertEquals(4, result.getPeerAddresses().size());
 		PeerAddress newClientsEntry = null;
 		for (PeerAddress address : result.getPeerAddresses()) {
-			if (address.equals(network.get(0).getConnection().getPeer().getPeerAddress())) {
+			if (address.equals(network.get(0).getConnection().getPeerDHT().peerAddress())) {
 				newClientsEntry = address;
 				break;
 			}
@@ -102,19 +101,19 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void notAllClientsAreAlive() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeerDHT().peerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeerDHT().peerAddress());
 		// not responding nodes
-		fakedLocations.addPeerAddress(network.get(4).getConnection().getPeer().getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(5).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(4).getConnection().getPeerDHT().peerAddress());
+		fakedLocations.addPeerAddress(network.get(5).getConnection().getPeerDHT().peerAddress());
 
 		Locations result = runProcessStep(fakedLocations,
-				isInitialClient(fakedLocations, network.get(0).getConnection().getPeer().getPeerAddress()));
+				isInitialClient(fakedLocations, network.get(0).getConnection().getPeerDHT().peerAddress()));
 
 		assertEquals(2, result.getPeerAddresses().size());
 		PeerAddress newClientsEntry = null;
 		for (PeerAddress address : result.getPeerAddresses()) {
-			if (address.equals(network.get(0).getConnection().getPeer().getPeerAddress())) {
+			if (address.equals(network.get(0).getConnection().getPeerDHT().peerAddress())) {
 				newClientsEntry = address;
 				break;
 			}
@@ -131,12 +130,12 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void noOtherClientsOrDeadClients() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeerDHT().peerAddress());
 
 		Locations result = runProcessStep(fakedLocations, true);
 
 		assertEquals(1, result.getPeerAddresses().size());
-		assertEquals(network.get(0).getConnection().getPeer().getPeerAddress(), result.getPeerAddresses().iterator().next());
+		assertEquals(network.get(0).getConnection().getPeerDHT().peerAddress(), result.getPeerAddresses().iterator().next());
 	}
 
 	/**
@@ -148,15 +147,15 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void allOtherClientsAreDead() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(0).getConnection().getPeerDHT().peerAddress());
 		// not responding nodes
-		fakedLocations.addPeerAddress(network.get(4).getConnection().getPeer().getPeerAddress());
-		fakedLocations.addPeerAddress(network.get(5).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(4).getConnection().getPeerDHT().peerAddress());
+		fakedLocations.addPeerAddress(network.get(5).getConnection().getPeerDHT().peerAddress());
 
 		Locations result = runProcessStep(fakedLocations, true);
 
 		assertEquals(1, result.getPeerAddresses().size());
-		assertEquals(network.get(0).getConnection().getPeer().getPeerAddress(), result.getPeerAddresses().iterator().next());
+		assertEquals(network.get(0).getConnection().getPeerDHT().peerAddress(), result.getPeerAddresses().iterator().next());
 	}
 
 	/**
@@ -172,7 +171,7 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		Locations result = runProcessStep(fakedLocations, true);
 
 		assertEquals(1, result.getPeerAddresses().size());
-		assertEquals(network.get(0).getConnection().getPeer().getPeerAddress(), result.getPeerAddresses().iterator().next());
+		assertEquals(network.get(0).getConnection().getPeerDHT().peerAddress(), result.getPeerAddresses().iterator().next());
 	}
 
 	/**
@@ -184,15 +183,15 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	@Test
 	public void notCompleteLocations() throws NoSessionException, NoPeerConnectionException {
 		Locations fakedLocations = new Locations(userId);
-		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().getPeerAddress());
+		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeerDHT().peerAddress());
 
 		Locations result = runProcessStep(fakedLocations,
-				isInitialClient(fakedLocations, network.get(0).getConnection().getPeer().getPeerAddress()));
+				isInitialClient(fakedLocations, network.get(0).getConnection().getPeerDHT().peerAddress()));
 
 		assertEquals(2, result.getPeerAddresses().size());
 		PeerAddress newClientsEntry = null;
 		for (PeerAddress address : result.getPeerAddresses()) {
-			if (address.equals(network.get(0).getConnection().getPeer().getPeerAddress())) {
+			if (address.equals(network.get(0).getConnection().getPeerDHT().peerAddress())) {
 				newClientsEntry = address;
 				break;
 			}

@@ -9,7 +9,7 @@ import java.security.KeyPair;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FuturePut;
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
@@ -51,11 +51,10 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		FuturePut futurePut = node.getDataManager().putUnblocked(parameters);
 		futurePut.awaitUninterruptibly();
 
-		assertFalse(futurePut.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut.getRawResult().keySet()) {
-			for (Number640 key : futurePut.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut.getRawResult().get(peerAddress)
-						.get(key)]);
+		assertFalse(futurePut.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut.rawResult().keySet()) {
+			for (Number640 key : futurePut.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
@@ -67,29 +66,25 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		H2HTestData data1 = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setData(data1);
+		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(data1);
 		FuturePut futurePut1 = node.getDataManager().putUnblocked(parameters1);
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setData(data2);
+		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(data2);
 		FuturePut futurePut2 = node.getDataManager().putUnblocked(parameters2);
 		futurePut2.awaitUninterruptibly();
 
-		assertFalse(futurePut2.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut2.getRawResult().keySet()) {
-			for (Number640 key : futurePut2.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut2.getRawResult()
-						.get(peerAddress).get(key)]);
+		assertFalse(futurePut2.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut2.rawResult().keySet()) {
+			for (Number640 key : futurePut2.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut2.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
 
 	@Test
-	public void putVersionKeyZeroPreviousVersionKeyNotZeroTest() throws IOException,
-			NoPeerConnectionException {
+	public void putVersionKeyZeroPreviousVersionKeyNotZeroTest() throws IOException, NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -102,16 +97,15 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		futurePut1.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setData(data2);
+		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(data2);
 		FuturePut futurePut2 = node.getDataManager().putUnblocked(parameters2);
 		futurePut2.awaitUninterruptibly();
 
-		assertFalse(futurePut2.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut2.getRawResult().keySet()) {
-			for (Number640 key : futurePut2.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.VERSION_CONFLICT_NO_VERSION_KEY, PutStatusH2H.values()[futurePut2
-						.getRawResult().get(peerAddress).get(key)]);
+		assertFalse(futurePut2.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut2.rawResult().keySet()) {
+			for (Number640 key : futurePut2.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.VERSION_CONFLICT_NO_VERSION_KEY,
+						PutStatusH2H.values()[futurePut2.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
@@ -130,13 +124,12 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 		FuturePut futurePut = node.getDataManager().putUnblocked(parameters);
 		futurePut.awaitUninterruptibly();
-		futurePut.getFutureRequests().awaitUninterruptibly();
+		futurePut.futureRequests().awaitUninterruptibly();
 
-		assertFalse(futurePut.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut.getRawResult().keySet()) {
-			for (Number640 key : futurePut.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut.getRawResult().get(peerAddress)
-						.get(key)]);
+		assertFalse(futurePut.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut.rawResult().keySet()) {
+			for (Number640 key : futurePut.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
@@ -161,11 +154,11 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		FuturePut futurePut2 = node.getDataManager().putUnblocked(parameters2);
 		futurePut2.awaitUninterruptibly();
 
-		assertFalse(futurePut2.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut2.getRawResult().keySet()) {
-			for (Number640 key : futurePut2.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.VERSION_CONFLICT_NO_BASED_ON, PutStatusH2H.values()[futurePut2
-						.getRawResult().get(peerAddress).get(key)]);
+		assertFalse(futurePut2.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut2.rawResult().keySet()) {
+			for (Number640 key : futurePut2.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.VERSION_CONFLICT_NO_BASED_ON,
+						PutStatusH2H.values()[futurePut2.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
@@ -194,11 +187,11 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		FuturePut futurePut3 = node.getDataManager().putUnblocked(parameters3);
 		futurePut3.awaitUninterruptibly();
 
-		assertFalse(futurePut3.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut3.getRawResult().keySet()) {
-			for (Number640 key : futurePut3.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.VERSION_CONFLICT, PutStatusH2H.values()[futurePut3.getRawResult()
-						.get(peerAddress).get(key)]);
+		assertFalse(futurePut3.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut3.rawResult().keySet()) {
+			for (Number640 key : futurePut3.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.VERSION_CONFLICT, PutStatusH2H.values()[futurePut3.rawResult().get(peerAddress)
+						.get(key)]);
 			}
 		}
 	}
@@ -224,18 +217,16 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		FuturePut futurePut2 = node.getDataManager().putUnblocked(parameters2);
 		futurePut2.awaitUninterruptibly();
 
-		assertFalse(futurePut2.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut2.getRawResult().keySet()) {
-			for (Number640 key : futurePut2.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut2.getRawResult()
-						.get(peerAddress).get(key)]);
+		assertFalse(futurePut2.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut2.rawResult().keySet()) {
+			for (Number640 key : futurePut2.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.OK, PutStatusH2H.values()[futurePut2.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
 
 	@Test
-	public void putNewVersionWithOldTimestampTest() throws InterruptedException, IOException,
-			NoPeerConnectionException {
+	public void putNewVersionWithOldTimestampTest() throws InterruptedException, IOException, NoPeerConnectionException {
 		NetworkManager node = network.get(random.nextInt(networkSize));
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -263,11 +254,11 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		FuturePut futurePut2 = node.getDataManager().putUnblocked(parameters2);
 		futurePut2.awaitUninterruptibly();
 
-		assertFalse(futurePut2.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut2.getRawResult().keySet()) {
-			for (Number640 key : futurePut2.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.VERSION_CONFLICT_OLD_TIMESTAMP, PutStatusH2H.values()[futurePut2
-						.getRawResult().get(peerAddress).get(key)]);
+		assertFalse(futurePut2.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut2.rawResult().keySet()) {
+			for (Number640 key : futurePut2.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.VERSION_CONFLICT_OLD_TIMESTAMP,
+						PutStatusH2H.values()[futurePut2.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}
@@ -280,22 +271,21 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair();
 
 		H2HTestData data1 = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setData(data1).setProtectionKeys(protectionKeys);
+		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(data1)
+				.setProtectionKeys(protectionKeys);
 		FuturePut futurePut = node.getDataManager().putUnblocked(parameters1);
 		futurePut.awaitUninterruptibly();
 
 		H2HTestData data2 = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setData(data2);
+		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(data2);
 		futurePut = node.getDataManager().putUnblocked(parameters2);
 		futurePut.awaitUninterruptibly();
 
-		assertFalse(futurePut.getRawResult().isEmpty());
-		for (PeerAddress peerAddress : futurePut.getRawResult().keySet()) {
-			for (Number640 key : futurePut.getRawResult().get(peerAddress).keySet()) {
-				assertEquals(PutStatusH2H.FAILED_SECURITY, PutStatusH2H.values()[futurePut.getRawResult()
-						.get(peerAddress).get(key)]);
+		assertFalse(futurePut.rawResult().isEmpty());
+		for (PeerAddress peerAddress : futurePut.rawResult().keySet()) {
+			for (Number640 key : futurePut.rawResult().get(peerAddress).keySet()) {
+				assertEquals(PutStatusH2H.FAILED_SECURITY,
+						PutStatusH2H.values()[futurePut.rawResult().get(peerAddress).get(key)]);
 			}
 		}
 	}

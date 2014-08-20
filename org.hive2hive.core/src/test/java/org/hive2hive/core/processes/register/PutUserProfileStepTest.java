@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -21,7 +21,6 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.processes.context.RegisterProcessContext;
-import org.hive2hive.core.processes.register.PutUserProfileStep;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
@@ -77,8 +76,8 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 				new Parameters().setLocationKey(credentials.getProfileLocationKey())
 						.setContentKey(H2HConstants.USER_PROFILE));
 		global.awaitUninterruptibly();
-		global.getFutureRequests().awaitUninterruptibly();
-		EncryptedNetworkContent found = (EncryptedNetworkContent) global.getData().object();
+		global.futureRequests().awaitUninterruptibly();
+		EncryptedNetworkContent found = (EncryptedNetworkContent) global.data().object();
 		Assert.assertNotNull(found);
 
 		// decrypt it using the same password as set above
@@ -93,9 +92,9 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepRollback() throws InterruptedException, NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
-		putter.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		putter.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
-		proxy.getConnection().getPeer().getPeerBean().storage(new DenyingPutTestStorage());
+		proxy.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
@@ -116,7 +115,7 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 				new Parameters().setLocationKey(credentials.getProfileLocationKey()).setContentKey(
 						H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@AfterClass

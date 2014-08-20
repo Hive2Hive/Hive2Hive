@@ -63,10 +63,10 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 
 	private void notifyMyPeers(List<PeerAddress> ownPeers, BaseNotificationMessageFactory messageFactory,
 			PublicKey ownPublicKey) {
-		ownPeers.remove(networkManager.getConnection().getPeer().getPeerAddress());
+		ownPeers.remove(networkManager.getConnection().getPeerDHT().peerAddress());
 		logger.debug("Notifying {} other peers of me (without myself).", ownPeers.size());
 		for (PeerAddress peerAddress : ownPeers) {
-			if (peerAddress.equals(networkManager.getConnection().getPeer().getPeerAddress())) {
+			if (peerAddress.equals(networkManager.getConnection().getPeerDHT().peerAddress())) {
 				// don't send myself
 				logger.trace("Skipping to send a message to myself.");
 				continue;

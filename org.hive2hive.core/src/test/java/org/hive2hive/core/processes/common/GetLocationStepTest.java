@@ -12,7 +12,6 @@ import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.context.interfaces.IGetUserLocationsContext;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
@@ -45,7 +44,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		// create the needed objects
 		String userId = proxy.getNodeId();
 		Locations newLocations = new Locations(userId);
-		newLocations.addPeerAddress(getter.getConnection().getPeer().getPeerAddress());
+		newLocations.addPeerAddress(getter.getConnection().getPeerDHT().peerAddress());
 
 		// put the locations to the DHT
 		proxy.getDataManager()
@@ -61,7 +60,7 @@ public class GetLocationStepTest extends H2HJUnitTest {
 		Assert.assertEquals(userId, context.locations.getUserId());
 
 		List<PeerAddress> onlinePeers = new ArrayList<PeerAddress>(context.locations.getPeerAddresses());
-		Assert.assertEquals(getter.getConnection().getPeer().getPeerAddress(), onlinePeers.get(0));
+		Assert.assertEquals(getter.getConnection().getPeerDHT().peerAddress(), onlinePeers.get(0));
 	}
 
 	@Test

@@ -73,7 +73,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		waitForResponses = new CountDownLatch(peerAddresses.size());
 		for (PeerAddress address : peerAddresses) {
 			// contact all other clients (exclude self)
-			if (!address.equals(networkManager.getConnection().getPeer().getPeerAddress())) {
+			if (!address.equals(networkManager.getConnection().getPeerDHT().peerAddress())) {
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);
 
@@ -138,7 +138,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		}
 
 		// add self
-		updatedLocations.addPeerAddress(networkManager.getConnection().getPeer().getPeerAddress());
+		updatedLocations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
 
 		// update context for future use
 		context.provideUserLocations(updatedLocations);
@@ -146,7 +146,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		// evaluate if initial
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
 		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
-				networkManager.getConnection().getPeer().getPeerAddress())) {
+				networkManager.getConnection().getPeerDHT().peerAddress())) {
 			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
 			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}

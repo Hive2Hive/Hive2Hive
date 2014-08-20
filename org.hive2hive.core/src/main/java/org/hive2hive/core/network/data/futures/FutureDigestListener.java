@@ -3,8 +3,8 @@ package org.hive2hive.core.network.data.futures;
 import java.util.NavigableMap;
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureDigest;
 import net.tomp2p.futures.BaseFutureListener;
-import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
@@ -53,7 +53,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 		if (future.isFailed()) {
 			logger.error("Could not get digest. '{}'", parameters.toString());
 		} else {
-			result = future.getDigest().keyDigest();
+			result = future.digest().keyDigest();
 			if (result == null) {
 				logger.warn("Got digest null. '{}'", parameters.toString());
 			} else {

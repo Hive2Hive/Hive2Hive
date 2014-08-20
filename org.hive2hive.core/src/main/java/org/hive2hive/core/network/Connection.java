@@ -8,13 +8,16 @@ import java.net.InetAddress;
 
 import net.tomp2p.connection.ChannelClientConfiguration;
 import net.tomp2p.connection.ChannelServerConficuration;
+import net.tomp2p.dht.PeerBuilderDHT;
+import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
-import net.tomp2p.p2p.PeerMaker;
+import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerMap;
 import net.tomp2p.peers.PeerMapConfiguration;
+import net.tomp2p.replication.IndirectReplication;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
@@ -27,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * Creates a <code>TomP2P</code> peer. Provides methods for discovering and bootstrapping to other peers as
  * well as shutdown.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class Connection {
 
@@ -39,8 +42,9 @@ public class Connection {
 	private final IH2HEncryption encryption;
 
 	private boolean isConnected;
-	private Peer peer;
+	private PeerDHT peerDHT;
 	private DefaultEventExecutorGroup eventExecutorGroup;
+	private IndirectReplication replication;
 
 	public Connection(String nodeID, NetworkManager networkManager, IH2HEncryption encryption) {
 		this.nodeID = nodeID;
@@ -89,27 +93,27 @@ public class Connection {
 			return false;
 		}
 
-		FutureDiscover futureDiscover = peer.discover().inetAddress(bootstrapAddress).ports(port).start();
+		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(port).start();
 		futureDiscover.awaitUninterruptibly();
 
 		if (futureDiscover.isSuccess()) {
-			logger.debug("Discovery successful: Outside address is '{}'.", futureDiscover.getPeerAddress());
+			logger.debug("Discovery successful: Outside address is '{}'.", futureDiscover.peerAddress());
 		} else {
-			logger.warn("Discovery failed: {}.", futureDiscover.getFailedReason());
-			peer.shutdown();
+			logger.warn("Discovery failed: {}.", futureDiscover.failedReason());
+			peerDHT.shutdown();
 			isConnected = false;
 			return false;
 		}
 
-		FutureBootstrap futureBootstrap = peer.bootstrap().setInetAddress(bootstrapAddress).setPorts(port).start();
+		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(port).start();
 		futureBootstrap.awaitUninterruptibly();
 
 		if (futureBootstrap.isSuccess()) {
 			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", bootstrapAddress.getHostAddress());
 			return true;
 		} else {
-			logger.warn("Bootstrapping failed: {}.", futureBootstrap.getFailedReason());
-			peer.shutdown();
+			logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
+			peerDHT.shutdown();
 			isConnected = false;
 			return false;
 		}
@@ -123,8 +127,14 @@ public class Connection {
 	public boolean disconnect() {
 		boolean isDisconnected = true;
 		if (isConnected) {
+			// stop the replication at this peer
+			if (replication != null) {
+				replication.shutdown();
+				logger.debug("Replication stopped");
+			}
+
 			// TODO check whether this always shuts down the whole network or if the peer just leaves
-			isDisconnected = peer.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
+			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			isConnected = !isDisconnected;
 
 			if (isDisconnected) {
@@ -149,40 +159,40 @@ public class Connection {
 		return isConnected;
 	}
 
-	public Peer getPeer() {
-		return peer;
+	public PeerDHT getPeerDHT() {
+		return peerDHT;
 	}
 
-	private PeerMaker preparePeerMaker() {
+	private PeerBuilder preparePeerMaker() {
 		int port = searchFreePort();
 
 		// configure the thread handling internally, callback can be blocking
 		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
 
-		ChannelClientConfiguration clientConfig = PeerMaker.createDefaultChannelClientConfiguration();
+		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(new H2HSignatureFactory());
-		clientConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+		clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 
-		ChannelServerConficuration serverConfig = PeerMaker.createDefaultChannelServerConfiguration();
+		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
-		serverConfig.pipelineFilter(new PeerMaker.EventExecutorGroupFilter(eventExecutorGroup));
+		serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 
-		return new PeerMaker(Number160.createHash(nodeID)).ports(port).setEnableIndirectReplication(true)
-				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
+		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).channelClientConfiguration(clientConfig)
+				.channelServerConfiguration(serverConfig);
 	}
 
 	private boolean createPeer() {
 		try {
-			peer = preparePeerMaker().makeAndListen();
+			peerDHT = new PeerBuilderDHT(preparePeerMaker().start()).storageLayer(new H2HStorageMemory()).start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
 		}
 
-		// override the put method for validation tasks
-		peer.getPeerBean().storage(new H2HStorageMemory());
 		// attach a reply handler for messages
-		peer.setObjectDataReply(new MessageReplyHandler(networkManager, encryption));
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+		// start the indirect replication
+		replication = new IndirectReplication(peerDHT).start();
 
 		return true;
 	}
@@ -199,17 +209,18 @@ public class Connection {
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			peer = preparePeerMaker().peerMap(peerMap).makeAndListen();
+			peerDHT = new PeerBuilderDHT(preparePeerMaker().peerMap(peerMap).start()).storageLayer(new H2HStorageMemory())
+					.start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			isConnected = false;
 			return false;
 		}
 
-		// override the put method for validation tasks
-		peer.getPeerBean().storage(new H2HStorageMemory());
 		// attach a reply handler for messages
-		peer.setObjectDataReply(new MessageReplyHandler(networkManager, encryption));
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+		// start the indirect replication
+		replication = new IndirectReplication(peerDHT).start();
 
 		isConnected = true;
 		return true;
@@ -230,28 +241,30 @@ public class Connection {
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			peer = preparePeerMaker().masterPeer(masterPeer).peerMap(peerMap).makeAndListen();
+			peerDHT = new PeerBuilderDHT(preparePeerMaker().masterPeer(masterPeer).peerMap(peerMap).start()).storageLayer(
+					new H2HStorageMemory()).start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			return false;
 		}
 
-		// override the put method for validation tasks
-		peer.getPeerBean().storage(new H2HStorageMemory());
 		// attach a reply handler for messages
-		peer.setObjectDataReply(new MessageReplyHandler(networkManager, encryption));
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+
+		// start the indirect replication
+		replication = new IndirectReplication(peerDHT).start();
 
 		// bootstrap to master peer
-		FutureBootstrap futureBootstrap = peer.bootstrap().setPeerAddress(masterPeer.getPeerAddress()).start();
+		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
 		futureBootstrap.awaitUninterruptibly();
 
 		if (futureBootstrap.isSuccess()) {
-			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.getPeerAddress());
+			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
 			isConnected = true;
 			return true;
 		} else {
-			logger.warn("Bootstrapping failed: {}.", futureBootstrap.getFailedReason());
-			peer.shutdown();
+			logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
+			peerDHT.shutdown();
 			isConnected = false;
 			return false;
 		}

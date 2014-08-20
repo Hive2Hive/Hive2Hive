@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.security.KeyPair;
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -88,10 +88,10 @@ public class DeleteFileTest extends H2HJUnitTest {
 				FutureGet get = client.getDataManager().getUnblocked(
 						new Parameters().setLocationKey(metaChunks.getChunkId()).setContentKey(H2HConstants.FILE_CHUNK));
 				get.awaitUninterruptibly();
-				get.getFutureRequests().awaitUninterruptibly();
+				get.futureRequests().awaitUninterruptibly();
 
 				// chunk should not exist
-				Assert.assertNull(get.getData());
+				Assert.assertNull(get.data());
 			}
 		}
 	}

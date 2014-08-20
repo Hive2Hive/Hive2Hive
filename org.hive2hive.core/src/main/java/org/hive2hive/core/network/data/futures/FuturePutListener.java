@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureDigest;
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDigest;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.futures.FutureRemove;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
@@ -78,7 +78,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			logger.warn("Put future was not successful. '{}'", parameters.toString());
 			retryPut();
 			return;
-		} else if (future.getRawResult().isEmpty()) {
+		} else if (future.rawResult().isEmpty()) {
 			logger.warn("Returned raw results are empty.");
 			retryPut();
 			return;
@@ -87,14 +87,14 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		// analyze returned put status
 		final List<PeerAddress> versionConflict = new ArrayList<PeerAddress>();
 		final List<PeerAddress> fail = new ArrayList<PeerAddress>();
-		for (PeerAddress peeradress : future.getRawResult().keySet()) {
-			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
+		for (PeerAddress peeradress : future.rawResult().keySet()) {
+			Map<Number640, Byte> map = future.rawResult().get(peeradress);
 			if (map == null) {
 				logger.warn("A node gave no status (null) back. '{}'", parameters.toString());
 				fail.add(peeradress);
 			} else {
-				for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
-					byte status = future.getRawResult().get(peeradress).get(key);
+				for (Number640 key : future.rawResult().get(peeradress).keySet()) {
+					byte status = future.rawResult().get(peeradress).get(key);
 					switch (PutStatusH2H.values()[status]) {
 						case OK:
 							break;
@@ -123,11 +123,11 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		if (!versionConflict.isEmpty()) {
 			logger.warn("Put verification failed. Version conflict! '{}'", parameters.toString());
 			notifyFailure();
-		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
+		} else if ((double) fail.size() < ((double) future.rawResult().size()) / 2.0) {
 			// majority of the contacted nodes responded with ok
 			verifyPut();
 		} else {
-			logger.warn("{} of {} contacted nodes failed.", fail.size(), future.getRawResult().size());
+			logger.warn("{} of {} contacted nodes failed.", fail.size(), future.rawResult().size());
 			retryPut();
 		}
 	}
@@ -166,11 +166,11 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
-				if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
+				if (future.isFailed() || future.rawDigest() == null || future.rawDigest().isEmpty()) {
 					logger.error("Put verification failed. Could not get digest. '{}'", parameters.toString());
 					notifyFailure();
 				} else {
-					checkVersionKey(future.getRawDigest());
+					checkVersionKey(future.rawDigest());
 				}
 			}
 		});
@@ -192,7 +192,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			} else {
 				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).keyDigest();
 
-				if (keyDigest.firstEntry().getKey().getVersionKey().equals(parameters.getVersionKey())) {
+				if (keyDigest.firstEntry().getKey().versionKey().equals(parameters.getVersionKey())) {
 					logger.trace("Put verification: On peer '{}' entry is newest. '{}'", peerAddress, parameters.toString());
 
 				} else if (keyDigest.containsKey(parameters.getKey())) {
@@ -237,7 +237,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			// figure out the next version based on same version
 			Number640 entryBasingOnSameParent = getSuccessor(keyDigest);
 			if (entryBasingOnSameParent == null) {
-				if (keyDigest.firstKey().getVersionKey().equals(parameters.getData().getBasedOnKey())) {
+				if (keyDigest.firstKey().versionKey().equals(parameters.getData().getBasedOnKey())) {
 					logger.error("Put verification: Peer '{}' has no successor version. '{}'", peerAddress,
 							parameters.toString());
 					// this peer doesn't contain any successor version, with this peer is something wrong
@@ -248,7 +248,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					return true;
 				}
 			} else {
-				int compare = entryBasingOnSameParent.getVersionKey().compareTo(parameters.getVersionKey());
+				int compare = entryBasingOnSameParent.versionKey().compareTo(parameters.getVersionKey());
 				if (compare == 0) {
 					logger.error("Put verification: Peer '{}' has same version. '{}'", peerAddress, parameters.toString());
 					return true;

@@ -7,9 +7,9 @@ import java.security.KeyPair;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.futures.FutureRemove;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -58,7 +58,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// verify initial put
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to put without a protection key
 		H2HTestData data2 = new H2HTestData("bla2");
@@ -70,7 +70,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been not modified
 		futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// verify initial put
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// overwrite with correct protection key
 		H2HTestData data2 = new H2HTestData("bla2");
@@ -104,7 +104,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// verify overwrite
 		futureGet = node.getDataManager().getUnblocked(parameters2);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data2.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data2.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to overwrite without protection key
 		H2HTestData data3 = new H2HTestData("bla3");
@@ -116,7 +116,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been not changed
 		futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data2.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data2.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// verify initial put
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to overwrite with wrong protection key
 		H2HTestData data2 = new H2HTestData("bla2");
@@ -151,7 +151,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been not changed;
 		futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 	}
 
 	@Test
@@ -174,7 +174,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// verify initial put
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to remove without protection keys
 		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
@@ -185,7 +185,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been not changed
 		futureGet = node.getDataManager().getUnblocked(parameters2);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to remove with wrong protection keys
 		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
@@ -196,7 +196,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been not changed
 		futureGet = node.getDataManager().getUnblocked(parameters2);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// remove with correct protection keys
 		futureRemove = node.getDataManager().removeUnblocked(parameters1);
@@ -205,7 +205,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been removed
 		futureGet = node.getDataManager().getUnblocked(parameters2);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test
@@ -231,7 +231,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// check if put was ok
 		FutureGet futureGet = node.getDataManager().getVersionUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to remove without a protection key
 		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
@@ -242,19 +242,18 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been not modified
 		futureGet = node.getDataManager().getVersionUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// try to remove with wrong protection key
 		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
-				.setContentKey(contentKey).setVersionKey(data1.getVersionKey())
-				.setProtectionKeys(protectionKey2);
+				.setContentKey(contentKey).setVersionKey(data1.getVersionKey()).setProtectionKeys(protectionKey2);
 		futureRemove = node.getDataManager().removeVersionUnblocked(parameters3);
 		futureRemove.awaitUninterruptibly();
 
 		// should have been not modified
 		futureGet = node.getDataManager().getVersionUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.getData().object()).getTestString());
+		assertEquals(data1.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
 
 		// remove with correct content protection key
 		Parameters parameters4 = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
@@ -266,7 +265,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		// should have been removed
 		futureGet = node.getDataManager().getVersionUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@AfterClass

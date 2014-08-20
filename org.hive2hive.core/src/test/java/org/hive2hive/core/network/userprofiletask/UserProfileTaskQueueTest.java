@@ -15,7 +15,7 @@ import java.util.Random;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -88,7 +88,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
-		assertNotNull(futureGet.getData());
+		assertNotNull(futureGet.data());
 	}
 
 	@Ignore
@@ -114,7 +114,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 				.setContentKey(userProfileTask.getContentKey());
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
 
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	@Test

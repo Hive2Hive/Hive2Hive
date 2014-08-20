@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureDigest;
+import net.tomp2p.dht.FutureDigest;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HConstants;
@@ -84,9 +84,9 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 		FutureDigest futureDigest = node.getDataManager().getDigestUnblocked(parameters);
 		futureDigest.awaitUninterruptibly();
 
-		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.getDigest().keyDigest().size());
+		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.digest().keyDigest().size());
 		int i = 0;
-		for (Number160 storedVersion : futureDigest.getDigest().keyDigest().values()) {
+		for (Number160 storedVersion : futureDigest.digest().keyDigest().values()) {
 			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
 		}
 	}

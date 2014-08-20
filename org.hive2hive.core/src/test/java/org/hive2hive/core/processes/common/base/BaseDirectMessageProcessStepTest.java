@@ -9,7 +9,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
@@ -23,7 +23,6 @@ import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.H2HWaiter;
@@ -78,11 +77,11 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected location is empty
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
-				.getPeerAddress(), contentKey, new H2HTestData(data), false);
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeerDHT()
+				.peerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -108,10 +107,10 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			w.tickASecond();
 			futureGet = nodeB.getDataManager().getUnblocked(parameters);
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// verify that data arrived
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String result = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}
@@ -136,14 +135,14 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected location is empty
 		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		// assign a denying message handler at target node
-		nodeB.getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		nodeB.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
-				.getPeerAddress(), contentKey, new H2HTestData(data), false);
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeerDHT()
+				.peerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -171,7 +170,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected location is still empty
 		futureGet = nodeB.getDataManager().getUnblocked(parameters);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 	}
 
 	/**
@@ -196,14 +195,14 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// check if selected locations are empty
 		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parametersA);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 		futureGet = nodeA.getDataManager().getUnblocked(parametersB);
 		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		assertNull(futureGet.data());
 
 		// create a message with target node B
-		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer()
-				.getPeerAddress(), contentKey);
+		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeerDHT()
+				.peerAddress(), contentKey);
 
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
@@ -236,13 +235,13 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			waiter.tickASecond();
 			futureGet = nodeA.getDataManager().getUnblocked(parametersA);
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		futureGet = nodeB.getDataManager().getUnblocked(parametersB);
 		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 

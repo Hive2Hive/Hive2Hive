@@ -220,7 +220,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.attachListener(listener);
 
 		// kick out peer 3 (B)
-		network.get(3).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		network.get(3).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent
@@ -258,8 +258,8 @@ public class NotificationTest extends H2HJUnitTest {
 		process.attachListener(listener);
 
 		// kick out peer 3 and 4 (B)
-		network.get(3).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
-		network.get(4).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		network.get(3).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
+		network.get(4).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent
@@ -296,7 +296,7 @@ public class NotificationTest extends H2HJUnitTest {
 		process.attachListener(listener);
 
 		// kick out Peer 1
-		network.get(1).getConnection().getPeer().setObjectDataReply(new DenyingMessageReplyHandler());
+		network.get(1).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 		process.start();
 
 		// wait until all messages are sent

@@ -8,7 +8,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -91,14 +91,14 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 			futureGet = nodeB.getDataManager().getUnblocked(
 					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		futureGet = nodeB.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 
@@ -113,8 +113,8 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	 * @throws NoSessionException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode()
-			throws ClassNotFoundException, IOException, NoPeerConnectionException, NoSessionException {
+	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException,
+			IOException, NoPeerConnectionException, NoSessionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -125,8 +125,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		// generate a random content key
 		String contentKey = NetworkTestUtil.randomString();
 		// create a message with target node B
-		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(),
-				contentKey);
+		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);
@@ -142,14 +141,14 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 			futureGet = nodeB.getDataManager().getUnblocked(
 					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
 			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (futureGet.data() == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		futureGet = nodeB.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
 		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 
