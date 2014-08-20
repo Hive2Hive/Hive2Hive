@@ -51,7 +51,7 @@ public class DataManagerTest extends H2HJUnitTest {
 		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
 				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data));
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		FuturePut future = node.getDataManager().putUnblocked(parameters);
 		future.awaitUninterruptibly();
@@ -86,7 +86,7 @@ public class DataManagerTest extends H2HJUnitTest {
 	public void testPutOneLocationKeyMultipleContentKeys() throws Exception {
 		String locationKey = NetworkTestUtil.randomString();
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		String data1 = NetworkTestUtil.randomString();
 		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
@@ -129,32 +129,32 @@ public class DataManagerTest extends H2HJUnitTest {
 		String data1 = NetworkTestUtil.randomString();
 		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
 				.setData(new H2HTestData(data1));
-		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters1);
+		FuturePut future1 = NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters1);
 		future1.awaitUninterruptibly();
 
 		String data2 = NetworkTestUtil.randomString();
 		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
 				.setData(new H2HTestData(data2));
-		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters2);
+		FuturePut future2 = NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters2);
 		future2.awaitUninterruptibly();
 
 		String data3 = NetworkTestUtil.randomString();
 		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
 				.setData(new H2HTestData(data3));
-		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters3);
+		FuturePut future3 = NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters3);
 		future3.awaitUninterruptibly();
 
-		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().getUnblocked(parameters1);
+		FutureGet get1 = NetworkTestUtil.getRandomNode(network).getDataManager().getUnblocked(parameters1);
 		get1.awaitUninterruptibly();
 		String result1 = (String) ((H2HTestData) get1.data().object()).getTestString();
 		assertEquals(data1, result1);
 
-		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().getUnblocked(parameters2);
+		FutureGet get2 = NetworkTestUtil.getRandomNode(network).getDataManager().getUnblocked(parameters2);
 		get2.awaitUninterruptibly();
 		String result2 = (String) ((H2HTestData) get2.data().object()).getTestString();
 		assertEquals(data2, result2);
 
-		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().getUnblocked(parameters3);
+		FutureGet get3 = NetworkTestUtil.getRandomNode(network).getDataManager().getUnblocked(parameters3);
 		get3.awaitUninterruptibly();
 		String result3 = (String) ((H2HTestData) get3.data().object()).getTestString();
 		assertEquals(data3, result3);
@@ -270,7 +270,7 @@ public class DataManagerTest extends H2HJUnitTest {
 				.setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew).setTTL(data.getTimeToLive())
 				.setHashFlag(true);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		// put some initial data
 		FuturePut putFuture1 = node.getDataManager().putUnblocked(parameters);

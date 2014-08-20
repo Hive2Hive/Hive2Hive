@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 
 import java.security.KeyPair;
 import java.util.List;
-import java.util.Random;
 
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
@@ -30,7 +29,6 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 3;
-	private static Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -46,7 +44,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		// initial put
 		H2HTestData data1 = new H2HTestData("bla1");
@@ -80,7 +78,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		// initial put
 		H2HTestData data1 = new H2HTestData("bla1");
@@ -127,7 +125,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
 		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		// initial put
 		H2HTestData data1 = new H2HTestData("bla1");
@@ -162,7 +160,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
 		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		// initial put
 		H2HTestData data1 = new H2HTestData("bla1");
@@ -216,7 +214,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
 		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data1 = new H2HTestData("bla1");
 		data1.generateVersionKey();

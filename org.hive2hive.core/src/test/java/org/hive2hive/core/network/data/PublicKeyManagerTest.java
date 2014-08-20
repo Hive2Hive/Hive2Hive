@@ -48,9 +48,8 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys,
-				node.getDataManager());
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
+		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
 		// check if the public key manager returns correctly the key of the logged in user
 		assertEquals(loggedInUserKeys.getPublic(), publicKeyManager.getPublicKey(loggedInUserId));
@@ -61,9 +60,8 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys,
-				node.getDataManager());
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
+		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
 		// create and upload some fake public keys into the network
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
@@ -71,10 +69,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			String userId = NetworkTestUtil.randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
-			Parameters parameters = new Parameters().setLocationKey(userId)
-					.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(userPublicKey);
-			network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
-					.awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
+					.setData(userPublicKey);
+			NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 			publicKeys.put(userId, key.getPublic());
 		}
 
@@ -89,19 +86,17 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys,
-				node.getDataManager());
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
+		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < random.nextInt(5); i++) {
 			String userId = NetworkTestUtil.randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
-			Parameters parameters = new Parameters().setLocationKey(userId)
-					.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(userPublicKey);
-			network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
-					.awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
+					.setData(userPublicKey);
+			NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 			publicKeys.put(userId, key.getPublic());
 		}
 
@@ -109,10 +104,8 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			assertEquals(publicKeys.get(userId), publicKeyManager.getPublicKey(userId));
 
 			// remove the public keys from network, the manager shouldn't do any get request
-			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(
-					H2HConstants.USER_PUBLIC_KEY);
-			network.get(random.nextInt(networkSize)).getDataManager().removeUnblocked(parameters)
-					.awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY);
+			NetworkTestUtil.getRandomNode(network).getDataManager().removeUnblocked(parameters).awaitUninterruptibly();
 
 			// the public key manager should use his cache
 			assertEquals(publicKeys.get(userId), publicKeyManager.getPublicKey(userId));
@@ -124,9 +117,8 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys,
-				node.getDataManager());
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
+		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
 		String nonExistingUserId = NetworkTestUtil.randomString();
 
@@ -143,16 +135,14 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys,
-				node.getDataManager());
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
+		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
 		String otherUser = NetworkTestUtil.randomString();
 		H2HTestData noPublicKey = new H2HTestData("public key");
-		Parameters parameters = new Parameters().setLocationKey(otherUser)
-				.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(noPublicKey);
-		network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
-				.awaitUninterruptibly();
+		Parameters parameters = new Parameters().setLocationKey(otherUser).setContentKey(H2HConstants.USER_PUBLIC_KEY)
+				.setData(noPublicKey);
+		NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 
 		try {
 			publicKeyManager.getPublicKey(otherUser);
@@ -167,9 +157,8 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		String loggedInUserId = NetworkTestUtil.randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
-		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys,
-				node.getDataManager());
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
+		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
 		// create and upload some fake public keys into the network
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
@@ -177,10 +166,9 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 			String userId = NetworkTestUtil.randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
-			Parameters parameters = new Parameters().setLocationKey(userId)
-					.setContentKey(H2HConstants.USER_PUBLIC_KEY).setData(userPublicKey);
-			network.get(random.nextInt(networkSize)).getDataManager().putUnblocked(parameters)
-					.awaitUninterruptibly();
+			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
+					.setData(userPublicKey);
+			NetworkTestUtil.getRandomNode(network).getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 			publicKeys.put(userId, key.getPublic());
 		}
 

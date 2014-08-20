@@ -32,7 +32,7 @@ import org.hive2hive.core.security.UserCredentials;
 /**
  * Helper class for testing. Provides methods for creating, shutdown nodes and some random generators.
  * 
- * @author Seppi
+ * @author Seppi, Nico
  */
 public class NetworkTestUtil {
 
@@ -145,8 +145,8 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.createInitial("initial"), FileConfiguration.createDefault(),
-				encryption);
+		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.createInitial("initial"),
+				FileConfiguration.createDefault(), encryption);
 		initial.connect();
 		initial.getFileManager().configureAutostart(false);
 		initial.getUserManager().configureAutostart(false);
@@ -204,11 +204,22 @@ public class NetworkTestUtil {
 		return UUID.randomUUID().toString();
 	}
 
+	/**
+	 * Generates random credentials
+	 * 
+	 * @return
+	 */
 	public static UserCredentials generateRandomCredentials() {
 		return new UserCredentials(NetworkTestUtil.randomString(), NetworkTestUtil.randomString(),
 				NetworkTestUtil.randomString());
 	}
 
+	/**
+	 * Selects a random node of the given network
+	 * 
+	 * @param network a list of online peers
+	 * @return a random node in the list
+	 */
 	public static NetworkManager getRandomNode(List<NetworkManager> network) {
 		return network.get(new Random().nextInt(network.size()));
 	}

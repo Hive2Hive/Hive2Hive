@@ -45,7 +45,7 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 
 	@Test
 	public void testCleanUpOutdatedVersion() throws InterruptedException, IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
 				.setDomainKey(NetworkTestUtil.randomString()).setContentKey(NetworkTestUtil.randomString())

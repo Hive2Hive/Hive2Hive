@@ -3,7 +3,6 @@ package org.hive2hive.core.processes.files;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -58,7 +57,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 	public void registerAndAddFileVersions() throws IOException, IllegalFileLocation, NoSessionException,
 			NoPeerConnectionException {
 		userCredentials = NetworkTestUtil.generateRandomCredentials();
-		client = network.get(new Random().nextInt(networkSize));
+		client = NetworkTestUtil.getRandomNode(network);
 
 		// register a user
 		root = FileTestUtil.getTempDirectory();

@@ -3,7 +3,6 @@ package org.hive2hive.core.processes.login;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import net.tomp2p.dht.FutureGet;
 
@@ -59,7 +58,7 @@ public class LoginTest extends H2HJUnitTest {
 	@Test
 	public void testValidCredentials() throws ClassNotFoundException, IOException, NoSessionException,
 			NoPeerConnectionException {
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 
 		// login with valid credentials
 		UseCaseTestUtil.login(userCredentials, client, root);
@@ -105,7 +104,7 @@ public class LoginTest extends H2HJUnitTest {
 
 	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials) throws InvalidProcessStateException,
 			NoSessionException, NoPeerConnectionException {
-		NetworkManager client = network.get(new Random().nextInt(networkSize));
+		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 		UserProfileManager upManager = new UserProfileManager(client.getDataManager(), wrongCredentials);
 		SessionParameters sessionParameters = new SessionParameters(root.toPath(), upManager, new TestFileConfiguration());
 

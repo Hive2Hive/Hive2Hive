@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotEquals;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.List;
-import java.util.Random;
 
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.peers.Number160;
@@ -31,7 +30,6 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
-	private static Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -42,7 +40,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putIntialVersionKeyZeroTest() throws NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(node.getNodeId())
@@ -61,7 +59,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putVersionKeyZeroPreviousVersionKeyZeroTest() throws NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -85,7 +83,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putVersionKeyZeroPreviousVersionKeyNotZeroTest() throws IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -112,7 +110,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putInitialTest() throws IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -136,7 +134,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putNoBasedOnTest() throws IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -165,7 +163,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putVersionConflictTest() throws IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -198,7 +196,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putNewVersionTest() throws IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -227,7 +225,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putNewVersionWithOldTimestampTest() throws InterruptedException, IOException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
@@ -265,7 +263,7 @@ public class H2HStorageMemoryTest extends H2HJUnitTest {
 
 	@Test
 	public void putFailedSecurityTest() throws InterruptedException, NoPeerConnectionException {
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		String locationKey = node.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair();

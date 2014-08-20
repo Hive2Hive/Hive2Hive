@@ -10,7 +10,6 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -60,7 +59,6 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	private static final IFileConfiguration config = FileConfiguration.createDefault();
 	private static List<NetworkManager> network;
 	private static final int networkSize = 3;
-	private Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -78,7 +76,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node);
 		TestExecutionUtil.executeProcess(putStep);
@@ -97,7 +95,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node);
 
@@ -122,7 +120,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
@@ -146,7 +144,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
@@ -164,7 +162,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		String userId = NetworkTestUtil.randomString();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
@@ -194,7 +192,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
 				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
@@ -245,7 +243,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException, IOException,
 			NoPeerConnectionException {
 		String userId = NetworkTestUtil.randomString();
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
 		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
