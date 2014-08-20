@@ -28,7 +28,7 @@ public class NetworkEventsTest extends H2HJUnitTest {
 	@Test
 	public void eventListenerTest() {
 		
-		IH2HNode node = H2HNode.createNode(NetworkConfiguration.create(), FileConfiguration.createDefault());
+		IH2HNode node = H2HNode.createNode(NetworkConfiguration.createInitial(), FileConfiguration.createDefault());
 		
 		TestNetworkEventListener listener = new TestNetworkEventListener();
 		node.addEventListener(listener);

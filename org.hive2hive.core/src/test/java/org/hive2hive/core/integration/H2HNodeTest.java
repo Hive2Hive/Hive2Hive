@@ -140,7 +140,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test
 	public void getPeer() {
 		// a unconnected node does not provide a peer
-		INetworkConfiguration config = NetworkConfiguration.create();
+		INetworkConfiguration config = NetworkConfiguration.createInitial();
 		IFileConfiguration fileConfig = FileConfiguration.createDefault();
 		IH2HNode node = H2HNode.createNode(config, fileConfig);
 		Assert.assertNull(node.getPeer());

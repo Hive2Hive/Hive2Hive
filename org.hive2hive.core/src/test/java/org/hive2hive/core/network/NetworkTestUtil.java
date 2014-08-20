@@ -46,7 +46,7 @@ public class NetworkTestUtil {
 		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
-		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
+		INetworkConfiguration netConfig = NetworkConfiguration.createInitial("Node A");
 		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption());
 		initial.connect();
 		nodes.add(initial);
@@ -145,7 +145,7 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.create("initial"), FileConfiguration.createDefault(),
+		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.createInitial("initial"), FileConfiguration.createDefault(),
 				encryption);
 		initial.connect();
 		initial.getFileManager().configureAutostart(false);
