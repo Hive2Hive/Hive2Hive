@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -86,8 +87,8 @@ public class CleanupVersionsTest extends H2HJUnitTest {
 
 		assertEquals(H2HConstants.MAX_VERSIONS_HISTORY, futureDigest.digest().keyDigest().size());
 		int i = 0;
-		for (Number160 storedVersion : futureDigest.digest().keyDigest().values()) {
-			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion);
+		for (Collection<Number160> storedVersion : futureDigest.digest().keyDigest().values()) {
+			assertEquals(newerVersions.get(i++).getVersionKey(), storedVersion.iterator().next());
 		}
 	}
 

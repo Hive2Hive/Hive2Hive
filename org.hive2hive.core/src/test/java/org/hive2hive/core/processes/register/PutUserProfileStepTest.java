@@ -16,10 +16,11 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.network.H2HStorageMemory;
+import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.processes.context.RegisterProcessContext;
 import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.H2HDummyEncryption;
@@ -92,9 +93,9 @@ public class PutUserProfileStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepRollback() throws InterruptedException, NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
-		putter.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
+		((H2HStorageMemory) putter.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 		NetworkManager proxy = network.get(1); // where the user profile is stored
-		proxy.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
+		((H2HStorageMemory) proxy.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 
 		// create the needed objects
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();

@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -190,7 +191,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					|| rawDigest.get(peerAddress).keyDigest().isEmpty()) {
 				logger.warn("Put verification: Received no digest from peer '{}'. '{}'", peerAddress, parameters.toString());
 			} else {
-				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).keyDigest();
+				NavigableMap<Number640, Collection<Number160>> keyDigest = rawDigest.get(peerAddress).keyDigest();
 
 				if (keyDigest.firstEntry().getKey().versionKey().equals(parameters.getVersionKey())) {
 					logger.trace("Put verification: On peer '{}' entry is newest. '{}'", peerAddress, parameters.toString());
@@ -225,7 +226,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 *         <code>true</code> if the new version key has precedence to the one listened in the digest,
 	 *         otherwise <code>false</code>
 	 */
-	protected boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest, PeerAddress peerAddress) {
+	protected boolean checkIfMyVerisonWins(NavigableMap<Number640, Collection<Number160>> keyDigest, PeerAddress peerAddress) {
 		/* Check if based on entry exists */
 		if (!keyDigest.containsKey(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
 				parameters.getData().getBasedOnKey()))) {
@@ -270,10 +271,10 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 *            a digest containing the parent version (based on)
 	 * @return the parent of the new version
 	 */
-	private Number640 getSuccessor(NavigableMap<Number640, Number160> keyDigest) {
+	private Number640 getSuccessor(NavigableMap<Number640, Collection<Number160>> keyDigest) {
 		Number640 entryBasingOnSameParent = null;
 		for (Number640 key : keyDigest.keySet()) {
-			if (keyDigest.get(key).equals(parameters.getData().getBasedOnKey())) {
+			if (keyDigest.get(key).iterator().next().equals(parameters.getData().getBasedOnKey())) {
 				entryBasingOnSameParent = key;
 				break;
 			}

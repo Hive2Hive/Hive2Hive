@@ -15,10 +15,10 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.network.H2HStorageMemory;
+import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.base.DenyingPutTestStorage;
 import org.hive2hive.core.processes.context.interfaces.IPutUserLocationsContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -58,9 +58,7 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	public void testStepSuccessful() throws InterruptedException, ClassNotFoundException, IOException,
 			NoPeerConnectionException {
 		NetworkManager putter = network.get(0); // where the process runs
-		putter.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
-		proxy.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 
 		// create the needed objects
 		String userId = proxy.getNodeId();
@@ -90,9 +88,13 @@ public class PutLocationStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepRollback() throws InterruptedException, NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0); // where the process runs
-		putter.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
 		NetworkManager proxy = network.get(1); // where the user profile is stored
-		proxy.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
+
+		// disable storage
+		H2HStorageMemory storageLayer = (H2HStorageMemory) putter.getConnection().getPeerDHT().storageLayer();
+		storageLayer.setMode(StorageMemoryMode.DENY_ALL);
+		storageLayer = (H2HStorageMemory) putter.getConnection().getPeerDHT().storageLayer();
+		storageLayer.setMode(StorageMemoryMode.DENY_ALL);
 
 		// create the needed objects
 		String userId = proxy.getNodeId();

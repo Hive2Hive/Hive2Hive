@@ -2,7 +2,9 @@ package org.hive2hive.core.processes.common.base;
 
 import static org.junit.Assert.assertNull;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.Number160;
@@ -73,13 +75,14 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 				Number160.ZERO);
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
-		// manipulate the nodes, remove will not work
-		network.get(0).getConnection().getPeerDHT().peerBean().storage(new FakeGetTestStorage(key));
-		network.get(1).getConnection().getPeerDHT().peerBean().storage(new FakeGetTestStorage(key));
 		// put some data to remove
 		network.get(0).getDataManager()
 				.putUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(testData))
 				.awaitUninterruptibly();
+
+		// manipulate the nodes, remove will not work
+		network.get(0).getConnection().getPeerDHT().peerBean().digestStorage(new FakeGetTestStorage(key));
+		network.get(1).getConnection().getPeerDHT().peerBean().digestStorage(new FakeGetTestStorage(key));
 
 		// initialize the process and the one and only step to test
 		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0)
@@ -108,10 +111,11 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		@Override
 		public DigestInfo digest(Number640 from, Number640 to, int limit, boolean ascending) {
 			DigestInfo digestInfo = new DigestInfo();
-			digestInfo.put(key, Number160.ZERO);
+			Set<Number160> zeroSet = new HashSet<Number160>(1);
+			zeroSet.add(Number160.ZERO);
+			digestInfo.put(key, zeroSet);
 			return digestInfo;
 		}
-
 	}
 
 	/**

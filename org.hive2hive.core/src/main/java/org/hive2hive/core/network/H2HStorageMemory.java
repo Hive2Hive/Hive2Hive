@@ -1,6 +1,7 @@
 package org.hive2hive.core.network;
 
 import java.security.PublicKey;
+import java.util.Collection;
 import java.util.NavigableMap;
 
 import net.tomp2p.dht.StorageLayer;
@@ -36,37 +37,67 @@ public class H2HStorageMemory extends StorageLayer {
 		VERSION_CONFLICT_OLD_TIMESTAMP,
 	};
 
+	public enum StorageMemoryMode {
+		/** the normal behavior, where each 'put' is checked for version conflicts */
+		ENABLE_REMOTE_VERIFICATION,
+
+		/** The extra verification is disabled, {@link StorageLayer} implementation is used instead */
+		DISABLE_VERIFICATION,
+
+		/** Every request to store will fail and returns a {@link PutStatusH2H#FAILED} */
+		DENY_ALL
+	}
+
+	private StorageMemoryMode mode;
+
 	public H2HStorageMemory() {
 		super(new StorageMemory());
+		this.mode = StorageMemoryMode.ENABLE_REMOTE_VERIFICATION;
+	}
+
+	public void setMode(StorageMemoryMode mode) {
+		assert mode != null;
+		this.mode = mode;
 	}
 
 	@Override
 	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
-		if (H2HConstants.REMOTE_VERIFICATION_ENABLED) {
-			logger.trace("Start put verification. Location key = '{}', Content key = '{}', Version key = '{}'.",
-					key.locationKey(), key.contentKey(), key.versionKey());
+		switch (mode) {
+			case ENABLE_REMOTE_VERIFICATION: {
+				logger.trace("Start put verification. Location key = '{}', Content key = '{}', Version key = '{}'.",
+						key.locationKey(), key.contentKey(), key.versionKey());
 
-			if (isProtectionKeyChange(newData)) {
-				logger.trace("Only chaning the protection key, no need to verify the versions.");
+				if (isProtectionKeyChange(newData)) {
+					logger.trace("Only chaning the protection key, no need to verify the versions.");
+					return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+				}
+
+				Enum<?> status = validateVersion(key, newData);
+				if (status == PutStatusH2H.OK) {
+					status = super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+
+					// after adding the content to the memory, old versions should be cleaned up. How many old
+					// versions we keep can be parameterized in the constants.
+					cleanupVersions(key, publicKey);
+				}
+
+				logger.trace(
+						"Put verification finished with status '{}'. Location key = '{}', Content key = '{}', Version key = '{}'.",
+						status, key.locationKey(), key.contentKey(), key.versionKey());
+				return status;
+			}
+			case DISABLE_VERIFICATION: {
+				logger.trace("Disabled the put verification strategy on the remote peer.");
 				return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
 			}
-
-			Enum<?> status = validateVersion(key, newData);
-			if (status == PutStatusH2H.OK) {
-				status = super.put(key, newData, publicKey, putIfAbsent, domainProtection);
-
-				// after adding the content to the memory, old versions should be cleaned up. How many old
-				// versions we keep can be parameterized in the constants.
-				cleanupVersions(key, publicKey);
+			case DENY_ALL: {
+				logger.warn("Memory mode is denying the put request.");
+				return PutStatusH2H.FAILED;
 			}
-
-			logger.trace(
-					"Put verification finished with status '{}'. Location key = '{}', Content key = '{}', Version key = '{}'.",
-					status, key.locationKey(), key.contentKey(), key.versionKey());
-			return status;
-		} else {
-			logger.trace("Disabled the put verification strategy on the remote peer.");
-			return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+			default: {
+				logger.error("Invald mode {}. Returning a failure", mode);
+				return PutStatusH2H.FAILED;
+			}
 		}
 	}
 
@@ -96,7 +127,7 @@ public class H2HStorageMemory extends StorageLayer {
 	 */
 	private PutStatusH2H validateVersion(Number640 key, Data newData) {
 		/** 0. get all versions for this locationKey, domainKey and contentKey combination **/
-		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
+		NavigableMap<Number640, Collection<Number160>> history = getHistoryOnStorage(key);
 
 		/** 1. if version key is zero **/
 		if (key.versionKey().equals(Number160.ZERO)) {
@@ -113,7 +144,7 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 
 		/** 1. if version is null or zero and no history yet, it is the first entry here **/
-		if (newData.basedOn().equals(Number160.ZERO)) {
+		if (newData.basedOnSet().isEmpty() || newData.basedOnSet().iterator().next().equals(Number160.ZERO)) {
 			if (history.isEmpty()) {
 				logger.trace("First version of a content is added.");
 				return PutStatusH2H.OK;
@@ -127,13 +158,13 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 
 		/** 2. check if previous exists **/
-		if (!history.lastKey().versionKey().equals(newData.basedOn())) {
+		if (!history.lastKey().versionKey().equals(newData.basedOnSet().iterator().next())) {
 			logger.warn("New data is not based on previous version. Previous version key = '{}'.", key.versionKey());
 			return PutStatusH2H.VERSION_CONFLICT;
 		}
 
 		/** 3. Check if previous version is latest one **/
-		if (newData.basedOn().timestamp() < key.versionKey().timestamp()) {
+		if (newData.basedOnSet().iterator().next().timestamp() < key.versionKey().timestamp()) {
 			// previous version is the latest one (continue).
 			logger.trace("New content is based on latest version.");
 			return PutStatusH2H.OK;
@@ -146,7 +177,7 @@ public class H2HStorageMemory extends StorageLayer {
 
 	// TODO consider fresh version before version cleanup
 	private void cleanupVersions(Number640 key, PublicKey publicKey) {
-		NavigableMap<Number640, Number160> history = getHistoryOnStorage(key);
+		NavigableMap<Number640, Collection<Number160>> history = getHistoryOnStorage(key);
 
 		// long now = System.currentTimeMillis();
 		while (history.size() > H2HConstants.MAX_VERSIONS_HISTORY) {
@@ -163,9 +194,9 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 	}
 
-	private NavigableMap<Number640, Number160> getHistoryOnStorage(Number640 key) {
+	private NavigableMap<Number640, Collection<Number160>> getHistoryOnStorage(Number640 key) {
 		return super.digest(new Number640(key.locationKey(), key.domainKey(), key.contentKey(), Number160.ZERO),
 				new Number640(key.locationKey(), key.domainKey(), key.contentKey(), Number160.MAX_VALUE), -1, true)
-				.getDigests();
+				.digests();
 	}
 }

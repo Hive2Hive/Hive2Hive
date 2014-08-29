@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.NavigableMap;
 
 import javax.crypto.SecretKey;
@@ -56,7 +57,7 @@ public class UserProfileHolder {
 				H2HConstants.USER_PROFILE);
 
 		// load the current digest list from network
-		NavigableMap<Number640, Number160> digest = dataManager.getDigestLatest(parameters);
+		NavigableMap<Number640, Collection<Number160>> digest = dataManager.getDigestLatest(parameters);
 		// compare the current user profile's version key with the cached one
 		if (cachedUserProfile != null && digest != null && digest.firstEntry() != null
 				&& digest.firstEntry().getKey().versionKey().equals(cachedUserProfile.getVersionKey())) {

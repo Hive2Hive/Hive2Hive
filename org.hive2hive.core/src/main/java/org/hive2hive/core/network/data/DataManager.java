@@ -2,6 +2,7 @@ package org.hive2hive.core.network.data;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.Collection;
 import java.util.NavigableMap;
 
 import net.tomp2p.dht.FutureDigest;
@@ -9,6 +10,7 @@ import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -126,7 +128,7 @@ public class DataManager implements IDataManager {
 						.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 			} else {
 				return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-						.domainKey(parameters.getVersionKey()).start();
+						.versionKey(parameters.getVersionKey()).start();
 			}
 		} catch (IOException e) {
 			logger.error("Put failed. {}.", parameters.toString(), e);
@@ -242,7 +244,8 @@ public class DataManager implements IDataManager {
 		return getPeer().remove(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.keyPair(parameters.getProtectionKeys()).start();
+				.requestP2PConfiguration(new RequestP2PConfiguration(3, 0, 0)).keyPair(parameters.getProtectionKeys())
+				.start();
 	}
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
@@ -251,7 +254,7 @@ public class DataManager implements IDataManager {
 				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 	}
 
-	public NavigableMap<Number640, Number160> getDigestLatest(IParameters parameters) {
+	public NavigableMap<Number640, Collection<Number160>> getDigestLatest(IParameters parameters) {
 		logger.debug("Get digest (latest). {}", parameters.toString());
 		FutureDigest futureDigest = getDigestLatestUnblocked(parameters);
 		FutureDigestListener listener = new FutureDigestListener(parameters);

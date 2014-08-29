@@ -44,7 +44,6 @@ public class Connection {
 	private boolean isConnected;
 	private PeerDHT peerDHT;
 	private DefaultEventExecutorGroup eventExecutorGroup;
-	private IndirectReplication replication;
 
 	public Connection(String nodeID, NetworkManager networkManager, IH2HEncryption encryption) {
 		this.nodeID = nodeID;
@@ -127,12 +126,6 @@ public class Connection {
 	public boolean disconnect() {
 		boolean isDisconnected = true;
 		if (isConnected) {
-			// stop the replication at this peer
-			if (replication != null) {
-				replication.shutdown();
-				logger.debug("Replication stopped");
-			}
-
 			// TODO check whether this always shuts down the whole network or if the peer just leaves
 			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			isConnected = !isDisconnected;
@@ -163,7 +156,7 @@ public class Connection {
 		return peerDHT;
 	}
 
-	private PeerBuilder preparePeerMaker() {
+	private PeerBuilder preparePeerBuilder() {
 		int port = searchFreePort();
 
 		// configure the thread handling internally, callback can be blocking
@@ -181,9 +174,17 @@ public class Connection {
 				.channelServerConfiguration(serverConfig);
 	}
 
+	private void startReplication() {
+		// start the indirect replication
+		new IndirectReplication(peerDHT).replicationFactor(H2HConstants.REPLICATION_FACTOR).start();
+	}
+
 	private boolean createPeer() {
 		try {
-			peerDHT = new PeerBuilderDHT(preparePeerMaker().start()).storageLayer(new H2HStorageMemory()).start();
+			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder().start()).storageLayer(storageMemory).start();
+			storageMemory.start(peerDHT.peer().connectionBean().timer(), storageMemory.storageCheckIntervalMillis());
+			peerDHT.peerBean().digestStorage(storageMemory);
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
@@ -191,8 +192,7 @@ public class Connection {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
-		// start the indirect replication
-		replication = new IndirectReplication(peerDHT).start();
+		startReplication();
 
 		return true;
 	}
@@ -209,8 +209,10 @@ public class Connection {
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			peerDHT = new PeerBuilderDHT(preparePeerMaker().peerMap(peerMap).start()).storageLayer(new H2HStorageMemory())
-					.start();
+			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder().peerMap(peerMap).start()).storageLayer(storageMemory).start();
+			storageMemory.start(peerDHT.peer().connectionBean().timer(), storageMemory.storageCheckIntervalMillis());
+			peerDHT.peerBean().digestStorage(storageMemory);
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			isConnected = false;
@@ -219,8 +221,7 @@ public class Connection {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
-		// start the indirect replication
-		replication = new IndirectReplication(peerDHT).start();
+		startReplication();
 
 		isConnected = true;
 		return true;
@@ -241,8 +242,11 @@ public class Connection {
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			peerDHT = new PeerBuilderDHT(preparePeerMaker().masterPeer(masterPeer).peerMap(peerMap).start()).storageLayer(
-					new H2HStorageMemory()).start();
+			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder().masterPeer(masterPeer).peerMap(peerMap).start()).storageLayer(
+					storageMemory).start();
+			storageMemory.start(peerDHT.peer().connectionBean().timer(), storageMemory.storageCheckIntervalMillis());
+			peerDHT.peerBean().digestStorage(storageMemory);
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			return false;
@@ -250,9 +254,7 @@ public class Connection {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
-
-		// start the indirect replication
-		replication = new IndirectReplication(peerDHT).start();
+		startReplication();
 
 		// bootstrap to master peer
 		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();

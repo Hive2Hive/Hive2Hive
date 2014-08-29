@@ -1,5 +1,6 @@
 package org.hive2hive.core.network.data.futures;
 
+import java.util.Collection;
 import java.util.NavigableMap;
 import java.util.concurrent.CountDownLatch;
 
@@ -26,7 +27,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	private final CountDownLatch latch;
 
 	// the result when it came back
-	private NavigableMap<Number640, Number160> result = null;
+	private NavigableMap<Number640, Collection<Number160>> result = null;
 
 	public FutureDigestListener(IParameters parameters) {
 		this.parameters = parameters;
@@ -38,7 +39,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	 * 
 	 * @return returns the content from the DHT
 	 */
-	public NavigableMap<Number640, Number160> awaitAndGet() {
+	public NavigableMap<Number640, Collection<Number160>> awaitAndGet() {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {

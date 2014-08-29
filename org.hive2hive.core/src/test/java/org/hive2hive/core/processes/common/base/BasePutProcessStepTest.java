@@ -13,6 +13,7 @@ import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
+import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.IDataManager;
@@ -46,9 +47,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void testPutProcessSuccess() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager putter = network.get(0);
-		putter.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 		NetworkManager proxy = network.get(1);
-		proxy.getConnection().getPeerDHT().peerBean().storage(new H2HStorageMemory());
 
 		String locationKey = proxy.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -68,9 +67,9 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void testPutProcessFailure() throws NoPeerConnectionException, InvalidProcessStateException {
 		NetworkManager putter = network.get(0);
-		putter.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
+		((H2HStorageMemory) putter.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 		NetworkManager proxy = network.get(1);
-		proxy.getConnection().getPeerDHT().peerBean().storage(new DenyingPutTestStorage());
+		((H2HStorageMemory) proxy.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 
 		String locationKey = proxy.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();

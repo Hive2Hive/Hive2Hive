@@ -13,6 +13,7 @@ import java.util.Random;
 
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -161,7 +162,7 @@ public class DataManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRemovalOneContentKey() throws NoPeerConnectionException {
+	public void testRemovalOneContentKey() throws NoPeerConnectionException, InterruptedException {
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 		String locationKey = nodeB.getNodeId();
@@ -179,7 +180,8 @@ public class DataManagerTest extends H2HJUnitTest {
 		assertNotNull(futureGet.data());
 
 		// delete it
-		nodeA.getDataManager().removeUnblocked(parameters).awaitUninterruptibly();
+		FutureRemove futureRemove = nodeA.getDataManager().removeUnblocked(parameters).awaitUninterruptibly();
+		futureRemove.awaitListeners();
 
 		// check that it is gone
 		futureGet = nodeB.getDataManager().getUnblocked(parameters);
@@ -232,6 +234,7 @@ public class DataManagerTest extends H2HJUnitTest {
 
 		// remove 2nd one and check that 1st and 3rd are still there
 		nodeA.getDataManager().removeUnblocked(parameters2).awaitUninterruptibly();
+
 		futureGet = nodeB.getDataManager().getUnblocked(parameters1);
 		futureGet.awaitUninterruptibly();
 		assertEquals(testString1, ((H2HTestData) futureGet.data().object()).getTestString());

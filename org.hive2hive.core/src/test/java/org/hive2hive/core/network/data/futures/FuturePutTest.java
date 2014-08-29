@@ -6,22 +6,24 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
-import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.H2HStorageMemory;
+import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager;
@@ -115,8 +117,8 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(1);
 		NetworkManager nodeC = network.get(2);
 
-		nodeB.getConnection().getPeerDHT().peerBean().storage(new TestPutFailureStorage());
-		nodeC.getConnection().getPeerDHT().peerBean().storage(new TestPutFailureStorage());
+		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -135,7 +137,7 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
-		nodeB.getConnection().getPeerDHT().peerBean().storage(new TestPutFailureStorage());
+		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -227,42 +229,54 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		TestFuturePutListener futurePutListener = new TestFuturePutListener(new Parameters().setLocationKey(locationKey)
 				.setContentKey(contentKey).setVersionKey(data2B.getVersionKey()).setData(data2B), null);
-		NavigableMap<Number640, Number160> dataMap = new ConcurrentSkipListMap<Number640, Number160>();
+		NavigableMap<Number640, Collection<Number160>> dataMap = new ConcurrentSkipListMap<Number640, Collection<Number160>>();
 
 		// empty map
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 
 		// no based on entry
-		dataMap.put(dataOtherKey, dataOther.getBasedOnKey());
+		Set<Number160> set = new HashSet<Number160>(1);
+		set.add(dataOther.getBasedOnKey());
+		dataMap.put(dataOtherKey, set);
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 
 		// contains only parent entry
 		dataMap.clear();
-		dataMap.put(data1Key, data1.getBasedOnKey());
+		Set<Number160> setData1 = new HashSet<Number160>(1);
+		setData1.add(data1.getBasedOnKey());
+		dataMap.put(data1Key, setData1);
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 
 		// first entry is parent, second is corrupt
 		dataMap.clear();
-		dataMap.put(data1Key, data1.getBasedOnKey());
-		dataMap.put(dataOtherKey, dataOther.getBasedOnKey());
+		Set<Number160> set2 = new HashSet<Number160>(1);
+		set2.add(dataOther.getBasedOnKey());
+		dataMap.put(data1Key, setData1);
+		dataMap.put(dataOtherKey, set2);
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 
 		// first entry is parent, second entry is older
 		dataMap.clear();
-		dataMap.put(data1Key, data1.getBasedOnKey());
-		dataMap.put(data2AOlderKey, data2AOlder.getBasedOnKey());
+		set2 = new HashSet<Number160>(1);
+		set2.add(data2AOlder.getBasedOnKey());
+		dataMap.put(data1Key, setData1);
+		dataMap.put(data2AOlderKey, set2);
 		assertFalse(futurePutListener.checkIfMyVerisonWins(dataMap));
 
 		// first entry is parent, second entry is newer
 		dataMap.clear();
-		dataMap.put(data1Key, data1.getBasedOnKey());
-		dataMap.put(data2ANewerKey, data2ANewer.getBasedOnKey());
+		set2 = new HashSet<Number160>(1);
+		set2.add(data2ANewer.getBasedOnKey());
+		dataMap.put(data1Key, setData1);
+		dataMap.put(data2ANewerKey, set2);
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 
 		// first entry is parent, second entry is same
 		dataMap.clear();
-		dataMap.put(data1Key, data1.getBasedOnKey());
-		dataMap.put(data2BKey, data2B.getBasedOnKey());
+		set2 = new HashSet<Number160>(1);
+		set2.add(data2B.getBasedOnKey());
+		dataMap.put(data1Key, setData1);
+		dataMap.put(data2BKey, set2);
 		assertTrue(futurePutListener.checkIfMyVerisonWins(dataMap));
 	}
 
@@ -271,19 +285,12 @@ public class FuturePutTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class TestPutFailureStorage extends H2HStorageMemory {
-		@Override
-		public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
-			return H2HStorageMemory.PutStatusH2H.FAILED;
-		}
-	}
-
 	private class TestFuturePutListener extends FuturePutListener {
 		public TestFuturePutListener(IParameters parameters, DataManager dataManager) {
 			super(parameters, dataManager);
 		}
 
-		public boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest) {
+		public boolean checkIfMyVerisonWins(NavigableMap<Number640, Collection<Number160>> keyDigest) {
 			return checkIfMyVerisonWins(keyDigest, null);
 		}
 	};

@@ -44,8 +44,8 @@ public interface H2HConstants {
 	public static final int MAX_MESSAGE_SENDING = 5;
 	public static final int MAX_MESSAGE_SENDING_DIRECT = 3;
 
-	// enable/disable the put verification on the remote peer
-	public static final boolean REMOTE_VERIFICATION_ENABLED = true;
+	// replicaton factor (how many nodes store the same data object)
+	public static final int REPLICATION_FACTOR = 5;
 
 	// maximal numbers of versions kept in the DHT (see versionKey)
 	public static final int MAX_VERSIONS_HISTORY = 5;
