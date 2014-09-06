@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: processframework
+Bundle-SymbolicName: org.hive2hive.processframework;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: .,
+ src/main/java/
+Require-Bundle: org.hive2hive.osgi;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: org.hive2hive.processframework,
+ org.hive2hive.processframework.abstracts,
+ org.hive2hive.processframework.concretes,
+ org.hive2hive.processframework.decorators,
+ org.hive2hive.processframework.exceptions,
+ org.hive2hive.processframework.interfaces,
+ org.hive2hive.processframework.util
