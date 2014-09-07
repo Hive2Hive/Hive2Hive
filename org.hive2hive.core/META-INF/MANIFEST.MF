@@ -5,11 +5,23 @@ Bundle-SymbolicName: org.hive2hive.core;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .,
  src/main/java/,
- src/main/resources/
+ src/main/resources/,
+ lib/tomp2p-core-5.0-Alpha4.jar
 Require-Bundle: org.hive2hive.osgi;bundle-version="1.0.0",
  org.hive2hive.processframework;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: org.hive2hive.core,
+Export-Package: net.tomp2p.connection,
+ net.tomp2p.futures,
+ net.tomp2p.message,
+ net.tomp2p.natpmp,
+ net.tomp2p.p2p,
+ net.tomp2p.p2p.builder,
+ net.tomp2p.peers,
+ net.tomp2p.rpc,
+ net.tomp2p.storage,
+ net.tomp2p.upnp,
+ net.tomp2p.utils,
+ org.hive2hive.core,
  org.hive2hive.core.api,
  org.hive2hive.core.api.configs,
  org.hive2hive.core.api.interfaces,

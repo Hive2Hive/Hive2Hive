@@ -6,6 +6,5 @@
 .DS_Store
 
 # Package Files #
-*.jar
 *.war
 *.ear
