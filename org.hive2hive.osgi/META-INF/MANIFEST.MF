@@ -11,10 +11,10 @@ Bundle-ClassPath: .,
  lib/logback-classic-1.1.1.jar,
  lib/logback-core-1.1.1.jar,
  lib/netty-buffer-4.0.21.Final.jar,
+ lib/netty-common-4.0.21.Final.jar,
  lib/netty-transport-4.0.21.Final.jar,
  lib/slf4j-api-1.7.6.jar,
- lib/tomp2p-core-5.0-Alpha4.jar,
- lib/netty-common-4.0.21.Final.jar
+ lib/tomp2p-core-5.0-Alpha4.jar
 Export-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
  ch.qos.logback.classic.db,

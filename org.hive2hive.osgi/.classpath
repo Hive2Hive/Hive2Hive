@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/netty-common-4.0.21.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk16-1.46.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/fst-1.58.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logback-classic-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logback-core-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/netty-buffer-4.0.21.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-common-4.0.21.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/netty-transport-4.0.21.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomp2p-core-5.0-Alpha4.jar"/>
