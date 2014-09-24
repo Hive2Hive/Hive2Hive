@@ -1,10 +1,13 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.implementations.FileMoveEvent;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FolderIndex;
@@ -86,6 +89,12 @@ public class MoveUserProfileTask extends UserProfileTask {
 
 			profileManager.readyToPut(userProfile, randomPID);
 
+			// event
+			Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParent);
+			Path src = Paths.get(srcParentPath.toString(), sourceFileName);
+			Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
+			Path dst = Paths.get(dstParentPath.toString(), destFileName);
+			networkManager.getEventBus().publish(new FileMoveEvent(src, dst));
 			// move the file on disk
 			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (Hive2HiveException | IOException e) {

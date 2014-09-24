@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.download.BaseDownloadTask;
@@ -33,8 +34,8 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private volatile Set<Locations> locations;
 
 	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey, String ownUserName,
-			PeerAddress ownAddress, Set<String> users) {
-		super(metaChunks, destination);
+			PeerAddress ownAddress, Set<String> users, EventBus eventBus) {
+		super(metaChunks, destination, eventBus);
 		this.fileKey = fileKey;
 		this.ownUserName = ownUserName;
 		this.ownAddress = ownAddress;

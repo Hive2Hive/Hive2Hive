@@ -8,6 +8,7 @@ import java.security.PublicKey;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.implementations.FileDeleteEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -106,6 +107,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 */
 	private void removeFileOnDisk(Path root, Index toDelete) {
 		Path path = FileUtil.getPath(root, toDelete);
+		networkManager.getEventBus().publish(new FileDeleteEvent(path));
 		if (path == null) {
 			logger.error("Could not find the file to delete.");
 		}

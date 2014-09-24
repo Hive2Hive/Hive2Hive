@@ -9,6 +9,7 @@ import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.slf4j.Logger;
@@ -272,6 +273,13 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	protected static String createMessageID() {
 		return new BigInteger(56, new SecureRandom()).toString(32);
+	}
+	
+	protected EventBus getEventBus() {
+		if(networkManager != null) {
+			return networkManager.getEventBus();
+		}
+		return null;
 	}
 
 }

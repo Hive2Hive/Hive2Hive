@@ -10,6 +10,7 @@ import java.util.UUID;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.implementations.FileDeleteEvent;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserProfile;
@@ -55,7 +56,10 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 			if (parentNode == null) {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent of.");
 			} else {
-				boolean deleted = new File(FileUtil.getPath(root, parentNode).toFile(), fileName).delete();
+				File fileToDelete =  new File(FileUtil.getPath(root, parentNode).toFile(), fileName);
+				getEventBus().publish(new FileDeleteEvent(fileToDelete.toPath()));
+				boolean deleted = fileToDelete.delete();
+				
 				if (!deleted) {
 					throw new IOException("Could not delete the file.");
 				}

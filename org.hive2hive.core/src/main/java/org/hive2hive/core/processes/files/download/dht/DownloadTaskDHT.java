@@ -4,6 +4,7 @@ import java.io.File;
 import java.security.PrivateKey;
 import java.util.List;
 
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.download.BaseDownloadTask;
 
@@ -13,8 +14,8 @@ public class DownloadTaskDHT extends BaseDownloadTask {
 
 	private final PrivateKey decryptionKey;
 
-	public DownloadTaskDHT(List<MetaChunk> metaChunks, File destination, PrivateKey decryptionKey) {
-		super(metaChunks, destination);
+	public DownloadTaskDHT(List<MetaChunk> metaChunks, File destination, PrivateKey decryptionKey, EventBus eventBus) {
+		super(metaChunks, destination, eventBus);
 		this.decryptionKey = decryptionKey;
 	}
 
