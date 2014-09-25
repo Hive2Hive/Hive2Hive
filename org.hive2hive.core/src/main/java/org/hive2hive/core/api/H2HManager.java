@@ -2,6 +2,7 @@ package org.hive2hive.core.api;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IManager;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -19,11 +20,13 @@ public abstract class H2HManager implements IManager {
 	private static final Logger logger = LoggerFactory.getLogger(H2HManager.class);
 
 	protected final NetworkManager networkManager;
+	protected final EventBus eventBus;
 
 	private boolean isAutostart = H2HConstants.DEFAULT_AUTOSTART_PROCESSES;
 
-	protected H2HManager(NetworkManager networkManager) {
+	protected H2HManager(NetworkManager networkManager, EventBus eventBus) {
 		this.networkManager = networkManager;
+		this.eventBus = eventBus;
 	}
 
 	protected void submitProcess(IProcessComponent processComponent) {

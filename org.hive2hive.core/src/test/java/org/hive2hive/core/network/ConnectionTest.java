@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -25,7 +26,7 @@ public class ConnectionTest extends H2HJUnitTest {
 	public void testConnectAsInitial() {
 		INetworkConfiguration netConfig = NetworkConfiguration.create("initial node");
 
-		NetworkManager initialNode = new NetworkManager(netConfig, new H2HDummyEncryption());
+		NetworkManager initialNode = new NetworkManager(netConfig, new H2HDummyEncryption(), new EventBus());
 		assertTrue(initialNode.connect());
 		initialNode.disconnect();
 	}
@@ -35,8 +36,8 @@ public class ConnectionTest extends H2HJUnitTest {
 		INetworkConfiguration netConfigA = NetworkConfiguration.create("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());
 
-		NetworkManager nodeA = new NetworkManager(netConfigA, new H2HDummyEncryption());
-		NetworkManager nodeB = new NetworkManager(netConfigB, new H2HDummyEncryption());
+		NetworkManager nodeA = new NetworkManager(netConfigA, new H2HDummyEncryption(), new EventBus());
+		NetworkManager nodeB = new NetworkManager(netConfigB, new H2HDummyEncryption(), new EventBus());
 		assertTrue(nodeA.connect());
 		assertTrue(nodeB.connect());
 		nodeA.disconnect();

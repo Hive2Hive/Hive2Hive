@@ -13,6 +13,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.events.EventBus;
+import org.hive2hive.core.events.implementations.FileDownloadEvent;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -34,13 +36,16 @@ public abstract class BaseDownloadTask implements Serializable {
 	private transient Set<IDownloadListener> listeners;
 	private final AtomicBoolean aborted;
 	private String reason;
+	
+	protected EventBus eventBus;
 
-	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination) {
+	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination, EventBus eventBus) {
 		this.metaChunks = metaChunks;
 		this.destination = destination;
 		this.finishedLatch = new CountDownLatch(1);
 		this.listeners = new HashSet<IDownloadListener>();
 		this.aborted = new AtomicBoolean(false);
+		this.eventBus = eventBus;
 
 		// init array as null
 		this.downloadedParts = new File[metaChunks.size()];
@@ -141,6 +146,7 @@ public abstract class BaseDownloadTask implements Serializable {
 			try {
 				// reassembly
 				List<File> fileParts = Arrays.asList(downloadedParts);
+				eventBus.publish(new FileDownloadEvent(destination.toPath()));
 				FileChunkUtil.reassembly(fileParts, destination);
 				logger.debug("File {} has successfully been reassembled", getDestinationName());
 

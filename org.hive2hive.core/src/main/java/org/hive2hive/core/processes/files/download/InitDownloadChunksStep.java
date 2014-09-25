@@ -8,6 +8,7 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
@@ -34,10 +35,14 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 	private File destination;
 
-	public InitDownloadChunksStep(DownloadFileContext context, H2HSession session, PeerAddress ownPeerAddress) {
+	private EventBus eventBus;
+
+	public InitDownloadChunksStep(DownloadFileContext context, H2HSession session, PeerAddress ownPeerAddress,
+			EventBus eventBus) {
 		this.context = context;
 		this.session = session;
 		this.ownPeerAddress = ownPeerAddress;
+		this.eventBus = eventBus;
 	}
 
 	@Override
@@ -76,7 +81,7 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 		try {
 			// start the download
-			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFile.getChunkKey().getPrivate());
+			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFile.getChunkKey().getPrivate(), eventBus);
 			session.getDownloadManager().submit(task);
 			task.join();
 		} catch (InterruptedException e) {
@@ -90,7 +95,7 @@ public class InitDownloadChunksStep extends ProcessStep {
 		try {
 			Set<String> users = context.consumeIndex().getCalculatedUserList();
 			DownloadTaskDirect task = new DownloadTaskDirect(metaFile.getMetaChunks(), destination, metaFile.getId(),
-					session.getUserId(), ownPeerAddress, users);
+					session.getUserId(), ownPeerAddress, users, eventBus);
 			session.getDownloadManager().submit(task);
 			task.join();
 		} catch (InterruptedException e) {

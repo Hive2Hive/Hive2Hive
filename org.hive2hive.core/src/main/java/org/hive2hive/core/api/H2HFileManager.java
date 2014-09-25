@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileManager;
+import org.hive2hive.core.events.EventBus;
+import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -31,9 +33,9 @@ import org.hive2hive.processframework.interfaces.IResultProcessComponent;
  * 
  */
 public class H2HFileManager extends H2HManager implements IFileManager {
-
-	public H2HFileManager(NetworkManager networkManager) {
-		super(networkManager);
+	
+	public H2HFileManager(NetworkManager networkManager, EventBus eventBus) {
+		super(networkManager, eventBus);
 	}
 
 	@Override
@@ -201,5 +203,16 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
+	}
+
+	@Override
+	public void subscribeFileEvents(IFileEventListener listener) {
+		if(listener == null) {
+			throw new IllegalArgumentException("The argument listener must not be null."); 
+		}
+		if(eventBus == null) {
+			throw new IllegalStateException("No EventBus instance provided.");
+		}
+		eventBus.subscribe(listener);
 	}
 }

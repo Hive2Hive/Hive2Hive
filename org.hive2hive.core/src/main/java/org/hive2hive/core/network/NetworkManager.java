@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
 import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
 import org.hive2hive.core.events.implementations.ConnectionEvent;
@@ -28,8 +29,9 @@ public class NetworkManager implements INetworkEventGenerator {
 	private H2HSession session;
 
 	private List<INetworkEventListener> eventListeners;
+	private final EventBus eventBus;
 
-	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption) {
+	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption, EventBus eventBus) {
 		this.networkConfiguration = networkConfiguration;
 
 		connection = new Connection(networkConfiguration.getNodeID(), this, encryption);
@@ -37,6 +39,7 @@ public class NetworkManager implements INetworkEventGenerator {
 		messageManager = new MessageManager(this, encryption);
 
 		eventListeners = new ArrayList<INetworkEventListener>();
+		this.eventBus = eventBus;
 	}
 
 	/**
@@ -173,5 +176,10 @@ public class NetworkManager implements INetworkEventGenerator {
 				iterator.next().onDisconnectionFailure(new ConnectionEvent(networkConfiguration));
 			}
 		}
+	}
+	
+	
+	public EventBus getEventBus() {
+		return eventBus;
 	}
 }

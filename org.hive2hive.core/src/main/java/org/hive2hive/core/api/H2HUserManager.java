@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
 import org.hive2hive.core.events.framework.interfaces.user.ILoginEvent;
 import org.hive2hive.core.events.framework.interfaces.user.ILogoutEvent;
@@ -43,8 +44,9 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	private List<IUserEventListener> eventListeners;
 
 	// TODO remove IFileConfiguration
-	public H2HUserManager(NetworkManager networkManager, IFileConfiguration fileConfiguration) {
-		super(networkManager);
+	public H2HUserManager(NetworkManager networkManager, IFileConfiguration fileConfiguration,
+			EventBus eventBus) {
+		super(networkManager, eventBus);
 		this.fileConfiguration = fileConfiguration;
 		eventListeners = new ArrayList<IUserEventListener>();
 	}

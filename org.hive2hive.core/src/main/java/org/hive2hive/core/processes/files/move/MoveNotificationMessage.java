@@ -1,12 +1,15 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.implementations.FileMoveEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
@@ -57,6 +60,14 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 
 			Index oldParent = userProfile.getFileById(oldParentKey);
 			Index newParent = userProfile.getFileById(newParentKey);
+			
+			// event
+			Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParent);
+			Path src = Paths.get(srcParentPath.toString(), sourceFileName);
+			Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
+			Path dst = Paths.get(dstParentPath.toString(), destFileName);
+			getEventBus().publish(new FileMoveEvent(src, dst));
+			
 			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (NoSessionException | GetFailedException | IOException e) {
 			logger.error("Could not process the notification message.", e);

@@ -56,7 +56,7 @@ public class FindInUserProfileStep extends ProcessStep {
 				IDataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaFileStep(context, dataManager));
 				PeerAddress ownPeerAddress = networkManager.getConnection().getPeer().getPeerAddress();
-				getParent().add(new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress));
+				getParent().add(new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress, networkManager.getEventBus()));
 			} catch (NoPeerConnectionException | NoSessionException e) {
 				throw new ProcessExecutionException(e);
 			}

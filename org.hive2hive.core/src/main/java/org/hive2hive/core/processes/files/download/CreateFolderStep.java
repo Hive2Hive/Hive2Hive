@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 
+import org.hive2hive.core.events.implementations.FileDownloadEvent;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
@@ -36,6 +37,7 @@ public class CreateFolderStep extends ProcessStep {
 		try {
 			// create the folder on disk
 			File folder = FileUtil.getPath(networkManager.getSession().getRoot(), file).toFile();
+			networkManager.getEventBus().publish(new FileDownloadEvent(folder.toPath()));
 			if (folder.exists()) {
 				throw new FileAlreadyExistsException("Folder already exists");
 			} else if (!folder.mkdir()) {

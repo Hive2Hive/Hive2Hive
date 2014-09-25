@@ -7,6 +7,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.H2HDefaultEncryption;
@@ -28,13 +29,14 @@ public class H2HNode implements IH2HNode {
 
 	private IUserManager userManager;
 	private IFileManager fileManager;
+	private EventBus eventBus;
 
 	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
 			IH2HEncryption encryption) {
 		this.networkConfiguration = networkConfiguration;
 		this.fileConfiguration = fileConfiguration;
 
-		networkManager = new NetworkManager(networkConfiguration, encryption);
+		networkManager = new NetworkManager(networkConfiguration, encryption, getEventBus());
 	}
 
 	/**
@@ -83,7 +85,7 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IUserManager getUserManager() {
 		if (userManager == null) {
-			userManager = new H2HUserManager(networkManager, fileConfiguration);
+			userManager = new H2HUserManager(networkManager, fileConfiguration, getEventBus());
 		}
 		return userManager;
 	}
@@ -91,9 +93,16 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IFileManager getFileManager() {
 		if (fileManager == null) {
-			fileManager = new H2HFileManager(networkManager);
+			fileManager = new H2HFileManager(networkManager, getEventBus());
 		}
 		return fileManager;
+	}
+	
+	private EventBus getEventBus() {
+		if(eventBus == null) {
+			eventBus = new EventBus();
+		}
+		return eventBus;
 	}
 
 	@Override

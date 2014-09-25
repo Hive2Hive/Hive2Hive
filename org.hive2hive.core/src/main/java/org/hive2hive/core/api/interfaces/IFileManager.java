@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
+import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -124,5 +125,14 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 */
 	IResultProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
+	
+	
+
+	/**
+	 * Subscribe all file event handlers of the given listener instance.
+	 * <strong>Note:</strong> The listener needs to annotate the handlers with the @Handler annotation.
+	 * @param listener implementing the handler methods
+	 */
+	void subscribeFileEvents(IFileEventListener listener);
 
 }
