@@ -17,6 +17,7 @@ import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -47,7 +48,7 @@ public class NetworkTestUtil {
 
 		// create the first node (initial)
 		INetworkConfiguration netConfig = NetworkConfiguration.create("Node A");
-		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption());
+		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption(), new EventBus());
 		initial.connect();
 		nodes.add(initial);
 
@@ -56,7 +57,7 @@ public class NetworkTestUtil {
 		for (int i = 1; i < numberOfNodes; i++) {
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeer());
-			NetworkManager node = new NetworkManager(otherNetConfig, encryption);
+			NetworkManager node = new NetworkManager(otherNetConfig, encryption, new EventBus());
 			node.connect();
 			nodes.add(node);
 		}
