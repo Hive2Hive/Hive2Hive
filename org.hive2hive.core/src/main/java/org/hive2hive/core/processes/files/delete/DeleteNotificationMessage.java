@@ -57,7 +57,9 @@ public class DeleteNotificationMessage extends BaseDirectMessage {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent of.");
 			} else {
 				File fileToDelete =  new File(FileUtil.getPath(root, parentNode).toFile(), fileName);
-				getEventBus().publish(new FileDeleteEvent(fileToDelete.toPath()));
+				// since already deleted in the index, we cannot determine whether it was a file or not.
+				// A fix for that may be that the node who deleted content sends this information with the notification
+				getEventBus().publish(new FileDeleteEvent(fileToDelete.toPath(), fileToDelete.isFile()));
 				boolean deleted = fileToDelete.delete();
 				
 				if (!deleted) {

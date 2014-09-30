@@ -6,7 +6,7 @@ import org.hive2hive.core.events.framework.abstracts.FileEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileDownloadEvent;
 
 public class FileDownloadEvent extends FileEvent implements IFileDownloadEvent {
-	public FileDownloadEvent(Path path) {
-		super(path);
+	public FileDownloadEvent(Path path, boolean isFile) {
+		super(path, isFile);
 	}
 }

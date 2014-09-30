@@ -7,8 +7,8 @@ import org.hive2hive.core.events.framework.interfaces.file.IFileMoveEvent;
 
 public class FileMoveEvent  extends FileEvent implements IFileMoveEvent  {
 	private Path dstPath;
-	public FileMoveEvent(Path srcPath, Path dstPath) {
-		super(srcPath);
+	public FileMoveEvent(Path srcPath, Path dstPath, boolean isFile) {
+		super(srcPath, isFile);
 		this.dstPath = dstPath;
 	}
 	

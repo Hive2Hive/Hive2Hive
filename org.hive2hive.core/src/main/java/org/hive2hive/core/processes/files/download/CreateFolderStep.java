@@ -37,7 +37,7 @@ public class CreateFolderStep extends ProcessStep {
 		try {
 			// create the folder on disk
 			File folder = FileUtil.getPath(networkManager.getSession().getRoot(), file).toFile();
-			networkManager.getEventBus().publish(new FileDownloadEvent(folder.toPath()));
+			networkManager.getEventBus().publish(new FileDownloadEvent(folder.toPath(), false));
 			if (folder.exists()) {
 				throw new FileAlreadyExistsException("Folder already exists");
 			} else if (!folder.mkdir()) {

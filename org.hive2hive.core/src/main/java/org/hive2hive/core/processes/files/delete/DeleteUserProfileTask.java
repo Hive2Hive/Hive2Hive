@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.files.delete;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.UUID;
@@ -107,7 +108,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 	 */
 	private void removeFileOnDisk(Path root, Index toDelete) {
 		Path path = FileUtil.getPath(root, toDelete);
-		networkManager.getEventBus().publish(new FileDeleteEvent(path));
+		
 		if (path == null) {
 			logger.error("Could not find the file to delete.");
 		}
@@ -117,6 +118,7 @@ public class DeleteUserProfileTask extends UserProfileTask {
 		}
 
 		try {
+			networkManager.getEventBus().publish(new FileDeleteEvent(path, Files.isRegularFile(path)));
 			Files.delete(path);
 		} catch (IOException e) {
 			logger.error("Could not delete file on disk.", e);

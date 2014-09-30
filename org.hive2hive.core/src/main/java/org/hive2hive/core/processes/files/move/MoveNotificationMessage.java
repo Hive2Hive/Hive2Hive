@@ -1,6 +1,8 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
@@ -66,7 +68,7 @@ public class MoveNotificationMessage extends BaseDirectMessage {
 			Path src = Paths.get(srcParentPath.toString(), sourceFileName);
 			Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
 			Path dst = Paths.get(dstParentPath.toString(), destFileName);
-			getEventBus().publish(new FileMoveEvent(src, dst));
+			getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
 			
 			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
 		} catch (NoSessionException | GetFailedException | IOException e) {

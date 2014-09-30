@@ -146,7 +146,7 @@ public abstract class BaseDownloadTask implements Serializable {
 			try {
 				// reassembly
 				List<File> fileParts = Arrays.asList(downloadedParts);
-				eventBus.publish(new FileDownloadEvent(destination.toPath()));
+				eventBus.publish(new FileDownloadEvent(destination.toPath(), true));
 				FileChunkUtil.reassembly(fileParts, destination);
 				logger.debug("File {} has successfully been reassembled", getDestinationName());
 
