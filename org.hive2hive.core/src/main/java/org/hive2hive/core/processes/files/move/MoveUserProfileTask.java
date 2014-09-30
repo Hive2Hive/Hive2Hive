@@ -2,13 +2,13 @@ package org.hive2hive.core.processes.files.move;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileMoveEvent;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.file.FileUtil;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
-public class MoveUserProfileTask extends UserProfileTask {
+public class MoveUserProfileTask extends UserProfileTask implements IFileEventGenerator {
 
 	private static final long serialVersionUID = 2182278170922295626L;
 

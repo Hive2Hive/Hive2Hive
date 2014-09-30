@@ -3,12 +3,12 @@ package org.hive2hive.core.processes.files.delete;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
-public class DeleteUserProfileTask extends UserProfileTask {
+public class DeleteUserProfileTask extends UserProfileTask implements IFileEventGenerator {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteUserProfileTask.class);
 

@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.events.EventBus;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDownloadEvent;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.MetaChunk;
@@ -21,7 +22,7 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseDownloadTask implements Serializable {
+public abstract class BaseDownloadTask implements Serializable, IFileEventGenerator {
 
 	private static final long serialVersionUID = 1580305288943800375L;
 	private static final Logger logger = LoggerFactory.getLogger(BaseDownloadTask.class);

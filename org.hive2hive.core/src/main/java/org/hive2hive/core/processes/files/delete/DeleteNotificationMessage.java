@@ -10,6 +10,7 @@ import java.util.UUID;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
-public class DeleteNotificationMessage extends BaseDirectMessage {
+public class DeleteNotificationMessage extends BaseDirectMessage implements IFileEventGenerator {
 
 	private static final long serialVersionUID = 5518489264065301800L;
 

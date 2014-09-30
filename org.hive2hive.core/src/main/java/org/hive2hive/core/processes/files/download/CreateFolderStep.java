@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDownloadEvent;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
@@ -17,7 +18,7 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreateFolderStep extends ProcessStep {
+public class CreateFolderStep extends ProcessStep implements IFileEventGenerator {
 
 	private static final Logger logger = LoggerFactory.getLogger(CreateFolderStep.class);
 

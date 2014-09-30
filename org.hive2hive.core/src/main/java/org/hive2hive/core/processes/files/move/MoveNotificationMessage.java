@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileMoveEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
-public class MoveNotificationMessage extends BaseDirectMessage {
+public class MoveNotificationMessage extends BaseDirectMessage implements IFileEventGenerator {
 
 	private static final long serialVersionUID = 2855700202146422905L;
 
