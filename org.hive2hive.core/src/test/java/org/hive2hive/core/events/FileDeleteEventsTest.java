@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -42,8 +43,12 @@ public class FileDeleteEventsTest extends FileEventsTest {
 		
 		// check paths
 		assertTrue(events.size() == 1);
-		assertEqualsRelativePaths(file.toPath(), events.get(0).getPath());
-		assertFalse(Files.exists(events.get(0).getPath()));
+		IFileEvent ev = events.get(0);
+		
+		assertTrue(ev.isFile());
+		assertFalse(ev.isFolder());
+		assertEqualsRelativePaths(file.toPath(), ev.getPath());
+		assertFalse(Files.exists(ev.getPath()));
 	}
 	
 	@Test
@@ -58,19 +63,24 @@ public class FileDeleteEventsTest extends FileEventsTest {
 		UseCaseTestUtil.deleteFile(clientA, folder);		
 		waitForNumberOfEvents(1);
 		
-		// check event types
+		// check event types and path
 		List<IFileEvent> events = listener.getEvents();
 		assertEventType(events, IFileDeleteEvent.class);
 		
 		// verify paths
 		assertTrue(events.size() == 1);
-		assertEqualsRelativePaths(folder.toPath(), events.get(0).getPath());
-		assertFalse(Files.exists(events.get(0).getPath()));
+		IFileEvent ev = events.get(0);
+		
+		assertFalse(ev.isFile());
+		assertTrue(ev.isFolder());
+		assertEqualsRelativePaths(folder.toPath(), ev.getPath());
+		assertFalse(Files.exists(ev.getPath()));
 	}
 	
 	@Test 
 	public void testFolderWithFilesDeleteEvent() throws NoPeerConnectionException, IOException, NoSessionException { 
 		List<File> files = createAndAddFolderWithFiles(rootA, clientA);
+		List<Boolean> isFile = new ArrayList<Boolean>();
 		// wait for events on other side (clientB)
 		waitForNumberOfEvents(files.size());
 		listener.getEvents().clear();
@@ -79,7 +89,10 @@ public class FileDeleteEventsTest extends FileEventsTest {
 		Collections.reverse(files);
 		ListIterator<File> it = files.listIterator();
 		while(it.hasNext()) {
-			UseCaseTestUtil.deleteFile(clientA, it.next());
+			// since the file will be gone, we cannot determine later whether it was a file or folder, hence save it here.
+			File f = it.next();
+			isFile.add(f.isFile());
+			UseCaseTestUtil.deleteFile(clientA, f);
 		}
 		
 		// wait for delete events on other side (clientB)
@@ -92,10 +105,13 @@ public class FileDeleteEventsTest extends FileEventsTest {
 		
 		// match file paths of events with uploaded files
 		for(int i = 0; i < files.size(); ++i) {
-			IFileEvent e = events.get(i);
+			IFileEvent ev = events.get(i);
 			File f = files.get(i);
-			assertEqualsRelativePaths(f.toPath(), e.getPath());
-			assertFalse(Files.exists(e.getPath()));
+			
+			assertTrue(isFile.get(i) == ev.isFile());
+			assertTrue(!isFile.get(i) == ev.isFolder());
+			assertEqualsRelativePaths(f.toPath(), ev.getPath());
+			assertFalse(Files.exists(ev.getPath()));
 		}
 	}
 }

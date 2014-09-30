@@ -41,6 +41,9 @@ public class FileMoveEventsTest extends FileEventsTest {
 		assertEqualsRelativePaths(file.toPath(), e.getSrcPath());
 		assertEqualsRelativePaths(dst.toPath(), e.getDstPath());
 
+		assertTrue(e.isFile());
+		assertFalse(e.isFolder());
+		
 		assertFalse(Files.exists(e.getSrcPath()));
 		assertTrue(Files.exists(e.getDstPath()));
 	}
@@ -64,7 +67,10 @@ public class FileMoveEventsTest extends FileEventsTest {
 		IFileMoveEvent e = (IFileMoveEvent) events.get(0);
 		assertEqualsRelativePaths(folder.toPath(), e.getSrcPath());
 		assertEqualsRelativePaths(dst.toPath(), e.getDstPath());
-
+		
+		assertFalse(e.isFile());
+		assertTrue(e.isFolder());
+		
 		assertFalse(Files.exists(e.getSrcPath()));
 		assertTrue(Files.exists(e.getDstPath()));
 	}
@@ -89,6 +95,10 @@ public class FileMoveEventsTest extends FileEventsTest {
 		IFileMoveEvent e = (IFileMoveEvent) events.get(0);
 		assertEqualsRelativePaths(folder.toPath(), e.getSrcPath());
 		assertEqualsRelativePaths(dst.toPath(), e.getDstPath());
+		
+		assertFalse(e.isFile());
+		assertTrue(e.isFolder());
+		
 
 		assertFalse(Files.exists(e.getSrcPath()));
 		assertTrue(Files.exists(e.getDstPath()));

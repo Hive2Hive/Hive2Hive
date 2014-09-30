@@ -10,6 +10,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	FileDeleteEventsTest.class,
 	FileMoveEventsTest.class 
 })
+
 public class FileEventsTestSuite {
 
 }
