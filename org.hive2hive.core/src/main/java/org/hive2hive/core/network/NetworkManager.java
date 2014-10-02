@@ -48,9 +48,9 @@ public class NetworkManager implements INetworkEventGenerator {
 		boolean success = false;
 		if (networkConfiguration.isLocal()) {
 			if (networkConfiguration.isBootstrappingLocaly()) {
-				success = connection.createLocalPeerAndBootstrap(networkConfiguration.getBootstapPeer());
+				success = connection.connectInternal(networkConfiguration.getBootstapPeer());
 			} else {
-				success = connection.createLocalPeer();
+				success = connection.connectInternal();
 			}
 		} else if (networkConfiguration.isInitialPeer()) {
 			success = connection.connect();

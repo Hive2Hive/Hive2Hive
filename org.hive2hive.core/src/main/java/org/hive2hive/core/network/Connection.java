@@ -8,12 +8,14 @@ import java.net.InetAddress;
 
 import net.tomp2p.connection.ChannelClientConfiguration;
 import net.tomp2p.connection.ChannelServerConficuration;
+import net.tomp2p.connection.Ports;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
+import net.tomp2p.peers.DefaultMaintenance;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerMap;
 import net.tomp2p.peers.PeerMapConfiguration;
@@ -96,10 +98,10 @@ public class Connection {
 		futureDiscover.awaitUninterruptibly();
 
 		if (futureDiscover.isSuccess()) {
-			logger.debug("Discovery successful: Outside address is '{}'.", futureDiscover.peerAddress());
+			logger.debug("Discovery successful. Outside address is '{}'.", futureDiscover.peerAddress().inetAddress());
 		} else {
 			logger.warn("Discovery failed: {}.", futureDiscover.failedReason());
-			peerDHT.shutdown();
+			peerDHT.shutdown().awaitUninterruptibly();
 			isConnected = false;
 			return false;
 		}
@@ -112,7 +114,7 @@ public class Connection {
 			return true;
 		} else {
 			logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-			peerDHT.shutdown();
+			peerDHT.shutdown().awaitUninterruptibly();
 			isConnected = false;
 			return false;
 		}
@@ -121,12 +123,14 @@ public class Connection {
 	/**
 	 * Disconnects a peer from the network.
 	 * 
-	 * @return True, if disconnection was successful, false otherwise.
+	 * @return <code>true</code>, if disconnection was successful, <code>false</code> otherwise.
 	 */
 	public boolean disconnect() {
 		boolean isDisconnected = true;
 		if (isConnected) {
-			// TODO check whether this always shuts down the whole network or if the peer just leaves
+			// notify neighbors about shutdown
+			peerDHT.peer().announceShutdown().start().awaitUninterruptibly();
+			// shutdown the peer, giving a certain timeout
 			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			isConnected = !isDisconnected;
 
@@ -169,22 +173,32 @@ public class Connection {
 		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
 		serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
+		serverConfig.ports(new Ports(port, port));
 
 		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).channelClientConfiguration(clientConfig)
 				.channelServerConfiguration(serverConfig);
 	}
 
 	private void startReplication() {
+		IndirectReplication replication = new IndirectReplication(peerDHT);
+		// set replication factor
+		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
+		// set replication frequency
+		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL);
+		// set kind of replication, default is 0Root
+		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
+			replication.nRoot();
+		}
+		// set flag to keep data, even when peer looses replication responsibility
+		replication.keepData(true);
 		// start the indirect replication
-		new IndirectReplication(peerDHT).replicationFactor(H2HConstants.REPLICATION_FACTOR).start();
+		replication.start();
 	}
 
 	private boolean createPeer() {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
 			peerDHT = new PeerBuilderDHT(preparePeerBuilder().start()).storageLayer(storageMemory).start();
-			storageMemory.start(peerDHT.peer().connectionBean().timer(), storageMemory.storageCheckIntervalMillis());
-			peerDHT.peerBean().digestStorage(storageMemory);
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
@@ -192,6 +206,8 @@ public class Connection {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+
+		// setup replication
 		startReplication();
 
 		return true;
@@ -202,29 +218,8 @@ public class Connection {
 	 * 
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
-	public boolean createLocalPeer() {
-		// disable peer verification (faster mutual acceptance)
-		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeID));
-		peerMapConfiguration.peerVerification(false);
-		PeerMap peerMap = new PeerMap(peerMapConfiguration);
-
-		try {
-			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder().peerMap(peerMap).start()).storageLayer(storageMemory).start();
-			storageMemory.start(peerDHT.peer().connectionBean().timer(), storageMemory.storageCheckIntervalMillis());
-			peerDHT.peerBean().digestStorage(storageMemory);
-		} catch (IOException e) {
-			logger.error("Exception while creating a local peer: ", e);
-			isConnected = false;
-			return false;
-		}
-
-		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
-		startReplication();
-
-		isConnected = true;
-		return true;
+	public boolean connectInternal() {
+		return connectInternal(null);
 	}
 
 	/**
@@ -235,18 +230,21 @@ public class Connection {
 	 *            the newly created peer bootstraps to given local master peer
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
-	public boolean createLocalPeerAndBootstrap(Peer masterPeer) {
+	public boolean connectInternal(Peer masterPeer) {
 		// disable peer verification (faster mutual acceptance)
 		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeID));
 		peerMapConfiguration.peerVerification(false);
+		// set higher peer map update frequency
+		peerMapConfiguration.maintenance(new DefaultMaintenance(4, new int[] { 1 }));
+		// only one try required to label a peer as offline
+		peerMapConfiguration.offlineCount(1);
+		peerMapConfiguration.shutdownTimeout(1);
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
 			peerDHT = new PeerBuilderDHT(preparePeerBuilder().masterPeer(masterPeer).peerMap(peerMap).start()).storageLayer(
 					storageMemory).start();
-			storageMemory.start(peerDHT.peer().connectionBean().timer(), storageMemory.storageCheckIntervalMillis());
-			peerDHT.peerBean().digestStorage(storageMemory);
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			return false;
@@ -254,21 +252,28 @@ public class Connection {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+
+		// setup replication
 		startReplication();
 
-		// bootstrap to master peer
-		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
-		futureBootstrap.awaitUninterruptibly();
+		if (masterPeer != null) {
+			// bootstrap to master peer
+			FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
+			futureBootstrap.awaitUninterruptibly();
 
-		if (futureBootstrap.isSuccess()) {
-			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
+			if (futureBootstrap.isSuccess()) {
+				logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
+				isConnected = true;
+				return true;
+			} else {
+				logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
+				peerDHT.shutdown().awaitUninterruptibly();
+				isConnected = false;
+				return false;
+			}
+		} else {
 			isConnected = true;
 			return true;
-		} else {
-			logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-			peerDHT.shutdown();
-			isConnected = false;
-			return false;
 		}
 	}
 
@@ -279,7 +284,6 @@ public class Connection {
 	 */
 	private int searchFreePort() {
 		int port = H2HConstants.H2H_PORT;
-		logger.debug("Start searching for a free port");
 		while (!NetworkUtils.isPortAvailable(port)) {
 			if (port > MAX_PORT) {
 				logger.error("Could not find any free port");

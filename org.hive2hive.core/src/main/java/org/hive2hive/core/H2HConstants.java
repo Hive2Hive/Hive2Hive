@@ -46,6 +46,8 @@ public interface H2HConstants {
 
 	// replicaton factor (how many nodes store the same data object)
 	public static final int REPLICATION_FACTOR = 5;
+	public static final int REPLICATION_INTERVAL = 300000; // in milliseconds
+	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
 
 	// maximal numbers of versions kept in the DHT (see versionKey)
 	public static final int MAX_VERSIONS_HISTORY = 5;

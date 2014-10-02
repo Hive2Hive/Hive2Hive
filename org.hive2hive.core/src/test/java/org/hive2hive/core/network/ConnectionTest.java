@@ -24,10 +24,13 @@ public class ConnectionTest extends H2HJUnitTest {
 	@Test
 	public void testConnectAsInitial() {
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitial("initial node");
-
 		NetworkManager initialNode = new NetworkManager(netConfig, new H2HDummyEncryption());
-		assertTrue(initialNode.connect());
-		initialNode.disconnect();
+
+		try {
+			assertTrue(initialNode.connect());
+		} finally {
+			initialNode.disconnect();
+		}
 	}
 
 	@Test
@@ -37,10 +40,14 @@ public class ConnectionTest extends H2HJUnitTest {
 
 		NetworkManager nodeA = new NetworkManager(netConfigA, new H2HDummyEncryption());
 		NetworkManager nodeB = new NetworkManager(netConfigB, new H2HDummyEncryption());
-		assertTrue(nodeA.connect());
-		assertTrue(nodeB.connect());
-		nodeA.disconnect();
-		nodeB.disconnect();
+
+		try {
+			assertTrue(nodeA.connect());
+			assertTrue(nodeB.connect());
+		} finally {
+			nodeA.disconnect();
+			nodeB.disconnect();
+		}
 	}
 
 	@AfterClass
