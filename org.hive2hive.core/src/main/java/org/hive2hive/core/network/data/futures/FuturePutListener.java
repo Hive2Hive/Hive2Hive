@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import net.tomp2p.dht.FutureDigest;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
+import net.tomp2p.dht.StorageLayer.PutStatus;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
@@ -18,7 +19,6 @@ import net.tomp2p.rpc.DigestResult;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
@@ -96,26 +96,24 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			} else {
 				for (Number640 key : future.rawResult().get(peeradress).keySet()) {
 					byte status = future.rawResult().get(peeradress).get(key);
-					switch (PutStatusH2H.values()[status]) {
+					switch (PutStatus.values()[status]) {
 						case OK:
 							break;
 						case FAILED:
-						case FAILED_NOT_ABSENT:
 						case FAILED_SECURITY:
-							logger.warn("A node denied putting data. Reason = '{}'. '{}'", PutStatusH2H.values()[status],
+							logger.warn("A node denied putting data. Reason = '{}'. '{}'", PutStatus.values()[status],
 									parameters.toString());
 							fail.add(peeradress);
 							break;
-						case VERSION_CONFLICT:
-						case VERSION_CONFLICT_NO_BASED_ON:
-						case VERSION_CONFLICT_NO_VERSION_KEY:
-						case VERSION_CONFLICT_OLD_TIMESTAMP:
-							logger.warn("Version conflict detected. Reason = '{}'. '{}'", PutStatusH2H.values()[status],
+						case VERSION_FORK:
+							logger.warn("Version conflict detected. Reason = '{}'. '{}'", PutStatus.values()[status],
 									parameters.toString());
 							versionConflict.add(peeradress);
 							break;
+						case DELETED:
+						case FAILED_NOT_ABSENT:
 						default:
-							logger.warn("Got an unknown status: {}", PutStatusH2H.values()[status]);
+							logger.warn("Got an unknown status: {}", PutStatus.values()[status]);
 					}
 				}
 			}

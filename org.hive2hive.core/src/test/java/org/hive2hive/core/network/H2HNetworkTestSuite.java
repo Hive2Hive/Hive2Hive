@@ -18,7 +18,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 		// Network
-		H2HStorageMemoryTest.class, ConnectionTest.class,
+		ConnectionTest.class,
 		// Network, Data
 		DataManagerTest.class, UserProfileManagerTest.class,
 		// Network, Message
