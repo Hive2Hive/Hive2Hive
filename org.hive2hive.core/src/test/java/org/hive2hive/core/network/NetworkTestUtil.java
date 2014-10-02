@@ -46,7 +46,7 @@ public class NetworkTestUtil {
 		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
-		INetworkConfiguration netConfig = NetworkConfiguration.createInitial("Node A");
+		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
 		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption());
 		initial.connect();
 		nodes.add(initial);
