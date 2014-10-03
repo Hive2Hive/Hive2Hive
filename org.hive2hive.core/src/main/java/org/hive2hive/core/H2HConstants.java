@@ -44,14 +44,8 @@ public interface H2HConstants {
 	public static final int MAX_MESSAGE_SENDING = 5;
 	public static final int MAX_MESSAGE_SENDING_DIRECT = 3;
 
-	// replicaton factor (how many nodes store the same data object)
-	public static final int REPLICATION_FACTOR = 5;
-	public static final int REPLICATION_INTERVAL = 300000; // in milliseconds
-	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
-
 	// maximal numbers of versions kept in the DHT (see versionKey)
 	public static final int MAX_VERSIONS_HISTORY = 5;
-	public static final long MIN_VERSION_AGE_BEFORE_REMOVAL_MS = 5 * 60 * 1000; // 5 mins
 
 	// DHT content keys - these are used to distinguish the different data types
 	// stored for a given key
@@ -62,6 +56,7 @@ public interface H2HConstants {
 	public static final String META_FILE = "META_FILE";
 
 	public static final int PUT_RETRIES = 3; // number of allowed tries to retry a put
+	public static final int CONFIRM_RETRIES = 3; // number of allowed tries to retry a confirm
 	public static final int REMOVE_RETRIES = 3; // number of allowed tries to retry a remove
 	public static final int GET_RETRIES = 3; // number of allowed tries to retry a get
 
@@ -99,6 +94,19 @@ public interface H2HConstants {
 
 	// key length for symmetric part of hybrid encryption
 	public static final AES_KEYLENGTH KEYLENGTH_HYBRID_AES = AES_KEYLENGTH.BIT_256;
+
+	/**
+	 * Replication
+	 */
+	public static final int REPLICATION_FACTOR = 5;
+	public static final int REPLICATION_INTERVAL = 300000; // in milliseconds
+	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
+
+	/**
+	 * TTL of Data in Network
+	 */
+	// period in milliseconds between successive ttl check task executions
+	public static final int TTL_PERIOD = 500;
 
 	/**
 	 * TTL Refreshment Management

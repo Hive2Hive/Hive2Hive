@@ -11,6 +11,7 @@ import net.tomp2p.connection.ChannelServerConficuration;
 import net.tomp2p.connection.Ports;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.dht.StorageMemory;
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
@@ -198,7 +199,9 @@ public class Connection {
 	private boolean createPeer() {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder().start()).storageLayer(storageMemory).start();
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder().start())
+					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
@@ -243,8 +246,9 @@ public class Connection {
 
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder().masterPeer(masterPeer).peerMap(peerMap).start()).storageLayer(
-					storageMemory).start();
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder().masterPeer(masterPeer).peerMap(peerMap).start())
+					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
 			return false;
