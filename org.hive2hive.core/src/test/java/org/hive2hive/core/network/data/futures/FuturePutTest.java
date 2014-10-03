@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import net.tomp2p.dht.FutureGet;
-
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -13,6 +11,7 @@ import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
+import org.hive2hive.core.network.data.IDataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.junit.AfterClass;
@@ -44,14 +43,10 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		IParameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setData(data);
+				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
 
-		boolean success = nodeB.getDataManager().put(parameters);
-		Assert.assertTrue(success);
-
-		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-		Assert.assertEquals(data.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
+		Assert.assertEquals(H2HPutStatus.OK, nodeB.getDataManager().put(parameters));
+		Assert.assertEquals(data.getTestString(), ((H2HTestData) nodeB.getDataManager().get(parameters)).getTestString());
 	}
 
 	@Test
@@ -65,14 +60,11 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setData(data);
+				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
 
 		try {
-			Assert.assertFalse(nodeA.getDataManager().put(parameters));
-
-			FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
-			futureGet.awaitUninterruptibly();
-			Assert.assertNull(futureGet.data());
+			Assert.assertEquals(H2HPutStatus.FAILED, nodeA.getDataManager().put(parameters));
+			Assert.assertNull(nodeA.getDataManager().get(parameters));
 		} finally {
 			((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
 			((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
@@ -88,17 +80,38 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setData(data);
+				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
 
 		try {
-			Assert.assertTrue(nodeA.getDataManager().put(parameters));
-
-			FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
-			futureGet.awaitUninterruptibly();
-			Assert.assertEquals(data.getTestString(), ((H2HTestData) futureGet.data().object()).getTestString());
+			Assert.assertEquals(H2HPutStatus.OK, nodeA.getDataManager().put(parameters));
+			Assert.assertEquals(data.getTestString(), ((H2HTestData) nodeA.getDataManager().get(parameters)).getTestString());
 		} finally {
 			((H2HStorageMemory) nodeA.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
 		}
+	}
+
+	@Test
+	public void testPutVersionFork() throws ClassNotFoundException, IOException, NoPeerConnectionException {
+		NetworkManager nodeA = network.get(0);
+		NetworkManager nodeB = network.get(1);
+
+		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		data.generateVersionKey();
+		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
+				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data)
+				.setPrepareFlag(true);
+
+		Assert.assertEquals(H2HPutStatus.OK, nodeA.getDataManager().put(parameters));
+
+		H2HTestData conflictingData = new H2HTestData(NetworkTestUtil.randomString());
+		conflictingData.generateVersionKey();
+		Parameters parametersConflicting = new Parameters().setLocationKey(nodeB.getNodeId())
+				.setContentKey(parameters.getContentKey()).setVersionKey(conflictingData.getVersionKey())
+				.setNetworkContent(conflictingData).setPrepareFlag(true);
+
+		Assert.assertEquals(H2HPutStatus.VERSION_FORK, nodeA.getDataManager().put(parametersConflicting));
+		Assert.assertEquals(data.getTestString(), ((H2HTestData) nodeA.getDataManager().get(parameters)).getTestString());
+		Assert.assertNull(nodeA.getDataManager().getVersion(parametersConflicting));
 	}
 
 	@AfterClass

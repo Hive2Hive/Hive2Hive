@@ -15,6 +15,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.IDataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +41,10 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private final DataManager dataManager;
 	private final CountDownLatch latch;
 
-	private boolean success = false;
-
 	// used to count put retries
 	private int putTries = 0;
+	// used as return value
+	private H2HPutStatus status;
 
 	public FuturePutListener(IParameters parameters, DataManager dataManager) {
 		this.parameters = parameters;
@@ -56,14 +57,14 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 * 
 	 * @return true if successful, false if not successful
 	 */
-	public boolean await() {
+	public H2HPutStatus await() {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
 			logger.error("Could not wait until put has finished.", e);
 		}
 
-		return success;
+		return status;
 	}
 
 	@Override
@@ -79,7 +80,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 		}
 
 		// analyze returned put status
-		final List<PeerAddress> fail = new ArrayList<PeerAddress>();
+		List<PeerAddress> fail = new ArrayList<PeerAddress>();
+		List<PeerAddress> versionFork = new ArrayList<PeerAddress>();
 		for (PeerAddress peeradress : future.rawResult().keySet()) {
 			Map<Number640, Byte> map = future.rawResult().get(peeradress);
 			if (map == null) {
@@ -97,6 +99,10 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 									parameters.toString());
 							fail.add(peeradress);
 							break;
+						case VERSION_FORK:
+							logger.warn("A node responded with a version fork. '{}'", parameters.toString());
+							versionFork.add(peeradress);
+							break;
 						default:
 							logger.warn("Got an unknown status: {}", PutStatus.values()[status]);
 					}
@@ -104,9 +110,30 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			}
 		}
 
+		// check if majority of the contacted nodes responded with ok
 		if ((double) fail.size() < ((double) future.rawResult().size()) / 2.0) {
-			// majority of the contacted nodes responded with ok
-			notifySuccess();
+			if (versionFork.isEmpty()) {
+				if (parameters.hasPrepareFlag()) {
+					// confirm put
+					status = dataManager.confirm(parameters);
+				} else {
+					status = H2HPutStatus.OK;
+				}
+				latch.countDown();
+			} else {
+				logger.warn("Version fork after put detected. Rejecting put.");
+				// reject put
+				dataManager.removeVersionUnblocked(parameters).addListener(new BaseFutureAdapter<FutureRemove>() {
+					@Override
+					public void operationComplete(FutureRemove future) {
+						if (future.isFailed()) {
+							logger.warn("Could not delete the prepared put. '{}'", parameters.toString());
+						}
+						status = H2HPutStatus.VERSION_FORK;
+						latch.countDown();
+					}
+				});
+			}
 		} else {
 			logger.warn("{} of {} contacted nodes failed.", fail.size(), future.rawResult().size());
 			retryPut();
@@ -120,13 +147,12 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private void retryPut() {
 		if (putTries++ < H2HConstants.PUT_RETRIES) {
 			logger.warn("Put retry #{}. '{}'", putTries, parameters.toString());
-			// remove succeeded puts
-			FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
-			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
+			// remove prior put
+			dataManager.removeVersionUnblocked(parameters).addListener(new BaseFutureAdapter<FutureRemove>() {
 				@Override
 				public void operationComplete(FutureRemove future) {
 					if (future.isFailed()) {
-						logger.warn("Put retry: Could not delete the newly put content. '{}'", parameters.toString());
+						logger.warn("Could not delete the newly put content. '{}'", parameters.toString());
 					}
 					// retry put, attach itself as listener
 					dataManager.putUnblocked(parameters).addListener(FuturePutListener.this);
@@ -134,32 +160,18 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 			});
 		} else {
 			logger.error("Could not put data after {} tries. '{}'", putTries, parameters.toString());
-			notifyFailure();
+			// remove prior put
+			dataManager.removeVersionUnblocked(parameters).addListener(new BaseFutureAdapter<FutureRemove>() {
+				@Override
+				public void operationComplete(FutureRemove future) {
+					if (future.isFailed()) {
+						logger.warn("Could not delete the newly put content. '{}'", parameters.toString());
+					}
+					status = H2HPutStatus.FAILED;
+					latch.countDown();
+				}
+			});
 		}
 	}
 
-	private void notifySuccess() {
-		// everything is ok
-		success = true;
-		latch.countDown();
-	}
-
-	/**
-	 * Remove first potentially successful puts. Then notify the listener about the fail.
-	 */
-	private void notifyFailure() {
-		// remove succeeded puts
-		FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
-		futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
-			@Override
-			public void operationComplete(FutureRemove future) {
-				if (future.isFailed()) {
-					logger.warn("Put retry: Could not delete the newly put content. '{}'", parameters.toString());
-				}
-
-				success = false;
-				latch.countDown();
-			}
-		});
-	}
 }

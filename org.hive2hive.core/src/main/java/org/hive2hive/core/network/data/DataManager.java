@@ -10,7 +10,6 @@ import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
-import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
@@ -19,6 +18,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
+import org.hive2hive.core.network.data.futures.FutureConfirmListener;
 import org.hive2hive.core.network.data.futures.FutureDigestListener;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
@@ -39,14 +39,9 @@ public class DataManager implements IDataManager {
 	private final NetworkManager networkManager;
 	private final IH2HEncryption encryptionTool;
 
-	// private final SignatureFactory signatureFactory;
-	// private final SignatureCodec signatureCodec;
-
 	public DataManager(NetworkManager networkManager, IH2HEncryption encryptionTool) {
 		this.networkManager = networkManager;
 		this.encryptionTool = encryptionTool;
-		// this.signatureFactory = new H2HSignatureFactory();
-		// this.signatureCodec = new H2HSignatureCodec();
 	}
 
 	/**
@@ -64,18 +59,6 @@ public class DataManager implements IDataManager {
 	}
 
 	@Override
-	public boolean put(IParameters parameters) {
-		FuturePut putFuture = putUnblocked(parameters);
-		if (putFuture == null) {
-			return false;
-		}
-
-		FuturePutListener listener = new FuturePutListener(parameters, this);
-		putFuture.addListener(listener);
-		return listener.await();
-	}
-
-	@Override
 	public boolean changeProtectionKey(IParameters parameters) {
 		FuturePut putFuture = changeProtectionKeyUnblocked(parameters);
 		if (putFuture == null) {
@@ -85,55 +68,6 @@ public class DataManager implements IDataManager {
 		FutureChangeProtectionListener listener = new FutureChangeProtectionListener(parameters);
 		putFuture.addListener(listener);
 		return listener.await();
-	}
-
-	@Override
-	public boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKey) {
-		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(contentKey)
-				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setData(content).setProtectionKeys(protectionKey)
-				.setTTL(content.getTimeToLive());
-		FuturePut putFuture = putUnblocked(parameters);
-		if (putFuture == null) {
-			return false;
-		}
-
-		FuturePutListener listener = new FuturePutListener(parameters, this);
-		putFuture.addListener(listener);
-		return listener.await();
-	}
-
-	public FuturePut putUnblocked(IParameters parameters) {
-		logger.debug("Put. {}", parameters.toString());
-		try {
-			Data data = new Data(parameters.getData());
-			data.ttlSeconds(parameters.getTTL()).addBasedOn(parameters.getData().getBasedOnKey());
-
-			// check if data to put is content protected
-			if (parameters.getProtectionKeys() != null) {
-				data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
-
-				// sign the data
-				// data.sign(parameters.getProtectionKeys(), new RSASignatureFactory());
-				// // check if hash creation is needed
-				// if (parameters.getHashFlag()) {
-				// // decrypt signature to get hash of the object
-				// Cipher rsa = Cipher.getInstance("RSA");
-				// rsa.init(Cipher.DECRYPT_MODE, parameters.getProtectionKeys().getPublic());
-				// byte[] hash = rsa.doFinal(data.signature().encode());
-				// // store hash
-				// parameters.setHash(hash);
-				// }
-
-				return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-						.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
-			} else {
-				return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-						.versionKey(parameters.getVersionKey()).start();
-			}
-		} catch (IOException e) {
-			logger.error("Put failed. {}.", parameters.toString(), e);
-			return null;
-		}
 	}
 
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
@@ -172,6 +106,82 @@ public class DataManager implements IDataManager {
 	}
 
 	@Override
+	public H2HPutStatus put(IParameters parameters) {
+		FuturePut putFuture = putUnblocked(parameters);
+		if (putFuture == null) {
+			return H2HPutStatus.FAILED;
+		}
+
+		FuturePutListener listener = new FuturePutListener(parameters, this);
+		putFuture.addListener(listener);
+		return listener.await();
+	}
+
+	@Override
+	public H2HPutStatus putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKey) {
+		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(contentKey)
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setNetworkContent(content)
+				.setProtectionKeys(protectionKey).setTTL(content.getTimeToLive());
+		FuturePut putFuture = putUnblocked(parameters);
+		if (putFuture == null) {
+			return H2HPutStatus.FAILED;
+		}
+
+		FuturePutListener listener = new FuturePutListener(parameters, this);
+		putFuture.addListener(listener);
+		return listener.await();
+	}
+
+	public FuturePut putUnblocked(IParameters parameters) {
+		logger.debug("Put. {}", parameters.toString());
+		try {
+			Data data = new Data(parameters.getNetworkContent());
+			data.ttlSeconds(parameters.getTTL()).addBasedOn(parameters.getNetworkContent().getBasedOnKey());
+			if (parameters.hasPrepareFlag()) {
+				data.prepareFlag();
+			}
+
+			// check if data to put is content protected
+			if (parameters.getProtectionKeys() != null) {
+				data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+			}
+
+			return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
+					.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
+		} catch (IOException e) {
+			logger.error("Put failed. {}.", parameters.toString(), e);
+			return null;
+		}
+	}
+
+	@Override
+	public H2HPutStatus confirm(IParameters parameters) {
+		FuturePut confirmFuture = confirmUnblocked(parameters);
+		if (confirmFuture == null) {
+			return H2HPutStatus.FAILED;
+		}
+
+		FutureConfirmListener listener = new FutureConfirmListener(parameters, this);
+		confirmFuture.addListener(listener);
+		return listener.await();
+	}
+
+	public FuturePut confirmUnblocked(IParameters parameters) {
+		logger.debug("Confirm. {}", parameters.toString());
+
+		Data data = new Data();
+		data.ttlSeconds(parameters.getTTL()).addBasedOn(parameters.getNetworkContent().getBasedOnKey());
+
+		// check if data to put is content protected
+		if (parameters.getProtectionKeys() != null) {
+			data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+		}
+
+		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
+				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).putConfirm().start();
+	}
+
+	@Override
 	public NetworkContent get(IParameters parameters) {
 		FutureGet futureGet = getUnblocked(parameters);
 		FutureGetListener listener = new FutureGetListener(parameters);
@@ -180,7 +190,7 @@ public class DataManager implements IDataManager {
 	}
 
 	public NetworkContent getVersion(IParameters parameters) {
-		FutureGet futureGet = getUnblocked(parameters);
+		FutureGet futureGet = getVersionUnblocked(parameters);
 		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
@@ -189,7 +199,6 @@ public class DataManager implements IDataManager {
 	@Override
 	public NetworkContent getUserProfileTask(String userId) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN);
-
 		FutureGet futureGet = getPeer().get(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.ZERO, Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.MAX_VALUE, Number160.MAX_VALUE))
@@ -211,6 +220,12 @@ public class DataManager implements IDataManager {
 		logger.debug("Get version. {}", parameters.toString());
 		return getPeer().get(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
 				.versionKey(parameters.getVersionKey()).start();
+	}
+
+	public FutureGet getLatestUnblocked(IParameters parameters) {
+		logger.debug("Get latest version. {}", parameters.toString());
+		return getPeer().get(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
+				.getLatest().withDigest().fastGet(false).start();
 	}
 
 	@Override
@@ -244,8 +259,7 @@ public class DataManager implements IDataManager {
 		return getPeer().remove(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.requestP2PConfiguration(new RequestP2PConfiguration(3, 0, 0)).keyPair(parameters.getProtectionKeys())
-				.start();
+				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
@@ -254,6 +268,7 @@ public class DataManager implements IDataManager {
 				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 	}
 
+	@Override
 	public NavigableMap<Number640, Collection<Number160>> getDigestLatest(IParameters parameters) {
 		logger.debug("Get digest (latest). {}", parameters.toString());
 		FutureDigest futureDigest = getDigestLatestUnblocked(parameters);

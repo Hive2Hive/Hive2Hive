@@ -1,8 +1,11 @@
 package org.hive2hive.core.network.data;
 
 import java.security.KeyPair;
+import java.util.Collection;
+import java.util.NavigableMap;
 
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -19,15 +22,21 @@ import org.hive2hive.core.security.IH2HEncryption;
  */
 public interface IDataManager {
 
+	public enum H2HPutStatus {
+		OK,
+		FAILED,
+		VERSION_FORK
+	};
+
 	IH2HEncryption getEncryption();
 
 	/**
 	 * Put some content to the DHT
 	 * 
 	 * @param parameters containing data and keys for routing and signing
-	 * @return the success of the put
+	 * @return the result state of the put
 	 */
-	boolean put(IParameters parameters);
+	H2HPutStatus put(IParameters parameters);
 
 	/**
 	 * Put some content to the DHT and change its protection key
@@ -45,9 +54,18 @@ public interface IDataManager {
 	 * @param contentKey the proxy peer of the user (ususally a hash of the user id of the receiver)
 	 * @param content the (encrypted) user profile task
 	 * @param protectionKeys heavily recommended thus no other user can delete or overwrite the task
-	 * @return the success of the put
+	 * @return the result state of the put
 	 */
-	boolean putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKeys);
+	H2HPutStatus putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKeys);
+
+	/**
+	 * Data which have been uploaded with a prepare flag (see {@link IParameters#hasPrepareFlag()}) has to be
+	 * confirmed if no {@link H2HPutStatus#VERSION_FORK} has been returned.
+	 * 
+	 * @param parameters containing the keys for routing
+	 * @return the result state of the confirmation
+	 */
+	H2HPutStatus confirm(IParameters parameters);
 
 	/**
 	 * Gets some content from the DHT, which is the newest version.
@@ -56,14 +74,6 @@ public interface IDataManager {
 	 * @return an encrypted or unencrypted content or null if no content was found
 	 */
 	NetworkContent get(IParameters parameters);
-
-	/**
-	 * Gets a specific version of some content from the DHT.
-	 * 
-	 * @param parameters containing the keys for routing
-	 * @return an encrypted or unencrypted content or null if no content was found
-	 */
-	NetworkContent getVersion(IParameters parameters);
 
 	/**
 	 * This is a special get because a {@link UserProfileTask} is stored at a certain pre-defined place.
@@ -103,4 +113,14 @@ public interface IDataManager {
 	 * @return the success of the removal
 	 */
 	boolean removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey);
+
+	/**
+	 * Requests for the version history currently stored in the network. A version has a version key and
+	 * multiple based on keys.
+	 * 
+	 * @param parameters containing the keys for routing and signing
+	 * @return digest
+	 */
+	NavigableMap<Number640, Collection<Number160>> getDigestLatest(IParameters parameters);
+
 }
