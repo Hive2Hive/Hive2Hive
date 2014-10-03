@@ -5,6 +5,7 @@ import java.security.PublicKey;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
+import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
@@ -25,12 +26,14 @@ public class Parameters implements IParameters {
 	private Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 cKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 vKey = H2HConstants.TOMP2P_DEFAULT_KEY;
-	private NetworkContent data;
+	private NetworkContent networkContent;
+	private Data data;
 	private KeyPair protectionKeys;
 	private KeyPair newProtectionKeys;
 	private int ttl = -1;
 	private boolean hashFlag = false;
 	private byte[] hash;
+	private boolean prepareFlag = false;
 
 	public Parameters setLocationKey(String locationKey) {
 		this.locationKey = locationKey;
@@ -40,6 +43,11 @@ public class Parameters implements IParameters {
 
 	public Parameters setLocationKey(PublicKey key) {
 		return setLocationKey(H2HDefaultEncryption.key2String(key));
+	}
+
+	public Parameters setLocationKey(Number160 lKey) {
+		this.lKey = lKey;
+		return this;
 	}
 
 	@Override
@@ -99,15 +107,26 @@ public class Parameters implements IParameters {
 		return vKey;
 	}
 
-	public Parameters setData(NetworkContent data) {
+	public Parameters setNetworkContent(NetworkContent networkContent) {
+		this.networkContent = networkContent;
+		return this;
+	}
+
+	@Override
+	public NetworkContent getNetworkContent() {
+		return networkContent;
+	}
+
+	public Parameters setData(Data data) {
 		this.data = data;
 		return this;
 	}
 
 	@Override
-	public NetworkContent getData() {
+	public Data getData() {
 		return data;
 	}
+
 
 	public Parameters setProtectionKeys(KeyPair protectionKeys) {
 		this.protectionKeys = protectionKeys;
@@ -167,10 +186,20 @@ public class Parameters implements IParameters {
 	}
 
 	@Override
+	public boolean hasPrepareFlag() {
+		return prepareFlag;
+	}
+
+	public Parameters setPrepareFlag(boolean prepareFlag) {
+		this.prepareFlag = prepareFlag;
+		return this;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		if (data != null) {
-			builder.append("content = '").append(data.getClass().getSimpleName()).append("' ");
+		if (networkContent != null) {
+			builder.append("content = '").append(networkContent.getClass().getSimpleName()).append("' ");
 		}
 
 		builder.append("location key = '").append(locationKey).append("' ");
@@ -199,6 +228,10 @@ public class Parameters implements IParameters {
 
 		if (hashFlag) {
 			builder.append("hashFlag = 'true'");
+		}
+
+		if (prepareFlag) {
+			builder.append("prepareFlag = 'true'");
 		}
 
 		return builder.toString();

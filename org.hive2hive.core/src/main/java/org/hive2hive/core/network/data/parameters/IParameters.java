@@ -4,6 +4,7 @@ import java.security.KeyPair;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
+import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.data.DataManager;
@@ -86,7 +87,7 @@ public interface IParameters {
 	 * 
 	 * @return data to store
 	 */
-	public NetworkContent getData();
+	public NetworkContent getNetworkContent();
 
 	/**
 	 * All content in the network has a time-to-live value (in seconds). If data is expired it gets
@@ -106,8 +107,8 @@ public interface IParameters {
 	/**
 	 * Set a flag which indicates the signature procedure to store the created hash.
 	 * 
-	 * @param hashFlag <code>true</code> for storing the hash, otherwise <code>false</code> 
-	 * @return it-self (builder pattern) 
+	 * @param hashFlag <code>true</code> for storing the hash, otherwise <code>false</code>
+	 * @return it-self (builder pattern)
 	 */
 	public IParameters setHashFlag(boolean hashFlag);
 
@@ -132,5 +133,20 @@ public interface IParameters {
 	 * @return hash of the signed data
 	 */
 	public byte[] getHash();
+
+	/**
+	 * Get the data object itself.
+	 * 
+	 * @return data used to put in network
+	 */
+	public Data getData();
+
+	/**
+	 * Prepare flag indicating if data should be stored only temporary. Prepared data has to be rejected or
+	 * confirmed at a later time.
+	 * 
+	 * @return <code>true</code> if data is prepared, otherwise <code>false</code>
+	 */
+	public boolean hasPrepareFlag();
 
 }
