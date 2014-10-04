@@ -50,14 +50,15 @@ public class MoveOnDiskStep extends ProcessStep {
 					e.getMessage()), e);
 		}
 
-		try {
-			// move the file
-			Files.move(context.getSource().toPath(), context.getDestination().toPath(), StandardCopyOption.ATOMIC_MOVE);
-			logger.debug("Moved the file from '{}' to '{}'.", context.getSource().getAbsolutePath(), context
-					.getDestination().getAbsolutePath());
-		} catch (IOException e) {
-			throw new ProcessExecutionException("File could not be moved to destination.", e);
-		}
+//		try {
+//			 move the file
+//			Files.move(context.getSource().toPath(), context.getDestination().toPath(), StandardCopyOption.ATOMIC_MOVE);
+//			logger.debug("Moved the file from '{}' to '{}'.", context.getSource().getAbsolutePath(), context
+//					.getDestination().getAbsolutePath());
+//		} catch (IOException e) {
+//			throw new ProcessExecutionException("File could not be moved to destination.", e);
+//		}
+		logger.debug("Automatic file move disabled!");
 	}
 
 	private void verifyFiles() throws NoSessionException {
@@ -69,7 +70,7 @@ public class MoveOnDiskStep extends ProcessStep {
 		}
 
 		if (!source.exists()) {
-			throw new IllegalArgumentException("File to move does not exist");
+			//throw new IllegalArgumentException("File to move does not exist");
 		} else if (destination.exists()) {
 			throw new IllegalArgumentException("Destination file already exists");
 		}

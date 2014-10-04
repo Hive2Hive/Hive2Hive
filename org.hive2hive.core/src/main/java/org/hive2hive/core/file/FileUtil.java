@@ -163,9 +163,9 @@ public class FileUtil {
 		}
 
 		// move the file
-		Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
-		logger.debug("Successfully moved the file from {} to {}.", toMoveSource.getAbsolutePath(),
-				toMoveDest.getAbsolutePath());
+		Path result = Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+		logger.debug("Successfully moved the file from {} to {}. Return: {}", toMoveSource.getAbsolutePath(),
+				toMoveDest.getAbsolutePath(), result);
 	}
 
 	/**
