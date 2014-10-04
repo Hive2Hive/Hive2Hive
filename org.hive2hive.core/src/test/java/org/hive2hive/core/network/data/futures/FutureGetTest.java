@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import net.tomp2p.peers.Number160;
 
@@ -27,7 +26,6 @@ public class FutureGetTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 3;
-	private static Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -38,8 +36,8 @@ public class FutureGetTest extends H2HJUnitTest {
 
 	@Test
 	public void testGet() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB =  NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -52,8 +50,8 @@ public class FutureGetTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetNoData() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(
 				NetworkTestUtil.randomString());
@@ -63,8 +61,8 @@ public class FutureGetTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetNewestVersion() throws ClassNotFoundException, IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = nodeA.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -91,8 +89,8 @@ public class FutureGetTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetAVersion() throws IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		data.generateVersionKey();
@@ -108,8 +106,8 @@ public class FutureGetTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetAVersionNoData() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())

@@ -2,7 +2,6 @@ package org.hive2hive.core.network.data.futures;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -27,8 +26,6 @@ public class FuturePutTest extends H2HJUnitTest {
 	private static List<NetworkManager> network;
 	private static final int networkSize = 3;
 
-	private static Random random = new Random();
-
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = FuturePutTest.class;
@@ -38,8 +35,8 @@ public class FuturePutTest extends H2HJUnitTest {
 
 	@Test
 	public void testPut() throws ClassNotFoundException, IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		IParameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -25,7 +24,6 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 3;
-	private static Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -36,8 +34,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemove() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -51,8 +49,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemoveSingleVersion() throws IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		data.generateVersionKey();
@@ -68,8 +66,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemoveMultipleVersions() throws IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = nodeA.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
