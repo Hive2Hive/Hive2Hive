@@ -1,7 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -10,7 +10,7 @@ import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.network.data.IDataManager.H2HPutStatus;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.junit.AfterClass;
@@ -23,8 +23,8 @@ import org.junit.Test;
  */
 public class FuturePutTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 3;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 6;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -51,9 +51,15 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 		NetworkManager nodeC = network.get(2);
+		NetworkManager nodeD = network.get(3);
+		NetworkManager nodeE = network.get(4);
+		NetworkManager nodeF = network.get(5);
 
 		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 		((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		((H2HStorageMemory) nodeD.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
@@ -65,6 +71,9 @@ public class FuturePutTest extends H2HJUnitTest {
 		} finally {
 			((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
 			((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
+			((H2HStorageMemory) nodeD.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
+			((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
+			((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
 		}
 	}
 

@@ -22,8 +22,8 @@ import org.junit.Test;
  */
 public class FutureRemoveTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 3;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {

@@ -24,8 +24,8 @@ import org.junit.Test;
  */
 public class FutureGetTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 3;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -37,7 +37,7 @@ public class FutureGetTest extends H2HJUnitTest {
 	@Test
 	public void testGet() throws NoPeerConnectionException {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
-		NetworkManager nodeB =  NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
@@ -67,15 +67,14 @@ public class FutureGetTest extends H2HJUnitTest {
 		String locationKey = nodeA.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
+		H2HTestData data = new H2HTestData("");
+		List<String> content = new ArrayList<String>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			data.setTestString(NetworkTestUtil.randomString());
+			content.add(data.getTestString());
+
 			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
-			}
-			content.add(data);
 
 			Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
 					.setVersionKey(data.getVersionKey()).setNetworkContent(data);
@@ -83,7 +82,7 @@ public class FutureGetTest extends H2HJUnitTest {
 		}
 
 		Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey);
-		assertEquals(content.get(numberOfContent - 1).getTestString(),
+		assertEquals(content.get(numberOfContent - 1),
 				((H2HTestData) nodeB.getDataManager().get(parameters)).getTestString());
 	}
 

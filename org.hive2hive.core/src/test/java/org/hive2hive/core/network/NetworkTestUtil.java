@@ -40,10 +40,10 @@ public class NetworkTestUtil {
 	 * Same as {@link NetworkTestUtil#createNetwork(int)} but with own encryption implementation (instead of
 	 * standard one)
 	 */
-	public static List<NetworkManager> createNetwork(int numberOfNodes, IH2HEncryption encryption) {
+	public static ArrayList<NetworkManager> createNetwork(int numberOfNodes, IH2HEncryption encryption) {
 		if (numberOfNodes < 1)
 			throw new IllegalArgumentException("invalid size of network");
-		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
+		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
@@ -73,7 +73,11 @@ public class NetworkTestUtil {
 	 *            size of the network (has to be larger than one)
 	 * @return list containing all nodes where the first one is the bootstrapping node (initial)
 	 */
-	public static List<NetworkManager> createNetwork(int numberOfNodes) {
+	public static ArrayList<NetworkManager> createNetwork(int numberOfNodes) {
+		if (numberOfNodes < H2HConstants.REPLICATION_FACTOR) {
+			throw new IllegalArgumentException(String.format("Network size must be at least %s (replication factor).",
+					H2HConstants.REPLICATION_FACTOR));
+		}
 		return createNetwork(numberOfNodes, new H2HDummyEncryption());
 	}
 
@@ -129,10 +133,10 @@ public class NetworkTestUtil {
 	 * @param network
 	 *            list containing all nodes which has to be disconnected.
 	 */
-	public static void shutdownNetwork(List<NetworkManager> network) {
-		for (NetworkManager node : network) {
-			if (node.getConnection().isConnected())
-				node.disconnect();
+	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
+		if (!network.isEmpty()) {
+			// shutdown of master peer is enough
+			network.get(0).disconnect();
 		}
 	}
 
