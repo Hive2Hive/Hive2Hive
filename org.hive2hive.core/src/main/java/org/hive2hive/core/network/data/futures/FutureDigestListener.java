@@ -52,13 +52,13 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	@Override
 	public void operationComplete(FutureDigest future) throws Exception {
 		if (future.isFailed()) {
-			logger.error("Could not get digest. '{}'", parameters.toString());
+			logger.error("Could not get digest. {}", parameters.toString());
 		} else {
 			result = future.digest().keyDigest();
 			if (result == null) {
-				logger.warn("Got digest null. '{}'", parameters.toString());
+				logger.warn("Got digest null. {}", parameters.toString());
 			} else {
-				logger.debug("Got digest. '{}'", parameters.toString());
+				logger.debug("Got digest. {}", parameters.toString());
 			}
 		}
 		latch.countDown();
