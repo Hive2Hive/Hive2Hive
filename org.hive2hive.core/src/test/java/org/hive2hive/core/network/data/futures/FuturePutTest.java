@@ -7,7 +7,7 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.H2HStorageMemory;
-import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
+import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryPutMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
@@ -55,11 +55,11 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeE = network.get(4);
 		NetworkManager nodeF = network.get(5);
 
-		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
-		((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
-		((H2HStorageMemory) nodeD.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
-		((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
-		((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
+		((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
+		((H2HStorageMemory) nodeD.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
+		((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
+		((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
@@ -69,11 +69,11 @@ public class FuturePutTest extends H2HJUnitTest {
 			Assert.assertEquals(H2HPutStatus.FAILED, nodeA.getDataManager().put(parameters));
 			Assert.assertNull(nodeA.getDataManager().get(parameters));
 		} finally {
-			((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
-			((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
-			((H2HStorageMemory) nodeD.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
-			((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
-			((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
+			((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.STANDARD);
+			((H2HStorageMemory) nodeC.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.STANDARD);
+			((H2HStorageMemory) nodeD.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.STANDARD);
+			((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.STANDARD);
+			((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.STANDARD);
 		}
 	}
 
@@ -82,7 +82,7 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
-		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
@@ -92,7 +92,7 @@ public class FuturePutTest extends H2HJUnitTest {
 			Assert.assertEquals(H2HPutStatus.OK, nodeA.getDataManager().put(parameters));
 			Assert.assertEquals(data.getTestString(), ((H2HTestData) nodeA.getDataManager().get(parameters)).getTestString());
 		} finally {
-			((H2HStorageMemory) nodeA.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.STANDARD);
+			((H2HStorageMemory) nodeA.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.STANDARD);
 		}
 	}
 
