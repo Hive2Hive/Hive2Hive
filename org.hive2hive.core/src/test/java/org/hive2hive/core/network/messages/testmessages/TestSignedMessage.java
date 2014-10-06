@@ -1,4 +1,7 @@
-package org.hive2hive.core.network.messages;
+package org.hive2hive.core.network.messages.testmessages;
+
+import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.BaseMessage;
 
 
 public class TestSignedMessage extends BaseMessage {

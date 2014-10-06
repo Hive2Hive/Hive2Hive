@@ -1,10 +1,11 @@
-package org.hive2hive.core.network.messages;
+package org.hive2hive.core.network.messages.testmessages;
 
 import java.io.Serializable;
 
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 
 /**

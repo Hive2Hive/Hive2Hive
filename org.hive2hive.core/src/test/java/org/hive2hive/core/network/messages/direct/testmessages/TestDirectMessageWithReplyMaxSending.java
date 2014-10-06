@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.messages.direct;
+package org.hive2hive.core.network.messages.direct.testmessages;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -8,10 +8,10 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
-import org.hive2hive.core.network.messages.TestResponseMessageMaxSending;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
+import org.hive2hive.core.network.messages.testmessages.TestResponseMessageMaxSending;
 import org.junit.Assert;
 
 public class TestDirectMessageWithReplyMaxSending extends DirectRequestMessage {
@@ -30,12 +30,9 @@ public class TestDirectMessageWithReplyMaxSending extends DirectRequestMessage {
 		String secret = NetworkTestUtil.randomString();
 
 		try {
-			networkManager
-					.getDataManager()
-					.putUnblocked(
-							new Parameters().setLocationKey(networkManager.getNodeId())
-									.setContentKey(contentKey).setData(new H2HTestData(secret)))
-					.awaitUninterruptibly();
+			networkManager.getDataManager().put(
+					new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
+							.setNetworkContent(new H2HTestData(secret)));
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();
 		}
@@ -62,12 +59,9 @@ public class TestDirectMessageWithReplyMaxSending extends DirectRequestMessage {
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
 			try {
-				networkManager
-						.getDataManager()
-						.putUnblocked(
-								new Parameters().setLocationKey(networkManager.getNodeId())
-										.setContentKey(contentKey).setData(new H2HTestData(receivedSecret)))
-						.awaitUninterruptibly();
+				networkManager.getDataManager().put(
+						new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
+								.setNetworkContent(new H2HTestData(receivedSecret)));
 			} catch (NoPeerConnectionException e) {
 				Assert.fail();
 			}

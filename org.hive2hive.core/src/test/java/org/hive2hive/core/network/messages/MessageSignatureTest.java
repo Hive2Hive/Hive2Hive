@@ -4,7 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.security.PublicKey;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
@@ -12,8 +13,8 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
+import org.hive2hive.core.network.messages.testmessages.TestSignedMessage;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -26,24 +27,27 @@ import org.junit.Test;
  */
 public class MessageSignatureTest extends H2HJUnitTest {
 
-	private List<NetworkManager> network;
+	private static final int networkSize = 10;
+	private static Random random = new Random();
+	private static ArrayList<NetworkManager> network;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = BaseMessageTest.class;
 		beforeClass();
+		network = NetworkTestUtil.createNetwork(networkSize);
 	}
 
 	@Before
 	public void createNetwork() {
-		network = NetworkTestUtil.createNetwork(2);
 	}
 
 	@Test
 	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.setSameSession(network);
-		NetworkManager sender = network.get(0);
-		NetworkManager receiver = network.get(1);
+		// select two random nodes
+		NetworkManager sender = network.get(random.nextInt(networkSize / 2));
+		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		// putting of the public key is not necessary
 
@@ -60,8 +64,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	@Test
 	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.setDifferentSessions(network);
-		NetworkManager sender = network.get(0);
-		NetworkManager receiver = network.get(1);
+		NetworkManager sender = network.get(random.nextInt(networkSize / 2));
+		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		// put the public key of the sender into the cache
 		receiver.getSession().getKeyManager().putPublicKey(sender.getUserId(), getPublicKey(sender));
@@ -79,8 +83,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	@Test
 	public void testMessageWithWrongSignature() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.setDifferentSessions(network);
-		NetworkManager sender = network.get(0);
-		NetworkManager receiver = network.get(1);
+		NetworkManager sender = network.get(random.nextInt(networkSize / 2));
+		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		// put a wrong public key of the sender into the cache
 		receiver.getSession()
@@ -106,13 +110,9 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		}
 	}
 
-	@After
-	public void shutdownNetwork() {
-		NetworkTestUtil.shutdownNetwork(network);
-	}
-
 	@AfterClass
 	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 }

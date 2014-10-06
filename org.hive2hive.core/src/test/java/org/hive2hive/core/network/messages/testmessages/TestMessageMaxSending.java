@@ -1,7 +1,9 @@
-package org.hive2hive.core.network.messages;
+package org.hive2hive.core.network.messages.testmessages;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HTestData;
+import org.hive2hive.core.network.messages.AcceptanceReply;
+import org.hive2hive.core.network.messages.BaseMessageTest;
 
 /**
  * Test message to simulate rejecting receiver nodes. For further details see

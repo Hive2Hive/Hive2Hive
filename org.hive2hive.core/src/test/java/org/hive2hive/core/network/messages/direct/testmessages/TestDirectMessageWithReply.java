@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.messages.direct;
+package org.hive2hive.core.network.messages.direct.testmessages;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -29,12 +29,9 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 		String secret = NetworkTestUtil.randomString();
 
 		try {
-			networkManager
-					.getDataManager()
-					.putUnblocked(
-							new Parameters().setLocationKey(networkManager.getNodeId())
-									.setContentKey(contentKey).setData(new H2HTestData(secret)))
-					.awaitUninterruptibly();
+			networkManager.getDataManager().put(
+					new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
+							.setNetworkContent(new H2HTestData(secret)));
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();
 		}
@@ -59,12 +56,9 @@ public class TestDirectMessageWithReply extends DirectRequestMessage {
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
 			try {
-				networkManager
-						.getDataManager()
-						.putUnblocked(
-								new Parameters().setLocationKey(networkManager.getNodeId())
-										.setContentKey(contentKey).setData(new H2HTestData(receivedSecret)))
-						.awaitUninterruptibly();
+				networkManager.getDataManager().put(
+						new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
+								.setNetworkContent(new H2HTestData(receivedSecret)));
 			} catch (NoPeerConnectionException e) {
 				Assert.fail();
 			}

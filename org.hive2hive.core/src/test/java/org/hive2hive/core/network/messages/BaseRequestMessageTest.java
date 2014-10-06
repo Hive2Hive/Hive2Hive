@@ -5,23 +5,24 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.security.PublicKey;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
-
-import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.network.messages.TestMessageWithReply.TestCallBackHandler;
-import org.hive2hive.core.network.messages.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
+import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply;
+import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending;
+import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply.TestCallBackHandler;
+import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,8 +36,8 @@ import org.junit.Test;
  */
 public class BaseRequestMessageTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 5;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 	private static Random random = new Random();
 
 	@BeforeClass
@@ -85,20 +86,17 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
-		FutureGet futureGet = null;
+		NetworkContent content = null;
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().getUnblocked(
+			content = nodeB.getDataManager().get(
 					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
-			futureGet.awaitUninterruptibly();
-		} while (futureGet.data() == null);
+		} while (content == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
-		futureGet = nodeB.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
-		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
+		String receivedSecret = ((H2HTestData) content).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().get(
+				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey))).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 
@@ -135,20 +133,17 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
-		FutureGet futureGet = null;
+		NetworkContent content = null;
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().getUnblocked(
+			content = nodeB.getDataManager().get(
 					new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey));
-			futureGet.awaitUninterruptibly();
-		} while (futureGet.data() == null);
+		} while (content == null);
 
 		// load and verify if same secret was shared
-		String receivedSecret = ((H2HTestData) futureGet.data().object()).getTestString();
-		futureGet = nodeB.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
-		futureGet.awaitUninterruptibly();
-		String originalSecret = ((H2HTestData) futureGet.data().object()).getTestString();
+		String receivedSecret = ((H2HTestData) content).getTestString();
+		String originalSecret = ((H2HTestData) nodeB.getDataManager().get(
+				new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey))).getTestString();
 		assertEquals(originalSecret, receivedSecret);
 	}
 
