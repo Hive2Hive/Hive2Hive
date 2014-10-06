@@ -117,6 +117,7 @@ public class Parameters implements IParameters {
 		return networkContent;
 	}
 
+	@Override
 	public Parameters setData(Data data) {
 		this.data = data;
 		return this;
@@ -215,7 +216,7 @@ public class Parameters implements IParameters {
 		}
 
 		if (!vKey.equals(H2HConstants.TOMP2P_DEFAULT_KEY)) {
-			builder.append("version key = '").append(vKey).append("' ");
+			builder.append("version key = '").append(vKey.timestamp()).append("' ");
 		}
 
 		if (ttl != -1) {

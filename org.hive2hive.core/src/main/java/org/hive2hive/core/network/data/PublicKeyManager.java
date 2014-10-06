@@ -27,10 +27,10 @@ public class PublicKeyManager {
 
 	private final String userId;
 	private final KeyPair usersKeyPair;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 	private final Map<String, PublicKey> publicKeyCache;
 
-	public PublicKeyManager(String userId, KeyPair usersKeyPair, IDataManager dataManager) {
+	public PublicKeyManager(String userId, KeyPair usersKeyPair, DataManager dataManager) {
 		this.userId = userId;
 		this.usersKeyPair = usersKeyPair;
 		this.dataManager = dataManager;

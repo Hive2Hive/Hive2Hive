@@ -18,7 +18,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.NetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
-import org.hive2hive.core.network.data.futures.FutureConfirmListener;
 import org.hive2hive.core.network.data.futures.FutureDigestListener;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
 import org.hive2hive.core.network.data.futures.FuturePutListener;
@@ -32,9 +31,15 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Seppi
  */
-public class DataManager implements IDataManager {
+public class DataManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
+
+	public enum H2HPutStatus {
+		OK,
+		FAILED,
+		VERSION_FORK
+	};
 
 	private final NetworkManager networkManager;
 	private final IH2HEncryption encryptionTool;
@@ -53,12 +58,10 @@ public class DataManager implements IDataManager {
 		return networkManager.getConnection().getPeerDHT();
 	}
 
-	@Override
 	public IH2HEncryption getEncryption() {
 		return encryptionTool;
 	}
 
-	@Override
 	public boolean changeProtectionKey(IParameters parameters) {
 		FuturePut putFuture = changeProtectionKeyUnblocked(parameters);
 		if (putFuture == null) {
@@ -105,7 +108,6 @@ public class DataManager implements IDataManager {
 				.keyPair(parameters.getProtectionKeys()).start();
 	}
 
-	@Override
 	public H2HPutStatus put(IParameters parameters) {
 		FuturePut putFuture = putUnblocked(parameters);
 		if (putFuture == null) {
@@ -117,7 +119,6 @@ public class DataManager implements IDataManager {
 		return listener.await();
 	}
 
-	@Override
 	public H2HPutStatus putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKey) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(contentKey)
 				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setNetworkContent(content)
@@ -146,24 +147,15 @@ public class DataManager implements IDataManager {
 				data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
 			}
 
+			// cache data
+			parameters.setData(data);
+
 			return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
 					.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 		} catch (IOException e) {
 			logger.error("Put failed. {}.", parameters.toString(), e);
 			return null;
 		}
-	}
-
-	@Override
-	public H2HPutStatus confirm(IParameters parameters) {
-		FuturePut confirmFuture = confirmUnblocked(parameters);
-		if (confirmFuture == null) {
-			return H2HPutStatus.FAILED;
-		}
-
-		FutureConfirmListener listener = new FutureConfirmListener(parameters, this);
-		confirmFuture.addListener(listener);
-		return listener.await();
 	}
 
 	public FuturePut confirmUnblocked(IParameters parameters) {
@@ -181,7 +173,6 @@ public class DataManager implements IDataManager {
 				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).putConfirm().start();
 	}
 
-	@Override
 	public NetworkContent get(IParameters parameters) {
 		FutureGet futureGet = getUnblocked(parameters);
 		FutureGetListener listener = new FutureGetListener(parameters);
@@ -196,7 +187,6 @@ public class DataManager implements IDataManager {
 		return listener.awaitAndGet();
 	}
 
-	@Override
 	public NetworkContent getUserProfileTask(String userId) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 		FutureGet futureGet = getPeer().get(parameters.getLKey())
@@ -213,7 +203,7 @@ public class DataManager implements IDataManager {
 		return getPeer().get(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.descending().returnNr(1).start();
+				.descending().returnNr(1).fastGet(false).start();
 	}
 
 	public FutureGet getVersionUnblocked(IParameters parameters) {
@@ -228,7 +218,6 @@ public class DataManager implements IDataManager {
 				.getLatest().withDigest().fastGet(false).start();
 	}
 
-	@Override
 	public boolean remove(IParameters parameters) {
 		FutureRemove futureRemove = removeUnblocked(parameters);
 		FutureRemoveListener listener = new FutureRemoveListener(parameters, false, this);
@@ -236,7 +225,6 @@ public class DataManager implements IDataManager {
 		return listener.await();
 	}
 
-	@Override
 	public boolean removeVersion(IParameters parameters) {
 		FutureRemove futureRemove = removeVersionUnblocked(parameters);
 		FutureRemoveListener listener = new FutureRemoveListener(parameters, true, this);
@@ -244,7 +232,6 @@ public class DataManager implements IDataManager {
 		return listener.await();
 	}
 
-	@Override
 	public boolean removeUserProfileTask(String userId, Number160 contentKey, KeyPair protectionKey) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
 				.setContentKey(contentKey).setProtectionKeys(protectionKey);
@@ -268,9 +255,7 @@ public class DataManager implements IDataManager {
 				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 	}
 
-	@Override
 	public NavigableMap<Number640, Collection<Number160>> getDigestLatest(IParameters parameters) {
-		logger.debug("Get digest (latest). {}", parameters.toString());
 		FutureDigest futureDigest = getDigestLatestUnblocked(parameters);
 		FutureDigestListener listener = new FutureDigestListener(parameters);
 		futureDigest.addListener(listener);
@@ -278,19 +263,19 @@ public class DataManager implements IDataManager {
 	}
 
 	public FutureDigest getDigestLatestUnblocked(IParameters parameters) {
-		logger.debug("Get digest (latest, unblocked). {}", parameters.toString());
+		logger.debug("Get digest (latest). {}", parameters.toString());
 		return getPeer().digest(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.descending().returnNr(1).start();
+				.descending().returnNr(1).fastGet(false).start();
 	}
 
 	public FutureDigest getDigestUnblocked(IParameters parameters) {
-		logger.debug("Get digest (unblocked). {}", parameters.toString());
+		logger.debug("Get digest. {}", parameters.toString());
 		return getPeer().digest(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.start();
+				.fastGet(false).start();
 
 	}
 }

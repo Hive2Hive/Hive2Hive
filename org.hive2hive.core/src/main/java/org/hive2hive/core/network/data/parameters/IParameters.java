@@ -135,6 +135,13 @@ public interface IParameters {
 	public byte[] getHash();
 
 	/**
+	 * Set data which is used to put in network.
+	 * 
+	 * @param data used to put in network
+	 */
+	public IParameters setData(Data data);
+
+	/**
 	 * Get the data object itself.
 	 * 
 	 * @return data used to put in network
