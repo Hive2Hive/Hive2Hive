@@ -5,7 +5,8 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
@@ -24,12 +25,12 @@ public abstract class BasePutProcessStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(BasePutProcessStep.class);
 
-	protected final IDataManager dataManager;
+	protected final DataManager dataManager;
 	protected boolean putPerformed;
 
 	private IParameters parameters;
 
-	public BasePutProcessStep(IDataManager dataManager) {
+	public BasePutProcessStep(DataManager dataManager) {
 		this.dataManager = dataManager;
 	}
 
@@ -41,7 +42,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKeys)
 			throws PutFailedException {
 		Parameters params = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setVersionKey(content.getVersionKey()).setData(content).setProtectionKeys(protectionKeys)
+				.setVersionKey(content.getVersionKey()).setNetworkContent(content).setProtectionKeys(protectionKeys)
 				.setTTL(content.getTimeToLive());
 		put(params);
 	}
@@ -50,10 +51,10 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		// store for roll back
 		this.parameters = parameters;
 
-		boolean success = dataManager.put(parameters);
+		H2HPutStatus status = dataManager.put(parameters);
 		putPerformed = true;
 
-		if (!success) {
+		if (!status.equals(H2HPutStatus.OK)) {
 			throw new PutFailedException();
 		}
 	}

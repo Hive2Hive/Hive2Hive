@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.common.base;
 import java.security.PublicKey;
 
 import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
@@ -18,9 +18,9 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  */
 public abstract class BaseGetProcessStep extends ProcessStep {
 
-	protected final IDataManager dataManager;
+	protected final DataManager dataManager;
 
-	public BaseGetProcessStep(IDataManager dataManager) {
+	public BaseGetProcessStep(DataManager dataManager) {
 		this.dataManager = dataManager;
 	}
 
