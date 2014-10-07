@@ -16,6 +16,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processframework.RollbackReason;
@@ -67,10 +68,10 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			DataManager dataManager = networkManager.getDataManager();
 			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(userProfileTask, publicKey);
 			encrypted.setTimeToLive(userProfileTask.getTimeToLive());
-			boolean success = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
+			H2HPutStatus status = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			putPerformed = true;
 
-			if (!success) {
+			if (!status.equals(H2HPutStatus.OK)) {
 				throw new PutFailedException();
 			}
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
@@ -92,17 +93,16 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException e) {
-			logger.warn("Rollback of user profile task put failed. No connection. User ID = '{}', Content key = '{}'.",
-					userId, contentKey, e);
+			logger.warn("Rollback of user profile task put failed. No connection. user = '{}', content key = '{}'.", userId,
+					contentKey, e);
 			return;
 		}
 
 		boolean success = dataManager.removeUserProfileTask(userId, contentKey, protectionKey);
 		if (success) {
-			logger.debug("Rollback of user profile task put succeeded. User ID = '{}', Content key = '{}'.", userId,
-					contentKey);
+			logger.debug("Rollback of user profile task put succeeded. user = '{}', content key = '{}'.", userId, contentKey);
 		} else {
-			logger.warn("Rollback of user profile put failed. Remove failed. User ID = '{}', Content key = '{}'.", userId,
+			logger.warn("Rollback of user profile put failed. Remove failed. user = '{}', content key = '{}'.", userId,
 					contentKey);
 		}
 	}

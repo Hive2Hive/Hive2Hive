@@ -13,6 +13,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
@@ -102,9 +103,9 @@ public class RemoveUserProfileTaskStep extends ProcessStep {
 		}
 
 		encrypted.setTimeToLive(upTask.getTimeToLive());
-		boolean success = dataManager.putUserProfileTask(userId, upTask.getContentKey(), encrypted,
+		H2HPutStatus status = dataManager.putUserProfileTask(userId, upTask.getContentKey(), encrypted,
 				upTask.getProtectionKey());
-		if (success) {
+		if (status.equals(H2HPutStatus.OK)) {
 			logger.debug("Rollback of removing user profile task succeeded. User ID = '{}', Content key = '{}'.", userId,
 					upTask.getContentKey());
 		} else {
