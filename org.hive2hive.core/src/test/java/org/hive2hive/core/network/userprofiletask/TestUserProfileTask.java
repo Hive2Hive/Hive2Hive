@@ -19,8 +19,7 @@ public class TestUserProfileTask extends UserProfileTask {
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-
+		// do nothing
 	}
 
 }
