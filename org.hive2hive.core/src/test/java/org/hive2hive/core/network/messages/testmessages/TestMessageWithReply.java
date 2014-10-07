@@ -61,11 +61,9 @@ public class TestMessageWithReply extends RoutedRequestMessage {
 		public void handleResponseMessage(ResponseMessage responseMessage) {
 			String receivedSecret = (String) responseMessage.getContent();
 			try {
-				networkManager
-						.getDataManager()
-						.putUnblocked(
-								new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
-										.setNetworkContent(new H2HTestData(receivedSecret))).awaitUninterruptibly();
+				networkManager.getDataManager().put(
+						new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
+								.setNetworkContent(new H2HTestData(receivedSecret)));
 			} catch (NoPeerConnectionException e) {
 				Assert.fail();
 			}
