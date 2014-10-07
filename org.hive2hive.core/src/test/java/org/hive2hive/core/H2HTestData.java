@@ -5,7 +5,7 @@ import org.hive2hive.core.model.NetworkContent;
 public class H2HTestData extends NetworkContent {
 
 	private static final long serialVersionUID = -4190279666159015217L;
-	private final String testString;
+	private String testString;
 
 	public H2HTestData(String testContent) {
 		this.testString = testContent;
@@ -18,6 +18,10 @@ public class H2HTestData extends NetworkContent {
 
 	public String getTestString() {
 		return testString;
+	}
+
+	public void setTestString(String testString) {
+		this.testString = testString;
 	}
 
 }

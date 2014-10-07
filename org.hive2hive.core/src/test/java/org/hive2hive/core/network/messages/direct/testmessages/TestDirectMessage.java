@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.common.base;
+package org.hive2hive.core.network.messages.direct.testmessages;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -25,8 +25,8 @@ public class TestDirectMessage extends BaseDirectMessage {
 	private final String contentKey;
 	private final H2HTestData wrapper;
 
-	public TestDirectMessage(String targetKey, PeerAddress targetAddress, String contentKey,
-			H2HTestData wrapper, boolean needsRedirectedSend) {
+	public TestDirectMessage(String targetKey, PeerAddress targetAddress, String contentKey, H2HTestData wrapper,
+			boolean needsRedirectedSend) {
 		super(targetKey, targetAddress, needsRedirectedSend);
 		this.contentKey = contentKey;
 		this.wrapper = wrapper;
@@ -35,11 +35,9 @@ public class TestDirectMessage extends BaseDirectMessage {
 	@Override
 	public void run() {
 		try {
-			networkManager
-					.getDataManager()
-					.putUnblocked(
-							new Parameters().setLocationKey(networkManager.getNodeId())
-									.setContentKey(contentKey).setData(wrapper)).awaitUninterruptibly();
+			networkManager.getDataManager().put(
+					new Parameters().setLocationKey(networkManager.getNodeId()).setContentKey(contentKey)
+							.setNetworkContent(wrapper));
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();
 		}
