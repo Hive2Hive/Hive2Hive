@@ -4,7 +4,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A process step which removes a {@link NetworkContent} object under the given keys from the network.</br>
+ * A process step which removes a {@link BaseNetworkContent} object under the given keys from the network.</br>
  * <b>Important:</b> Use only this process step to remove data from the network so that in case of failure a
  * appropriate handling is triggered.
  * 

@@ -4,7 +4,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -34,15 +34,15 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		this.dataManager = dataManager;
 	}
 
-	protected void put(PublicKey locationKey, String contentKey, NetworkContent content, KeyPair protectionKey)
+	protected void put(PublicKey locationKey, String contentKey, BaseNetworkContent content, KeyPair protectionKey)
 			throws PutFailedException {
 		put(H2HDefaultEncryption.key2String(locationKey), contentKey, content, protectionKey);
 	}
 
-	protected void put(String locationKey, String contentKey, NetworkContent content, KeyPair protectionKeys)
+	protected void put(String locationKey, String contentKey, BaseNetworkContent content, KeyPair protectionKeys)
 			throws PutFailedException {
 		Parameters params = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setVersionKey(content.getVersionKey()).setNetworkContent(content).setProtectionKeys(protectionKeys)
+				.setNetworkContent(content).setProtectionKeys(protectionKeys)
 				.setTTL(content.getTimeToLive());
 		put(params);
 	}

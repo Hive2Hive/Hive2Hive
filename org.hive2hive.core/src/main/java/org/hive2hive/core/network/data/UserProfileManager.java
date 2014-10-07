@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
  * order.
  * 
  * @author Nico, Seppi
- * 
  */
 public class UserProfileManager {
 
