@@ -160,7 +160,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 			Thread.sleep(Math.abs(new Random().nextLong() % 100));
 		}
 
-		H2HWaiter waiter = new H2HWaiter(20);
+		H2HWaiter waiter = new H2HWaiter(60);
 		boolean allFinished;
 		do {
 			waiter.tickASecond();
