@@ -8,7 +8,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 
@@ -26,7 +26,8 @@ public class Parameters implements IParameters {
 	private Number160 dKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 cKey = H2HConstants.TOMP2P_DEFAULT_KEY;
 	private Number160 vKey = H2HConstants.TOMP2P_DEFAULT_KEY;
-	private NetworkContent networkContent;
+	private Number160 bKey = null;
+	private BaseNetworkContent networkContent;
 	private Data data;
 	private KeyPair protectionKeys;
 	private KeyPair newProtectionKeys;
@@ -107,13 +108,23 @@ public class Parameters implements IParameters {
 		return vKey;
 	}
 
-	public Parameters setNetworkContent(NetworkContent networkContent) {
+	public Parameters setBasedOnKey(Number160 basedOnKey) {
+		this.bKey = basedOnKey;
+		return this;
+	}
+
+	@Override
+	public Number160 getBasedOnKey() {
+		return bKey;
+	}
+
+	public Parameters setNetworkContent(BaseNetworkContent networkContent) {
 		this.networkContent = networkContent;
 		return this;
 	}
 
 	@Override
-	public NetworkContent getNetworkContent() {
+	public BaseNetworkContent getNetworkContent() {
 		return networkContent;
 	}
 
@@ -127,7 +138,6 @@ public class Parameters implements IParameters {
 	public Data getData() {
 		return data;
 	}
-
 
 	public Parameters setProtectionKeys(KeyPair protectionKeys) {
 		this.protectionKeys = protectionKeys;

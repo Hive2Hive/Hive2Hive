@@ -3,6 +3,7 @@ package org.hive2hive.core.model;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
@@ -18,7 +19,7 @@ public class UserProfileTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = MetaFileTest.class;
+		testClass = UserProfileTest.class;
 		beforeClass();
 	}
 

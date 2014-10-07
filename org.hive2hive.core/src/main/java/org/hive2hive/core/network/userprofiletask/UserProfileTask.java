@@ -11,7 +11,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -29,7 +29,7 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  * 
  * <b>User Profile Task Queue</b> All {@link UserProfileTask} objects have to be stored (encrypted with the
  * receivers public key) on the proxy node of the receiver. The {@link DataManager} provides the method
- * {@link DataManager#putUserProfileTask(String, Number160, NetworkContent)} which stores an
+ * {@link DataManager#putUserProfileTask(String, Number160, BaseNetworkContent)} which stores an
  * {@link UserProfileTask} object in a specific domain (see {@link H2HConstants#USER_PROFILE_TASK_DOMAIN}).
  * For this purpose the constructor generates a content key which is based on a time stamp (taking the time at
  * creating the object). This allows us to build an implicit queue on the proxy node. The tasks are sorted
@@ -41,7 +41,7 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  * 
  * @author Christian, Seppi, Nico
  */
-public abstract class UserProfileTask extends NetworkContent {
+public abstract class UserProfileTask extends BaseNetworkContent {
 
 	private static final long serialVersionUID = -773794512479641000L;
 

@@ -3,7 +3,7 @@ package org.hive2hive.core.network.data;
 import java.util.concurrent.CountDownLatch;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 
 class QueueEntry {
 

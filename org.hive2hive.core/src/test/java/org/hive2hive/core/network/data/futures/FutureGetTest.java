@@ -77,7 +77,7 @@ public class FutureGetTest extends H2HJUnitTest {
 			data.generateVersionKey();
 
 			Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-					.setVersionKey(data.getVersionKey()).setNetworkContent(data);
+					.setVersionKey(data.getVersionKey()).setBasedOnKey(data.getBasedOnKey()).setNetworkContent(data);
 			nodeA.getDataManager().put(parameters);
 		}
 

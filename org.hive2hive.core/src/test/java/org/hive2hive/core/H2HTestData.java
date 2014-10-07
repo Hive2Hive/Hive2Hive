@@ -1,8 +1,8 @@
 package org.hive2hive.core;
 
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.versioned.BaseVersionedNetworkContent;
 
-public class H2HTestData extends NetworkContent {
+public class H2HTestData extends BaseVersionedNetworkContent {
 
 	private static final long serialVersionUID = -4190279666159015217L;
 	private String testString;

@@ -1,4 +1,4 @@
-package org.hive2hive.core.model;
+package org.hive2hive.core.model.versioned;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,7 @@ import org.hive2hive.core.TimeToLiveStore;
  * @author Nico
  * 
  */
-public class Locations extends NetworkContent {
+public class Locations extends BaseVersionedNetworkContent {
 
 	private static final long serialVersionUID = 3538720256521250650L;
 

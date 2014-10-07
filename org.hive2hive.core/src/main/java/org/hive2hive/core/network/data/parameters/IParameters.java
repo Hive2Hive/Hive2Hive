@@ -6,7 +6,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
 
 /**
@@ -69,6 +69,13 @@ public interface IParameters {
 	public Number160 getVersionKey();
 
 	/**
+	 * Reference to predecessor version, if any.
+	 * 
+	 * @return hashed based on key
+	 */
+	public Number160 getBasedOnKey();
+
+	/**
 	 * Get the key containing all four <code>TomP2P</code> key dimensions.
 	 * 
 	 * @return key containing the location, domain, content and version key
@@ -87,7 +94,7 @@ public interface IParameters {
 	 * 
 	 * @return data to store
 	 */
-	public NetworkContent getNetworkContent();
+	public BaseNetworkContent getNetworkContent();
 
 	/**
 	 * All content in the network has a time-to-live value (in seconds). If data is expired it gets

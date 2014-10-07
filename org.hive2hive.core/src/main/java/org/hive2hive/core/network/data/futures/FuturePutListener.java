@@ -13,7 +13,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
+ * A put future adapter for verifying a put of a {@link BaseNetworkContent} object. Provides failure handling and
  * a blocking wait.</br></br>
  * 
  * <b>Failure Handling</b></br>

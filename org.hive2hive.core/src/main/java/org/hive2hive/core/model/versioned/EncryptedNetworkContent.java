@@ -1,15 +1,13 @@
-package org.hive2hive.core.security;
+package org.hive2hive.core.model.versioned;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.model.NetworkContent;
 
 /**
  * This class holds the bytes of an encrypted content and its initialization vector.
  * 
  * @author Christian
- * 
  */
-public final class EncryptedNetworkContent extends NetworkContent {
+public final class EncryptedNetworkContent extends BaseVersionedNetworkContent {
 
 	// TODO maybe this class should not just represent symmetric encrypted content but also asymmetric	
 

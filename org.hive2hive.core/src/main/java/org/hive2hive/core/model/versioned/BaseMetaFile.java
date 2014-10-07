@@ -1,4 +1,4 @@
-package org.hive2hive.core.model;
+package org.hive2hive.core.model.versioned;
 
 import java.security.PublicKey;
 
@@ -10,14 +10,14 @@ import org.hive2hive.core.TimeToLiveStore;
  * @author Nico
  * 
  */
-public abstract class MetaFile extends NetworkContent {
+public abstract class BaseMetaFile extends BaseVersionedNetworkContent {
 
 	private static final long serialVersionUID = -7819224117319481636L;
 
 	protected final PublicKey id;
 	private final boolean isSmall;
 
-	public MetaFile(PublicKey id, boolean isSmall) {
+	public BaseMetaFile(PublicKey id, boolean isSmall) {
 		this.id = id;
 		this.isSmall = isSmall;
 	}

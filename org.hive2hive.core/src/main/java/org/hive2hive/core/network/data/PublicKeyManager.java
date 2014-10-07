@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -93,11 +93,11 @@ public class PublicKeyManager {
 		}
 
 		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY);
-		NetworkContent content = dataManager.get(parameters);
+		BaseNetworkContent content = dataManager.get(parameters);
 		return evaluateResult(content, userId);
 	}
 
-	private PublicKey evaluateResult(NetworkContent content, String requestingUserId) throws GetFailedException {
+	private PublicKey evaluateResult(BaseNetworkContent content, String requestingUserId) throws GetFailedException {
 		if (content == null) {
 			logger.warn("Did not find the public key of user '{}'.", requestingUserId);
 			throw new GetFailedException("No public key found.");

@@ -1,4 +1,4 @@
-package org.hive2hive.core.model;
+package org.hive2hive.core.model.versioned;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -8,6 +8,10 @@ import java.security.PublicKey;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
@@ -16,7 +20,7 @@ import org.hive2hive.core.security.EncryptionUtil;
  * @author Nico, Seppi
  * 
  */
-public class UserProfile extends NetworkContent {
+public class UserProfile extends BaseVersionedNetworkContent {
 
 	private static final long serialVersionUID = -8089242126512434561L;
 

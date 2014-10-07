@@ -4,6 +4,8 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Set;
 
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+
 /**
  * An index stored in the user profile that represents a file in the directory
  * 

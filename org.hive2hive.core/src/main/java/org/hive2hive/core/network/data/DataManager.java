@@ -15,7 +15,7 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
 import org.hive2hive.core.network.data.futures.FutureDigestListener;
@@ -119,7 +119,8 @@ public class DataManager {
 		return listener.await();
 	}
 
-	public H2HPutStatus putUserProfileTask(String userId, Number160 contentKey, NetworkContent content, KeyPair protectionKey) {
+	public H2HPutStatus putUserProfileTask(String userId, Number160 contentKey, BaseNetworkContent content,
+			KeyPair protectionKey) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setContentKey(contentKey)
 				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setNetworkContent(content)
 				.setProtectionKeys(protectionKey).setTTL(content.getTimeToLive());
@@ -137,7 +138,10 @@ public class DataManager {
 		logger.debug("Put. {}", parameters.toString());
 		try {
 			Data data = new Data(parameters.getNetworkContent());
-			data.ttlSeconds(parameters.getTTL()).addBasedOn(parameters.getNetworkContent().getBasedOnKey());
+			data.ttlSeconds(parameters.getTTL());
+			if (parameters.getBasedOnKey() != null) {
+				data.addBasedOn(parameters.getBasedOnKey());
+			}
 			if (parameters.hasPrepareFlag()) {
 				data.prepareFlag();
 			}
@@ -162,7 +166,10 @@ public class DataManager {
 		logger.debug("Confirm. {}", parameters.toString());
 
 		Data data = new Data();
-		data.ttlSeconds(parameters.getTTL()).addBasedOn(parameters.getNetworkContent().getBasedOnKey());
+		data.ttlSeconds(parameters.getTTL());
+		if (parameters.getBasedOnKey() != null) {
+			data.addBasedOn(parameters.getBasedOnKey());
+		}
 
 		// check if data to put is content protected
 		if (parameters.getProtectionKeys() != null) {
@@ -173,21 +180,21 @@ public class DataManager {
 				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).putConfirm().start();
 	}
 
-	public NetworkContent get(IParameters parameters) {
+	public BaseNetworkContent get(IParameters parameters) {
 		FutureGet futureGet = getUnblocked(parameters);
 		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
 
-	public NetworkContent getVersion(IParameters parameters) {
+	public BaseNetworkContent getVersion(IParameters parameters) {
 		FutureGet futureGet = getVersionUnblocked(parameters);
 		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
 
-	public NetworkContent getUserProfileTask(String userId) {
+	public BaseNetworkContent getUserProfileTask(String userId) {
 		IParameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN);
 		FutureGet futureGet = getPeer().get(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.ZERO, Number160.ZERO))

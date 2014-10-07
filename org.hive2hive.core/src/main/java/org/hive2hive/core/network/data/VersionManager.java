@@ -25,16 +25,16 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.versioned.BaseVersionedNetworkContent;
+import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.EncryptedNetworkContent;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VersionManager<T extends NetworkContent> {
+public class VersionManager<T extends BaseVersionedNetworkContent> {
 
 	private static final Logger logger = LoggerFactory.getLogger(VersionManager.class);
 
@@ -210,8 +210,8 @@ public class VersionManager<T extends NetworkContent> {
 
 			IParameters parameters = new Parameters().setLocationKey(this.parameters.getLocationKey())
 					.setContentKey(this.parameters.getContentKey()).setVersionKey(encrypted.getVersionKey())
-					.setNetworkContent(encrypted).setProtectionKeys(protectionKeys).setTTL(networkContent.getTimeToLive())
-					.setPrepareFlag(true);
+					.setBasedOnKey(encrypted.getBasedOnKey()).setNetworkContent(encrypted).setProtectionKeys(protectionKeys)
+					.setTTL(networkContent.getTimeToLive()).setPrepareFlag(true);
 
 			H2HPutStatus status = dataManager.put(parameters);
 			if (status.equals(H2HPutStatus.FAILED)) {

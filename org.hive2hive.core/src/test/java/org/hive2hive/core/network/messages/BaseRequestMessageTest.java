@@ -12,7 +12,7 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -86,7 +86,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
-		NetworkContent content = null;
+		BaseNetworkContent content = null;
 		do {
 			w.tickASecond();
 			content = nodeB.getDataManager().get(
@@ -133,7 +133,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 
 		// wait till callback handler gets executed
 		H2HWaiter w = new H2HWaiter(10);
-		NetworkContent content = null;
+		BaseNetworkContent content = null;
 		do {
 			w.tickASecond();
 			content = nodeB.getDataManager().get(

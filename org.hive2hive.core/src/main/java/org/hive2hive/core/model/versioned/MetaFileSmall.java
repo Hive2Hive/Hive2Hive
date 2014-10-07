@@ -1,4 +1,4 @@
-package org.hive2hive.core.model;
+package org.hive2hive.core.model.versioned;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -7,12 +7,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.hive2hive.core.model.FileVersion;
+
 /**
  * Holds meta data of a small file in the DHT
  * 
  * @author Nico, Seppi
  */
-public class MetaFileSmall extends MetaFile {
+public class MetaFileSmall extends BaseMetaFile {
 
 	private static final long serialVersionUID = -3385321499412137545L;
 	private final List<FileVersion> versions;
