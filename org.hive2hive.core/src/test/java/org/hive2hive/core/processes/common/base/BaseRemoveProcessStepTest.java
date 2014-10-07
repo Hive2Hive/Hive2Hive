@@ -2,28 +2,19 @@ package org.hive2hive.core.processes.common.base;
 
 import static org.junit.Assert.assertNull;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import net.tomp2p.dht.FutureGet;
-import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.Number640;
-import net.tomp2p.rpc.DigestInfo;
+import java.util.ArrayList;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,8 +27,8 @@ import org.junit.Test;
  */
 public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 2;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -48,74 +39,44 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemoveProcessStepSuccess() throws NoPeerConnectionException {
-		String locationKey = network.get(0).getNodeId();
+		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// put some data to remove
-		network.get(0).getDataManager()
-				.putUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(testData))
-				.awaitUninterruptibly();
+		NetworkTestUtil.getRandomNode(network).getDataManager()
+				.put(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setNetworkContent(testData));
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStep putStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0).getDataManager());
-		TestExecutionUtil.executeProcess(putStep);
+		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, NetworkTestUtil.getRandomNode(
+				network).getDataManager());
+		TestExecutionUtil.executeProcessTillSucceded(removeStep);
 
-		FutureGet futureGet = network.get(0).getDataManager()
-				.getUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.data());
+		assertNull(NetworkTestUtil.getRandomNode(network).getDataManager()
+				.get(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
 	}
 
 	@Test
 	public void testRemoveProcessStepRollBack() throws NoPeerConnectionException, InvalidProcessStateException {
-		String locationKey = network.get(0).getNodeId();
+		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
-		Number640 key = new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-				Number160.ZERO);
 		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
 
 		// put some data to remove
-		network.get(0).getDataManager()
-				.putUnblocked(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setData(testData))
-				.awaitUninterruptibly();
-
-		// manipulate the nodes, remove will not work
-		network.get(0).getConnection().getPeerDHT().peerBean().digestStorage(new FakeGetTestStorage(key));
-		network.get(1).getConnection().getPeerDHT().peerBean().digestStorage(new FakeGetTestStorage(key));
+		NetworkTestUtil.getRandomNode(network).getDataManager()
+				.put(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setNetworkContent(testData));
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStep removeStep = new TestRemoveProcessStep(locationKey, contentKey, network.get(0)
+		TestRemoveProcessStepRollBack removeStep = new TestRemoveProcessStepRollBack(locationKey, contentKey, network.get(0)
 				.getDataManager());
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		removeStep.attachListener(listener);
-		removeStep.start();
-		TestExecutionUtil.waitTillFailed(listener, 10);
+
+		TestExecutionUtil.executeProcessTillFailed(removeStep);
 	}
 
 	@AfterClass
 	public static void cleanAfterClass() {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
-	}
-
-	private class FakeGetTestStorage extends H2HStorageMemory {
-
-		private final Number640 key;
-
-		public FakeGetTestStorage(Number640 key) {
-			super();
-			this.key = key;
-		}
-
-		@Override
-		public DigestInfo digest(Number640 from, Number640 to, int limit, boolean ascending) {
-			DigestInfo digestInfo = new DigestInfo();
-			Set<Number160> zeroSet = new HashSet<Number160>(1);
-			zeroSet.add(Number160.ZERO);
-			digestInfo.put(key, zeroSet);
-			return digestInfo;
-		}
 	}
 
 	/**
@@ -128,7 +89,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		private final String locationKey;
 		private final String contentKey;
 
-		public TestRemoveProcessStep(String locationKey, String contentKey, IDataManager dataManager) {
+		public TestRemoveProcessStep(String locationKey, String contentKey, DataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
@@ -141,6 +102,33 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 			} catch (RemoveFailedException e) {
 				throw new ProcessExecutionException(e);
 			}
+		}
+	}
+
+	/**
+	 * A simple remove process step which always roll backs.
+	 * 
+	 * @author Seppi
+	 */
+	private class TestRemoveProcessStepRollBack extends BaseRemoveProcessStep {
+
+		private final String locationKey;
+		private final String contentKey;
+
+		public TestRemoveProcessStepRollBack(String locationKey, String contentKey, DataManager dataManager) {
+			super(dataManager);
+			this.locationKey = locationKey;
+			this.contentKey = contentKey;
+		}
+
+		@Override
+		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+			try {
+				remove(locationKey, contentKey, null);
+			} catch (RemoveFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
+			throw new ProcessExecutionException("Rollback test.");
 		}
 	}
 }

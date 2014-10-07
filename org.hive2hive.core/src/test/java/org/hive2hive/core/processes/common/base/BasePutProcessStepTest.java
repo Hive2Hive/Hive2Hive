@@ -4,24 +4,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.util.List;
-
-import net.tomp2p.dht.FutureGet;
+import java.util.ArrayList;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
-import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryMode;
+import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryPutMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,8 +31,8 @@ import org.junit.Test;
  */
 public class BasePutProcessStepTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 2;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -46,8 +43,8 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutProcessSuccess() throws ClassNotFoundException, IOException, NoPeerConnectionException {
-		NetworkManager putter = network.get(0);
-		NetworkManager proxy = network.get(1);
+		NetworkManager putter = NetworkTestUtil.getRandomNode(network);
+		NetworkManager proxy = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = proxy.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
@@ -56,39 +53,40 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
 				putter.getDataManager());
-		TestExecutionUtil.executeProcess(putStep);
+		TestExecutionUtil.executeProcessTillSucceded(putStep);
 
-		FutureGet futureGet = proxy.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
-		futureGet.awaitUninterruptibly();
-		assertEquals(data, ((H2HTestData) futureGet.data().object()).getTestString());
+		assertEquals(
+				data,
+				((H2HTestData) proxy.getDataManager().get(
+						new Parameters().setLocationKey(locationKey).setContentKey(contentKey))).getTestString());
 	}
 
 	@Test
 	public void testPutProcessFailure() throws NoPeerConnectionException, InvalidProcessStateException {
-		NetworkManager putter = network.get(0);
-		((H2HStorageMemory) putter.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
-		NetworkManager proxy = network.get(1);
-		((H2HStorageMemory) proxy.getConnection().getPeerDHT().storageLayer()).setMode(StorageMemoryMode.DENY_ALL);
+		try {
+			NetworkManager putter = NetworkTestUtil.getRandomNode(network);
+			NetworkManager proxy = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = proxy.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		String data = NetworkTestUtil.randomString();
+			for (int i = 0; i < networkSize; i++) {
+				((H2HStorageMemory) network.get(i).getConnection().getPeerDHT().storageLayer())
+						.setPutMode(StorageMemoryPutMode.DENY_ALL);
+			}
+			String locationKey = proxy.getNodeId();
+			String contentKey = NetworkTestUtil.randomString();
+			String data = NetworkTestUtil.randomString();
 
-		// initialize the process and the one and only step to test
-		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
-				putter.getDataManager());
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		putStep.attachListener(listener);
-		putStep.start();
+			// initialize the process and the one and only step to test
+			TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
+					putter.getDataManager());
+			TestExecutionUtil.executeProcessTillFailed(putStep);
 
-		// wait for the process to finish
-		TestExecutionUtil.waitTillFailed(listener, 10);
-
-		FutureGet futureGet = proxy.getDataManager().getUnblocked(
-				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.data());
+			assertNull(proxy.getDataManager().get(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
+		} finally {
+			for (int i = 0; i < networkSize; i++) {
+				((H2HStorageMemory) network.get(i).getConnection().getPeerDHT().storageLayer())
+						.setPutMode(StorageMemoryPutMode.STANDARD);
+			}
+		}
 	}
 
 	@AfterClass
@@ -108,7 +106,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		private final String contentKey;
 		private final H2HTestData data;
 
-		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data, IDataManager dataManager) {
+		public TestPutProcessStep(String locationKey, String contentKey, H2HTestData data, DataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
