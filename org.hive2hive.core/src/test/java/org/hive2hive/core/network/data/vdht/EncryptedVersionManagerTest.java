@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data;
+package org.hive2hive.core.network.data.vdht;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * @author Seppi
  */
-public class VersionManagerTest extends H2HJUnitTest {
+public class EncryptedVersionManagerTest extends H2HJUnitTest {
 
 	private static ArrayList<NetworkManager> network;
 	private static final int networkSize = 10;
@@ -49,7 +49,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = VersionManagerTest.class;
+		testClass = EncryptedVersionManagerTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
 	}
@@ -61,7 +61,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		H2HTestData version = new H2HTestData("version0");
@@ -84,11 +84,11 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(conurrencyFactor);
-		ArrayList<VersionManager<H2HTestData>> versionManagers = new ArrayList<VersionManager<H2HTestData>>(conurrencyFactor);
+		ArrayList<EncryptedVersionManager<H2HTestData>> versionManagers = new ArrayList<EncryptedVersionManager<H2HTestData>>(conurrencyFactor);
 		for (int i = 0; i < conurrencyFactor; i++) {
 			NetworkManager node = NetworkTestUtil.getRandomNode(network);
 			nodes.add(node);
-			VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(),
+			EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(),
 					encryptionKey, locationKey, contentKey);
 			versionManagers.add(versionManager);
 		}
@@ -121,7 +121,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		H2HTestData versionA = new H2HTestData(NetworkTestUtil.randomString());
@@ -138,7 +138,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		versionManager.get();
@@ -151,7 +151,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		H2HTestData version0 = new H2HTestData("version0");
@@ -201,7 +201,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 				storage.setManipulatedMap(manipulatedMap);
 			}
 
-			VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(NetworkTestUtil.getRandomNode(
+			EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(NetworkTestUtil.getRandomNode(
 					network).getDataManager(), encryptionKey, locationKey, contentKey);
 
 			// should trigger a get failed exception (version fork)
@@ -224,11 +224,11 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 
 		IH2HEncryption encryption = new H2HDefaultEncryption();
-		VersionManager<H2HTestData> versionManagerA = new VersionManager<H2HTestData>(nodeA.getDataManager(), encryption,
+		EncryptedVersionManager<H2HTestData> versionManagerA = new EncryptedVersionManager<H2HTestData>(nodeA.getDataManager(), encryption,
 				encryptionKey, locationKey, contentKey);
 		SecretKey otherEncryptionKey = PasswordUtil.generateAESKeyFromPassword(NetworkTestUtil.randomString(),
 				NetworkTestUtil.randomString(), AES_KEYLENGTH.BIT_256);
-		VersionManager<H2HTestData> versionManagerB = new VersionManager<H2HTestData>(nodeB.getDataManager(), encryption,
+		EncryptedVersionManager<H2HTestData> versionManagerB = new EncryptedVersionManager<H2HTestData>(nodeB.getDataManager(), encryption,
 				otherEncryptionKey, locationKey, contentKey);
 
 		H2HTestData version = new H2HTestData("version0");
@@ -246,7 +246,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		H2HTestData version0 = new H2HTestData("version0");
@@ -263,7 +263,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair();
@@ -282,7 +282,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair();
@@ -333,7 +333,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair();
@@ -392,7 +392,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		String locationKey = NetworkTestUtil.randomString();
 		String contentKey = NetworkTestUtil.randomString();
 
-		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
+		EncryptedVersionManager<H2HTestData> versionManager = new EncryptedVersionManager<H2HTestData>(node.getDataManager(), encryptionKey,
 				locationKey, contentKey);
 
 		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair();

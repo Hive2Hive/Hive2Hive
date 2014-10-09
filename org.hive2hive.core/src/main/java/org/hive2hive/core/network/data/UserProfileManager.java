@@ -9,6 +9,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.data.vdht.EncryptedVersionManager;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class UserProfileManager {
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
 	private static final long MAX_MODIFICATION_TIME = 1000;
 
-	private final VersionManager<UserProfile> versionManager;
+	private final EncryptedVersionManager<UserProfile> versionManager;
 	private final UserCredentials credentials;
 
 	private final Object queueWaiter = new Object();
@@ -40,7 +41,7 @@ public class UserProfileManager {
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {
 		this.credentials = credentials;
-		this.versionManager = new VersionManager<UserProfile>(dataManager, PasswordUtil.generateAESKeyFromPassword(
+		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, PasswordUtil.generateAESKeyFromPassword(
 				credentials.getPassword(), credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE),
 				credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		this.running = new AtomicBoolean(true);

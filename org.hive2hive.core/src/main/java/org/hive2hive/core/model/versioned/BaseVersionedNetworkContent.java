@@ -1,10 +1,8 @@
 package org.hive2hive.core.model.versioned;
 
-import java.io.IOException;
+import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.model.BaseNetworkContent;
-
-import net.tomp2p.peers.Number160;
 
 /**
  * All data of <code>Hive2Hive</code> which has to be stored in the DHT and are frequently manipulated are
@@ -45,10 +43,8 @@ public abstract class BaseVersionedNetworkContent extends BaseNetworkContent {
 	/**
 	 * Call this method in front of a put into the network if the data is a new version or will have other
 	 * versions.
-	 * 
-	 * @throws IOException
 	 */
-	public void generateVersionKey() throws IOException {
+	public void generateVersionKey() {
 		// re-attach version keys
 		basedOnKey = versionKey;
 		// increase counter

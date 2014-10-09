@@ -1,4 +1,4 @@
-package org.hive2hive.core.network.data;
+package org.hive2hive.core.network.data.vdht;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -27,6 +27,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.BaseVersionedNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -34,9 +35,9 @@ import org.hive2hive.core.security.IH2HEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VersionManager<T extends BaseVersionedNetworkContent> {
+public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> {
 
-	private static final Logger logger = LoggerFactory.getLogger(VersionManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(EncryptedVersionManager.class);
 
 	private final DataManager dataManager;
 	private final IH2HEncryption encryption;
@@ -56,11 +57,11 @@ public class VersionManager<T extends BaseVersionedNetworkContent> {
 	private Cache<EncryptedNetworkContent> encryptedContentCache = new Cache<EncryptedNetworkContent>();
 	private Cache<T> contentCache = new Cache<T>();
 
-	public VersionManager(DataManager dataManager, SecretKey encryptionKey, String locationKey, String contentKey) {
+	public EncryptedVersionManager(DataManager dataManager, SecretKey encryptionKey, String locationKey, String contentKey) {
 		this(dataManager, dataManager.getEncryption(), encryptionKey, locationKey, contentKey);
 	}
 
-	public VersionManager(DataManager dataManager, IH2HEncryption encryption, SecretKey encryptionKey, String locationKey,
+	public EncryptedVersionManager(DataManager dataManager, IH2HEncryption encryption, SecretKey encryptionKey, String locationKey,
 			String contentKey) {
 		this.dataManager = dataManager;
 		this.encryption = encryption;
