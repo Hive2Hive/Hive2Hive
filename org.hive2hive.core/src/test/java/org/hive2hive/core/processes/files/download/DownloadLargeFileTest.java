@@ -1,9 +1,9 @@
-package org.hive2hive.core.processes.files;
+package org.hive2hive.core.processes.files.download;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -12,7 +12,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
@@ -29,10 +29,10 @@ import org.junit.Test;
  */
 public class DownloadLargeFileTest extends H2HJUnitTest {
 
-	private final static int networkSize = 2;
+	private final static int networkSize = 6;
 	private final static int CHUNK_SIZE = 1024;
 
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 	private static NetworkManager uploader;
 	private static NetworkManager downloader;
 	private static UserCredentials userCredentials;
