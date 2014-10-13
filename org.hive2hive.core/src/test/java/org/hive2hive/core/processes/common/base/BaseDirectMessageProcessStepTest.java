@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -20,11 +19,11 @@ import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessage;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply;
+import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.H2HWaiter;
@@ -247,10 +246,4 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	private class DenyingMessageReplyHandler implements ObjectDataReply {
-		@Override
-		public Object reply(PeerAddress sender, Object request) throws Exception {
-			return AcceptanceReply.FAILURE;
-		}
-	}
 }

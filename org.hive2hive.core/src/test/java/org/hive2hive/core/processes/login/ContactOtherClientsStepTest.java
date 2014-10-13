@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.rpc.ObjectDataReply;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -16,6 +15,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.processes.context.LoginProcessContext;
+import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -224,18 +224,6 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 	public static void endTest() {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
-	}
-
-	/**
-	 * A message reply handler which rejects all message.
-	 * 
-	 * @author Seppi
-	 */
-	private static class DenyingMessageReplyHandler implements ObjectDataReply {
-		@Override
-		public Object reply(PeerAddress sender, Object request) throws Exception {
-			return null;
-		}
 	}
 
 }
