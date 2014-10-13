@@ -18,9 +18,12 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
+import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
@@ -92,15 +95,24 @@ public class NetworkTestUtil {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = generateRandomCredentials();
+
+			IFileConfiguration fileConfig = FileConfiguration.createDefault();
+			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
-			IFileConfiguration config = FileConfiguration.createDefault();
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					keyManager, config);
-			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-			H2HSession session;
-			session = new H2HSession(profileManager, keyManager, downloadManager, config, root.toPath());
-			node.setSession(session);
+					keyManager, fileConfig);
+			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
+					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
+
+			SessionParameters params = new SessionParameters(root.toPath(), fileConfig);
+			params.setDownloadManager(downloadManager);
+			params.setKeyManager(keyManager);
+			params.setUserProfileManager(profileManager);
+			params.setLocationsManager(locationsManager);
+
+			node.setSession(new H2HSession(params));
 		}
 	}
 
@@ -115,15 +127,23 @@ public class NetworkTestUtil {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = generateRandomCredentials();
 		for (NetworkManager node : network) {
+			IFileConfiguration fileConfig = FileConfiguration.createDefault();
+			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
-			IFileConfiguration config = FileConfiguration.createDefault();
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					keyManager, config);
-			File root = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
-			H2HSession session;
-			session = new H2HSession(profileManager, keyManager, downloadManager, config, root.toPath());
-			node.setSession(session);
+					keyManager, fileConfig);
+			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
+					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
+
+			SessionParameters params = new SessionParameters(root.toPath(), fileConfig);
+			params.setDownloadManager(downloadManager);
+			params.setKeyManager(keyManager);
+			params.setUserProfileManager(profileManager);
+			params.setLocationsManager(locationsManager);
+
+			node.setSession(new H2HSession(params));
 		}
 	}
 

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -15,6 +16,7 @@ import java.util.List;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
@@ -29,12 +31,12 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.common.userprofiletask.PutUserProfileTaskStep;
 import org.hive2hive.core.processes.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.context.interfaces.IUserProfileTaskContext;
+import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.RollbackReason;
@@ -53,6 +55,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	private static final IFileConfiguration config = FileConfiguration.createDefault();
 	private static ArrayList<NetworkManager> network;
+	private static File root;
 	private static final int networkSize = 10;
 
 	@BeforeClass
@@ -60,21 +63,23 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		testClass = UserProfileTaskQueueTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
+		root = FileTestUtil.getTempDirectory();
 	}
 
 	@Test
 	public void testPut() throws NoPeerConnectionException, InvalidProcessStateException {
-		String userId = NetworkTestUtil.randomString();
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node);
+		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(credentials.getUserId(), userProfileTask,
+				key.getPublic(), node);
 		TestExecutionUtil.executeProcessTillSucceded(putStep);
 
 		// check if user profile task has been put into network
-		Parameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
-				.setContentKey(userProfileTask.getContentKey());
+		Parameters parameters = new Parameters().setLocationKey(credentials.getUserId())
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setContentKey(userProfileTask.getContentKey());
 		assertNotNull(node.getDataManager().get(parameters));
 
 		// manually trigger roll back
@@ -86,26 +91,28 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException {
-		String userId = NetworkTestUtil.randomString();
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
-		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
-		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
-				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
-				publicKeyManager, config), config, FileTestUtil.getTempDirectory().toPath()));
+		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
+		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
+		SessionParameters params = new SessionParameters(root.toPath(), config);
+		params.setKeyManager(publicKeyManager);
+		params.setUserProfileManager(userProfileManager);
+		node.setSession(new H2HSession(params));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node));
+		process.add(new TestPutUserProfileTaskStep(credentials.getUserId(), userProfileTask, key.getPublic(), node));
 		process.add(new GetUserProfileTaskStep(context, node));
 
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// check if user profile task has been put into network
-		Parameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
-				.setContentKey(userProfileTask.getContentKey());
+		Parameters parameters = new Parameters().setLocationKey(credentials.getUserId())
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setContentKey(userProfileTask.getContentKey());
 		assertNotNull(node.getDataManager().get(parameters));
 		// check if context has been initialized
 		assertNotNull(context.consumeUserProfileTask());
@@ -122,26 +129,28 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException {
-		String userId = NetworkTestUtil.randomString();
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
-		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
-		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
-				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
-				publicKeyManager, config), config, FileTestUtil.getTempDirectory().toPath()));
+		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
+		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
+		SessionParameters params = new SessionParameters(root.toPath(), config);
+		params.setKeyManager(publicKeyManager);
+		params.setUserProfileManager(userProfileManager);
+		node.setSession(new H2HSession(params));
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new TestPutUserProfileTaskStep(userId, userProfileTask, key.getPublic(), node));
+		process.add(new TestPutUserProfileTaskStep(credentials.getUserId(), userProfileTask, key.getPublic(), node));
 		process.add(new GetUserProfileTaskStep(context, node));
 		process.add(new RemoveUserProfileTaskStep(context, node));
 
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
-		Parameters parameters = new Parameters().setLocationKey(userId).setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN)
-				.setContentKey(userProfileTask.getContentKey());
+		Parameters parameters = new Parameters().setLocationKey(credentials.getUserId())
+				.setDomainKey(H2HConstants.USER_PROFILE_TASK_DOMAIN).setContentKey(userProfileTask.getContentKey());
 		assertNull(node.getDataManager().get(parameters));
 
 		// manually trigger roll back
@@ -157,13 +166,15 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	public void testCorrectOrder() throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException, IOException,
 			NoPeerConnectionException {
-		String userId = NetworkTestUtil.randomString();
+		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		PublicKeyManager publicKeyManager = new PublicKeyManager(userId, key, node.getDataManager());
-		node.setSession(new H2HSession(new UserProfileManager(node.getDataManager(), new UserCredentials(userId, "password",
-				"pin")), publicKeyManager, new DownloadManager(node.getDataManager(), node.getMessageManager(),
-				publicKeyManager, config), config, FileTestUtil.getTempDirectory().toPath()));
+		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
+		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
+		SessionParameters params = new SessionParameters(root.toPath(), config);
+		params.setKeyManager(publicKeyManager);
+		params.setUserProfileManager(userProfileManager);
+		node.setSession(new H2HSession(params));
 
 		// create some tasks
 		List<TestUserProfileTask> tasks = new ArrayList<TestUserProfileTask>();
@@ -178,7 +189,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		List<TestUserProfileTask> shuffledTasks = new ArrayList<TestUserProfileTask>(tasks);
 		Collections.shuffle(shuffledTasks);
 		for (TestUserProfileTask task : shuffledTasks) {
-			TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(userId, task, key.getPublic(), node);
+			TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(credentials.getUserId(), task,
+					key.getPublic(), node);
 			TestExecutionUtil.executeProcessTillSucceded(putStep);
 		}
 
@@ -207,9 +219,10 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@AfterClass
-	public static void cleanAfterClass() {
+	public static void cleanAfterClass() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
+		FileUtils.deleteDirectory(root);
 	}
 
 	private class SimpleGetUserProfileTaskContext implements IUserProfileTaskContext {
