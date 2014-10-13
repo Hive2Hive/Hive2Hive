@@ -11,9 +11,9 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileLarge;
-import org.hive2hive.core.model.MetaFileSmall;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileLarge;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.processes.context.DownloadFileContext;
 import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.files.download.direct.DownloadTaskDirect;
@@ -42,7 +42,7 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaFile metaFile = context.consumeMetaFile();
+		BaseMetaFile metaFile = context.consumeMetaFile();
 
 		// support to store the file on another location than default (used for recovery)
 		if (context.downloadToDefaultDestination()) {

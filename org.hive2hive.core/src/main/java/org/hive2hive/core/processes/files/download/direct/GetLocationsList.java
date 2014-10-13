@@ -5,42 +5,51 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.network.data.IDataManager;
-import org.hive2hive.core.processes.common.GetUserLocationsStep;
-import org.hive2hive.core.processes.context.interfaces.IGetUserLocationsContext;
+import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.BaseNetworkContent;
+import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Gets a list of all locations (using the internal process framework
  * 
- * @author Nico
+ * @author Nico, Seppi
  */
 public class GetLocationsList implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(GetLocationsList.class);
 
 	private final DownloadTaskDirect task;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 
-	public GetLocationsList(DownloadTaskDirect task, IDataManager dataManager) {
+	public GetLocationsList(DownloadTaskDirect task, DataManager dataManager) {
 		this.task = task;
 		this.dataManager = dataManager;
 	}
 
 	@Override
 	public void run() {
-		Set<Locations> collectingSet = Collections.newSetFromMap(new ConcurrentHashMap<Locations, Boolean>());
+		// thread safe super collection
+		final Set<Locations> collectingSet = Collections.newSetFromMap(new ConcurrentHashMap<Locations, Boolean>());
 
 		SequentialProcess process = new SequentialProcess();
-		for (String user : task.getUsers()) {
-			ProvideUserLocationsContext context = new ProvideUserLocationsContext(collectingSet, user);
-			GetUserLocationsStep step = new GetUserLocationsStep(context, dataManager);
-			process.add(new AsyncComponent(step));
+		for (final String userId : task.getUsers()) {
+			process.add(new AsyncComponent(new BaseGetProcessStep(dataManager) {
+				@Override
+				protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+					BaseNetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
+					if (content != null) {
+						collectingSet.add((Locations) content);
+					}
+				}
+			}));
 		}
 
 		try {
@@ -64,34 +73,4 @@ public class GetLocationsList implements Runnable {
 		task.provideLocations(collectingSet);
 	}
 
-	/**
-	 * Local context for holding multiple locations
-	 * 
-	 * @author Nico
-	 * 
-	 */
-	private class ProvideUserLocationsContext implements IGetUserLocationsContext {
-
-		private final String userId;
-		private final Set<Locations> allLocationsCollection;
-
-		public ProvideUserLocationsContext(Set<Locations> allLocationsCollection, String userId) {
-			this.allLocationsCollection = allLocationsCollection;
-			this.userId = userId;
-		}
-
-		@Override
-		public void provideUserLocations(Locations locations) {
-			if (locations != null) {
-				// forward the locations to the (thread-safe) super-collection
-				logger.debug("User {} has {} peers online to ask", userId, locations.getPeerAddresses().size());
-				allLocationsCollection.add(locations);
-			}
-		}
-
-		@Override
-		public String consumeUserId() {
-			return userId;
-		}
-	}
 }

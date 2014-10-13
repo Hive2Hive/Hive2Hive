@@ -9,7 +9,7 @@ import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.processes.files.download.direct.DownloadTaskDirect;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;

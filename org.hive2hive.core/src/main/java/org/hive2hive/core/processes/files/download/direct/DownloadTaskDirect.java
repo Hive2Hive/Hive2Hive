@@ -9,8 +9,8 @@ import java.util.concurrent.CountDownLatch;
 
 import net.tomp2p.peers.PeerAddress;
 
-import org.hive2hive.core.model.Locations;
 import org.hive2hive.core.model.MetaChunk;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.download.BaseDownloadTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

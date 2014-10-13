@@ -13,7 +13,7 @@ import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
 import org.hive2hive.core.processes.files.download.direct.process.ChunkMessageResponse.AnswerType;
