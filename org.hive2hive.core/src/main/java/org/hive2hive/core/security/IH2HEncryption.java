@@ -11,15 +11,16 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
+import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 
 public interface IH2HEncryption {
 
 	/**
-	 * Symmetrically encrypts content inheriting from {@link NetworkContent} by means of the AES algorithm.
+	 * Symmetrically encrypts content inheriting from {@link BaseNetworkContent} by means of the AES algorithm.
 	 * The content first gets serialized, then encrypted.
 	 * 
-	 * @param content the content to be encrypted. Can be of any type that extends {@link NetworkContent}.
+	 * @param content the content to be encrypted. Can be of any type that extends {@link BaseNetworkContent}.
 	 * @param aesKey The symmetric key with which the content will be encrypted.
 	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization
 	 *         vector (IV).
@@ -28,11 +29,11 @@ public interface IH2HEncryption {
 	 * @throws DataLengthException
 	 * @throws IOException
 	 */
-	EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
+	EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			IOException;
 
 	/**
-	 * Symmetrically decrypts a prior content inheriting from {@link NetworkContent} by means of the AES
+	 * Symmetrically decrypts a prior content inheriting from {@link BaseNetworkContent} by means of the AES
 	 * algorithm. The content gets deserialized after the decryption.
 	 * 
 	 * @param content The EncryptedContent to be decrypted.
@@ -44,11 +45,11 @@ public interface IH2HEncryption {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
+	BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			ClassNotFoundException, IOException;
 
 	/**
-	 * Asymmetrically encrypts content inheriting from {@link NetworkContent}. A default key length will be
+	 * Asymmetrically encrypts content inheriting from {@link BaseNetworkContent}. A default key length will be
 	 * used.
 	 * 
 	 * @param content the content to be encrypted.
@@ -63,7 +64,7 @@ public interface IH2HEncryption {
 	 * @throws BadPaddingException
 	 * @throws IOException
 	 */
-	HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey) throws InvalidKeyException,
+	HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException;
 
 	/**
@@ -86,7 +87,7 @@ public interface IH2HEncryption {
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException;
 
 	/**
-	 * Asymmetrically decrypts a prior content inheriting from {@link NetworkContent}.
+	 * Asymmetrically decrypts a prior content inheriting from {@link BaseNetworkContent}.
 	 * 
 	 * @param content the encrypted content to be decrypted
 	 * @param privateKey the asymmetric private key that matches the public key at encryption
@@ -100,7 +101,7 @@ public interface IH2HEncryption {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+	BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException;
 
 	/**

@@ -1,7 +1,7 @@
 package org.hive2hive.core.security;
 
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 
 /**
  * This class contains the result of a hybrid encryption. It holds the RSA encrypted parameters and the AES
@@ -10,7 +10,7 @@ import org.hive2hive.core.model.NetworkContent;
  * @author Christian, Nico
  * 
  */
-public final class HybridEncryptedContent extends NetworkContent {
+public final class HybridEncryptedContent extends BaseNetworkContent {
 
 	private static final long serialVersionUID = -1612926603789157681L;
 
