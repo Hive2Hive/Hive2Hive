@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
@@ -12,12 +11,11 @@ import net.tomp2p.rpc.ObjectDataReply;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.processes.context.LoginProcessContext;
-import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,8 +38,7 @@ import org.junit.Test;
 public class ContactOtherClientsStepTest extends H2HJUnitTest {
 
 	private static final int networkSize = 6;
-	// in seconds
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 	private static String userId = "user id";
 
 	@BeforeClass
@@ -77,6 +74,8 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeerDHT().peerAddress());
 		fakedLocations.addPeerAddress(network.get(2).getConnection().getPeerDHT().peerAddress());
 		fakedLocations.addPeerAddress(network.get(3).getConnection().getPeerDHT().peerAddress());
+		
+		
 
 		Locations result = runProcessStep(fakedLocations,
 				isInitialClient(fakedLocations, network.get(0).getConnection().getPeerDHT().peerAddress()));
@@ -213,14 +212,12 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		// initialize the process and the one and only step to test
 
-		LoginProcessContext context = new LoginProcessContext(null);
-		context.provideUserLocations(fakedLocations);
+		LoginProcessContext context = new LoginProcessContext(null, null);
+		context.provideLocations(fakedLocations);
 		ContactOtherClientsStep processStep = new ContactOtherClientsStep(context, network.get(0));
-		SequentialProcess process = new SequentialProcess();
-		process.add(processStep);
-		TestExecutionUtil.executeProcess(process);
+		TestExecutionUtil.executeProcessTillSucceded(processStep);
 
-		return context.consumeUserLocations();
+		return context.consumeLocations();
 	}
 
 	@AfterClass

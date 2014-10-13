@@ -15,7 +15,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -62,11 +62,33 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		}
 
 		PublicKey ownPublicKey = keyManager.getOwnPublicKey();
-		Locations locations = context.consumeUserLocations();
-		if (locations != null && locations.getPeerAddresses() != null) {
-			sendBlocking(locations.getPeerAddresses(), ownPublicKey);
+		Locations locations = context.consumeLocations();
+
+		sendBlocking(locations.getPeerAddresses(), ownPublicKey);
+
+		Locations updatedLocations = new Locations(locations.getUserId());
+		updatedLocations.setBasedOnKey(locations.getBasedOnKey());
+		updatedLocations.setVersionKey(locations.getVersionKey());
+
+		// add addresses that responded
+		for (PeerAddress address : responses.keySet()) {
+			if (responses.get(address)) {
+				updatedLocations.addPeerAddress(address);
+			}
 		}
-		updateLocations();
+		// add self
+		updatedLocations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
+		context.provideLocations(updatedLocations);
+
+		// evaluate if initial
+		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
+		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
+				networkManager.getConnection().getPeerDHT().peerAddress())) {
+			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
+			if (getParent() != null) {
+				getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
+			}
+		}
 	}
 
 	private void sendBlocking(Set<PeerAddress> peerAddresses, PublicKey ownPublicKey) {
@@ -94,6 +116,8 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		} catch (InterruptedException e) {
 			logger.error("Could not wait the given time for the clients to respond.", e);
 		}
+
+		isUpdated = true;
 	}
 
 	@Override
@@ -113,42 +137,6 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 			logger.error(
 					"Received during liveness check of other clients a wrong evidence content. Responding node = '{}'.",
 					responseMessage.getSenderAddress());
-		}
-	}
-
-	private void updateLocations() {
-		isUpdated = true;
-
-		Locations oldLocations = context.consumeUserLocations();
-		Locations updatedLocations;
-		if (oldLocations == null) {
-			// TODO check if based-on key can be omitted!
-			updatedLocations = new Locations(networkManager.getUserId());
-		} else {
-			updatedLocations = new Locations(oldLocations.getUserId());
-			updatedLocations.setBasedOnKey(oldLocations.getBasedOnKey());
-			updatedLocations.setVersionKey(oldLocations.getVersionKey());
-		}
-
-		// add addresses that responded
-		for (PeerAddress address : responses.keySet()) {
-			if (responses.get(address)) {
-				updatedLocations.addPeerAddress(address);
-			}
-		}
-
-		// add self
-		updatedLocations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
-
-		// update context for future use
-		context.provideUserLocations(updatedLocations);
-
-		// evaluate if initial
-		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
-		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
-				networkManager.getConnection().getPeerDHT().peerAddress())) {
-			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
-			getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
 		}
 	}
 

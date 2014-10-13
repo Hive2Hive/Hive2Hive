@@ -2,55 +2,50 @@ package org.hive2hive.core.processes.context;
 
 import java.security.KeyPair;
 
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.processes.context.interfaces.IGetUserLocationsContext;
-import org.hive2hive.core.processes.context.interfaces.IGetUserProfileContext;
-import org.hive2hive.core.processes.context.interfaces.IPutUserLocationsContext;
+import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
-public class LoginProcessContext implements IGetUserProfileContext, IGetUserLocationsContext, IPutUserLocationsContext {
+public class LoginProcessContext {
 
 	private final UserCredentials credentials;
+	private final SessionParameters params;
 
-	private UserProfile profile;
+	private UserProfile userProfile;
 	private Locations locations;
 
-	public LoginProcessContext(UserCredentials credentials) {
+	public LoginProcessContext(UserCredentials credentials, SessionParameters params) {
 		this.credentials = credentials;
+		this.params = params;
 	}
 
-	@Override
 	public UserCredentials consumeUserCredentials() {
 		return credentials;
 	}
 
-	@Override
 	public String consumeUserId() {
 		return credentials.getUserId();
 	}
 
-	@Override
-	public void provideUserProfile(UserProfile profile) {
-		this.profile = profile;
+	public SessionParameters consumeSessionParameters() {
+		return params;
 	}
 
-	public UserProfile consumeUserProfile() {
-		return profile;
+	public void provideUserProfile(UserProfile userProfile) {
+		this.userProfile = userProfile;
 	}
 
-	@Override
 	public KeyPair consumeUserLocationsProtectionKeys() {
-		return profile.getProtectionKeys();
+		return userProfile.getProtectionKeys();
 	}
 
-	@Override
-	public void provideUserLocations(Locations locations) {
+	public void provideLocations(Locations locations) {
 		this.locations = locations;
 	}
 
-	@Override
-	public Locations consumeUserLocations() {
+	public Locations consumeLocations() {
 		return locations;
 	}
+
 }
