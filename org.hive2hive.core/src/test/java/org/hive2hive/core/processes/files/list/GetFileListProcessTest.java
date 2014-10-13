@@ -1,10 +1,11 @@
-package org.hive2hive.core.processes.files;
+package org.hive2hive.core.processes.files.list;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -20,45 +21,32 @@ import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class GetFileListProcessTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 	private static File root;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = GetFileListProcessTest.class;
 		beforeClass();
-	}
-
-	@Before
-	public void setup() throws NoPeerConnectionException {
-		super.beforeMethod();
 
 		// network
-		network = NetworkTestUtil.createNetwork(2);
+		network = NetworkTestUtil.createNetwork(6);
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		root = FileTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(credentials, network.get(0), root);
 	}
 
-	@After
-	public void tearDown() throws IOException {
-		super.afterMethod();
-
+	@AfterClass
+	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
 		FileUtils.deleteDirectory(root);
-	}
-
-	@AfterClass
-	public static void endTest() {
 		afterClass();
 	}
 
