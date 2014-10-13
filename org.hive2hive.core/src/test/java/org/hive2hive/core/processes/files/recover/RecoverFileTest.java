@@ -1,7 +1,8 @@
-package org.hive2hive.core.processes.files;
+package org.hive2hive.core.processes.files.recover;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -14,7 +15,6 @@ import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
@@ -33,12 +33,11 @@ import org.junit.Test;
  * simplifies the verification.
  * 
  * @author Nico
- * 
  */
 public class RecoverFileTest extends H2HJUnitTest {
 
-	private static final int networkSize = 5;
-	private static List<NetworkManager> network;
+	private static final int networkSize = 6;
+	private static ArrayList<NetworkManager> network;
 
 	private NetworkManager client;
 	private UserCredentials userCredentials;

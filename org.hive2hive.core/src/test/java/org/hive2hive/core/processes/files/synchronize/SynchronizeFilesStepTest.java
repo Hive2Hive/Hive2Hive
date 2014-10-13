@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.files;
+package org.hive2hive.core.processes.files.synchronize;
 
 import java.io.File;
 import java.io.IOException;

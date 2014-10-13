@@ -11,9 +11,9 @@ import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -46,7 +46,7 @@ public class SelectVersionStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaFile metaFile = context.consumeMetaFile();
+		BaseMetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta document not found.");
 		} else if (!metaFile.isSmall()) {
