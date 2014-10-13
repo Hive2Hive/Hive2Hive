@@ -11,7 +11,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
@@ -58,7 +58,7 @@ public class GetUserProfileTaskStep extends ProcessStep {
 		}
 
 		logger.debug("Get the next user profile task of user '{}'.", userId);
-		NetworkContent content = dataManager.getUserProfileTask(userId);
+		BaseNetworkContent content = dataManager.getUserProfileTask(userId);
 
 		if (content == null) {
 			logger.warn("Did not get an user profile task. User ID = '{}'.", userId);
@@ -73,7 +73,7 @@ public class GetUserProfileTaskStep extends ProcessStep {
 			} catch (NoSessionException e) {
 				throw new ProcessExecutionException(e);
 			}
-			NetworkContent decrypted = null;
+			BaseNetworkContent decrypted = null;
 			try {
 				decrypted = dataManager.getEncryption().decryptHybrid(encrypted, key);
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
