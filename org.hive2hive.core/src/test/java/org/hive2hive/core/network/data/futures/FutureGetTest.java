@@ -1,15 +1,12 @@
 package org.hive2hive.core.network.data.futures;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import net.tomp2p.futures.FutureGet;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HJUnitTest;
@@ -27,9 +24,8 @@ import org.junit.Test;
  */
 public class FutureGetTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 5;
-	private static Random random = new Random();
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -39,98 +35,86 @@ public class FutureGetTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testGetNoVersion() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+	public void testGet() throws NoPeerConnectionException {
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setData(data);
+				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
 
-		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+		nodeA.getDataManager().put(parameters);
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(parameters);
-		assertEquals(data.getTestString(), result.getTestString());
+		assertEquals(data.getTestString(), ((H2HTestData) nodeB.getDataManager().get(parameters)).getTestString());
 	}
 
 	@Test
-	public void testGetNoVersionNoData() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+	public void testGetNoData() throws NoPeerConnectionException {
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(
 				NetworkTestUtil.randomString());
 
-		FutureGet futureGet = nodeA.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
-
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(parameters);
-		assertNull(result);
+		assertNull(nodeB.getDataManager().get(parameters));
 	}
 
 	@Test
 	public void testGetNewestVersion() throws ClassNotFoundException, IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = nodeA.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
+		H2HTestData data = new H2HTestData("");
+		List<String> content = new ArrayList<String>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			data.setTestString(NetworkTestUtil.randomString());
+			content.add(data.getTestString());
+
 			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
-			}
-			content.add(data);
 
 			Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-					.setVersionKey(data.getVersionKey()).setData(data);
-			nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+					.setVersionKey(data.getVersionKey()).setBasedOnKey(data.getBasedOnKey()).setNetworkContent(data);
+			nodeA.getDataManager().put(parameters);
 		}
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().get(
-				new Parameters().setLocationKey(locationKey).setContentKey(contentKey));
-		assertNotNull(result);
-		assertEquals(content.get(numberOfContent - 1).getTestString(), result.getTestString());
+		Parameters parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey);
+		assertEquals(content.get(numberOfContent - 1),
+				((H2HTestData) nodeB.getDataManager().get(parameters)).getTestString());
 	}
 
 	@Test
 	public void testGetAVersion() throws IOException, NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		data.generateVersionKey();
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
 				.setContentKey(NetworkTestUtil.randomString())
-				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setData(data);
+				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setNetworkContent(data);
 
-		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
+		nodeA.getDataManager().put(parameters);
 
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().getVersion(parameters);
-		assertEquals(data.getTestString(), result.getTestString());
+		assertEquals(data.getTestString(), ((H2HTestData) nodeB.getDataManager().get(parameters)).getTestString());
+		assertEquals(data.getTestString(), ((H2HTestData) nodeB.getDataManager().getVersion(parameters)).getTestString());
 	}
 
 	@Test
 	public void testGetAVersionNoData() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize));
+		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
+		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
 				.setContentKey(NetworkTestUtil.randomString())
-				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setData(data);
+				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setNetworkContent(data);
 
-		FutureGet futureGet = nodeA.getDataManager().getVersionUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
-
-		H2HTestData result = (H2HTestData) nodeB.getDataManager().getVersion(parameters);
-		assertNull(result);
+		assertNull(nodeB.getDataManager().getVersion(parameters));
+		assertNull(nodeB.getDataManager().get(parameters));
 	}
 
 	@AfterClass

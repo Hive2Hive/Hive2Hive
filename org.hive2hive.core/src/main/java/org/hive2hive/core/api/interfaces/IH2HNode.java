@@ -1,6 +1,6 @@
 package org.hive2hive.core.api.interfaces;
 
-import net.tomp2p.p2p.Peer;
+import net.tomp2p.dht.PeerDHT;
 
 import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
 
@@ -67,9 +67,9 @@ public interface IH2HNode extends INetworkEventGenerator {
 	IFileConfiguration getFileConfiguration();
 
 	/**
-	 * Returns the {@link Peer} which can be used to implement custom actions.
+	 * Returns the {@link PeerDHT} which can be used to implement custom actions.
 	 * 
 	 * @return the TomP2P peer. Before calling {@link IH2HNode#connect()}, this method returns null.
 	 */
-	Peer getPeer();
+	PeerDHT getPeer();
 }

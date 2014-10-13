@@ -1,18 +1,13 @@
 package org.hive2hive.core.events;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
 import net.engio.mbassy.listener.Handler;
 
@@ -40,8 +35,8 @@ import org.junit.Test;
 
 public class FileEventsTest extends H2HJUnitTest {
 	
-	protected static final int networkSize = 2;
-	protected static List<NetworkManager> network;
+	protected static final int networkSize = 6;
+	protected static ArrayList<NetworkManager> network;
 	protected static UserCredentials userCredentials;
 	protected final static int CHUNK_SIZE = 1024;
 	protected static File rootA;

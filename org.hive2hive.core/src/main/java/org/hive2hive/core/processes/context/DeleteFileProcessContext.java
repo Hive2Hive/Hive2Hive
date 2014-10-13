@@ -5,12 +5,12 @@ import java.security.KeyPair;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DeleteFileProcessContext implements IFile2MetaContext, INotifyContext {
 
@@ -18,7 +18,7 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 
 	private KeyPair protectionKeys;
 	private KeyPair encryptionKeys;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 	private Index index;
 	private DeleteNotifyMessageFactory deleteNotifyMessageFactory;
 	private Set<String> users;
@@ -47,7 +47,7 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 	}
 
 	@Override
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 
@@ -82,7 +82,7 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 		return index;
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 

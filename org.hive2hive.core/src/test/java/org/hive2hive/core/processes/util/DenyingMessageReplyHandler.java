@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
  * @author Nico, Seppi
  */
 public class DenyingMessageReplyHandler implements ObjectDataReply {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(DenyingMessageReplyHandler.class);
-	
+
 	@Override
 	public Object reply(PeerAddress sender, Object request) throws Exception {
 		logger.warn(String.format("Denying a message. Sender = '{}'.", sender));

@@ -7,7 +7,7 @@ import org.hive2hive.core.TimeToLiveStore;
  * 
  * @author Nico
  */
-public class Chunk extends NetworkContent {
+public class Chunk extends BaseNetworkContent {
 
 	private static final long serialVersionUID = 6880686784324242531L;
 

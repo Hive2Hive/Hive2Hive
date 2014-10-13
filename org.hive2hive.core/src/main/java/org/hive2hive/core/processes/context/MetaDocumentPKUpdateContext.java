@@ -9,10 +9,10 @@ import net.tomp2p.peers.Number160;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FileIndex;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * Provides the required context to update the meta document
@@ -23,7 +23,7 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 
 	private final PublicKey fileKey;
 	private final FileIndex fileIndex;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 
 	public MetaDocumentPKUpdateContext(KeyPair oldProtectionKeys, KeyPair newProtectionKeys, PublicKey fileKey,
 			FileIndex fileIndex) {
@@ -38,7 +38,7 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 	}
 
 	@Override
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 
@@ -47,7 +47,7 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 		// ignore
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 

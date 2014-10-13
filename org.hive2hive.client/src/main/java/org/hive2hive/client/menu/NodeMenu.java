@@ -42,7 +42,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 		createNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
 
-				buildNode(NetworkConfiguration.create(askNodeID()));
+				buildNode(NetworkConfiguration.createInitial(askNodeID()));
 				connectNode();
 			}
 		};

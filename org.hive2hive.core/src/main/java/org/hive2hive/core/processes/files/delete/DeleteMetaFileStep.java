@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.files.delete;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.common.base.BaseRemoveProcessStep;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -12,7 +12,7 @@ public class DeleteMetaFileStep extends BaseRemoveProcessStep {
 
 	private final DeleteFileProcessContext context;
 
-	public DeleteMetaFileStep(DeleteFileProcessContext context, IDataManager dataManager) {
+	public DeleteMetaFileStep(DeleteFileProcessContext context, DataManager dataManager) {
 		super(dataManager);
 		this.context = context;
 	}

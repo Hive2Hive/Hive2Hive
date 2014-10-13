@@ -69,7 +69,7 @@ public class NetworkUtils {
 	private static class PeerAddressComperator implements Comparator<PeerAddress> {
 		@Override
 		public int compare(PeerAddress o1, PeerAddress o2) {
-			return o1.getPeerId().toString().compareTo(o2.getPeerId().toString());
+			return o1.peerId().toString().compareTo(o2.peerId().toString());
 		}
 	}
 }

@@ -2,9 +2,10 @@ package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureDigest;
+import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDigest;
-import net.tomp2p.futures.FutureRemove;
+import net.tomp2p.peers.Number640;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.DataManager;
@@ -62,14 +63,29 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
 			@Override
 			public void operationComplete(FutureDigest future) throws Exception {
-				if (future.getDigest() == null) {
+				if (future.digest() == null) {
 					retryRemove();
-				} else if (!future.getDigest().keyDigest().isEmpty()) {
-					retryRemove();
+				} else if (versionRemove) {
+					if (future
+							.digest()
+							.keyDigest()
+							.containsKey(
+									new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+											parameters.getVersionKey()))) {
+						retryRemove();
+					} else {
+						logger.trace("Verification for remove completed. '{}'", parameters.toString());
+						success = true;
+						latch.countDown();
+					}
 				} else {
-					logger.trace("Verification for remove completed. '{}'", parameters.toString());
-					success = true;
-					latch.countDown();
+					if (!future.digest().keyDigest().isEmpty()) {
+						retryRemove();
+					} else {
+						logger.trace("Verification for remove completed. '{}'", parameters.toString());
+						success = true;
+						latch.countDown();
+					}
 				}
 			}
 		});

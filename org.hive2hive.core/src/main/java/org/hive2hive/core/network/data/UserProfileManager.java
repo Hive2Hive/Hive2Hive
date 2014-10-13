@@ -2,13 +2,15 @@ package org.hive2hive.core.network.data;
 
 import java.security.KeyPair;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.data.vdht.EncryptedVersionManager;
+import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +20,13 @@ import org.slf4j.LoggerFactory;
  * order.
  * 
  * @author Nico, Seppi
- * 
  */
 public class UserProfileManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
 	private static final long MAX_MODIFICATION_TIME = 1000;
 
-	private final UserProfileHolder profileHolder;
+	private final EncryptedVersionManager<UserProfile> versionManager;
 	private final UserCredentials credentials;
 
 	private final Object queueWaiter = new Object();
@@ -36,12 +37,14 @@ public class UserProfileManager {
 	private volatile PutQueueEntry modifying;
 
 	private final AtomicBoolean running;
-	private KeyPair defaultProtectionKey = null;
+	private KeyPair protectionKeys = null;
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {
 		this.credentials = credentials;
-		profileHolder = new UserProfileHolder(credentials, dataManager);
-		running = new AtomicBoolean(true);
+		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, PasswordUtil.generateAESKeyFromPassword(
+				credentials.getPassword(), credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE),
+				credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
+		this.running = new AtomicBoolean(true);
 
 		Thread thread = new Thread(worker);
 		thread.setName("UP queue");
@@ -112,6 +115,10 @@ public class UserProfileManager {
 	 *             himself as intending to put)
 	 */
 	public void readyToPut(UserProfile profile, String pid) throws PutFailedException {
+		if (protectionKeys == null) {
+			protectionKeys = profile.getProtectionKeys();
+		}
+
 		if (modifying != null && modifying.equals(pid)) {
 			modifying.setUserProfile(profile);
 			modifying.readyToPut();
@@ -131,22 +138,6 @@ public class UserProfileManager {
 		}
 	}
 
-	/**
-	 * Get the default content protection keys. If called first time the method is called first time the user
-	 * profile gets loaded from network and the default protection key temporally gets stored for further
-	 * gets.
-	 * 
-	 * @return the default content protection keys
-	 * @throws GetFailedException
-	 */
-	public KeyPair getDefaultProtectionKey() throws GetFailedException {
-		if (defaultProtectionKey == null) {
-			UserProfile userProfile = getUserProfile(UUID.randomUUID().toString(), false);
-			defaultProtectionKey = userProfile.getProtectionKeys();
-		}
-		return defaultProtectionKey;
-	}
-
 	private class QueueWorker implements Runnable {
 
 		@Override
@@ -164,37 +155,38 @@ public class UserProfileManager {
 					}
 				} else if (modifyQueue.isEmpty()) {
 					logger.trace("{} process(es) are waiting for read-only access.", readOnlyQueue.size());
-					// a process wants to read
-					QueueEntry entry = readOnlyQueue.peek();
+					try {
+						logger.trace("Loading latest version of user profile.");
+						UserProfile userProfile = versionManager.get();
 
-					profileHolder.get(entry);
-
-					logger.trace("Notifying {} processes that newest profile is ready.", readOnlyQueue.size());
-					// notify all read only processes
-					while (!readOnlyQueue.isEmpty()) {
-						// copy user profile and errors to other entries
-						QueueEntry readOnly = readOnlyQueue.poll();
-						readOnly.setUserProfile(entry.getUserProfile());
-						readOnly.setGetError(entry.getGetError());
-						readOnly.notifyGet();
+						logger.trace("Notifying {} processes that newest profile is ready.", readOnlyQueue.size());
+						while (!readOnlyQueue.isEmpty()) {
+							QueueEntry readOnly = readOnlyQueue.poll();
+							readOnly.setUserProfile(userProfile);
+							readOnly.notifyGet();
+						}
+					} catch (GetFailedException e) {
+						logger.warn("Notifying {} processes that getting latest user profile version failed. reason = '{}'",
+								readOnlyQueue.size(), e.getMessage());
+						while (!readOnlyQueue.isEmpty()) {
+							QueueEntry readOnly = readOnlyQueue.poll();
+							readOnly.setGetError(e);
+							readOnly.notifyGet();
+						}
 					}
 				} else {
 					// a process wants to modify
 					modifying = modifyQueue.poll();
-					logger.trace("Process {} is waiting to make profile modifications.", modifying.getPid());
-					profileHolder.get(modifying);
-					logger.trace("Notifying {} processes (inclusive process {}) to get newest profile.",
-							readOnlyQueue.size() + 1, modifying.getPid());
 
-					modifying.notifyGet();
-					// notify all read only processes
-					while (!readOnlyQueue.isEmpty()) {
-						// copy user profile and errors to other entries
-						QueueEntry readOnly = readOnlyQueue.poll();
-						readOnly.setUserProfile(modifying.getUserProfile());
-						readOnly.setGetError(modifying.getGetError());
-						readOnly.notifyGet();
+					logger.trace("Process {} is waiting to make profile modifications.", modifying.getPid());
+
+					try {
+						logger.trace("Loading latest version of user profile for process {} to modify.", modifying.getPid());
+						modifying.setUserProfile(versionManager.get());
+					} catch (GetFailedException e) {
+						modifying.setGetError(e);
 					}
+					modifying.notifyGet();
 
 					int counter = 0;
 					long sleepTime = MAX_MODIFICATION_TIME / 10;
@@ -209,16 +201,28 @@ public class UserProfileManager {
 					}
 
 					if (modifying.isReadyToPut()) {
-						// is ready to put
 						logger.trace("Process {} made modifcations and uploads them now.", modifying.getPid());
-						profileHolder.put(modifying);
+						try {
+							// put updated user profile version into network
+							versionManager.put(modifying.getUserProfile(), protectionKeys);
+							modifying.notifyPut();
+
+							// notify all read only processes with newest version
+							while (!readOnlyQueue.isEmpty()) {
+								QueueEntry readOnly = readOnlyQueue.poll();
+								readOnly.setUserProfile(modifying.getUserProfile());
+								readOnly.notifyGet();
+							}
+						} catch (PutFailedException e) {
+							modifying.setPutError(e);
+							modifying.notifyPut();
+						}
 					} else if (!modifying.isAborted()) {
-						// request is not ready to put and has not been aborted
 						logger.warn("Process {} never finished doing modifications. Abort the put request.",
 								modifying.getPid());
 						modifying.abort();
-						modifying.setPutError(new PutFailedException("Too long modification. Only " + MAX_MODIFICATION_TIME
-								+ "ms are allowed."));
+						modifying.setPutError(new PutFailedException(String.format(
+								"Too long modification. Only %s ms are allowed.", MAX_MODIFICATION_TIME)));
 						modifying.notifyPut();
 					}
 				}

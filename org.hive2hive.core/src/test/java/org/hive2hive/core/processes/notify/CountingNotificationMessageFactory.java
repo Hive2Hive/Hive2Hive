@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HTestData;
@@ -15,7 +15,6 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.TestUserProfileTask;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 import org.junit.Assert;
 
 /**
@@ -55,12 +54,12 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 				Assert.fail();
 			}
 
-			if (futureGet.getData() == null) {
+			if (futureGet.data() == null) {
 				continue;
 			}
 
 			try {
-				H2HTestData gotData = (H2HTestData) futureGet.getData().object();
+				H2HTestData gotData = (H2HTestData) futureGet.data().object();
 				if (gotData.getTestString().equalsIgnoreCase(data.getTestString())) {
 					counter++;
 				}

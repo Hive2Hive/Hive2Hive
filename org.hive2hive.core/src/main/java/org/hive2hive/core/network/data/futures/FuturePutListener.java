@@ -3,37 +3,33 @@ package org.hive2hive.core.network.data.futures;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
+import net.tomp2p.dht.StorageLayer.PutStatus;
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureDigest;
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.futures.FutureRemove;
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.rpc.DigestResult;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.H2HStorageMemory.PutStatusH2H;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A put future adapter for verifying a put of a {@link NetworkContent} object. Provides failure handling and
+ * A put future adapter for verifying a put of a {@link BaseNetworkContent} object. Provides failure handling and
  * a blocking wait.</br></br>
  * 
  * <b>Failure Handling</b></br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
- * responding node detected a failure. See {@link PutStatusH2H} for possible failures. If putting fails the
- * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). After a successful put
- * the adapter verifies with a digest if no concurrent modification happened. All puts are asynchronous.
- * That's why the future listener attaches himself to the new future objects so that the adapter can finally
- * notify his/her listener about a success or failure.
+ * responding node detected a failure. See {@link PutStatus} for possible failures. If putting fails the
+ * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). All puts are
+ * asynchronous. That's why the future listener attaches himself to the new future objects so that the adapter
+ * can finally notify his/her listener about a success or failure.
  * 
  * @author Seppi, Nico
  */
@@ -47,7 +43,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 
 	// used to count put retries
 	private int putTries = 0;
-	private boolean success = false;
+	// used as return value
+	private H2HPutStatus status;
 
 	public FuturePutListener(IParameters parameters, DataManager dataManager) {
 		this.parameters = parameters;
@@ -60,74 +57,158 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 * 
 	 * @return true if successful, false if not successful
 	 */
-	public boolean await() {
+	public H2HPutStatus await() {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
 			logger.error("Could not wait until put has finished.", e);
 		}
 
-		return success;
+		return status;
 	}
 
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
-		logger.trace("Start verification of put. '{}'", parameters.toString());
-
 		if (future.isFailed()) {
 			logger.warn("Put future was not successful. '{}'", parameters.toString());
 			retryPut();
 			return;
-		} else if (future.getRawResult().isEmpty()) {
-			logger.warn("Returned raw results are empty.");
+		} else if (future.rawResult().isEmpty()) {
+			logger.warn("Returned raw results are empty. '{}'", parameters.toString());
 			retryPut();
 			return;
 		}
 
 		// analyze returned put status
-		final List<PeerAddress> versionConflict = new ArrayList<PeerAddress>();
-		final List<PeerAddress> fail = new ArrayList<PeerAddress>();
-		for (PeerAddress peeradress : future.getRawResult().keySet()) {
-			Map<Number640, Byte> map = future.getRawResult().get(peeradress);
+		List<PeerAddress> fail = new ArrayList<PeerAddress>();
+		List<PeerAddress> versionFork = new ArrayList<PeerAddress>();
+		for (PeerAddress peeradress : future.rawResult().keySet()) {
+			Map<Number640, Byte> map = future.rawResult().get(peeradress);
 			if (map == null) {
 				logger.warn("A node gave no status (null) back. '{}'", parameters.toString());
 				fail.add(peeradress);
 			} else {
-				for (Number640 key : future.getRawResult().get(peeradress).keySet()) {
-					byte status = future.getRawResult().get(peeradress).get(key);
-					switch (PutStatusH2H.values()[status]) {
+				for (Number640 key : future.rawResult().get(peeradress).keySet()) {
+					byte status = future.rawResult().get(peeradress).get(key);
+					switch (PutStatus.values()[status]) {
 						case OK:
 							break;
 						case FAILED:
-						case FAILED_NOT_ABSENT:
 						case FAILED_SECURITY:
-							logger.warn("A node denied putting data. Reason = '{}'. '{}'", PutStatusH2H.values()[status],
+							logger.warn("A node denied putting data. reason = '{}'. '{}'", PutStatus.values()[status],
 									parameters.toString());
 							fail.add(peeradress);
 							break;
-						case VERSION_CONFLICT:
-						case VERSION_CONFLICT_NO_BASED_ON:
-						case VERSION_CONFLICT_NO_VERSION_KEY:
-						case VERSION_CONFLICT_OLD_TIMESTAMP:
-							logger.warn("Version conflict detected. Reason = '{}'. '{}'", PutStatusH2H.values()[status],
-									parameters.toString());
-							versionConflict.add(peeradress);
+						case VERSION_FORK:
+							logger.warn("A node responded with a version fork. '{}'", parameters.toString());
+							versionFork.add(peeradress);
 							break;
 						default:
-							logger.warn("Got an unknown status: {}", PutStatusH2H.values()[status]);
+							logger.warn("Got an unknown status: {}", PutStatus.values()[status]);
 					}
 				}
 			}
 		}
 
-		if (!versionConflict.isEmpty()) {
-			logger.warn("Put verification failed. Version conflict! '{}'", parameters.toString());
-			notifyFailure();
-		} else if ((double) fail.size() < ((double) future.getRawResult().size()) / 2.0) {
-			// majority of the contacted nodes responded with ok
-			verifyPut();
+		// check if majority of the contacted nodes responded with ok
+		if ((double) fail.size() < ((double) future.rawResult().size()) / 2.0) {
+			if (versionFork.isEmpty()) {
+				if (parameters.hasPrepareFlag()) {
+					// confirm put
+					dataManager.confirmUnblocked(parameters).addListener(new BaseFutureAdapter<FuturePut>() {
+
+						// used to count confirm retries
+						private int confirmTries = 0;
+
+						@Override
+						public void operationComplete(FuturePut future) throws Exception {
+							if (future.isFailed()) {
+								logger.warn("Confirm future was not successful. reason = '{}' {}", future.failedReason(),
+										parameters.toString());
+								retryConfirm();
+								return;
+							} else if (future.rawResult().isEmpty()) {
+								logger.warn("Returned raw results are empty. {}", parameters.toString());
+								retryConfirm();
+								return;
+							}
+
+							// analyze returned status
+							List<PeerAddress> fail = new ArrayList<PeerAddress>();
+							for (PeerAddress peeradress : future.rawResult().keySet()) {
+								Map<Number640, Byte> map = future.rawResult().get(peeradress);
+								if (map == null) {
+									logger.warn("A node gave no status (null) back. {}", parameters.toString());
+									fail.add(peeradress);
+								} else {
+									for (Number640 key : future.rawResult().get(peeradress).keySet()) {
+										byte status = future.rawResult().get(peeradress).get(key);
+										switch (PutStatus.values()[status]) {
+											case OK:
+												break;
+											case FAILED:
+											case FAILED_SECURITY:
+											case NOT_FOUND:
+												logger.warn("A node could not confirm data. reason = '{}'. {}",
+														PutStatus.values()[status], parameters.toString());
+												fail.add(peeradress);
+												break;
+											default:
+												logger.warn("Got an unknown status = '{}' {}", PutStatus.values()[status],
+														parameters.toString());
+										}
+									}
+								}
+							}
+
+							// check if majority of the contacted nodes responded with ok
+							if ((double) fail.size() < ((double) future.rawResult().size()) / 2.0) {
+								status = H2HPutStatus.OK;
+								latch.countDown();
+							} else {
+								logger.warn("{} of {} contacted nodes failed. {}", fail.size(), future.rawResult().size(),
+										parameters.toString());
+								retryConfirm();
+							}
+						}
+
+						/**
+						 * Retries a confirm till a certain threshold is reached (see
+						 * {@link H2HConstants.CONFIRM_RETRIES}). A {@link RetryPutListener} tries to confirm
+						 * again.
+						 */
+						private void retryConfirm() {
+							if (confirmTries++ < H2HConstants.CONFIRM_RETRIES) {
+								logger.warn("Confirm retry #{}. {}", confirmTries, parameters.toString());
+								// retry confirmation, attach itself as listener
+								dataManager.confirmUnblocked(parameters).addListener(this);
+							} else {
+								logger.error("Could not confirm put after {} tries. {}", confirmTries, parameters.toString());
+								status = H2HPutStatus.FAILED;
+								latch.countDown();
+							}
+						}
+					});
+				} else {
+					status = H2HPutStatus.OK;
+					latch.countDown();
+				}
+			} else {
+				logger.warn("Version fork after put detected. Rejecting put.");
+				// reject put
+				dataManager.removeVersionUnblocked(parameters).addListener(new BaseFutureAdapter<FutureRemove>() {
+					@Override
+					public void operationComplete(FutureRemove future) {
+						if (future.isFailed()) {
+							logger.warn("Could not delete the prepared put. '{}'", parameters.toString());
+						}
+						status = H2HPutStatus.VERSION_FORK;
+						latch.countDown();
+					}
+				});
+			}
 		} else {
-			logger.warn("{} of {} contacted nodes failed.", fail.size(), future.getRawResult().size());
+			logger.warn("{} of {} contacted nodes failed.", fail.size(), future.rawResult().size());
 			retryPut();
 		}
 	}
@@ -139,171 +220,31 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	private void retryPut() {
 		if (putTries++ < H2HConstants.PUT_RETRIES) {
 			logger.warn("Put retry #{}. '{}'", putTries, parameters.toString());
-			// remove succeeded puts
-			FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
-			futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
+			// remove prior put
+			dataManager.removeVersionUnblocked(parameters).addListener(new BaseFutureAdapter<FutureRemove>() {
 				@Override
 				public void operationComplete(FutureRemove future) {
 					if (future.isFailed()) {
-						logger.warn("Put retry: Could not delete the newly put content. '{}'", parameters.toString());
+						logger.warn("Could not delete the newly put content. '{}'", parameters.toString());
 					}
-
+					// retry put, attach itself as listener
 					dataManager.putUnblocked(parameters).addListener(FuturePutListener.this);
 				}
 			});
 		} else {
-			logger.error("Put verification failed. Could not put data after {} tries. '{}'", putTries, parameters.toString());
-			notifyFailure();
-		}
-	}
-
-	/**
-	 * Loads digest and triggers a check.
-	 */
-	private void verifyPut() {
-		// get data to verify if everything went correct
-		FutureDigest digestFuture = dataManager.getDigestUnblocked(parameters);
-		digestFuture.addListener(new BaseFutureAdapter<FutureDigest>() {
-			@Override
-			public void operationComplete(FutureDigest future) throws Exception {
-				if (future.isFailed() || future.getRawDigest() == null || future.getRawDigest().isEmpty()) {
-					logger.error("Put verification failed. Could not get digest. '{}'", parameters.toString());
-					notifyFailure();
-				} else {
-					checkVersionKey(future.getRawDigest());
-				}
-			}
-		});
-	}
-
-	/**
-	 * Checks if newly put version is listened in the digest. If yes everything is fine. If one peer doesn't
-	 * contain the new version key it is a sign for a concurrent modification. In this case we have to figure
-	 * out which newly put version wins.
-	 * 
-	 * @param rawDigest
-	 *            raw digest data set
-	 */
-	private void checkVersionKey(Map<PeerAddress, DigestResult> rawDigest) {
-		for (PeerAddress peerAddress : rawDigest.keySet()) {
-			if (rawDigest.get(peerAddress) == null || rawDigest.get(peerAddress).keyDigest() == null
-					|| rawDigest.get(peerAddress).keyDigest().isEmpty()) {
-				logger.warn("Put verification: Received no digest from peer '{}'. '{}'", peerAddress, parameters.toString());
-			} else {
-				NavigableMap<Number640, Number160> keyDigest = rawDigest.get(peerAddress).keyDigest();
-
-				if (keyDigest.firstEntry().getKey().getVersionKey().equals(parameters.getVersionKey())) {
-					logger.trace("Put verification: On peer '{}' entry is newest. '{}'", peerAddress, parameters.toString());
-
-				} else if (keyDigest.containsKey(parameters.getKey())) {
-					logger.trace("Put verification: On peer '{}' entry exists in history. '{}'", peerAddress,
-							parameters.toString());
-
-				} else {
-					logger.warn("Put verification: Concurrent modification on peer '{}' happened. '{}'", peerAddress,
-							parameters.toString());
-
-					// if version key is older than the other, the version wins
-					if (!checkIfMyVerisonWins(keyDigest, peerAddress)) {
-						notifyFailure();
-						return;
+			logger.error("Could not put data after {} tries. '{}'", putTries, parameters.toString());
+			// remove prior put
+			dataManager.removeVersionUnblocked(parameters).addListener(new BaseFutureAdapter<FutureRemove>() {
+				@Override
+				public void operationComplete(FutureRemove future) {
+					if (future.isFailed()) {
+						logger.warn("Could not delete the newly put content. '{}'", parameters.toString());
 					}
+					status = H2HPutStatus.FAILED;
+					latch.countDown();
 				}
-			}
-		}
-		notifySuccess();
-	}
-
-	/**
-	 * Checks if the new version key is older than the one listened in the digest.
-	 * 
-	 * @param keyDigest
-	 *            digest of a peer
-	 * @param peerAddress
-	 *            the owner of the digest
-	 * @return
-	 *         <code>true</code> if the new version key has precedence to the one listened in the digest,
-	 *         otherwise <code>false</code>
-	 */
-	protected boolean checkIfMyVerisonWins(NavigableMap<Number640, Number160> keyDigest, PeerAddress peerAddress) {
-		/* Check if based on entry exists */
-		if (!keyDigest.containsKey(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-				parameters.getData().getBasedOnKey()))) {
-			logger.warn("Put verification: Peer '{}' does not contain based on version. '{}'", peerAddress,
-					parameters.toString());
-			// something is definitely wrong with this peer
-			return true;
-		} else {
-			// figure out the next version based on same version
-			Number640 entryBasingOnSameParent = getSuccessor(keyDigest);
-			if (entryBasingOnSameParent == null) {
-				if (keyDigest.firstKey().getVersionKey().equals(parameters.getData().getBasedOnKey())) {
-					logger.error("Put verification: Peer '{}' has no successor version. '{}'", peerAddress,
-							parameters.toString());
-					// this peer doesn't contain any successor version, with this peer is something wrong
-					return true;
-				} else {
-					logger.error("Put verification: Peer '{}' has a corrupt version history. '{}'", peerAddress,
-							parameters.toString());
-					return true;
-				}
-			} else {
-				int compare = entryBasingOnSameParent.getVersionKey().compareTo(parameters.getVersionKey());
-				if (compare == 0) {
-					logger.error("Put verification: Peer '{}' has same version. '{}'", peerAddress, parameters.toString());
-					return true;
-				} else if (compare < 0) {
-					logger.warn("Put verification: Peer '{}' has older version. '{}'", peerAddress, parameters.toString());
-					return false;
-				} else {
-					logger.warn("Put verification: Peer '{}' has newer version. '{}'", peerAddress, parameters.toString());
-					return true;
-				}
-			}
+			});
 		}
 	}
 
-	/**
-	 * Get the entry which is the parent of the new version.
-	 * 
-	 * @param keyDigest
-	 *            a digest containing the parent version (based on)
-	 * @return the parent of the new version
-	 */
-	private Number640 getSuccessor(NavigableMap<Number640, Number160> keyDigest) {
-		Number640 entryBasingOnSameParent = null;
-		for (Number640 key : keyDigest.keySet()) {
-			if (keyDigest.get(key).equals(parameters.getData().getBasedOnKey())) {
-				entryBasingOnSameParent = key;
-				break;
-			}
-		}
-		return entryBasingOnSameParent;
-	}
-
-	private void notifySuccess() {
-		logger.trace("Verification for put completed. '{}'", parameters.toString());
-		// everything is ok
-		success = true;
-		latch.countDown();
-	}
-
-	/**
-	 * Remove first potentially successful puts. Then notify the listener about the fail.
-	 */
-	private void notifyFailure() {
-		// remove succeeded puts
-		FutureRemove futureRemove = dataManager.removeVersionUnblocked(parameters);
-		futureRemove.addListener(new BaseFutureAdapter<FutureRemove>() {
-			@Override
-			public void operationComplete(FutureRemove future) {
-				if (future.isFailed()) {
-					logger.warn("Put retry: Could not delete the newly put content. '{}'", parameters.toString());
-				}
-
-				success = false;
-				latch.countDown();
-			}
-		});
-	}
 }

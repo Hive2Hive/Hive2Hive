@@ -156,7 +156,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			logger.error("A failure while sending a message occured. Reason = '{}'.", errorReason);
 			return AcceptanceReply.FAILURE;
 		} else {
-			logger.error("Future not successful. Reason = '{}'.", future.getFailedReason());
+			logger.error("Future not successful. Reason = '{}'.", future.failedReason());
 			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}

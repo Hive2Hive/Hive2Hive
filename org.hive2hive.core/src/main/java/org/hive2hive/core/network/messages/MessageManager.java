@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
+import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.FutureDirect;
-import net.tomp2p.futures.FutureSend;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 
@@ -19,6 +19,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -27,7 +28,6 @@ import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.SerializationUtil;
 import org.slf4j.Logger;
@@ -72,8 +72,9 @@ public final class MessageManager implements IMessageManager {
 		}
 
 		// send message to the peer which is responsible for the given key
-		FutureSend futureSend = networkManager.getConnection().getPeer().send(Number160.createHash(message.getTargetKey()))
-				.setObject(encryptedMessage).setRequestP2PConfiguration(createSendingConfiguration()).start();
+		FutureSend futureSend = networkManager.getConnection().getPeerDHT()
+				.send(Number160.createHash(message.getTargetKey())).object(encryptedMessage)
+				.requestP2PConfiguration(createSendingConfiguration()).start();
 
 		// attach a future listener to log, handle and notify events
 		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this);
@@ -110,8 +111,8 @@ public final class MessageManager implements IMessageManager {
 		}
 
 		// send message directly to the peer with the given peer address
-		FutureDirect futureDirect = networkManager.getConnection().getPeer().sendDirect(message.getTargetAddress())
-				.setObject(encryptedMessage).start();
+		FutureDirect futureDirect = networkManager.getConnection().getPeerDHT().peer()
+				.sendDirect(message.getTargetAddress()).object(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
 		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this);
 		futureDirect.addListener(listener);
@@ -151,7 +152,7 @@ public final class MessageManager implements IMessageManager {
 	}
 
 	private void prepareMessage(BaseMessage message) {
-		message.setSenderAddress(networkManager.getConnection().getPeer().getPeerAddress());
+		message.setSenderAddress(networkManager.getConnection().getPeerDHT().peerAddress());
 		configureCallbackHandlerIfNeeded(message);
 		setSenderPublicKeyIfNeeded(message);
 	}

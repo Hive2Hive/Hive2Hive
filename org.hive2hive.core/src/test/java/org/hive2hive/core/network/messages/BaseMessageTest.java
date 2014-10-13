@@ -6,27 +6,31 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.security.PublicKey;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
-
-import net.tomp2p.futures.FutureGet;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.network.messages.testmessages.TestMessage;
+import org.hive2hive.core.network.messages.testmessages.TestMessageMaxSending;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * @author Seppi
+ */
 public class BaseMessageTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private final static int networkSize = 5;
+	private static ArrayList<NetworkManager> network;
+	private final static int networkSize = 10;
 	private Random random = new Random();
 
 	@BeforeClass
@@ -48,8 +52,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * @throws NoPeerConnectionException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyToTargetNode() throws ClassNotFoundException,
-			IOException, NoPeerConnectionException {
+	public void testSendingAnAsynchronousMessageWithNoReplyToTargetNode() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -65,16 +69,15 @@ public class BaseMessageTest extends H2HJUnitTest {
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
-		FutureGet futureGet = null;
+		BaseNetworkContent content = null;
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().getUnblocked(
+			content = nodeB.getDataManager().get(
 					new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
-			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (content == null);
 
 		// verify that data arrived
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String result = ((H2HTestData) content).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}
@@ -90,8 +93,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 	 * @throws NoSessionException
 	 */
 	@Test
-	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode()
-			throws ClassNotFoundException, IOException, NoPeerConnectionException, NoSessionException {
+	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesTargetNode() throws ClassNotFoundException, IOException,
+			NoPeerConnectionException, NoSessionException {
 		// select two random nodes
 		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
@@ -102,8 +105,7 @@ public class BaseMessageTest extends H2HJUnitTest {
 		String contentKey = NetworkTestUtil.randomString();
 		String data = NetworkTestUtil.randomString();
 		// create a test message which gets rejected several times
-		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey,
-				new H2HTestData(data));
+		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
 		// send message
 		assertTrue(nodeA.getMessageManager().send(message, getPublicKey(nodeB)));
@@ -111,16 +113,15 @@ public class BaseMessageTest extends H2HJUnitTest {
 		// wait till message gets handled
 		// this might need some time
 		H2HWaiter w = new H2HWaiter(10);
-		FutureGet futureGet = null;
+		BaseNetworkContent content = null;
 		do {
 			w.tickASecond();
-			futureGet = nodeB.getDataManager().getUnblocked(
+			content = nodeB.getDataManager().get(
 					new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey));
-			futureGet.awaitUninterruptibly();
-		} while (futureGet.getData() == null);
+		} while (content == null);
 
 		// verify that data arrived
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
+		String result = ((H2HTestData) content).getTestString();
 		assertNotNull(result);
 		assertEquals(data, result);
 	}

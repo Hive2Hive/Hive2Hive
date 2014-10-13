@@ -20,16 +20,15 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFileSmall;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.context.BasePKUpdateContext;
-import org.hive2hive.core.processes.share.pkupdate.ChangeProtectionKeysStep;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
-import org.hive2hive.core.security.HybridEncryptedContent;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -45,8 +44,8 @@ import org.junit.Test;
  */
 public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
-	private static final int networkSize = 2;
-	private static List<NetworkManager> network;
+	private static final int networkSize = 6;
+	private static ArrayList<NetworkManager> network;
 	private static H2HDummyEncryption dummyEncryption;
 
 	@BeforeClass
@@ -78,14 +77,14 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// initialize put
 		Parameters parameters = new Parameters().setLocationKey(chunk.getId()).setContentKey(H2HConstants.FILE_CHUNK)
-				.setProtectionKeys(protectionKeysOld).setData(encryptedChunk);
+				.setProtectionKeys(protectionKeysOld).setNetworkContent(encryptedChunk);
 		// indicate to generate hash
 		parameters.setHashFlag(true);
 		// put encrypted chunk into network
 		getter.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 
 		// verify put
-		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData());
+		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().data());
 
 		// initialize a fake process context
 		BasePKUpdateContext context = new TestChunkPKUpdateContext(protectionKeysOld, protectionKeysNew, chunk,
@@ -97,14 +96,14 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
 		step.cancel(new RollbackReason("Testing rollback."));
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 	}
 
 	@Test
@@ -139,14 +138,14 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// initialize put
 		Parameters parameters = new Parameters().setLocationKey(metaFileSmall.getId()).setContentKey(H2HConstants.META_FILE)
 				.setVersionKey(encryptedMetaFile.getVersionKey()).setProtectionKeys(protectionKeysOld)
-				.setData(encryptedMetaFile);
+				.setNetworkContent(encryptedMetaFile);
 		// indicate to generate hash
 		parameters.setHashFlag(true);
 		// put encrypted meta file into network
 		getter.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
 
 		// verify put
-		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData());
+		Assert.assertNotNull(getter.getDataManager().getUnblocked(parameters).awaitUninterruptibly().data());
 
 		// initialize a fake process context
 		BasePKUpdateContext context = new TestMetaFilePKUpdateContext(protectionKeysOld, protectionKeysNew, metaFileSmall,
@@ -158,14 +157,14 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// verify if content protection keys have changed
 		Assert.assertEquals(protectionKeysNew.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
 		step.cancel(new RollbackReason("Testing rollback."));
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
-				.awaitUninterruptibly().getData().publicKey());
+				.awaitUninterruptibly().data().publicKey());
 	}
 
 	@AfterClass

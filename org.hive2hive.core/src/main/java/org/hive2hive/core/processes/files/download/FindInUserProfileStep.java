@@ -6,12 +6,12 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.common.GetMetaFileStep;
 import org.hive2hive.core.processes.context.DownloadFileContext;
+import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -53,10 +53,12 @@ public class FindInUserProfileStep extends ProcessStep {
 		} else {
 			logger.info("Initalize the process for downloading file '{}'.", index.getFullPath());
 			try {
-				IDataManager dataManager = networkManager.getDataManager();
+				DataManager dataManager = networkManager.getDataManager();
 				getParent().add(new GetMetaFileStep(context, dataManager));
-				PeerAddress ownPeerAddress = networkManager.getConnection().getPeer().getPeerAddress();
-				getParent().add(new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress, networkManager.getEventBus()));
+				PeerAddress ownPeerAddress = networkManager.getConnection().getPeerDHT().peerAddress();
+				getParent().add(
+						new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress, networkManager
+								.getEventBus()));
 			} catch (NoPeerConnectionException | NoSessionException e) {
 				throw new ProcessExecutionException(e);
 			}

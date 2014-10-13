@@ -1,20 +1,18 @@
 package org.hive2hive.core.processes.common.base;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -27,8 +25,8 @@ import org.junit.Test;
  */
 public class BaseGetProcessStepTest extends H2HJUnitTest {
 
-	private final static int networkSize = 2;
-	private static List<NetworkManager> network;
+	private final static int networkSize = 10;
+	private static ArrayList<NetworkManager> network;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -40,19 +38,17 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void testGetProcessStepSuccess() throws NoPeerConnectionException {
 		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		NetworkManager getter = network.get(0);
-		NetworkManager holder = network.get(1);
+		NetworkManager getter = NetworkTestUtil.getRandomNode(network);
+		NetworkManager holder = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = holder.getNodeId();
 		String contentKey = NetworkTestUtil.randomString();
 
-		// put in the memory of 2nd peer
-		holder.getDataManager()
-				.putUnblocked(new Parameters().setLocationKey(holder.getNodeId()).setContentKey(contentKey).setData(data))
-				.awaitUninterruptibly();
+		holder.getDataManager().put(
+				new Parameters().setLocationKey(holder.getNodeId()).setContentKey(contentKey).setNetworkContent(data));
 
 		TestGetProcessStep getStep = new TestGetProcessStep(locationKey, contentKey, getter.getDataManager());
-		TestExecutionUtil.executeProcess(getStep);
+		TestExecutionUtil.executeProcessTillSucceded(getStep);
 
 		Assert.assertEquals(data.getTestString(), ((H2HTestData) getStep.getContent()).getTestString());
 	}
@@ -67,12 +63,8 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 		TestGetProcessStepRollBack getStepRollBack = new TestGetProcessStepRollBack(locationKey, contentKey,
 				getter.getDataManager());
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		getStepRollBack.attachListener(listener);
-		getStepRollBack.start();
 
-		// wait for the process to finish
-		TestExecutionUtil.waitTillFailed(listener, 10);
+		TestExecutionUtil.executeProcessTillFailed(getStepRollBack);
 
 		Assert.assertNull(getStepRollBack.getContent());
 	}
@@ -87,9 +79,9 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		private final String locationKey;
 		private final String contentKey;
 
-		private NetworkContent content;
+		private BaseNetworkContent content;
 
-		public TestGetProcessStep(String locationKey, String contentKey, IDataManager dataManager) {
+		public TestGetProcessStep(String locationKey, String contentKey, DataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
@@ -100,7 +92,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 			this.content = get(locationKey, contentKey);
 		}
 
-		public NetworkContent getContent() {
+		public BaseNetworkContent getContent() {
 			return content;
 		}
 	}
@@ -115,9 +107,9 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		private final String locationKey;
 		private final String contentKey;
 
-		private NetworkContent content;
+		private BaseNetworkContent content;
 
-		public TestGetProcessStepRollBack(String locationKey, String contentKey, IDataManager dataManager) {
+		public TestGetProcessStepRollBack(String locationKey, String contentKey, DataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
@@ -125,13 +117,13 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-			NetworkContent content = get(locationKey, contentKey);
+			BaseNetworkContent content = get(locationKey, contentKey);
 			this.content = content;
 			if (content == null)
 				throw new ProcessExecutionException("Content is null.");
 		}
 
-		public NetworkContent getContent() {
+		public BaseNetworkContent getContent() {
 			return content;
 		}
 	}

@@ -16,7 +16,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.message.SignatureCodec;
-import net.tomp2p.p2p.PeerMaker;
+import net.tomp2p.p2p.PeerBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 		buf.skipBytes(2);
 
 		if (len <= 0) {
-			return PeerMaker.EMPTY_PUBLICKEY;
+			return PeerBuilder.EMPTY_PUBLICKEY;
 		}
 
 		byte[] me = new byte[len];

@@ -2,10 +2,10 @@ package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureListener;
-import net.tomp2p.futures.FutureGet;
 
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	private final CountDownLatch latch;
 
 	// the result when it came back
-	private NetworkContent result = null;
+	private BaseNetworkContent result = null;
 
 	public FutureGetListener(IParameters parameters) {
 		this.parameters = parameters;
@@ -36,7 +36,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	 * 
 	 * @return returns the content from the DHT
 	 */
-	public NetworkContent awaitAndGet() {
+	public BaseNetworkContent awaitAndGet() {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
@@ -48,12 +48,12 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	@Override
 	public void operationComplete(FutureGet future) throws Exception {
-		if (future == null || future.isFailed() || future.getData() == null) {
+		if (future == null || future.isFailed() || future.data() == null) {
 			result = null;
 			logger.debug("Got null. '{}'", parameters.toString());
 		} else {
 			// set the result
-			result = (NetworkContent) future.getData().object();
+			result = (BaseNetworkContent) future.data().object();
 			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
 		}
 		// release the lock

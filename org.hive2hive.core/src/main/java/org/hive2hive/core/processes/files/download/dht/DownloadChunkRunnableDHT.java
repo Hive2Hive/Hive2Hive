@@ -11,13 +11,13 @@ import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +34,9 @@ public class DownloadChunkRunnableDHT implements Runnable {
 	private final DownloadTaskDHT task;
 	private final MetaChunk metaChunk;
 	private final File tempDestination;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 
-	public DownloadChunkRunnableDHT(DownloadTaskDHT task, MetaChunk chunk, IDataManager dataManager) {
+	public DownloadChunkRunnableDHT(DownloadTaskDHT task, MetaChunk chunk, DataManager dataManager) {
 		this.task = task;
 		this.metaChunk = chunk;
 		this.dataManager = dataManager;
@@ -58,7 +58,7 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		logger.debug("Downloading chunk {} of file {} from the DHT", metaChunk.getIndex(), task.getDestinationName());
 		IParameters parameters = new Parameters().setLocationKey(metaChunk.getChunkId()).setContentKey(
 				H2HConstants.FILE_CHUNK);
-		NetworkContent content = dataManager.get(parameters);
+		BaseNetworkContent content = dataManager.get(parameters);
 		if (content == null) {
 			task.abortDownload("Chunk not found in the DHT");
 			return;
@@ -68,7 +68,7 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		Chunk chunk;
 
 		try {
-			NetworkContent decrypted = dataManager.getEncryption().decryptHybrid(encrypted, task.getDecryptionKey());
+			BaseNetworkContent decrypted = dataManager.getEncryption().decryptHybrid(encrypted, task.getDecryptionKey());
 			chunk = (Chunk) decrypted;
 		} catch (ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
 				| BadPaddingException | IllegalStateException | InvalidCipherTextException | IllegalArgumentException

@@ -7,7 +7,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFileSmall;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;

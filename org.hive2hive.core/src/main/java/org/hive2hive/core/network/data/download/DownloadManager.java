@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.processes.files.download.dht.DownloadChunkRunnableDHT;
@@ -34,7 +34,7 @@ public class DownloadManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DownloadManager.class);
 
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 	private final IMessageManager messageManager;
 	private final PublicKeyManager keyManager;
 	private final IFileConfiguration fileConfig;
@@ -42,7 +42,7 @@ public class DownloadManager {
 
 	private ExecutorService executor;
 
-	public DownloadManager(IDataManager dataManager, IMessageManager messageManager, PublicKeyManager keyManager,
+	public DownloadManager(DataManager dataManager, IMessageManager messageManager, PublicKeyManager keyManager,
 			IFileConfiguration fileConfig) {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;

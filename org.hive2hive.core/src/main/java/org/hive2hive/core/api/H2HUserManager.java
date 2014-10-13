@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
@@ -18,10 +19,8 @@ import org.hive2hive.core.events.implementations.RegisterEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.common.GetUserLocationsStep;
-import org.hive2hive.core.processes.context.IsRegisteredContext;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.RollbackReason;
@@ -71,9 +70,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public IProcessComponent login(UserCredentials credentials, Path rootPath) throws NoPeerConnectionException {
-		// TODO refactor
-		UserProfileManager profileManager = new UserProfileManager(networkManager.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(rootPath, profileManager, fileConfiguration);
+		SessionParameters params = new SessionParameters(rootPath, fileConfiguration);
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 
@@ -101,11 +98,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public boolean isRegistered(String userId) throws NoPeerConnectionException {
-		IsRegisteredContext context = new IsRegisteredContext(userId);
-		IProcessComponent checkProcess = new GetUserLocationsStep(context, networkManager.getDataManager());
-		executeProcess(checkProcess);
-
-		return context.isRegistered();
+		return networkManager.getDataManager().get(
+				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)) == null;
 	}
 
 	@Override

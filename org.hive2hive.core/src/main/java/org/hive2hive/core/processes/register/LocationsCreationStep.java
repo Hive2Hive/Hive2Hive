@@ -1,6 +1,6 @@
 package org.hive2hive.core.processes.register;
 
-import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.processes.context.RegisterProcessContext;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;

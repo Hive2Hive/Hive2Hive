@@ -2,13 +2,18 @@ package org.hive2hive.core.processes.context;
 
 import java.security.KeyPair;
 
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
-import org.hive2hive.core.processes.context.interfaces.IGetUserLocationsContext;
-import org.hive2hive.core.processes.context.interfaces.IPutUserLocationsContext;
+import javax.crypto.SecretKey;
+
+import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 
-public final class RegisterProcessContext implements IGetUserLocationsContext, IPutUserLocationsContext {
+/**
+ * @author Nico, Seppi
+ */
+public final class RegisterProcessContext {
 
 	private final UserCredentials userCredentials;
 
@@ -19,21 +24,18 @@ public final class RegisterProcessContext implements IGetUserLocationsContext, I
 		this.userCredentials = userCredentials;
 	}
 
-	public UserCredentials getUserCredentials() {
-		return userCredentials;
-	}
-
-	@Override
 	public String consumeUserId() {
 		return userCredentials.getUserId();
 	}
 
-	@Override
+	public String consumeUserProflieLocationKey() {
+		return userCredentials.getProfileLocationKey();
+	}
+
 	public void provideUserLocations(Locations locations) {
 		this.locations = locations;
 	}
 
-	@Override
 	public Locations consumeUserLocations() {
 		return locations;
 	}
@@ -46,9 +48,21 @@ public final class RegisterProcessContext implements IGetUserLocationsContext, I
 		return profile;
 	}
 
-	@Override
 	public KeyPair consumeUserLocationsProtectionKeys() {
 		return profile.getProtectionKeys();
+	}
+
+	public KeyPair consumeUserProfileProtectionKeys() {
+		return profile.getProtectionKeys();
+	}
+
+	public KeyPair consumeUserPublicKeyProtectionKeys() {
+		return profile.getProtectionKeys();
+	}
+
+	public SecretKey consumeUserProfileEncryptionKeys() {
+		return PasswordUtil.generateAESKeyFromPassword(userCredentials.getPassword(), userCredentials.getPin(),
+				H2HConstants.KEYLENGTH_USER_PROFILE);
 	}
 
 }

@@ -2,11 +2,13 @@ package org.hive2hive.core.tomp2p;
 
 import java.io.IOException;
 
-import net.tomp2p.futures.FuturePut;
-import net.tomp2p.p2p.Peer;
-import net.tomp2p.p2p.PeerMaker;
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.PeerBuilderDHT;
+import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
+import net.tomp2p.replication.IndirectReplication;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HJUnitTest;
@@ -30,34 +32,37 @@ public class ReplicationTest extends H2HJUnitTest {
 
 	@Test
 	public void testReplicationPureTomP2P() throws IOException, InterruptedException {
-		Peer p1 = new PeerMaker(Number160.createHash(1)).setEnableIndirectReplication(true).ports(5000)
-				.makeAndListen();
-		Peer p2 = new PeerMaker(Number160.createHash(2)).setEnableIndirectReplication(true).masterPeer(p1)
-				.makeAndListen();
-		Peer p3 = new PeerMaker(Number160.createHash(3)).setEnableIndirectReplication(true).masterPeer(p1)
-				.makeAndListen();
+		PeerDHT p1 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(1)).ports(5000).start()).start();
+		PeerDHT p2 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(2)).masterPeer(p1.peer()).start()).start();
+		PeerDHT p3 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(2)).masterPeer(p1.peer()).start()).start();
 
-		p2.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		IndirectReplication rep1 = new IndirectReplication(p1).start();
+		IndirectReplication rep2 = new IndirectReplication(p2).start();
+		IndirectReplication rep3 = new IndirectReplication(p3).start();
 
-		FuturePut putFuture = p2.put(Number160.createHash("key"))
-				.setData(Number160.ZERO, Number160.ZERO, new Data("test")).start();
+		p2.peer().bootstrap().peerAddress(p1.peerAddress()).start().awaitUninterruptibly();
+
+		FuturePut putFuture = p2.put(Number160.createHash("key")).data(Number160.ZERO, Number160.ZERO, new Data("test"))
+				.start();
 		putFuture.awaitUninterruptibly();
-		putFuture.getFutureRequests().awaitUninterruptibly();
-		Assert.assertEquals(2, putFuture.getFutureRequests().getSuccessCounter());
+		putFuture.futureRequests().awaitUninterruptibly();
+		Assert.assertEquals(2, putFuture.futureRequests().successCounter());
 
-		p3.bootstrap().setPeerAddress(p1.getPeerAddress()).start().awaitUninterruptibly();
+		p3.peer().bootstrap().peerAddress(p1.peerAddress()).start().awaitUninterruptibly();
 
 		H2HWaiter w = new H2HWaiter(10);
 		Data tmp = null;
 		do {
 			w.tickASecond();
-			tmp = p3.getPeerBean()
-					.storage()
-					.get(new Number640(Number160.createHash("key"), Number160.ZERO, Number160.ZERO,
-							Number160.ZERO));
+			tmp = p3.storageLayer().get(
+					new Number640(Number160.createHash("key"), Number160.ZERO, Number160.ZERO, Number160.ZERO));
 		} while (tmp == null);
 
 		Assert.assertNotNull(tmp);
+
+		rep1.shutdown();
+		rep2.shutdown();
+		rep3.shutdown();
 
 		p1.shutdown();
 		p2.shutdown();

@@ -51,7 +51,7 @@ public class UserEventsTest extends H2HJUnitTest {
 	
 	@Before
 	public void before() {
-		node = H2HNode.createNode(NetworkConfiguration.create(), FileConfiguration.createDefault());
+		node = H2HNode.createNode(NetworkConfiguration.createInitial(), FileConfiguration.createDefault());
 		node.connect();
 		userManager = node.getUserManager();
 		credentials = NetworkTestUtil.generateRandomCredentials();

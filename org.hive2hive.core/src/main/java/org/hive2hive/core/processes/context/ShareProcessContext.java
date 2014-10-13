@@ -5,14 +5,14 @@ import java.security.KeyPair;
 import java.util.Set;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IInitializeMetaUpdateContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareProcessContext implements IInitializeMetaUpdateContext, INotifyContext {
 
@@ -21,7 +21,7 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 	private final UserPermission permission;
 
 	private KeyPair oldProtectionKeys;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
@@ -69,7 +69,7 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 		this.oldProtectionKeys = protectionKeys;
 	}
 
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 
@@ -77,7 +77,7 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 		// ignore because only used for deletion
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 

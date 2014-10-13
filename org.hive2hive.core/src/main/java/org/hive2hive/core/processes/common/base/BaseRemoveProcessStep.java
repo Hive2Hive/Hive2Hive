@@ -4,8 +4,9 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.model.BaseNetworkContent;
+import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A process step which removes a {@link NetworkContent} object under the given keys from the network.</br>
+ * A process step which removes a {@link BaseNetworkContent} object under the given keys from the network.</br>
  * <b>Important:</b> Use only this process step to remove data from the network so that in case of failure a
  * appropriate handling is triggered.
  * 
@@ -32,22 +33,19 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(BaseRemoveProcessStep.class);
 
 	private IParameters parameters;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 	private boolean removePerformed = false;
 
-	public BaseRemoveProcessStep(IDataManager dataManager) {
+	public BaseRemoveProcessStep(DataManager dataManager) {
 		this.dataManager = dataManager;
 	}
 
-	protected void remove(PublicKey locationKey, String contentKey, KeyPair protectionKey)
-			throws RemoveFailedException {
+	protected void remove(PublicKey locationKey, String contentKey, KeyPair protectionKey) throws RemoveFailedException {
 		remove(H2HDefaultEncryption.key2String(locationKey), contentKey, protectionKey);
 	}
 
-	protected void remove(String locationKey, String contentKey, KeyPair protectionKey)
-			throws RemoveFailedException {
-		parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-				.setProtectionKeys(protectionKey);
+	protected void remove(String locationKey, String contentKey, KeyPair protectionKey) throws RemoveFailedException {
+		parameters = new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setProtectionKeys(protectionKey);
 
 		// deletes all versions
 		boolean success = dataManager.remove(parameters);
@@ -66,13 +64,13 @@ public abstract class BaseRemoveProcessStep extends ProcessStep {
 		}
 
 		// TODO ugly bug fix
-		if (parameters.getData() == null) {
+		if (parameters.getNetworkContent() == null) {
 			logger.warn("Rollback of remove failed. No content to re-put. '{}'", parameters.toString());
 			return;
 		}
 
-		boolean success = dataManager.put(parameters);
-		if (success) {
+		H2HPutStatus status = dataManager.put(parameters);
+		if (status.equals(H2HPutStatus.OK)) {
 			logger.debug("Rollback of remove succeeded. '{}'", parameters.toString());
 		} else {
 			logger.warn("Rollback of remove failed. Re-put failed. '{}'", parameters.toString());

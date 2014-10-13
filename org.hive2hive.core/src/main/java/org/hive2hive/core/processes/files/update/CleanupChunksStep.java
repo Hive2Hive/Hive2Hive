@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.files.delete.DeleteSingleChunkStep;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
@@ -27,9 +27,9 @@ public class CleanupChunksStep extends ProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(CleanupChunksStep.class);
 
 	private final UpdateFileProcessContext context;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 
-	public CleanupChunksStep(UpdateFileProcessContext context, IDataManager dataManager) {
+	public CleanupChunksStep(UpdateFileProcessContext context, DataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
 	}

@@ -1,18 +1,11 @@
 package org.hive2hive.core.network.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.SignatureException;
-import java.util.List;
-import java.util.Random;
+import java.util.ArrayList;
 
-import net.tomp2p.futures.FutureGet;
-import net.tomp2p.futures.FuturePut;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -21,6 +14,7 @@ import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.junit.AfterClass;
@@ -34,9 +28,8 @@ import org.junit.Test;
  */
 public class DataManagerTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int networkSize = 3;
-	private static Random random = new Random();
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -46,218 +39,66 @@ public class DataManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGet() throws Exception {
+	public void testPutGetRemove() throws Exception {
 		String data = NetworkTestUtil.randomString();
 		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data));
+				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(new H2HTestData(data));
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters));
 
-		FuturePut future = node.getDataManager().putUnblocked(parameters);
-		future.awaitUninterruptibly();
+		Assert.assertEquals(data,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters)).getTestString());
 
-		FutureGet futureGet = node.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
+		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters));
 
-		String result = (String) ((H2HTestData) futureGet.getData().object()).getTestString();
-		assertEquals(data, result);
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters));
 	}
 
 	@Test
-	public void testPutGetFromOtherNode() throws Exception {
-		String data = NetworkTestUtil.randomString();
-		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data));
-
-		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-
-		FuturePut future = nodeA.getDataManager().putUnblocked(parameters);
-		future.awaitUninterruptibly();
-
-		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-
-		String result = ((H2HTestData) futureGet.getData().object()).getTestString();
-		assertEquals(data, result);
-	}
-
-	@Test
-	public void testPutOneLocationKeyMultipleContentKeys() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-
-		NetworkManager node = network.get(random.nextInt(networkSize));
-
-		String data1 = NetworkTestUtil.randomString();
-		Parameters parameters1 = new Parameters().setLocationKey(locationKey)
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data1));
-		FuturePut future1 = node.getDataManager().putUnblocked(parameters1);
-		future1.awaitUninterruptibly();
-
-		String data2 = NetworkTestUtil.randomString();
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey)
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data2));
-		FuturePut future2 = node.getDataManager().putUnblocked(parameters2);
-		future2.awaitUninterruptibly();
-
-		String data3 = NetworkTestUtil.randomString();
-		Parameters parameters3 = new Parameters().setLocationKey(locationKey)
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data3));
-		FuturePut future3 = node.getDataManager().putUnblocked(parameters3);
-		future3.awaitUninterruptibly();
-
-		FutureGet get1 = node.getDataManager().getUnblocked(parameters1);
-		get1.awaitUninterruptibly();
-		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
-		assertEquals(data1, result1);
-
-		FutureGet get2 = node.getDataManager().getUnblocked(parameters2);
-		get2.awaitUninterruptibly();
-		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
-		assertEquals(data2, result2);
-
-		FutureGet get3 = node.getDataManager().getUnblocked(parameters3);
-		get3.awaitUninterruptibly();
-		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
-		assertEquals(data3, result3);
-	}
-
-	@Test
-	public void testPutOneLocationKeyMultipleContentKeysGlobalGetFromOtherNodes() throws Exception {
+	public void testPutGetRemoveOneLocationKeyMultipleContentKeys() throws Exception {
 		String locationKey = NetworkTestUtil.randomString();
 
 		String data1 = NetworkTestUtil.randomString();
-		Parameters parameters1 = new Parameters().setLocationKey(locationKey)
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data1));
-		FuturePut future1 = network.get(random.nextInt(networkSize)).getDataManager()
-				.putUnblocked(parameters1);
-		future1.awaitUninterruptibly();
+		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
+				.setNetworkContent(new H2HTestData(data1));
+		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters1));
 
 		String data2 = NetworkTestUtil.randomString();
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey)
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data2));
-		FuturePut future2 = network.get(random.nextInt(networkSize)).getDataManager()
-				.putUnblocked(parameters2);
-		future2.awaitUninterruptibly();
+		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
+				.setNetworkContent(new H2HTestData(data2));
+		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters2));
 
 		String data3 = NetworkTestUtil.randomString();
-		Parameters parameters3 = new Parameters().setLocationKey(locationKey)
-				.setContentKey(NetworkTestUtil.randomString()).setData(new H2HTestData(data3));
-		FuturePut future3 = network.get(random.nextInt(networkSize)).getDataManager()
-				.putUnblocked(parameters3);
-		future3.awaitUninterruptibly();
+		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
+				.setNetworkContent(new H2HTestData(data3));
+		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters3));
 
-		FutureGet get1 = network.get(random.nextInt(networkSize)).getDataManager().getUnblocked(parameters1);
-		get1.awaitUninterruptibly();
-		String result1 = (String) ((H2HTestData) get1.getData().object()).getTestString();
-		assertEquals(data1, result1);
+		Assert.assertEquals(data1,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1)).getTestString());
+		Assert.assertEquals(data2,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2)).getTestString());
+		Assert.assertEquals(data3,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3)).getTestString());
 
-		FutureGet get2 = network.get(random.nextInt(networkSize)).getDataManager().getUnblocked(parameters2);
-		get2.awaitUninterruptibly();
-		String result2 = (String) ((H2HTestData) get2.getData().object()).getTestString();
-		assertEquals(data2, result2);
+		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters1));
 
-		FutureGet get3 = network.get(random.nextInt(networkSize)).getDataManager().getUnblocked(parameters3);
-		get3.awaitUninterruptibly();
-		String result3 = (String) ((H2HTestData) get3.getData().object()).getTestString();
-		assertEquals(data3, result3);
-	}
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1));
+		Assert.assertEquals(data2,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2)).getTestString());
+		Assert.assertEquals(data3,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3)).getTestString());
 
-	@Test
-	public void testRemovalOneContentKey() throws NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-		String locationKey = nodeB.getNodeId();
+		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters2));
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1));
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2));
+		Assert.assertEquals(data3,
+				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3)).getTestString());
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters = new Parameters().setLocationKey(locationKey).setDomainKey("domain key")
-				.setContentKey(NetworkTestUtil.randomString()).setData(data);
+		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters3));
 
-		// put a content
-		nodeA.getDataManager().putUnblocked(parameters).awaitUninterruptibly();
-
-		// test that it is there
-		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-		assertNotNull(futureGet.getData());
-
-		// delete it
-		nodeA.getDataManager().removeUnblocked(parameters).awaitUninterruptibly();
-
-		// check that it is gone
-		futureGet = nodeB.getDataManager().getUnblocked(parameters);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
-	}
-
-	@Test
-	public void testRemovalMultipleContentKey() throws ClassNotFoundException, IOException,
-			NoPeerConnectionException {
-		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
-
-		String locationKey = nodeB.getNodeId();
-
-		String contentKey1 = NetworkTestUtil.randomString();
-		String testString1 = NetworkTestUtil.randomString();
-		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey1)
-				.setData(new H2HTestData(testString1));
-
-		String contentKey2 = NetworkTestUtil.randomString();
-		String testString2 = NetworkTestUtil.randomString();
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey2)
-				.setData(new H2HTestData(testString2));
-
-		String contentKey3 = NetworkTestUtil.randomString();
-		String testString3 = NetworkTestUtil.randomString();
-		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setContentKey(contentKey3)
-				.setData(new H2HTestData(testString3));
-
-		// insert them
-		FuturePut put1 = nodeA.getDataManager().putUnblocked(parameters1);
-		put1.awaitUninterruptibly();
-
-		FuturePut put2 = nodeA.getDataManager().putUnblocked(parameters2);
-		put2.awaitUninterruptibly();
-
-		FuturePut put3 = nodeA.getDataManager().putUnblocked(parameters3);
-		put3.awaitUninterruptibly();
-
-		// check that they are all stored
-		FutureGet futureGet = nodeB.getDataManager().getUnblocked(parameters1);
-		futureGet.awaitUninterruptibly();
-		assertEquals(testString1, ((H2HTestData) futureGet.getData().object()).getTestString());
-		futureGet = nodeB.getDataManager().getUnblocked(parameters2);
-		futureGet.awaitUninterruptibly();
-		assertEquals(testString2, ((H2HTestData) futureGet.getData().object()).getTestString());
-		futureGet = nodeB.getDataManager().getUnblocked(parameters3);
-		futureGet.awaitUninterruptibly();
-		assertEquals(testString3, ((H2HTestData) futureGet.getData().object()).getTestString());
-
-		// remove 2nd one and check that 1st and 3rd are still there
-		nodeA.getDataManager().removeUnblocked(parameters2).awaitUninterruptibly();
-		futureGet = nodeB.getDataManager().getUnblocked(parameters1);
-		futureGet.awaitUninterruptibly();
-		assertEquals(testString1, ((H2HTestData) futureGet.getData().object()).getTestString());
-		futureGet = nodeB.getDataManager().getUnblocked(parameters2);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
-		futureGet = nodeB.getDataManager().getUnblocked(parameters3);
-		futureGet.awaitUninterruptibly();
-		assertEquals(testString3, ((H2HTestData) futureGet.getData().object()).getTestString());
-
-		// remove 3rd one as well and check that they are gone as well
-		nodeA.getDataManager().removeUnblocked(parameters1).awaitUninterruptibly();
-		nodeA.getDataManager().removeUnblocked(parameters3).awaitUninterruptibly();
-		futureGet = nodeB.getDataManager().getUnblocked(parameters1);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
-		futureGet = nodeB.getDataManager().getUnblocked(parameters2);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
-		futureGet = nodeB.getDataManager().getUnblocked(parameters3);
-		futureGet.awaitUninterruptibly();
-		assertNull(futureGet.getData());
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1));
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2));
+		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3));
 	}
 
 	@Test
@@ -270,30 +111,25 @@ public class DataManagerTest extends H2HJUnitTest {
 		data.generateVersionKey();
 		data.setBasedOnKey(Number160.ZERO);
 		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey())
-				.setData(data).setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew)
-				.setTTL(data.getTimeToLive()).setHashFlag(true);
+				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data)
+				.setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew).setTTL(data.getTimeToLive())
+				.setHashFlag(true);
 
-		NetworkManager node = network.get(random.nextInt(networkSize));
+		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		// put some initial data
-		FuturePut putFuture1 = node.getDataManager().putUnblocked(parameters);
-		putFuture1.awaitUninterruptibly();
-		Assert.assertTrue(putFuture1.isSuccess());
-		
+		Assert.assertEquals(H2HPutStatus.OK, node.getDataManager().put(parameters));
+
 		// parameters without the data object itself
-		parameters = new Parameters().setLocationKey(parameters.getLocationKey())
-			.setContentKey(parameters.getContentKey()).setVersionKey(data.getVersionKey())
-			.setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew)
-			.setTTL(data.getTimeToLive());
+		parameters = new Parameters().setLocationKey(parameters.getLocationKey()).setContentKey(parameters.getContentKey())
+				.setVersionKey(data.getVersionKey()).setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew)
+				.setTTL(data.getTimeToLive());
 
 		// change content protection key
-		FuturePut changeFuture = node.getDataManager().changeProtectionKeyUnblocked(parameters);
-		changeFuture.awaitUninterruptibly();
-		Assert.assertTrue(changeFuture.isSuccess());
+		Assert.assertTrue(node.getDataManager().changeProtectionKey(parameters));
 
 		// verify if content protection key has been changed
-		Data resData = node.getDataManager().getUnblocked(parameters).awaitUninterruptibly().getData();
+		Data resData = node.getDataManager().getUnblocked(parameters).awaitUninterruptibly().data();
 		Assert.assertEquals(keypairNew.getPublic(), resData.publicKey());
 	}
 

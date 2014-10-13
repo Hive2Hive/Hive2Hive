@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;

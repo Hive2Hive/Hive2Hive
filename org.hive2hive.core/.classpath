@@ -27,5 +27,26 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/tomp2p-core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/tomp2p-dht"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/tomp2p-replication"/>
+	<classpathentry kind="lib" path="C:/Users/Sebastian/.m2/repository/io/netty/netty-buffer/4.0.21.Final/netty-buffer-4.0.21.Final.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="io.netty"/>
+			<attribute name="maven.artifactId" value="netty-buffer"/>
+			<attribute name="maven.version" value="4.0.21.Final"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Sebastian/.m2/repository/io/netty/netty-common/4.0.21.Final/netty-common-4.0.21.Final.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="io.netty"/>
+			<attribute name="maven.artifactId" value="netty-common"/>
+			<attribute name="maven.version" value="4.0.21.Final"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

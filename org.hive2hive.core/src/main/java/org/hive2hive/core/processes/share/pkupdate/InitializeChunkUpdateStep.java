@@ -2,9 +2,9 @@ package org.hive2hive.core.processes.share.pkupdate;
 
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.ChunkPKUpdateContext;
 import org.hive2hive.core.processes.context.MetaDocumentPKUpdateContext;
 import org.hive2hive.processframework.abstracts.ProcessStep;
@@ -24,16 +24,16 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(InitializeChunkUpdateStep.class);
 
 	private final MetaDocumentPKUpdateContext context;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 
-	public InitializeChunkUpdateStep(MetaDocumentPKUpdateContext context, IDataManager dataManager) {
+	public InitializeChunkUpdateStep(MetaDocumentPKUpdateContext context, DataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		MetaFile metaFile = context.consumeMetaFile();
+		BaseMetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
 			throw new ProcessExecutionException("Meta File not found");
 		} else if (!(metaFile.isSmall())) {

@@ -9,7 +9,7 @@ import org.hive2hive.core.TimeToLiveStore;
  * 
  * @author Nico, Seppi
  */
-public class UserPublicKey extends NetworkContent {
+public class UserPublicKey extends BaseNetworkContent {
 
 	private static final long serialVersionUID = 6707545248946917053L;
 

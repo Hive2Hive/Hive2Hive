@@ -4,8 +4,8 @@ import java.security.PublicKey;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureSend;
 
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
@@ -123,7 +123,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	private AcceptanceReply extractAcceptanceReply(FutureSend future) {
 		String errorReason = "";
 		if (future.isSuccess()) {
-			Collection<Object> returndedObject = future.getRawDirectData2().values();
+			Collection<Object> returndedObject = future.rawDirectData2().values();
 			if (returndedObject == null) {
 				errorReason = "Returned object is null.";
 			} else if (returndedObject.isEmpty()) {
@@ -141,7 +141,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 			logger.error("A failure while sending a message occured. Reason = '{}'", errorReason);
 			return AcceptanceReply.FAILURE;
 		} else {
-			logger.error("Future not successful. Reason = '{}'.", future.getFailedReason());
+			logger.error("Future not successful. Reason = '{}'.", future.failedReason());
 			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}

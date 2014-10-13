@@ -12,12 +12,14 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
+import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 
 public final class H2HDefaultEncryption implements IH2HEncryption {
 
 	@Override
-	public EncryptedNetworkContent encryptAES(NetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
+	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			IOException {
 		byte[] serialized = SerializationUtil.serialize(content);
 		byte[] initVector = EncryptionUtil.generateIV();
@@ -29,14 +31,14 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public NetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
+	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
 			ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector());
-		return (NetworkContent) SerializationUtil.deserialize(decrypted);
+		return (BaseNetworkContent) SerializationUtil.deserialize(decrypted);
 	}
 
 	@Override
-	public HybridEncryptedContent encryptHybrid(NetworkContent content, PublicKey publicKey) throws InvalidKeyException,
+	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
 		byte[] serialized = SerializationUtil.serialize(content);
 
@@ -52,9 +54,9 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public NetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
+	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		return (NetworkContent) SerializationUtil.deserialize(decryptHybridRaw(content, privateKey));
+		return (BaseNetworkContent) SerializationUtil.deserialize(decryptHybridRaw(content, privateKey));
 	}
 
 	@Override

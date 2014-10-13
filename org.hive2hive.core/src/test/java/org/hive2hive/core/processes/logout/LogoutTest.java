@@ -1,16 +1,16 @@
 package org.hive2hive.core.processes.logout;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
-import net.tomp2p.futures.FutureGet;
+import net.tomp2p.dht.FutureGet;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -31,8 +31,8 @@ import org.junit.Test;
  */
 public class LogoutTest extends H2HJUnitTest {
 
-	private static final int networkSize = 3;
-	private static List<NetworkManager> network;
+	private static final int networkSize = 10;
+	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
 
 	@BeforeClass
@@ -54,8 +54,8 @@ public class LogoutTest extends H2HJUnitTest {
 		FutureGet futureGet = client.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
-		futureGet.getFutureRequests().awaitUninterruptibly();
-		Locations locations = (Locations) futureGet.getData().object();
+		futureGet.futureRequests().awaitUninterruptibly();
+		Locations locations = (Locations) futureGet.data().object();
 
 		Assert.assertEquals(1, locations.getPeerAddresses().size());
 
@@ -67,8 +67,8 @@ public class LogoutTest extends H2HJUnitTest {
 		FutureGet futureGet2 = client.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet2.awaitUninterruptibly();
-		futureGet2.getFutureRequests().awaitUninterruptibly();
-		Locations locations2 = (Locations) futureGet2.getData().object();
+		futureGet2.futureRequests().awaitUninterruptibly();
+		Locations locations2 = (Locations) futureGet2.data().object();
 
 		Assert.assertEquals(0, locations2.getPeerAddresses().size());
 	}

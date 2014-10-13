@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi
  */
+@Deprecated
 public class TTLRefreshManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(TTLRefreshManager.class);

@@ -30,16 +30,16 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @param bootstrapAddress the address to bootstrap to
 	 * @param isLocal true if peer will run only locally
 	 * @param bootstrapPort the port to bootstrap and to listen to
-	 * @param masterPeer the local peer to bootstrap
+	 * @param initialPeer the local peer to bootstrap
 	 */
 	private NetworkConfiguration(String nodeID, boolean isInitialPeer, InetAddress bootstrapAddress, int bootstrapPort,
-			boolean isLocal, Peer masterPeer) {
+			boolean isLocal, Peer initialPeer) {
 		this.nodeID = nodeID;
 		this.isInitialPeer = isInitialPeer;
 		this.bootstrapAddress = bootstrapAddress;
 		this.isLocal = isLocal;
 		this.bootstrapPort = bootstrapPort;
-		this.bootstrapPeer = masterPeer;
+		this.bootstrapPeer = initialPeer;
 	}
 
 	/**
@@ -47,8 +47,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * 
 	 * @return the network configuration
 	 */
-	public static INetworkConfiguration create() {
-		return create(UUID.randomUUID().toString());
+	public static INetworkConfiguration createInitial() {
+		return createInitial(UUID.randomUUID().toString());
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @param nodeID defines the location of the peer in the DHT
 	 * @return the network configuration
 	 */
-	public static INetworkConfiguration create(String nodeID) {
+	public static INetworkConfiguration createInitial(String nodeID) {
 		return new NetworkConfiguration(nodeID, true, null, -1, false, null);
 	}
 
@@ -87,11 +87,25 @@ public class NetworkConfiguration implements INetworkConfiguration {
 		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort, false, null);
 	}
 
-	public static INetworkConfiguration createLocalPeer(String nodeID, Peer masterPeer) {
-		return new NetworkConfiguration(nodeID, false, null, -1, true, masterPeer);
+	/**
+	 * Creates a local peer that is only able to bootstrap to a peer running on the same host.
+	 * 
+	 * @param nodeID the id of the peer to create
+	 * @param initialPeer the peer to bootstrap to
+	 * @return
+	 */
+	public static INetworkConfiguration createLocalPeer(String nodeID, Peer initialPeer) {
+		return new NetworkConfiguration(nodeID, false, null, -1, true, initialPeer);
 	}
-	
-	public static INetworkConfiguration createLocalMasterPeer(String nodeID) {
+
+	/**
+	 * Create a local initial peer. Regard that bootstrapping may only work for peers running on the same
+	 * host.
+	 * 
+	 * @param nodeID the id of the initial peer
+	 * @return
+	 */
+	public static INetworkConfiguration createInitialLocalPeer(String nodeID) {
 		return new NetworkConfiguration(nodeID, false, null, -1, true, null);
 	}
 

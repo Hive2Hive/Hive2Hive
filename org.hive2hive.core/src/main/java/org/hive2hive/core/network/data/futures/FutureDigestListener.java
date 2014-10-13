@@ -1,10 +1,11 @@
 package org.hive2hive.core.network.data.futures;
 
+import java.util.Collection;
 import java.util.NavigableMap;
 import java.util.concurrent.CountDownLatch;
 
+import net.tomp2p.dht.FutureDigest;
 import net.tomp2p.futures.BaseFutureListener;
-import net.tomp2p.futures.FutureDigest;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
@@ -26,7 +27,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	private final CountDownLatch latch;
 
 	// the result when it came back
-	private NavigableMap<Number640, Number160> result = null;
+	private NavigableMap<Number640, Collection<Number160>> result = null;
 
 	public FutureDigestListener(IParameters parameters) {
 		this.parameters = parameters;
@@ -38,7 +39,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	 * 
 	 * @return returns the content from the DHT
 	 */
-	public NavigableMap<Number640, Number160> awaitAndGet() {
+	public NavigableMap<Number640, Collection<Number160>> awaitAndGet() {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
@@ -51,13 +52,13 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	@Override
 	public void operationComplete(FutureDigest future) throws Exception {
 		if (future.isFailed()) {
-			logger.error("Could not get digest. '{}'", parameters.toString());
+			logger.error("Could not get digest. {}", parameters.toString());
 		} else {
-			result = future.getDigest().keyDigest();
+			result = future.digest().keyDigest();
 			if (result == null) {
-				logger.warn("Got digest null. '{}'", parameters.toString());
+				logger.warn("Got digest null. {}", parameters.toString());
 			} else {
-				logger.debug("Got digest. '{}'", parameters.toString());
+				logger.debug("Got digest. {}", parameters.toString());
 			}
 		}
 		latch.countDown();
