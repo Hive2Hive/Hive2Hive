@@ -9,7 +9,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.context.ShareProcessContext;
 import org.hive2hive.processframework.RollbackReason;

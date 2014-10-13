@@ -20,7 +20,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFileSmall;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -44,8 +44,8 @@ import org.junit.Test;
  */
 public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
-	private static final int networkSize = 2;
-	private static List<NetworkManager> network;
+	private static final int networkSize = 6;
+	private static ArrayList<NetworkManager> network;
 	private static H2HDummyEncryption dummyEncryption;
 
 	@BeforeClass
@@ -77,7 +77,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// initialize put
 		Parameters parameters = new Parameters().setLocationKey(chunk.getId()).setContentKey(H2HConstants.FILE_CHUNK)
-				.setProtectionKeys(protectionKeysOld).setData(encryptedChunk);
+				.setProtectionKeys(protectionKeysOld).setNetworkContent(encryptedChunk);
 		// indicate to generate hash
 		parameters.setHashFlag(true);
 		// put encrypted chunk into network
@@ -138,7 +138,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// initialize put
 		Parameters parameters = new Parameters().setLocationKey(metaFileSmall.getId()).setContentKey(H2HConstants.META_FILE)
 				.setVersionKey(encryptedMetaFile.getVersionKey()).setProtectionKeys(protectionKeysOld)
-				.setData(encryptedMetaFile);
+				.setNetworkContent(encryptedMetaFile);
 		// indicate to generate hash
 		parameters.setHashFlag(true);
 		// put encrypted meta file into network

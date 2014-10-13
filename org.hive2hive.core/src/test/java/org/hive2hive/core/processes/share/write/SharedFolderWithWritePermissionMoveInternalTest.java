@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.share.write;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -18,7 +18,7 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
@@ -38,9 +38,9 @@ import org.junit.Test;
 public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTest {
 
 	private static final int CHUNK_SIZE = 1024;
-	private static final int networkSize = 3;
+	private static final int networkSize = 6;
 	private static final int maxNumChunks = 2;
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 
 	private static File rootA;
 	private static File rootB;

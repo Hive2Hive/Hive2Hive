@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.share.pkupdate;
 
-import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.model.BaseNetworkContent;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.context.BasePKUpdateContext;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Changes the protection key for any data of type {@link NetworkContent}. Use the {@link BasePKUpdateContext}
+ * Changes the protection key for any data of type {@link BaseNetworkContent}. Use the {@link BasePKUpdateContext}
  * to hand over the required data.
  * 
  * @author Nico, Seppi
@@ -23,11 +23,11 @@ public class ChangeProtectionKeysStep extends ProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(ChangeProtectionKeysStep.class);
 
 	private final BasePKUpdateContext context;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 	private IParameters parameters;
 	private boolean changePerformed = false;
 
-	public ChangeProtectionKeysStep(BasePKUpdateContext context, IDataManager dataManager) {
+	public ChangeProtectionKeysStep(BasePKUpdateContext context, DataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
 	}

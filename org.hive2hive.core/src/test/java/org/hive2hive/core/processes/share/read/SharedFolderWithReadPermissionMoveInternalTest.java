@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.share.read;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -19,7 +19,7 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -43,7 +43,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends H2HJUnitTest
 	private static final int CHUNK_SIZE = 1024;
 	private static final int maxNumChunks = 2;
 
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 	private static NetworkManager nodeA;
 	private static NetworkManager nodeB;
 
@@ -70,7 +70,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends H2HJUnitTest
 		beforeClass();
 
 		logger.info("Setup network.");
-		network = NetworkTestUtil.createNetwork(2);
+		network = NetworkTestUtil.createNetwork(6);
 		nodeA = network.get(0);
 		nodeB = network.get(1);
 
