@@ -22,15 +22,12 @@ public class RemoveOwnLocationsStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-
-		System.err.println("bla");
 		UserProfile userProfile;
 		try {
 			userProfile = networkManager.getSession().getProfileManager().getUserProfile(getID(), false);
 		} catch (GetFailedException | NoSessionException e) {
 			throw new ProcessExecutionException(e);
 		}
-		System.err.println("hallo");
 
 		VersionManager<Locations> locationsManager;
 		try {
