@@ -10,9 +10,9 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
 /**
  * Provides the required context to update the meta document

@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 
 public final class H2HDefaultEncryption implements IH2HEncryption {
 

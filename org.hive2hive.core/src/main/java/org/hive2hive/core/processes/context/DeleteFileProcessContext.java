@@ -6,11 +6,11 @@ import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class DeleteFileProcessContext implements IFile2MetaContext, INotifyContext {
 

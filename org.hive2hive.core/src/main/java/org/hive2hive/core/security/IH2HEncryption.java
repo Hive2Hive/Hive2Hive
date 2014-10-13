@@ -13,6 +13,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 
 public interface IH2HEncryption {
 

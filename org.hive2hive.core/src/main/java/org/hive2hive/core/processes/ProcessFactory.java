@@ -11,22 +11,12 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.processes.common.CheckWriteAccessStep;
-import org.hive2hive.core.processes.common.File2MetaFileComponent;
-import org.hive2hive.core.processes.common.GetUserLocationsStep;
-import org.hive2hive.core.processes.common.GetUserProfileStep;
-import org.hive2hive.core.processes.common.InitializeChunksStep;
-import org.hive2hive.core.processes.common.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.common.PrepareNotificationStep;
-import org.hive2hive.core.processes.common.PutMetaFileStep;
-import org.hive2hive.core.processes.common.PutUserLocationsStep;
-import org.hive2hive.core.processes.common.ValidateFileSizeStep;
 import org.hive2hive.core.processes.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
 import org.hive2hive.core.processes.context.DownloadFileContext;
 import org.hive2hive.core.processes.context.LoginProcessContext;
-import org.hive2hive.core.processes.context.LogoutProcessContext;
 import org.hive2hive.core.processes.context.MoveFileProcessContext;
 import org.hive2hive.core.processes.context.NotifyProcessContext;
 import org.hive2hive.core.processes.context.RecoverFileContext;
@@ -35,6 +25,12 @@ import org.hive2hive.core.processes.context.ShareProcessContext;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
+import org.hive2hive.core.processes.files.CheckWriteAccessStep;
+import org.hive2hive.core.processes.files.File2MetaFileComponent;
+import org.hive2hive.core.processes.files.InitializeChunksStep;
+import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
+import org.hive2hive.core.processes.files.PutMetaFileStep;
+import org.hive2hive.core.processes.files.ValidateFileSizeStep;
 import org.hive2hive.core.processes.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.files.add.CreateMetaFileStep;
 import org.hive2hive.core.processes.files.delete.DeleteFileOnDiskStep;
@@ -52,6 +48,7 @@ import org.hive2hive.core.processes.files.update.CleanupChunksStep;
 import org.hive2hive.core.processes.files.update.CreateNewVersionStep;
 import org.hive2hive.core.processes.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.login.ContactOtherClientsStep;
+import org.hive2hive.core.processes.login.GetLocationsStep;
 import org.hive2hive.core.processes.login.SessionCreationStep;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.processes.logout.DeleteSessionStep;
@@ -122,7 +119,7 @@ public final class ProcessFactory {
 		process.add(new LocationsCreationStep(context));
 		process.add(new UserProfileCreationStep(context));
 		process.add(new AsyncComponent(new PutUserProfileStep(context, dataManager)));
-		process.add(new AsyncComponent(new PutUserLocationsStep(context, dataManager)));
+		process.add(new AsyncComponent(new org.hive2hive.core.processes.register.PutLocationsStep(context, dataManager)));
 		process.add(new AsyncComponent(new PutPublicKeyStep(context, dataManager)));
 
 		return process;
@@ -140,16 +137,15 @@ public final class ProcessFactory {
 	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
-		LoginProcessContext context = new LoginProcessContext(credentials);
+		LoginProcessContext context = new LoginProcessContext(credentials, params);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserProfileStep(context, dataManager));
-		process.add(new SessionCreationStep(params, context, networkManager));
-		process.add(new GetUserLocationsStep(context, networkManager.getDataManager()));
+		process.add(new SessionCreationStep(context, networkManager));
+		process.add(new GetLocationsStep(context, networkManager));
 		process.add(new ContactOtherClientsStep(context, networkManager));
-		process.add(new PutUserLocationsStep(context, dataManager));
+		process.add(new org.hive2hive.core.processes.login.PutLocationsStep(context, dataManager));
 
 		return process;
 	}
@@ -174,15 +170,12 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createLogoutProcess(NetworkManager networkManager) throws NoPeerConnectionException,
 			NoSessionException {
-		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
-		LogoutProcessContext context = new LogoutProcessContext(session);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
 
-		process.add(new GetUserLocationsStep(context, dataManager));
-		process.add(new RemoveOwnLocationsStep(context, networkManager));
+		process.add(new RemoveOwnLocationsStep(networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
 		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager(), session.getDownloadManager()));
 		process.add(new DeleteSessionStep(networkManager));
@@ -382,7 +375,7 @@ public final class ProcessFactory {
 
 	private ProcessComponent createNotificationProcess(INotifyContext providerContext, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
-		NotifyProcessContext context = new NotifyProcessContext(providerContext, networkManager.getUserId());
+		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));

@@ -8,11 +8,11 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IInitializeMetaUpdateContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.HybridEncryptedContent;
 
 public class ShareProcessContext implements IInitializeMetaUpdateContext, INotifyContext {
 

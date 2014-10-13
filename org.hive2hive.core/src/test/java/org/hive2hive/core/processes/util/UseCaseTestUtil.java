@@ -12,16 +12,14 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.integration.TestFileConfiguration;
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.MetaFile;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.common.GetMetaFileStep;
-import org.hive2hive.core.processes.common.GetUserLocationsStep;
+import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
@@ -38,7 +36,6 @@ import org.hive2hive.processframework.util.TestProcessComponentListener;
  * All methods are blocking until the result is here.
  * 
  * @author Nico, Seppi
- * 
  */
 public class UseCaseTestUtil {
 
@@ -53,8 +50,7 @@ public class UseCaseTestUtil {
 
 	public static void login(UserCredentials credentials, NetworkManager networkManager, File root)
 			throws NoPeerConnectionException {
-		UserProfileManager upManager = new UserProfileManager(networkManager.getDataManager(), credentials);
-		SessionParameters sessionParameters = new SessionParameters(root.toPath(), upManager, new TestFileConfiguration());
+		SessionParameters sessionParameters = new SessionParameters(root.toPath(), new TestFileConfiguration());
 		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials, sessionParameters,
 				networkManager);
 		TestExecutionUtil.executeProcess(process);
@@ -127,12 +123,12 @@ public class UseCaseTestUtil {
 		TestExecutionUtil.executeProcess(process);
 	}
 
-	public static MetaFile getMetaFile(NetworkManager networkManager, KeyPair keys) throws NoPeerConnectionException,
+	public static BaseMetaFile getMetaFile(NetworkManager networkManager, KeyPair keys) throws NoPeerConnectionException,
 			InvalidProcessStateException {
 		return getMetaFile(networkManager, keys, true);
 	}
 
-	public static MetaFile getMetaFile(NetworkManager networkManager, KeyPair keys, boolean expectSuccess)
+	public static BaseMetaFile getMetaFile(NetworkManager networkManager, KeyPair keys, boolean expectSuccess)
 			throws NoPeerConnectionException, InvalidProcessStateException {
 		GetMetaFileContext context = new GetMetaFileContext(keys);
 		GetMetaFileStep step = new GetMetaFileStep(context, networkManager.getDataManager());
@@ -146,13 +142,6 @@ public class UseCaseTestUtil {
 			TestExecutionUtil.waitTillFailed(listener, TestExecutionUtil.MAX_PROCESS_WAIT_TIME);
 			return null;
 		}
-	}
-
-	public static Locations getLocations(NetworkManager networkManager, String userId) throws NoPeerConnectionException {
-		GetUserLocationsContext context = new GetUserLocationsContext(userId);
-		GetUserLocationsStep step = new GetUserLocationsStep(context, networkManager.getDataManager());
-		TestExecutionUtil.executeProcess(step);
-		return context.consumeUserLocations();
 	}
 
 	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoSessionException,
@@ -170,4 +159,5 @@ public class UseCaseTestUtil {
 
 		return listener.getResult();
 	}
+
 }

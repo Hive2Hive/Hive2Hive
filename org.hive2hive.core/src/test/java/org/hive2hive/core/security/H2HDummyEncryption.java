@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
+import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 
 /**
  * Dummy encryption class that does not really encrypt but just serializes the object. This class should
