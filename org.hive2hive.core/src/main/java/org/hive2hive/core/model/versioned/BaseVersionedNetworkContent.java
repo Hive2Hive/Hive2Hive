@@ -40,10 +40,6 @@ public abstract class BaseVersionedNetworkContent extends BaseNetworkContent {
 		this.basedOnKey = basedOnKey;
 	}
 
-	/**
-	 * Call this method in front of a put into the network if the data is a new version or will have other
-	 * versions.
-	 */
 	public void generateVersionKey() {
 		// re-attach version keys
 		basedOnKey = versionKey;
