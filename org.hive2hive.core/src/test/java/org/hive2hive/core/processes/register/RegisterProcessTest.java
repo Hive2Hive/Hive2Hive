@@ -5,68 +5,54 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.List;
-
-import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
+import java.util.ArrayList;
+import java.util.Random;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.UserProfile;
 import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
+import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.concretes.ProcessComponentListener;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.H2HWaiter;
-import org.junit.After;
+import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RegisterProcessTest extends H2HJUnitTest {
 
-	private static List<NetworkManager> network;
-	private static final int NETWORK_SIZE = 2;
+	private static ArrayList<NetworkManager> network;
+	private static final int networkSize = 10;
+	private static final Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = RegisterProcessTest.class;
 		beforeClass();
-	}
-
-	@Override
-	public void beforeMethod() {
-		super.beforeMethod();
-
-		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
-	}
-
-	@After
-	public void afterMethod() {
-		NetworkTestUtil.shutdownNetwork(network);
-		super.afterMethod();
+		network = NetworkTestUtil.createNetwork(networkSize);
 	}
 
 	@AfterClass
 	public static void endTest() {
+		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}
 
 	@Test
 	public void testRegisterProcessSuccess() throws InvalidProcessStateException, ClassNotFoundException, IOException,
 			GetFailedException, NoPeerConnectionException {
-		NetworkManager client = network.get(0);
-		NetworkManager otherClient = network.get(1);
+		NetworkManager client = network.get(random.nextInt(networkSize / 2));
+		NetworkManager otherClient = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 		UseCaseTestUtil.register(credentials, client);
@@ -78,23 +64,15 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		assertEquals(credentials.getUserId(), getUserProfile.getUserId());
 
 		// verify put locations
-		FutureGet getLocations = otherClient.getDataManager().getUnblocked(
+		Locations locations = (Locations) otherClient.getDataManager().get(
 				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
-		getLocations.awaitUninterruptibly();
-		getLocations.futureRequests().awaitUninterruptibly();
-		Locations locations = (Locations) getLocations.data().object();
-
 		assertNotNull(locations);
 		assertEquals(credentials.getUserId(), locations.getUserId());
 		assertTrue(locations.getPeerAddresses().isEmpty());
 
 		// verify put user public key
-		FutureGet getKey = otherClient.getDataManager().getUnblocked(
+		UserPublicKey publicKey = (UserPublicKey) otherClient.getDataManager().get(
 				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_PUBLIC_KEY));
-		getKey.awaitUninterruptibly();
-		getKey.futureRequests().awaitUninterruptibly();
-		UserPublicKey publicKey = (UserPublicKey) getKey.data().object();
-
 		assertNotNull(publicKey);
 	}
 
@@ -105,39 +83,12 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
 
 		// already put a locations map
-		FuturePut putLocations = client.getDataManager().putUnblocked(
+		assertEquals(H2HPutStatus.OK, client.getDataManager().put(
 				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS)
-						.setData(new Locations(credentials.getUserId())));
-		putLocations.awaitUninterruptibly();
-		putLocations.futureRequests().awaitUninterruptibly();
-
-		assertTrue(putLocations.isSuccess());
+				.setNetworkContent(new Locations(credentials.getUserId()))));
 
 		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, client);
-		ProcessComponentListener listener = new ProcessComponentListener();
-		registerProcess.attachListener(listener);
-		registerProcess.start();
-
-		H2HWaiter waiter = new H2HWaiter(20);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		TestExecutionUtil.executeProcessTillFailed(registerProcess);
 	}
 
-	@Test
-	public void testRegisterMultipleUsers() throws NoPeerConnectionException {
-		// register three users on two peers
-		UserCredentials credentials1 = NetworkTestUtil.generateRandomCredentials();
-		UseCaseTestUtil.register(credentials1, network.get(0));
-
-		UserCredentials credentials2 = NetworkTestUtil.generateRandomCredentials();
-		UseCaseTestUtil.register(credentials2, network.get(1));
-
-		UserCredentials credentials3 = NetworkTestUtil.generateRandomCredentials();
-		UseCaseTestUtil.register(credentials3, network.get(0));
-
-		// login two of them
-		UseCaseTestUtil.login(credentials2, network.get(0), FileTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(credentials1, network.get(1), FileTestUtil.getTempDirectory());
-	}
 }
