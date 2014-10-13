@@ -229,6 +229,10 @@ public class Parameters implements IParameters {
 			builder.append("version key = '").append(vKey.timestamp()).append("' ");
 		}
 
+		if (bKey != null) {
+			builder.append("based on key = '").append(bKey.timestamp()).append("' ");
+		}
+
 		if (ttl != -1) {
 			builder.append("ttl = '").append(ttl).append("' ");
 		}
