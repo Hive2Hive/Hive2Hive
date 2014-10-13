@@ -37,7 +37,7 @@ public class TestDirectNotificationMessage extends BaseDirectMessage {
 					.getDataManager()
 					.putUnblocked(
 							new Parameters().setLocationKey(verificationLoc)
-									.setContentKey(verificationContentKey).setData(verificationData))
+									.setContentKey(verificationContentKey).setNetworkContent(verificationData))
 					.awaitUninterruptibly();
 		} catch (NoPeerConnectionException e) {
 			Assert.fail();

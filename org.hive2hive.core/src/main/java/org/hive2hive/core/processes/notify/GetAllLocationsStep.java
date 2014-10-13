@@ -8,9 +8,9 @@ import java.util.Map;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.Locations;
-import org.hive2hive.core.model.NetworkContent;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.model.BaseNetworkContent;
+import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.context.NotifyProcessContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * them.
  * 
  * @author Nico
- * 
  */
 // TODO: do parallel for faster processing
 public class GetAllLocationsStep extends BaseGetProcessStep {
@@ -30,7 +29,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(GetAllLocationsStep.class);
 	private final NotifyProcessContext context;
 
-	public GetAllLocationsStep(NotifyProcessContext context, IDataManager dataManager) {
+	public GetAllLocationsStep(NotifyProcessContext context, DataManager dataManager) {
 		super(dataManager);
 		this.context = context;
 	}
@@ -42,7 +41,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 
 		// iterate over all users and get the locations of them
 		for (String userId : context.consumeUsersToNotify()) {
-			NetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
+			BaseNetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
 			if (content == null) {
 				allLocations.put(userId, new ArrayList<PeerAddress>());
 			} else {

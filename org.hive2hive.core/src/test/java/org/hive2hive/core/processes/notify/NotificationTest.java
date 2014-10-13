@@ -1,15 +1,16 @@
 package org.hive2hive.core.processes.notify;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.model.Locations;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -38,7 +39,7 @@ import org.junit.Test;
 public class NotificationTest extends H2HJUnitTest {
 
 	private static final int NETWORK_SIZE = 6;
-	private List<NetworkManager> network;
+	private ArrayList<NetworkManager> network;
 
 	private UserCredentials userACredentials;
 	private UserCredentials userBCredentials;
@@ -280,11 +281,13 @@ public class NotificationTest extends H2HJUnitTest {
 	 * @throws NoPeerConnectionException
 	 * @throws IllegalArgumentException
 	 * @throws NoSessionException
+	 * @throws GetFailedException
 	 * @throws ProcessExecutionException
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException, InterruptedException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException,
+			GetFailedException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -303,7 +306,7 @@ public class NotificationTest extends H2HJUnitTest {
 		TestExecutionUtil.waitTillSucceded(listener, 20);
 
 		// check the locations map; should have 2 entries only
-		Locations locations = UseCaseTestUtil.getLocations(network.get(0), userACredentials.getUserId());
+		Locations locations = notifier.getSession().getLocationsManager().get();
 		Assert.assertEquals(2, locations.getPeerAddresses().size());
 	}
 

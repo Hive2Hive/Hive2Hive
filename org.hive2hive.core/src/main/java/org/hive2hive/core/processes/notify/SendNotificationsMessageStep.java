@@ -12,10 +12,8 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
-import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.common.GetUserLocationsStep;
 import org.hive2hive.core.processes.common.base.BaseDirectMessageProcessStep;
 import org.hive2hive.core.processes.context.NotifyProcessContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -57,7 +55,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 
 		if (!unreachablePeers.isEmpty()) {
 			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
-			initCleanupUnreachablePeers();
+			getParent().add(new RemoveUnreachableStep(unreachablePeers, networkManager));
 		}
 	}
 
@@ -109,16 +107,6 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			logger.debug("Successfully notified the initial peer of user '{}' that it should check its UP tasks.", userId);
 		} else {
 			logger.info("All clients of user '{}' are currently offline or unreachable.", userId);
-		}
-	}
-
-	private void initCleanupUnreachablePeers() {
-		try {
-			DataManager dataManager = networkManager.getDataManager();
-			getParent().add(new GetUserLocationsStep(context, dataManager));
-			getParent().add(new RemoveUnreachableStep(context, unreachablePeers, networkManager));
-		} catch (NoPeerConnectionException e) {
-			logger.error("No connection to the network. Failed to cleanup unreachable peers");
 		}
 	}
 
