@@ -1,6 +1,6 @@
 package org.hive2hive.core.processes.register;
 
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.processes.context.RegisterProcessContext;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -8,6 +8,9 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Seppi
+ */
 public class UserProfileCreationStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileCreationStep.class);
