@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileVersion;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileLarge;
-import org.hive2hive.core.model.MetaFileSmall;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileLarge;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
@@ -36,7 +36,7 @@ public class CreateMetaFileStep extends ProcessStep {
 
 		logger.trace("Creating new meta file for file '{}'.", file.getName());
 
-		MetaFile metaFile = null;
+		BaseMetaFile metaFile = null;
 		if (context.isLargeFile()) {
 			metaFile = new MetaFileLarge(context.generateOrGetMetaKeys().getPublic(), context.getMetaChunks());
 		} else {

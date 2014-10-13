@@ -1,10 +1,10 @@
-package org.hive2hive.core.processes.files;
+package org.hive2hive.core.processes.files.add;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -14,9 +14,9 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -40,9 +40,9 @@ import org.junit.Test;
 public class AddFileTest extends H2HJUnitTest {
 
 	private final static int CHUNK_SIZE = 1024;
-	private final static int NETWORK_SIZE = 3;
+	private final static int NETWORK_SIZE = 6;
 
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static File uploaderRoot;
 	private static File downloaderRoot;
@@ -156,7 +156,7 @@ public class AddFileTest extends H2HJUnitTest {
 		// verify the meta document
 		KeyPair metaFileKeys = node.getFileKeys();
 		if (originalFile.isFile()) {
-			MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaFileKeys);
+			BaseMetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaFileKeys);
 			Assert.assertNotNull(metaFile);
 			Assert.assertTrue(metaFile instanceof MetaFileSmall);
 			MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;

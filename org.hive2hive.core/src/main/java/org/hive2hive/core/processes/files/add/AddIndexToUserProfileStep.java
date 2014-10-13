@@ -11,7 +11,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
 import org.hive2hive.core.security.HashUtil;
