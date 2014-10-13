@@ -11,8 +11,8 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileSmall;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.processes.context.interfaces.ICheckWriteAccessContext;
 import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.processes.context.interfaces.IInitializeChunksStepContext;
@@ -37,7 +37,7 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	private KeyPair protectionKeys;
 	private KeyPair encryptionKeys;
 	private boolean largeFile;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 	private byte[] hash;
 	private Index index;
 	private Set<String> users;
@@ -105,7 +105,7 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	}
 
 	@Override
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 
@@ -129,7 +129,7 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 		// not used here
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 

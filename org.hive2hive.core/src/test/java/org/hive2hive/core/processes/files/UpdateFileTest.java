@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -18,11 +18,12 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
+import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
 import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
@@ -43,10 +44,10 @@ import org.junit.Test;
  */
 public class UpdateFileTest extends H2HJUnitTest {
 
-	private final static int networkSize = 3;
+	private final static int networkSize = 6;
 	private final static int CHUNK_SIZE = 1024;
 
-	private static List<NetworkManager> network;
+	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static Path uploaderRoot;
 	private static File file;
@@ -153,8 +154,12 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		H2HSession newSession = new H2HSession(session.getProfileManager(), session.getKeyManager(),
-				session.getDownloadManager(), limitingConfig, session.getRoot());
+		SessionParameters params = new SessionParameters(session.getRoot(), limitingConfig);
+		params.setDownloadManager(session.getDownloadManager());
+		params.setKeyManager(session.getKeyManager());
+		params.setLocationsManager(session.getLocationsManager());
+		params.setUserProfileManager(session.getProfileManager());
+		H2HSession newSession = new H2HSession(params);
 		uploader.setSession(newSession);
 
 		// update the file
@@ -197,8 +202,12 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		H2HSession newSession = new H2HSession(session.getProfileManager(), session.getKeyManager(),
-				session.getDownloadManager(), limitingConfig, session.getRoot());
+		SessionParameters params = new SessionParameters(session.getRoot(), limitingConfig);
+		params.setDownloadManager(session.getDownloadManager());
+		params.setKeyManager(session.getKeyManager());
+		params.setLocationsManager(session.getLocationsManager());
+		params.setUserProfileManager(session.getProfileManager());
+		H2HSession newSession = new H2HSession(params);
 		uploader.setSession(newSession);
 
 		// update the file (append some data)
