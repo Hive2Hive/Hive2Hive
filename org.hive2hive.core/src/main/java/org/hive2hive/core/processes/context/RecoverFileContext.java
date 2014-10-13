@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.context;
 import java.io.File;
 import java.security.KeyPair;
 
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
@@ -11,7 +11,7 @@ public class RecoverFileContext implements IFile2MetaContext {
 
 	private final File file;
 	private KeyPair metaFileEncryptionKeys;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 
 	public RecoverFileContext(File file) {
 		this.file = file;
@@ -28,11 +28,11 @@ public class RecoverFileContext implements IFile2MetaContext {
 	}
 
 	@Override
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 

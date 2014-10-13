@@ -5,7 +5,7 @@ import java.security.KeyPair;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
@@ -15,7 +15,7 @@ public class MoveFileProcessContext {
 	private final File destination;
 
 	private KeyPair protectionKeys;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 	private KeyPair fileNodeKeys;
 
 	private final Set<String> usersToNotifySource;
@@ -59,11 +59,11 @@ public class MoveFileProcessContext {
 
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 

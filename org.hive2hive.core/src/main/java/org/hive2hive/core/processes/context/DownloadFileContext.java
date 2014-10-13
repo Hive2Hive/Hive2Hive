@@ -5,7 +5,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.MetaFile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.HybridEncryptedContent;
 
@@ -19,7 +19,7 @@ public class DownloadFileContext implements IGetMetaFileContext {
 	private final int versionToDownload;
 
 	private Index index;
-	private MetaFile metaFile;
+	private BaseMetaFile metaFile;
 
 	public DownloadFileContext(PublicKey fileKey, File destination, int versionToDownload) {
 		this.fileKey = fileKey;
@@ -36,7 +36,7 @@ public class DownloadFileContext implements IGetMetaFileContext {
 	}
 
 	@Override
-	public void provideMetaFile(MetaFile metaFile) {
+	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
 	}
 
@@ -50,7 +50,7 @@ public class DownloadFileContext implements IGetMetaFileContext {
 		return index.getFileKeys();
 	}
 
-	public MetaFile consumeMetaFile() {
+	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 
