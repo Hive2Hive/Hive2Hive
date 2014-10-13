@@ -12,7 +12,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,7 +4,7 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.RemoveFailedException;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.common.base.BaseRemoveProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -14,7 +14,7 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 	private final String locationKey;
 	private final KeyPair protectionKeys;
 
-	public DeleteSingleChunkStep(String locationKey, KeyPair protectionKeys, IDataManager dataManager) {
+	public DeleteSingleChunkStep(String locationKey, KeyPair protectionKeys, DataManager dataManager) {
 		super(dataManager);
 		this.locationKey = locationKey;
 		this.protectionKeys = protectionKeys;

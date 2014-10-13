@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.network.data.IDataManager;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
 import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -16,9 +16,9 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 public class DeleteChunksProcess extends SequentialProcess {
 
 	private final DeleteFileProcessContext context;
-	private final IDataManager dataManager;
+	private final DataManager dataManager;
 
-	public DeleteChunksProcess(DeleteFileProcessContext context, IDataManager dataManager) {
+	public DeleteChunksProcess(DeleteFileProcessContext context, DataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
 	}
@@ -33,7 +33,7 @@ public class DeleteChunksProcess extends SequentialProcess {
 		}
 
 		List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
-		MetaFile metaFile = context.consumeMetaFile();
+		BaseMetaFile metaFile = context.consumeMetaFile();
 
 		if (metaFile.isSmall()) {
 			MetaFileSmall metaSmall = (MetaFileSmall) metaFile;

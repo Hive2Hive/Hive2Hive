@@ -1,10 +1,10 @@
-package org.hive2hive.core.processes.files;
+package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.List;
+import java.util.ArrayList;
 
 import net.tomp2p.dht.FutureGet;
 
@@ -18,9 +18,9 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.model.MetaFile;
-import org.hive2hive.core.model.MetaFileSmall;
-import org.hive2hive.core.model.UserProfile;
+import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -39,8 +39,8 @@ import org.junit.Test;
  */
 public class DeleteFileTest extends H2HJUnitTest {
 
-	private static final int networkSize = 2;
-	private static List<NetworkManager> network;
+	private static final int networkSize = 6;
+	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private final static int CHUNK_SIZE = 1024;
 	private static File root;
@@ -80,7 +80,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNull(userProfile.getFileById(metaKeyPair.getPublic()));
 
-		MetaFile metaDocument = UseCaseTestUtil.getMetaFile(client, metaKeyPair, false);
+		BaseMetaFile metaDocument = UseCaseTestUtil.getMetaFile(client, metaKeyPair, false);
 		Assert.assertNull(metaDocument);
 
 		for (FileVersion version : metaDocumentBeforeDeletion.getVersions()) {
@@ -147,7 +147,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		Assert.assertNotNull(userProfile.getFileById(metaKeyPairFolder.getPublic()));
 
 		// check the meta file is still in the DHT
-		MetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaKeyPairFile, false);
+		BaseMetaFile metaFile = UseCaseTestUtil.getMetaFile(client, metaKeyPairFile, false);
 		Assert.assertNull(metaFile);
 	}
 
@@ -183,6 +183,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
+		FileUtils.deleteDirectory(root);
 		afterClass();
 	}
 }
