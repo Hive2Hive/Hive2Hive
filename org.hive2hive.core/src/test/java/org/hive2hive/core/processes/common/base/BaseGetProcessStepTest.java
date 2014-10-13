@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager;
@@ -79,7 +79,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		private final String locationKey;
 		private final String contentKey;
 
-		private NetworkContent content;
+		private BaseNetworkContent content;
 
 		public TestGetProcessStep(String locationKey, String contentKey, DataManager dataManager) {
 			super(dataManager);
@@ -92,7 +92,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 			this.content = get(locationKey, contentKey);
 		}
 
-		public NetworkContent getContent() {
+		public BaseNetworkContent getContent() {
 			return content;
 		}
 	}
@@ -107,7 +107,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		private final String locationKey;
 		private final String contentKey;
 
-		private NetworkContent content;
+		private BaseNetworkContent content;
 
 		public TestGetProcessStepRollBack(String locationKey, String contentKey, DataManager dataManager) {
 			super(dataManager);
@@ -117,13 +117,13 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 		@Override
 		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-			NetworkContent content = get(locationKey, contentKey);
+			BaseNetworkContent content = get(locationKey, contentKey);
 			this.content = content;
 			if (content == null)
 				throw new ProcessExecutionException("Content is null.");
 		}
 
-		public NetworkContent getContent() {
+		public BaseNetworkContent getContent() {
 			return content;
 		}
 	}

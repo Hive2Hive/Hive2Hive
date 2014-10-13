@@ -16,7 +16,7 @@ import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
-import org.hive2hive.core.model.NetworkContent;
+import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -100,7 +100,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 		// wait till message gets handled
 		H2HWaiter w = new H2HWaiter(10);
-		NetworkContent content = null;
+		BaseNetworkContent content = null;
 		do {
 			w.tickASecond();
 			content = nodeA.getDataManager().get(parameters);
@@ -220,7 +220,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 		// wait till response message gets handled
 		H2HWaiter waiter = new H2HWaiter(10);
-		NetworkContent content = null;
+		BaseNetworkContent content = null;
 		do {
 			waiter.tickASecond();
 			content = nodeA.getDataManager().get(parametersA);
