@@ -5,8 +5,6 @@ import org.hive2hive.core.processes.common.base.BaseGetProcessStepTest;
 import org.hive2hive.core.processes.common.base.BaseMessageProcessStepTest;
 import org.hive2hive.core.processes.common.base.BasePutProcessStepTest;
 import org.hive2hive.core.processes.common.base.BaseRemoveProcessStepTest;
-import org.hive2hive.core.processes.login.GetUserProfileStepTest;
-import org.hive2hive.core.processes.register.PutUserProfileStepTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -21,10 +19,10 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 
 // ProcessStep, Common, Get
-		BaseGetProcessStepTest.class, GetLocationStepTest.class, GetUserProfileStepTest.class,
+		BaseGetProcessStepTest.class,
 
 		// ProcessStep, Common, Put
-		BasePutProcessStepTest.class, PutLocationStepTest.class, PutUserProfileStepTest.class,
+		BasePutProcessStepTest.class,
 
 		// ProcessStep, Common, Remove
 		BaseRemoveProcessStepTest.class,
