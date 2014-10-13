@@ -34,7 +34,7 @@ public class CreateMetaFileStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException {
 		File file = context.consumeFile();
 
-		logger.trace("Creating new meta file for file '{}'.", file.getName());
+		logger.trace("Creating new meta file for file '{}'.", file.getAbsolutePath());
 
 		MetaFile metaFile = null;
 		if (context.isLargeFile()) {

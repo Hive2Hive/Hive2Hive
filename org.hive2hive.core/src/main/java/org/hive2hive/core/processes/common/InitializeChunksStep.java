@@ -60,7 +60,7 @@ public class InitializeChunksStep extends ProcessStep {
 			KeyPair chunkKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
 			context.provideChunkKeys(chunkKeys);
 		}
-
+		logger.trace("Finished consumeChunkKeys: {}", file.getAbsolutePath());
 		// create put chunks steps
 		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());

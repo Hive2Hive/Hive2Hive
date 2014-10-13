@@ -132,12 +132,12 @@ public class FileChunkUtil {
 
 		if (destination.exists()) {
 			// overwrite
-			if (destination.delete()) {
-				logger.debug("Destination gets overwritten. destination = '{}'", destination);
-			} else {
-				logger.error("Couldn't overwrite destination. destination = '{}'", destination);
-				return;
-			}
+//			if (destination.delete()) {
+//				logger.debug("Destination gets overwritten. destination = '{}'", destination);
+//			} else {
+//				logger.error("Couldn't overwrite destination. destination = '{}'", destination);
+//				return;
+//			}
 		}
 
 		for (File filePart : fileParts) {
