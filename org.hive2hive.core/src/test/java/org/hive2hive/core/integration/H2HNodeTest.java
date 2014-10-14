@@ -63,12 +63,12 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
 		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
-		TestExecutionUtil.executeProcess(registerProcess);
+		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
 
 		rootDirectory = FileTestUtil.getTempDirectory();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
 		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials, rootDirectory.toPath());
-		TestExecutionUtil.executeProcess(loginProcess);
+		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 	}
 
 	@Test
@@ -78,11 +78,11 @@ public class H2HNodeTest extends H2HJUnitTest {
 		FileUtils.write(testFile, "Hello World");
 
 		IProcessComponent process = loggedInNode.getFileManager().add(testFile);
-		TestExecutionUtil.executeProcess(process);
+		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// is now added; delete it
 		process = loggedInNode.getFileManager().delete(testFile);
-		TestExecutionUtil.executeProcess(process);
+		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 
 	@Test(expected = IllegalFileLocation.class)
@@ -110,7 +110,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		FileUtils.write(test2File, "Hello World 2");
 
 		IProcessComponent process = loggedInNode.getFileManager().add(folder1);
-		TestExecutionUtil.executeProcess(process);
+		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// TODO wait for all async process to upload
 
@@ -119,7 +119,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
 
 		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, rootUser2.toPath());
-		TestExecutionUtil.executeProcess(loginProcess);
+		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 
 		// TODO wait for login process to download all files
 
@@ -152,7 +152,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@After
 	public void logoutAndUnregister() throws NoSessionException, NoPeerConnectionException {
 		IProcessComponent process = loggedInNode.getUserManager().logout();
-		TestExecutionUtil.executeProcess(process);
+		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// TODO unregister
 	}

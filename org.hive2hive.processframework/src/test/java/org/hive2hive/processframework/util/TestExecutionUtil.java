@@ -39,14 +39,6 @@ public final class TestExecutionUtil {
 		} while (!listener.hasFailed());
 	}
 
-	/**
-	 * Executes a process and waits until it's done. This is a simple helper method to reduce code
-	 * clones.
-	 */
-	public static void executeProcess(IProcessComponent process) {
-		executeProcessTillSucceded(process);
-	}
-
 	public static void executeProcessTillSucceded(IProcessComponent process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);

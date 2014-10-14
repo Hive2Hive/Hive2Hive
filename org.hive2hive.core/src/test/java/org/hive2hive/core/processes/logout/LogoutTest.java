@@ -61,7 +61,7 @@ public class LogoutTest extends H2HJUnitTest {
 
 		// logout
 		IProcessComponent process = ProcessFactory.instance().createLogoutProcess(client);
-		TestExecutionUtil.executeProcess(process);
+		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// verify the locations map after logout
 		FutureGet futureGet2 = client.getDataManager().getUnblocked(
