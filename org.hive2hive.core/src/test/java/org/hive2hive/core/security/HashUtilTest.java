@@ -23,7 +23,7 @@ public class HashUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void md5DataTest() {
-		String data = generateRandomString(1000);
+		String data = randomString(1000);
 		byte[] md5 = HashUtil.hash(data.getBytes());
 		assertNotNull(md5);
 
@@ -31,14 +31,14 @@ public class HashUtilTest extends H2HJUnitTest {
 		assertEquals(new String(md5), new String(HashUtil.hash(data.getBytes())));
 
 		// assert that different data is hashed to different md5 hashes
-		String data2 = generateRandomString(1000);
+		String data2 = randomString(1000);
 		assertNotEquals(data, data2);
 		assertNotEquals(new String(md5), new String(HashUtil.hash(data2.getBytes())));
 	}
 
 	@Test
 	public void md5StreamTest() throws IOException {
-		String data = generateRandomString(5 * 1024);
+		String data = randomString(5 * 1024);
 		File file = new File(System.getProperty("java.io.tmpdir"), randomString());
 		FileUtils.writeStringToFile(file, data);
 
@@ -49,7 +49,7 @@ public class HashUtilTest extends H2HJUnitTest {
 		assertEquals(new String(md5), new String(HashUtil.hash(file)));
 
 		// assert that different data is hashed to different md5 hashes
-		String data2 = generateRandomString(1000);
+		String data2 = randomString(1000);
 		assertNotEquals(data, data2);
 		assertNotEquals(new String(md5), new String(HashUtil.hash(data2.getBytes())));
 	}

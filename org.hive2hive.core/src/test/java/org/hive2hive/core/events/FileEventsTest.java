@@ -123,7 +123,7 @@ public class FileEventsTest extends H2HJUnitTest {
 	}
 	
 	protected File createAndAddFolder(File root, NetworkManager client) throws NoSessionException, NoPeerConnectionException {
-		File folder = new File(root, "folder-" + generateRandomString(5));
+		File folder = new File(root, "folder-" + randomString(5));
 		assertTrue(folder.mkdirs());
 		UseCaseTestUtil.uploadNewFile(client, folder);
 		return folder;

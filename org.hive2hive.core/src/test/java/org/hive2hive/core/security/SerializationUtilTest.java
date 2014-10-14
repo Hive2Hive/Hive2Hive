@@ -22,7 +22,7 @@ public class SerializationUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void serializationTest() throws IOException, ClassNotFoundException {
-		String data = generateRandomString(1000);
+		String data = randomString(1000);
 		logger.debug("Testing data serialization.");
 		logger.debug("Test String: {}.", data);
 

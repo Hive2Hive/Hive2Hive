@@ -98,13 +98,7 @@ public class H2HJUnitTest {
 		return content;
 	}
 
-	/**
-	 * Returns a random string that with a specified maximal length of chars. The returned string has at least
-	 * one char.
-	 * 
-	 * @return
-	 */
-	public static String generateRandomString(int maxLength) {
+	public static String randomString(int maxLength) {
 		Random random = new Random();
 		char[] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
@@ -121,20 +115,10 @@ public class H2HJUnitTest {
 		return new String(buf);
 	}
 
-	/**
-	 * Generates a random string (based on UUID)
-	 * 
-	 * @return a random string
-	 */
 	public static String randomString() {
 		return UUID.randomUUID().toString();
 	}
 
-	/**
-	 * Generates random credentials
-	 * 
-	 * @return random user credentials
-	 */
 	public static UserCredentials generateRandomCredentials() {
 		return new UserCredentials(randomString(), randomString(), randomString());
 	}

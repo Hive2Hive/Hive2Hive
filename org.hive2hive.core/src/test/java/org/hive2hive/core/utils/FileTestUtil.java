@@ -19,7 +19,7 @@ public class FileTestUtil {
 		// create file of size of multiple numbers of chunks
 		File file = new File(parent, fileName);
 		while (Math.ceil(1.0 * FileUtil.getFileSize(file) / chunkSize) < numOfChunks) {
-			String random = H2HJUnitTest.generateRandomString((int) chunkSize - 1);
+			String random = H2HJUnitTest.randomString((int) chunkSize - 1);
 			FileUtils.write(file, random, true);
 		}
 

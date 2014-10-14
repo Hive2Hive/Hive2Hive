@@ -25,7 +25,7 @@ public class FileMoveEventsTest extends FileEventsTest {
 	public void testFileMoveEvent() throws NoPeerConnectionException, IOException, NoSessionException {
 		// upload a file from machine A
 		File file = createAndAddFile(rootA, clientA);
-		File dst = new File(rootA, generateRandomString(12));
+		File dst = new File(rootA, randomString(12));
 
 		waitForNumberOfEvents(1);
 
@@ -52,7 +52,7 @@ public class FileMoveEventsTest extends FileEventsTest {
 	public void testEmptyFolderMoveEvent() throws NoPeerConnectionException, IOException, NoSessionException {
 		// upload a folder from machine A
 		File folder = createAndAddFolder(rootA, clientA);
-		File dst = new File(rootA, generateRandomString(12));
+		File dst = new File(rootA, randomString(12));
 
 		waitForNumberOfEvents(1);
 
@@ -79,7 +79,7 @@ public class FileMoveEventsTest extends FileEventsTest {
 	public void testFolderWithFilesMoveEvent() throws NoPeerConnectionException, IOException, NoSessionException {
 		List<File> files = createAndAddFolderWithFiles(rootA, clientA);
 		File folder = files.get(0);
-		File dst = new File(rootA, generateRandomString(12));
+		File dst = new File(rootA, randomString(12));
 		
 		waitForNumberOfEvents(files.size());
 		listener.getEvents().clear();

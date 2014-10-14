@@ -47,7 +47,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		// test for different input
 		byte[][] input = new byte[5][];
 		for (int i = 0; i < input.length; i++) {
-			input[i] = generateRandomString(15).getBytes();
+			input[i] = randomString(15).getBytes();
 
 			logger.debug("Random Input: {}.", EncryptionUtil.byteToHex(input[i]));
 
@@ -81,8 +81,8 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			// test various UserPasswords
 			for (int i = 0; i < 3; i++) {
 
-				String randomPW = generateRandomString(20);
-				String randomPIN = generateRandomString(6);
+				String randomPW = randomString(20);
+				String randomPIN = randomString(6);
 
 				logger.debug("Testing {}-bit AES key generation from user password and PIN:", sizes[s].value());
 				logger.debug("Random PW: {}.", randomPW);
@@ -120,7 +120,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int i = 0; i < password.length; i++) {
 
 			// set a random password and salt
-			password[i] = generateRandomString(20).toCharArray();
+			password[i] = randomString(20).toCharArray();
 			byte[] salt = PasswordUtil.generateRandomSalt();
 
 			logger.debug("Tested Password: {}.", String.valueOf(password[i]));
@@ -144,7 +144,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				// assure new parameters
 				char[] otherPW;
 				do {
-					otherPW = generateRandomString(20).toCharArray();
+					otherPW = randomString(20).toCharArray();
 				} while (Arrays.equals(otherPW, password[i]));
 				byte[] otherSalt;
 				do {
@@ -166,7 +166,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 		for (int i = 0; i < password.length; i++) {
 
 			// set a random password and salt
-			password[i] = generateRandomString(20).toCharArray();
+			password[i] = randomString(20).toCharArray();
 			byte[] salt = PasswordUtil.generateRandomSalt();
 
 			logger.debug("Validating password '{}' with salt '{}'.", String.valueOf(password[i]),
@@ -186,7 +186,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				// assure new parameters
 				char[] otherPW;
 				do {
-					otherPW = generateRandomString(20).toCharArray();
+					otherPW = randomString(20).toCharArray();
 				} while (Arrays.equals(otherPW, password[i]));
 				byte[] otherSalt;
 				do {
@@ -194,7 +194,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				} while (Arrays.equals(otherSalt, salt));
 				byte[] otherHash = null;
 				do {
-					otherHash = PasswordUtil.generateHash(generateRandomString(20).toCharArray(),
+					otherHash = PasswordUtil.generateHash(randomString(20).toCharArray(),
 							PasswordUtil.generateRandomSalt());
 				} while (Arrays.equals(otherHash, hash));
 
