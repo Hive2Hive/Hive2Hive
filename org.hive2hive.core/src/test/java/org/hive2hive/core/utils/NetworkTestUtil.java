@@ -30,7 +30,6 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
 
-// TODO NetworkTestUtil#createNetwork and NetwortTestUtil#createH2HNetwork seem to be redundant!! remove!
 // TODO test classes using a test network should inherit from the same test class that handles instantiation and shutdown of network, all in the same way
 
 /**
@@ -74,6 +73,19 @@ public class NetworkTestUtil {
 		}
 
 		return nodes;
+	}
+
+	/**
+	 * Shutdown a network.
+	 * 
+	 * @param network
+	 *            list containing all nodes which has to be disconnected.
+	 */
+	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
+		if (!network.isEmpty()) {
+			// shutdown of master peer is enough
+			network.get(0).disconnect();
+		}
 	}
 
 	/**
@@ -136,19 +148,6 @@ public class NetworkTestUtil {
 			params.setLocationsManager(locationsManager);
 
 			node.setSession(new H2HSession(params));
-		}
-	}
-
-	/**
-	 * Shutdown a network.
-	 * 
-	 * @param network
-	 *            list containing all nodes which has to be disconnected.
-	 */
-	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
-		if (!network.isEmpty()) {
-			// shutdown of master peer is enough
-			network.get(0).disconnect();
 		}
 	}
 
