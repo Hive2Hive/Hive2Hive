@@ -12,7 +12,7 @@ import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileMoveEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.Test;
 
 public class FileMoveEventsTest extends FileEventsTest {

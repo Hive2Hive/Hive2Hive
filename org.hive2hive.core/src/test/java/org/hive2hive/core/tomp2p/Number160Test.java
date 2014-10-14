@@ -5,7 +5,6 @@ import java.util.Arrays;
 import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -22,9 +21,9 @@ public class Number160Test extends H2HJUnitTest {
 	@Test
 	public void testHashes() {
 		// test two random literals
-		String unrelated1 = NetworkTestUtil.randomString();
+		String unrelated1 = randomString();
 		Number160 num1 = Number160.createHash(unrelated1);
-		String unrelated2 = NetworkTestUtil.randomString();
+		String unrelated2 = randomString();
 		Number160 num2 = Number160.createHash(unrelated2);
 
 		Assert.assertFalse(Arrays.equals(num1.toByteArray(), num2.toByteArray()));

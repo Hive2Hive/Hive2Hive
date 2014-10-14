@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.util;
+package org.hive2hive.core.utils;
 
 import java.io.File;
 import java.security.KeyPair;
@@ -23,6 +23,8 @@ import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.helper.GetMetaFileContext;
+import org.hive2hive.core.utils.helper.TestResultProcessComponentListener;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;

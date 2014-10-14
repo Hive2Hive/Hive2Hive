@@ -15,19 +15,19 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.login.SessionParameters;
-import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
+import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.util.H2HWaiter;
@@ -63,7 +63,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		NetworkManager registrer = network.get(0);
 		uploader = network.get(1);
 		downloader = network.get(2);
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 
 		// make the two clients ignore each other
 		uploader.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
@@ -87,7 +87,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	@Test
 	public void testUploadNewVersion() throws IOException, GetFailedException, NoSessionException, NoPeerConnectionException {
 		// overwrite the content in the file
-		String newContent = NetworkTestUtil.randomString();
+		String newContent = randomString();
 		FileUtils.write(file, newContent, false);
 		byte[] md5UpdatedFile = HashUtil.hash(file);
 
@@ -211,7 +211,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		uploader.setSession(newSession);
 
 		// update the file (append some data)
-		FileUtils.write(file, NetworkTestUtil.randomString(), true);
+		FileUtils.write(file, randomString(), true);
 
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
 

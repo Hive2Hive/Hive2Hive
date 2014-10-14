@@ -13,12 +13,12 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply.TestCallBackHandler;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReplyMaxSending;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -49,7 +49,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(1);
 
 		// generate a random content key
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 		// create a message with target node B
 		TestDirectMessageWithReply message = new TestDirectMessageWithReply(
 				nodeB.getConnection().getPeerDHT().peerAddress(), contentKey);
@@ -86,7 +86,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate a random content key
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 		// create a message with target node B
 		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(nodeB.getConnection()
 				.getPeerDHT().peerAddress(), contentKey);

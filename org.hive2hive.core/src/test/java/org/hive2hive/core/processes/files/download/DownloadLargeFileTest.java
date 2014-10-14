@@ -10,13 +10,13 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -53,14 +53,14 @@ public class DownloadLargeFileTest extends H2HJUnitTest {
 		downloader = network.get(1);
 
 		// create user, register and login both clients
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 		uploaderRoot = FileTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
 
 		// upload the large file before the 2nd peer logs in
 		uploadLargeFile();
 
-		downloaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		downloaderRoot = new File(FileUtils.getTempDirectory(), randomString());
 		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);
 	}
 
@@ -69,7 +69,7 @@ public class DownloadLargeFileTest extends H2HJUnitTest {
 		// upload a large file
 		BigInteger maxFileSize = uploader.getSession().getFileConfiguration().getMaxFileSize();
 		int minChunks = (int) maxFileSize.longValue() / CHUNK_SIZE;
-		String fileName = NetworkTestUtil.randomString();
+		String fileName = randomString();
 		uploadedFile = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, uploaderRoot, CHUNK_SIZE);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);

@@ -11,8 +11,8 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,9 +37,9 @@ public class FutureRemoveTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
+				.setContentKey(randomString()).setNetworkContent(data);
 
 		nodeA.getDataManager().put(parameters);
 
@@ -52,10 +52,10 @@ public class FutureRemoveTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
 		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data);
+				.setContentKey(randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data);
 
 		nodeA.getDataManager().put(parameters);
 
@@ -70,12 +70,12 @@ public class FutureRemoveTest extends H2HJUnitTest {
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 
 		List<H2HTestData> content = new ArrayList<H2HTestData>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			H2HTestData data = new H2HTestData(randomString());
 			data.generateVersionKey();
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());

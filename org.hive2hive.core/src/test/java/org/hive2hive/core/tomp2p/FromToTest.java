@@ -23,7 +23,6 @@ import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,7 +55,7 @@ public class FromToTest extends H2HJUnitTest {
 		List<H2HTestData> content = new ArrayList<H2HTestData>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			H2HTestData data = new H2HTestData(randomString());
 			data.generateVersionKey();
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());
@@ -151,7 +150,7 @@ public class FromToTest extends H2HJUnitTest {
 		List<H2HTestData> content = new ArrayList<H2HTestData>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			H2HTestData data = new H2HTestData(randomString());
 			data.generateVersionKey();
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());
@@ -197,7 +196,7 @@ public class FromToTest extends H2HJUnitTest {
 		List<H2HTestData> content = new ArrayList<H2HTestData>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			H2HTestData data = new H2HTestData(randomString());
 			data.generateVersionKey();
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());
@@ -240,7 +239,7 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
 
 		p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
@@ -272,7 +271,7 @@ public class FromToTest extends H2HJUnitTest {
 		Number160 dKey = Number160.createHash("domain");
 		Number160 cKey = Number160.createHash("content");
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 
 		p2.put(lKey).data(cKey, new Data(data)).domainKey(dKey).start().awaitUninterruptibly();
 
@@ -306,7 +305,7 @@ public class FromToTest extends H2HJUnitTest {
 		Number160 dKey = Number160.createHash("domain");
 		Number160 cKey = Number160.createHash("content");
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 
 		p2.put(lKey).data(cKey, new Data(data)).domainKey(dKey).start().awaitUninterruptibly();
 
@@ -338,7 +337,7 @@ public class FromToTest extends H2HJUnitTest {
 		List<H2HTestData> content = new ArrayList<H2HTestData>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			H2HTestData data = new H2HTestData(randomString());
 			data.generateVersionKey();
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());
@@ -385,7 +384,7 @@ public class FromToTest extends H2HJUnitTest {
 		List<H2HTestData> content = new ArrayList<H2HTestData>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+			H2HTestData data = new H2HTestData(randomString());
 			data.generateVersionKey();
 			if (i > 0) {
 				data.setBasedOnKey(content.get(i - 1).getVersionKey());
@@ -420,7 +419,7 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
 		// data.setBasedOnKey(Number160.createHash(10));
 

@@ -9,9 +9,9 @@ import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.RemoveFailedException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -39,9 +39,9 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemoveProcessStepSuccess() throws NoPeerConnectionException {
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
+		String locationKey = randomString();
+		String contentKey = randomString();
+		H2HTestData testData = new H2HTestData(randomString());
 
 		// put some data to remove
 		NetworkTestUtil.getRandomNode(network).getDataManager()
@@ -58,9 +58,9 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemoveProcessStepRollBack() throws NoPeerConnectionException, InvalidProcessStateException {
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
-		H2HTestData testData = new H2HTestData(NetworkTestUtil.randomString());
+		String locationKey = randomString();
+		String contentKey = randomString();
+		H2HTestData testData = new H2HTestData(randomString());
 
 		// put some data to remove
 		NetworkTestUtil.getRandomNode(network).getDataManager()

@@ -11,17 +11,17 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
+import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -65,10 +65,10 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		downloader = network.get(1);
 
 		// create user, register and login both clients
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 		uploaderRoot = FileTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
-		downloaderRoot = new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		downloaderRoot = new File(FileUtils.getTempDirectory(), randomString());
 		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);
 
 		// workaround that the downloader does not get notified about the newly added file (it will be done
@@ -79,7 +79,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	@Before
 	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
 		// upload a small file
-		String fileName = NetworkTestUtil.randomString();
+		String fileName = randomString();
 		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);

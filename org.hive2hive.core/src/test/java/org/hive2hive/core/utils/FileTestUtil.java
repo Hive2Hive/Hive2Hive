@@ -1,17 +1,17 @@
-package org.hive2hive.core.file;
+package org.hive2hive.core.utils;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.network.NetworkTestUtil;
+import org.hive2hive.core.file.FileUtil;
 
 public class FileTestUtil {
 
 	public static File createFileRandomContent(int numOfChunks, File parent, int chunkSize)
 			throws IOException {
-		return createFileRandomContent(NetworkTestUtil.randomString(), numOfChunks, parent, chunkSize);
+		return createFileRandomContent(H2HJUnitTest.randomString(), numOfChunks, parent, chunkSize);
 	}
 
 	public static File createFileRandomContent(String fileName, int numOfChunks, File parent, int chunkSize)
@@ -27,6 +27,6 @@ public class FileTestUtil {
 	}
 
 	public static File getTempDirectory() {
-		return new File(FileUtils.getTempDirectory(), NetworkTestUtil.randomString());
+		return new File(FileUtils.getTempDirectory(), H2HJUnitTest.randomString());
 	}
 }

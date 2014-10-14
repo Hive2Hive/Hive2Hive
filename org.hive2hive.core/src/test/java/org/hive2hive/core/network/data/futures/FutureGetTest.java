@@ -13,8 +13,8 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,9 +39,9 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
+		H2HTestData data = new H2HTestData(randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString())
+				.setNetworkContent(data);
 
 		nodeA.getDataManager().put(parameters);
 
@@ -53,8 +53,7 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(
-				NetworkTestUtil.randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString());
 
 		assertNull(nodeB.getDataManager().get(parameters));
 	}
@@ -65,13 +64,13 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = nodeA.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 
 		H2HTestData data = new H2HTestData("");
 		List<String> content = new ArrayList<String>();
 		int numberOfContent = 3;
 		for (int i = 0; i < numberOfContent; i++) {
-			data.setTestString(NetworkTestUtil.randomString());
+			data.setTestString(randomString());
 			content.add(data.getTestString());
 
 			data.generateVersionKey();
@@ -91,11 +90,10 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
-		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString())
-				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setNetworkContent(data);
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString())
+				.setVersionKey(Number160.createHash(randomString())).setNetworkContent(data);
 
 		nodeA.getDataManager().put(parameters);
 
@@ -108,10 +106,9 @@ public class FutureGetTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString())
-				.setVersionKey(Number160.createHash(NetworkTestUtil.randomString())).setNetworkContent(data);
+		H2HTestData data = new H2HTestData(randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString())
+				.setVersionKey(Number160.createHash(randomString())).setNetworkContent(data);
 
 		assertNull(nodeB.getDataManager().getVersion(parameters));
 		assertNull(nodeB.getDataManager().get(parameters));

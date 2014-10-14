@@ -17,10 +17,10 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -46,7 +46,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testGettingLocalUserKeys() throws GetFailedException, NoPeerConnectionException {
-		String loggedInUserId = NetworkTestUtil.randomString();
+		String loggedInUserId = randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -58,7 +58,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testFetchingFromNetwork() throws GetFailedException, NoPeerConnectionException {
-		String loggedInUserId = NetworkTestUtil.randomString();
+		String loggedInUserId = randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -67,7 +67,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		// create and upload some fake public keys into the network
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < random.nextInt(10); i++) {
-			String userId = NetworkTestUtil.randomString();
+			String userId = randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
 			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
@@ -84,7 +84,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testCachingOfPublicKeys() throws GetFailedException, NoPeerConnectionException {
-		String loggedInUserId = NetworkTestUtil.randomString();
+		String loggedInUserId = randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -92,7 +92,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < random.nextInt(5); i++) {
-			String userId = NetworkTestUtil.randomString();
+			String userId = randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
 			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
@@ -115,26 +115,26 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 	@Test(expected = GetFailedException.class)
 	public void testNonExistingPublicKey() throws NoPeerConnectionException, GetFailedException {
-		String loggedInUserId = NetworkTestUtil.randomString();
+		String loggedInUserId = randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
-		String nonExistingUserId = NetworkTestUtil.randomString();
+		String nonExistingUserId = randomString();
 
 		publicKeyManager.getPublicKey(nonExistingUserId);
 	}
 
 	@Test(expected = GetFailedException.class)
 	public void testGetFailedExceptions() throws NoPeerConnectionException, GetFailedException {
-		String loggedInUserId = NetworkTestUtil.randomString();
+		String loggedInUserId = randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, node.getDataManager());
 
-		String otherUser = NetworkTestUtil.randomString();
+		String otherUser = randomString();
 		H2HTestData noPublicKey = new H2HTestData("public key");
 		Parameters parameters = new Parameters().setLocationKey(otherUser).setContentKey(H2HConstants.USER_PUBLIC_KEY)
 				.setNetworkContent(noPublicKey);
@@ -145,7 +145,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testAllMixed() throws GetFailedException, NoPeerConnectionException {
-		String loggedInUserId = NetworkTestUtil.randomString();
+		String loggedInUserId = randomString();
 		KeyPair loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -154,7 +154,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		// create and upload some fake public keys into the network
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < 5; i++) {
-			String userId = NetworkTestUtil.randomString();
+			String userId = randomString();
 			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
 			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)

@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -37,9 +37,9 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testOverwrittingWithoutProtectionKeys() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String domainKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String domainKey = randomString();
+		String contentKey = randomString();
 		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -65,9 +65,9 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testOverwrittingWithCorrectProtectionKeys() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String domainKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String domainKey = randomString();
+		String contentKey = randomString();
 		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair();
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -102,9 +102,9 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testOverwrittingWithWrongProtectionKeys() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String domainKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String domainKey = randomString();
+		String contentKey = randomString();
 		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
 		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 
@@ -131,9 +131,9 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemove() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String domainKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String domainKey = randomString();
+		String contentKey = randomString();
 		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
 		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 
@@ -173,9 +173,9 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testRemoveVersion() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
-		String domainKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String domainKey = randomString();
+		String contentKey = randomString();
 		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair();
 		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair();
 

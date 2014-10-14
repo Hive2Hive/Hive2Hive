@@ -11,15 +11,15 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -59,7 +59,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		root1 = FileTestUtil.getTempDirectory();
 
 		// first, register and login a new user
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, root0);
 
 		// create default tree that can be used later. Upload it to the DHT
@@ -68,11 +68,11 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		// - folder 1
 		// - - file 3
 		File file1 = new File(root0, "file 1");
-		FileUtils.writeStringToFile(file1, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1, randomString());
 		UseCaseTestUtil.uploadNewFile(uploader, file1);
 
 		File file2 = new File(root0, "file 2");
-		FileUtils.writeStringToFile(file2, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file2, randomString());
 		UseCaseTestUtil.uploadNewFile(uploader, file2);
 
 		File folder1 = new File(root0, "folder 1");
@@ -80,7 +80,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(uploader, folder1);
 
 		File file3 = new File(folder1, "file 3");
-		FileUtils.writeStringToFile(file3, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file3, randomString());
 		UseCaseTestUtil.uploadNewFile(uploader, file3);
 
 		// copy the content to the other client such that they are in sync
@@ -105,7 +105,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 			InvalidProcessStateException, NoPeerConnectionException {
 		/** do some modifications on client **/
 		// add a file
-		FileUtils.write(new File(root1, "added-file"), NetworkTestUtil.randomString());
+		FileUtils.write(new File(root1, "added-file"), randomString());
 
 		// delete file 1
 		File file1 = new File(root1, "file 1");
@@ -116,7 +116,7 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 
 		// add a file 4 within folder 1
 		File file4 = new File(new File(root0, "folder 1"), "file 4");
-		FileUtils.write(file4, NetworkTestUtil.randomString());
+		FileUtils.write(file4, randomString());
 		UseCaseTestUtil.uploadNewFile(remoteClient, file4);
 
 		// delete file 2
@@ -148,27 +148,27 @@ public class SynchronizeFilesStepTest extends H2HJUnitTest {
 		/** do some modifications on client **/
 		// modify file 1
 		File file1 = new File(root1, "file 1");
-		FileUtils.write(file1, NetworkTestUtil.randomString());
+		FileUtils.write(file1, randomString());
 		byte[] newMD5File1 = HashUtil.hash(file1);
 
 		// modify file 3
 		File folder = new File(root1, "folder 1");
 		File file3 = new File(folder, "file 3");
-		FileUtils.write(file3, NetworkTestUtil.randomString());
+		FileUtils.write(file3, randomString());
 
 		/** do some modifications on the remote **/
 		NetworkManager remoteClient = network.get(0);
 
 		// modify file 2
 		File file2 = new File(root0, "file 2");
-		String file2Content = NetworkTestUtil.randomString();
+		String file2Content = randomString();
 		FileUtils.write(file2, file2Content);
 		UseCaseTestUtil.uploadNewVersion(remoteClient, file2);
 
 		// also modify file 3
 		folder = new File(root0, "folder 1");
 		file3 = new File(folder, "file 3");
-		FileUtils.write(file3, NetworkTestUtil.randomString());
+		FileUtils.write(file3, randomString());
 		byte[] newMD5File3 = HashUtil.hash(file3);
 		UseCaseTestUtil.uploadNewVersion(remoteClient, file3);
 

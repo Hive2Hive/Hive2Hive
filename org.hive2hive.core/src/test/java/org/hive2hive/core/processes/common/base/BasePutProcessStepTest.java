@@ -13,9 +13,9 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryPutMode;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -47,8 +47,8 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		NetworkManager proxy = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = proxy.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
-		String data = NetworkTestUtil.randomString();
+		String contentKey = randomString();
+		String data = randomString();
 
 		// initialize the process and the one and only step to test
 		TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),
@@ -72,8 +72,8 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 						.setPutMode(StorageMemoryPutMode.DENY_ALL);
 			}
 			String locationKey = proxy.getNodeId();
-			String contentKey = NetworkTestUtil.randomString();
-			String data = NetworkTestUtil.randomString();
+			String contentKey = randomString();
+			String data = randomString();
 
 			// initialize the process and the one and only step to test
 			TestPutProcessStep putStep = new TestPutProcessStep(locationKey, contentKey, new H2HTestData(data),

@@ -1,6 +1,6 @@
 package org.hive2hive.core.network.userprofiletask;
 
-import org.hive2hive.core.network.NetworkTestUtil;
+import org.hive2hive.core.H2HJUnitTest;
 
 public class TestUserProfileTask extends UserProfileTask {
 
@@ -9,8 +9,8 @@ public class TestUserProfileTask extends UserProfileTask {
 	private final String id;
 
 	public TestUserProfileTask() {
-		super(NetworkTestUtil.randomString());
-		this.id = NetworkTestUtil.randomString();
+		super(H2HJUnitTest.randomString());
+		this.id = H2HJUnitTest.randomString();
 	}
 
 	public String getId() {

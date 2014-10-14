@@ -10,13 +10,13 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -46,7 +46,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		client = network.get(1);
 
 		// create a user
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 		// register user
 		UseCaseTestUtil.register(userCredentials, client);
 		root = FileTestUtil.getTempDirectory();
@@ -59,7 +59,7 @@ public class MoveFileTest extends H2HJUnitTest {
 			NoSessionException, NoPeerConnectionException {
 		// add a file to the root
 		File file = new File(root, "test-file-from-root-to-folder");
-		FileUtils.write(file, NetworkTestUtil.randomString());
+		FileUtils.write(file, randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// add the target directory
@@ -92,7 +92,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// add a file to the folder
 		File file = new File(folder, "test-file-from-folder-to-root");
-		FileUtils.write(file, NetworkTestUtil.randomString());
+		FileUtils.write(file, randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		File destination = new File(root, file.getName());
@@ -120,7 +120,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// add a file to the folder
 		File file = new File(sourceFolder, "test-file");
-		FileUtils.write(file, NetworkTestUtil.randomString());
+		FileUtils.write(file, randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// add the destination folder
@@ -151,7 +151,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// add a file to the network
 		File file = new File(root, "test-file-to-rename");
-		FileUtils.write(file, NetworkTestUtil.randomString());
+		FileUtils.write(file, randomString());
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// don't move, only rename

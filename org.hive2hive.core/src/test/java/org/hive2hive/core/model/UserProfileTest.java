@@ -4,7 +4,6 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.junit.AfterClass;
@@ -30,7 +29,7 @@ public class UserProfileTest extends H2HJUnitTest {
 
 	@Before
 	public void createUserProfile() {
-		userProfile = new UserProfile(NetworkTestUtil.randomString());
+		userProfile = new UserProfile(randomString());
 	}
 
 	@Test
@@ -38,13 +37,13 @@ public class UserProfileTest extends H2HJUnitTest {
 		FolderIndex root = userProfile.getRoot();
 
 		KeyPair child1Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
-		FolderIndex child1Folder = new FolderIndex(root, child1Key, NetworkTestUtil.randomString());
+		FolderIndex child1Folder = new FolderIndex(root, child1Key, randomString());
 
 		KeyPair child2Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024);
-		new FileIndex(root, child2Key, NetworkTestUtil.randomString(), "bla".getBytes());
+		new FileIndex(root, child2Key, randomString(), "bla".getBytes());
 
 		KeyPair child3Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
-		new FileIndex(child1Folder, child3Key, NetworkTestUtil.randomString(), "blubb".getBytes());
+		new FileIndex(child1Folder, child3Key, randomString(), "blubb".getBytes());
 
 		Assert.assertNotNull(userProfile.getFileById(child1Key.getPublic()));
 		Assert.assertNotNull(userProfile.getFileById(child2Key.getPublic()));

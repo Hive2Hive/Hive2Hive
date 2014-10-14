@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.file.FileTestUtil;
+import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;

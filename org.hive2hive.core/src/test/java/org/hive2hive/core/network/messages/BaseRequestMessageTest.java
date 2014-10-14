@@ -14,7 +14,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
@@ -23,6 +22,7 @@ import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply.TestCallBackHandler;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -74,7 +74,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate a random content key
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 		// create a message with target node B
 		TestMessageWithReply message = new TestMessageWithReply(nodeB.getNodeId(), contentKey);
 		// create and add a callback handler
@@ -121,7 +121,7 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate a random content key
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 		// create a message with target node B
 		TestMessageWithReplyMaxSending message = new TestMessageWithReplyMaxSending(nodeB.getNodeId(), contentKey);
 		// create and add a callback handler

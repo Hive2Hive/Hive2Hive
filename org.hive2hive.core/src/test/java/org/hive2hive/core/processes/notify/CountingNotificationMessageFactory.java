@@ -7,10 +7,10 @@ import java.util.List;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.TestUserProfileTask;
@@ -27,7 +27,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 
 	private final NetworkManager sender;
 	private final List<String> testContentKeys;
-	private final H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+	private final H2HTestData data = new H2HTestData(H2HJUnitTest.randomString());
 
 	public CountingNotificationMessageFactory(NetworkManager sender) {
 		this.sender = sender;
@@ -73,7 +73,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 
 	@Override
 	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = H2HJUnitTest.randomString();
 		testContentKeys.add(contentKey);
 		return new TestDirectNotificationMessage(receiver, sender.getNodeId(), contentKey, data);
 	}

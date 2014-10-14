@@ -14,7 +14,6 @@ import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.junit.After;
@@ -54,7 +53,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Before
 	public void createTreeNode() throws IOException {
-		String randomName = NetworkTestUtil.randomString();
+		String randomName = randomString();
 		fileRoot = new File(System.getProperty("java.io.tmpdir"), randomName);
 		rootPath = fileRoot.toPath();
 
@@ -70,13 +69,13 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		// - - 2f
 		// - - 2d (empty folder)
 		file1f1 = new File(fileRoot, "1f1");
-		FileUtils.writeStringToFile(file1f1, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f1, randomString());
 		file1f2 = new File(fileRoot, "1f2");
-		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f2, randomString());
 		file1d = new File(fileRoot, "1d");
 		file1d.mkdirs();
 		file2f = new File(file1d, "2f");
-		FileUtils.writeStringToFile(file2f, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file2f, randomString());
 		file2d = new File(file1d, "2d");
 		file2d.mkdir();
 
@@ -132,7 +131,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 		// one file
 		File file1f3 = new File(fileRoot, "1f3");
-		FileUtils.writeStringToFile(file1f3, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f3, randomString());
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<Path> addedLocally = fileSynchronizer.getAddedLocally();
@@ -157,8 +156,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testUpdatedLocally() throws IOException, ClassNotFoundException {
 		// change two files
-		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
-		FileUtils.writeStringToFile(file2f, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f2, randomString());
+		FileUtils.writeStringToFile(file2f, randomString());
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<Path> updatedLocally = fileSynchronizer.getUpdatedLocally();
@@ -167,7 +166,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertTrue(updatedLocally.contains(file2f.toPath()));
 
 		// change file in user profile as well --> should not occur as updated locally
-		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
 
 		fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		updatedLocally = fileSynchronizer.getUpdatedLocally();
@@ -178,8 +177,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testUpdatedRemotely() throws IOException, ClassNotFoundException {
 		// change two files in the user profile; hashes on disk remain the same
-		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
-		node2f.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
+		node2f.setMD5(HashUtil.hash(randomString().getBytes()));
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
@@ -203,7 +202,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testConflictUpdateLocallyDeleteRemotely() throws IOException, ClassNotFoundException {
 		// change a file locally
-		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f2, randomString());
 
 		// delete the same file remotely
 		root.removeChild(node1f2);
@@ -223,7 +222,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		file1f2.delete();
 
 		// modify the same file remotely
-		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<Index> addedRemotely = fileSynchronizer.getAddedRemotely();
@@ -240,11 +239,11 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testConflictUpdateRemotelyAndLocally() throws IOException, ClassNotFoundException {
 		// change a file in the user profile
-		node1f2.setMD5(HashUtil.hash(NetworkTestUtil.randomString().getBytes()));
+		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
 
 		// change file on disk as well --> should occur as updated remotely since there is a conflict and the
 		// profile wins
-		FileUtils.writeStringToFile(file1f2, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file1f2, randomString());
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
 		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();

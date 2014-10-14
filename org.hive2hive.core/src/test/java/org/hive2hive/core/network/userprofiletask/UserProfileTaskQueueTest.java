@@ -26,9 +26,7 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
@@ -39,6 +37,8 @@ import org.hive2hive.core.processes.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -68,7 +68,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testPut() throws NoPeerConnectionException, InvalidProcessStateException {
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -91,7 +91,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException {
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -129,7 +129,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException {
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
@@ -166,7 +166,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	public void testCorrectOrder() throws DataLengthException, InvalidKeyException, IllegalStateException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, InterruptedException, IOException,
 			NoPeerConnectionException {
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials credentials = generateRandomCredentials();
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());

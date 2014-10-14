@@ -9,14 +9,14 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
+import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.ProcessState;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -60,13 +60,13 @@ public class NotificationTest extends H2HJUnitTest {
 		// node 0-2: user A
 		// node 3-4: user B
 		// node 5: user C
-		userACredentials = new UserCredentials("User A", NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
+		userACredentials = new UserCredentials("User A", randomString(), randomString());
 		UseCaseTestUtil.register(userACredentials, network.get(0));
 
-		userBCredentials = new UserCredentials("User B", NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
+		userBCredentials = new UserCredentials("User B", randomString(), randomString());
 		UseCaseTestUtil.register(userBCredentials, network.get(3));
 
-		userCCredentials = new UserCredentials("User C", NetworkTestUtil.randomString(), NetworkTestUtil.randomString());
+		userCCredentials = new UserCredentials("User C", randomString(), randomString());
 		UseCaseTestUtil.register(userCCredentials, network.get(5));
 
 		// login all nodes

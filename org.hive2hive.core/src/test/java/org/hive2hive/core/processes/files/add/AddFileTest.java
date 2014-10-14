@@ -12,16 +12,16 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.util.H2HWaiter;
@@ -54,7 +54,7 @@ public class AddFileTest extends H2HJUnitTest {
 		// setup network
 		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
 		// create some random user credentials
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 		// register and login a user (peer 0)
 		uploaderRoot = FileTestUtil.getTempDirectory();
 		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), uploaderRoot);
@@ -102,7 +102,7 @@ public class AddFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(network.get(0), folder);
 
 		File file = new File(folder, "test-file");
-		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file, randomString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
 		verifyUpload(file, 1);
 	}

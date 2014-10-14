@@ -12,9 +12,9 @@ import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class UserManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void isRegisteredTest() throws NoPeerConnectionException, InterruptedException {
-		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials userCredentials = generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
 		// all nodes must have same result: false
@@ -75,7 +75,7 @@ public class UserManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException, NoSessionException {
-		UserCredentials userCredentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials userCredentials = generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
 		Path rootPah = FileTestUtil.getTempDirectory().toPath();

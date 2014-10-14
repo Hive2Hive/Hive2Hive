@@ -16,19 +16,19 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -77,7 +77,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	@Before
 	public void setup() throws NoPeerConnectionException, InvalidCipherTextException, IOException {
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 		client = NetworkTestUtil.getRandomNode(network);
 		root = FileTestUtil.getTempDirectory();
 
@@ -193,7 +193,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), operation == Operation.PUT);
 
 				if (operation == Operation.MODIFY) {
-					new FolderIndex(userProfile.getRoot(), null, NetworkTestUtil.randomString());
+					new FolderIndex(userProfile.getRoot(), null, randomString());
 				}
 
 				if (operation == Operation.PUT) {
@@ -219,8 +219,8 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 			KeyPair keys = null;
 			byte[] md5Hash = null;
 			if (!isFolder) {
-				file = new File(root, NetworkTestUtil.randomString());
-				FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
+				file = new File(root, randomString());
+				FileUtils.writeStringToFile(file, randomString());
 				keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 				md5Hash = HashUtil.hash(file);
 			}
@@ -231,7 +231,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 			List<FolderIndex> indexes = getIndexList(profile.getRoot());
 
 			if (isFolder) {
-				new FolderIndex(indexes.get(random.nextInt(indexes.size())), null, NetworkTestUtil.randomString());
+				new FolderIndex(indexes.get(random.nextInt(indexes.size())), null, randomString());
 			} else {
 				new FileIndex(indexes.get(random.nextInt(indexes.size())), keys, file.getName(), md5Hash);
 			}

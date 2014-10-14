@@ -9,10 +9,10 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryPutMode;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -38,9 +38,9 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = NetworkTestUtil.getRandomNode(network);
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		IParameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
+		H2HTestData data = new H2HTestData(randomString());
+		IParameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString())
+				.setNetworkContent(data);
 
 		Assert.assertEquals(H2HPutStatus.OK, nodeB.getDataManager().put(parameters));
 		Assert.assertEquals(data.getTestString(), ((H2HTestData) nodeB.getDataManager().get(parameters)).getTestString());
@@ -61,9 +61,9 @@ public class FuturePutTest extends H2HJUnitTest {
 		((H2HStorageMemory) nodeE.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
 		((H2HStorageMemory) nodeF.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
+		H2HTestData data = new H2HTestData(randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(randomString())
+				.setNetworkContent(data);
 
 		try {
 			Assert.assertEquals(H2HPutStatus.FAILED, nodeA.getDataManager().put(parameters));
@@ -84,9 +84,9 @@ public class FuturePutTest extends H2HJUnitTest {
 
 		((H2HStorageMemory) nodeB.getConnection().getPeerDHT().storageLayer()).setPutMode(StorageMemoryPutMode.DENY_ALL);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
-		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(data);
+		H2HTestData data = new H2HTestData(randomString());
+		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(randomString())
+				.setNetworkContent(data);
 
 		try {
 			Assert.assertEquals(H2HPutStatus.OK, nodeA.getDataManager().put(parameters));
@@ -101,15 +101,14 @@ public class FuturePutTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(0);
 		NetworkManager nodeB = network.get(1);
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
-		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId())
-				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data)
-				.setPrepareFlag(true);
+		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(randomString())
+				.setVersionKey(data.getVersionKey()).setNetworkContent(data).setPrepareFlag(true);
 
 		Assert.assertEquals(H2HPutStatus.OK, nodeA.getDataManager().put(parameters));
 
-		H2HTestData conflictingData = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData conflictingData = new H2HTestData(randomString());
 		conflictingData.generateVersionKey();
 		Parameters parametersConflicting = new Parameters().setLocationKey(nodeB.getNodeId())
 				.setContentKey(parameters.getContentKey()).setVersionKey(conflictingData.getVersionKey())

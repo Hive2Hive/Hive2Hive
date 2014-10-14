@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.util;
+package org.hive2hive.core.utils.helper;
 
 import java.security.KeyPair;
 

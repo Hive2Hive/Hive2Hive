@@ -1,7 +1,6 @@
 package org.hive2hive.core.model;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -25,9 +24,9 @@ public class UserCredentialsTest extends H2HJUnitTest {
 	@Test
 	public void generateLocations() {
 		// random credentials
-		String userName = NetworkTestUtil.randomString();
-		String password = NetworkTestUtil.randomString();
-		String pin = NetworkTestUtil.randomString();
+		String userName = randomString();
+		String password = randomString();
+		String pin = randomString();
 
 		UserCredentials credentials1 = new UserCredentials(userName, password, pin);
 		UserCredentials credentials2 = new UserCredentials(userName, password, pin);

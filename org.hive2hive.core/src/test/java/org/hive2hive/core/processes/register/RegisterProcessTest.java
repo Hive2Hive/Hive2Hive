@@ -16,12 +16,12 @@ import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -54,7 +54,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		NetworkManager client = network.get(random.nextInt(networkSize / 2));
 		NetworkManager otherClient = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials credentials = generateRandomCredentials();
 		UseCaseTestUtil.register(credentials, client);
 
 		// verify put user profile
@@ -80,7 +80,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 	public void testFailOnExistingLocations() throws InvalidProcessStateException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
 
-		UserCredentials credentials = NetworkTestUtil.generateRandomCredentials();
+		UserCredentials credentials = generateRandomCredentials();
 
 		// already put a locations map
 		assertEquals(H2HPutStatus.OK, client.getDataManager().put(

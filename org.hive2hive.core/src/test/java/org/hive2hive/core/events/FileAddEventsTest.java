@@ -1,6 +1,7 @@
 package org.hive2hive.core.events;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,9 +13,8 @@ import org.hive2hive.core.events.framework.interfaces.file.IFileDownloadEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.Test;
 
 public class FileAddEventsTest extends FileEventsTest {
@@ -49,7 +49,7 @@ public class FileAddEventsTest extends FileEventsTest {
 		// upload a big file from machine A
 		BigInteger maxFileSize = clientA.getSession().getFileConfiguration().getMaxFileSize();
 		int minChunks = (int) maxFileSize.longValue() / CHUNK_SIZE;
-		String fileName = NetworkTestUtil.randomString();
+		String fileName = randomString();
 		File file = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, rootA, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(clientA, file);
 		

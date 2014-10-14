@@ -9,7 +9,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,7 +39,7 @@ public class HashUtilTest extends H2HJUnitTest {
 	@Test
 	public void md5StreamTest() throws IOException {
 		String data = generateRandomString(5 * 1024);
-		File file = new File(System.getProperty("java.io.tmpdir"), NetworkTestUtil.randomString());
+		File file = new File(System.getProperty("java.io.tmpdir"), randomString());
 		FileUtils.writeStringToFile(file, data);
 
 		byte[] md5 = HashUtil.hash(file);

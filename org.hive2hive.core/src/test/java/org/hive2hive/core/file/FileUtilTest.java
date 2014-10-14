@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -42,7 +41,7 @@ public class FileUtilTest extends H2HJUnitTest {
 
 	@Before
 	public void createRoot() {
-		String randomName = NetworkTestUtil.randomString();
+		String randomName = randomString();
 		root = new File(System.getProperty("java.io.tmpdir"), randomName);
 	}
 
@@ -55,10 +54,9 @@ public class FileUtilTest extends H2HJUnitTest {
 	public void testReadWriteMetaData() throws IOException, ClassNotFoundException {
 		String fileName = "test-file";
 		File file = new File(root, fileName);
-		FileUtils.writeStringToFile(file, NetworkTestUtil.randomString());
+		FileUtils.writeStringToFile(file, randomString());
 
-		PublicKeyManager publicKeyManager = new PublicKeyManager("user", EncryptionUtil.generateRSAKeyPair(),
-				null);
+		PublicKeyManager publicKeyManager = new PublicKeyManager("user", EncryptionUtil.generateRSAKeyPair(), null);
 		DownloadManager downloadManager = new DownloadManager(null, null, publicKeyManager, null);
 		FileUtil.writePersistentMetaData(root.toPath(), publicKeyManager, downloadManager);
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());

@@ -15,13 +15,13 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.testmessages.TestMessage;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply;
-import org.hive2hive.core.processes.util.DenyingMessageReplyHandler;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.H2HWaiter;
@@ -66,8 +66,8 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
 		// generate random data and content key
-		String data = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String data = randomString();
+		String contentKey = randomString();
 		Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey);
 
 		// check if selected location is empty
@@ -121,8 +121,8 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		final NetworkManager nodeB = network.remove(random.nextInt(network.size() / 2) + network.size() / 2);
 		try {
 			// generate random data and content key
-			String data = NetworkTestUtil.randomString();
-			String contentKey = NetworkTestUtil.randomString();
+			String data = randomString();
+			String contentKey = randomString();
 			Parameters parameters = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey);
 
 			// check if selected location is empty
@@ -178,7 +178,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		final NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
 		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
 		// generate a random content key
-		final String contentKey = NetworkTestUtil.randomString();
+		final String contentKey = randomString();
 		final Parameters parametersA = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey);
 		final Parameters parametersB = new Parameters().setLocationKey(nodeB.getNodeId()).setContentKey(contentKey);
 

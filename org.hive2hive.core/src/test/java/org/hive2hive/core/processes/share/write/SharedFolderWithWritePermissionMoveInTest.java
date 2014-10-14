@@ -14,16 +14,16 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -68,13 +68,13 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Create user A.");
 		rootA = FileTestUtil.getTempDirectory();
-		userA = NetworkTestUtil.generateRandomCredentials();
+		userA = generateRandomCredentials();
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
-		userB = NetworkTestUtil.generateRandomCredentials();
+		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 

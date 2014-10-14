@@ -7,9 +7,9 @@ import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -37,12 +37,12 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 	@Test
 	public void testGetProcessStepSuccess() throws NoPeerConnectionException {
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		NetworkManager getter = NetworkTestUtil.getRandomNode(network);
 		NetworkManager holder = NetworkTestUtil.getRandomNode(network);
 
 		String locationKey = holder.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 
 		holder.getDataManager().put(
 				new Parameters().setLocationKey(holder.getNodeId()).setContentKey(contentKey).setNetworkContent(data));
@@ -59,7 +59,7 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		NetworkManager holder = network.get(1);
 
 		String locationKey = holder.getNodeId();
-		String contentKey = NetworkTestUtil.randomString();
+		String contentKey = randomString();
 
 		TestGetProcessStepRollBack getStepRollBack = new TestGetProcessStepRollBack(locationKey, contentKey,
 				getter.getDataManager());

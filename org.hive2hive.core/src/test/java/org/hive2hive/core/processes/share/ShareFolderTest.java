@@ -11,12 +11,12 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -51,11 +51,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 		network = NetworkTestUtil.createNetwork(networkSize);
 		rootA = FileTestUtil.getTempDirectory();
-		userA = NetworkTestUtil.generateRandomCredentials();
+		userA = generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
 		rootB = FileTestUtil.getTempDirectory();
-		userB = NetworkTestUtil.generateRandomCredentials();
+		userB = generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 	}
 
@@ -104,7 +104,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	public void shareEmptyFolder() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
 			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
-		File sharedFolderAtA = new File(rootA, NetworkTestUtil.randomString());
+		File sharedFolderAtA = new File(rootA, randomString());
 		sharedFolderAtA.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderAtA);
 

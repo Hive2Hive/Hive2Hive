@@ -10,15 +10,15 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.integration.TestFileConfiguration;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -46,7 +46,7 @@ public class LoginTest extends H2HJUnitTest {
 		beforeClass();
 
 		network = NetworkTestUtil.createNetwork(networkSize);
-		userCredentials = NetworkTestUtil.generateRandomCredentials();
+		userCredentials = generateRandomCredentials();
 
 		UseCaseTestUtil.register(userCredentials, network.get(0));
 		root = FileTestUtil.getTempDirectory();
@@ -72,7 +72,7 @@ public class LoginTest extends H2HJUnitTest {
 	@Test(expected = NoSessionException.class)
 	public void testInvalidPassword() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException,
 			ProcessExecutionException {
-		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), NetworkTestUtil.randomString(),
+		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), randomString(),
 				userCredentials.getPin());
 
 		loginAndWaitToFail(wrongCredentials);
@@ -82,7 +82,7 @@ public class LoginTest extends H2HJUnitTest {
 	public void testInvalidPin() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException,
 			ProcessExecutionException {
 		UserCredentials wrongCredentials = new UserCredentials(userCredentials.getUserId(), userCredentials.getPassword(),
-				NetworkTestUtil.randomString());
+				randomString());
 
 		loginAndWaitToFail(wrongCredentials);
 	}
@@ -90,7 +90,7 @@ public class LoginTest extends H2HJUnitTest {
 	@Test(expected = NoSessionException.class)
 	public void testInvalidUserId() throws NoSessionException, InvalidProcessStateException, NoPeerConnectionException,
 			ProcessExecutionException {
-		UserCredentials wrongCredentials = new UserCredentials(NetworkTestUtil.randomString(),
+		UserCredentials wrongCredentials = new UserCredentials(randomString(),
 				userCredentials.getPassword(), userCredentials.getPin());
 
 		loginAndWaitToFail(wrongCredentials);

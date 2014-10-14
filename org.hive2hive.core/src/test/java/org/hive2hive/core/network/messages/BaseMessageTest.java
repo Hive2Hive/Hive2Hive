@@ -15,10 +15,10 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.testmessages.TestMessage;
 import org.hive2hive.core.network.messages.testmessages.TestMessageMaxSending;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -59,8 +59,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		// generate random data and content key
-		String data = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String data = randomString();
+		String contentKey = randomString();
 		// create a message with target node B
 		TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 
@@ -102,8 +102,8 @@ public class BaseMessageTest extends H2HJUnitTest {
 		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
 
 		// generate random data and content key
-		String contentKey = NetworkTestUtil.randomString();
-		String data = NetworkTestUtil.randomString();
+		String contentKey = randomString();
+		String data = randomString();
 		// create a test message which gets rejected several times
 		TestMessageMaxSending message = new TestMessageMaxSending(nodeB.getNodeId(), contentKey, new H2HTestData(data));
 

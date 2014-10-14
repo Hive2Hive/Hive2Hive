@@ -17,10 +17,10 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryGetMode;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -49,8 +49,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testPutGetMultipleModifiesSingleClient() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -71,8 +71,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testPutGetMultipleModifiesMultipleClients() throws Exception {
 		int conurrencyFactor = random.nextInt(2) + 2;
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(conurrencyFactor);
 		ArrayList<VersionManager<H2HTestData>> versionManagers = new ArrayList<VersionManager<H2HTestData>>(conurrencyFactor);
@@ -84,7 +84,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 			versionManagers.add(versionManager);
 		}
 
-		H2HTestData initialVersion = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData initialVersion = new H2HTestData(randomString());
 		ArrayList<String> versions = new ArrayList<String>();
 		versions.add(initialVersion.getTestString());
 
@@ -98,7 +98,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 			// check get
 			Assert.assertEquals(versions.get(i - 1), version.getTestString());
 			// update version
-			version.setTestString(NetworkTestUtil.randomString());
+			version.setTestString(randomString());
 			versions.add(version.getTestString());
 			// put version
 			versionManagers.get(puttingClient).put(version, protectionKeys);
@@ -109,14 +109,14 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testPutVersionFork() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
 
-		H2HTestData versionA = new H2HTestData(NetworkTestUtil.randomString());
-		H2HTestData versionB = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData versionA = new H2HTestData(randomString());
+		H2HTestData versionB = new H2HTestData(randomString());
 
 		versionManager.put(versionA, protectionKeys);
 		versionManager.put(versionB, protectionKeys);
@@ -126,8 +126,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testGetNoData() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -139,8 +139,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testGetDelay() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -168,8 +168,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 			H2HTestData version0B = new H2HTestData("version0B");
 			version0B.generateVersionKey();
 
-			String locationKey = NetworkTestUtil.randomString();
-			String contentKey = NetworkTestUtil.randomString();
+			String locationKey = randomString();
+			String contentKey = randomString();
 
 			Map<Number640, Data> manipulatedMap = new HashMap<Number640, Data>(2);
 			manipulatedMap.put(
@@ -203,8 +203,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testContentProtectionPutWithoutProtectionKey() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -220,8 +220,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testContentProtectionPutWithWrongProtectionKey() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -239,8 +239,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testContentProtectionPutManual() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -288,8 +288,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testContentProtectionRemove() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
@@ -343,8 +343,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 	public void testContentProtectionRemoveVersion() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = NetworkTestUtil.randomString();
-		String contentKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
+		String contentKey = randomString();
 
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);

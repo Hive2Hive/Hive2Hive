@@ -2,8 +2,10 @@ package org.hive2hive.core;
 
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.UUID;
 
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.UserCredentials;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -117,6 +119,24 @@ public class H2HJUnitTest {
 		}
 
 		return new String(buf);
+	}
+
+	/**
+	 * Generates a random string (based on UUID)
+	 * 
+	 * @return a random string
+	 */
+	public static String randomString() {
+		return UUID.randomUUID().toString();
+	}
+
+	/**
+	 * Generates random credentials
+	 * 
+	 * @return random user credentials
+	 */
+	public static UserCredentials generateRandomCredentials() {
+		return new UserCredentials(randomString(), randomString(), randomString());
 	}
 
 	protected static void printBytes(String description, byte[] bytes) {

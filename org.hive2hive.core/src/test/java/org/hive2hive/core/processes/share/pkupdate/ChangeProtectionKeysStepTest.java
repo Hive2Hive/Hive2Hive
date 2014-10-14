@@ -23,12 +23,12 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.context.BasePKUpdateContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -71,7 +71,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair();
 
 		// generate a fake chunk
-		Chunk chunk = new Chunk(proxy.getNodeId(), NetworkTestUtil.randomString().getBytes(), 0);
+		Chunk chunk = new Chunk(proxy.getNodeId(), randomString().getBytes(), 0);
 		// encrypt the chunk
 		HybridEncryptedContent encryptedChunk = dummyEncryption.encryptHybrid(chunk, encryptionKeys.getPublic());
 
@@ -121,10 +121,10 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// generate a fake meta file
 		List<MetaChunk> metaChunks1 = new ArrayList<MetaChunk>();
-		metaChunks1.add(new MetaChunk(NetworkTestUtil.randomString(), NetworkTestUtil.randomString().getBytes(), 0));
-		metaChunks1.add(new MetaChunk(NetworkTestUtil.randomString(), NetworkTestUtil.randomString().getBytes(), 1));
+		metaChunks1.add(new MetaChunk(randomString(), randomString().getBytes(), 0));
+		metaChunks1.add(new MetaChunk(randomString(), randomString().getBytes(), 1));
 		List<MetaChunk> metaChunks2 = new ArrayList<MetaChunk>();
-		metaChunks2.add(new MetaChunk(NetworkTestUtil.randomString(), NetworkTestUtil.randomString().getBytes(), 2));
+		metaChunks2.add(new MetaChunk(randomString(), randomString().getBytes(), 2));
 		List<FileVersion> fileVersions = new ArrayList<FileVersion>();
 		fileVersions.add(new FileVersion(0, 123, System.currentTimeMillis(), metaChunks1));
 		fileVersions.add(new FileVersion(1, 123, System.currentTimeMillis(), metaChunks2));

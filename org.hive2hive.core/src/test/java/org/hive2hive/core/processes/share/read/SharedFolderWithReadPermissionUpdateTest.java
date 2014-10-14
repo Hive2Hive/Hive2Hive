@@ -15,16 +15,16 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
@@ -74,13 +74,13 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Create user A.");
 		rootA = FileTestUtil.getTempDirectory();
-		userA = NetworkTestUtil.generateRandomCredentials();
+		userA = generateRandomCredentials();
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
 
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
-		userB = NetworkTestUtil.generateRandomCredentials();
+		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, nodeB, rootB);
 
@@ -117,7 +117,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromAAtA.lastModified();
-		FileUtils.write(fileFromAAtA, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(nodeA, fileFromAAtA);
 
@@ -141,7 +141,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		waitTillSynchronizedAdding(fileFromAAtB);
 
 		logger.info("Try to update file '{}' at B.", relativePath);
-		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtB, randomString(), false);
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
 		checkFileIndex(relativePath, HashUtil.hash(fileFromAAtA));
 	}
@@ -161,7 +161,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromAAtA.lastModified();
-		FileUtils.write(fileFromAAtA, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(nodeA, fileFromAAtA);
 
@@ -185,7 +185,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		waitTillSynchronizedAdding(fileFromAAtB);
 
 		logger.info("Try to update file '{}' at B.", relativePath);
-		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtB, randomString(), false);
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
 		checkFileIndex(relativePath, HashUtil.hash(fileFromAAtA));
 	}

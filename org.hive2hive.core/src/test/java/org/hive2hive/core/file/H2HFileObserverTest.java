@@ -14,6 +14,7 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.H2HFileObserver;
 import org.hive2hive.core.api.interfaces.IFileObserver;
 import org.hive2hive.core.api.interfaces.IFileObserverListener;
+import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

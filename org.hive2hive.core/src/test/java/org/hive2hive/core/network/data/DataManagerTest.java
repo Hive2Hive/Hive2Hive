@@ -13,10 +13,10 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -40,9 +40,9 @@ public class DataManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutGetRemove() throws Exception {
-		String data = NetworkTestUtil.randomString();
-		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setContentKey(NetworkTestUtil.randomString()).setNetworkContent(new H2HTestData(data));
+		String data = randomString();
+		Parameters parameters = new Parameters().setLocationKey(randomString())
+				.setContentKey(randomString()).setNetworkContent(new H2HTestData(data));
 
 		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters));
 
@@ -56,20 +56,20 @@ public class DataManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testPutGetRemoveOneLocationKeyMultipleContentKeys() throws Exception {
-		String locationKey = NetworkTestUtil.randomString();
+		String locationKey = randomString();
 
-		String data1 = NetworkTestUtil.randomString();
-		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
+		String data1 = randomString();
+		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(randomString())
 				.setNetworkContent(new H2HTestData(data1));
 		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters1));
 
-		String data2 = NetworkTestUtil.randomString();
-		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
+		String data2 = randomString();
+		Parameters parameters2 = new Parameters().setLocationKey(locationKey).setContentKey(randomString())
 				.setNetworkContent(new H2HTestData(data2));
 		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters2));
 
-		String data3 = NetworkTestUtil.randomString();
-		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setContentKey(NetworkTestUtil.randomString())
+		String data3 = randomString();
+		Parameters parameters3 = new Parameters().setLocationKey(locationKey).setContentKey(randomString())
 				.setNetworkContent(new H2HTestData(data3));
 		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters3));
 
@@ -107,11 +107,11 @@ public class DataManagerTest extends H2HJUnitTest {
 		KeyPair keypairOld = EncryptionUtil.generateRSAKeyPair();
 		KeyPair keypairNew = EncryptionUtil.generateRSAKeyPair();
 
-		H2HTestData data = new H2HTestData(NetworkTestUtil.randomString());
+		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
 		data.setBasedOnKey(Number160.ZERO);
-		Parameters parameters = new Parameters().setLocationKey(NetworkTestUtil.randomString())
-				.setContentKey(NetworkTestUtil.randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data)
+		Parameters parameters = new Parameters().setLocationKey(randomString())
+				.setContentKey(randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data)
 				.setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew).setTTL(data.getTimeToLive())
 				.setHashFlag(true);
 

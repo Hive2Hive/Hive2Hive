@@ -20,9 +20,8 @@ import org.hive2hive.core.events.framework.interfaces.user.IRegisterEvent;
 import org.hive2hive.core.events.util.TestUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -37,7 +36,7 @@ public class UserEventsTest extends H2HJUnitTest {
 	private UserCredentials credentials;
 	private Path rootPath;
 	private H2HWaiter waiter = new H2HWaiter(20);
-	
+
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = UserEventsTest.class;
@@ -48,13 +47,13 @@ public class UserEventsTest extends H2HJUnitTest {
 	public static void endTest() {
 		afterClass();
 	}
-	
+
 	@Before
 	public void before() {
 		node = H2HNode.createNode(NetworkConfiguration.createInitial(), FileConfiguration.createDefault());
 		node.connect();
 		userManager = node.getUserManager();
-		credentials = NetworkTestUtil.generateRandomCredentials();
+		credentials = generateRandomCredentials();
 		rootPath = FileTestUtil.getTempDirectory().toPath();
 	}
 
@@ -62,10 +61,10 @@ public class UserEventsTest extends H2HJUnitTest {
 	public void after() {
 		node.disconnect();
 	}
-	
+
 	@Test
 	public void registerEventsTest() throws NoPeerConnectionException {
-		
+
 		// test success
 		TestUserEventListener listener = new TestUserEventListener() {
 			@Override
@@ -82,7 +81,7 @@ public class UserEventsTest extends H2HJUnitTest {
 		}
 		assertTrue(listener.registerSuccess);
 		assertFalse(listener.registerFailure);
-		
+
 		// test failure (i.e., 2nd registration)
 		listener = new TestUserEventListener() {
 			@Override
@@ -100,10 +99,10 @@ public class UserEventsTest extends H2HJUnitTest {
 		assertTrue(listener.registerFailure);
 		assertFalse(listener.registerSuccess);
 	}
-	
+
 	@Test
 	public void loginEventsTest() throws NoPeerConnectionException, InterruptedException {
-		
+
 		// test failure (i.e., login before register)
 		TestUserEventListener listener = new TestUserEventListener() {
 			@Override
@@ -121,10 +120,10 @@ public class UserEventsTest extends H2HJUnitTest {
 		}
 		assertTrue(listener.loginFailure);
 		assertFalse(listener.loginSuccess);
-		
+
 		// test success
 		userManager.register(credentials).await();
-		
+
 		listener = new TestUserEventListener() {
 			@Override
 			public void onLoginSuccess(ILoginEvent event) {
@@ -141,18 +140,18 @@ public class UserEventsTest extends H2HJUnitTest {
 		}
 		assertTrue(listener.loginSuccess);
 		assertFalse(listener.loginFailure);
-		
+
 	}
-	
+
 	@Test
 	public void logoutEventsTest() throws NoPeerConnectionException, InterruptedException, NoSessionException {
-		
+
 		// TODO test failure
-		
+
 		// test success
 		userManager.register(credentials).await();
 		userManager.login(credentials, rootPath).await();
-		
+
 		TestUserEventListener listener = new TestUserEventListener() {
 			@Override
 			public void onLogoutSuccess(ILogoutEvent event) {
@@ -168,6 +167,6 @@ public class UserEventsTest extends H2HJUnitTest {
 		}
 		assertTrue(listener.logoutSuccess);
 		assertFalse(listener.logoutFailure);
-		
+
 	}
 }

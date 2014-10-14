@@ -2,10 +2,10 @@ package org.hive2hive.core.network.messages.direct.testmessages;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -27,7 +27,7 @@ public class TestDirectMessageWithReplyMaxSending extends DirectRequestMessage {
 
 	@Override
 	public void run() {
-		String secret = NetworkTestUtil.randomString();
+		String secret = H2HJUnitTest.randomString();
 
 		try {
 			networkManager.getDataManager().put(

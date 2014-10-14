@@ -15,15 +15,15 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
-import org.hive2hive.core.processes.util.UseCaseTestUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -68,13 +68,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Create user A.");
 		rootA = FileTestUtil.getTempDirectory();
-		userA = NetworkTestUtil.generateRandomCredentials();
+		userA = generateRandomCredentials();
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
-		userB = NetworkTestUtil.generateRandomCredentials();
+		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 
@@ -111,7 +111,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromAAtA.lastModified();
-		FileUtils.write(fileFromAAtA, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
@@ -136,7 +136,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromAAtB.lastModified();
-		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
@@ -161,7 +161,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromBAtA.lastModified();
-		FileUtils.write(fileFromBAtA, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromBAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
@@ -186,7 +186,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromBAtB.lastModified();
-		FileUtils.write(fileFromBAtB, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromBAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
@@ -211,7 +211,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromAAtA.lastModified();
-		FileUtils.write(fileFromAAtA, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
@@ -236,7 +236,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromAAtB.lastModified();
-		FileUtils.write(fileFromAAtB, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromAAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
@@ -261,7 +261,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at A.", relativePath);
 		long lastUpdated = fileFromBAtA.lastModified();
-		FileUtils.write(fileFromBAtA, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromBAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
@@ -286,7 +286,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Update file '{}' at B.", relativePath);
 		long lastUpdated = fileFromBAtB.lastModified();
-		FileUtils.write(fileFromBAtB, NetworkTestUtil.randomString(), false);
+		FileUtils.write(fileFromBAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 

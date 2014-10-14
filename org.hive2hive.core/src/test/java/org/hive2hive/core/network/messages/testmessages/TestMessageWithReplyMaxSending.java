@@ -1,9 +1,9 @@
 package org.hive2hive.core.network.messages.testmessages;
 
+import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseRequestMessageTest;
@@ -31,7 +31,7 @@ public class TestMessageWithReplyMaxSending extends RoutedRequestMessage {
 
 	@Override
 	public void run() {
-		String secret = NetworkTestUtil.randomString();
+		String secret = H2HJUnitTest.randomString();
 
 		try {
 			networkManager.getDataManager().put(

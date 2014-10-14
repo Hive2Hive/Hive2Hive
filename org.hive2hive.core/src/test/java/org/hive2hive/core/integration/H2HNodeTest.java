@@ -16,9 +16,9 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileTestUtil;
-import org.hive2hive.core.network.NetworkTestUtil;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.After;
@@ -59,7 +59,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@Before
 	public void testRegisterLogin() throws IOException, NoPeerConnectionException {
-		credentials = NetworkTestUtil.generateRandomCredentials();
+		credentials = generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
 		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
