@@ -10,13 +10,13 @@ package org.hive2hive.processframework;
 public class RollbackReason {
 
 	private final String hint;
-	private final Throwable cause;
+	private final Exception cause;
 
 	public RollbackReason(String hint) {
 		this(hint, null);
 	}
 
-	public RollbackReason(String hint, Throwable cause) {
+	public RollbackReason(String hint, Exception cause) {
 		this.hint = hint;
 		this.cause = cause;
 	}
@@ -35,7 +35,7 @@ public class RollbackReason {
 	 * 
 	 * @return The cause (or exception) that caused the process component to fail, if any.
 	 */
-	public Throwable getCause() {
+	public Exception getCause() {
 		return cause;
 	}
 }
