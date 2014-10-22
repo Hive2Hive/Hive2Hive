@@ -22,18 +22,24 @@
 			<version>1.1.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-dht</artifactId>
-			<version>5.0-Alpha24</version>
+			<version>5.0-Alpha26</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-replication</artifactId>
-			<version>5.0-Alpha24</version>
+			<version>5.0-Alpha26</version>
 			<scope>compile</scope>
-		</dependency>-->
+		</dependency>
+		<dependency>
+			<groupId>net.tomp2p</groupId>
+			<artifactId>tomp2p-replication</artifactId>
+			<version>5.0-Alpha26</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -76,6 +82,16 @@
 			<classifier>tests</classifier>
 		</dependency>
 		
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-common</artifactId>
+			<version>4.0.21.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-buffer</artifactId>
+			<version>4.0.21.Final</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>
