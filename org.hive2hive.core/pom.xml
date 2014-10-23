@@ -30,7 +30,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
-			<artifactId>tomp2p-replication</artifactId>
+			<artifactId>tomp2p-core</artifactId>
 			<version>5.0-Alpha26</version>
 			<scope>compile</scope>
 		</dependency>
@@ -85,12 +85,12 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-common</artifactId>
-			<version>4.0.21.Final</version>
+			<version>4.0.23.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-buffer</artifactId>
-			<version>4.0.21.Final</version>
+			<version>4.0.23.Final</version>
 		</dependency>
 	</dependencies>
 

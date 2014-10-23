@@ -15,7 +15,7 @@ public class ProcessExecutionException extends Exception {
 
 	private final RollbackReason reason;
 
-	public ProcessExecutionException(Throwable cause) {
+	public ProcessExecutionException(Exception cause) {
 		this(new RollbackReason(cause.getMessage(), cause));
 	}
 
@@ -23,7 +23,7 @@ public class ProcessExecutionException extends Exception {
 		this(new RollbackReason(hint, null));
 	}
 
-	public ProcessExecutionException(String hint, Throwable cause) {
+	public ProcessExecutionException(String hint, Exception cause) {
 		this(new RollbackReason(hint, cause));
 	}
 
