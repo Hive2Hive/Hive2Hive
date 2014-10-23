@@ -21,6 +21,7 @@ import net.tomp2p.storage.Data;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.BaseVersionedNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
@@ -183,7 +184,11 @@ public class VersionManager<T extends BaseVersionedNetworkContent> {
 		if (status.equals(H2HPutStatus.FAILED)) {
 			throw new PutFailedException("Put failed.");
 		} else if (status.equals(H2HPutStatus.VERSION_FORK)) {
-			throw new PutFailedException("Version fork.");
+			logger.warn("Version fork after put detected. Rejecting put");
+			if (!dataManager.remove(parameters)) {
+				logger.warn("Removing of conflicting version failed.");
+			}
+			throw new VersionForkAfterPutException();
 		} else {
 			// cache digest
 			digestCache.put(parameters.getVersionKey(), new HashSet<Number160>(parameters.getData().basedOnSet()));

@@ -16,6 +16,7 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.network.H2HStorageMemory;
 import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryGetMode;
@@ -114,7 +115,7 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 		}
 	}
 
-	@Test(expected = PutFailedException.class)
+	@Test(expected = VersionForkAfterPutException.class)
 	public void testPutVersionFork() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
