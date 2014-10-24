@@ -1,5 +1,6 @@
 package org.hive2hive.processframework.exceptions;
 
+import org.hive2hive.processframework.ProcessError;
 import org.hive2hive.processframework.RollbackReason;
 
 /**
@@ -15,12 +16,20 @@ public class ProcessExecutionException extends Exception {
 
 	private final RollbackReason reason;
 
+	public ProcessExecutionException(Exception cause, ProcessError failType) {
+		this(new RollbackReason(cause.getMessage(), cause, failType));
+	}
+	
 	public ProcessExecutionException(Exception cause) {
-		this(new RollbackReason(cause.getMessage(), cause));
+		this(new RollbackReason(cause.getMessage(), cause, ProcessError.FAILED));
 	}
 
 	public ProcessExecutionException(String hint) {
 		this(new RollbackReason(hint, null));
+	}
+	
+	public ProcessExecutionException(String hint, ProcessError failType) {
+		this(new RollbackReason(hint, null, failType));
 	}
 
 	public ProcessExecutionException(String hint, Exception cause) {
