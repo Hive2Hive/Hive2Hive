@@ -8,6 +8,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -57,9 +58,14 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			md5 = calculateHash(file);
 		}
 
-		logger.trace("Start updating the user profile where adding the file '{}'.", file.getName());
-		try {
-			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
+		// update the user profile where adding the file
+		while (true) {
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
 
 			// find the parent node using the relative path to navigate there
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
@@ -80,11 +86,20 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 				context.provideIndex(fileIndex);
 			}
 
-			// put the updated user profile
-			profileManager.readyToPut(userProfile, getID());
-			modified = true;
-		} catch (PutFailedException | GetFailedException e) {
-			throw new ProcessExecutionException(e);
+			try {
+				// put the updated user profile
+				profileManager.readyToPut(userProfile, getID());
+
+				// set flag, that an update has been made (for roll back)
+				modified = true;
+			} catch (VersionForkAfterPutException e) {
+				// repeat user profile modification
+				continue;
+			} catch (PutFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
+
+			break;
 		}
 	}
 
@@ -102,20 +117,36 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (modified) {
 			// remove the file from the user profile
-			UserProfile userProfile;
-			try {
-				userProfile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				return;
-			}
-			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
-			Index childNode = parentNode.getChildByName(context.consumeFile().getName());
-			parentNode.removeChild(childNode);
-			try {
-				profileManager.readyToPut(userProfile, getID());
-				modified = false;
-			} catch (PutFailedException e) {
-				// ignore
+			while (true) {
+				UserProfile userProfile;
+				try {
+					userProfile = profileManager.getUserProfile(getID(), true);
+				} catch (GetFailedException e) {
+					logger.warn("Couldn't load user profile for redo.", e);
+					return;
+				}
+
+				// find the parent and child node
+				FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
+				Index childNode = parentNode.getChildByName(context.consumeFile().getName());
+
+				// remove newly added child node
+				parentNode.removeChild(childNode);
+
+				try {
+					// put the user profile
+					profileManager.readyToPut(userProfile, getID());
+
+					// adapt flag
+					modified = false;
+				} catch (VersionForkAfterPutException e) {
+					// repeat user profile modification
+					continue;
+				} catch (PutFailedException e) {
+					logger.warn("Couldn't redo put of user profile.", e);
+					return;
+				}
+				break;
 			}
 		}
 	}

@@ -3,9 +3,11 @@ package org.hive2hive.core.processes.files.add;
 import java.security.PublicKey;
 import java.util.UUID;
 
-import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -34,11 +36,24 @@ public class UploadUserProfileTask extends UserProfileTask {
 
 	@Override
 	public void start() {
-		try {
-			// get the user profile first
+		while (true) {
+			UserProfileManager profileManager;
+			try {
+				profileManager = networkManager.getSession().getProfileManager();
+			} catch (NoSessionException e) {
+				logger.error("No user seems to be logged in.", e);
+				return;
+			}
+
 			String randomPID = UUID.randomUUID().toString();
-			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(randomPID, true);
+			} catch (GetFailedException e) {
+				logger.error("Couldn't load user profile.", e);
+				return;
+			}
+
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
 			if (parentNode == null) {
 				logger.error("Could not process the task because the parent node has not been found.");
@@ -53,8 +68,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 				return;
 			}
 
-			// this task is sent when the file has been added or updated, make the difference between them.
-			// When it's been added, add the index to the user profile, else, simply upldate it's md5 hash
+			// This task is sent when the file has been added or updated, distinguish between them.
+			// When it's been added, add the index to the user profile, else, simply update it's md5 hash
 			// there.
 			if (parentNode.getChildByName(index.getName()) == null) {
 				logger.debug("Newly shared file '{}' received.", index.getName());
@@ -72,12 +87,18 @@ public class UploadUserProfileTask extends UserProfileTask {
 				}
 			}
 
-			// upload the changes
-			profileManager.readyToPut(userProfile, randomPID);
-			logger.debug("Successfully updated the index '{}' in the own user profile.", index.getName());
-		} catch (Hive2HiveException e) {
-			logger.error("Could not add the filenode to the own user profile.", e);
-			return;
+			try {
+				// upload the changes
+				profileManager.readyToPut(userProfile, randomPID);
+				logger.debug("Successfully updated the index '{}' in the own user profile.", index.getName());
+			} catch (VersionForkAfterPutException e) {
+				// repeat modification of the user profile
+				continue;
+			} catch (PutFailedException e) {
+				logger.error("Couldn't put updated user profile.");
+				return;
+			}
+			break;
 		}
 
 		// then we're ready to download the file
