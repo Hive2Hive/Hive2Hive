@@ -11,6 +11,7 @@ import org.hive2hive.core.processes.context.interfaces.ICheckWriteAccessContext;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ParentInUserProfileNotFoundException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,9 @@ public class CheckWriteAccessStep extends ProcessStep {
 		// find the parent node using the relative path to navigate there
 		FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
 
+		if(parentNode == null){
+			throw new ParentInUserProfileNotFoundException("parentNode == null");
+		}
 		// validate the write protection
 		if (!parentNode.canWrite()) {
 			throw new ProcessExecutionException(String.format(
