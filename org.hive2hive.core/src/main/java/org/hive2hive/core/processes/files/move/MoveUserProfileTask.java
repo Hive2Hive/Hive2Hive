@@ -5,12 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
-import java.util.UUID;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileMoveEvent;
-import org.hive2hive.core.exceptions.Hive2HiveException;
+import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -25,8 +27,7 @@ import org.slf4j.LoggerFactory;
  * moved such a way that user A still has access to the file (probably the file has been moved within the same
  * shared folder or the file has been renamed).
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class MoveUserProfileTask extends UserProfileTask implements IFileEventGenerator {
 
@@ -50,58 +51,83 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 
 	@Override
 	public void start() {
+		H2HSession session;
 		try {
-			H2HSession session = networkManager.getSession();
-			String randomPID = UUID.randomUUID().toString();
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
+			logger.error("No user seems to be logged in.", e);
+			return;
+		}
+
+		FolderIndex newParentNode = null;
+		FolderIndex oldParentNode = null;
+		while (true) {
 			UserProfileManager profileManager = session.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
+
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getId(), true);
+			} catch (GetFailedException e) {
+				logger.error("Couldn't get user profile.", e);
+				return;
+			}
 
 			// get and check the file nodes to be rearranged
-			FolderIndex oldParent = (FolderIndex) userProfile.getFileById(oldParentKey);
-			if (oldParent == null) {
+			oldParentNode = (FolderIndex) userProfile.getFileById(oldParentKey);
+			if (oldParentNode == null) {
 				logger.error("Could not find the old parent.");
 				return;
-			} else if (!oldParent.canWrite(sender)) {
+			} else if (!oldParentNode.canWrite(sender)) {
 				logger.error("User was not allowed to change the source directory.");
 				return;
 			}
 
-			Index child = oldParent.getChildByName(sourceFileName);
-			if (child == null) {
+			Index movedNode = oldParentNode.getChildByName(sourceFileName);
+			if (movedNode == null) {
 				logger.error("File node that should be moved not found.");
 				return;
 			}
 
-			FolderIndex newParent = (FolderIndex) userProfile.getFileById(newParentKey);
-			if (newParent == null) {
+			newParentNode = (FolderIndex) userProfile.getFileById(newParentKey);
+			if (newParentNode == null) {
 				logger.error("Could not find the new parent.");
 				return;
-			} else if (!newParent.canWrite(sender)) {
+			} else if (!newParentNode.canWrite(sender)) {
 				logger.error("User was not allowed to change the destination directory.");
 				return;
 			}
 
-			// rearrange
-			oldParent.removeChild(child);
-			newParent.addChild(child);
-			child.setParent(newParent);
+			// relink
+			oldParentNode.removeChild(movedNode);
+			newParentNode.addChild(movedNode);
+			movedNode.setParent(newParentNode);
 
 			// change the child's name
-			child.setName(destFileName);
+			movedNode.setName(destFileName);
 
-			profileManager.readyToPut(userProfile, randomPID);
+			try {
+				profileManager.readyToPut(userProfile, getId());
+			} catch (VersionForkAfterPutException e) {
+				continue;
+			} catch (PutFailedException e) {
+				logger.error("Couldn't put updated user profile.", e);
+				return;
+			}
+			break;
+		}
 
-			// event
-			Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParent);
-			Path src = Paths.get(srcParentPath.toString(), sourceFileName);
-			Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
-			Path dst = Paths.get(dstParentPath.toString(), destFileName);
-			networkManager.getEventBus().publish(
-					new FileMoveEvent(src, dst, Files.isRegularFile(src)));
+		// event
+		Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParentNode);
+		Path src = Paths.get(srcParentPath.toString(), sourceFileName);
+		Path dstParentPath = FileUtil.getPath(session.getRoot(), newParentNode);
+		Path dst = Paths.get(dstParentPath.toString(), destFileName);
+		networkManager.getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
+
+		try {
 			// move the file on disk
-			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
-		} catch (Hive2HiveException | IOException e) {
-			logger.error("Could not process the user profile task.", e);
+			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParentNode, newParentNode);
+		} catch (IOException e) {
+			logger.error("Couldn't move file on disk.", e);
 		}
 	}
 }
