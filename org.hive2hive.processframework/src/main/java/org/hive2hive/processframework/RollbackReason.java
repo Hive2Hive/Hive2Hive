@@ -11,14 +11,20 @@ public class RollbackReason {
 
 	private final String hint;
 	private final Exception cause;
+	private final ProcessError errorType;
 
 	public RollbackReason(String hint) {
 		this(hint, null);
 	}
 
 	public RollbackReason(String hint, Exception cause) {
+		this(hint, cause, ProcessError.FAILED);
+	}
+	
+	public RollbackReason(String hint, Exception cause, ProcessError errorType) {
 		this.hint = hint;
 		this.cause = cause;
+		this.errorType = errorType;
 	}
 
 	/**
@@ -37,5 +43,10 @@ public class RollbackReason {
 	 */
 	public Exception getCause() {
 		return cause;
+	}
+
+	
+	public ProcessError getErrorType(){
+		return errorType;
 	}
 }
