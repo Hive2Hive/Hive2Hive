@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import net.tomp2p.peers.Number160;
 
@@ -47,13 +48,19 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 
 	protected final String sender;
 	private final KeyPair protectionKey;
-	private Number160 contentKey;
+	private final String id;
+	private final Number160 contentKey;
 	protected NetworkManager networkManager;
 
 	public UserProfileTask(String sender) {
 		this.sender = sender;
 		this.protectionKey = EncryptionUtil.generateRSAKeyPair();
-		generateContentKey();
+		this.id = UUID.randomUUID().toString();
+
+		// get the current time
+		long timestamp = new Date().getTime();
+		// use time stamp value to create a content key
+		contentKey = new Number160(timestamp);
 	}
 
 	/**
@@ -61,14 +68,8 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 	 */
 	public abstract void start();
 
-	/**
-	 * Creates a key which is a time stamp (taking current time).
-	 */
-	private void generateContentKey() {
-		// get the current time
-		long timestamp = new Date().getTime();
-		// use time stamp value to create a content key
-		contentKey = new Number160(timestamp);
+	public String getId() {
+		return id;
 	}
 
 	public Number160 getContentKey() {
