@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.files.move;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
@@ -13,6 +12,7 @@ import org.hive2hive.core.events.implementations.FileMoveEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -47,7 +47,7 @@ public class MoveNotificationMessage extends BaseDirectMessage implements IFileE
 
 	@Override
 	public void run() {
-		logger.debug("Notification message received.");
+		logger.debug("Move file notification message received.");
 
 		H2HSession session;
 		try {
@@ -67,15 +67,16 @@ public class MoveNotificationMessage extends BaseDirectMessage implements IFileE
 			return;
 		}
 
-		Index oldParent = userProfile.getFileById(oldParentKey);
-		Index newParent = userProfile.getFileById(newParentKey);
+		Index oldParentNode = userProfile.getFileById(oldParentKey);
+		Index newParentNode = userProfile.getFileById(newParentKey);
+		Index movedNode = ((FolderIndex) newParentNode).getChildByName(destFileName);
 
 		// trigger event
-		Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParent);
+		Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParentNode);
 		Path src = Paths.get(srcParentPath.toString(), sourceFileName);
-		Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
+		Path dstParentPath = FileUtil.getPath(session.getRoot(), newParentNode);
 		Path dst = Paths.get(dstParentPath.toString(), destFileName);
-		getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
+		getEventBus().publish(new FileMoveEvent(src, dst, movedNode.isFile()));
 	}
 
 }

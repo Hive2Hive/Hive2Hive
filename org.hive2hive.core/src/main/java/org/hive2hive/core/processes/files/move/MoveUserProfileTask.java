@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.files.move;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
@@ -10,6 +9,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileMoveEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
@@ -19,6 +19,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,7 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 
 		FolderIndex newParentNode = null;
 		FolderIndex oldParentNode = null;
+		Index movedNode = null;
 		int forkCounter = 0;
 		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
@@ -86,7 +88,7 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 				return;
 			}
 
-			Index movedNode = oldParentNode.getChildByName(sourceFileName);
+			movedNode = oldParentNode.getChildByName(sourceFileName);
 			if (movedNode == null) {
 				logger.error("File node that should be moved not found.");
 				return;
@@ -135,11 +137,20 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 			break;
 		}
 
+		try {
+			// notify own other clients
+			notifyOtherClients(new MoveNotificationMessageFactory(sourceFileName, destFileName, oldParentKey, newParentKey));
+			logger.debug("Notified other clients that a file has been moved by another user.");
+		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
+			logger.error("Could not notify other clients of me about the moved file.", e);
+		}
+
 		// trigger event
 		Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParentNode);
 		Path src = Paths.get(srcParentPath.toString(), sourceFileName);
 		Path dstParentPath = FileUtil.getPath(session.getRoot(), newParentNode);
 		Path dst = Paths.get(dstParentPath.toString(), destFileName);
-		networkManager.getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
+		networkManager.getEventBus().publish(new FileMoveEvent(src, dst, movedNode.isFile()));
 	}
+
 }
