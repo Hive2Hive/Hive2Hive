@@ -31,14 +31,14 @@ public class UploadUserProfileTask extends UserProfileTask {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadUserProfileTask.class);
 
-	private final Index index;
+	private final Index addedFileIndex;
 	private final PublicKey parentKey;
 
 	private final int forkLimit = 2;
 
 	public UploadUserProfileTask(String sender, Index index, PublicKey parentKey) {
 		super(sender);
-		this.index = index;
+		this.addedFileIndex = index;
 		this.parentKey = parentKey;
 	}
 
@@ -82,18 +82,18 @@ public class UploadUserProfileTask extends UserProfileTask {
 			// This task is sent when the file has been added or updated, distinguish between them.
 			// When it's been added, add the index to the user profile, else, simply update it's md5 hash
 			// there.
-			if (parentNode.getChildByName(index.getName()) == null) {
-				logger.debug("Newly shared file '{}' received.", index.getName());
+			if (parentNode.getChildByName(addedFileIndex.getName()) == null) {
+				logger.debug("Newly shared file '{}' received.", addedFileIndex.getName());
 				// file is new, link parent and new child
-				parentNode.addChild(index);
-				index.setParent(parentNode);
+				parentNode.addChild(addedFileIndex);
+				addedFileIndex.setParent(parentNode);
 			} else {
 				// copy the md5 parameter of the received file
-				Index existing = parentNode.getChildByName(index.getName());
-				if (existing.isFile() && index.isFile()) {
-					logger.debug("File update in a shared folder received: '{}'.", index.getName());
+				Index existing = parentNode.getChildByName(addedFileIndex.getName());
+				if (existing.isFile() && addedFileIndex.isFile()) {
+					logger.debug("File update in a shared folder received: '{}'.", addedFileIndex.getName());
 					FileIndex existingFile = (FileIndex) existing;
-					FileIndex newFile = (FileIndex) index;
+					FileIndex newFile = (FileIndex) addedFileIndex;
 					existingFile.setMD5(newFile.getMD5());
 				}
 			}
@@ -101,7 +101,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 			try {
 				// upload the changes
 				profileManager.readyToPut(userProfile, getId());
-				logger.debug("Successfully updated the index '{}' in the own user profile.", index.getName());
+				logger.debug("Successfully updated the index '{}' in the own user profile.", addedFileIndex.getName());
 			} catch (VersionForkAfterPutException e) {
 				if (forkCounter++ > forkLimit) {
 					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
@@ -126,7 +126,7 @@ public class UploadUserProfileTask extends UserProfileTask {
 
 			try {
 				// notify own other clients
-				notifyOtherClients(new UploadNotificationMessageFactory(index, parentKey));
+				notifyOtherClients(new UploadNotificationMessageFactory(addedFileIndex, parentKey));
 				logger.debug("Notified other clients that a file has been updated by another user.");
 			} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
 					| NoSessionException e) {
@@ -134,8 +134,8 @@ public class UploadUserProfileTask extends UserProfileTask {
 			}
 
 			// trigger event
-			Path addedFile = FileUtil.getPath(session.getRoot(), index);
-			networkManager.getEventBus().publish(new FileAddEvent(addedFile, index.isFile()));
+			Path addedFilePath = FileUtil.getPath(session.getRoot(), addedFileIndex);
+			networkManager.getEventBus().publish(new FileAddEvent(addedFilePath, addedFileIndex.isFile()));
 
 			break;
 		}
