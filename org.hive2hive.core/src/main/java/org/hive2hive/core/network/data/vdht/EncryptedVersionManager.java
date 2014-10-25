@@ -218,7 +218,8 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> {
 			if (status.equals(H2HPutStatus.FAILED)) {
 				throw new PutFailedException("Put failed.");
 			} else if (status.equals(H2HPutStatus.VERSION_FORK)) {
-				throw new PutFailedException("Version fork.");
+				throw new PutFailedException("EncryptedVersionManager: Version fork.");
+				
 			} else {
 				networkContent.setVersionKey(encrypted.getVersionKey());
 				networkContent.setBasedOnKey(encrypted.getBasedOnKey());

@@ -183,7 +183,7 @@ public class VersionManager<T extends BaseVersionedNetworkContent> {
 		if (status.equals(H2HPutStatus.FAILED)) {
 			throw new PutFailedException("Put failed.");
 		} else if (status.equals(H2HPutStatus.VERSION_FORK)) {
-			throw new PutFailedException("Version fork.");
+			throw new PutFailedException("VersionManager: Version fork.");
 		} else {
 			// cache digest
 			digestCache.put(parameters.getVersionKey(), new HashSet<Number160>(parameters.getData().basedOnSet()));
