@@ -1,32 +1,40 @@
 package org.hive2hive.core.processes.files.add;
 
+import java.nio.file.Path;
 import java.security.PublicKey;
-import java.util.UUID;
+import java.util.Random;
 
+import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.implementations.FileAddEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Nico, Seppi
+ */
 public class UploadUserProfileTask extends UserProfileTask {
 
 	private static final long serialVersionUID = -4568985873058024202L;
+
 	private static final Logger logger = LoggerFactory.getLogger(UploadUserProfileTask.class);
 
 	private final Index index;
 	private final PublicKey parentKey;
+
+	private final int forkLimit = 2;
 
 	public UploadUserProfileTask(String sender, Index index, PublicKey parentKey) {
 		super(sender);
@@ -36,19 +44,22 @@ public class UploadUserProfileTask extends UserProfileTask {
 
 	@Override
 	public void start() {
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
-			UserProfileManager profileManager;
+			H2HSession session;
 			try {
-				profileManager = networkManager.getSession().getProfileManager();
+				session = networkManager.getSession();
 			} catch (NoSessionException e) {
 				logger.error("No user seems to be logged in.", e);
 				return;
 			}
 
-			String randomPID = UUID.randomUUID().toString();
+			UserProfileManager profileManager = session.getProfileManager();
+
 			UserProfile userProfile;
 			try {
-				userProfile = profileManager.getUserProfile(randomPID, true);
+				userProfile = profileManager.getUserProfile(getId(), true);
 			} catch (GetFailedException e) {
 				logger.error("Couldn't load user profile.", e);
 				return;
@@ -89,42 +100,45 @@ public class UploadUserProfileTask extends UserProfileTask {
 
 			try {
 				// upload the changes
-				profileManager.readyToPut(userProfile, randomPID);
+				profileManager.readyToPut(userProfile, getId());
 				logger.debug("Successfully updated the index '{}' in the own user profile.", index.getName());
 			} catch (VersionForkAfterPutException e) {
-				// repeat modification of the user profile
-				continue;
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
 			} catch (PutFailedException e) {
 				logger.error("Couldn't put updated user profile.");
 				return;
 			}
+
+			try {
+				// notify own other clients
+				notifyOtherClients(new UploadNotificationMessageFactory(index, parentKey));
+				logger.debug("Notified other clients that a file has been updated by another user.");
+			} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
+					| NoSessionException e) {
+				logger.error("Could not notify other clients of me about the new file.", e);
+			}
+
+			// trigger event
+			Path addedFile = FileUtil.getPath(session.getRoot(), index);
+			networkManager.getEventBus().publish(new FileAddEvent(addedFile, index.isFile()));
+
 			break;
 		}
-
-		// then we're ready to download the file
-		startDownload();
-
-		// notify own other clients
-		startNotification();
 	}
 
-	private void startDownload() {
-		try {
-			ProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(index.getFilePublicKey(),
-					networkManager);
-			logger.debug("Start downloading the file '{}'.", index.getFullPath());
-			process.start();
-		} catch (NoSessionException | InvalidProcessStateException e) {
-			logger.error("Could not start the download of the newly shared file.");
-		}
-	}
-
-	private void startNotification() {
-		try {
-			notifyOtherClients(new UploadNotificationMessageFactory(index, parentKey));
-			logger.debug("Notified other clients that a file has been updated by another user.");
-		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
-			logger.error("Could not notify other clients of me about the new file.", e);
-		}
-	}
 }

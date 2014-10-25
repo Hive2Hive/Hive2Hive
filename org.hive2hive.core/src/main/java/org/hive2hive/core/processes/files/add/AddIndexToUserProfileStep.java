@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
-import java.security.PublicKey;
+import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
@@ -35,8 +35,9 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
 
+	private final int forkLimit = 2;
+
 	// used for rollback
-	private PublicKey parentKey;
 	private boolean modified = false;
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
@@ -59,6 +60,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 		}
 
 		// update the user profile where adding the file
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
 			UserProfile userProfile;
 			try {
@@ -76,8 +79,6 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			}
 
 			// create a file tree node in the user profile
-			parentKey = parentNode.getFilePublicKey();
-			// use the file keys generated above is stored
 			if (file.isDirectory()) {
 				FolderIndex folderIndex = new FolderIndex(parentNode, metaKeys, file.getName());
 				context.provideIndex(folderIndex);
@@ -93,8 +94,22 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 				// set flag, that an update has been made (for roll back)
 				modified = true;
 			} catch (VersionForkAfterPutException e) {
-				// repeat user profile modification
-				continue;
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
 			} catch (PutFailedException e) {
 				throw new ProcessExecutionException(e);
 			}
@@ -116,7 +131,12 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (modified) {
+			File file = context.consumeFile();
+			Path root = context.consumeRoot();
+
 			// remove the file from the user profile
+			int forkCounter = 0;
+			int forkWaitTime = new Random().nextInt(1000) + 500;
 			while (true) {
 				UserProfile userProfile;
 				try {
@@ -127,8 +147,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 				}
 
 				// find the parent and child node
-				FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
-				Index childNode = parentNode.getChildByName(context.consumeFile().getName());
+				FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
+				Index childNode = parentNode.getChildByName(file.getName());
 
 				// remove newly added child node
 				parentNode.removeChild(childNode);
@@ -140,8 +160,22 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 					// adapt flag
 					modified = false;
 				} catch (VersionForkAfterPutException e) {
-					// repeat user profile modification
-					continue;
+					if (forkCounter++ > forkLimit) {
+						logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+					} else {
+						logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+						// exponential back off waiting
+						try {
+							Thread.sleep(forkWaitTime);
+						} catch (InterruptedException e1) {
+							// ignore
+						}
+						forkWaitTime = forkWaitTime * 2;
+
+						// retry update of user profile
+						continue;
+					}
 				} catch (PutFailedException e) {
 					logger.warn("Couldn't redo put of user profile.", e);
 					return;
