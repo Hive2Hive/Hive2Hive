@@ -1,11 +1,9 @@
 package org.hive2hive.core.processes.files.move;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
-import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -26,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * This message is sent after a file has been moved and the receiver had access to the file before and after
  * movement.
  * 
- * @author Nico
+ * @author Nico, Seppi
  */
 public class MoveNotificationMessage extends BaseDirectMessage implements IFileEventGenerator {
 
@@ -50,30 +48,34 @@ public class MoveNotificationMessage extends BaseDirectMessage implements IFileE
 	@Override
 	public void run() {
 		logger.debug("Notification message received.");
-		move();
-	}
 
-	private void move() {
+		H2HSession session;
 		try {
-			H2HSession session = networkManager.getSession();
-			UserProfileManager profileManager = session.getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(UUID.randomUUID().toString(), false);
-
-			Index oldParent = userProfile.getFileById(oldParentKey);
-			Index newParent = userProfile.getFileById(newParentKey);
-			
-			// event
-			Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParent);
-			Path src = Paths.get(srcParentPath.toString(), sourceFileName);
-			Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
-			Path dst = Paths.get(dstParentPath.toString(), destFileName);
-			getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
-			
-			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParent, newParent);
-		} catch (NoSessionException | GetFailedException | IOException e) {
-			logger.error("Could not process the notification message.", e);
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
+			logger.error("No user seems to be logged in.");
+			return;
 		}
 
+		UserProfileManager profileManager = session.getProfileManager();
+
+		UserProfile userProfile;
+		try {
+			userProfile = profileManager.getUserProfile(getMessageID(), false);
+		} catch (GetFailedException e) {
+			logger.error("Couldn't load user profile.", e);
+			return;
+		}
+
+		Index oldParent = userProfile.getFileById(oldParentKey);
+		Index newParent = userProfile.getFileById(newParentKey);
+
+		// trigger event
+		Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParent);
+		Path src = Paths.get(srcParentPath.toString(), sourceFileName);
+		Path dstParentPath = FileUtil.getPath(session.getRoot(), newParent);
+		Path dst = Paths.get(dstParentPath.toString(), destFileName);
+		getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
 	}
 
 }

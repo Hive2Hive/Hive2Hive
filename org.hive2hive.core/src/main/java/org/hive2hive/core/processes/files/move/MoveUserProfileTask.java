@@ -1,10 +1,10 @@
 package org.hive2hive.core.processes.files.move;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
+import java.util.Random;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
@@ -40,6 +40,8 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 	private final PublicKey oldParentKey;
 	private final PublicKey newParentKey;
 
+	private final int forkLimit = 2;
+
 	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName, PublicKey oldParentKey,
 			PublicKey newParentKey) {
 		super(sender);
@@ -61,6 +63,8 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 
 		FolderIndex newParentNode = null;
 		FolderIndex oldParentNode = null;
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
 			UserProfileManager profileManager = session.getProfileManager();
 
@@ -108,7 +112,22 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 			try {
 				profileManager.readyToPut(userProfile, getId());
 			} catch (VersionForkAfterPutException e) {
-				continue;
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
 			} catch (PutFailedException e) {
 				logger.error("Couldn't put updated user profile.", e);
 				return;
@@ -116,18 +135,11 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 			break;
 		}
 
-		// event
+		// trigger event
 		Path srcParentPath = FileUtil.getPath(session.getRoot(), oldParentNode);
 		Path src = Paths.get(srcParentPath.toString(), sourceFileName);
 		Path dstParentPath = FileUtil.getPath(session.getRoot(), newParentNode);
 		Path dst = Paths.get(dstParentPath.toString(), destFileName);
 		networkManager.getEventBus().publish(new FileMoveEvent(src, dst, Files.isRegularFile(src)));
-
-		try {
-			// move the file on disk
-			FileUtil.moveFile(session.getRoot(), sourceFileName, destFileName, oldParentNode, newParentNode);
-		} catch (IOException e) {
-			logger.error("Couldn't move file on disk.", e);
-		}
 	}
 }
