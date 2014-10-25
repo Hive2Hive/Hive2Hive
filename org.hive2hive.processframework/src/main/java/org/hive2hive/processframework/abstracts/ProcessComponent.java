@@ -61,7 +61,10 @@ public abstract class ProcessComponent implements IProcessComponent {
 			doExecute();
 			succeed();
 		} catch (ProcessExecutionException e) {
+			logger.warn("Catched ProcessExecutionException and Reason: {}", e.getRollbackReason().getHint());
 			cancel(e.getRollbackReason());
+		} catch (Exception e){
+			logger.warn("Catched {}", e.getClass());
 		}
 
 		return this;

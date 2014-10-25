@@ -19,6 +19,7 @@ import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.PutToDHTException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,8 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			profileManager.readyToPut(userProfile, getID());
 			modified = true;
 		} catch (PutFailedException | GetFailedException e) {
-			throw new ProcessExecutionException(e);
+			logger.debug("Catched PutFailedException or GetFailedException in AddIndexToUserProfileStep! {} {} {}", e.getMessage(), e.getClass(), e.getStackTrace().toString());
+			throw new PutToDHTException(e);
 		}
 	}
 
@@ -116,6 +118,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 				modified = false;
 			} catch (PutFailedException e) {
 				// ignore
+				logger.debug("Catched PutFailedException in AddIndexToUserProfileStep! {}", e.getMessage());
 			}
 		}
 	}

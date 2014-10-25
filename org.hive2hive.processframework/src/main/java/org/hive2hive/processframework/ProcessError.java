@@ -2,7 +2,7 @@ package org.hive2hive.processframework;
 
 public enum ProcessError {
 	
-	
+	FAILED, //TODO remove as soon as possible, to general.
 	
 	PUT_FAILED,
 	
@@ -10,5 +10,6 @@ public enum ProcessError {
 	
 	PARENT_IN_USERFILE_NOT_FOUND,
 	
-	FAILED
+	VERSION_FORK //unused atm as PutFailedException throws are not distinguished
+
 }

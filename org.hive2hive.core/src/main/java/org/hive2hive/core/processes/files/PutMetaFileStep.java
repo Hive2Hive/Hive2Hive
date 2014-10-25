@@ -67,6 +67,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new ProcessExecutionException("Meta file could not be encrypted.", e);
 		} catch (PutFailedException e) {
+			logger.debug("Catched PutFailedException in PutMetaFileStep! {}", e.getMessage());
 			throw new ProcessExecutionException(e);
 		}
 	}
