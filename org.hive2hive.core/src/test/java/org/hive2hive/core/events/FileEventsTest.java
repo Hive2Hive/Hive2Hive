@@ -16,7 +16,6 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileDeleteEvent;
-import org.hive2hive.core.events.framework.interfaces.file.IFileDownloadEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileMoveEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -178,12 +177,6 @@ public class FileEventsTest extends H2HJUnitTest {
 		@Override
 		@Handler
 		public void onFileDelete(IFileDeleteEvent fileEvent) {
-			events.add(fileEvent);
-		}
-
-		@Override
-		@Handler
-		public void onFileDownload(IFileDownloadEvent fileEvent) {
 			events.add(fileEvent);
 		}
 

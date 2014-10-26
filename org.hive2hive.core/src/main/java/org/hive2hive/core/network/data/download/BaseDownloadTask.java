@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
-import org.hive2hive.core.events.implementations.FileDownloadEvent;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -147,7 +146,6 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 			try {
 				// reassembly
 				List<File> fileParts = Arrays.asList(downloadedParts);
-				eventBus.publish(new FileDownloadEvent(destination.toPath(), true));
 				FileChunkUtil.reassembly(fileParts, destination);
 				logger.debug("File {} has successfully been reassembled", getDestinationName());
 

@@ -27,4 +27,5 @@ public class DownloadTaskDHT extends BaseDownloadTask {
 	public boolean isDirectDownload() {
 		return false;
 	}
+
 }

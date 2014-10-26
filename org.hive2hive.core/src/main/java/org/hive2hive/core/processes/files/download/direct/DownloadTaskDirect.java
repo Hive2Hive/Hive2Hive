@@ -96,4 +96,5 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 		this.locationLocker = new CountDownLatch(1);
 		this.locations = null;
 	}
+
 }
