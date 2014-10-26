@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileAddEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class UploadNotificationMessage extends BaseDirectMessage {
+public class UploadNotificationMessage extends BaseDirectMessage implements IFileEventGenerator{
 
 	private static final long serialVersionUID = -695268345354561544L;
 

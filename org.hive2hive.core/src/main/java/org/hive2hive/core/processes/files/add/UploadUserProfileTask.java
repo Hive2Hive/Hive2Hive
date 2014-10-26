@@ -5,6 +5,7 @@ import java.security.PublicKey;
 import java.util.Random;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileAddEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Nico, Seppi
  */
-public class UploadUserProfileTask extends UserProfileTask {
+public class UploadUserProfileTask extends UserProfileTask implements IFileEventGenerator{
 
 	private static final long serialVersionUID = -4568985873058024202L;
 
