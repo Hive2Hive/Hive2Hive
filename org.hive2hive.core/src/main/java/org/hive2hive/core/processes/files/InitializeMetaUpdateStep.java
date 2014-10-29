@@ -81,9 +81,11 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 		// each meta document gets own context
 		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(context.consumeOldProtectionKeys(),
 				context.consumeNewProtectionKeys(), index.getFilePublicKey(), index);
-		sequential.add(new File2MetaFileComponent(index, metaContext, dataManager));
+
+		sequential.add(new GetMetaFileStep(metaContext, dataManager));
 		sequential.add(new ChangeProtectionKeysStep(metaContext, dataManager));
 		sequential.add(new InitializeChunkUpdateStep(metaContext, dataManager));
+
 		return sequential;
 	}
 }

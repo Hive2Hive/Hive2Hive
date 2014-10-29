@@ -37,7 +37,7 @@ public class CleanupChunksStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		List<MetaChunk> chunksToDelete = context.getChunksToDelete();
-		KeyPair protectionKeys = context.consumeProtectionKeys();
+		KeyPair protectionKeys = context.consumeChunkProtectionKeys();
 
 		logger.debug("Cleaning {} old file chunks.", chunksToDelete.size());
 		int counter = 0;

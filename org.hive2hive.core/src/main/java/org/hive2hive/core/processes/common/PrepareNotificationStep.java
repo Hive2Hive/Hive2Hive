@@ -7,7 +7,7 @@ import java.util.Set;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.processes.context.interfaces.IPrepareNotificationContext;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -20,9 +20,9 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  */
 public class PrepareNotificationStep extends ProcessStep {
 
-	private final IPrepareNotificationContext context;
+	private final IUploadContext context;
 
-	public PrepareNotificationStep(IPrepareNotificationContext context) {
+	public PrepareNotificationStep(IUploadContext context) {
 		this.context = context;
 	}
 

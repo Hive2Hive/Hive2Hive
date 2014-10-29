@@ -51,7 +51,7 @@ public class GetFileKeysStep extends ProcessStep {
 		}
 
 		// set the corresponding content protection keys
-		context.provideProtectionKeys(fileNode.getProtectionKeys());
+		context.provideChunkProtectionKeys(fileNode.getProtectionKeys());
 		context.provideMetaFileEncryptionKeys(fileNode.getFileKeys());
 	}
 }

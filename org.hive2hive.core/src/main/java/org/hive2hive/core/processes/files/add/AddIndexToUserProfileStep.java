@@ -3,7 +3,6 @@ package org.hive2hive.core.processes.files.add;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.KeyPair;
 import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -50,9 +49,6 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 		File file = context.consumeFile();
 		Path root = context.consumeRoot();
 
-		// pre-calculate the meta keys because this may take a while
-		KeyPair metaKeys = context.generateOrGetMetaKeys();
-
 		// pre-calculate the md5 hash because this may take a while
 		byte[] md5 = null;
 		if (file.isFile()) {
@@ -80,10 +76,11 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 
 			// create a file tree node in the user profile
 			if (file.isDirectory()) {
-				FolderIndex folderIndex = new FolderIndex(parentNode, metaKeys, file.getName());
+				FolderIndex folderIndex = new FolderIndex(parentNode, context.consumeMetaFileEncryptionKeys(),
+						file.getName());
 				context.provideIndex(folderIndex);
 			} else {
-				FileIndex fileIndex = new FileIndex(parentNode, metaKeys, file.getName(), md5);
+				FileIndex fileIndex = new FileIndex(parentNode, context.consumeMetaFileEncryptionKeys(), file.getName(), md5);
 				context.provideIndex(fileIndex);
 			}
 

@@ -15,6 +15,7 @@ import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -75,28 +76,38 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 	private Index updateUserProfile(UserProfileManager profileManager) throws GetFailedException, PutFailedException {
 		String randomPID = UUID.randomUUID().toString();
 
-		UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
-		Index toDelete = userProfile.getFileById(fileKey);
-		if (toDelete == null) {
-			logger.warn("Could not delete the file because it does not exist anymore.");
-			return null;
-		}
+		Index toDelete = null;
+		while (true) {
+			UserProfile userProfile = profileManager.getUserProfile(randomPID, true);
+			toDelete = userProfile.getFileById(fileKey);
+			if (toDelete == null) {
+				logger.warn("Could not delete the file because it does not exist anymore.");
+				return null;
+			}
 
-		FolderIndex parent = toDelete.getParent();
-		if (parent == null) {
-			logger.error("Got task to delete the root, which is invalid.");
-			return null;
-		}
+			FolderIndex parent = toDelete.getParent();
+			if (parent == null) {
+				logger.error("Got task to delete the root, which is invalid.");
+				return null;
+			}
 
-		// check write permision
-		if (!parent.canWrite(sender)) {
-			logger.error("User without WRITE permissions tried to delete a file.");
-			return null;
-		}
+			// check write permision
+			if (!parent.canWrite(sender)) {
+				logger.error("User without WRITE permissions tried to delete a file.");
+				return null;
+			}
 
-		parent.removeChild(toDelete);
-		profileManager.readyToPut(userProfile, randomPID);
-		logger.debug("Removed the dead link from the user profile.");
+			parent.removeChild(toDelete);
+
+			try {
+				profileManager.readyToPut(userProfile, randomPID);
+				logger.debug("Removed the dead link from the user profile.");
+			} catch (VersionForkAfterPutException e) {
+				continue;
+			}
+
+			break;
+		}
 		return toDelete;
 	}
 
@@ -108,7 +119,7 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 	 */
 	private void removeFileOnDisk(Path root, Index toDelete) {
 		Path path = FileUtil.getPath(root, toDelete);
-		
+
 		if (path == null) {
 			logger.error("Could not find the file to delete.");
 		}
