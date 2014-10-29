@@ -31,6 +31,8 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 	private final UpdateFileProcessContext context;
 	private final UserProfileManager profileManager;
 
+	private final int forkLimit = 2;
+
 	private byte[] originalMD5;
 
 	public UpdateMD5inUserProfileStep(UpdateFileProcessContext context, UserProfileManager profileManager) {
@@ -48,6 +50,8 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 			throw new ProcessExecutionException("The new MD5 hash for the user profile could not be generated.", e);
 		}
 
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
 			try {
 				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
@@ -70,7 +74,22 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 				// store for notification
 				context.provideIndex(index);
 			} catch (VersionForkAfterPutException e) {
-				continue;
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
 			} catch (GetFailedException | PutFailedException e) {
 				throw new ProcessExecutionException(e);
 			}
@@ -82,26 +101,46 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		BaseMetaFile metaFile = context.consumeMetaFile();
-			
-			int forkCounter = 0;
-			int forkWaitTime = new Random().nextInt(1000) + 500;
-			while (true) {
-				UserProfile userProfile;
-				try {
-					userProfile = profileManager.getUserProfile(getID(), true);
-				} catch (GetFailedException e) {
-					logger.error("Couldn't get user profile and redo modifications.");
-					return;
-				}
 
-				FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
-				fileNode.setMD5(originalMD5);
-
-				try {
-					profileManager.readyToPut(userProfile, getID());
-				} catch (Exception e) {
-					// ignore
-				}
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
+		while (true) {
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				logger.error("Couldn't get user profile and redo modifications.");
+				return;
 			}
+
+			FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
+			fileNode.setMD5(originalMD5);
+
+			try {
+				profileManager.readyToPut(userProfile, getID());
+			} catch (VersionForkAfterPutException e) {
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
+			} catch (PutFailedException e) {
+				logger.warn("Couldn't redo put of user profile.", e);
+				return;
+			}
+
+			break;
+		}
 	}
 }
