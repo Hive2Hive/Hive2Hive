@@ -34,11 +34,14 @@ public class ValidateFileSizeStep extends ProcessStep {
 			// ok
 			return;
 		}
-		
+
 		// validate the file size
 		IFileConfiguration config = context.consumeFileConfiguration();
 		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {
 			logger.debug("File " + file.getName() + " is a 'large file'.");
+			if (!context.allowLargeFile()) {
+				throw new ProcessExecutionException("Large files are not allowed (" + file.getName() + ").");
+			}
 			context.setLargeFile(true);
 		} else {
 			logger.debug("File " + file.getName() + " is a 'small file'.");
