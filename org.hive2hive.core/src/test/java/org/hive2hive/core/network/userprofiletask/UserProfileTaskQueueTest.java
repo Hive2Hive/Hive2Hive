@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -37,8 +36,8 @@ import org.hive2hive.core.processes.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -55,7 +54,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	private static final IFileConfiguration config = FileConfiguration.createDefault();
 	private static ArrayList<NetworkManager> network;
-	private static File root;
+	private static TestFileAgent fileAgent;
 	private static final int networkSize = 10;
 
 	@BeforeClass
@@ -63,7 +62,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		testClass = UserProfileTaskQueueTest.class;
 		beforeClass();
 		network = NetworkTestUtil.createNetwork(networkSize);
-		root = FileTestUtil.getTempDirectory();
+		fileAgent = new TestFileAgent();
 	}
 
 	@Test
@@ -97,7 +96,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(root.toPath(), config);
+		SessionParameters params = new SessionParameters(fileAgent, config);
 		params.setKeyManager(publicKeyManager);
 		params.setUserProfileManager(userProfileManager);
 		node.setSession(new H2HSession(params));
@@ -135,7 +134,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(root.toPath(), config);
+		SessionParameters params = new SessionParameters(fileAgent, config);
 		params.setKeyManager(publicKeyManager);
 		params.setUserProfileManager(userProfileManager);
 		node.setSession(new H2HSession(params));
@@ -171,7 +170,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(root.toPath(), config);
+		SessionParameters params = new SessionParameters(fileAgent, config);
 		params.setKeyManager(publicKeyManager);
 		params.setUserProfileManager(userProfileManager);
 		node.setSession(new H2HSession(params));
@@ -222,7 +221,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	public static void cleanAfterClass() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
-		FileUtils.deleteDirectory(root);
+		FileUtils.deleteDirectory(fileAgent.getRoot());
 	}
 
 	private class SimpleGetUserProfileTaskContext implements IUserProfileTaskContext {

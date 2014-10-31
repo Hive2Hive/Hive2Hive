@@ -16,8 +16,8 @@ public class GetMetaFileContext implements IGetMetaFileContext {
 	private final KeyPair keys;
 	public BaseMetaFile metaFile;
 
+	public GetMetaFileContext(KeyPair keys) {
 		this.keys = keys;
-		public GetMetaFileContext(KeyPair keys) {
 	}
 
 	@Override

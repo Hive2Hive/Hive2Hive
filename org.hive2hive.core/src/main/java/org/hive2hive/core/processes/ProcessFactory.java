@@ -43,7 +43,6 @@ import org.hive2hive.core.processes.files.list.GetFileListStep;
 import org.hive2hive.core.processes.files.move.RelinkUserProfileStep;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.files.recover.SelectVersionStep;
-import org.hive2hive.core.processes.files.synchronize.SynchronizeFilesStep;
 import org.hive2hive.core.processes.files.update.CleanupChunksStep;
 import org.hive2hive.core.processes.files.update.CreateNewVersionStep;
 import org.hive2hive.core.processes.files.update.UpdateMD5inUserProfileStep;
@@ -177,19 +176,13 @@ public final class ProcessFactory {
 
 		process.add(new RemoveOwnLocationsStep(networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
-		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager(), session.getDownloadManager()));
+		process.add(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(), session.getDownloadManager()));
 		process.add(new DeleteSessionStep(networkManager));
 
 		// TODO to be implemented:
 		// // stop all running processes
 		// ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
-		return process;
-	}
-
-	public ProcessComponent createSynchronizeFilesProcess(NetworkManager networkManager) {
-		SequentialProcess process = new SequentialProcess();
-		process.add(new SynchronizeFilesStep(networkManager));
 		return process;
 	}
 

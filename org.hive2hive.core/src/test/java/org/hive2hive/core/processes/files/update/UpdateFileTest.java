@@ -154,7 +154,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		SessionParameters params = new SessionParameters(session.getRoot(), limitingConfig);
+		SessionParameters params = new SessionParameters(session.getFileAgent(), limitingConfig);
 		params.setDownloadManager(session.getDownloadManager());
 		params.setKeyManager(session.getKeyManager());
 		params.setLocationsManager(session.getLocationsManager());
@@ -202,7 +202,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		SessionParameters params = new SessionParameters(session.getRoot(), limitingConfig);
+		SessionParameters params = new SessionParameters(session.getFileAgent(), limitingConfig);
 		params.setDownloadManager(session.getDownloadManager());
 		params.setKeyManager(session.getKeyManager());
 		params.setLocationsManager(session.getLocationsManager());

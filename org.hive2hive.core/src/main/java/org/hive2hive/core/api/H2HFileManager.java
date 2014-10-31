@@ -35,24 +35,8 @@ import org.hive2hive.processframework.interfaces.IResultProcessComponent;
  */
 public class H2HFileManager extends H2HManager implements IFileManager {
 
-	private final IFileAgent fileAgent;
-
-	public H2HFileManager(NetworkManager networkManager, EventBus eventBus, IFileAgent fileAgent) {
+	public H2HFileManager(NetworkManager networkManager, EventBus eventBus) {
 		super(networkManager, eventBus);
-		this.fileAgent = fileAgent;
-	}
-
-	@Override
-	public IProcessComponent synchronize() throws NoSessionException {
-		if (networkManager.getSession() == null) {
-			throw new NoSessionException();
-		}
-
-		IProcessComponent syncProcess = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
-		AsyncComponent asyncProcess = new AsyncComponent(syncProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
 	}
 
 	@Override
@@ -65,7 +49,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File does not exist.");
 		} else if (session.getRootFile().equals(file)) {
 			throw new IllegalArgumentException("Root cannot be added.");
-		} else if (!FileUtil.isInH2HDirectory(fileAgent, file, session)) {
+		} else if (!FileUtil.isInH2HDirectory(session.getFileAgent(), file)) {
 			throw new IllegalFileLocation();
 		}
 
@@ -91,7 +75,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("A folder can have one version only");
 		} else if (!file.exists()) {
 			throw new IllegalArgumentException("File does not exist");
-		} else if (!FileUtil.isInH2HDirectory(fileAgent, file, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
@@ -105,14 +89,16 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException {
+		IFileAgent fileAgent = networkManager.getSession().getFileAgent();
+
 		// TODO support the file listener that already moved the file
 		if (!source.exists()) {
 			// throw new IllegalArgumentException("Source file not found");
 		} else if (destination.exists()) {
 			throw new IllegalArgumentException("Destination already exists");
-		} else if (!FileUtil.isInH2HDirectory(fileAgent, source, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, source)) {
 			throw new IllegalArgumentException("Source file not in the Hive2Hive directory");
-		} else if (!FileUtil.isInH2HDirectory(fileAgent, destination, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, destination)) {
 			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
 		}
 
@@ -126,7 +112,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException {
-		if (!FileUtil.isInH2HDirectory(fileAgent, file, networkManager.getSession())) {
+		if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
@@ -177,15 +163,14 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		}
 
 		H2HSession session = networkManager.getSession();
-		Path root = session.getRoot();
 
 		// folder must be in the given root directory
-		if (!folder.toPath().toString().startsWith(root.toString())) {
+		if (!FileUtil.isInH2HDirectory(session.getFileAgent(), folder)) {
 			throw new IllegalFileLocation("Folder must be in root of the H2H directory.");
 		}
 
 		// sharing root folder is not allowed
-		if (folder.toPath().toString().equals(root.toString())) {
+		if (folder.equals(session.getRootFile())) {
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
 		}
 

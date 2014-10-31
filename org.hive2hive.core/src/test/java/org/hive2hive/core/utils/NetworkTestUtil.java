@@ -1,6 +1,5 @@
 package org.hive2hive.core.utils;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
@@ -29,6 +28,7 @@ import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 
 // TODO test classes using a test network should inherit from the same test class that handles instantiation and shutdown of network, all in the same way
 
@@ -101,7 +101,6 @@ public class NetworkTestUtil {
 			UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 
 			IFileConfiguration fileConfig = FileConfiguration.createDefault();
-			File root = new File(System.getProperty("java.io.tmpdir"), H2HJUnitTest.randomString());
 
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
@@ -110,7 +109,7 @@ public class NetworkTestUtil {
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
-			SessionParameters params = new SessionParameters(root.toPath(), fileConfig);
+			SessionParameters params = new SessionParameters(new TestFileAgent(), fileConfig);
 			params.setDownloadManager(downloadManager);
 			params.setKeyManager(keyManager);
 			params.setUserProfileManager(profileManager);
@@ -132,7 +131,6 @@ public class NetworkTestUtil {
 		UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 		for (NetworkManager node : network) {
 			IFileConfiguration fileConfig = FileConfiguration.createDefault();
-			File root = new File(System.getProperty("java.io.tmpdir"), H2HJUnitTest.randomString());
 
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
@@ -141,7 +139,7 @@ public class NetworkTestUtil {
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
-			SessionParameters params = new SessionParameters(root.toPath(), fileConfig);
+			SessionParameters params = new SessionParameters(new TestFileAgent(), fileConfig);
 			params.setDownloadManager(downloadManager);
 			params.setKeyManager(keyManager);
 			params.setUserProfileManager(profileManager);

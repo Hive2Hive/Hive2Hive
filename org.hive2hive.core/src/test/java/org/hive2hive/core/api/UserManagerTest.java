@@ -3,7 +3,6 @@ package org.hive2hive.core.api;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
@@ -13,8 +12,8 @@ import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -78,7 +77,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		UserCredentials userCredentials = generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
-		Path rootPah = FileTestUtil.getTempDirectory().toPath();
+		TestFileAgent fileAgent = new TestFileAgent();
 
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
@@ -89,7 +88,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		// before registering: login all nodes and check again
 		for (int i = 0; i < network.size(); i++) {
 			network.get(i).getUserManager().configureAutostart(true);
-			network.get(i).getUserManager().login(userCredentials, rootPah).await();
+			network.get(i).getUserManager().login(userCredentials, fileAgent).await();
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
 			assertFalse(isLoggedIn);
 		}
@@ -99,7 +98,7 @@ public class UserManagerTest extends H2HJUnitTest {
 
 		// after registering: login all nodes and check again
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getUserManager().login(userCredentials, rootPah).await();
+			network.get(i).getUserManager().login(userCredentials, fileAgent).await();
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
 			assertTrue(isLoggedIn);
 		}

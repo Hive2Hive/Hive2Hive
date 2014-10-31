@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -162,7 +161,7 @@ public class FileUtil {
 	 * @param session a valid session of any user
 	 * @return true when the file is within the H2H directory, otherwise false
 	 */
-	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file, File root) {
+	public static boolean isInH2HDirectory(File file, File root) {
 		if (root == null || file == null) {
 			return false;
 		}
@@ -173,8 +172,8 @@ public class FileUtil {
 	/**
 	 * Does the same as {@link #isInH2HDirectory(IFileAgent, File, File)} but taking a session as parameter
 	 */
-	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file, H2HSession session) {
-		return session == null ? false : isInH2HDirectory(fileAgent, file, session.getRootFile());
+	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file) {
+		return fileAgent == null ? false : isInH2HDirectory(file, fileAgent.getRoot());
 	}
 
 	/**

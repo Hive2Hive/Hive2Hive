@@ -23,15 +23,6 @@ import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 public interface IFileManager extends IManager {
 
 	/**
-	 * Synchronizes the files on disk with the files in the network, i.e. downloads necessary files, uploads
-	 * new files etc. It's recommended to run this after the logging in.
-	 * 
-	 * @return an observable process component
-	 * @throws NoSessionException no user has logged in
-	 */
-	IProcessComponent synchronize() throws NoSessionException;
-
-	/**
 	 * Add a file or a folder. Note that the file must already be in the predefined Hive2Hive folder. If the
 	 * folder is not empty, all containing files are added to Hive2Hive as well.
 	 * 
@@ -125,12 +116,11 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 */
 	IResultProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
-	
-	
 
 	/**
 	 * Subscribe all file event handlers of the given listener instance.
 	 * <strong>Note:</strong> The listener needs to annotate the handlers with the @Handler annotation.
+	 * 
 	 * @param listener implementing the handler methods
 	 */
 	void subscribeFileEvents(IFileEventListener listener);

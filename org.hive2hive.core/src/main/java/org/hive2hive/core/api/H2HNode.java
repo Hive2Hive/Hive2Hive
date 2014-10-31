@@ -9,7 +9,6 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
-import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
@@ -27,17 +26,15 @@ public class H2HNode implements IH2HNode {
 	private final INetworkConfiguration networkConfiguration;
 	private final IFileConfiguration fileConfiguration;
 	private final NetworkManager networkManager;
-	private final IFileAgent fileAgent;
 
 	private IUserManager userManager;
 	private IFileManager fileManager;
 	private EventBus eventBus;
 
 	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IH2HEncryption encryption, IFileAgent fileAgent) {
+			IH2HEncryption encryption) {
 		this.networkConfiguration = networkConfiguration;
 		this.fileConfiguration = fileConfiguration;
-		this.fileAgent = fileAgent;
 
 		networkManager = new NetworkManager(networkConfiguration, encryption, getEventBus());
 	}
@@ -51,9 +48,8 @@ public class H2HNode implements IH2HNode {
 	 * @param fileConfiguration the file configuration
 	 * @return
 	 */
-	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IFileAgent fileAgent) {
-		return new H2HNode(networkConfiguration, fileConfiguration, new H2HDefaultEncryption(), fileAgent);
+	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration) {
+		return new H2HNode(networkConfiguration, fileConfiguration, new H2HDefaultEncryption());
 	}
 
 	/**
@@ -67,8 +63,8 @@ public class H2HNode implements IH2HNode {
 	 * @return
 	 */
 	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IH2HEncryption encryption, IFileAgent fileAgent) {
-		return new H2HNode(networkConfiguration, fileConfiguration, encryption, fileAgent);
+			IH2HEncryption encryption) {
+		return new H2HNode(networkConfiguration, fileConfiguration, encryption);
 	}
 
 	@Override
@@ -97,7 +93,7 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IFileManager getFileManager() {
 		if (fileManager == null) {
-			fileManager = new H2HFileManager(networkManager, getEventBus(), fileAgent);
+			fileManager = new H2HFileManager(networkManager, getEventBus());
 		}
 		return fileManager;
 	}

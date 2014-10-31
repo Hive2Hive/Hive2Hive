@@ -15,6 +15,10 @@ public class TestFileAgent implements IFileAgent {
 		root = FileTestUtil.getTempDirectory();
 	}
 
+	public TestFileAgent(File root) {
+		this.root = root;
+	}
+
 	@Override
 	public void writeCache(String name, byte[] data) throws IOException {
 		FileUtils.writeByteArrayToFile(new File(root, name), data);
@@ -27,5 +31,16 @@ public class TestFileAgent implements IFileAgent {
 		} catch (IOException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public File getRoot() {
+		return root;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		// cleanup when object is not used anymore
+		FileUtils.deleteDirectory(root);
 	}
 }

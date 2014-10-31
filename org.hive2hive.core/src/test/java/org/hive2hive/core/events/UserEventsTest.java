@@ -6,8 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.file.Path;
-
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -21,7 +19,7 @@ import org.hive2hive.core.events.util.TestUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -34,8 +32,8 @@ public class UserEventsTest extends H2HJUnitTest {
 	private IH2HNode node;
 	private IUserManager userManager;
 	private UserCredentials credentials;
-	private Path rootPath;
 	private H2HWaiter waiter = new H2HWaiter(20);
+	private TestFileAgent fileAgent;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -54,7 +52,7 @@ public class UserEventsTest extends H2HJUnitTest {
 		node.connect();
 		userManager = node.getUserManager();
 		credentials = generateRandomCredentials();
-		rootPath = FileTestUtil.getTempDirectory().toPath();
+		fileAgent = new TestFileAgent();
 	}
 
 	@After
@@ -108,13 +106,13 @@ public class UserEventsTest extends H2HJUnitTest {
 			@Override
 			public void onLoginFailure(ILoginEvent event) {
 				assertEquals(credentials, event.getUserCredentials());
-				assertEquals(rootPath, event.getRootPath());
+				assertEquals(fileAgent, event.getFileAgent());
 				assertNotNull(event.getRollbackReason());
 				super.onLoginFailure(event);
 			}
 		};
 		userManager.addEventListener(listener);
-		userManager.login(credentials, rootPath);
+		userManager.login(credentials, fileAgent);
 		while (!listener.loginFailure) {
 			waiter.tickASecond();
 		}
@@ -128,13 +126,13 @@ public class UserEventsTest extends H2HJUnitTest {
 			@Override
 			public void onLoginSuccess(ILoginEvent event) {
 				assertEquals(credentials, event.getUserCredentials());
-				assertEquals(rootPath, event.getRootPath());
+				assertEquals(fileAgent, event.getFileAgent());
 				assertNull(event.getRollbackReason());
 				super.onLoginSuccess(event);
 			}
 		};
 		userManager.addEventListener(listener);
-		userManager.login(credentials, rootPath);
+		userManager.login(credentials, fileAgent);
 		while (!listener.loginSuccess) {
 			waiter.tickASecond();
 		}
@@ -150,7 +148,7 @@ public class UserEventsTest extends H2HJUnitTest {
 
 		// test success
 		userManager.register(credentials).await();
-		userManager.login(credentials, rootPath).await();
+		userManager.login(credentials, fileAgent).await();
 
 		TestUserEventListener listener = new TestUserEventListener() {
 			@Override
