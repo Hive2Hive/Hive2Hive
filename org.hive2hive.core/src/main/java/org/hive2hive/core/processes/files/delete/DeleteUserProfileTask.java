@@ -15,7 +15,6 @@ import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
@@ -107,8 +106,8 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 	 * @param toDelete the {@link FolderIndex} to remove
 	 */
 	private void removeFileOnDisk(Path root, Index toDelete) {
-		Path path = FileUtil.getPath(root, toDelete);
-		
+		Path path = null; // = FileUtil.getPath(root, toDelete);
+
 		if (path == null) {
 			logger.error("Could not find the file to delete.");
 		}

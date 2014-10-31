@@ -1,4 +1,4 @@
-package org.hive2hive.core.file;
+package org.hive2hive.core.extras;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -16,6 +17,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
+import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -25,14 +27,14 @@ import org.junit.Test;
 
 public class FileSynchronizerTest extends H2HJUnitTest {
 
-	private Path rootPath;
+	private File rootFile;
+
 	private FolderIndex root;
 	private FileIndex node1f1;
 	private FileIndex node1f2;
 	private FolderIndex node1d;
 	private FileIndex node2f;
 	private Index node2d;
-	private File fileRoot;
 	private File file1f1;
 	private File file1f2;
 	private File file1d;
@@ -53,9 +55,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Before
 	public void createTreeNode() throws IOException {
-		String randomName = randomString();
-		fileRoot = new File(System.getProperty("java.io.tmpdir"), randomName);
-		rootPath = fileRoot.toPath();
+		rootFile = FileTestUtil.getTempDirectory();
 
 		// naming convention:
 		// [number][type][index] where number is the level and type is either 'f' for file or 'd' for
@@ -68,11 +68,11 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		// - 1d:
 		// - - 2f
 		// - - 2d (empty folder)
-		file1f1 = new File(fileRoot, "1f1");
+		file1f1 = new File(rootFile, "1f1");
 		FileUtils.writeStringToFile(file1f1, randomString());
-		file1f2 = new File(fileRoot, "1f2");
+		file1f2 = new File(rootFile, "1f2");
 		FileUtils.writeStringToFile(file1f2, randomString());
-		file1d = new File(fileRoot, "1d");
+		file1d = new File(rootFile, "1d");
 		file1d.mkdirs();
 		file2f = new File(file1d, "2f");
 		FileUtils.writeStringToFile(file2f, randomString());
@@ -87,22 +87,27 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node1d = new FolderIndex(root, keys, "1d");
 		node2f = new FileIndex(node1d, keys, "2f", HashUtil.hash(file2f));
 		node2d = new FolderIndex(node1d, keys, "2d");
-
-		// write the meta data now. Before creating the synchronizer, modify the file system as desired first.
-		FileUtil.writePersistentMetaData(rootPath, null, null);
 	}
 
 	@After
 	public void cleanup() throws IOException {
-		FileUtils.deleteDirectory(rootPath.toFile());
+		FileUtils.deleteDirectory(rootFile);
+	}
+
+	private Map<String, byte[]> visitFiles() throws IOException {
+		PersistenceFileVisitor visitor = new PersistenceFileVisitor(rootFile);
+		Files.walkFileTree(rootFile.toPath(), visitor);
+		return visitor.getFileTree();
 	}
 
 	@Test
 	public void testDeletedLocally() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
 		Files.delete(file1f1.toPath());
 		Files.delete(file2d.toPath());
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Index> deletedLocally = fileSynchronizer.getDeletedLocally();
 		Assert.assertEquals(2, deletedLocally.size());
 		Assert.assertTrue(deletedLocally.contains(node1f1));
@@ -111,10 +116,12 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeletedRemotely() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
 		root.removeChild(node1f1);
 		root.removeChild(node1d); // delete whole directory
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Path> deletedRemotely = fileSynchronizer.getDeletedRemotely();
 		Assert.assertEquals(4, deletedRemotely.size());
 		Assert.assertTrue(deletedRemotely.contains(file1f1.toPath()));
@@ -125,15 +132,17 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddedLocally() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
 		// one folder
 		File file2d2 = new File(file1d, "2d2");
 		file2d2.mkdir();
 
 		// one file
-		File file1f3 = new File(fileRoot, "1f3");
+		File file1f3 = new File(rootFile, "1f3");
 		FileUtils.writeStringToFile(file1f3, randomString());
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Path> addedLocally = fileSynchronizer.getAddedLocally();
 		Assert.assertEquals(2, addedLocally.size());
 		Assert.assertTrue(addedLocally.contains(file2d2.toPath()));
@@ -146,7 +155,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Index node1f3 = new FileIndex(root, keys, "1f3", null);
 		Index node2d2 = new FolderIndex(node1d, keys, "2d2");
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		Map<String, byte[]> same = visitFiles();
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, same, same);
 		List<Index> addedRemotely = fileSynchronizer.getAddedRemotely();
 		Assert.assertEquals(2, addedRemotely.size());
 		Assert.assertTrue(addedRemotely.contains(node1f3));
@@ -155,11 +165,14 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testUpdatedLocally() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
+
 		// change two files
 		FileUtils.writeStringToFile(file1f2, randomString());
 		FileUtils.writeStringToFile(file2f, randomString());
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Path> updatedLocally = fileSynchronizer.getUpdatedLocally();
 		Assert.assertEquals(2, updatedLocally.size());
 		Assert.assertTrue(updatedLocally.contains(file1f2.toPath()));
@@ -168,7 +181,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		// change file in user profile as well --> should not occur as updated locally
 		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
 
-		fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		updatedLocally = fileSynchronizer.getUpdatedLocally();
 		Assert.assertEquals(1, updatedLocally.size());
 		Assert.assertTrue(updatedLocally.contains(file2f.toPath()));
@@ -180,7 +193,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
 		node2f.setMD5(HashUtil.hash(randomString().getBytes()));
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		Map<String, byte[]> same = visitFiles();
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, same, same);
 		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
 		Assert.assertEquals(2, updatedRemotely.size());
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
@@ -190,7 +204,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testNothingChanged() throws ClassNotFoundException, IOException {
 		// nothing has changed --> should receive no file to upload/download
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		Map<String, byte[]> same = visitFiles();
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, same, same);
 		Assert.assertEquals(0, fileSynchronizer.getUpdatedRemotely().size());
 		Assert.assertEquals(0, fileSynchronizer.getUpdatedLocally().size());
 		Assert.assertEquals(0, fileSynchronizer.getAddedRemotely().size());
@@ -201,13 +216,16 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testConflictUpdateLocallyDeleteRemotely() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
+
 		// change a file locally
 		FileUtils.writeStringToFile(file1f2, randomString());
 
 		// delete the same file remotely
 		root.removeChild(node1f2);
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Path> addedLocally = fileSynchronizer.getAddedLocally();
 		Assert.assertEquals(1, addedLocally.size());
 		Assert.assertTrue(addedLocally.contains(file1f2.toPath()));
@@ -218,13 +236,16 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testConflictUpdateRemotelyDeleteLocally() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
+
 		// delete a file locally
 		file1f2.delete();
 
 		// modify the same file remotely
 		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Index> addedRemotely = fileSynchronizer.getAddedRemotely();
 		Assert.assertEquals(1, addedRemotely.size());
 		Assert.assertTrue(addedRemotely.contains(node1f2));
@@ -238,14 +259,17 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testConflictUpdateRemotelyAndLocally() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
+
 		// change a file in the user profile
 		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
 
 		// change file on disk as well --> should occur as updated remotely since there is a conflict and the
 		// profile wins
 		FileUtils.writeStringToFile(file1f2, randomString());
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<FileIndex> updatedRemotely = fileSynchronizer.getUpdatedRemotely();
 		Assert.assertEquals(1, updatedRemotely.size());
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
@@ -256,11 +280,14 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testConflictDeleteRemotelyAndLocally() throws IOException, ClassNotFoundException {
+		Map<String, byte[]> before = visitFiles();
+
 		// remove a file in the user profile and on disk
 		root.removeChild(node1f2);
 		file1f2.delete();
+		Map<String, byte[]> after = visitFiles();
 
-		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootPath, userProfile);
+		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		List<Index> deletedRemotely = fileSynchronizer.getDeletedLocally();
 		Assert.assertTrue(deletedRemotely.isEmpty());
 

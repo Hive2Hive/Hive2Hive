@@ -1,10 +1,13 @@
-package org.hive2hive.core.file.buffer;
+package org.hive2hive.core.extras.buffer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.extras.buffer.BaseFileBuffer;
+import org.hive2hive.core.extras.buffer.IFileBuffer;
+import org.hive2hive.core.extras.buffer.IFileBufferHolder;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;

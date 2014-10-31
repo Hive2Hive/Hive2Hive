@@ -1,13 +1,11 @@
-package org.hive2hive.core.file;
+package org.hive2hive.core.extras;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,35 +24,33 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
+@Extra
 public class FileSynchronizer {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileSynchronizer.class);
 
-	private final Path root;
+	private final File root;
 	private final UserProfile userProfile;
-
 	private final FolderIndex profileRootNode;
 
 	// Map<file-path, file-hash>
 	private final Map<String, byte[]> before;
-	private Map<String, byte[]> now;
+	private final Map<String, byte[]> now;
 
-	public FileSynchronizer(Path rootDirectory, UserProfile userProfile) throws IOException {
+	/**
+	 * @param rootDirectory the root Hive2Hive directory
+	 * @param userProfile the current user profile
+	 * @param before represents the file state at the last logout, before H2H was shutdown. The key of the map
+	 *            is the path, the byte[] is the hash of the file content.
+	 * @param now represents the current file state. The key of the map is the path, the byte[] is the hash of
+	 *            the file content.
+	 */
+	public FileSynchronizer(File rootDirectory, UserProfile userProfile, Map<String, byte[]> before, Map<String, byte[]> now) {
 		this.root = rootDirectory;
 		this.userProfile = userProfile;
+		this.before = before;
+		this.now = now;
 		this.profileRootNode = userProfile.getRoot();
-
-		// load the two file trees
-		before = FileUtil.readPersistentMetaData(root).getFileTree();
-
-		PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
-		try {
-			Files.walkFileTree(root, visitor);
-			now = visitor.getFileTree();
-		} catch (IOException e) {
-			logger.error("Cannot walk the current tree.", e);
-			now = new HashMap<String, byte[]>(0);
-		}
 	}
 
 	/**
@@ -204,7 +200,7 @@ public class FileSynchronizer {
 			// different versions. Thus, the profile wins.
 			if (HashUtil.compare(fileNode.getMD5(), before.get(path)) && !HashUtil.compare(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File '{}' has been updated locally during absence.", path);
-				updatedLocally.add(FileUtil.getPath(root, fileNode));
+				updatedLocally.add(Paths.get(root.toString(), fileNode.getFullPath().toString()));
 			}
 		}
 

@@ -1,4 +1,4 @@
-package org.hive2hive.core.file.buffer;
+package org.hive2hive.core.extras.buffer;
 
 import java.io.File;
 import java.util.HashSet;
@@ -8,6 +8,7 @@ import java.util.TimerTask;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessResultListener;
@@ -15,6 +16,7 @@ import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Extra
 public abstract class BaseFileBuffer implements IFileBuffer {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseFileBuffer.class);

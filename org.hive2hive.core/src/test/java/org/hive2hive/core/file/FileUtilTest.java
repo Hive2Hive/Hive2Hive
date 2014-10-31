@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -19,7 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Test the file util used for the H2H node.
+ * Test the {@link FileUtil} used for the H2H node.
  * 
  * @author Nico
  * 
@@ -27,6 +27,7 @@ import org.junit.Test;
 public class FileUtilTest extends H2HJUnitTest {
 
 	private File root;
+	private TestFileAgent fileAgent;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -43,6 +44,7 @@ public class FileUtilTest extends H2HJUnitTest {
 	public void createRoot() {
 		String randomName = randomString();
 		root = new File(System.getProperty("java.io.tmpdir"), randomName);
+		fileAgent = new TestFileAgent();
 	}
 
 	@After
@@ -52,16 +54,13 @@ public class FileUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void testReadWriteMetaData() throws IOException, ClassNotFoundException {
-		String fileName = "test-file";
-		File file = new File(root, fileName);
-		FileUtils.writeStringToFile(file, randomString());
-
 		PublicKeyManager publicKeyManager = new PublicKeyManager("user", EncryptionUtil.generateRSAKeyPair(), null);
 		DownloadManager downloadManager = new DownloadManager(null, null, publicKeyManager, null);
-		FileUtil.writePersistentMetaData(root.toPath(), publicKeyManager, downloadManager);
-		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(root.toPath());
-		Map<String, byte[]> fileTree = persistentMetaData.getFileTree();
-		Assert.assertTrue(fileTree.containsKey(fileName));
+		FileUtil.writePersistentMetaData(fileAgent, publicKeyManager, downloadManager);
+		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(fileAgent);
+		Assert.assertNotNull(persistentMetaData);
+		Assert.assertEquals(0, persistentMetaData.getDownloads().size());
+		Assert.assertEquals(0, persistentMetaData.getPublicKeyCache().size());
 	}
 
 	@Test

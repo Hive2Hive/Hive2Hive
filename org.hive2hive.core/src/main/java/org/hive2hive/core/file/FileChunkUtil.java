@@ -111,7 +111,7 @@ public class FileChunkUtil {
 	}
 
 	/**
-	 * Reassembly of multiple file parts to a single file. Note that the file parts need to be sorted
+	 * Reassembling of multiple file parts to a single file. Note that the file parts need to be sorted
 	 * beforehand
 	 * 
 	 * @param fileParts the sorted file parts.
@@ -132,12 +132,12 @@ public class FileChunkUtil {
 
 		if (destination.exists()) {
 			// overwrite
-//			if (destination.delete()) {
-//				logger.debug("Destination gets overwritten. destination = '{}'", destination);
-//			} else {
-//				logger.error("Couldn't overwrite destination. destination = '{}'", destination);
-//				return;
-//			}
+			// if (destination.delete()) {
+			// logger.debug("Destination gets overwritten. destination = '{}'", destination);
+			// } else {
+			// logger.error("Couldn't overwrite destination. destination = '{}'", destination);
+			// return;
+			// }
 		}
 
 		for (File filePart : fileParts) {

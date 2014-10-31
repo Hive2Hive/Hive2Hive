@@ -1,7 +1,10 @@
-package org.hive2hive.core.file.buffer;
+package org.hive2hive.core.extras.buffer;
 
 import java.io.File;
 
+import org.hive2hive.core.extras.Extra;
+
+@Extra
 public interface IFileBuffer {
 
 	// how long the buffer collects incoming events until the buffer is processed

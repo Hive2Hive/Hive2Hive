@@ -1,4 +1,4 @@
-package org.hive2hive.core.file.buffer;
+package org.hive2hive.core.extras.buffer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  * 
  */
+@Extra
 public class FileBufferHolder implements IFileBufferHolder {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileBufferHolder.class);

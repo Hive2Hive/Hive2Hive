@@ -13,6 +13,7 @@ import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
@@ -33,9 +34,12 @@ import org.hive2hive.processframework.interfaces.IResultProcessComponent;
  * 
  */
 public class H2HFileManager extends H2HManager implements IFileManager {
-	
-	public H2HFileManager(NetworkManager networkManager, EventBus eventBus) {
+
+	private final IFileAgent fileAgent;
+
+	public H2HFileManager(NetworkManager networkManager, EventBus eventBus, IFileAgent fileAgent) {
 		super(networkManager, eventBus);
+		this.fileAgent = fileAgent;
 	}
 
 	@Override
@@ -59,9 +63,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File cannot be null.");
 		} else if (!file.exists()) {
 			throw new IllegalArgumentException("File does not exist.");
-		} else if (session.getRoot().toFile().equals(file)) {
+		} else if (session.getRootFile().equals(file)) {
 			throw new IllegalArgumentException("Root cannot be added.");
-		} else if (!FileUtil.isInH2HDirectory(file, session)) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, file, session)) {
 			throw new IllegalFileLocation();
 		}
 
@@ -87,7 +91,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("A folder can have one version only");
 		} else if (!file.exists()) {
 			throw new IllegalArgumentException("File does not exist");
-		} else if (!FileUtil.isInH2HDirectory(file, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, file, networkManager.getSession())) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
@@ -103,12 +107,12 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	public IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException {
 		// TODO support the file listener that already moved the file
 		if (!source.exists()) {
-			//throw new IllegalArgumentException("Source file not found");
+			// throw new IllegalArgumentException("Source file not found");
 		} else if (destination.exists()) {
 			throw new IllegalArgumentException("Destination already exists");
-		} else if (!FileUtil.isInH2HDirectory(source, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, source, networkManager.getSession())) {
 			throw new IllegalArgumentException("Source file not in the Hive2Hive directory");
-		} else if (!FileUtil.isInH2HDirectory(destination, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, destination, networkManager.getSession())) {
 			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
 		}
 
@@ -122,7 +126,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException {
-		if (!FileUtil.isInH2HDirectory(file, networkManager.getSession())) {
+		if (!FileUtil.isInH2HDirectory(fileAgent, file, networkManager.getSession())) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
@@ -207,10 +211,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public void subscribeFileEvents(IFileEventListener listener) {
-		if(listener == null) {
-			throw new IllegalArgumentException("The argument listener must not be null."); 
+		if (listener == null) {
+			throw new IllegalArgumentException("The argument listener must not be null.");
 		}
-		if(eventBus == null) {
+		if (eventBus == null) {
 			throw new IllegalStateException("No EventBus instance provided.");
 		}
 		eventBus.subscribe(listener);
