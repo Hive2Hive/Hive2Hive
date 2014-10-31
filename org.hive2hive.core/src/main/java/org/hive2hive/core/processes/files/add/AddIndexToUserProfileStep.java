@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.files.add;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -47,7 +46,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
-		Path root = context.consumeRoot();
+		File root = context.consumeRoot();
 
 		// pre-calculate the md5 hash because this may take a while
 		byte[] md5 = null;
@@ -129,7 +128,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (modified) {
 			File file = context.consumeFile();
-			Path root = context.consumeRoot();
+			File root = context.consumeRoot();
 
 			// remove the file from the user profile
 			int forkCounter = 0;

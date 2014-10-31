@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files;
 
 import java.io.File;
-import java.nio.file.Path;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.FolderIndex;
@@ -37,7 +36,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
-		Path root = context.consumeRoot();
+		File root = context.consumeRoot();
 
 		logger.trace("Check write access in folder '{}' to add file '{}'.", file.getParentFile().getName(), file.getName());
 
@@ -52,7 +51,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 		// find the parent node using the relative path to navigate there
 		FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
 
-		if(parentNode == null){
+		if (parentNode == null) {
 			throw new ParentInUserProfileNotFoundException("parentNode == null");
 		}
 		// validate the write protection

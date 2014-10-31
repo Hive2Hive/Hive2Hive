@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.context;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +49,8 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 	}
 
 	@Override
-	public Path consumeRoot() {
-		return session.getRoot();
+	public File consumeRoot() {
+		return session.getRootFile();
 	}
 
 	@Override

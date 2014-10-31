@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class UploadNotificationMessage extends BaseDirectMessage implements IFileEventGenerator{
+public class UploadNotificationMessage extends BaseDirectMessage implements IFileEventGenerator {
 
 	private static final long serialVersionUID = -695268345354561544L;
 

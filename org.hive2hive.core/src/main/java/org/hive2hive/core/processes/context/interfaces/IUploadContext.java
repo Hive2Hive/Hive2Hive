@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.context.interfaces;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +17,7 @@ public interface IUploadContext {
 
 	// ------ CheckWriteAccessStep, AddIndexToUserProfileStep ------
 
-	public Path consumeRoot();
+	public File consumeRoot();
 
 	// ------ PrepareNotifictionStep ------
 
@@ -29,7 +28,7 @@ public interface IUploadContext {
 	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory);
 
 	// ------ PutMetaFileStep, CreateNewVersionStep, UpdateMD5InUserProfileStep ------
-	
+
 	public BaseMetaFile consumeMetaFile();
 
 	// ------ PutMetaFileStep ------
@@ -73,7 +72,7 @@ public interface IUploadContext {
 	public List<MetaChunk> getMetaChunks();
 
 	// ------ ValidateFileSizeStep, InitializeChunksStep, PutSingleChunkStep, CreateNewVersionStep ------
-	
+
 	public IFileConfiguration consumeFileConfiguration();
 
 }

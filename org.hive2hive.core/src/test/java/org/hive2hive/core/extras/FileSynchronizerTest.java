@@ -3,7 +3,6 @@ package org.hive2hive.core.extras;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.Map;
@@ -122,12 +121,12 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Map<String, byte[]> after = visitFiles();
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
-		List<Path> deletedRemotely = fileSynchronizer.getDeletedRemotely();
+		List<File> deletedRemotely = fileSynchronizer.getDeletedRemotely();
 		Assert.assertEquals(4, deletedRemotely.size());
-		Assert.assertTrue(deletedRemotely.contains(file1f1.toPath()));
-		Assert.assertTrue(deletedRemotely.contains(file1d.toPath()));
-		Assert.assertTrue(deletedRemotely.contains(file2f.toPath()));
-		Assert.assertTrue(deletedRemotely.contains(file2d.toPath()));
+		Assert.assertTrue(deletedRemotely.contains(file1f1));
+		Assert.assertTrue(deletedRemotely.contains(file1d));
+		Assert.assertTrue(deletedRemotely.contains(file2f));
+		Assert.assertTrue(deletedRemotely.contains(file2d));
 	}
 
 	@Test
@@ -143,10 +142,10 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Map<String, byte[]> after = visitFiles();
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
-		List<Path> addedLocally = fileSynchronizer.getAddedLocally();
+		List<File> addedLocally = fileSynchronizer.getAddedLocally();
 		Assert.assertEquals(2, addedLocally.size());
-		Assert.assertTrue(addedLocally.contains(file2d2.toPath()));
-		Assert.assertTrue(addedLocally.contains(file1f3.toPath()));
+		Assert.assertTrue(addedLocally.contains(file2d2));
+		Assert.assertTrue(addedLocally.contains(file1f3));
 	}
 
 	@Test
@@ -173,10 +172,10 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Map<String, byte[]> after = visitFiles();
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
-		List<Path> updatedLocally = fileSynchronizer.getUpdatedLocally();
+		List<File> updatedLocally = fileSynchronizer.getUpdatedLocally();
 		Assert.assertEquals(2, updatedLocally.size());
-		Assert.assertTrue(updatedLocally.contains(file1f2.toPath()));
-		Assert.assertTrue(updatedLocally.contains(file2f.toPath()));
+		Assert.assertTrue(updatedLocally.contains(file1f2));
+		Assert.assertTrue(updatedLocally.contains(file2f));
 
 		// change file in user profile as well --> should not occur as updated locally
 		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
@@ -184,7 +183,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		updatedLocally = fileSynchronizer.getUpdatedLocally();
 		Assert.assertEquals(1, updatedLocally.size());
-		Assert.assertTrue(updatedLocally.contains(file2f.toPath()));
+		Assert.assertTrue(updatedLocally.contains(file2f));
 	}
 
 	@Test
@@ -226,11 +225,11 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Map<String, byte[]> after = visitFiles();
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
-		List<Path> addedLocally = fileSynchronizer.getAddedLocally();
+		List<File> addedLocally = fileSynchronizer.getAddedLocally();
 		Assert.assertEquals(1, addedLocally.size());
-		Assert.assertTrue(addedLocally.contains(file1f2.toPath()));
+		Assert.assertTrue(addedLocally.contains(file1f2));
 
-		List<Path> deletedRemotely = fileSynchronizer.getDeletedRemotely();
+		List<File> deletedRemotely = fileSynchronizer.getDeletedRemotely();
 		Assert.assertTrue(deletedRemotely.isEmpty());
 	}
 
@@ -274,7 +273,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertEquals(1, updatedRemotely.size());
 		Assert.assertTrue(updatedRemotely.contains(node1f2));
 
-		List<Path> updatedLocally = fileSynchronizer.getUpdatedLocally();
+		List<File> updatedLocally = fileSynchronizer.getUpdatedLocally();
 		Assert.assertTrue(updatedLocally.isEmpty());
 	}
 
@@ -291,7 +290,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		List<Index> deletedRemotely = fileSynchronizer.getDeletedLocally();
 		Assert.assertTrue(deletedRemotely.isEmpty());
 
-		List<Path> updatedLocally = fileSynchronizer.getDeletedRemotely();
+		List<File> updatedLocally = fileSynchronizer.getDeletedRemotely();
 		Assert.assertTrue(updatedLocally.isEmpty());
 	}
 }

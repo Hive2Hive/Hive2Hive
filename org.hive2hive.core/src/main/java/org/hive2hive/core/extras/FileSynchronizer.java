@@ -1,8 +1,6 @@
 package org.hive2hive.core.extras;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,7 +65,7 @@ public class FileSynchronizer {
 				continue;
 			} else {
 				// test whether it is in the user profile
-				Index node = userProfile.getFileByPath(Paths.get(path));
+				Index node = userProfile.getFileByPath(new File(root, path), root);
 				if (node != null) {
 					// file is still in user profile
 					if (node.isFolder()) {
@@ -98,16 +96,16 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<Path> getDeletedRemotely() {
-		List<Path> deletedRemotely = new ArrayList<Path>();
+	public List<File> getDeletedRemotely() {
+		List<File> deletedRemotely = new ArrayList<File>();
 
 		for (String p : now.keySet()) {
-			Path path = Paths.get(p);
-			if (before.containsKey(p) && userProfile.getFileByPath(path) == null) {
+			File file = new File(root, p);
+			if (before.containsKey(p) && userProfile.getFileByPath(file, root) == null) {
 				// is on disk but deleted in the user profile
 				if (HashUtil.compare(before.get(p), now.get(p))) {
 					// only delete the file, if it was not modified locally
-					deletedRemotely.add(Paths.get(root.toString(), path.toString()));
+					deletedRemotely.add(file);
 				}
 			}
 		}
@@ -122,17 +120,17 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<Path> getAddedLocally() {
-		List<Path> addedLocally = new ArrayList<Path>();
+	public List<File> getAddedLocally() {
+		List<File> addedLocally = new ArrayList<File>();
 
 		for (String p : now.keySet()) {
-			Path path = Paths.get(p);
+			File file = new File(root, p);
 			// test whether it is in the user profile
-			Index node = userProfile.getFileByPath(path);
+			Index node = userProfile.getFileByPath(file, root);
 			if (node == null) {
 				// not in profile --> it has been added locally
 				logger.debug("File '{}' has been added locally during absence.", p);
-				addedLocally.add(Paths.get(root.toString(), path.toString()));
+				addedLocally.add(file);
 			}
 		}
 
@@ -173,8 +171,8 @@ public class FileSynchronizer {
 	 * 
 	 * @return
 	 */
-	public List<Path> getUpdatedLocally() {
-		List<Path> updatedLocally = new ArrayList<Path>();
+	public List<File> getUpdatedLocally() {
+		List<File> updatedLocally = new ArrayList<File>();
 
 		for (String path : now.keySet()) {
 			if (!before.containsKey(path)) {
@@ -187,7 +185,8 @@ public class FileSynchronizer {
 				continue;
 			}
 
-			Index index = userProfile.getFileByPath(Paths.get(path));
+			File file = new File(root, path);
+			Index index = userProfile.getFileByPath(file, root);
 			if (index == null || index.isFolder()) {
 				// file not found --> skip, this is not the task of this method
 				// file node is a folder --> cannot compare the modification
@@ -200,7 +199,7 @@ public class FileSynchronizer {
 			// different versions. Thus, the profile wins.
 			if (HashUtil.compare(fileNode.getMD5(), before.get(path)) && !HashUtil.compare(fileNode.getMD5(), now.get(path))) {
 				logger.debug("File '{}' has been updated locally during absence.", path);
-				updatedLocally.add(Paths.get(root.toString(), fileNode.getFullPath().toString()));
+				updatedLocally.add(file);
 			}
 		}
 
@@ -261,12 +260,12 @@ public class FileSynchronizer {
 	 * 
 	 * @param deletedLocally
 	 */
-	private void sortFilesPreorder(List<Path> fileList) {
-		Collections.sort(fileList, new Comparator<Path>() {
+	private void sortFilesPreorder(List<File> fileList) {
+		Collections.sort(fileList, new Comparator<File>() {
 
 			@Override
-			public int compare(Path path1, Path path2) {
-				return path1.compareTo(path2);
+			public int compare(File file1, File file2) {
+				return file1.compareTo(file2);
 			}
 		});
 	}

@@ -118,6 +118,7 @@ public class UserProfile extends BaseVersionedNetworkContent {
 	}
 
 	@Deprecated
+	// don't use Path
 	public Index getFileByPath(Path relativePath) {
 		String[] split = relativePath.toString().split(FileUtil.getFileSep());
 		FolderIndex current = root;
