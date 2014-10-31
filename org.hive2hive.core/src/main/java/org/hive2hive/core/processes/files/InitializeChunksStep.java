@@ -11,7 +11,7 @@ import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.processes.context.interfaces.IInitializeChunksStepContext;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
@@ -30,10 +30,10 @@ public class InitializeChunksStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
 
-	private final IInitializeChunksStepContext context;
+	private final IUploadContext context;
 	private final DataManager dataManager;
 
-	public InitializeChunksStep(IInitializeChunksStepContext context, DataManager dataManager) {
+	public InitializeChunksStep(IUploadContext context, DataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
 	}
@@ -54,11 +54,11 @@ public class InitializeChunksStep extends ProcessStep {
 	}
 
 	private void initSmallFile(File file) {
-		if (context.consumeChunkKeys() == null) {
+		if (context.consumeChunkEncryptionKeys() == null) {
 			logger.trace("Create chunk keys for the file '{}'.", file.getName());
 			// create and provide chunk keys
 			KeyPair chunkKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-			context.provideChunkKeys(chunkKeys);
+			context.provideChunkEncryptionKeys(chunkKeys);
 		}
 
 		// create put chunks steps

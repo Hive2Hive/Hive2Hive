@@ -5,9 +5,10 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
-import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
+import org.hive2hive.core.processes.context.interfaces.IGetFileKeysContext;
+import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 
-public class RecoverFileContext implements IFile2MetaContext {
+public class RecoverFileContext implements IGetFileKeysContext, IGetMetaFileContext {
 
 	private final File file;
 	private KeyPair metaFileEncryptionKeys;
@@ -23,7 +24,7 @@ public class RecoverFileContext implements IFile2MetaContext {
 	}
 
 	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
+	public void provideChunkProtectionKeys(KeyPair protectionKeys) {
 		// not used here
 	}
 

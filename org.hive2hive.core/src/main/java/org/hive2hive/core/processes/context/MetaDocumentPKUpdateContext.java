@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.context;
 
-import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
@@ -11,7 +10,7 @@ import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
-import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
+import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 
 /**
@@ -19,7 +18,7 @@ import org.hive2hive.core.security.H2HDefaultEncryption;
  * 
  * @author Nico, Seppi
  */
-public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements IFile2MetaContext {
+public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements IGetMetaFileContext {
 
 	private final PublicKey fileKey;
 	private final FileIndex fileIndex;
@@ -30,11 +29,6 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 		super(oldProtectionKeys, newProtectionKeys);
 		this.fileKey = fileKey;
 		this.fileIndex = fileIndex;
-	}
-
-	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		// ignore because this is the old protection key which we have already
 	}
 
 	@Override
@@ -81,19 +75,8 @@ public class MetaDocumentPKUpdateContext extends BasePKUpdateContext implements 
 	}
 
 	@Override
-	public void provideMetaFileEncryptionKeys(KeyPair encryptionKeys) {
-		// ignore
-	}
-
-	@Override
 	public KeyPair consumeMetaFileEncryptionKeys() {
 		return fileIndex.getFileKeys();
-	}
-
-	@Override
-	public File consumeFile() {
-		// not used here
-		return null;
 	}
 
 }

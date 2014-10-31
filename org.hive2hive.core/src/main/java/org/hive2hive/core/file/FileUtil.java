@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Comparator;
@@ -188,5 +189,11 @@ public class FileUtil {
 				return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
 			}
 		});
+	}
+
+	@Deprecated
+	// don't use Path
+	public static Path getPath(Path root, Index parentNode) {
+		return Paths.get(root.toString(), parentNode.getFullPath().toString());
 	}
 }

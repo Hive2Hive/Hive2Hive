@@ -31,10 +31,6 @@ public class DownloadFileContext implements IGetMetaFileContext {
 		return fileKey;
 	}
 
-	public boolean isFolder() {
-		return index.isFolder();
-	}
-
 	@Override
 	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;

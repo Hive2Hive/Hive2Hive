@@ -25,6 +25,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.BaseVersionedNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.network.data.DataManager;
@@ -61,8 +62,8 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> {
 		this(dataManager, dataManager.getEncryption(), encryptionKey, locationKey, contentKey);
 	}
 
-	public EncryptedVersionManager(DataManager dataManager, IH2HEncryption encryption, SecretKey encryptionKey, String locationKey,
-			String contentKey) {
+	public EncryptedVersionManager(DataManager dataManager, IH2HEncryption encryption, SecretKey encryptionKey,
+			String locationKey, String contentKey) {
 		this.dataManager = dataManager;
 		this.encryption = encryption;
 		this.encryptionKey = encryptionKey;
@@ -218,8 +219,11 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> {
 			if (status.equals(H2HPutStatus.FAILED)) {
 				throw new PutFailedException("Put failed.");
 			} else if (status.equals(H2HPutStatus.VERSION_FORK)) {
-				throw new PutFailedException("EncryptedVersionManager: Version fork.");
-				
+				logger.warn("Version fork after put detected. Rejecting put");
+				if (!dataManager.remove(parameters)) {
+					logger.warn("Removing of conflicting version failed.");
+				}
+				throw new VersionForkAfterPutException();
 			} else {
 				networkContent.setVersionKey(encrypted.getVersionKey());
 				networkContent.setBasedOnKey(encrypted.getBasedOnKey());

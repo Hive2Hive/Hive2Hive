@@ -17,7 +17,7 @@ import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.context.interfaces.IPutMetaFileContext;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -33,9 +33,9 @@ public class PutMetaFileStep extends BasePutProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(PutMetaFileStep.class);
 
-	private final IPutMetaFileContext context;
+	private final IUploadContext context;
 
-	public PutMetaFileStep(IPutMetaFileContext context, DataManager dataManager) {
+	public PutMetaFileStep(IUploadContext context, DataManager dataManager) {
 		super(dataManager);
 		this.context = context;
 	}
@@ -45,9 +45,11 @@ public class PutMetaFileStep extends BasePutProcessStep {
 		try {
 			BaseMetaFile metaFile = context.consumeMetaFile();
 			KeyPair protectionKeys = context.consumeMetaFileProtectionKeys();
+			KeyPair encryptionKeys = context.consumeMetaFileEncryptionKeys();
 
 			logger.trace("Encrypting meta file in a hybrid manner.");
-			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(metaFile, metaFile.getId());
+			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(metaFile,
+					encryptionKeys.getPublic());
 			encrypted.setBasedOnKey(metaFile.getBasedOnKey());
 			encrypted.setVersionKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();

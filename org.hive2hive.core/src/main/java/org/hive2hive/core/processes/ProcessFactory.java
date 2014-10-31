@@ -26,7 +26,8 @@ import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.files.CheckWriteAccessStep;
-import org.hive2hive.core.processes.files.File2MetaFileComponent;
+import org.hive2hive.core.processes.files.GetFileKeysStep;
+import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.core.processes.files.InitializeChunksStep;
 import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.files.PutMetaFileStep;
@@ -39,7 +40,6 @@ import org.hive2hive.core.processes.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.files.download.FindInUserProfileStep;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.list.GetFileListStep;
-import org.hive2hive.core.processes.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.files.move.RelinkUserProfileStep;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.files.recover.SelectVersionStep;
@@ -232,7 +232,8 @@ public final class ProcessFactory {
 		SequentialProcess process = new SequentialProcess();
 		process.add(new ValidateFileSizeStep(context));
 		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
-		process.add(new File2MetaFileComponent(context, networkManager));
+		process.add(new GetFileKeysStep(context, session));
+		process.add(new GetMetaFileStep(context, dataManager));
 		process.add(new InitializeChunksStep(context, dataManager));
 		process.add(new CreateNewVersionStep(context));
 		process.add(new PutMetaFileStep(context, dataManager));
@@ -294,11 +295,12 @@ public final class ProcessFactory {
 
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, networkManager.getUserId());
+		H2HSession session = networkManager.getSession();
+		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRoot());
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new MoveOnDiskStep(context, networkManager));
-		process.add(new RelinkUserProfileStep(context, networkManager));
+		process.add(new org.hive2hive.core.processes.files.move.CheckWriteAccessStep(context, session.getProfileManager()));
+		process.add(new RelinkUserProfileStep(context, session.getProfileManager(), networkManager.getDataManager()));
 		process.add(createNotificationProcess(context.getMoveNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getAddNotificationContext(), networkManager));
@@ -310,7 +312,8 @@ public final class ProcessFactory {
 			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
-		process.add(new File2MetaFileComponent(context, networkManager));
+		process.add(new GetFileKeysStep(context, networkManager.getSession()));
+		process.add(new GetMetaFileStep(context, networkManager.getDataManager()));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
 		return process;

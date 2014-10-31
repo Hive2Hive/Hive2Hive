@@ -4,6 +4,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
@@ -36,20 +37,26 @@ public class RemoveOwnLocationsStep extends ProcessStep {
 			throw new ProcessExecutionException("No session yet");
 		}
 
-		Locations locations;
-		try {
-			locations = locationsManager.get();
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException(e);
-		}
+		while (true) {
+			Locations locations;
+			try {
+				locations = locationsManager.get();
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
 
-		// remove peer
-		locations.removePeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
+			// remove peer
+			locations.removePeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
 
-		try {
-			locationsManager.put(locations, userProfile.getProtectionKeys());
-		} catch (PutFailedException e) {
-			throw new ProcessExecutionException(e);
+			try {
+				locationsManager.put(locations, userProfile.getProtectionKeys());
+			} catch (VersionForkAfterPutException e) {
+				continue;
+			} catch (PutFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
+
+			break;
 		}
 	}
 }

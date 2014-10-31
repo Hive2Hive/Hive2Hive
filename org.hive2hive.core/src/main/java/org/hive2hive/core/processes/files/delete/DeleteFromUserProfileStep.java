@@ -8,6 +8,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
@@ -16,7 +17,7 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
-import org.hive2hive.core.processes.files.File2MetaFileComponent;
+import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -56,59 +57,66 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
 
-		// get user profile
-		UserProfile profile = null;
-		try {
-			profile = profileManager.getUserProfile(getID(), true);
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException("Could not get user profile.", e);
-		}
-
-		index = profile.getFileByPath(file, root);
-
-		// validate
-		if (index == null) {
-			throw new ProcessExecutionException("File index not found in user profile");
-		} else if (!index.canWrite()) {
-			throw new ProcessExecutionException("Not allowed to delete this file (read-only permissions)");
-		}
-
-		// check preconditions
-		if (index.isFolder()) {
-			FolderIndex folder = (FolderIndex) index;
-			if (!folder.getChildren().isEmpty()) {
-				throw new ProcessExecutionException("Cannot delete a directory that is not empty.");
+		while (true) {
+			// get user profile
+			UserProfile profile = null;
+			try {
+				profile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException("Could not get user profile.", e);
 			}
-		}
 
-		// remove the node from the tree
-		FolderIndex parentIndex = index.getParent();
-		parentIndex.removeChild(index);
+			index = profile.getFileByPath(file, root);
 
-		// store for later
-		context.provideIndex(index);
+			// validate
+			if (index == null) {
+				throw new ProcessExecutionException("File index not found in user profile");
+			} else if (!index.canWrite()) {
+				throw new ProcessExecutionException("Not allowed to delete this file (read-only permissions)");
+			}
 
-		// store for rollback
-		this.parentIndexKey = parentIndex.getFilePublicKey();
+			// check preconditions
+			if (index.isFolder()) {
+				FolderIndex folder = (FolderIndex) index;
+				if (!folder.getChildren().isEmpty()) {
+					throw new ProcessExecutionException("Cannot delete a directory that is not empty.");
+				}
+			}
 
-		try {
-			profileManager.readyToPut(profile, getID());
-		} catch (PutFailedException e) {
-			logger.error("Cannot remove the file {} from the user profile", index.getFullPath(), e);
-			throw new ProcessExecutionException("Could not put user profile.");
+			// remove the node from the tree
+			FolderIndex parentIndex = index.getParent();
+			parentIndex.removeChild(index);
+
+			// store for later
+			context.provideIndex(index);
+
+			// store for rollback
+			this.parentIndexKey = parentIndex.getFilePublicKey();
+
+			try {
+				profileManager.readyToPut(profile, getID());
+			} catch (VersionForkAfterPutException e) {
+				continue;
+			} catch (PutFailedException e) {
+				logger.error("Cannot remove the file {} from the user profile", index.getFullPath(), e);
+				throw new ProcessExecutionException("Could not put user profile.");
+			}
+
+			break;
 		}
 
 		if (index.isFile()) {
-			/**
-			 * Delete the meta file and all chunks
-			 */
-			File2MetaFileComponent file2Meta = new File2MetaFileComponent(index, context, dataManager);
+			context.provideProtectionKeys(index.getProtectionKeys());
+			context.provideMetaFileEncryptionKeys(index.getFileKeys());
+
+			// create steps to delete meta and all chunks
+			GetMetaFileStep getMeta = new GetMetaFileStep(context, dataManager);
 			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
 			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
 
 			// insert them in correct order
-			getParent().insertNext(file2Meta, this);
-			getParent().insertNext(deleteChunks, file2Meta);
+			getParent().insertNext(getMeta, this);
+			getParent().insertNext(deleteChunks, getMeta);
 			getParent().insertNext(deleteMeta, deleteChunks);
 		}
 	}

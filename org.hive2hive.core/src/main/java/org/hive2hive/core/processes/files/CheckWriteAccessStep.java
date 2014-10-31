@@ -7,7 +7,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.processes.context.interfaces.ICheckWriteAccessContext;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -26,10 +26,10 @@ public class CheckWriteAccessStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(CheckWriteAccessStep.class);
 
-	private final ICheckWriteAccessContext context;
+	private final IUploadContext context;
 	private final UserProfileManager profileManager;
 
-	public CheckWriteAccessStep(ICheckWriteAccessContext context, UserProfileManager profileManager) {
+	public CheckWriteAccessStep(IUploadContext context, UserProfileManager profileManager) {
 		this.context = context;
 		this.profileManager = profileManager;
 	}
@@ -39,8 +39,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 		File file = context.consumeFile();
 		Path root = context.consumeRoot();
 
-		logger.trace("Check write access in folder '{}' to add file '{}'.", file
-				.getParentFile().getName(), file.getName());
+		logger.trace("Check write access in folder '{}' to add file '{}'.", file.getParentFile().getName(), file.getName());
 
 		UserProfile userProfile = null;
 		try {
@@ -59,18 +58,19 @@ public class CheckWriteAccessStep extends ProcessStep {
 		// validate the write protection
 		if (!parentNode.canWrite()) {
 			throw new ProcessExecutionException(String.format(
-					"This directory '%s' is write protected (and we don't have the keys).", file
-							.getParentFile().getName()));
+					"This directory '%s' is write protected (and we don't have the keys).", file.getParentFile().getName()));
 		}
-		
-		// provide the content protection keys
-		context.provideProtectionKeys(parentNode.getProtectionKeys());
+
+		// provide the content protection keys, use same for chunks and meta file
+		context.provideChunkProtectionKeys(parentNode.getProtectionKeys());
+		context.provideMetaFileProtectionKeys(parentNode.getProtectionKeys());
 	}
-	
+
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		// remove provided protection keys
-		context.provideProtectionKeys(null);
+		context.provideChunkProtectionKeys(null);
+		context.provideMetaFileProtectionKeys(null);
 	}
 
 }

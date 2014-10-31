@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.files.util;
+package org.hive2hive.core.extras;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,6 +22,14 @@ import org.hive2hive.processframework.concretes.SequentialProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
+/**
+ * Build a recursive process to add / delete multiple files. When for example uploading a folder with
+ * subfolders, etc., this can't happen concurrently since parent folders must already be uploaded.
+ * 
+ * @author Nico
+ *
+ */
+@Extra
 public class FileRecursionUtil {
 
 	private FileRecursionUtil() {

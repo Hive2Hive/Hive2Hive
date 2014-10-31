@@ -14,8 +14,8 @@ import net.engio.mbassy.listener.Handler;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
+import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileDeleteEvent;
-import org.hive2hive.core.events.framework.interfaces.file.IFileDownloadEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileMoveEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -159,22 +159,29 @@ public class FileEventsTest extends H2HJUnitTest {
 			logger.debug("Number of events received: {}", listener.getEvents().size());
 		} while(listener.getEvents().size() < numberOfEvents);
 	}
-	
+
 	protected static class FileEventAggregatorStub implements IFileEventListener {
+
 		private List<IFileEvent> events = new ArrayList<IFileEvent>();
-		public List<IFileEvent> getEvents() { return events; }
-		
-		@Override @Handler
+
+		public List<IFileEvent> getEvents() {
+			return events;
+		}
+
+		@Override
+		@Handler
+		public void onFileAdd(IFileAddEvent fileEvent) {
+			events.add(fileEvent);
+		}
+
+		@Override
+		@Handler
 		public void onFileDelete(IFileDeleteEvent fileEvent) {
 			events.add(fileEvent);
 		}
 
-		@Override @Handler
-		public void onFileDownload(IFileDownloadEvent fileEvent) {
-			events.add(fileEvent);
-		}
-
-		@Override @Handler
+		@Override
+		@Handler
 		public void onFileMove(IFileMoveEvent fileEvent) {
 			events.add(fileEvent);
 		}

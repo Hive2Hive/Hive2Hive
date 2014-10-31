@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
@@ -43,9 +42,6 @@ public class FileMoveEventsTest extends FileEventsTest {
 
 		assertTrue(e.isFile());
 		assertFalse(e.isFolder());
-		
-		assertFalse(Files.exists(e.getSrcPath()));
-		assertTrue(Files.exists(e.getDstPath()));
 	}
 	
 	@Test
@@ -70,9 +66,6 @@ public class FileMoveEventsTest extends FileEventsTest {
 		
 		assertFalse(e.isFile());
 		assertTrue(e.isFolder());
-		
-		assertFalse(Files.exists(e.getSrcPath()));
-		assertTrue(Files.exists(e.getDstPath()));
 	}
 
 	@Test
@@ -98,9 +91,5 @@ public class FileMoveEventsTest extends FileEventsTest {
 		
 		assertFalse(e.isFile());
 		assertTrue(e.isFolder());
-		
-
-		assertFalse(Files.exists(e.getSrcPath()));
-		assertTrue(Files.exists(e.getDstPath()));
 	}
 }

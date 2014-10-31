@@ -6,6 +6,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
@@ -47,49 +48,55 @@ public class UpdateUserProfileStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Updating user profile for sharing folder '{}'.", context.getFolder().getName());
 
-		try {
-			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-			FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
+		while (true) {
+			try {
+				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
+				FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
-			if (!folderIndex.canWrite()) {
-				throw new ProcessExecutionException(String.format("Cannot share folder '%s' with read-only access.",
-						folderIndex.getName()));
-			} else if (!folderIndex.getSharedFlag() && folderIndex.isSharedOrHasSharedChildren()) {
-				// restriction that disallows sharing folders within other shared folders
-				throw new ProcessExecutionException(String.format(
-						"Folder '%s' is already shared or contains an shared folder.", folderIndex.getName()));
+				if (!folderIndex.canWrite()) {
+					throw new ProcessExecutionException(String.format("Cannot share folder '%s' with read-only access.",
+							folderIndex.getName()));
+				} else if (!folderIndex.getSharedFlag() && folderIndex.isSharedOrHasSharedChildren()) {
+					// restriction that disallows sharing folders within other shared folders
+					throw new ProcessExecutionException(String.format(
+							"Folder '%s' is already shared or contains an shared folder.", folderIndex.getName()));
+				}
+
+				// check if the folder is already shared with this user
+				if (folderIndex.getCalculatedUserList().contains(context.getFriendId())) {
+					throw new ProcessExecutionException(String.format("Friend '%s' already has access to folder '%s'.",
+							context.getFriendId(), folderIndex.getName()));
+				}
+
+				// store for the notification
+				context.provideIndex(folderIndex);
+
+				if (folderIndex.getSharedFlag()) {
+					// this if-clause allows sharing with multiple users and omits the next if-clause
+					logger.debug("Sharing an already shared folder '{}' with friend '{}'.", folderIndex.getName(),
+							context.getFriendId());
+					folderIndex.addUserPermissions(context.getUserPermission());
+				} else {
+					// make the node shared with the new protection keys
+					folderIndex.share(context.consumeNewProtectionKeys());
+					// add read/write user permission of friend
+					folderIndex.addUserPermissions(context.getUserPermission());
+					// add write user permission of user itself
+					folderIndex.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
+				}
+
+				// upload modified profile
+				profileManager.readyToPut(userProfile, getID());
+
+				// set modification flag needed for roll backs
+				modified = true;
+			} catch (VersionForkAfterPutException e) {
+				continue;
+			} catch (GetFailedException | PutFailedException e) {
+				throw new ProcessExecutionException(e);
 			}
 
-			// check if the folder is already shared with this user
-			if (folderIndex.getCalculatedUserList().contains(context.getFriendId())) {
-				throw new ProcessExecutionException(String.format("Friend '%s' already has access to folder '%s'.",
-						context.getFriendId(), folderIndex.getName()));
-			}
-
-			// store for the notification
-			context.provideIndex(folderIndex);
-
-			if (folderIndex.getSharedFlag()) {
-				// this if-clause allows sharing with multiple users and omits the next if-clause
-				logger.debug("Sharing an already shared folder '{}' with friend '{}'.", folderIndex.getName(),
-						context.getFriendId());
-				folderIndex.addUserPermissions(context.getUserPermission());
-			} else {
-				// make the node shared with the new protection keys
-				folderIndex.share(context.consumeNewProtectionKeys());
-				// add read/write user permission of friend
-				folderIndex.addUserPermissions(context.getUserPermission());
-				// add write user permission of user itself
-				folderIndex.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
-			}
-
-			// upload modified profile
-			profileManager.readyToPut(userProfile, getID());
-
-			// set modification flag needed for roll backs
-			modified = true;
-		} catch (GetFailedException | PutFailedException e) {
-			throw new ProcessExecutionException(e);
+			break;
 		}
 	}
 

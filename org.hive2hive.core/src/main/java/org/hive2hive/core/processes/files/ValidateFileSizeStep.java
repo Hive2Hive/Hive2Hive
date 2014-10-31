@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.processes.context.interfaces.IValidateFileSizeContext;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -21,9 +21,9 @@ public class ValidateFileSizeStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(ValidateFileSizeStep.class);
 
-	private final IValidateFileSizeContext context;
+	private final IUploadContext context;
 
-	public ValidateFileSizeStep(IValidateFileSizeContext context) {
+	public ValidateFileSizeStep(IUploadContext context) {
 		this.context = context;
 	}
 
@@ -34,7 +34,7 @@ public class ValidateFileSizeStep extends ProcessStep {
 			// ok
 			return;
 		}
-		
+
 		// validate the file size
 		IFileConfiguration config = context.consumeFileConfiguration();
 		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {

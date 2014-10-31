@@ -1,11 +1,8 @@
 package org.hive2hive.core.processes.files.download;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 
-import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
-import org.hive2hive.core.events.implementations.FileDownloadEvent;
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
@@ -18,13 +15,17 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreateFolderStep extends ProcessStep implements IFileEventGenerator {
+/**
+ * @author Nico, Seppi
+ */
+public class CreateFolderStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(CreateFolderStep.class);
 
 	private final NetworkManager networkManager;
 	private final DownloadFileContext context;
-	private boolean existedBefore = false;
+
+	private boolean folderCreated = false;
 
 	public CreateFolderStep(DownloadFileContext context, NetworkManager networkManager) {
 		this.context = context;
@@ -35,34 +36,49 @@ public class CreateFolderStep extends ProcessStep implements IFileEventGenerator
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		Index file = context.consumeIndex();
 		logger.debug("Try creating a new folder '{}' on disk.", file.getName());
+
+		H2HSession session;
 		try {
-			// create the folder on disk
-			File folder = FileUtil.getPath(networkManager.getSession().getRoot(), file).toFile();
-			networkManager.getEventBus().publish(new FileDownloadEvent(folder.toPath(), false));
-			if (folder.exists()) {
-				throw new FileAlreadyExistsException("Folder already exists");
-			} else if (!folder.mkdir()) {
-				existedBefore = true;
-				throw new IOException("Folder could not be created");
-			}
-		} catch (IOException | NoSessionException e) {
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
 			throw new ProcessExecutionException(e);
 		}
 
-		// done with 'downloading' the file
+		// create the folder on disk
+		File folder = FileUtil.getPath(session.getRoot(), file).toFile();
+
+		if (folder.exists()) {
+			throw new ProcessExecutionException("Folder already exists");
+		} else if (!folder.mkdir()) {
+			throw new ProcessExecutionException("Folder could not be created.");
+		}
+
+		// set modification flag
+		folderCreated = true;
+
 		logger.debug("New folder '{}' has successfuly been created on disk.", file.getName());
 	}
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		try {
-			if (!existedBefore) {
-				File folder = FileUtil.getPath(networkManager.getSession().getRoot(), context.consumeIndex())
-						.toFile();
-				folder.delete();
+		if (folderCreated) {
+			H2HSession session;
+			try {
+				session = networkManager.getSession();
+			} catch (NoSessionException e) {
+				logger.error("Couldn't redo folder creation. No user seems to be logged in.");
+				return;
 			}
-		} catch (Exception e) {
-			// ignore and continue
+
+			File folder = FileUtil.getPath(session.getRoot(), context.consumeIndex()).toFile();
+
+			if (!folder.delete()) {
+				logger.error("Couldn't delete created folder.");
+				return;
+			}
+
+			// reset flag
+			folderCreated = false;
 		}
 	}
 }
