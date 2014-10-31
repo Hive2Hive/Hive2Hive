@@ -47,6 +47,9 @@ public class FolderIndex extends Index {
 		super(keyPair, name, parent);
 	}
 
+	/**
+	 * Copy constructor
+	 */
 	public FolderIndex(FolderIndex folderIndex) {
 		super(folderIndex.fileKeys, folderIndex.name, folderIndex.parent);
 		this.children = new HashSet<Index>();
