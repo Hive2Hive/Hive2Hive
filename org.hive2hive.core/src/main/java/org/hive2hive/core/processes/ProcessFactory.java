@@ -32,6 +32,7 @@ import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.files.PutMetaFileStep;
 import org.hive2hive.core.processes.files.ValidateFileSizeStep;
 import org.hive2hive.core.processes.files.add.AddIndexToUserProfileStep;
+import org.hive2hive.core.processes.files.add.CreateFileKeysStep;
 import org.hive2hive.core.processes.files.add.CreateMetaFileStep;
 import org.hive2hive.core.processes.files.add.PrepareAddNotificationStep;
 import org.hive2hive.core.processes.files.delete.DeleteFileOnDiskStep;
@@ -210,6 +211,7 @@ public final class ProcessFactory {
 		SequentialProcess process = new SequentialProcess();
 		process.add(new ValidateFileSizeStep(context));
 		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
+		process.add(new CreateFileKeysStep(context));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
 			process.add(new InitializeChunksStep(context, dataManager));

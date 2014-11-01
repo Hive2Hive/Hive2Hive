@@ -30,8 +30,8 @@ public class FolderIndex extends Index {
 	 * @param keyPair
 	 * @param name
 	 */
-	public FolderIndex(KeyPair keyPair, String name) {
-		super(keyPair, name);
+	public FolderIndex(KeyPair keyPair) {
+		super(keyPair);
 	}
 
 	/**

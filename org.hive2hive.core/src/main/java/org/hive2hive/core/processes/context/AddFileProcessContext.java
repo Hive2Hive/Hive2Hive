@@ -31,7 +31,7 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	private KeyPair chunkEncryptionKeys;
 	private KeyPair chunkProtectionKeys;
-	private KeyPair metaFileEncryptionKeys;
+	private KeyPair fileKeys;
 	private KeyPair metaFileProtectionKeys;
 	private boolean largeFile;
 	private BaseMetaFile metaFile;
@@ -91,11 +91,11 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	@Override
 	public KeyPair consumeMetaFileEncryptionKeys() {
-		return metaFileEncryptionKeys;
+		return fileKeys;
 	}
 
-	public void provideMetaFileEncryptionKeys(KeyPair metaFileEncryptionKeys) {
-		this.metaFileEncryptionKeys = metaFileEncryptionKeys;
+	public void provideFileKeys(KeyPair fileKeys) {
+		this.fileKeys = fileKeys;
 	}
 
 	@Override
