@@ -18,11 +18,6 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This message is sent after an upload has finished.
- * 
- * @author Nico, Seppi
- */
 public class UpdateNotificationMessage extends BaseDirectMessage implements IFileEventGenerator{
 
 	private static final long serialVersionUID = -695268345354561544L;
@@ -38,7 +33,7 @@ public class UpdateNotificationMessage extends BaseDirectMessage implements IFil
 
 	@Override
 	public void run() {
-		logger.debug("Upload file notification message received.");
+		logger.debug("Update file notification message received.");
 
 		H2HSession session;
 		try {
@@ -58,11 +53,15 @@ public class UpdateNotificationMessage extends BaseDirectMessage implements IFil
 			return;
 		}
 
-		Index updatedFileIndex = userProfile.getFileById(fileKey);
+		Index updatedFile = userProfile.getFileById(fileKey);
+		if (updatedFile == null) {
+			logger.error("Got notified about a file we don't know.");
+			return;
+		}
 
 		// trigger event
-		Path updatedFilePath = FileUtil.getPath(session.getRoot(), updatedFileIndex);
-		getEventBus().publish(new FileUpdateEvent(updatedFilePath, updatedFileIndex.isFile()));
+		Path updatedFilePath = FileUtil.getPath(session.getRoot(), updatedFile);
+		getEventBus().publish(new FileUpdateEvent(updatedFilePath, updatedFile.isFile()));
 	}
 
 }

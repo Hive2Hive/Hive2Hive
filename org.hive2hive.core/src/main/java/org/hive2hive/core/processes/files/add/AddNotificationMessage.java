@@ -18,27 +18,22 @@ import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This message is sent after an upload has finished.
- * 
- * @author Nico, Seppi
- */
 public class AddNotificationMessage extends BaseDirectMessage implements IFileEventGenerator{
 
 	private static final long serialVersionUID = -695268345354561544L;
 
 	private static final Logger logger = LoggerFactory.getLogger(AddNotificationMessage.class);
 
-	private final PublicKey addedFileKey;
+	private final PublicKey fileKey;
 
-	public AddNotificationMessage(PeerAddress targetAddress, PublicKey addedFileKey) {
+	public AddNotificationMessage(PeerAddress targetAddress, PublicKey fileKey) {
 		super(targetAddress);
-		this.addedFileKey = addedFileKey;
+		this.fileKey = fileKey;
 	}
 
 	@Override
 	public void run() {
-		logger.debug("Upload file notification message received.");
+		logger.debug("Add file notification message received.");
 
 		H2HSession session;
 		try {
@@ -58,11 +53,15 @@ public class AddNotificationMessage extends BaseDirectMessage implements IFileEv
 			return;
 		}
 
-		Index addedFileIndex = userProfile.getFileById(addedFileKey);
+		Index addedFile = userProfile.getFileById(fileKey);
+		if (addedFile == null) {
+			logger.error("Got notified about a file we don't know.");
+			return;
+		}
 
 		// trigger event
-		Path addedFilePath = FileUtil.getPath(session.getRoot(), addedFileIndex);
-		getEventBus().publish(new FileAddEvent(addedFilePath, addedFileIndex.isFile()));
+		Path addedFilePath = FileUtil.getPath(session.getRoot(), addedFile);
+		getEventBus().publish(new FileAddEvent(addedFilePath, addedFile.isFile()));
 	}
 
 }

@@ -1,75 +1,66 @@
 package org.hive2hive.core.processes.files.delete;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.security.PublicKey;
-import java.util.UUID;
 
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
+import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Performs the necessary processes when another user did any modification on the file
- * 
- * @author Nico
- * 
- */
 public class DeleteNotificationMessage extends BaseDirectMessage implements IFileEventGenerator {
 
 	private static final long serialVersionUID = 5518489264065301800L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteNotificationMessage.class);
-	private final PublicKey parentFileKey;
-	private final String fileName;
 
-	public DeleteNotificationMessage(PeerAddress targetAddress, PublicKey parentFileKey, String fileName) {
+	private final PublicKey fileKey;
+
+	public DeleteNotificationMessage(PeerAddress targetAddress, PublicKey fileKey) {
 		super(targetAddress);
-		this.parentFileKey = parentFileKey;
-		this.fileName = fileName;
+		this.fileKey = fileKey;
 	}
 
 	@Override
 	public void run() {
-		logger.debug("File notification message received.");
-		delete();
-	}
+		logger.debug("Delete file notification message received.");
 
-	private void delete() {
+		H2HSession session;
 		try {
-			H2HSession session = networkManager.getSession();
-			String pid = UUID.randomUUID().toString();
-
-			Path root = session.getRoot();
-			UserProfile userProfile = session.getProfileManager().getUserProfile(pid, false);
-			Index parentNode = userProfile.getFileById(parentFileKey);
-
-			if (parentNode == null) {
-				throw new FileNotFoundException("Got notified about a file we don't know the parent of.");
-			} else {
-				File fileToDelete =  new File(FileUtil.getPath(root, parentNode).toFile(), fileName);
-				// since already deleted in the index, we cannot determine whether it was a file or not.
-				// A fix for that may be that the node who deleted content sends this information with the notification
-				getEventBus().publish(new FileDeleteEvent(fileToDelete.toPath(), fileToDelete.isFile()));
-				boolean deleted = fileToDelete.delete();
-				
-				if (!deleted) {
-					throw new IOException("Could not delete the file.");
-				}
-			}
-		} catch (Exception e) {
-			logger.error("Got notified but cannot delete the file.", e);
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
+			logger.error("No user seems to be logged in.");
+			return;
 		}
-	}
 
+		UserProfileManager profileManager = session.getProfileManager();
+
+		UserProfile userProfile;
+		try {
+			userProfile = profileManager.getUserProfile(getMessageID(), false);
+		} catch (GetFailedException e) {
+			logger.error("Couldn't load user profile.", e);
+			return;
+		}
+
+		Index fileToDelete = userProfile.getFileById(fileKey);
+		if (fileToDelete == null) {
+			logger.error("Got notified about a file we don't know.");
+			return;
+		}
+
+		// trigger event
+		Path deletedFilePath = FileUtil.getPath(session.getRoot(), fileToDelete);
+		getEventBus().publish(new FileDeleteEvent(deletedFilePath, fileToDelete.isFile()));
+	}
 }
