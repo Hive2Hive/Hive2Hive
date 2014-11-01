@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.files.download.direct.process;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
@@ -10,7 +10,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileChunkUtil;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
@@ -85,8 +84,8 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		}
 
 		// check if file is on disk
-		Path path = FileUtil.getPath(session.getRoot(), index);
-		if (path == null || !path.toFile().exists()) {
+		File file = index.asFile(session.getRootFile());
+		if (file == null || !file.exists()) {
 			logger.info("File not found on disk, cannot return a chunk");
 			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 			return;
@@ -95,7 +94,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		Chunk chunk = null;
 		try {
 			// retrieve the requested file part (offset and length)
-			chunk = FileChunkUtil.getChunk(path.toFile(), chunkLength, chunkNumber, "chunk-" + chunkNumber);
+			chunk = FileChunkUtil.getChunk(file, chunkLength, chunkNumber, "chunk-" + chunkNumber);
 		} catch (IOException e) {
 			logger.error("Cannot read the chunk", e);
 			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));

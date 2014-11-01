@@ -1,9 +1,6 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.UUID;
 
@@ -56,8 +53,8 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 				return;
 			}
 
-			// remove the file on disk
-			removeFileOnDisk(session.getRootFile(), toDelete);
+			File file = toDelete.asFile(session.getRootFile());
+			networkManager.getEventBus().publish(new FileDeleteEvent(file, file.isFile()));
 
 			// notify others
 			startNotification(toDelete);
@@ -108,31 +105,6 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 			break;
 		}
 		return toDelete;
-	}
-
-	/**
-	 * Removes the file from the disk
-	 * 
-	 * @param fileManager
-	 * @param toDelete the {@link FolderIndex} to remove
-	 */
-	private void removeFileOnDisk(File root, Index toDelete) {
-		Path path = null; // = FileUtil.getPath(root, toDelete);
-
-		if (path == null) {
-			logger.error("Could not find the file to delete.");
-		}
-		File file = path.toFile();
-		if (!file.exists()) {
-			logger.error("File does not exist and cannot be deleted.");
-		}
-
-		try {
-			networkManager.getEventBus().publish(new FileDeleteEvent(path, Files.isRegularFile(path)));
-			Files.delete(path);
-		} catch (IOException e) {
-			logger.error("Could not delete file on disk.", e);
-		}
 	}
 
 	/**

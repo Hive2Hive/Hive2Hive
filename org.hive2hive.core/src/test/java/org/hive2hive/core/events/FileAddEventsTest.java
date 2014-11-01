@@ -38,8 +38,7 @@ public class FileAddEventsTest extends FileEventsTest {
 		IFileEvent ev = events.get(0);
 
 		assertTrue(ev.isFile());
-		assertFalse(ev.isFolder());
-		assertEqualsRelativePaths(file.toPath(), ev.getPath());
+		assertEqualsRelativePaths(file, ev.getFile());
 	}
 
 	@Test
@@ -63,8 +62,7 @@ public class FileAddEventsTest extends FileEventsTest {
 		IFileEvent ev = events.get(0);
 
 		assertTrue(ev.isFile());
-		assertFalse(ev.isFolder());
-		assertEqualsRelativePaths(file.toPath(), ev.getPath());
+		assertEqualsRelativePaths(file, ev.getFile());
 	}
 
 	@Test
@@ -83,8 +81,7 @@ public class FileAddEventsTest extends FileEventsTest {
 		IFileEvent ev = events.get(0);
 
 		assertFalse(ev.isFile());
-		assertTrue(ev.isFolder());
-		assertEqualsRelativePaths(folder.toPath(), ev.getPath());
+		assertEqualsRelativePaths(folder, ev.getFile());
 	}
 
 	@Test
@@ -105,8 +102,7 @@ public class FileAddEventsTest extends FileEventsTest {
 			File f = files.get(i);
 
 			assertTrue(f.isFile() == ev.isFile());
-			assertTrue(f.isDirectory() == ev.isFolder());
-			assertEqualsRelativePaths(f.toPath(), ev.getPath());
+			assertEqualsRelativePaths(f, ev.getFile());
 		}
 	}
 }

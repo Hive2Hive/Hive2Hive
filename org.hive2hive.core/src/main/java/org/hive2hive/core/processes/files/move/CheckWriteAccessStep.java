@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
-import java.nio.file.Path;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.FolderIndex;
@@ -32,7 +31,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File source = context.getSource();
 		File destination = context.getDestination();
-		Path root = context.getRoot();
+		File root = context.getRoot();
 
 		// check if source and destination are the same
 		if (source.equals(destination)) {
@@ -40,9 +39,9 @@ public class CheckWriteAccessStep extends ProcessStep {
 		}
 
 		// check if moving file belongs to H2H folder
-		if (!source.getAbsolutePath().startsWith(root.toString())) {
+		if (!source.getAbsolutePath().startsWith(root.getAbsolutePath())) {
 			throw new IllegalArgumentException("Source file is not in Hive2Hive directory. Use 'add'.");
-		} else if (!destination.getAbsolutePath().startsWith(root.toString())) {
+		} else if (!destination.getAbsolutePath().startsWith(root.getAbsolutePath())) {
 			throw new IllegalArgumentException("Destination file is not in Hive2Hive directory.");
 		}
 

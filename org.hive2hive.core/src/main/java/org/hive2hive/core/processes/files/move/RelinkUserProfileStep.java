@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.HashSet;
@@ -57,7 +56,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File source = context.getSource();
 		File destination = context.getDestination();
-		Path root = context.getRoot();
+		File root = context.getRoot();
 
 		// different possibilities of movement:
 		// - file moved from root to other destination
@@ -206,7 +205,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		if (profileUpdated) {
 			File source = context.getSource();
 			File destination = context.getDestination();
-			Path root = context.getRoot();
+			File root = context.getRoot();
 
 			int forkCounter = 0;
 			int forkWaitTime = new Random().nextInt(1000) + 500;

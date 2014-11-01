@@ -23,8 +23,8 @@ public class UploadNotificationMessageFactory extends BaseNotificationMessageFac
 	 * @param addedFileKey the key of file that has been added (may contain sub-files)
 	 * @param parentKey the new parent's public key
 	 */
-	public UploadNotificationMessageFactory(Index addedFileIndex, PublicKey parentKey) {
-		this.addedFileIndex = addedFileIndex;
+	public UploadNotificationMessageFactory(Index addedIndex, PublicKey parentKey) {
+		this.addedFileIndex = addedIndex;
 		this.parentKey = parentKey;
 	}
 

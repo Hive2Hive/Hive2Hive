@@ -2,8 +2,6 @@ package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.UUID;
 
@@ -12,7 +10,6 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -50,22 +47,15 @@ public class DeleteNotificationMessage extends BaseDirectMessage implements IFil
 			H2HSession session = networkManager.getSession();
 			String pid = UUID.randomUUID().toString();
 
-			Path root = session.getRoot();
+			File root = session.getRootFile();
 			UserProfile userProfile = session.getProfileManager().getUserProfile(pid, false);
 			Index parentNode = userProfile.getFileById(parentFileKey);
 
 			if (parentNode == null) {
 				throw new FileNotFoundException("Got notified about a file we don't know the parent of.");
 			} else {
-				File fileToDelete =  new File(FileUtil.getPath(root, parentNode).toFile(), fileName);
-				// since already deleted in the index, we cannot determine whether it was a file or not.
-				// A fix for that may be that the node who deleted content sends this information with the notification
-				getEventBus().publish(new FileDeleteEvent(fileToDelete.toPath(), fileToDelete.isFile()));
-				boolean deleted = fileToDelete.delete();
-				
-				if (!deleted) {
-					throw new IOException("Could not delete the file.");
-				}
+				File fileToDelete = new File(parentNode.asFile(root), fileName);
+				getEventBus().publish(new FileDeleteEvent(fileToDelete, fileToDelete.isFile()));
 			}
 		} catch (Exception e) {
 			logger.error("Got notified but cannot delete the file.", e);

@@ -1,11 +1,13 @@
 package org.hive2hive.core.events.framework.interfaces.file;
 
-import java.nio.file.Path;
+import java.io.File;
 
 import org.hive2hive.core.events.framework.IEvent;
 
 public interface IFileEvent extends IEvent {
-	Path getPath();
-	boolean isFolder();
+	File getFile();
+
 	boolean isFile();
+
+	boolean isFolder();
 }

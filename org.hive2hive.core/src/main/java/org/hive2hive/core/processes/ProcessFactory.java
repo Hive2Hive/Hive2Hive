@@ -289,7 +289,7 @@ public final class ProcessFactory {
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		H2HSession session = networkManager.getSession();
-		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRoot());
+		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRootFile());
 
 		SequentialProcess process = new SequentialProcess();
 		process.add(new org.hive2hive.core.processes.files.move.CheckWriteAccessStep(context, session.getProfileManager()));

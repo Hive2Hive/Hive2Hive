@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
@@ -54,7 +53,7 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 		// support to store the file on another location than default (used for recovery)
 		if (context.downloadToDefaultDestination()) {
-			destination = FileUtil.getPath(session.getRoot(), context.consumeIndex()).toFile();
+			destination = context.consumeIndex().asFile(session.getRootFile());
 		} else {
 			destination = context.getDestination();
 		}

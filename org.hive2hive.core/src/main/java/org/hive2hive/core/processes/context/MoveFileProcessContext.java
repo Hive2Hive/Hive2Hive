@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.context;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Set;
 
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
@@ -14,7 +13,7 @@ public class MoveFileProcessContext {
 
 	private final File source;
 	private final File destination;
-	private final Path root;
+	private final File root;
 
 	// three context objects because we need to send three different types of notifications:
 	// 1. users that had access before and after move
@@ -24,7 +23,7 @@ public class MoveFileProcessContext {
 	private final DeleteNotificationContext deleteNotificationContext;
 	private final AddNotificationContext addNotificationContext;
 
-	public MoveFileProcessContext(File source, File destination, Path root) {
+	public MoveFileProcessContext(File source, File destination, File root) {
 		this.source = source;
 		this.destination = destination;
 		this.root = root;
@@ -42,7 +41,7 @@ public class MoveFileProcessContext {
 		return destination;
 	}
 
-	public Path getRoot() {
+	public File getRoot() {
 		return root;
 	}
 

@@ -1,6 +1,6 @@
 package org.hive2hive.core.processes.share;
 
-import java.nio.file.Path;
+import java.io.File;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -32,7 +32,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 
 	private final ShareProcessContext context;
 	private final UserProfileManager profileManager;
-	private final Path root;
+	private final File root;
 	private final String userId;
 
 	private boolean modified = false;
@@ -40,7 +40,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
 		this.context = context;
 		this.profileManager = session.getProfileManager();
-		this.root = session.getRoot();
+		this.root = session.getRootFile();
 		this.userId = session.getUserId();
 	}
 

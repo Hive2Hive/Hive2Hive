@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,8 +72,12 @@ public class FileEventsTest extends H2HJUnitTest {
 	public static void endTest() {
 		NetworkTestUtil.shutdownNetwork(network);
 		try {
-			FileUtils.deleteDirectory(rootA);
-			FileUtils.deleteDirectory(rootB);
+			if (rootA != null && rootA.exists()) {
+				FileUtils.deleteDirectory(rootA);
+			}
+			if (rootB != null && rootB.exists()) {
+				FileUtils.deleteDirectory(rootB);
+			}
 		} catch (IOException ioex) {
 			logger.error("Could not cleanup folders.", ioex);
 		}
@@ -91,8 +94,12 @@ public class FileEventsTest extends H2HJUnitTest {
 	@After
 	public void afterTest() {
 		try {
-			FileUtils.cleanDirectory(rootA);
-			FileUtils.cleanDirectory(rootB);
+			if (rootA != null && rootA.exists()) {
+				FileUtils.cleanDirectory(rootA);
+			}
+			if (rootB != null && rootB.exists()) {
+				FileUtils.cleanDirectory(rootB);
+			}
 		} catch (IOException ioex) {
 			logger.error("Could not cleanup directories.", ioex);
 		}
@@ -112,9 +119,9 @@ public class FileEventsTest extends H2HJUnitTest {
 	 * @param absA absolute path (client A)
 	 * @param absB absolute path (client B)
 	 */
-	protected void assertEqualsRelativePaths(Path absA, Path absB) {
-		Path relativeA = rootA.toPath().relativize(absA);
-		Path relativeB = rootB.toPath().relativize(absB);
+	protected void assertEqualsRelativePaths(File absA, File absB) {
+		String relativeA = absA.getAbsolutePath().replaceFirst(rootA.getAbsolutePath(), "");
+		String relativeB = absB.getAbsolutePath().replaceFirst(rootB.getAbsolutePath(), "");
 		logger.debug("Path comparison: '{}' vs '{}'", relativeA, relativeB);
 		assertTrue(relativeA.equals(relativeB));
 	}

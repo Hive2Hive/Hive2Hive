@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -39,7 +38,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	private final DeleteFileProcessContext context;
 	private final UserProfileManager profileManager;
 	private DataManager dataManager;
-	private final Path root;
+	private final File root;
 
 	private Index index;
 	private PublicKey parentIndexKey;
@@ -50,7 +49,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		this.context = context;
 		this.dataManager = networkManager.getDataManager();
 		this.profileManager = networkManager.getSession().getProfileManager();
-		this.root = networkManager.getSession().getRoot();
+		this.root = networkManager.getSession().getRootFile();
 	}
 
 	@Override

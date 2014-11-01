@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.files.add;
 
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.Random;
 
@@ -12,7 +11,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -26,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Nico, Seppi
  */
-public class UploadUserProfileTask extends UserProfileTask implements IFileEventGenerator{
+public class UploadUserProfileTask extends UserProfileTask implements IFileEventGenerator {
 
 	private static final long serialVersionUID = -4568985873058024202L;
 
@@ -135,11 +133,9 @@ public class UploadUserProfileTask extends UserProfileTask implements IFileEvent
 			}
 
 			// trigger event
-			Path addedFilePath = FileUtil.getPath(session.getRoot(), addedFileIndex);
-			networkManager.getEventBus().publish(new FileAddEvent(addedFilePath, addedFileIndex.isFile()));
-
+			networkManager.getEventBus().publish(
+					new FileAddEvent(addedFileIndex.asFile(session.getRootFile()), addedFileIndex.isFile()));
 			break;
 		}
 	}
-
 }

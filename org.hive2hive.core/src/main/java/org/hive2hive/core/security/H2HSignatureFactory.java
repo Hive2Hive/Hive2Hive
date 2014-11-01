@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class H2HSignatureFactory implements SignatureFactory {
 
+	private static final long serialVersionUID = -8522085229948986395L;
 	private static final Logger logger = LoggerFactory.getLogger(H2HSignatureFactory.class);
 
 	/**

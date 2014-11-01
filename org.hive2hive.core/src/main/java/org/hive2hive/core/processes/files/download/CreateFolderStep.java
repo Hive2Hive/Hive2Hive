@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.context.DownloadFileContext;
@@ -45,7 +44,7 @@ public class CreateFolderStep extends ProcessStep {
 		}
 
 		// create the folder on disk
-		File folder = FileUtil.getPath(session.getRoot(), file).toFile();
+		File folder = file.asFile(session.getRootFile());
 
 		if (folder.exists()) {
 			throw new ProcessExecutionException("Folder already exists");
@@ -70,7 +69,7 @@ public class CreateFolderStep extends ProcessStep {
 				return;
 			}
 
-			File folder = FileUtil.getPath(session.getRoot(), context.consumeIndex()).toFile();
+			File folder = context.consumeIndex().asFile(session.getRootFile());
 
 			if (!folder.delete()) {
 				logger.error("Couldn't delete created folder.");
