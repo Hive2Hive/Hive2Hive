@@ -11,7 +11,7 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.files.util.FileRecursionUtil;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -97,7 +97,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		}
 
 		/** 2. Notify others that files are available */
-		notifyOtherClients(new UploadNotificationMessageFactory(sharedIndex, null));
+		notifyOtherClients(new AddNotificationMessageFactory(sharedIndex, null));
 		logger.debug("Notified other client that new (shared) files are available for download.");
 
 		/** 3. download the files that are now available */
