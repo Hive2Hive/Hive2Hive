@@ -7,7 +7,6 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.files.add.AddUserProfileTask;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
 /**
@@ -36,6 +35,6 @@ public class UpdateNotificationMessageFactory extends BaseNotificationMessageFac
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new AddUserProfileTask(sender, updatedFileIndex, parentKey);
+		return new UpdateUserProfileTask(sender, updatedFileIndex, parentKey);
 	}
 }
