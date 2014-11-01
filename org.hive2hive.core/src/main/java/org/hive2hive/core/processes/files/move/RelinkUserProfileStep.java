@@ -187,8 +187,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 		logger.debug("Inform {} users that a file has been removed (after movement).", usersAtSource.size());
 		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
-		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, oldParentNode.getFilePublicKey(),
-				sourceName));
+		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey));
 		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file
