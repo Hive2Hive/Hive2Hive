@@ -29,11 +29,11 @@ public class UpdateNotificationMessage extends BaseDirectMessage implements IFil
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateNotificationMessage.class);
 
-	private final PublicKey addedFileKey;
+	private final PublicKey fileKey;
 
-	public UpdateNotificationMessage(PeerAddress targetAddress, PublicKey addedFileKey) {
+	public UpdateNotificationMessage(PeerAddress targetAddress, PublicKey fileKey) {
 		super(targetAddress);
-		this.addedFileKey = addedFileKey;
+		this.fileKey = fileKey;
 	}
 
 	@Override
@@ -58,11 +58,11 @@ public class UpdateNotificationMessage extends BaseDirectMessage implements IFil
 			return;
 		}
 
-		Index addedFileIndex = userProfile.getFileById(addedFileKey);
+		Index updatedFileIndex = userProfile.getFileById(fileKey);
 
 		// trigger event
-		Path addedFilePath = FileUtil.getPath(session.getRoot(), addedFileIndex);
-		getEventBus().publish(new FileUpdateEvent(addedFilePath, addedFileIndex.isFile()));
+		Path updatedFilePath = FileUtil.getPath(session.getRoot(), updatedFileIndex);
+		getEventBus().publish(new FileUpdateEvent(updatedFilePath, updatedFileIndex.isFile()));
 	}
 
 }
