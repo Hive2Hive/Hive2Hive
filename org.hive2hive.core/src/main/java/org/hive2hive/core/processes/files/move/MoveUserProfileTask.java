@@ -24,10 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Is pushed in a user profile queue of a user (A) when another user (B) has moved a file. The file has been
- * moved such a way that user A still has access to the file (probably the file has been moved within the same
- * shared folder or the file has been renamed).
- * 
  * @author Nico, Seppi
  */
 public class MoveUserProfileTask extends UserProfileTask implements IFileEventGenerator {

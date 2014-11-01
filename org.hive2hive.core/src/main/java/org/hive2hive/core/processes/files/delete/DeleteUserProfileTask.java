@@ -23,9 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link UserProfileTask} that is pushed into the queue when a shared file is deleted. It removes the dead
- * reference in the user profile of this user. All other clients get notified.
- * 
  * @author Nico, Seppi
  */
 public class DeleteUserProfileTask extends UserProfileTask implements IFileEventGenerator {

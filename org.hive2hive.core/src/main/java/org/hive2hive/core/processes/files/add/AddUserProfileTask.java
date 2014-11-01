@@ -44,17 +44,17 @@ public class AddUserProfileTask extends UserProfileTask implements IFileEventGen
 
 	@Override
 	public void start() {
+		H2HSession session;
+		try {
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
+			logger.error("No user seems to be logged in.", e);
+			return;
+		}
+
 		int forkCounter = 0;
 		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
-			H2HSession session;
-			try {
-				session = networkManager.getSession();
-			} catch (NoSessionException e) {
-				logger.error("No user seems to be logged in.", e);
-				return;
-			}
-
 			UserProfileManager profileManager = session.getProfileManager();
 
 			UserProfile userProfile;

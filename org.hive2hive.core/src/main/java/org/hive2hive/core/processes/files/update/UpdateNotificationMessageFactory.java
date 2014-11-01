@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.files.update;
 
-import java.security.PublicKey;
-
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.Index;
@@ -17,15 +15,12 @@ import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 public class UpdateNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final Index updatedFileIndex;
-	private final PublicKey parentKey;
 
 	/**
 	 * @param addedFileKey the key of file that has been added (may contain sub-files)
-	 * @param parentKey the new parent's public key
 	 */
-	public UpdateNotificationMessageFactory(Index updatedFileIndex, PublicKey parentKey) {
+	public UpdateNotificationMessageFactory(Index updatedFileIndex) {
 		this.updatedFileIndex = updatedFileIndex;
-		this.parentKey = parentKey;
 	}
 
 	@Override
@@ -35,6 +30,6 @@ public class UpdateNotificationMessageFactory extends BaseNotificationMessageFac
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new UpdateUserProfileTask(sender, updatedFileIndex, parentKey);
+		return new UpdateUserProfileTask(sender, updatedFileIndex.getFilePublicKey());
 	}
 }

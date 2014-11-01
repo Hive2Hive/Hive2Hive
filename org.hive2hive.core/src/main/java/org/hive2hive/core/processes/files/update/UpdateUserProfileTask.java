@@ -32,30 +32,29 @@ public class UpdateUserProfileTask extends UserProfileTask implements IFileEvent
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateUserProfileTask.class);
 
-	private final Index updatedFileIndex;
-	private final PublicKey parentKey;
+	private final PublicKey fileKey;
 
 	private final int forkLimit = 2;
 
-	public UpdateUserProfileTask(String sender, Index updatedFileIndex, PublicKey parentKey) {
+	public UpdateUserProfileTask(String sender, PublicKey fileKey) {
 		super(sender);
-		this.updatedFileIndex = updatedFileIndex;
-		this.parentKey = parentKey;
+		this.fileKey = fileKey;
 	}
 
 	@Override
 	public void start() {
+		H2HSession session;
+		try {
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
+			logger.error("No user seems to be logged in.", e);
+			return;
+		}
+
+		Index updatedFile;
 		int forkCounter = 0;
 		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
-			H2HSession session;
-			try {
-				session = networkManager.getSession();
-			} catch (NoSessionException e) {
-				logger.error("No user seems to be logged in.", e);
-				return;
-			}
-
 			UserProfileManager profileManager = session.getProfileManager();
 
 			UserProfile userProfile;
@@ -66,33 +65,37 @@ public class UpdateUserProfileTask extends UserProfileTask implements IFileEvent
 				return;
 			}
 
-			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
-			if (parentNode == null) {
-				logger.error("Could not process the task because the parent node has not been found.");
+			updatedFile = userProfile.getFileById(fileKey);
+			if (updatedFile == null) {
+				logger.error("Got notified about a file we don't know.");
 				return;
 			}
 
-			// validate if the other sharer has the right to share
-			if (parentNode.canWrite(sender)) {
-				logger.debug("Rights of user '{}' checked. User is allowed to modify.", sender);
-			} else {
-				logger.error("Permission of user '{}' not found. Deny to apply this user's changes.", sender);
+			FolderIndex parent = updatedFile.getParent();
+			if (parent == null) {
+				logger.error("Got task to update the root, which is invalid.");
+				return;
+			}
+
+			// check write permission
+			if (!parent.canWrite(sender)) {
+				logger.error("User without WRITE permissions tried to update a file.");
 				return;
 			}
 
 			// copy the md5 parameter of the received file
-			Index existing = parentNode.getChildByName(updatedFileIndex.getName());
-			if (existing.isFile() && updatedFileIndex.isFile()) {
-				logger.debug("File update in a shared folder received: '{}'.", updatedFileIndex.getName());
+			Index existing = parent.getChildByName(updatedFile.getName());
+			if (existing.isFile() && updatedFile.isFile()) {
+				logger.debug("File update in a shared folder received: '{}'.", updatedFile.getName());
 				FileIndex existingFile = (FileIndex) existing;
-				FileIndex newFile = (FileIndex) updatedFileIndex;
+				FileIndex newFile = (FileIndex) updatedFile;
 				existingFile.setMD5(newFile.getMD5());
 			}
 
 			try {
 				// upload the changes
 				profileManager.readyToPut(userProfile, getId());
-				logger.debug("Successfully updated the index '{}' in the own user profile.", updatedFileIndex.getName());
+				logger.debug("Successfully updated the index '{}' in the own user profile.", updatedFile.getName());
 			} catch (VersionForkAfterPutException e) {
 				if (forkCounter++ > forkLimit) {
 					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
@@ -117,7 +120,7 @@ public class UpdateUserProfileTask extends UserProfileTask implements IFileEvent
 
 			try {
 				// notify own other clients
-				notifyOtherClients(new UpdateNotificationMessageFactory(updatedFileIndex, parentKey));
+				notifyOtherClients(new UpdateNotificationMessageFactory(updatedFile));
 				logger.debug("Notified other clients that a file has been updated by another user.");
 			} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
 					| NoSessionException e) {
@@ -125,8 +128,8 @@ public class UpdateUserProfileTask extends UserProfileTask implements IFileEvent
 			}
 
 			// trigger event
-			Path updatedFilePath = FileUtil.getPath(session.getRoot(), updatedFileIndex);
-			networkManager.getEventBus().publish(new FileUpdateEvent(updatedFilePath, updatedFileIndex.isFile()));
+			Path updatedFilePath = FileUtil.getPath(session.getRoot(), updatedFile);
+			networkManager.getEventBus().publish(new FileUpdateEvent(updatedFilePath, updatedFile.isFile()));
 
 			break;
 		}

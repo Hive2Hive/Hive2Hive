@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.files.update;
 
-import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,8 +35,6 @@ public class PrepareUpdateNotificationStep extends ProcessStep {
 		context.provideUsersToNotify(users);
 
 		// prepare the file tree node for sending to other users
-		PublicKey parentKey = index.getParent().getFilePublicKey();
-
 		Index indexToSend;
 		if (index instanceof FileIndex) {
 			FileIndex fileIndex = (FileIndex) index;
@@ -51,7 +48,7 @@ public class PrepareUpdateNotificationStep extends ProcessStep {
 		// decouple from file tree
 		indexToSend.decoupleFromParent();
 
-		UpdateNotificationMessageFactory messageFactory = new UpdateNotificationMessageFactory(indexToSend, parentKey);
+		UpdateNotificationMessageFactory messageFactory = new UpdateNotificationMessageFactory(indexToSend);
 		context.provideMessageFactory(messageFactory);
 	}
 
