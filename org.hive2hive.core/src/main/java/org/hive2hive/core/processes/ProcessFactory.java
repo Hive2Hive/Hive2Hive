@@ -11,7 +11,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.processes.common.PrepareNotificationStep;
 import org.hive2hive.core.processes.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
@@ -34,6 +33,7 @@ import org.hive2hive.core.processes.files.PutMetaFileStep;
 import org.hive2hive.core.processes.files.ValidateFileSizeStep;
 import org.hive2hive.core.processes.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.files.add.CreateMetaFileStep;
+import org.hive2hive.core.processes.files.add.PrepareAddNotificationStep;
 import org.hive2hive.core.processes.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.files.delete.PrepareDeleteNotificationStep;
@@ -46,6 +46,7 @@ import org.hive2hive.core.processes.files.recover.SelectVersionStep;
 import org.hive2hive.core.processes.files.synchronize.SynchronizeFilesStep;
 import org.hive2hive.core.processes.files.update.CleanupChunksStep;
 import org.hive2hive.core.processes.files.update.CreateNewVersionStep;
+import org.hive2hive.core.processes.files.update.PrepareUpdateNotificationStep;
 import org.hive2hive.core.processes.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.login.ContactOtherClientsStep;
 import org.hive2hive.core.processes.login.GetLocationsStep;
@@ -216,7 +217,7 @@ public final class ProcessFactory {
 			process.add(new PutMetaFileStep(context, dataManager));
 		}
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager()));
-		process.add(new PrepareNotificationStep(context));
+		process.add(new PrepareAddNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -238,10 +239,9 @@ public final class ProcessFactory {
 		process.add(new CreateNewVersionStep(context));
 		process.add(new PutMetaFileStep(context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
-
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new CleanupChunksStep(context, dataManager));
-		process.add(new PrepareNotificationStep(context));
+		process.add(new PrepareUpdateNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;

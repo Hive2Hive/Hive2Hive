@@ -14,7 +14,7 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
 /**
@@ -37,7 +37,7 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 	private BaseMetaFile metaFile;
 	private Index index;
 	private Set<String> usersToNotify;
-	private UploadNotificationMessageFactory messageFactory;
+	private AddNotificationMessageFactory messageFactory;
 
 	public AddFileProcessContext(File file, H2HSession session) {
 		this.file = file;
@@ -141,8 +141,7 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 		this.usersToNotify = users;
 	}
 
-	@Override
-	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory) {
+	public void provideMessageFactory(AddNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
 

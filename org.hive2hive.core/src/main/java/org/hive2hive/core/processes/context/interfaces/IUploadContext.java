@@ -10,7 +10,6 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
 
 public interface IUploadContext {
 
@@ -25,8 +24,6 @@ public interface IUploadContext {
 	public Index consumeIndex();
 
 	public void provideUsersToNotify(Set<String> users);
-
-	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory);
 
 	// ------ PutMetaFileStep, CreateNewVersionStep, UpdateMD5InUserProfileStep ------
 	
