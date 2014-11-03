@@ -35,7 +35,6 @@ import org.hive2hive.core.processes.files.add.AddIndexToUserProfileStep;
 import org.hive2hive.core.processes.files.add.CreateFileKeysStep;
 import org.hive2hive.core.processes.files.add.CreateMetaFileStep;
 import org.hive2hive.core.processes.files.add.PrepareAddNotificationStep;
-import org.hive2hive.core.processes.files.delete.DeleteFileOnDiskStep;
 import org.hive2hive.core.processes.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.files.download.FindInUserProfileStep;
@@ -280,15 +279,15 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file);
+		H2HSession session = networkManager.getSession();
+
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file, session);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
-
 		// hint: this step automatically adds additional process steps when the meta file and the chunks need
 		// to be deleted
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
-		process.add(new DeleteFileOnDiskStep(context)); // TODO make asynchronous
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
