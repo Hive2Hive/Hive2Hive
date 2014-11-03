@@ -2,6 +2,7 @@ package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.HashSet;
@@ -187,7 +188,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 		logger.debug("Inform {} users that a file has been removed (after movement).", usersAtSource.size());
 		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
-		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey));
+		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, Paths.get(
+				oldParentNode.getFullPath().toString(), sourceName).toString(), movedNode.isFile()));
 		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file

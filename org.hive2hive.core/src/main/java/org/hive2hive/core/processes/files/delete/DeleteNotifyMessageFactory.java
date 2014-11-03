@@ -11,14 +11,18 @@ import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 
 	private final PublicKey fileKey;
+	private final String relativeFilePath;
+	private final boolean isFile;
 
-	public DeleteNotifyMessageFactory(PublicKey fileKey) {
+	public DeleteNotifyMessageFactory(PublicKey fileKey, String relativeFilePath, boolean isFile) {
 		this.fileKey = fileKey;
+		this.relativeFilePath = relativeFilePath;
+		this.isFile = isFile;
 	}
 
 	@Override
 	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
-		return new DeleteNotificationMessage(receiver, fileKey);
+		return new DeleteNotificationMessage(receiver, relativeFilePath, isFile);
 	}
 
 	@Override

@@ -28,7 +28,8 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 		Index fileNode = context.consumeIndex();
 
 		// provide the message factory
-		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey()));
+		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), fileNode.getFullPath()
+				.toString(), fileNode.isFile()));
 
 		Set<String> users = new HashSet<String>();
 		users.addAll(fileNode.getCalculatedUserList());

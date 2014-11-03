@@ -183,6 +183,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 				break;
 			}
+
+			// remove index from cache
+			context.provideIndex(null);
 		}
 	}
 

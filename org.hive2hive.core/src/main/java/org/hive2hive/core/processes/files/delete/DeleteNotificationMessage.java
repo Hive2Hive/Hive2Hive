@@ -1,19 +1,14 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.nio.file.Path;
-import java.security.PublicKey;
+import java.nio.file.Paths;
 
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
-import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.model.Index;
-import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +19,13 @@ public class DeleteNotificationMessage extends BaseDirectMessage implements IFil
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteNotificationMessage.class);
 
-	private final PublicKey fileKey;
+	private final String relativeFilePath;
+	private final boolean isFile;
 
-	public DeleteNotificationMessage(PeerAddress targetAddress, PublicKey fileKey) {
+	public DeleteNotificationMessage(PeerAddress targetAddress, String relativeFilePath, boolean isFile) {
 		super(targetAddress);
-		this.fileKey = fileKey;
+		this.relativeFilePath = relativeFilePath;
+		this.isFile = isFile;
 	}
 
 	@Override
@@ -43,24 +40,8 @@ public class DeleteNotificationMessage extends BaseDirectMessage implements IFil
 			return;
 		}
 
-		UserProfileManager profileManager = session.getProfileManager();
-
-		UserProfile userProfile;
-		try {
-			userProfile = profileManager.getUserProfile(getMessageID(), false);
-		} catch (GetFailedException e) {
-			logger.error("Couldn't load user profile.", e);
-			return;
-		}
-
-		Index fileToDelete = userProfile.getFileById(fileKey);
-		if (fileToDelete == null) {
-			logger.error("Got notified about a file we don't know.");
-			return;
-		}
-
 		// trigger event
-		Path deletedFilePath = FileUtil.getPath(session.getRoot(), fileToDelete);
-		getEventBus().publish(new FileDeleteEvent(deletedFilePath, fileToDelete.isFile()));
+		Path deletedFilePath = Paths.get(session.getRoot().toString(), relativeFilePath);
+		getEventBus().publish(new FileDeleteEvent(deletedFilePath, isFile));
 	}
 }

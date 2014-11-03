@@ -113,7 +113,8 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 
 		try {
 			// notify own other clients
-			notifyOtherClients(new DeleteNotifyMessageFactory(fileKey));
+			notifyOtherClients(new DeleteNotifyMessageFactory(fileToDelete.getFilePublicKey(), fileToDelete.getFullPath()
+					.toString(), fileToDelete.isFile()));
 			logger.debug("Notified other clients that a file has been deleted by another user.");
 		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the deleted file.", e);
