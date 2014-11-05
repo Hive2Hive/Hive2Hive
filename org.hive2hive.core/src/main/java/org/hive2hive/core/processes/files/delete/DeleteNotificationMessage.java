@@ -2,35 +2,45 @@ package org.hive2hive.core.processes.files.delete;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
+import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Nico, Seppi
+ */
 public class DeleteNotificationMessage extends BaseDirectMessage implements IFileEventGenerator {
 
 	private static final long serialVersionUID = 5518489264065301800L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteNotificationMessage.class);
 
-	private final String relativeFilePath;
+	private final PublicKey parentFileKey;
+	private final String fileName;
 	private final boolean isFile;
 
-	public DeleteNotificationMessage(PeerAddress targetAddress, String relativeFilePath, boolean isFile) {
+	public DeleteNotificationMessage(PeerAddress targetAddress, PublicKey parentFileKey, String fileName, boolean isFile) {
 		super(targetAddress);
-		this.relativeFilePath = relativeFilePath;
+		this.parentFileKey = parentFileKey;
+		this.fileName = fileName;
 		this.isFile = isFile;
 	}
 
 	@Override
 	public void run() {
-		logger.debug("Delete file notification message received.");
+		logger.debug("File delete notification message received.");
 
 		H2HSession session;
 		try {
@@ -40,8 +50,28 @@ public class DeleteNotificationMessage extends BaseDirectMessage implements IFil
 			return;
 		}
 
+		UserProfile userProfile;
+		try {
+			userProfile = session.getProfileManager().getUserProfile(getMessageID(), false);
+		} catch (GetFailedException e) {
+			logger.error("Couldn't load the user profile.");
+			return;
+		}
+
+		Index parentNode = userProfile.getFileById(parentFileKey);
+
+		if (parentNode == null) {
+			logger.error("Got notified about a file we don't know the parent of.");
+			return;
+		} else if (parentNode.isFile()) {
+			logger.error("Received id belongs to a file but should be a folder.");
+			return;
+		}
+
 		// trigger event
-		Path deletedFilePath = Paths.get(session.getRoot().toString(), relativeFilePath);
+		Path parentPath = FileUtil.getPath(session.getRoot(), parentNode);
+		Path deletedFilePath = Paths.get(parentPath.toString(), fileName);
 		getEventBus().publish(new FileDeleteEvent(deletedFilePath, isFile));
 	}
+
 }

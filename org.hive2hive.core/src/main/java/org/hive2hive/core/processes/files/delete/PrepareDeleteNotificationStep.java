@@ -11,8 +11,7 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 /**
  * Provide the needed data for the notification
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class PrepareDeleteNotificationStep extends ProcessStep {
 
@@ -28,8 +27,8 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 		Index fileNode = context.consumeIndex();
 
 		// provide the message factory
-		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), fileNode.getFullPath()
-				.toString(), fileNode.isFile()));
+		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), fileNode.getParent()
+				.getFilePublicKey(), fileNode.getName(), fileNode.isFile()));
 
 		Set<String> users = new HashSet<String>();
 		users.addAll(fileNode.getCalculatedUserList());

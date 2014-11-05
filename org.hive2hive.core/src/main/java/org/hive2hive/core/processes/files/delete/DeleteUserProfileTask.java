@@ -51,6 +51,7 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 		}
 
 		Index fileToDelete;
+		FolderIndex parent;
 		int forkCounter = 0;
 		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
@@ -70,7 +71,7 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 				return;
 			}
 
-			FolderIndex parent = fileToDelete.getParent();
+			parent = fileToDelete.getParent();
 			if (parent == null) {
 				logger.error("Got task to delete the root, which is invalid.");
 				return;
@@ -113,8 +114,8 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 
 		try {
 			// notify own other clients
-			notifyOtherClients(new DeleteNotifyMessageFactory(fileToDelete.getFilePublicKey(), fileToDelete.getFullPath()
-					.toString(), fileToDelete.isFile()));
+			notifyOtherClients(new DeleteNotifyMessageFactory(fileToDelete.getFilePublicKey(), parent.getFilePublicKey(),
+					fileToDelete.getName(), fileToDelete.isFile()));
 			logger.debug("Notified other clients that a file has been deleted by another user.");
 		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the deleted file.", e);
