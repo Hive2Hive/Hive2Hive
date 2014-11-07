@@ -283,7 +283,8 @@ public final class ProcessFactory {
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file, session);
 
 		// process composition
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
+		
 		// hint: this step automatically adds additional process steps when the meta file and the chunks need
 		// to be deleted
 		process.add(new DeleteFromUserProfileStep(context, networkManager));

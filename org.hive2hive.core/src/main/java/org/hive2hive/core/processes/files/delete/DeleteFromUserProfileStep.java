@@ -20,6 +20,7 @@ import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,10 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		
+		setRequiresRollback(true);
+
 		File file = context.consumeFile();
 		File root = context.consumeRoot();
 
@@ -61,24 +65,24 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			UserProfile profile = null;
 			try {
 				profile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				throw new ProcessExecutionException("Could not get user profile.", e);
+			} catch (GetFailedException ex) {
+				throw new ProcessExecutionException(this, ex, "Could not get user profile.");
 			}
 
 			fileIndex = profile.getFileByPath(file, root);
 
 			// validate
 			if (fileIndex == null) {
-				throw new ProcessExecutionException("File index not found in user profile");
+				throw new ProcessExecutionException(this, "File index not found in user profile.");
 			} else if (!fileIndex.canWrite()) {
-				throw new ProcessExecutionException("Not allowed to delete this file (read-only permissions)");
+				throw new ProcessExecutionException(this, "Not allowed to delete this file (read-only permission).");
 			}
 
 			// check preconditions
 			if (fileIndex.isFolder()) {
 				FolderIndex folder = (FolderIndex) fileIndex;
 				if (!folder.getChildren().isEmpty()) {
-					throw new ProcessExecutionException("Cannot delete a directory that is not empty.");
+					throw new ProcessExecutionException(this, "Cannot delete a directory that is not empty.");
 				}
 			}
 
@@ -108,11 +112,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 					// retry update of user profile
 					continue;
 				}
-			} catch (PutFailedException e) {
-				logger.error("Cannot remove the file {} from the user profile", fileIndex.getFullPath(), e);
-				throw new ProcessExecutionException("Could not put user profile.");
+			} catch (PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex, String.format("Cannot remove the file '%s' from the user profile.", fileIndex.getFullPath()));
 			}
-
 			break;
 		}
 
@@ -133,7 +135,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		File file = context.consumeFile();
 		File root = context.consumeRoot();
 		Index index = context.consumeIndex();
@@ -146,9 +148,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 				UserProfile profile = null;
 				try {
 					profile = profileManager.getUserProfile(getID(), true);
-				} catch (GetFailedException e) {
-					logger.warn("Rollback failed.", e);
-					return;
+				} catch (GetFailedException ex) {
+					throw new ProcessExecutionException(this, ex);
 				}
 
 				// re-add file to user profile
@@ -175,9 +176,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 						// retry update of user profile
 						continue;
 					}
-				} catch (PutFailedException e) {
-					logger.warn("Rollback failed.", e);
-					return;
+				} catch (PutFailedException ex) {
+					throw new ProcessRollbackException(this, ex);
 				}
 
 				break;
@@ -185,6 +185,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 			// remove index from cache
 			context.provideIndex(null);
+			
+			setRequiresRollback(false);
+			return null;
 		}
 	}
 

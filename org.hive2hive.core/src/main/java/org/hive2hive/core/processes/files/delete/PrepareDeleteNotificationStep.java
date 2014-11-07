@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
@@ -13,7 +13,7 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  * 
  * @author Nico, Seppi
  */
-public class PrepareDeleteNotificationStep extends ProcessStep {
+public class PrepareDeleteNotificationStep extends ProcessStep<Void> {
 
 	private final DeleteFileProcessContext context;
 
@@ -22,7 +22,7 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		// prepare the file tree node for sending to other users
 		Index fileNode = context.consumeIndex();
 
@@ -35,5 +35,7 @@ public class PrepareDeleteNotificationStep extends ProcessStep {
 
 		// provide the user list
 		context.provideUsersToNotify(users);
+		
+		return null;
 	}
 }
