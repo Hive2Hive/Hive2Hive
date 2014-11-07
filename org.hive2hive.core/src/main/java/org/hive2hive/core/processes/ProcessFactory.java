@@ -202,7 +202,9 @@ public final class ProcessFactory {
 		DataManager dataManager = networkManager.getDataManager();
 		AddFileProcessContext context = new AddFileProcessContext(file, session);
 
-		SequentialProcess process = new SequentialProcess();
+		// process composition
+		SyncProcess process = new SyncProcess();
+		
 		process.add(new ValidateFileStep(context));
 		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
 		process.add(new CreateFileKeysStep(context));

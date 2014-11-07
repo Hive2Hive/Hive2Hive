@@ -1,6 +1,7 @@
-package org.hive2hive.processframework.exceptions;
+package org.hive2hive.core.exceptions;
 
 import org.hive2hive.processframework.ProcessError;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 public class PutToDHTException extends ProcessExecutionException{
 //ProcessExecutionException{

@@ -18,7 +18,6 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			BaseMetaFile metaFile = context.consumeMetaFile();
 			KeyPair protectionKeys = context.consumeMetaFileProtectionKeys();
@@ -64,21 +63,24 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			put(parameters);
 			// store the hash
 			context.provideMetaFileHash(parameters.getHash());
+			setRequiresRollback(true);
 
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new ProcessExecutionException("Meta file could not be encrypted.", e);
-		} catch (PutFailedException e) {
-			logger.debug("Catched PutFailedException in PutMetaFileStep! {}", e.getMessage());
-			throw new ProcessExecutionException(e);
+				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException ex) {
+			throw new ProcessExecutionException(this, ex, "Meta file could not be encrypted.");
+		} catch (PutFailedException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		super.doRollback(reason);
+	protected Void doRollback() throws InvalidProcessStateException {
+		super.doRollback();
 
 		// remove provided hash
 		context.provideMetaFileHash(null);
+		setRequiresRollback(false);
+		return null;
 	}
 }

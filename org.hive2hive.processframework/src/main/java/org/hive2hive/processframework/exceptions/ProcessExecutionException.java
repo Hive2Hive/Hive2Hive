@@ -1,6 +1,6 @@
 package org.hive2hive.processframework.exceptions;
 
-import org.hive2hive.processframework.ProcessError;
+import org.hive2hive.core.exceptions.ProcessError;
 import org.hive2hive.processframework.RollbackReason;
 
 /**

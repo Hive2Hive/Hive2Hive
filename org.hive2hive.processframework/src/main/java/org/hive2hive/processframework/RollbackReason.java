@@ -1,5 +1,7 @@
 package org.hive2hive.processframework;
 
+import org.hive2hive.core.exceptions.ProcessError;
+
 /**
  * Represents the reason of a process component failure and might indicate why it got cancelled and rolled
  * back.

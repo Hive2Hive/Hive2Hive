@@ -6,7 +6,7 @@ import java.math.BigInteger;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class ValidateFileStep extends ProcessStep {
+public class ValidateFileStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ValidateFileStep.class);
 
@@ -28,15 +28,15 @@ public class ValidateFileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
 		if (!file.exists()) {
-			throw new ProcessExecutionException("File does not exist: " + file);
+			throw new ProcessExecutionException(this, String.format("File does not exist: %s.", file));
 		}
 
 		if (file.isDirectory()) {
 			logger.debug("File {} is a directory.", file.getName());
-			return;
+			return null;
 		}
 
 		// validate the file size
@@ -44,12 +44,13 @@ public class ValidateFileStep extends ProcessStep {
 		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {
 			logger.debug("File {} is a 'large file'.", file.getName());
 			if (!context.allowLargeFile()) {
-				throw new ProcessExecutionException("Large files are not allowed (" + file.getName() + ").");
+				throw new ProcessExecutionException(this, String.format("Large files are not allowed (%s).", file.getName()));
 			}
 			context.setLargeFile(true);
 		} else {
 			logger.debug("File {} is a 'small file'.", file.getName());
 			context.setLargeFile(false);
 		}
+		return null;
 	}
 }

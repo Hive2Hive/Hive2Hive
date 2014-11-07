@@ -1,4 +1,4 @@
-package org.hive2hive.processframework;
+package org.hive2hive.core.processes;
 
 public enum ProcessError {
 	
