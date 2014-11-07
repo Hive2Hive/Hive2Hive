@@ -1,7 +1,6 @@
 package org.hive2hive.core;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
@@ -53,12 +52,6 @@ public class H2HSession {
 	 */
 	public KeyPair getKeyPair() {
 		return keyManager.getOwnKeyPair();
-	}
-
-	@Deprecated
-	// get rid of 'Path'
-	public Path getRoot() {
-		return getFileAgent().getRoot().toPath();
 	}
 
 	public File getRootFile() {

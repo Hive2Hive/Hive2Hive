@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -109,7 +108,7 @@ public class FileRecursionUtil {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	public static ProcessComponent buildDeletionProcess(List<Path> files, NetworkManager networkManager)
+	public static ProcessComponent buildDeletionProcess(List<File> files, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		// the sequential root process
 		SequentialProcess rootProcess = new SequentialProcess();
@@ -117,9 +116,8 @@ public class FileRecursionUtil {
 		// deletion must happen in reverse tree order. Since this is very complicated when it contains
 		// asynchronous components, we simply delete them all in the same thread (reverse preorder of course)
 		Collections.reverse(files);
-		for (Path file : files) {
-			ProcessComponent deletionProcess = ProcessFactory.instance().createDeleteFileProcess(file.toFile(),
-					networkManager);
+		for (File file : files) {
+			ProcessComponent deletionProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
 			rootProcess.add(deletionProcess);
 		}
 
@@ -139,9 +137,10 @@ public class FileRecursionUtil {
 	@Deprecated
 	public static ProcessComponent buildDeletionProcessFromNodelist(List<Index> files, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		List<Path> filesToDelete = new ArrayList<Path>();
+		List<File> filesToDelete = new ArrayList<File>();
 		for (Index documentIndex : files) {
-			filesToDelete.add(FileUtil.getPath(networkManager.getSession().getRoot(), documentIndex));
+			File file = documentIndex.asFile(networkManager.getSession().getRootFile());
+			filesToDelete.add(file);
 		}
 
 		return buildDeletionProcess(filesToDelete, networkManager);

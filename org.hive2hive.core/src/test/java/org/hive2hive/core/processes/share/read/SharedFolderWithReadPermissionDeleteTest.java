@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.share.read;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
@@ -107,22 +106,22 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' at A.", relativePath.toString());
+
+		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(fileFromAAtA, false);
 
-		logger.info("Delete file '{}' at A.", relativePath.toString());
+		logger.info("Delete file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, fileFromAAtA);
 
-		logger.info("Wait till deletion of file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till deletion of file '{}' gets synchronized with B.", fileFromAAtB.toString());
 		waitTillSynchronized(fileFromAAtB, false);
-		checkIndex(relativePath, true);
+		checkIndex(fileFromAAtA, true);
 	}
 
 	@Test
@@ -130,19 +129,18 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' from A.", relativePath.toString());
+		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(fileFromAAtA, false);
 
-		logger.info("Try to delete file '{}' at B.", relativePath.toString());
+		logger.info("Try to delete file '{}' at B.", fileFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(fileFromAAtB, nodeB));
-		checkIndex(relativePath, false);
+		checkIndex(fileFromAAtA, false);
 	}
 
 	@Test
@@ -150,8 +148,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
-		Path relativePath = rootB.toPath().relativize(fileAtB.toPath());
-		logger.info("Try to upload a new file '{}' from B.", relativePath.toString());
+		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB, nodeB));
 	}
 
@@ -160,22 +157,21 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder1FromA");
 		folderFromAAtA.mkdir();
-		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
-		logger.info("Upload a new folder '{}' at A.", relativePath.toString());
+		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, folderFromAAtA);
 
-		logger.info("Wait till new folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		File folderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(folderFromAAtA, false);
 
-		logger.info("Delete folder '{}' at A.", relativePath.toString());
+		logger.info("Delete folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, folderFromAAtA);
 
-		logger.info("Wait till deletion of folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till deletion of folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		waitTillSynchronized(folderFromAAtB, false);
-		checkIndex(relativePath, true);
+		checkIndex(folderFromAAtA, true);
 	}
 
 	@Test
@@ -183,19 +179,18 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder2FromA");
 		folderFromAAtA.mkdir();
-		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
-		logger.info("Upload a new folder '{}' at A.", relativePath.toString());
+		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, folderFromAAtA);
 
-		logger.info("Wait till new folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		File folderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(folderFromAAtA, false);
 
-		logger.info("Try to delete folder '{}' at B.", relativePath.toString());
+		logger.info("Try to delete folder '{}' at B.", folderFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folderFromAAtB, nodeB));
-		checkIndex(relativePath, false);
+		checkIndex(folderFromAAtA, false);
 	}
 
 	@Test
@@ -203,8 +198,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(sharedFolderB, "folderFromB");
 		folderAtB.mkdir();
-		Path relativePath = rootB.toPath().relativize(folderAtB.toPath());
-		logger.info("Try to upload a new folder '{}' from B.", relativePath.toString());
+		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB, nodeB));
 	}
 
@@ -213,22 +207,21 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' at A.", relativePath.toString());
+		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(fileFromAAtA, false);
 
-		logger.info("Delete file '{}' at A.", relativePath.toString());
+		logger.info("Delete file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, fileFromAAtA);
 
-		logger.info("Wait till deletion of file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till deletion of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronized(fileFromAAtB, false);
-		checkIndex(relativePath, true);
+		checkIndex(fileFromAAtA, true);
 	}
 
 	@Test
@@ -236,19 +229,18 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' from A.", relativePath.toString());
+		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(fileFromAAtA, false);
 
-		logger.info("Try to delete file '{}' at B.", relativePath.toString());
+		logger.info("Try to delete file '{}' at B.", fileFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(fileFromAAtB, nodeB));
-		checkIndex(relativePath, false);
+		checkIndex(fileFromAAtA, false);
 	}
 
 	@Test
@@ -256,8 +248,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, CHUNK_SIZE);
-		Path relativePath = rootB.toPath().relativize(fileAtB.toPath());
-		logger.info("Try to upload a new file '{}' from B.", relativePath.toString());
+		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB, nodeB));
 	}
 
@@ -266,22 +257,21 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder1FromA");
 		folderFromAAtA.mkdir();
-		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
-		logger.info("Upload a new folder '{}' at A.", relativePath.toString());
+		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, folderFromAAtA);
 
-		logger.info("Wait till new folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		File folderFromAAtB = new File(subFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(folderFromAAtA, false);
 
-		logger.info("Delete folder '{}' at A.", relativePath.toString());
+		logger.info("Delete folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, folderFromAAtA);
 
-		logger.info("Wait till deletion of folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till deletion of folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		waitTillSynchronized(folderFromAAtB, false);
-		checkIndex(relativePath, true);
+		checkIndex(folderFromAAtA, true);
 	}
 
 	@Test
@@ -289,19 +279,18 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder2FromA");
 		folderFromAAtA.mkdir();
-		Path relativePath = rootA.toPath().relativize(folderFromAAtA.toPath());
-		logger.info("Upload a new folder '{}' at A.", relativePath.toString());
+		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, folderFromAAtA);
 
-		logger.info("Wait till new folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		File folderFromAAtB = new File(subFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(relativePath, false);
+		checkIndex(folderFromAAtA, false);
 
-		logger.info("Try to delete folder '{}' at B.", relativePath.toString());
+		logger.info("Try to delete folder '{}' at B.", folderFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folderFromAAtB, nodeB));
-		checkIndex(relativePath, false);
+		checkIndex(folderFromAAtA, false);
 	}
 
 	@Test
@@ -309,8 +298,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(subFolderB, "subfolderFromB");
 		folderAtB.mkdir();
-		Path relativePath = rootB.toPath().relativize(folderAtB.toPath());
-		logger.info("Try to upload a new folder '{}' from B.", relativePath.toString());
+		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB, nodeB));
 	}
 
@@ -342,14 +330,14 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndex(Path relativePath, boolean deleted) throws GetFailedException, NoSessionException {
+	private static void checkIndex(File file, boolean deleted) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Index indexA = userProfileA.getFileByPath(relativePath);
+		Index indexA = userProfileA.getFileByPath(file, nodeA.getSession().getRootFile());
 
 		UserProfile userProfileB = nodeB.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Index indexB = userProfileB.getFileByPath(relativePath);
+		Index indexB = userProfileB.getFileByPath(file, nodeB.getSession().getRootFile());
 
 		// in case of deletion verify removed index nodes
 		if (deleted) {

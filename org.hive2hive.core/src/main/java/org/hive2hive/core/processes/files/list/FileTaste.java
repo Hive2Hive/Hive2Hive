@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.list;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Set;
 
 import org.hive2hive.core.model.UserPermission;
@@ -15,12 +14,12 @@ import org.hive2hive.core.security.EncryptionUtil;
  */
 public class FileTaste {
 
-	private final Path path;
+	private final String path;
 	private final File file;
 	private final byte[] md5;
 	private final Set<UserPermission> userPermissions;
 
-	FileTaste(File file, Path path, byte[] md5, Set<UserPermission> userPermissions) {
+	FileTaste(File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
 		this.file = file;
 		this.path = path;
 		this.md5 = md5;
@@ -41,7 +40,7 @@ public class FileTaste {
 	 * 
 	 * @return
 	 */
-	public Path getPath() {
+	public String getPath() {
 		return path;
 	}
 

@@ -1,6 +1,5 @@
 package org.hive2hive.core.model;
 
-import java.nio.file.Paths;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
@@ -73,14 +72,14 @@ public class IndexTest extends H2HJUnitTest {
 
 	@Test
 	public void testFullPath() {
-		Assert.assertEquals("", root.getFullPath().toString());
-		Assert.assertEquals("1f1", child1.getFullPath().toString());
-		Assert.assertEquals("1f2", child2.getFullPath().toString());
-		Assert.assertEquals("1d", dir1.getFullPath().toString());
-		Assert.assertEquals(Paths.get("1d", "2f").toString(), child3.getFullPath().toString());
-		Assert.assertEquals(Paths.get("1d", "2d").toString(), dir2.getFullPath().toString());
-		Assert.assertEquals(Paths.get("1d", "3d").toString(), dir3.getFullPath().toString());
-		Assert.assertEquals(Paths.get("1d", "3d", "4d").toString(), dir4.getFullPath().toString());
+		Assert.assertEquals("/", root.getFullPath().toString());
+		Assert.assertEquals("/1f1", child1.getFullPath().toString());
+		Assert.assertEquals("/1f2", child2.getFullPath().toString());
+		Assert.assertEquals("/1d/", dir1.getFullPath().toString());
+		Assert.assertEquals("/1d/2f", child3.getFullPath().toString());
+		Assert.assertEquals("/1d/2d/", dir2.getFullPath().toString());
+		Assert.assertEquals("/1d/3d/", dir3.getFullPath().toString());
+		Assert.assertEquals("/1d/3d/4d/", dir4.getFullPath().toString());
 	}
 
 	@Test
@@ -94,7 +93,7 @@ public class IndexTest extends H2HJUnitTest {
 		Assert.assertTrue(child3.isShared());
 		Assert.assertTrue(dir3.isShared());
 		Assert.assertTrue(dir4.isShared());
-		
+
 		Assert.assertFalse(root.isShared());
 		Assert.assertFalse(child1.isShared());
 		Assert.assertFalse(child2.isShared());

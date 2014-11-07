@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.share.read;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
@@ -114,12 +113,11 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtA.getName());
 		UseCaseTestUtil.moveFile(nodeA, fileFromAAtA, movedFileFromAAtA);
 
-		Path relativePath = rootA.toPath().relativize(movedFileFromAAtA.toPath());
-		logger.info("Wait till new moved in file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new moved in file '{}' gets synchronized with B.", movedFileFromAAtA.toString());
 		File movedFileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(movedFileFromAAtB);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
-		checkIndex(relativePath);
+		checkIndex(movedFileFromAAtA);
 	}
 
 	@Test
@@ -148,12 +146,11 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromAAtA.getName());
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
-		Path relativePath = rootA.toPath().relativize(movedFolderFromAAtA.toPath());
-		logger.info("Wait till new moved in folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new moved in folder '{}' gets synchronized with B.", movedFolderFromAAtA.toString());
 		File movedFolderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(movedFolderFromAAtB);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
-		checkIndex(relativePath);
+		checkIndex(movedFolderFromAAtA);
 	}
 
 	@Test
@@ -184,12 +181,11 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		File movedFileFromAAtA = new File(subFolderA, fileFromAAtA.getName());
 		UseCaseTestUtil.moveFile(nodeA, fileFromAAtA, movedFileFromAAtA);
 
-		Path relativePath = rootA.toPath().relativize(movedFileFromAAtA.toPath());
-		logger.info("Wait till new moved in file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new moved in file '{}' gets synchronized with B.", movedFileFromAAtA.toString());
 		File movedFileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(movedFileFromAAtB);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
-		checkIndex(relativePath);
+		checkIndex(movedFileFromAAtA);
 	}
 
 	@Test
@@ -220,12 +216,11 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		File movedFolderFromAAtA = new File(subFolderA, folderFromAAtA.getName());
 		UseCaseTestUtil.moveFile(nodeA, folderFromAAtA, movedFolderFromAAtA);
 
-		Path relativePath = rootA.toPath().relativize(movedFolderFromAAtA.toPath());
-		logger.info("Wait till new moved in folder '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new moved in folder '{}' gets synchronized with B.", movedFolderFromAAtA.toString());
 		File movedFolderFromAAtB = new File(subFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(movedFolderFromAAtB);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
-		checkIndex(relativePath);
+		checkIndex(movedFolderFromAAtA);
 	}
 
 	@Test
@@ -264,14 +259,14 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndex(Path relativePath) throws GetFailedException, NoSessionException {
+	private static void checkIndex(File file) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Index indexA = userProfileA.getFileByPath(relativePath);
+		Index indexA = userProfileA.getFileByPath(file, nodeA.getSession().getRootFile());
 
 		UserProfile userProfileB = nodeB.getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Index indexB = userProfileB.getFileByPath(relativePath);
+		Index indexB = userProfileB.getFileByPath(file, nodeB.getSession().getRootFile());
 
 		// check if userA's content protection keys are other ones
 		Assert.assertFalse(indexA.getProtectionKeys().getPrivate().equals(userProfileA.getProtectionKeys().getPrivate()));

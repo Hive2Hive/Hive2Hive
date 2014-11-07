@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.share.write;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
@@ -481,13 +480,11 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Path relativePathA = rootA.toPath().relativize(fileAtA.toPath());
-		Index indexA = userProfileA.getFileByPath(relativePathA);
+		Index indexA = userProfileA.getFileByPath(fileAtA, network.get(0).getSession().getRootFile());
 
 		UserProfile userProfileB = network.get(1).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		Path relativePathB = rootB.toPath().relativize(fileAtB.toPath());
-		Index indexB = userProfileB.getFileByPath(relativePathB);
+		Index indexB = userProfileB.getFileByPath(fileAtB, network.get(1).getSession().getRootFile());
 
 		// in case of deletion verify removed index nodes
 		if (deleted) {

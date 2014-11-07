@@ -2,14 +2,14 @@ package org.hive2hive.core.model;
 
 import java.io.File;
 import java.io.Serializable;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import org.hive2hive.core.file.FileUtil;
 
 public abstract class Index implements Comparable<Index>, Serializable {
 
@@ -29,7 +29,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	}
 
 	public Index(KeyPair fileKeys, String name, FolderIndex parent) {
-		if(fileKeys == null) {
+		if (fileKeys == null) {
 			throw new IllegalArgumentException("File keys can't be null.");
 		}
 		this.fileKeys = fileKeys;
@@ -156,15 +156,19 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	}
 
 	/**
-	 * Returns the full path (starting at the root) of this node
+	 * Returns the full path string (starting at the root) of this node
 	 * 
 	 * @return
 	 */
-	public Path getFullPath() {
+	public String getFullPath() {
 		if (parent == null) {
-			return Paths.get("");
+			return FileUtil.getFileSep();
 		} else {
-			return Paths.get(parent.getFullPath().toString(), getName());
+			if (isFile()) {
+				return parent.getFullPath() + name;
+			} else {
+				return parent.getFullPath() + name + FileUtil.getFileSep();
+			}
 		}
 	}
 
@@ -265,9 +269,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * @param node The root node from which the digest is started.
 	 * @return The digest in sorted order.
 	 */
-	public static List<Path> getFilePathList(Index node) {
+	public static List<String> getFilePathList(Index node) {
 		List<Index> fileNodes = getIndexList(node);
-		List<Path> digest = new ArrayList<Path>();
+		List<String> digest = new ArrayList<String>();
 
 		for (Index fileNode : fileNodes) {
 			digest.add(fileNode.getFullPath());

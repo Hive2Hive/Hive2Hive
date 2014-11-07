@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.share.write;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -90,7 +89,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 		subFolderA = new File(sharedFolderA, "subfolder");
 		subFolderA.mkdir();
-		logger.info("Upload a new subfolder '{}'.", rootA.toPath().relativize(subFolderA.toPath()).toString());
+		logger.info("Upload a new subfolder '{}'.", subFolderA.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFolderA);
 		subFolderB = new File(sharedFolderB, subFolderA.getName());
 		waitTillSynchronizedAdding(subFolderB);
@@ -101,24 +100,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' from A.", relativePath.toString());
+		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronizedAdding(fileFromAAtB);
 
-		logger.info("Update file '{}' at A.", relativePath);
+		logger.info("Update file '{}' at A.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
-		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromAAtA, newMD5);
 	}
 
 	@Test
@@ -126,24 +124,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' from A.", relativePath.toString());
+		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronizedAdding(fileFromAAtB);
 
-		logger.info("Update file '{}' at B.", relativePath);
+		logger.info("Update file '{}' at B.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtB.lastModified();
 		FileUtils.write(fileFromAAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
-		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtA, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromAAtA, newMD5);
 	}
 
 	@Test
@@ -151,24 +148,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
-		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
-		logger.info("Upload a new file '{}' from B.", relativePath.toString());
+		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
-		logger.info("Wait till new file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		File fileFromBAtA = new File(sharedFolderA, fileFromBAtB.getName());
 		waitTillSynchronizedAdding(fileFromBAtA);
 
-		logger.info("Update file '{}' at A.", relativePath);
+		logger.info("Update file '{}' at A.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtA.lastModified();
 		FileUtils.write(fileFromBAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
-		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtB, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromBAtB, newMD5);
 	}
 
 	@Test
@@ -176,24 +172,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
-		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
-		logger.info("Upload a new file '{}' from B.", relativePath.toString());
+		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
-		logger.info("Wait till new file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		File fileFromBAtA = new File(sharedFolderA, fileFromBAtB.getName());
 		waitTillSynchronizedAdding(fileFromBAtA);
 
-		logger.info("Update file '{}' at B.", relativePath);
+		logger.info("Update file '{}' at B.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtB.lastModified();
 		FileUtils.write(fileFromBAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
-		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtA, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromBAtB, newMD5);
 	}
 
 	@Test
@@ -201,24 +196,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' from A.", relativePath.toString());
+		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronizedAdding(fileFromAAtB);
 
-		logger.info("Update file '{}' at A.", relativePath);
+		logger.info("Update file '{}' at A.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
-		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromAAtA, newMD5);
 	}
 
 	@Test
@@ -226,24 +220,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, CHUNK_SIZE);
-		Path relativePath = rootA.toPath().relativize(fileFromAAtA.toPath());
-		logger.info("Upload a new file '{}' from A.", relativePath.toString());
+		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
-		logger.info("Wait till new file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		File fileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronizedAdding(fileFromAAtB);
 
-		logger.info("Update file '{}' at B.", relativePath);
+		logger.info("Update file '{}' at B.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtB.lastModified();
 		FileUtils.write(fileFromAAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
-		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtA, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromAAtA, newMD5);
 	}
 
 	@Test
@@ -251,24 +244,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, CHUNK_SIZE);
-		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
-		logger.info("Upload a new file '{}' from B.", relativePath.toString());
+		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
-		logger.info("Wait till new file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		File fileFromBAtA = new File(subFolderA, fileFromBAtB.getName());
 		waitTillSynchronizedAdding(fileFromBAtA);
 
-		logger.info("Update file '{}' at A.", relativePath);
+		logger.info("Update file '{}' at A.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtA.lastModified();
 		FileUtils.write(fileFromBAtA, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
-		logger.info("Wait till update of file '{}' gets synchronized with B.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtB, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromBAtB, newMD5);
 	}
 
 	@Test
@@ -276,24 +268,23 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, CHUNK_SIZE);
-		Path relativePath = rootB.toPath().relativize(fileFromBAtB.toPath());
-		logger.info("Upload a new file '{}' from B.", relativePath.toString());
+		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
-		logger.info("Wait till new file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till new file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		File fileFromBAtA = new File(subFolderA, fileFromBAtB.getName());
 		waitTillSynchronizedAdding(fileFromBAtA);
 
-		logger.info("Update file '{}' at B.", relativePath);
+		logger.info("Update file '{}' at B.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtB.lastModified();
 		FileUtils.write(fileFromBAtB, randomString(), false);
 		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
-		logger.info("Wait till update of file '{}' gets synchronized with A.", relativePath.toString());
+		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtA, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(relativePath, newMD5);
+		checkFileIndex(fileFromBAtB, newMD5);
 	}
 
 	/**
@@ -331,14 +322,14 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
 	}
 
-	private static void checkFileIndex(Path relativePath, byte[] md5Hash) throws GetFailedException, NoSessionException {
+	private static void checkFileIndex(File file, byte[] md5Hash) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(relativePath);
+		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(file, network.get(0).getSession().getRootFile());
 
 		UserProfile userProfileB = network.get(1).getSession().getProfileManager()
 				.getUserProfile(UUID.randomUUID().toString(), false);
-		FileIndex indexB = (FileIndex) userProfileB.getFileByPath(relativePath);
+		FileIndex indexB = (FileIndex) userProfileB.getFileByPath(file, network.get(0).getSession().getRootFile());
 
 		// check if index is file
 		Assert.assertTrue(indexA.isFile());

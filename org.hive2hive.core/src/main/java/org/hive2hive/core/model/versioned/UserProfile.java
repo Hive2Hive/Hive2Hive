@@ -1,7 +1,6 @@
 package org.hive2hive.core.model.versioned;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
@@ -86,13 +84,6 @@ public class UserProfile extends BaseVersionedNetworkContent {
 		return found;
 	}
 
-	@Deprecated
-	// don't use Path
-	public Index getFileByPath(File file, Path root) {
-		Path relativePath = root.relativize(file.toPath());
-		return getFileByPath(relativePath);
-	}
-
 	public Index getFileByPath(File file, File root) {
 		// holds all files in-order
 		File currentFile = new File(file.getAbsolutePath());
@@ -115,27 +106,5 @@ public class UserProfile extends BaseVersionedNetworkContent {
 			}
 		}
 		return currentIndex;
-	}
-
-	@Deprecated
-	// don't use Path
-	public Index getFileByPath(Path relativePath) {
-		String[] split = relativePath.toString().split(FileUtil.getFileSep());
-		FolderIndex current = root;
-		for (int i = 0; i < split.length; i++) {
-			if (split[i].isEmpty()) {
-				continue;
-			}
-			Index child = current.getChildByName(split[i]);
-			if (child == null) {
-				return null;
-			} else if (child instanceof FolderIndex) {
-				current = (FolderIndex) child;
-			} else if (child.getFullPath().equals(relativePath)) {
-				return child;
-			}
-		}
-
-		return current;
 	}
 }

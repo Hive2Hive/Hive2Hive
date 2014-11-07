@@ -1,21 +1,14 @@
 package org.hive2hive.core.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.FolderIndex;
-import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.SerializationUtil;
@@ -120,41 +113,6 @@ public class FileUtil {
 	}
 
 	/**
-	 * Move a file according to their nodes. This operation also support renaming and moving in the same step.
-	 * 
-	 * @param sourceName the name of the file at the source
-	 * @param destName the name of the file at the destination
-	 * @param oldParent the old parent {@link FolderIndex}
-	 * @param newParent the new parent {@link FolderIndex}
-	 * @param fileManager the {@link FileManager} of the user
-	 * @throws IOException when moving went wrong
-	 */
-	@Deprecated
-	public static void moveFile(File root, String sourceName, String destName, Index oldParent, Index newParent)
-			throws IOException {
-		// find the file of this user on the disc
-		File oldParentFile = new File(root, oldParent.getFullPath().toString());
-		File toMoveSource = new File(oldParentFile, sourceName);
-
-		if (!toMoveSource.exists()) {
-			throw new FileNotFoundException("Cannot move file '" + toMoveSource.getAbsolutePath()
-					+ "' because it's not at the source location anymore");
-		}
-
-		File newParentFile = new File(root, newParent.getFullPath().toString());
-		File toMoveDest = new File(newParentFile, destName);
-
-		if (toMoveDest.exists()) {
-			logger.warn("Overwriting '{}' because file has been moved remotely.", toMoveDest.getAbsolutePath());
-		}
-
-		// move the file
-		Path result = Files.move(toMoveSource.toPath(), toMoveDest.toPath(), StandardCopyOption.ATOMIC_MOVE);
-		logger.debug("Successfully moved the file from {} to {}. Return: {}", toMoveSource.getAbsolutePath(),
-				toMoveDest.getAbsolutePath(), result);
-	}
-
-	/**
 	 * Checks whether the given file is in the given H2H root folder (note, the user must be logged in).
 	 * 
 	 * @param file the file to test
@@ -188,11 +146,5 @@ public class FileUtil {
 				return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
 			}
 		});
-	}
-
-	@Deprecated
-	// don't use Path
-	public static Path getPath(Path root, Index parentNode) {
-		return Paths.get(root.toString(), parentNode.getFullPath().toString());
 	}
 }

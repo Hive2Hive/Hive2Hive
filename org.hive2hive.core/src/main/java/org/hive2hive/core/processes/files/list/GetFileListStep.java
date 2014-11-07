@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.list;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -51,8 +50,8 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 				continue;
 			}
 
-			Path path = index.getFullPath();
-			File file = new File(rootFile, path.toString());
+			String path = index.getFullPath();
+			File file = new File(rootFile, path);
 
 			byte[] md5Hash = null;
 			Set<UserPermission> userPermissions;

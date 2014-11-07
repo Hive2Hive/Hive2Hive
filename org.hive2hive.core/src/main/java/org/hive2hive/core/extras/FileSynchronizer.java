@@ -152,7 +152,7 @@ public class FileSynchronizer {
 		indexList.remove(profileRootNode);
 
 		for (Index index : indexList) {
-			if (now.containsKey(index.getFullPath().toString())) {
+			if (now.containsKey(index.getFullPath())) {
 				// was here before and is still here --> nothing to add
 				logger.trace("File '{}' was already here.", index.getFullPath());
 			} else {
@@ -225,7 +225,7 @@ public class FileSynchronizer {
 			}
 
 			FileIndex fileIndex = (FileIndex) index;
-			String path = fileIndex.getFullPath().toString();
+			String path = fileIndex.getFullPath();
 			if (before.containsKey(path) && now.containsKey(path)) {
 				if (!HashUtil.compare(fileIndex.getMD5(), now.get(path))
 						&& !HashUtil.compare(fileIndex.getMD5(), before.get(path))) {
@@ -250,7 +250,7 @@ public class FileSynchronizer {
 
 			@Override
 			public int compare(Index node1, Index node2) {
-				return node1.getFullPath().toString().compareTo(node2.getFullPath().toString());
+				return node1.getFullPath().compareTo(node2.getFullPath());
 			}
 		});
 	}

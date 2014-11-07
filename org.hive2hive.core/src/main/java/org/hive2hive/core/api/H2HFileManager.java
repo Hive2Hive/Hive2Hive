@@ -2,7 +2,6 @@ package org.hive2hive.core.api;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.hive2hive.core.H2HSession;
@@ -12,8 +11,6 @@ import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.extras.FileRecursionUtil;
-import org.hive2hive.core.extras.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.PermissionType;
@@ -53,16 +50,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalFileLocation();
 		}
 
-		IProcessComponent addProcess;
-		if (file.isDirectory() && file.listFiles().length > 0) {
-			// add the files recursively
-			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			addProcess = FileRecursionUtil.buildUploadProcess(preorderList, FileProcessAction.NEW_FILE, networkManager);
-		} else {
-			// add single file
-			addProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
-		}
-
+		IProcessComponent addProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
 		AsyncComponent asyncProcess = new AsyncComponent(addProcess);
 
 		submitProcess(asyncProcess);
@@ -116,16 +104,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
-		IProcessComponent deleteProcess;
-		if (file.isDirectory() && file.listFiles().length > 0) {
-			// delete the files recursively
-			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			deleteProcess = FileRecursionUtil.buildDeletionProcess(preorderList, networkManager);
-		} else {
-			// delete a single file
-			deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
-		}
-
+		IProcessComponent deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
 		AsyncComponent asyncProcess = new AsyncComponent(deleteProcess);
 
 		submitProcess(asyncProcess);
