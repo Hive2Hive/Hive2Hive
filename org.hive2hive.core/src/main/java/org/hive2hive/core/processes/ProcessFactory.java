@@ -149,9 +149,12 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public IProcessComponent<Void> createUserProfileTaskStep(NetworkManager networkManager) {
-		SequentialProcess process = new SequentialProcess();
+	public IProcessComponent<Void> createUserProfileTaskProcess(NetworkManager networkManager) {
 		UserProfileTaskContext context = new UserProfileTaskContext();
+		
+		// process composition
+		SyncProcess process = new SyncProcess();
+		
 		process.add(new GetUserProfileTaskStep(context, networkManager));
 		// Note: this step will add the next steps since it depends on the get result
 		process.add(new HandleUserProfileTaskStep(context, networkManager));

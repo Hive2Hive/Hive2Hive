@@ -86,7 +86,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 				networkManager.getConnection().getPeerDHT().peerAddress())) {
 			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
 			if (getParent() != null) {
-				getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
+				getParent().add(ProcessFactory.instance().createUserProfileTaskProcess(networkManager));
 			}
 		}
 		

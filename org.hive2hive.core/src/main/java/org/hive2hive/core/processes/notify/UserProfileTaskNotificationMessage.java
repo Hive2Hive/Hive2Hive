@@ -31,7 +31,7 @@ public class UserProfileTaskNotificationMessage extends BaseDirectMessage {
 	public void run() {
 		logger.debug("Received a user profile task notification from '{}'.", senderId);
 		try {
-			ProcessComponent process = ProcessFactory.instance().createUserProfileTaskStep(networkManager);
+			ProcessComponent process = ProcessFactory.instance().createUserProfileTaskProcess(networkManager);
 			process.start();
 		} catch (InvalidProcessStateException e) {
 			logger.error("Cannot handle user profile task queue. Currently no user is logged in.");
