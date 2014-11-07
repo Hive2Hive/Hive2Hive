@@ -13,11 +13,11 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.processframework.concretes.ResultProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
-public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
+public class GetFileListStep extends ProcessStep<List<FileTaste>> {
 
 	private final UserProfileManager profileManager;
 	private final File rootFile;
@@ -30,13 +30,13 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected List<FileTaste> doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// get the user profile
 		UserProfile profile = null;
 		try {
 			profile = profileManager.getUserProfile(getID(), false);
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException("User profile could not be loaded.");
+		} catch (GetFailedException ex) {
+			throw new ProcessExecutionException(this, ex, "User profile could not be loaded.");
 		}
 
 		// the result set
@@ -67,11 +67,6 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 			result.add(new FileTaste(file, path, md5Hash, userPermissions));
 		}
 
-		notifyResultComputed(result);
-	}
-
-	@Override
-	public List<FileTaste> getResult() {
 		return result;
 	}
 }

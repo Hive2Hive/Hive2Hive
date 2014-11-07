@@ -361,8 +361,11 @@ public final class ProcessFactory {
 	public IProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
 			throws NoSessionException {
 		H2HSession session = networkManager.getSession();
+		
+		// only one process step
 		GetFileListStep listStep = new GetFileListStep(session.getProfileManager(), session.getRootFile());
-		return new AsyncResultComponent<List<FileTaste>>(listStep);
+		
+		return listStep;
 	}
 
 	public IProcessComponent<Void> createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
@@ -388,7 +391,9 @@ public final class ProcessFactory {
 			throws NoPeerConnectionException, NoSessionException {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
+		// process composition
 		SequentialProcess process = new SequentialProcess();
+		
 		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));
 		process.add(new GetPublicKeysStep(context, networkManager.getSession().getKeyManager()));
 		process.add(new PutAllUserProfileTasksStep(context, networkManager));
