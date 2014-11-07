@@ -1,16 +1,8 @@
 package org.hive2hive.core.events;
 
-import static org.junit.Assert.assertTrue;
-
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.api.H2HNode;
-import org.hive2hive.core.api.configs.FileConfiguration;
-import org.hive2hive.core.api.configs.NetworkConfiguration;
-import org.hive2hive.core.api.interfaces.IH2HNode;
-import org.hive2hive.core.events.util.TestNetworkEventListener;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class NetworkEventsTest extends H2HJUnitTest {
 		
@@ -25,7 +17,7 @@ public class NetworkEventsTest extends H2HJUnitTest {
 		afterClass();
 	}
 	
-	@Test
+	/*@Test
 	public void eventListenerTest() {
 		
 		IH2HNode node = H2HNode.createNode(NetworkConfiguration.createInitial(), FileConfiguration.createDefault());
@@ -43,6 +35,6 @@ public class NetworkEventsTest extends H2HJUnitTest {
 		assertTrue(listener.disconnectionSucceeded || listener.disconnectionFailed);
 		assertTrue(!listener.connectionSucceeded && !listener.connectionFailed);
 		listener.reset();
-	}
+	}*/
 
 }

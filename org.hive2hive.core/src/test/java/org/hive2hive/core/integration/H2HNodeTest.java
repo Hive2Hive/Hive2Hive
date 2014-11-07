@@ -64,7 +64,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		credentials = generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
+		IProcessComponent<?> registerProcess = registerNode.getUserManager().register(credentials);
 		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
 
 		fileAgent = new TestFileAgent();
