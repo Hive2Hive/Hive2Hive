@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.files.delete;
 
-import java.io.File;
 import java.security.PublicKey;
 import java.util.Random;
 
@@ -121,8 +120,8 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 		}
 
 		// trigger event
-		File deletedFile = fileToDelete.asFile(session.getRootFile());
-		networkManager.getEventBus().publish(new FileDeleteEvent(deletedFile, fileToDelete.isFile()));
+		networkManager.getEventBus().publish(
+				new FileDeleteEvent(fileToDelete.asFile(session.getRootFile()), fileToDelete.isFile()));
 	}
 
 }
