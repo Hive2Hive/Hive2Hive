@@ -1,6 +1,0 @@
-/bin
-/target
-.settings/org.sonar.ide.eclipse.core.prefs
-
-# Mac #
-.DS_Store
