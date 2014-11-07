@@ -24,7 +24,7 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * @return an observable process component
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
-	IProcessComponent register(UserCredentials credentials) throws NoPeerConnectionException;
+	IProcessComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
 	 * Login a (registered) user with the same credentials as {@link IUserManager#register(UserCredentials)}
@@ -36,7 +36,7 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	IProcessComponent login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
+	IProcessComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
@@ -46,7 +46,7 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 * @throws NoSessionException no user has logged in
 	 */
-	IProcessComponent logout() throws NoPeerConnectionException, NoSessionException;
+	IProcessComponent<Void> logout() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Checks whether a user is registered in the network.
