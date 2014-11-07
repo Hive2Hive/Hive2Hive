@@ -13,8 +13,7 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.context.ShareProcessContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class UpdateUserProfileStep extends ProcessStep {
+public class UpdateUserProfileStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateUserProfileStep.class);
 
@@ -34,8 +33,6 @@ public class UpdateUserProfileStep extends ProcessStep {
 	private final UserProfileManager profileManager;
 	private final File root;
 	private final String userId;
-
-	private boolean modified = false;
 
 	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
 		this.context = context;
@@ -45,7 +42,7 @@ public class UpdateUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		logger.debug("Updating user profile for sharing folder '{}'.", context.getFolder().getName());
 
 		while (true) {
@@ -54,18 +51,18 @@ public class UpdateUserProfileStep extends ProcessStep {
 				FolderIndex folderIndex = (FolderIndex) userProfile.getFileByPath(context.getFolder(), root);
 
 				if (!folderIndex.canWrite()) {
-					throw new ProcessExecutionException(String.format("Cannot share folder '%s' with read-only access.",
-							folderIndex.getName()));
+					throw new ProcessExecutionException(this, String.format(
+							"Cannot share folder '%s' with read-only access.", folderIndex.getName()));
 				} else if (!folderIndex.getSharedFlag() && folderIndex.isSharedOrHasSharedChildren()) {
 					// restriction that disallows sharing folders within other shared folders
-					throw new ProcessExecutionException(String.format(
-							"Folder '%s' is already shared or contains an shared folder.", folderIndex.getName()));
+					throw new ProcessExecutionException(this, String.format(
+							"Folder '%s' is already shared or contains a shared folder.", folderIndex.getName()));
 				}
 
 				// check if the folder is already shared with this user
 				if (folderIndex.getCalculatedUserList().contains(context.getFriendId())) {
-					throw new ProcessExecutionException(String.format("Friend '%s' already has access to folder '%s'.",
-							context.getFriendId(), folderIndex.getName()));
+					throw new ProcessExecutionException(this, String.format(
+							"Friend '%s' already has access to folder '%s'.", context.getFriendId(), folderIndex.getName()));
 				}
 
 				// store for the notification
@@ -89,35 +86,36 @@ public class UpdateUserProfileStep extends ProcessStep {
 				profileManager.readyToPut(userProfile, getID());
 
 				// set modification flag needed for roll backs
-				modified = true;
-			} catch (VersionForkAfterPutException e) {
-				continue;
-			} catch (GetFailedException | PutFailedException e) {
-				throw new ProcessExecutionException(e);
-			}
+				setRequiresRollback(true);
 
+			} catch (VersionForkAfterPutException ex) {
+				continue;
+			} catch (GetFailedException | PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
+			}
 			break;
 		}
+
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (modified) {
-			// return to original domain key and put the userProfile
-			try {
-				UserProfile userProfile = profileManager.getUserProfile(getID(), true);
-				FolderIndex folderNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile().getId());
+	protected Void doRollback() throws InvalidProcessStateException {
+		// return to original domain key and put the userProfile
+		try {
+			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
+			FolderIndex folderNode = (FolderIndex) userProfile.getFileById(context.consumeMetaFile().getId());
 
-				// unshare the fileNode
-				folderNode.unshare();
+			// unshare the fileNode
+			folderNode.unshare();
 
-				profileManager.readyToPut(userProfile, getID());
+			profileManager.readyToPut(userProfile, getID());
 
-				// reset flag
-				modified = false;
-			} catch (Exception e) {
-				logger.warn("Rollback of updating user profile (sharing a folder) failed. Exception = '{}'.", e.getMessage());
-			}
+			// reset flag
+			setRequiresRollback(false);
+		} catch (Exception e) {
+			logger.warn("Rollback of updating user profile (sharing a folder) failed. Exception = '{}'.", e.getMessage());
 		}
+		return null;
 	}
 }

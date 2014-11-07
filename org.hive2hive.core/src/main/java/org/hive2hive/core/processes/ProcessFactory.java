@@ -329,7 +329,9 @@ public final class ProcessFactory {
 			throws NoSessionException, NoPeerConnectionException {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
-		SequentialProcess process = new SequentialProcess();
+		// process composition
+		SyncProcess process = new SyncProcess();
+		
 		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission.getUserId()));
 		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
 		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));

@@ -12,12 +12,12 @@ import org.hive2hive.core.processes.context.MetaDocumentPKUpdateContext;
 import org.hive2hive.core.processes.context.interfaces.IInitializeMetaUpdateContext;
 import org.hive2hive.core.processes.share.pkupdate.ChangeProtectionKeysStep;
 import org.hive2hive.core.processes.share.pkupdate.InitializeChunkUpdateStep;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
-import org.hive2hive.processframework.abstracts.ProcessStep;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.ProcessStep;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class InitializeMetaUpdateStep extends ProcessStep {
+public class InitializeMetaUpdateStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitializeMetaUpdateStep.class);
 
@@ -40,7 +40,7 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		Index index = context.consumeIndex();
 
 		try {
@@ -51,10 +51,11 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 				FileIndex fileIndex = (FileIndex) index;
 				initForFile(fileIndex);
 			}
-		} catch (NoSessionException | NoPeerConnectionException e) {
-			throw new ProcessExecutionException(e);
+		} catch (NoSessionException | NoPeerConnectionException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
-
+		
+		return null;
 	}
 
 	private void initForFolder(FolderIndex folderIndex) throws ProcessExecutionException, NoSessionException,
@@ -70,22 +71,23 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 
 	private void initForFile(FileIndex fileIndex) throws NoSessionException, NoPeerConnectionException {
 		logger.debug("Initialize to change the protection keys of meta document of index '{}'.", fileIndex.getName());
-		// create the process and make wrap it to make it asynchronous
-		getParent().add(new AsyncComponent(buildProcess(fileIndex)));
+		// create the process and wrap it to make it asynchronous
+		getParent().add(new AsyncComponent<>(buildProcess(fileIndex)));
 	}
 
-	private ProcessComponent buildProcess(FileIndex index) throws NoSessionException, NoPeerConnectionException {
+	private IProcessComponent<Void> buildProcess(FileIndex index) throws NoSessionException, NoPeerConnectionException {
+		
 		// create a new sub-process
-		SequentialProcess sequential = new SequentialProcess();
+		SyncProcess subProcess = new SyncProcess();
 
 		// each meta document gets own context
 		MetaDocumentPKUpdateContext metaContext = new MetaDocumentPKUpdateContext(context.consumeOldProtectionKeys(),
 				context.consumeNewProtectionKeys(), index.getFilePublicKey(), index);
 
-		sequential.add(new GetMetaFileStep(metaContext, dataManager));
-		sequential.add(new ChangeProtectionKeysStep(metaContext, dataManager));
-		sequential.add(new InitializeChunkUpdateStep(metaContext, dataManager));
+		subProcess.add(new GetMetaFileStep(metaContext, dataManager));
+		subProcess.add(new ChangeProtectionKeysStep(metaContext, dataManager));
+		subProcess.add(new InitializeChunkUpdateStep(metaContext, dataManager));
 
-		return sequential;
+		return subProcess;
 	}
 }
