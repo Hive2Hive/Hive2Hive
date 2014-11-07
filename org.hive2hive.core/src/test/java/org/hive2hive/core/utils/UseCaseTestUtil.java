@@ -10,7 +10,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.integration.TestFileConfiguration;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
@@ -24,6 +24,7 @@ import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.helper.GetMetaFileContext;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.core.utils.helper.TestResultProcessComponentListener;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -52,7 +53,12 @@ public class UseCaseTestUtil {
 
 	public static void login(UserCredentials credentials, NetworkManager networkManager, File root)
 			throws NoPeerConnectionException {
-		SessionParameters sessionParameters = new SessionParameters(root.toPath(), new TestFileConfiguration());
+		login(credentials, networkManager, new TestFileAgent(root));
+	}
+
+	public static void login(UserCredentials credentials, NetworkManager networkManager, IFileAgent fileAgent)
+			throws NoPeerConnectionException {
+		SessionParameters sessionParameters = new SessionParameters(fileAgent, new TestFileConfiguration());
 		IProcessComponent process = ProcessFactory.instance().createLoginProcess(credentials, sessionParameters,
 				networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
@@ -64,12 +70,6 @@ public class UseCaseTestUtil {
 		login(credentials, networkManager, root);
 	}
 
-	public static void registerLoginAndSynchronize(UserCredentials credentials, NetworkManager networkManager, File root)
-			throws NoPeerConnectionException {
-		registerAndLogin(credentials, networkManager, root);
-		synchronize(networkManager);
-	}
-
 	public static void logout(NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
 		ProcessComponent process = ProcessFactory.instance().createLogoutProcess(networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
@@ -79,11 +79,6 @@ public class UseCaseTestUtil {
 			throws GetFailedException, NoPeerConnectionException {
 		UserProfileManager manager = new UserProfileManager(networkManager.getDataManager(), credentials);
 		return manager.getUserProfile(UUID.randomUUID().toString(), false);
-	}
-
-	public static void synchronize(NetworkManager networkManager) {
-		ProcessComponent process = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
-		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
@@ -103,7 +98,7 @@ public class UseCaseTestUtil {
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
-		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey)).toFile();
+		return userProfile.getFileById(fileKey).asFile(networkManager.getSession().getRootFile());
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,

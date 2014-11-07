@@ -4,6 +4,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
@@ -34,7 +37,7 @@ public class UserProfile extends BaseVersionedNetworkContent {
 		this.encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 
 		// create the root node
-		root = new FolderIndex(encryptionKeys, null);
+		root = new FolderIndex(encryptionKeys);
 		root.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
@@ -83,16 +86,39 @@ public class UserProfile extends BaseVersionedNetworkContent {
 		return found;
 	}
 
+	@Deprecated
+	// don't use Path
 	public Index getFileByPath(File file, Path root) {
 		Path relativePath = root.relativize(file.toPath());
 		return getFileByPath(relativePath);
 	}
 
 	public Index getFileByPath(File file, File root) {
-		Path relativePath = root.toPath().relativize(file.toPath());
-		return getFileByPath(relativePath);
+		// holds all files in-order
+		File currentFile = new File(file.getAbsolutePath());
+		List<String> filePath = new ArrayList<String>();
+		while (!root.equals(currentFile) && currentFile != null) {
+			filePath.add(currentFile.getName());
+			currentFile = currentFile.getParentFile();
+		}
+		Collections.reverse(filePath);
+
+		FolderIndex currentIndex = this.root;
+		for (String fileName : filePath) {
+			Index child = currentIndex.getChildByName(fileName);
+			if (child == null) {
+				return null;
+			} else if (child instanceof FolderIndex) {
+				currentIndex = (FolderIndex) child;
+			} else if (child.getName().equals(file.getName())) {
+				return child;
+			}
+		}
+		return currentIndex;
 	}
 
+	@Deprecated
+	// don't use Path
 	public Index getFileByPath(Path relativePath) {
 		String[] split = relativePath.toString().split(FileUtil.getFileSep());
 		FolderIndex current = root;

@@ -1,11 +1,13 @@
 package org.hive2hive.core.model;
 
+import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
+import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,5 +50,37 @@ public class UserProfileTest extends H2HJUnitTest {
 		Assert.assertNotNull(userProfile.getFileById(child1Key.getPublic()));
 		Assert.assertNotNull(userProfile.getFileById(child2Key.getPublic()));
 		Assert.assertNotNull(userProfile.getFileById(child3Key.getPublic()));
+	}
+
+	@Test
+	public void getFileByPath() {
+		FolderIndex root = userProfile.getRoot();
+
+		// tree in the UP
+		FolderIndex folderIndex1 = new FolderIndex(root, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				randomString());
+		FileIndex fileIndex1 = new FileIndex(folderIndex1, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				randomString(), "bla".getBytes());
+		FileIndex fileIndex2 = new FileIndex(folderIndex1, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				randomString(), "blubb".getBytes());
+		FolderIndex folderIndex2 = new FolderIndex(folderIndex1, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				randomString());
+		FileIndex fileIndex3 = new FileIndex(folderIndex2, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
+				randomString(), "bla".getBytes());
+
+		// tree on the FS
+		File rootFile = FileTestUtil.getTempDirectory();
+		File folder1 = new File(rootFile, folderIndex1.getName());
+		File file1 = new File(folder1, fileIndex1.getName());
+		File file2 = new File(folder1, fileIndex2.getName());
+		File folder2 = new File(folder1, folderIndex2.getName());
+		File file3 = new File(folder2, fileIndex3.getName());
+
+		Assert.assertEquals(root, userProfile.getFileByPath(rootFile, rootFile));
+		Assert.assertEquals(folderIndex1, userProfile.getFileByPath(folder1, rootFile));
+		Assert.assertEquals(fileIndex1, userProfile.getFileByPath(file1, rootFile));
+		Assert.assertEquals(fileIndex2, userProfile.getFileByPath(file2, rootFile));
+		Assert.assertEquals(folderIndex2, userProfile.getFileByPath(folder2, rootFile));
+		Assert.assertEquals(fileIndex3, userProfile.getFileByPath(file3, rootFile));
 	}
 }

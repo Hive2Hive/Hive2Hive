@@ -45,13 +45,13 @@ public class GetFileKeysStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		Index fileNode = profile.getFileByPath(file, session.getRoot());
+		Index fileNode = profile.getFileByPath(file, session.getRootFile());
 		if (fileNode == null) {
 			throw new ProcessExecutionException("File does not exist in user profile. Consider uploading a new file.");
 		}
 
 		// set the corresponding content protection keys
-		context.provideProtectionKeys(fileNode.getProtectionKeys());
+		context.provideChunkProtectionKeys(fileNode.getProtectionKeys());
 		context.provideMetaFileEncryptionKeys(fileNode.getFileKeys());
 	}
 }

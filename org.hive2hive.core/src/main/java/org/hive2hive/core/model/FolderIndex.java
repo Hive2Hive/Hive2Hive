@@ -30,8 +30,8 @@ public class FolderIndex extends Index {
 	 * @param keyPair
 	 * @param name
 	 */
-	public FolderIndex(KeyPair keyPair, String name) {
-		super(keyPair, name);
+	public FolderIndex(KeyPair keyPair) {
+		super(keyPair);
 	}
 
 	/**
@@ -47,6 +47,9 @@ public class FolderIndex extends Index {
 		super(keyPair, name, parent);
 	}
 
+	/**
+	 * Copy constructor
+	 */
 	public FolderIndex(FolderIndex folderIndex) {
 		super(folderIndex.fileKeys, folderIndex.name, folderIndex.parent);
 		this.children = new HashSet<Index>();

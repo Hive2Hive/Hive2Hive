@@ -1,25 +1,19 @@
 package org.hive2hive.core.processes.context;
 
 import java.io.File;
-import java.security.KeyPair;
-import java.util.HashSet;
 import java.util.Set;
 
-import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
+/**
+ * @author Nico, Seppi
+ */
 public class MoveFileProcessContext {
 
 	private final File source;
 	private final File destination;
-
-	private KeyPair protectionKeys;
-	private BaseMetaFile metaFile;
-	private KeyPair fileNodeKeys;
-
-	private final Set<String> usersToNotifySource;
-	private final Set<String> usersToNotifyDestination;
+	private final File root;
 
 	// three context objects because we need to send three different types of notifications:
 	// 1. users that had access before and after move
@@ -29,13 +23,10 @@ public class MoveFileProcessContext {
 	private final DeleteNotificationContext deleteNotificationContext;
 	private final AddNotificationContext addNotificationContext;
 
-	public MoveFileProcessContext(File source, File destination, String userId) {
+	public MoveFileProcessContext(File source, File destination, File root) {
 		this.source = source;
 		this.destination = destination;
-		this.usersToNotifySource = new HashSet<String>();
-		usersToNotifySource.add(userId);
-		this.usersToNotifyDestination = new HashSet<String>();
-		usersToNotifyDestination.add(userId);
+		this.root = root;
 
 		moveNotificationContext = new MoveNotificationContext();
 		deleteNotificationContext = new DeleteNotificationContext();
@@ -50,29 +41,8 @@ public class MoveFileProcessContext {
 		return destination;
 	}
 
-	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
-	}
-
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
-
-	}
-
-	public BaseMetaFile consumeMetaFile() {
-		return metaFile;
-	}
-
-	public void provideMetaFile(BaseMetaFile metaFile) {
-		this.metaFile = metaFile;
-	}
-
-	public void setFileNodeKeys(KeyPair fileNodeKeys) {
-		this.fileNodeKeys = fileNodeKeys;
-	}
-
-	public KeyPair getFileNodeKeys() {
-		return fileNodeKeys;
+	public File getRoot() {
+		return root;
 	}
 
 	public MoveNotificationContext getMoveNotificationContext() {

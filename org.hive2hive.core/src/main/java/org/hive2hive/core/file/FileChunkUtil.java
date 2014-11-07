@@ -111,7 +111,7 @@ public class FileChunkUtil {
 	}
 
 	/**
-	 * Reassembly of multiple file parts to a single file. Note that the file parts need to be sorted
+	 * Reassembling of multiple file parts to a single file. Note that the file parts need to be sorted
 	 * beforehand
 	 * 
 	 * @param fileParts the sorted file parts.
@@ -120,24 +120,20 @@ public class FileChunkUtil {
 	 */
 	public static void reassembly(List<File> fileParts, File destination) throws IOException {
 		if (fileParts == null || fileParts.isEmpty()) {
-			logger.error("File parts can't be null.");
-			return;
+			throw new IllegalArgumentException("File parts can't be null.");
 		} else if (fileParts.isEmpty()) {
-			logger.error("File parts can't be empty.");
-			return;
+			throw new IllegalArgumentException("File parts can't be empty.");
 		} else if (destination == null) {
-			logger.error("Destination can't be null");
-			return;
+			throw new IllegalArgumentException("Destination can't be null");
 		}
 
 		if (destination.exists()) {
 			// overwrite
-//			if (destination.delete()) {
-//				logger.debug("Destination gets overwritten. destination = '{}'", destination);
-//			} else {
-//				logger.error("Couldn't overwrite destination. destination = '{}'", destination);
-//				return;
-//			}
+			if (destination.delete()) {
+				logger.warn("Destination gets overwritten. destination = '{}'", destination);
+			} else {
+				throw new IOException(String.format("Couldn't overwrite destination. destination = '%s'", destination));
+			}
 		}
 
 		for (File filePart : fileParts) {

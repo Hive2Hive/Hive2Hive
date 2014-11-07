@@ -12,30 +12,29 @@ import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 /**
  * The notification message factory is used when a file has been added / updated.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class UploadNotificationMessageFactory extends BaseNotificationMessageFactory {
 
-	private final Index index;
+	private final Index addedFileIndex;
 	private final PublicKey parentKey;
 
 	/**
-	 * @param index the file that has been added (may contain sub-files)
+	 * @param addedFileKey the key of file that has been added (may contain sub-files)
 	 * @param parentKey the new parent's public key
 	 */
-	public UploadNotificationMessageFactory(Index index, PublicKey parentKey) {
-		this.index = index;
+	public UploadNotificationMessageFactory(Index addedIndex, PublicKey parentKey) {
+		this.addedFileIndex = addedIndex;
 		this.parentKey = parentKey;
 	}
 
 	@Override
 	public BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver) {
-		return new UploadNotificationMessage(receiver, index);
+		return new UploadNotificationMessage(receiver, addedFileIndex.getFilePublicKey());
 	}
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new UploadUserProfileTask(sender, index, parentKey);
+		return new UploadUserProfileTask(sender, addedFileIndex, parentKey);
 	}
 }

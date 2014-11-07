@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.download;
 
-import net.tomp2p.peers.PeerAddress;
-
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -12,12 +11,16 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.context.DownloadFileContext;
 import org.hive2hive.core.processes.files.GetMetaFileStep;
+import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Nico, Seppi
+ */
 public class FindInUserProfileStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(FindInUserProfileStep.class);
@@ -32,13 +35,22 @@ public class FindInUserProfileStep extends ProcessStep {
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		UserProfile userProfile = null;
+		H2HSession session;
 		try {
-			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-			userProfile = profileManager.getUserProfile(getID(), false);
-		} catch (GetFailedException | NoSessionException e) {
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
 			throw new ProcessExecutionException(e);
 		}
+
+		UserProfileManager profileManager = session.getProfileManager();
+
+		UserProfile userProfile = null;
+		try {
+			userProfile = profileManager.getUserProfile(getID(), false);
+		} catch (GetFailedException e) {
+			throw new ProcessExecutionException(e);
+		}
+
 		Index index = userProfile.getFileById(context.getFileKey());
 		if (index == null) {
 			throw new ProcessExecutionException("File key not found in user profile.");
@@ -52,16 +64,20 @@ public class FindInUserProfileStep extends ProcessStep {
 			getParent().add(new CreateFolderStep(context, networkManager));
 		} else {
 			logger.info("Initalize the process for downloading file '{}'.", index.getFullPath());
+			DataManager dataManager;
 			try {
-				DataManager dataManager = networkManager.getDataManager();
-				getParent().add(new GetMetaFileStep(context, dataManager));
-				PeerAddress ownPeerAddress = networkManager.getConnection().getPeerDHT().peerAddress();
-				getParent().add(
-						new InitDownloadChunksStep(context, networkManager.getSession(), ownPeerAddress, networkManager
-								.getEventBus()));
-			} catch (NoPeerConnectionException | NoSessionException e) {
+				dataManager = networkManager.getDataManager();
+			} catch (NoPeerConnectionException e) {
 				throw new ProcessExecutionException(e);
 			}
+			getParent().add(new GetMetaFileStep(context, dataManager));
+			getParent().add(new InitDownloadChunksStep(context, networkManager));
 		}
 	}
+
+	@Override
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+		context.provideIndex(null);
+	}
+
 }

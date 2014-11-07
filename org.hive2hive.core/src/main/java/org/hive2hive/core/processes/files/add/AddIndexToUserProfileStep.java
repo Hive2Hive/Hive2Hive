@@ -2,12 +2,11 @@ package org.hive2hive.core.processes.files.add;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.security.KeyPair;
-import java.security.PublicKey;
+import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -19,7 +18,6 @@ import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
-import org.hive2hive.processframework.exceptions.PutToDHTException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +33,9 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	private final AddFileProcessContext context;
 	private final UserProfileManager profileManager;
 
+	private final int forkLimit = 2;
+
 	// used for rollback
-	private PublicKey parentKey;
 	private boolean modified = false;
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
@@ -47,10 +46,7 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
-		Path root = context.consumeRoot();
-
-		// pre-calculate the meta keys because this may take a while
-		KeyPair metaKeys = context.generateOrGetMetaKeys();
+		File root = context.consumeRoot();
 
 		// pre-calculate the md5 hash because this may take a while
 		byte[] md5 = null;
@@ -58,9 +54,16 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			md5 = calculateHash(file);
 		}
 
-		logger.trace("Start updating the user profile where adding the file '{}'.", file.getName());
-		try {
-			UserProfile userProfile = profileManager.getUserProfile(getID(), true);
+		// update the user profile where adding the file
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
+		while (true) {
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
 
 			// find the parent node using the relative path to navigate there
 			FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
@@ -71,22 +74,43 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 			}
 
 			// create a file tree node in the user profile
-			parentKey = parentNode.getFilePublicKey();
-			// use the file keys generated above is stored
 			if (file.isDirectory()) {
-				FolderIndex folderIndex = new FolderIndex(parentNode, metaKeys, file.getName());
+				FolderIndex folderIndex = new FolderIndex(parentNode, context.consumeMetaFileEncryptionKeys(),
+						file.getName());
 				context.provideIndex(folderIndex);
 			} else {
-				FileIndex fileIndex = new FileIndex(parentNode, metaKeys, file.getName(), md5);
+				FileIndex fileIndex = new FileIndex(parentNode, context.consumeMetaFileEncryptionKeys(), file.getName(), md5);
 				context.provideIndex(fileIndex);
 			}
 
-			// put the updated user profile
-			profileManager.readyToPut(userProfile, getID());
-			modified = true;
-		} catch (PutFailedException | GetFailedException e) {
-			logger.debug("Catched PutFailedException or GetFailedException in AddIndexToUserProfileStep! {} {} {}", e.getMessage(), e.getClass(), e.getStackTrace().toString());
-			throw new PutToDHTException(e);
+			try {
+				// put the updated user profile
+				profileManager.readyToPut(userProfile, getID());
+
+				// set flag, that an update has been made (for roll back)
+				modified = true;
+			} catch (VersionForkAfterPutException e) {
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
+			} catch (PutFailedException e) {
+				throw new ProcessExecutionException(e);
+			}
+
+			break;
 		}
 	}
 
@@ -103,22 +127,56 @@ public class AddIndexToUserProfileStep extends ProcessStep {
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
 		if (modified) {
+			File file = context.consumeFile();
+			File root = context.consumeRoot();
+
 			// remove the file from the user profile
-			UserProfile userProfile;
-			try {
-				userProfile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				return;
-			}
-			FolderIndex parentNode = (FolderIndex) userProfile.getFileById(parentKey);
-			Index childNode = parentNode.getChildByName(context.consumeFile().getName());
-			parentNode.removeChild(childNode);
-			try {
-				profileManager.readyToPut(userProfile, getID());
-				modified = false;
-			} catch (PutFailedException e) {
-				// ignore
-				logger.debug("Catched PutFailedException in AddIndexToUserProfileStep! {}", e.getMessage());
+			int forkCounter = 0;
+			int forkWaitTime = new Random().nextInt(1000) + 500;
+			while (true) {
+				UserProfile userProfile;
+				try {
+					userProfile = profileManager.getUserProfile(getID(), true);
+				} catch (GetFailedException e) {
+					logger.warn("Couldn't load user profile for redo.", e);
+					return;
+				}
+
+				// find the parent and child node
+				FolderIndex parentNode = (FolderIndex) userProfile.getFileByPath(file.getParentFile(), root);
+				Index childNode = parentNode.getChildByName(file.getName());
+
+				// remove newly added child node
+				parentNode.removeChild(childNode);
+
+				try {
+					// put the user profile
+					profileManager.readyToPut(userProfile, getID());
+
+					// adapt flag
+					modified = false;
+				} catch (VersionForkAfterPutException e) {
+					if (forkCounter++ > forkLimit) {
+						logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+					} else {
+						logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+						// exponential back off waiting
+						try {
+							Thread.sleep(forkWaitTime);
+						} catch (InterruptedException e1) {
+							// ignore
+						}
+						forkWaitTime = forkWaitTime * 2;
+
+						// retry update of user profile
+						continue;
+					}
+				} catch (PutFailedException e) {
+					logger.warn("Couldn't redo put of user profile.", e);
+					return;
+				}
+				break;
 			}
 		}
 	}

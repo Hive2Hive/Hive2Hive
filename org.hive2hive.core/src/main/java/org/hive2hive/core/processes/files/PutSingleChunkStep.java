@@ -19,7 +19,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.common.base.BasePutProcessStep;
-import org.hive2hive.core.processes.context.interfaces.IPutSingleChunkContext;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -35,10 +35,10 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(PutSingleChunkStep.class);
 
 	private final int index;
-	private final IPutSingleChunkContext context;
+	private final IUploadContext context;
 	private final String chunkId;
 
-	public PutSingleChunkStep(IPutSingleChunkContext context, int index, String chunkId, DataManager dataManager) {
+	public PutSingleChunkStep(IUploadContext context, int index, String chunkId, DataManager dataManager) {
 		super(dataManager);
 		this.index = index;
 		this.context = context;
@@ -62,12 +62,12 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
 				HybridEncryptedContent encryptedContent = dataManager.getEncryption().encryptHybrid(chunk,
-						context.consumeChunkKeys().getPublic());
+						context.consumeChunkEncryptionKeys().getPublic());
 
 				logger.debug("Uploading chunk {} of file {}.", chunk.getOrder(), file.getName());
 				Parameters parameters = new Parameters().setLocationKey(chunk.getId())
 						.setContentKey(H2HConstants.FILE_CHUNK).setNetworkContent(encryptedContent)
-						.setProtectionKeys(context.consumeProtectionKeys()).setTTL(chunk.getTimeToLive());
+						.setProtectionKeys(context.consumeChunkProtectionKeys()).setTTL(chunk.getTimeToLive());
 
 				// data manager has to produce the hash, which gets used for signing
 				parameters.setHashFlag(true);

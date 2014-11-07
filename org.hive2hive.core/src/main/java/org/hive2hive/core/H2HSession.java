@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.security.KeyPair;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -20,7 +21,7 @@ public class H2HSession {
 	private final PublicKeyManager keyManager;
 	private final DownloadManager downloadManager;
 	private final IFileConfiguration fileConfiguration;
-	private final Path root;
+	private final IFileAgent fileAgent;
 
 	public H2HSession(SessionParameters params) {
 		this.profileManager = params.getProfileManager();
@@ -28,10 +29,7 @@ public class H2HSession {
 		this.keyManager = params.getKeyManager();
 		this.downloadManager = params.getDownloadManager();
 		this.fileConfiguration = params.getFileConfig();
-		this.root = params.getRoot();
-		if (!root.toFile().exists()) {
-			root.toFile().mkdirs();
-		}
+		this.fileAgent = params.getFileAgent();
 	}
 
 	public UserProfileManager getProfileManager() {
@@ -57,12 +55,14 @@ public class H2HSession {
 		return keyManager.getOwnKeyPair();
 	}
 
+	@Deprecated
+	// get rid of 'Path'
 	public Path getRoot() {
-		return root;
+		return getFileAgent().getRoot().toPath();
 	}
 
 	public File getRootFile() {
-		return root.toFile();
+		return getFileAgent().getRoot();
 	}
 
 	public String getUserId() {
@@ -86,5 +86,12 @@ public class H2HSession {
 	 */
 	public DownloadManager getDownloadManager() {
 		return downloadManager;
+	}
+
+	/**
+	 * @return the file agent
+	 */
+	public IFileAgent getFileAgent() {
+		return fileAgent;
 	}
 }

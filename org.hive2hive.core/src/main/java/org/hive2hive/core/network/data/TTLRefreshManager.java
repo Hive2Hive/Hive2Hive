@@ -21,12 +21,12 @@ public class TTLRefreshManager {
 	private Timer timer;
 	private RefreshTask task;
 
-	private final UserProfileManager profileManager;
-	private final DataManager dataManager;
+	// private final UserProfileManager profileManager;
+	// private final DataManager dataManager;
 
 	public TTLRefreshManager(UserProfileManager profileManager, DataManager dataManager) {
-		this.profileManager = profileManager;
-		this.dataManager = dataManager;
+		// this.profileManager = profileManager;
+		// this.dataManager = dataManager;
 	}
 
 	public void start() {
@@ -37,8 +37,7 @@ public class TTLRefreshManager {
 		// create a new timer task
 		task = new RefreshTask();
 		// start refreshment task periodically
-		timer.scheduleAtFixedRate(task, H2HConstants.TTL_REFRESHMENT_DELAY,
-				H2HConstants.TTL_REFRESHMENT_PERIOD);
+		timer.scheduleAtFixedRate(task, H2HConstants.TTL_REFRESHMENT_DELAY, H2HConstants.TTL_REFRESHMENT_PERIOD);
 
 		logger.debug("TTL refresh manager started.");
 	}

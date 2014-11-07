@@ -17,6 +17,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
+import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -42,31 +43,39 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		KeyPair keyPair = context.consumeMetaFileEncryptionKeys();
 
-		BaseVersionedNetworkContent loadedContent = (BaseVersionedNetworkContent) get(keyPair.getPublic(), H2HConstants.META_FILE);
+		BaseVersionedNetworkContent loadedContent = (BaseVersionedNetworkContent) get(keyPair.getPublic(),
+				H2HConstants.META_FILE);
 
 		if (loadedContent == null) {
 			logger.warn("Meta file not found.");
 			throw new ProcessExecutionException("Meta file not found.");
-		} else {
-			// decrypt meta document
-			HybridEncryptedContent encryptedContent = (HybridEncryptedContent) loadedContent;
-
-			BaseNetworkContent decryptedContent = null;
-			try {
-				decryptedContent = dataManager.getEncryption().decryptHybrid(encryptedContent, keyPair.getPrivate());
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
-				throw new ProcessExecutionException("Meta file could not be decrypted.", e);
-			}
-
-			BaseMetaFile metaFile = (BaseMetaFile) decryptedContent;
-			metaFile.setBasedOnKey(loadedContent.getBasedOnKey());
-			metaFile.setVersionKey(loadedContent.getVersionKey());
-
-			context.provideMetaFile(metaFile);
-			context.provideEncryptedMetaFile(encryptedContent);
-
-			logger.debug("Got and decrypted the meta file.");
 		}
+
+		HybridEncryptedContent encryptedContent = (HybridEncryptedContent) loadedContent;
+
+		// decrypt meta document
+		BaseNetworkContent decryptedContent = null;
+		try {
+			decryptedContent = dataManager.getEncryption().decryptHybrid(encryptedContent, keyPair.getPrivate());
+		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
+				| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
+			throw new ProcessExecutionException("Meta file could not be decrypted.", e);
+		}
+
+		BaseMetaFile metaFile = (BaseMetaFile) decryptedContent;
+		metaFile.setBasedOnKey(loadedContent.getBasedOnKey());
+		metaFile.setVersionKey(loadedContent.getVersionKey());
+
+		context.provideMetaFile(metaFile);
+		context.provideEncryptedMetaFile(encryptedContent);
+
+		logger.debug("Got and decrypted the meta file.");
 	}
+
+	@Override
+	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+		context.provideMetaFile(null);
+		context.provideEncryptedMetaFile(null);
+	}
+
 }

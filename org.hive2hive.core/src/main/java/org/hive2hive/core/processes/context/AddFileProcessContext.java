@@ -1,49 +1,42 @@
 package org.hive2hive.core.processes.context;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
-import org.hive2hive.core.processes.context.interfaces.ICheckWriteAccessContext;
-import org.hive2hive.core.processes.context.interfaces.IInitializeChunksStepContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
-import org.hive2hive.core.processes.context.interfaces.IPrepareNotificationContext;
-import org.hive2hive.core.processes.context.interfaces.IPutMetaFileContext;
-import org.hive2hive.core.processes.context.interfaces.IValidateFileSizeContext;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
+import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * The context for the process of putting a file.
  * 
  * @author Nico, Seppi
  */
-public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWriteAccessContext,
-		IInitializeChunksStepContext, IPutMetaFileContext, IPrepareNotificationContext, INotifyContext {
+public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	private final File file;
 	private final H2HSession session;
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
+	private KeyPair chunkEncryptionKeys;
+	private KeyPair chunkProtectionKeys;
+	private KeyPair fileKeys;
+	private KeyPair metaFileProtectionKeys;
 	private boolean largeFile;
-	private KeyPair chunkKeys;
-	private KeyPair protectionKeys;
 	private BaseMetaFile metaFile;
-	private KeyPair metaKeys;
 	private Index index;
 	private Set<String> usersToNotify;
-	private UploadNotificationMessageFactory messageFactory;
+	private AddNotificationMessageFactory messageFactory;
 
 	public AddFileProcessContext(File file, H2HSession session) {
 		this.file = file;
@@ -66,13 +59,8 @@ public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWr
 	}
 
 	@Override
-	public Path consumeRoot() {
-		return session.getRoot();
-	}
-
-	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
+	public File consumeRoot() {
+		return session.getRootFile();
 	}
 
 	@Override
@@ -81,13 +69,42 @@ public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWr
 	}
 
 	@Override
-	public KeyPair consumeChunkKeys() {
-		return chunkKeys;
+	public KeyPair consumeChunkProtectionKeys() {
+		return chunkProtectionKeys;
 	}
 
 	@Override
-	public void provideChunkKeys(KeyPair chunkKeys) {
-		this.chunkKeys = chunkKeys;
+	public void provideChunkProtectionKeys(KeyPair chunkProtectionKeys) {
+		this.chunkProtectionKeys = chunkProtectionKeys;
+	}
+
+	@Override
+	public KeyPair consumeChunkEncryptionKeys() {
+		return chunkEncryptionKeys;
+	}
+
+	@Override
+	public void provideChunkEncryptionKeys(KeyPair chunkEncryptionKeys) {
+		this.chunkEncryptionKeys = chunkEncryptionKeys;
+	}
+
+	@Override
+	public KeyPair consumeMetaFileEncryptionKeys() {
+		return fileKeys;
+	}
+
+	public void provideFileKeys(KeyPair fileKeys) {
+		this.fileKeys = fileKeys;
+	}
+
+	@Override
+	public KeyPair consumeMetaFileProtectionKeys() {
+		return metaFileProtectionKeys;
+	}
+
+	@Override
+	public void provideMetaFileProtectionKeys(KeyPair metaFileProtectionKeys) {
+		this.metaFileProtectionKeys = metaFileProtectionKeys;
 	}
 
 	@Override
@@ -95,29 +112,13 @@ public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWr
 		return metaChunks;
 	}
 
-	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
-	}
-
 	public void provideMetaFile(BaseMetaFile metaFile) {
 		this.metaFile = metaFile;
-	}
-
-	public KeyPair generateOrGetMetaKeys() {
-		if (metaKeys == null) {
-			metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		}
-		return metaKeys;
 	}
 
 	@Override
 	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
-	}
-
-	@Override
-	public KeyPair consumeMetaFileProtectionKeys() {
-		return protectionKeys;
 	}
 
 	@Override
@@ -139,8 +140,7 @@ public class AddFileProcessContext implements IValidateFileSizeContext, ICheckWr
 		this.usersToNotify = users;
 	}
 
-	@Override
-	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory) {
+	public void provideMessageFactory(AddNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
 

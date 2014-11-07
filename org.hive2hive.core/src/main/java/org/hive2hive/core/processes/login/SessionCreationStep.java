@@ -54,7 +54,7 @@ public class SessionCreationStep extends ProcessStep {
 			params.setLocationsManager(locationsManager);
 
 			// get the persistently cached items
-			PersistentMetaData metaData = FileUtil.readPersistentMetaData(params.getRoot());
+			PersistentMetaData metaData = FileUtil.readPersistentMetaData(params.getFileAgent());
 
 			// create the key manager
 			PublicKeyManager keyManager = new PublicKeyManager(userProfile.getUserId(), userProfile.getEncryptionKeys(),

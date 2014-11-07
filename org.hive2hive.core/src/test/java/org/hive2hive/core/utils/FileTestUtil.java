@@ -6,11 +6,11 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.file.FileUtil;
+import org.junit.Assert;
 
 public class FileTestUtil {
 
-	public static File createFileRandomContent(int numOfChunks, File parent, int chunkSize)
-			throws IOException {
+	public static File createFileRandomContent(int numOfChunks, File parent, int chunkSize) throws IOException {
 		return createFileRandomContent(H2HJUnitTest.randomString(), numOfChunks, parent, chunkSize);
 	}
 
@@ -27,6 +27,8 @@ public class FileTestUtil {
 	}
 
 	public static File getTempDirectory() {
-		return new File(FileUtils.getTempDirectory(), H2HJUnitTest.randomString());
+		File dir = new File(FileUtils.getTempDirectory(), H2HJUnitTest.randomString());
+		Assert.assertTrue(dir.mkdirs());
+		return dir;
 	}
 }

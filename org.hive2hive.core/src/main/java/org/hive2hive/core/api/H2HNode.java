@@ -97,9 +97,9 @@ public class H2HNode implements IH2HNode {
 		}
 		return fileManager;
 	}
-	
+
 	private EventBus getEventBus() {
-		if(eventBus == null) {
+		if (eventBus == null) {
 			eventBus = new EventBus();
 		}
 		return eventBus;

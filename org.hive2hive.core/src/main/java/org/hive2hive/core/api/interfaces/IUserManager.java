@@ -1,10 +1,9 @@
 package org.hive2hive.core.api.interfaces;
 
-import java.nio.file.Path;
-
 import org.hive2hive.core.events.framework.interfaces.IUserEventGenerator;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
@@ -32,12 +31,12 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * has been called. After login, the root folder gets synchronized.
 	 * 
 	 * @param credentials the user credentials
-	 * @param rootPath the path of the Hive2Hive root folder. In this folder, all files are synchronized.
+	 * @param fileAgent handles needed file operations and provides the root folder of this user
 	 * @return an observable process component
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	IProcessComponent login(UserCredentials credentials, Path rootPath) throws NoPeerConnectionException;
+	IProcessComponent login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,

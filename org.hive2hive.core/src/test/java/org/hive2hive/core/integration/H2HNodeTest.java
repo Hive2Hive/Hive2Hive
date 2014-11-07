@@ -16,9 +16,11 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.After;
@@ -41,8 +43,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 	private final Random random = new Random();
 
 	private IH2HNode loggedInNode;
-	private File rootDirectory;
 	private UserCredentials credentials;
+	private TestFileAgent fileAgent;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -65,16 +67,16 @@ public class H2HNodeTest extends H2HJUnitTest {
 		IProcessComponent registerProcess = registerNode.getUserManager().register(credentials);
 		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
 
-		rootDirectory = FileTestUtil.getTempDirectory();
+		fileAgent = new TestFileAgent();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials, rootDirectory.toPath());
+		IProcessComponent loginProcess = loggedInNode.getUserManager().login(credentials, fileAgent);
 		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 	}
 
 	@Test
 	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException, NoSuchFieldException,
 			SecurityException, IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
-		File testFile = new File(rootDirectory, "test-file");
+		File testFile = new File(fileAgent.getRoot(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
 		IProcessComponent process = loggedInNode.getFileManager().add(testFile);
@@ -99,7 +101,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// /folder1/
 		// /folder1/test1.txt
 		// /folder1/folder2/test2.txt
-		File folder1 = new File(rootDirectory, "folder1");
+		File folder1 = new File(fileAgent.getRoot(), "folder1");
 		folder1.mkdir();
 		File test1File = new File(folder1, "test1.txt");
 		FileUtils.write(test1File, "Hello World 1");
@@ -115,16 +117,16 @@ public class H2HNodeTest extends H2HJUnitTest {
 		// TODO wait for all async process to upload
 
 		// then start 2nd client and login
-		File rootUser2 = FileTestUtil.getTempDirectory();
+		IFileAgent fileAgentUser2 = new TestFileAgent();
 		IH2HNode newNode = network.get((random.nextInt(NETWORK_SIZE / 2) + NETWORK_SIZE / 2));
 
-		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, rootUser2.toPath());
+		IProcessComponent loginProcess = newNode.getUserManager().login(credentials, fileAgentUser2);
 		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 
 		// TODO wait for login process to download all files
 
 		// verfiy that all files are here
-		folder1 = new File(rootUser2, "folder1");
+		folder1 = new File(fileAgentUser2.getRoot(), "folder1");
 		Assert.assertTrue(folder1.exists());
 
 		test1File = new File(folder1, "test1.txt");

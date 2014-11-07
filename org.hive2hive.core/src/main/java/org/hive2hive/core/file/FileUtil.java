@@ -13,9 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -37,19 +35,10 @@ public class FileUtil {
 	 * 
 	 * @throws IOException
 	 */
-	public static void writePersistentMetaData(Path root, PublicKeyManager keyManager, DownloadManager downloadManager)
-			throws IOException {
-		assert root != null;
-
+	public static void writePersistentMetaData(IFileAgent fileAgent, PublicKeyManager keyManager,
+			DownloadManager downloadManager) throws IOException {
 		// generate the new persistent meta data
 		PersistentMetaData metaData = new PersistentMetaData();
-
-		// add the files
-		if (root != null) {
-			PersistenceFileVisitor visitor = new PersistenceFileVisitor(root);
-			Files.walkFileTree(root, visitor);
-			metaData.setFileTree(visitor.getFileTree());
-		}
 
 		// add the public keys
 		if (keyManager != null) {
@@ -61,22 +50,24 @@ public class FileUtil {
 		}
 
 		byte[] encoded = SerializationUtil.serialize(metaData);
-		FileUtils.writeByteArrayToFile(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile(), encoded);
+		fileAgent.writeCache(H2HConstants.META_FILE_NAME, encoded);
 	}
 
 	/**
 	 * Reads the meta data (used to synchronize) from the disk
 	 * 
 	 * @return the read meta data (never null)
-	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public static PersistentMetaData readPersistentMetaData(Path root) {
+	public static PersistentMetaData readPersistentMetaData(IFileAgent fileAgent) {
 		try {
-			byte[] content = FileUtils.readFileToByteArray(Paths.get(root.toString(), H2HConstants.META_FILE_NAME).toFile());
+			byte[] content = fileAgent.readCache(H2HConstants.META_FILE_NAME);
+			if (content == null || content.length == 0) {
+				logger.warn("Not found the meta data. Create new one");
+				return new PersistentMetaData();
+			}
 			return (PersistentMetaData) SerializationUtil.deserialize(content);
 		} catch (IOException | ClassNotFoundException e) {
-			logger.warn("Cannot read the persistent meta data. It probably does not exist yet");
+			logger.error("Cannot deserialize meta data", e);
 			return new PersistentMetaData();
 		}
 	}
@@ -95,16 +86,10 @@ public class FileUtil {
 	}
 
 	/**
-	 * Returns the file on disk from a file node of the user profile
-	 * 
-	 * @param fileToFind
-	 * @return the path to the file or null if the parameter is null
+	 * Makes a file path relative to the base
 	 */
-	public static Path getPath(Path root, Index fileToFind) {
-		if (fileToFind == null) {
-			return null;
-		}
-		return Paths.get(root.toString(), fileToFind.getFullPath().toString());
+	public static File relativize(File base, File child) {
+		return new File(base.toURI().relativize(child.toURI()).getPath());
 	}
 
 	/**
@@ -144,10 +129,11 @@ public class FileUtil {
 	 * @param fileManager the {@link FileManager} of the user
 	 * @throws IOException when moving went wrong
 	 */
-	public static void moveFile(Path root, String sourceName, String destName, Index oldParent, Index newParent)
+	@Deprecated
+	public static void moveFile(File root, String sourceName, String destName, Index oldParent, Index newParent)
 			throws IOException {
 		// find the file of this user on the disc
-		File oldParentFile = FileUtil.getPath(root, oldParent).toFile();
+		File oldParentFile = new File(root, oldParent.getFullPath().toString());
 		File toMoveSource = new File(oldParentFile, sourceName);
 
 		if (!toMoveSource.exists()) {
@@ -155,7 +141,7 @@ public class FileUtil {
 					+ "' because it's not at the source location anymore");
 		}
 
-		File newParentFile = FileUtil.getPath(root, newParent).toFile();
+		File newParentFile = new File(root, newParent.getFullPath().toString());
 		File toMoveDest = new File(newParentFile, destName);
 
 		if (toMoveDest.exists()) {
@@ -175,12 +161,19 @@ public class FileUtil {
 	 * @param session a valid session of any user
 	 * @return true when the file is within the H2H directory, otherwise false
 	 */
-	public static boolean isInH2HDirectory(File file, H2HSession session) {
-		if (session == null || file == null) {
+	public static boolean isInH2HDirectory(File file, File root) {
+		if (root == null || file == null) {
 			return false;
 		}
 
-		return file.getAbsolutePath().toString().startsWith(session.getRootFile().getAbsolutePath());
+		return file.getAbsolutePath().toString().startsWith(root.getAbsolutePath());
+	}
+
+	/**
+	 * Does the same as {@link #isInH2HDirectory(IFileAgent, File, File)} but taking a session as parameter
+	 */
+	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file) {
+		return fileAgent == null ? false : isInH2HDirectory(file, fileAgent.getRoot());
 	}
 
 	/**
@@ -195,5 +188,11 @@ public class FileUtil {
 				return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
 			}
 		});
+	}
+
+	@Deprecated
+	// don't use Path
+	public static Path getPath(Path root, Index parentNode) {
+		return Paths.get(root.toString(), parentNode.getFullPath().toString());
 	}
 }

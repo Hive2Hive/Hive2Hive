@@ -11,7 +11,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.processes.common.PrepareNotificationStep;
 import org.hive2hive.core.processes.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
@@ -26,26 +25,27 @@ import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.files.CheckWriteAccessStep;
-import org.hive2hive.core.processes.files.File2MetaFileComponent;
+import org.hive2hive.core.processes.files.GetFileKeysStep;
+import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.core.processes.files.InitializeChunksStep;
 import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.files.PutMetaFileStep;
-import org.hive2hive.core.processes.files.ValidateFileSizeStep;
+import org.hive2hive.core.processes.files.ValidateFileStep;
 import org.hive2hive.core.processes.files.add.AddIndexToUserProfileStep;
+import org.hive2hive.core.processes.files.add.CreateFileKeysStep;
 import org.hive2hive.core.processes.files.add.CreateMetaFileStep;
-import org.hive2hive.core.processes.files.delete.DeleteFileOnDiskStep;
+import org.hive2hive.core.processes.files.add.PrepareAddNotificationStep;
 import org.hive2hive.core.processes.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.files.download.FindInUserProfileStep;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.list.GetFileListStep;
-import org.hive2hive.core.processes.files.move.MoveOnDiskStep;
 import org.hive2hive.core.processes.files.move.RelinkUserProfileStep;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.core.processes.files.recover.SelectVersionStep;
-import org.hive2hive.core.processes.files.synchronize.SynchronizeFilesStep;
 import org.hive2hive.core.processes.files.update.CleanupChunksStep;
 import org.hive2hive.core.processes.files.update.CreateNewVersionStep;
+import org.hive2hive.core.processes.files.update.PrepareUpdateNotificationStep;
 import org.hive2hive.core.processes.files.update.UpdateMD5inUserProfileStep;
 import org.hive2hive.core.processes.login.ContactOtherClientsStep;
 import org.hive2hive.core.processes.login.GetLocationsStep;
@@ -177,19 +177,13 @@ public final class ProcessFactory {
 
 		process.add(new RemoveOwnLocationsStep(networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
-		process.add(new WritePersistentStep(session.getRoot(), session.getKeyManager(), session.getDownloadManager()));
+		process.add(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(), session.getDownloadManager()));
 		process.add(new DeleteSessionStep(networkManager));
 
 		// TODO to be implemented:
 		// // stop all running processes
 		// ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
-		return process;
-	}
-
-	public ProcessComponent createSynchronizeFilesProcess(NetworkManager networkManager) {
-		SequentialProcess process = new SequentialProcess();
-		process.add(new SynchronizeFilesStep(networkManager));
 		return process;
 	}
 
@@ -207,8 +201,9 @@ public final class ProcessFactory {
 		AddFileProcessContext context = new AddFileProcessContext(file, session);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new ValidateFileSizeStep(context));
+		process.add(new ValidateFileStep(context));
 		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
+		process.add(new CreateFileKeysStep(context));
 		if (file.isFile()) {
 			// file needs to upload the chunks and a meta file
 			process.add(new InitializeChunksStep(context, dataManager));
@@ -216,7 +211,7 @@ public final class ProcessFactory {
 			process.add(new PutMetaFileStep(context, dataManager));
 		}
 		process.add(new AddIndexToUserProfileStep(context, session.getProfileManager()));
-		process.add(new PrepareNotificationStep(context));
+		process.add(new PrepareAddNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -230,17 +225,17 @@ public final class ProcessFactory {
 		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session);
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new ValidateFileSizeStep(context));
+		process.add(new ValidateFileStep(context));
 		process.add(new CheckWriteAccessStep(context, session.getProfileManager()));
-		process.add(new File2MetaFileComponent(context, networkManager));
+		process.add(new GetFileKeysStep(context, session));
+		process.add(new GetMetaFileStep(context, dataManager));
 		process.add(new InitializeChunksStep(context, dataManager));
 		process.add(new CreateNewVersionStep(context));
 		process.add(new PutMetaFileStep(context, dataManager));
 		process.add(new UpdateMD5inUserProfileStep(context, session.getProfileManager()));
-
 		// TODO: cleanup can be made async because user operation does not depend on it
 		process.add(new CleanupChunksStep(context, dataManager));
-		process.add(new PrepareNotificationStep(context));
+		process.add(new PrepareUpdateNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
 		return process;
@@ -277,15 +272,15 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file);
+		H2HSession session = networkManager.getSession();
+
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file, session);
 
 		// process composition
 		SequentialProcess process = new SequentialProcess();
-
 		// hint: this step automatically adds additional process steps when the meta file and the chunks need
 		// to be deleted
 		process.add(new DeleteFromUserProfileStep(context, networkManager));
-		process.add(new DeleteFileOnDiskStep(context)); // TODO make asynchronous
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
@@ -294,11 +289,12 @@ public final class ProcessFactory {
 
 	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, networkManager.getUserId());
+		H2HSession session = networkManager.getSession();
+		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRootFile());
 
 		SequentialProcess process = new SequentialProcess();
-		process.add(new MoveOnDiskStep(context, networkManager));
-		process.add(new RelinkUserProfileStep(context, networkManager));
+		process.add(new org.hive2hive.core.processes.files.move.CheckWriteAccessStep(context, session.getProfileManager()));
+		process.add(new RelinkUserProfileStep(context, session.getProfileManager(), networkManager.getDataManager()));
 		process.add(createNotificationProcess(context.getMoveNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getAddNotificationContext(), networkManager));
@@ -310,7 +306,8 @@ public final class ProcessFactory {
 			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
-		process.add(new File2MetaFileComponent(context, networkManager));
+		process.add(new GetFileKeysStep(context, networkManager.getSession()));
+		process.add(new GetMetaFileStep(context, networkManager.getDataManager()));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
 		return process;

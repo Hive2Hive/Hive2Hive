@@ -1,13 +1,13 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.security.PublicKey;
+import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
@@ -16,7 +16,7 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
-import org.hive2hive.core.processes.files.File2MetaFileComponent;
+import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory;
  * In case the deleted file is a file (and not a folder), this step initiates the deletion of the meta file
  * and all according chunks.
  * 
- * @author Nico
- * 
+ * @author Nico, Seppi
  */
 public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
@@ -37,11 +36,9 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 	private final DeleteFileProcessContext context;
 	private final UserProfileManager profileManager;
-	private DataManager dataManager;
-	private final Path root;
+	private final DataManager dataManager;
 
-	private Index index;
-	private PublicKey parentIndexKey;
+	private final int forkLimit = 2;
 
 	public DeleteFromUserProfileStep(DeleteFileProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
@@ -49,94 +46,145 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 		this.context = context;
 		this.dataManager = networkManager.getDataManager();
 		this.profileManager = networkManager.getSession().getProfileManager();
-		this.root = networkManager.getSession().getRoot();
 	}
 
 	@Override
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
+		File root = context.consumeRoot();
 
-		// get user profile
-		UserProfile profile = null;
-		try {
-			profile = profileManager.getUserProfile(getID(), true);
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException("Could not get user profile.", e);
-		}
-
-		index = profile.getFileByPath(file, root);
-
-		// validate
-		if (index == null) {
-			throw new ProcessExecutionException("File index not found in user profile");
-		} else if (!index.canWrite()) {
-			throw new ProcessExecutionException("Not allowed to delete this file (read-only permissions)");
-		}
-
-		// check preconditions
-		if (index.isFolder()) {
-			FolderIndex folder = (FolderIndex) index;
-			if (!folder.getChildren().isEmpty()) {
-				throw new ProcessExecutionException("Cannot delete a directory that is not empty.");
+		Index fileIndex;
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
+		while (true) {
+			// get user profile
+			UserProfile profile = null;
+			try {
+				profile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException e) {
+				throw new ProcessExecutionException("Could not get user profile.", e);
 			}
+
+			fileIndex = profile.getFileByPath(file, root);
+
+			// validate
+			if (fileIndex == null) {
+				throw new ProcessExecutionException("File index not found in user profile");
+			} else if (!fileIndex.canWrite()) {
+				throw new ProcessExecutionException("Not allowed to delete this file (read-only permissions)");
+			}
+
+			// check preconditions
+			if (fileIndex.isFolder()) {
+				FolderIndex folder = (FolderIndex) fileIndex;
+				if (!folder.getChildren().isEmpty()) {
+					throw new ProcessExecutionException("Cannot delete a directory that is not empty.");
+				}
+			}
+
+			// remove the node from the tree
+			FolderIndex parentIndex = fileIndex.getParent();
+			parentIndex.removeChild(fileIndex);
+
+			// store for later
+			context.provideIndex(fileIndex);
+
+			try {
+				profileManager.readyToPut(profile, getID());
+			} catch (VersionForkAfterPutException e) {
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
+			} catch (PutFailedException e) {
+				logger.error("Cannot remove the file {} from the user profile", fileIndex.getFullPath(), e);
+				throw new ProcessExecutionException("Could not put user profile.");
+			}
+
+			break;
 		}
 
-		// remove the node from the tree
-		FolderIndex parentIndex = index.getParent();
-		parentIndex.removeChild(index);
+		if (fileIndex.isFile()) {
+			context.provideProtectionKeys(fileIndex.getProtectionKeys());
+			context.provideMetaFileEncryptionKeys(fileIndex.getFileKeys());
 
-		// store for later
-		context.provideIndex(index);
-
-		// store for rollback
-		this.parentIndexKey = parentIndex.getFilePublicKey();
-
-		try {
-			profileManager.readyToPut(profile, getID());
-		} catch (PutFailedException e) {
-			logger.error("Cannot remove the file {} from the user profile", index.getFullPath(), e);
-			throw new ProcessExecutionException("Could not put user profile.");
-		}
-
-		if (index.isFile()) {
-			/**
-			 * Delete the meta file and all chunks
-			 */
-			File2MetaFileComponent file2Meta = new File2MetaFileComponent(index, context, dataManager);
+			// create steps to delete meta and all chunks
+			GetMetaFileStep getMeta = new GetMetaFileStep(context, dataManager);
 			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
 			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
 
 			// insert them in correct order
-			getParent().insertNext(file2Meta, this);
-			getParent().insertNext(deleteChunks, file2Meta);
+			getParent().insertNext(getMeta, this);
+			getParent().insertNext(deleteChunks, getMeta);
 			getParent().insertNext(deleteMeta, deleteChunks);
 		}
 	}
 
 	@Override
 	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (index != null && parentIndexKey != null) {
+		File file = context.consumeFile();
+		File root = context.consumeRoot();
+		Index index = context.consumeIndex();
 
-			// get user profile
-			UserProfile profile = null;
-			try {
-				profile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				logger.warn("Rollback failed.", e);
-				return;
+		if (index != null) {
+			int forkCounter = 0;
+			int forkWaitTime = new Random().nextInt(1000) + 500;
+			while (true) {
+				// get user profile
+				UserProfile profile = null;
+				try {
+					profile = profileManager.getUserProfile(getID(), true);
+				} catch (GetFailedException e) {
+					logger.warn("Rollback failed.", e);
+					return;
+				}
+
+				// re-add file to user profile
+				FolderIndex parent = (FolderIndex) profile.getFileByPath(file.getParentFile(), root);
+				parent.addChild(index);
+				index.setParent(parent);
+
+				try {
+					profileManager.readyToPut(profile, getID());
+				} catch (VersionForkAfterPutException e) {
+					if (forkCounter++ > forkLimit) {
+						logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+					} else {
+						logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+						// exponential back off waiting
+						try {
+							Thread.sleep(forkWaitTime);
+						} catch (InterruptedException e1) {
+							// ignore
+						}
+						forkWaitTime = forkWaitTime * 2;
+
+						// retry update of user profile
+						continue;
+					}
+				} catch (PutFailedException e) {
+					logger.warn("Rollback failed.", e);
+					return;
+				}
+
+				break;
 			}
 
-			// TODO this is buggy! rather use list to check for containment instead of above if-statement
-			// re-add file to user profile
-			FolderIndex parent = (FolderIndex) profile.getFileById(parentIndexKey);
-			parent.addChild(index);
-			index.setParent(parent);
-
-			try {
-				profileManager.readyToPut(profile, getID());
-			} catch (PutFailedException e) {
-				logger.warn("Rollback failed.", e);
-			}
+			// remove index from cache
+			context.provideIndex(null);
 		}
 	}
 

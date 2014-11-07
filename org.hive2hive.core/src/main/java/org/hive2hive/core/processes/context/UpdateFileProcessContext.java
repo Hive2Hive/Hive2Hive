@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.context;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,34 +13,30 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
-import org.hive2hive.core.processes.context.interfaces.ICheckWriteAccessContext;
-import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
-import org.hive2hive.core.processes.context.interfaces.IInitializeChunksStepContext;
+import org.hive2hive.core.processes.context.interfaces.IGetFileKeysContext;
+import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
-import org.hive2hive.core.processes.context.interfaces.IPrepareNotificationContext;
-import org.hive2hive.core.processes.context.interfaces.IPutMetaFileContext;
-import org.hive2hive.core.processes.context.interfaces.IValidateFileSizeContext;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.context.interfaces.IUploadContext;
+import org.hive2hive.core.processes.files.update.UpdateNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
-public class UpdateFileProcessContext implements IValidateFileSizeContext, ICheckWriteAccessContext, IFile2MetaContext,
-		IInitializeChunksStepContext, IPutMetaFileContext, IPrepareNotificationContext, INotifyContext {
+public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysContext, IGetMetaFileContext, INotifyContext {
 
 	private final File file;
 	private final H2HSession session;
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
-	// the chunk keys to delete (if the configuration does not allow as many or as big chunks as existent)
-	private List<MetaChunk> chunksToDelete;
 
-	private KeyPair protectionKeys;
-	private KeyPair encryptionKeys;
+	private KeyPair chunkProtectionKeys;
+	private KeyPair metaFileProtectionKeys;
+	private KeyPair metaFileEncryptionKeys;
 	private boolean largeFile;
 	private BaseMetaFile metaFile;
 	private byte[] hash;
 	private Index index;
 	private Set<String> users;
-	private UploadNotificationMessageFactory messageFactory;
+	private UpdateNotificationMessageFactory messageFactory;
+	private List<MetaChunk> chunksToDelete;
 
 	public UpdateFileProcessContext(File file, H2HSession session) {
 		this.file = file;
@@ -54,13 +49,51 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	}
 
 	@Override
-	public Path consumeRoot() {
-		return session.getRoot();
+	public File consumeRoot() {
+		return session.getRootFile();
 	}
 
 	@Override
-	public void provideProtectionKeys(KeyPair protectionKeys) {
-		this.protectionKeys = protectionKeys;
+	public void provideMetaFileProtectionKeys(KeyPair metaFileProtectionKeys) {
+		this.metaFileProtectionKeys = metaFileProtectionKeys;
+	}
+
+	@Override
+	public KeyPair consumeMetaFileProtectionKeys() {
+		return metaFileProtectionKeys;
+	}
+
+	@Override
+	public void provideMetaFileEncryptionKeys(KeyPair encryptionKeys) {
+		this.metaFileEncryptionKeys = encryptionKeys;
+	}
+
+	@Override
+	public KeyPair consumeMetaFileEncryptionKeys() {
+		return metaFileEncryptionKeys;
+	}
+
+	@Override
+	public void provideChunkProtectionKeys(KeyPair chunkProtectionKeys) {
+		this.chunkProtectionKeys = chunkProtectionKeys;
+	}
+
+	@Override
+	public KeyPair consumeChunkProtectionKeys() {
+		return chunkProtectionKeys;
+	}
+
+	@Override
+	public void provideChunkEncryptionKeys(KeyPair chunkKeys) {
+		// not used here
+	}
+
+	@Override
+	public KeyPair consumeChunkEncryptionKeys() {
+		if (metaFile instanceof MetaFileSmall) {
+			return ((MetaFileSmall) metaFile).getChunkKey();
+		}
+		return null;
 	}
 
 	public List<MetaChunk> getChunksToDelete() {
@@ -69,14 +102,6 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 
 	public void setChunksToDelete(List<MetaChunk> chunksToDelete) {
 		this.chunksToDelete = chunksToDelete;
-	}
-
-	@Override
-	public KeyPair consumeChunkKeys() {
-		if (metaFile instanceof MetaFileSmall) {
-			return ((MetaFileSmall) metaFile).getChunkKey();
-		}
-		return null;
 	}
 
 	@Override
@@ -92,16 +117,6 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	@Override
 	public void setLargeFile(boolean largeFile) {
 		this.largeFile = largeFile;
-	}
-
-	@Override
-	public void provideMetaFileEncryptionKeys(KeyPair encryptionKeys) {
-		this.encryptionKeys = encryptionKeys;
-	}
-
-	@Override
-	public KeyPair consumeMetaFileEncryptionKeys() {
-		return encryptionKeys;
 	}
 
 	@Override
@@ -125,27 +140,13 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 	}
 
 	@Override
-	public void provideChunkKeys(KeyPair chunkKeys) {
-		// not used here
-	}
-
 	public BaseMetaFile consumeMetaFile() {
 		return metaFile;
 	}
 
 	@Override
-	public KeyPair consumeMetaFileProtectionKeys() {
-		return protectionKeys;
-	}
-
-	@Override
 	public void provideMetaFileHash(byte[] hash) {
 		this.hash = hash;
-	}
-
-	@Override
-	public KeyPair consumeProtectionKeys() {
-		return protectionKeys;
 	}
 
 	public byte[] consumeHash() {
@@ -166,8 +167,7 @@ public class UpdateFileProcessContext implements IValidateFileSizeContext, IChec
 		this.users = users;
 	}
 
-	@Override
-	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory) {
+	public void provideMessageFactory(UpdateNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
 

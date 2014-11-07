@@ -4,17 +4,19 @@ import java.io.File;
 import java.security.KeyPair;
 import java.util.Set;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
-import org.hive2hive.core.processes.context.interfaces.IFile2MetaContext;
+import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
-public class DeleteFileProcessContext implements IFile2MetaContext, INotifyContext {
+public class DeleteFileProcessContext implements IGetMetaFileContext, INotifyContext {
 
 	private final File file;
+	private final H2HSession session;
 
 	private KeyPair protectionKeys;
 	private KeyPair encryptionKeys;
@@ -23,20 +25,23 @@ public class DeleteFileProcessContext implements IFile2MetaContext, INotifyConte
 	private DeleteNotifyMessageFactory deleteNotifyMessageFactory;
 	private Set<String> users;
 
-	public DeleteFileProcessContext(File file) {
+	public DeleteFileProcessContext(File file, H2HSession session) {
 		this.file = file;
+		this.session = session;
 	}
 
 	public File consumeFile() {
 		return file;
 	}
 
-	@Override
+	public File consumeRoot() {
+		return session.getRootFile();
+	}
+
 	public void provideProtectionKeys(KeyPair protectionKeys) {
 		this.protectionKeys = protectionKeys;
 	}
 
-	@Override
 	public void provideMetaFileEncryptionKeys(KeyPair encryptionKeys) {
 		this.encryptionKeys = encryptionKeys;
 	}

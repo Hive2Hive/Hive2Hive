@@ -1,5 +1,6 @@
 package org.hive2hive.core.model;
 
+import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,13 +24,14 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * @param fileKeys
 	 * @param name
 	 */
-	public Index(KeyPair fileKeys, String name) {
-		this.fileKeys = fileKeys;
-		this.name = name;
-		this.parent = null;
+	public Index(KeyPair fileKeys) {
+		this(fileKeys, null, null);
 	}
 
 	public Index(KeyPair fileKeys, String name, FolderIndex parent) {
+		if(fileKeys == null) {
+			throw new IllegalArgumentException("File keys can't be null.");
+		}
 		this.fileKeys = fileKeys;
 		this.name = name;
 		this.parent = parent;
@@ -163,6 +165,20 @@ public abstract class Index implements Comparable<Index>, Serializable {
 			return Paths.get("");
 		} else {
 			return Paths.get(parent.getFullPath().toString(), getName());
+		}
+	}
+
+	/**
+	 * Converts the index to a file
+	 * 
+	 * @param root the root folder
+	 * @return the file
+	 */
+	public File asFile(File root) {
+		if (parent == null) {
+			return root;
+		} else {
+			return new File(parent.asFile(root), getName());
 		}
 	}
 

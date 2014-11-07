@@ -1,6 +1,5 @@
 package org.hive2hive.core.api;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +17,7 @@ import org.hive2hive.core.events.implementations.LogoutEvent;
 import org.hive2hive.core.events.implementations.RegisterEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
@@ -43,8 +43,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	private List<IUserEventListener> eventListeners;
 
 	// TODO remove IFileConfiguration
-	public H2HUserManager(NetworkManager networkManager, IFileConfiguration fileConfiguration,
-			EventBus eventBus) {
+	public H2HUserManager(NetworkManager networkManager, IFileConfiguration fileConfiguration, EventBus eventBus) {
 		super(networkManager, eventBus);
 		this.fileConfiguration = fileConfiguration;
 		eventListeners = new ArrayList<IUserEventListener>();
@@ -69,13 +68,13 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	@Override
-	public IProcessComponent login(UserCredentials credentials, Path rootPath) throws NoPeerConnectionException {
-		SessionParameters params = new SessionParameters(rootPath, fileConfiguration);
+	public IProcessComponent login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
+		SessionParameters params = new SessionParameters(fileAgent, fileConfiguration);
 
 		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 
 		CompletionHandleComponent eventComponent = new CompletionHandleComponent(loginProcess, createLoginHandle(
-				credentials, rootPath));
+				credentials, fileAgent));
 
 		AsyncComponent asyncProcess = new AsyncComponent(eventComponent);
 
@@ -99,7 +98,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	@Override
 	public boolean isRegistered(String userId) throws NoPeerConnectionException {
 		return networkManager.getDataManager().get(
-				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)) == null;
+				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)) != null;
 	}
 
 	@Override
@@ -137,9 +136,9 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		};
 	}
 
-	private ICompletionHandle createLoginHandle(UserCredentials credentials, Path rootPath) {
+	private ICompletionHandle createLoginHandle(UserCredentials credentials, IFileAgent fileAgent) {
 
-		final ILoginEvent loginEvent = new LoginEvent(credentials, rootPath);
+		final ILoginEvent loginEvent = new LoginEvent(credentials, fileAgent);
 
 		return new ICompletionHandle() {
 			public void onCompletionSuccess() {

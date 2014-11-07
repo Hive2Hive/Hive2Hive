@@ -12,15 +12,16 @@ import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.extras.FileRecursionUtil;
+import org.hive2hive.core.extras.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
-import org.hive2hive.core.processes.files.util.FileRecursionUtil;
-import org.hive2hive.core.processes.files.util.FileRecursionUtil.FileProcessAction;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.decorators.AsyncResultComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -33,22 +34,9 @@ import org.hive2hive.processframework.interfaces.IResultProcessComponent;
  * 
  */
 public class H2HFileManager extends H2HManager implements IFileManager {
-	
+
 	public H2HFileManager(NetworkManager networkManager, EventBus eventBus) {
 		super(networkManager, eventBus);
-	}
-
-	@Override
-	public IProcessComponent synchronize() throws NoSessionException {
-		if (networkManager.getSession() == null) {
-			throw new NoSessionException();
-		}
-
-		IProcessComponent syncProcess = ProcessFactory.instance().createSynchronizeFilesProcess(networkManager);
-		AsyncComponent asyncProcess = new AsyncComponent(syncProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
 	}
 
 	@Override
@@ -59,9 +47,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File cannot be null.");
 		} else if (!file.exists()) {
 			throw new IllegalArgumentException("File does not exist.");
-		} else if (session.getRoot().toFile().equals(file)) {
+		} else if (session.getRootFile().equals(file)) {
 			throw new IllegalArgumentException("Root cannot be added.");
-		} else if (!FileUtil.isInH2HDirectory(file, session)) {
+		} else if (!FileUtil.isInH2HDirectory(session.getFileAgent(), file)) {
 			throw new IllegalFileLocation();
 		}
 
@@ -87,7 +75,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("A folder can have one version only");
 		} else if (!file.exists()) {
 			throw new IllegalArgumentException("File does not exist");
-		} else if (!FileUtil.isInH2HDirectory(file, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
@@ -101,14 +89,16 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException {
+		IFileAgent fileAgent = networkManager.getSession().getFileAgent();
+
 		// TODO support the file listener that already moved the file
 		if (!source.exists()) {
-			//throw new IllegalArgumentException("Source file not found");
+			// throw new IllegalArgumentException("Source file not found");
 		} else if (destination.exists()) {
 			throw new IllegalArgumentException("Destination already exists");
-		} else if (!FileUtil.isInH2HDirectory(source, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, source)) {
 			throw new IllegalArgumentException("Source file not in the Hive2Hive directory");
-		} else if (!FileUtil.isInH2HDirectory(destination, networkManager.getSession())) {
+		} else if (!FileUtil.isInH2HDirectory(fileAgent, destination)) {
 			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
 		}
 
@@ -122,7 +112,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException {
-		if (!FileUtil.isInH2HDirectory(file, networkManager.getSession())) {
+		if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
@@ -173,15 +163,14 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		}
 
 		H2HSession session = networkManager.getSession();
-		Path root = session.getRoot();
 
 		// folder must be in the given root directory
-		if (!folder.toPath().toString().startsWith(root.toString())) {
+		if (!FileUtil.isInH2HDirectory(session.getFileAgent(), folder)) {
 			throw new IllegalFileLocation("Folder must be in root of the H2H directory.");
 		}
 
 		// sharing root folder is not allowed
-		if (folder.toPath().toString().equals(root.toString())) {
+		if (folder.equals(session.getRootFile())) {
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
 		}
 
@@ -207,10 +196,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public void subscribeFileEvents(IFileEventListener listener) {
-		if(listener == null) {
-			throw new IllegalArgumentException("The argument listener must not be null."); 
+		if (listener == null) {
+			throw new IllegalArgumentException("The argument listener must not be null.");
 		}
-		if(eventBus == null) {
+		if (eventBus == null) {
 			throw new IllegalStateException("No EventBus instance provided.");
 		}
 		eventBus.subscribe(listener);

@@ -30,6 +30,9 @@ public class FileIndex extends Index {
 		this.md5LatestVersion = md5LatestVersion;
 	}
 
+	/**
+	 * Copy constructor
+	 */
 	public FileIndex(FileIndex fileIndex) {
 		super(fileIndex.fileKeys, fileIndex.name, fileIndex.parent);
 		this.md5LatestVersion = fileIndex.md5LatestVersion;

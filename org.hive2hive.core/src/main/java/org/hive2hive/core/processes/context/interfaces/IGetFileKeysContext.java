@@ -7,7 +7,7 @@ public interface IGetFileKeysContext {
 	
 	public File consumeFile();
 
-	public void provideProtectionKeys(KeyPair protectionKeys);
+	public void provideChunkProtectionKeys(KeyPair protectionKeys);
 
 	public void provideMetaFileEncryptionKeys(KeyPair encryptionKeys);
 

@@ -1,8 +1,7 @@
 package org.hive2hive.core.processes.login;
 
-import java.nio.file.Path;
-
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
@@ -12,15 +11,15 @@ import org.hive2hive.core.network.data.vdht.VersionManager;
 public class SessionParameters {
 
 	private final IFileConfiguration fileConfig;
-	private final Path root;
+	private final IFileAgent fileAgent;
 
 	private UserProfileManager profileManager;
 	private VersionManager<Locations> locationsManager;
 	private DownloadManager downloadManager;
 	private PublicKeyManager keyManager;
 
-	public SessionParameters(Path root, IFileConfiguration fileConfig) {
-		this.root = root;
+	public SessionParameters(IFileAgent fileAgent, IFileConfiguration fileConfig) {
+		this.fileAgent = fileAgent;
 		this.fileConfig = fileConfig;
 	}
 
@@ -34,10 +33,6 @@ public class SessionParameters {
 
 	public IFileConfiguration getFileConfig() {
 		return fileConfig;
-	}
-
-	public Path getRoot() {
-		return root;
 	}
 
 	public PublicKeyManager getKeyManager() {
@@ -62,6 +57,10 @@ public class SessionParameters {
 
 	public void setLocationsManager(VersionManager<Locations> locationsManager) {
 		this.locationsManager = locationsManager;
+	}
+
+	public IFileAgent getFileAgent() {
+		return fileAgent;
 	}
 
 }

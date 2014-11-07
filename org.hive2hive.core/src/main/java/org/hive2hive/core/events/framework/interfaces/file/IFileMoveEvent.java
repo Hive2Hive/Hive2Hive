@@ -1,8 +1,9 @@
 package org.hive2hive.core.events.framework.interfaces.file;
 
-import java.nio.file.Path;
+import java.io.File;
 
 public interface IFileMoveEvent extends IFileEvent {
-	Path getSrcPath();
-	Path getDstPath();
+	File getSrcFile();
+
+	File getDstFile();
 }

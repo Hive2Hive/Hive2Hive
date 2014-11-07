@@ -16,6 +16,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -225,18 +226,25 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 				md5Hash = HashUtil.hash(file);
 			}
 
-			String pid = UUID.randomUUID().toString();
-			UserProfile profile = profileManager.getUserProfile(pid, true);
+			while (true) {
+				String pid = UUID.randomUUID().toString();
+				UserProfile profile = profileManager.getUserProfile(pid, true);
 
-			List<FolderIndex> indexes = getIndexList(profile.getRoot());
+				List<FolderIndex> indexes = getIndexList(profile.getRoot());
 
-			if (isFolder) {
-				new FolderIndex(indexes.get(random.nextInt(indexes.size())), null, randomString());
-			} else {
-				new FileIndex(indexes.get(random.nextInt(indexes.size())), keys, file.getName(), md5Hash);
+				if (isFolder) {
+					new FolderIndex(indexes.get(random.nextInt(indexes.size())), null, randomString());
+				} else {
+					new FileIndex(indexes.get(random.nextInt(indexes.size())), keys, file.getName(), md5Hash);
+				}
+
+				try {
+					profileManager.readyToPut(profile, pid);
+				} catch (VersionForkAfterPutException e) {
+					continue;
+				}
+				break;
 			}
-
-			profileManager.readyToPut(profile, pid);
 		}
 	}
 
