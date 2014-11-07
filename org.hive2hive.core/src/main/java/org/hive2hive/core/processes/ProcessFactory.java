@@ -262,10 +262,11 @@ public final class ProcessFactory {
 			NetworkManager networkManager) throws NoSessionException {
 		// precondition: session is existent
 		networkManager.getSession();
-
-		SequentialProcess process = new SequentialProcess();
 		DownloadFileContext context = new DownloadFileContext(fileKey, destination, versionToDownload);
 
+		// process composition
+		SyncProcess process = new SyncProcess();
+		
 		process.add(new FindInUserProfileStep(context, networkManager));
 
 		return process;

@@ -7,8 +7,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.context.DownloadFileContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Nico, Seppi
  */
-public class CreateFolderStep extends ProcessStep {
+public class CreateFolderStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CreateFolderStep.class);
 
