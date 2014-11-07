@@ -73,17 +73,6 @@ public class FileMenu extends H2HConsoleMenu {
 
 	@Override
 	protected void addMenuItems() {
-		add(new H2HConsoleMenuItem("Synchronize") {
-			protected boolean checkPreconditions() {
-				return createRootDirectory();
-			}
-
-			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
-				IProcessComponent synchronizeProcess = menus.getNodeMenu().getNode().getFileManager().synchronize();
-				executeBlocking(synchronizeProcess, displayText);
-			}
-		});
-
 		add(new H2HConsoleMenuItem("Add File") {
 			protected boolean checkPreconditions() {
 				return createRootDirectory();

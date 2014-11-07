@@ -2,6 +2,7 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.ConsoleFileAgent;
 import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -24,8 +25,8 @@ public final class RootMenu extends H2HConsoleMenu {
 		});
 
 		add(new H2HConsoleMenuItem("Login") {
-			protected boolean checkPreconditions() throws NoPeerConnectionException,
-					InvalidProcessStateException, InterruptedException {
+			protected boolean checkPreconditions() throws NoPeerConnectionException, InvalidProcessStateException,
+					InterruptedException {
 				if (!menus.getNodeMenu().createNetwork()) {
 					printAbortion(displayText, "Node not connected.");
 					return false;
@@ -45,15 +46,10 @@ public final class RootMenu extends H2HConsoleMenu {
 				return true;
 			}
 
-			protected void execute() throws NoPeerConnectionException, InterruptedException,
-					InvalidProcessStateException {
-
-				IProcessComponent loginProcess = menus
-						.getNodeMenu()
-						.getNode()
-						.getUserManager()
-						.login(menus.getUserMenu().getUserCredentials(),
-								menus.getFileMenu().getRootDirectory().toPath());
+			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
+				ConsoleFileAgent fileAgent = new ConsoleFileAgent(menus.getFileMenu().getRootDirectory());
+				IProcessComponent loginProcess = menus.getNodeMenu().getNode().getUserManager()
+						.login(menus.getUserMenu().getUserCredentials(), fileAgent);
 
 				boolean success = executeBlocking(loginProcess, displayText);
 				// reset user configs as they might be wrong
@@ -93,8 +89,7 @@ public final class RootMenu extends H2HConsoleMenu {
 		return "Please select an option:";
 	}
 
-	private boolean register() throws NoPeerConnectionException, InvalidProcessStateException,
-			InterruptedException {
+	private boolean register() throws NoPeerConnectionException, InvalidProcessStateException, InterruptedException {
 
 		IUserManager userManager = menus.getNodeMenu().getNode().getUserManager();
 		UserCredentials userCredentials = menus.getUserMenu().getUserCredentials();
@@ -112,16 +107,14 @@ public final class RootMenu extends H2HConsoleMenu {
 	private boolean checkLogin() throws NoPeerConnectionException {
 
 		if (menus.getNodeMenu().getNode() == null) {
-			H2HConsoleMenuItem
-					.printPrecondition("You are not logged in. Node is not connected to a network.");
+			H2HConsoleMenuItem.printPrecondition("You are not logged in. Node is not connected to a network.");
 			return false;
 		}
 		if (menus.getUserMenu().getUserCredentials() == null) {
 			H2HConsoleMenuItem.printPrecondition("You are not logged in. No user credentials specified.");
 			return false;
 		}
-		if (!menus.getNodeMenu().getNode().getUserManager()
-				.isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
+		if (!menus.getNodeMenu().getNode().getUserManager().isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
 			H2HConsoleMenuItem.printPrecondition("You are not logged in.");
 			return false;
 		}

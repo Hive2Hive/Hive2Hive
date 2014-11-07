@@ -34,6 +34,7 @@ public interface IFileAgent {
 	 * @param key the filename or other unique key to read from. Return either an empty byte-array or null if
 	 *            the data is not available.
 	 * @return the data associated with the name <code>null</code> or an empty array.
+	 * @throws IOException if reading fails
 	 */
-	byte[] readCache(String key);
+	byte[] readCache(String key) throws IOException;
 }

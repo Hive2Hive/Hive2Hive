@@ -25,12 +25,8 @@ public class TestFileAgent implements IFileAgent {
 	}
 
 	@Override
-	public byte[] readCache(String name) {
-		try {
-			return FileUtils.readFileToByteArray(new File(root, name));
-		} catch (IOException e) {
-			return null;
-		}
+	public byte[] readCache(String name) throws IOException {
+		return FileUtils.readFileToByteArray(new File(root, name));
 	}
 
 	@Override
