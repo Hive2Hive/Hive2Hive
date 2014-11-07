@@ -72,14 +72,14 @@ public class IndexTest extends H2HJUnitTest {
 
 	@Test
 	public void testFullPath() {
-		Assert.assertEquals("/", root.getFullPath().toString());
-		Assert.assertEquals("/1f1", child1.getFullPath().toString());
-		Assert.assertEquals("/1f2", child2.getFullPath().toString());
-		Assert.assertEquals("/1d/", dir1.getFullPath().toString());
-		Assert.assertEquals("/1d/2f", child3.getFullPath().toString());
-		Assert.assertEquals("/1d/2d/", dir2.getFullPath().toString());
-		Assert.assertEquals("/1d/3d/", dir3.getFullPath().toString());
-		Assert.assertEquals("/1d/3d/4d/", dir4.getFullPath().toString());
+		Assert.assertEquals("", root.getFullPath().toString());
+		Assert.assertEquals("1f1", child1.getFullPath().toString());
+		Assert.assertEquals("1f2", child2.getFullPath().toString());
+		Assert.assertEquals("1d/", dir1.getFullPath().toString());
+		Assert.assertEquals("1d/2f", child3.getFullPath().toString());
+		Assert.assertEquals("1d/2d/", dir2.getFullPath().toString());
+		Assert.assertEquals("1d/3d/", dir3.getFullPath().toString());
+		Assert.assertEquals("1d/3d/4d/", dir4.getFullPath().toString());
 	}
 
 	@Test

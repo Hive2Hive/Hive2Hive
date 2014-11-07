@@ -50,7 +50,7 @@ public class FileRecursionUtil {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	public static ProcessComponent buildUploadProcess(List<Path> files, FileProcessAction action,
+	public static ProcessComponent buildUploadProcess(List<File> files, FileProcessAction action,
 			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
 		// the sequential root process
 		SequentialProcess rootProcess = new SequentialProcess();
@@ -58,17 +58,17 @@ public class FileRecursionUtil {
 		// key idea: Find the children with the same parents and add them to a sequential process. They need
 		// to be sequential because the parent meta file must be adapted. If they would run in parallel, they
 		// would modify the parent meta folder simultaneously.
-		Map<Path, SequentialProcess> sameParents = new HashMap<Path, SequentialProcess>();
-		for (Path file : files) {
+		Map<File, SequentialProcess> sameParents = new HashMap<File, SequentialProcess>();
+		for (File file : files) {
 			// create the process which uploads or updates the file
 			ProcessComponent uploadProcess;
 			if (action == FileProcessAction.NEW_FILE) {
-				uploadProcess = ProcessFactory.instance().createNewFileProcess(file.toFile(), networkManager);
+				uploadProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
 			} else {
-				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file.toFile(), networkManager);
+				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 			}
 
-			Path parentFile = file.getParent();
+			File parentFile = file.getParentFile();
 			if (sameParents.containsKey(parentFile)) {
 				// a sibling exists that already created a sequential process
 				SequentialProcess sequentialProcess = sameParents.get(parentFile);
@@ -82,9 +82,9 @@ public class FileRecursionUtil {
 		}
 
 		// the children are now grouped together. Next, we need to link the parent files.
-		for (Path parent : sameParents.keySet()) {
+		for (File parent : sameParents.keySet()) {
 			AsyncComponent asyncChain = new AsyncComponent(sameParents.get(parent));
-			Path parentOfParent = parent.getParent();
+			File parentOfParent = parent.getParentFile();
 			if (sameParents.containsKey(parentOfParent)) {
 				// parent exists, we add this sub-process (sequential) to it. It can be async here
 				SequentialProcess sequentialProcess = sameParents.get(parentOfParent);

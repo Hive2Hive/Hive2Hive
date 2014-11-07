@@ -1,12 +1,18 @@
 package org.hive2hive.core.extras;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -40,8 +46,10 @@ public class FileSynchronizer {
 	 * @param userProfile the current user profile
 	 * @param before represents the file state at the last logout, before H2H was shutdown. The key of the map
 	 *            is the path, the byte[] is the hash of the file content.
+	 *            {@link FileSynchronizer#visitFiles(File)} can be used to generate this map.
 	 * @param now represents the current file state. The key of the map is the path, the byte[] is the hash of
-	 *            the file content.
+	 *            the file content. {@link FileSynchronizer#visitFiles(File)} can be used to generate this
+	 *            map.
 	 */
 	public FileSynchronizer(File rootDirectory, UserProfile userProfile, Map<String, byte[]> before, Map<String, byte[]> now) {
 		this.root = rootDirectory;
@@ -268,5 +276,32 @@ public class FileSynchronizer {
 				return file1.compareTo(file2);
 			}
 		});
+	}
+
+	/**
+	 * Visit all files recursively and calculate the hash of the file. Folders are also added to the result.
+	 * 
+	 * @param root the root folder
+	 * @return a map where the key is the relative file path to the root and the value is the hash
+	 * @throws IOException if hashing fails
+	 */
+	public static Map<String, byte[]> visitFiles(File root) throws IOException {
+		Map<String, byte[]> digest = new HashMap<String, byte[]>();
+		Iterator<File> files = FileUtils.iterateFilesAndDirs(root, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+		while (files.hasNext()) {
+			File file = files.next();
+			if (file.equals(root)) {
+				// skip root folder
+				continue;
+			}
+			String path = FileUtil.relativize(root, file).toString();
+			byte[] hash = HashUtil.hash(file);
+			if (file.isDirectory()) {
+				digest.put(path + FileUtil.getFileSep(), hash);
+			} else {
+				digest.put(path, hash);
+			}
+		}
+		return digest;
 	}
 }

@@ -146,7 +146,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 			for (Index child : children) {
 				if (child.isFolder()) {
 					FolderIndex subfolder = (FolderIndex) child;
-					return subfolder.getSharedFlag();
+					if (subfolder.getSharedFlag()) {
+						return true;
+					}
 				}
 			}
 		}
@@ -162,7 +164,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 */
 	public String getFullPath() {
 		if (parent == null) {
-			return FileUtil.getFileSep();
+			return "";
 		} else {
 			if (isFile()) {
 				return parent.getFullPath() + name;
