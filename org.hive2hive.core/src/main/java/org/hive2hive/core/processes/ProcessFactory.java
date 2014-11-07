@@ -314,7 +314,10 @@ public final class ProcessFactory {
 	public IProcessComponent<Void> createRecoverFileProcess(File file, IVersionSelector selector, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
-		SequentialProcess process = new SequentialProcess();
+		
+		// process composition
+		SyncProcess process = new SyncProcess();
+		
 		process.add(new GetFileKeysStep(context, networkManager.getSession()));
 		process.add(new GetMetaFileStep(context, networkManager.getDataManager()));
 		process.add(new SelectVersionStep(context, selector, networkManager));
