@@ -98,7 +98,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	@Override
 	public boolean isRegistered(String userId) throws NoPeerConnectionException {
 		return networkManager.getDataManager().get(
-				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)) == null;
+				new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_LOCATIONS)) != null;
 	}
 
 	@Override
@@ -137,6 +137,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	private ICompletionHandle createLoginHandle(UserCredentials credentials, IFileAgent fileAgent) {
+
 		final ILoginEvent loginEvent = new LoginEvent(credentials, fileAgent);
 
 		return new ICompletionHandle() {

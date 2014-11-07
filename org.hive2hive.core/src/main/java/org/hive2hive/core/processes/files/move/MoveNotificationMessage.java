@@ -66,8 +66,20 @@ public class MoveNotificationMessage extends BaseDirectMessage implements IFileE
 		}
 
 		Index oldParentNode = userProfile.getFileById(oldParentKey);
+		if (oldParentNode == null) {
+			logger.error("Got notified about a file we don't know.");
+			return;
+		}
 		Index newParentNode = userProfile.getFileById(newParentKey);
+		if (newParentNode == null) {
+			logger.error("Got notified about a file we don't know.");
+			return;
+		}
 		Index movedNode = ((FolderIndex) newParentNode).getChildByName(destFileName);
+		if (movedNode == null) {
+			logger.error("Got notified about a file we don't know.");
+			return;
+		}
 
 		// trigger event
 		File srcParent = oldParentNode.asFile(session.getRootFile());

@@ -10,7 +10,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.integration.TestFileConfiguration;
 import org.hive2hive.core.model.PermissionType;
@@ -99,7 +98,7 @@ public class UseCaseTestUtil {
 		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 		UserProfile userProfile = getUserProfile(networkManager, networkManager.getSession().getCredentials());
-		return FileUtil.getPath(networkManager.getSession().getRoot(), userProfile.getFileById(fileKey)).toFile();
+		return userProfile.getFileById(fileKey).asFile(networkManager.getSession().getRootFile());
 	}
 
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,

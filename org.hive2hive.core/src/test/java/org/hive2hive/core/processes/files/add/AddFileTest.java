@@ -148,7 +148,7 @@ public class AddFileTest extends H2HJUnitTest {
 		UserProfile gotProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
 		Assert.assertNotNull(gotProfile);
 
-		Index node = gotProfile.getFileByPath(originalFile, uploaderRoot.toPath());
+		Index node = gotProfile.getFileByPath(originalFile, uploaderRoot);
 		Assert.assertNotNull(node);
 
 		// verify the meta document
@@ -164,20 +164,20 @@ public class AddFileTest extends H2HJUnitTest {
 			Assert.assertEquals(expectedChunks, metaFileSmall.getVersions().get(0).getMetaChunks().size());
 		}
 
-//		// verify the file (should have been downloaded automatically during the notification)
-//		Path relative = uploaderRoot.toPath().relativize(originalFile.toPath());
-//		File file = new File(downloaderRoot, relative.toString());
-//
-//		// give some seconds for the file to download
-//		H2HWaiter waiter = new H2HWaiter(10);
-//		do {
-//			waiter.tickASecond();
-//		} while (!file.exists());
-//
-//		Assert.assertTrue(file.exists());
-//		if (originalFile.isFile()) {
-//			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
-//		}
+		// // verify the file (should have been downloaded automatically during the notification)
+		// Path relative = uploaderRoot.toPath().relativize(originalFile.toPath());
+		// File file = new File(downloaderRoot, relative.toString());
+		//
+		// // give some seconds for the file to download
+		// H2HWaiter waiter = new H2HWaiter(10);
+		// do {
+		// waiter.tickASecond();
+		// } while (!file.exists());
+		//
+		// Assert.assertTrue(file.exists());
+		// if (originalFile.isFile()) {
+		// Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
+		// }
 	}
 
 	@AfterClass

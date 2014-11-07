@@ -6,7 +6,7 @@ import org.hive2hive.core.events.framework.abstracts.FileEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileDeleteEvent;
 
 public class FileDeleteEvent extends FileEvent implements IFileDeleteEvent {
-	public FileDeleteEvent(File file,  boolean isFile) {
+	public FileDeleteEvent(File file, boolean isFile) {
 		super(file, isFile);
 	}
 }

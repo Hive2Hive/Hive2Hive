@@ -21,7 +21,7 @@ import org.hive2hive.core.processes.context.MoveFileProcessContext.DeleteNotific
 import org.hive2hive.core.processes.context.MoveFileProcessContext.MoveNotificationContext;
 import org.hive2hive.core.processes.context.MoveUpdateProtectionKeyContext;
 import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.processframework.RollbackReason;
@@ -187,14 +187,14 @@ public class RelinkUserProfileStep extends ProcessStep {
 		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
 		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, oldParentNode.getFilePublicKey(),
-				sourceName));
+				sourceName, movedNode.isFile()));
 		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file
 		logger.debug("Inform {} users that a file has been added (after movement).", usersAtDestination.size());
 		usersAtDestination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
-		addContext.provideMessageFactory(new UploadNotificationMessageFactory(movedNode, movedNode.getParent()
+		addContext.provideMessageFactory(new AddNotificationMessageFactory(movedNode, movedNode.getParent()
 				.getFilePublicKey()));
 		addContext.provideUsersToNotify(usersAtDestination);
 	}

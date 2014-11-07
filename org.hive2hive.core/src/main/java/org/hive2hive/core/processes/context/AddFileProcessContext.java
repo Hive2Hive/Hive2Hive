@@ -13,7 +13,7 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
 /**
@@ -30,13 +30,13 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	private KeyPair chunkEncryptionKeys;
 	private KeyPair chunkProtectionKeys;
-	private KeyPair metaFileEncryptionKeys;
+	private KeyPair fileKeys;
 	private KeyPair metaFileProtectionKeys;
 	private boolean largeFile;
 	private BaseMetaFile metaFile;
 	private Index index;
 	private Set<String> usersToNotify;
-	private UploadNotificationMessageFactory messageFactory;
+	private AddNotificationMessageFactory messageFactory;
 
 	public AddFileProcessContext(File file, H2HSession session) {
 		this.file = file;
@@ -90,11 +90,11 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	@Override
 	public KeyPair consumeMetaFileEncryptionKeys() {
-		return metaFileEncryptionKeys;
+		return fileKeys;
 	}
 
-	public void provideMetaFileEncryptionKeys(KeyPair metaFileEncryptionKeys) {
-		this.metaFileEncryptionKeys = metaFileEncryptionKeys;
+	public void provideFileKeys(KeyPair fileKeys) {
+		this.fileKeys = fileKeys;
 	}
 
 	@Override
@@ -140,8 +140,7 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 		this.usersToNotify = users;
 	}
 
-	@Override
-	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory) {
+	public void provideMessageFactory(AddNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
 

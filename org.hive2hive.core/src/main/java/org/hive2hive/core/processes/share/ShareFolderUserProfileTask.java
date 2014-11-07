@@ -12,7 +12,7 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
@@ -97,9 +97,10 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		}
 
 		/** 2. Notify others that files are available */
-		notifyOtherClients(new UploadNotificationMessageFactory(sharedIndex, null));
+		notifyOtherClients(new AddNotificationMessageFactory(sharedIndex, null));
 		logger.debug("Notified other client that new (shared) files are available for download.");
 
+		// TODO notify instead of download
 		/** 3. download the files that are now available */
 		List<Index> fileList = Index.getIndexList(sharedIndex);
 		// the folder itself is also contained, so remove it

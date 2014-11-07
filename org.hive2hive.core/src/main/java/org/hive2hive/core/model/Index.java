@@ -24,13 +24,14 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * @param fileKeys
 	 * @param name
 	 */
-	public Index(KeyPair fileKeys, String name) {
-		this.fileKeys = fileKeys;
-		this.name = name;
-		this.parent = null;
+	public Index(KeyPair fileKeys) {
+		this(fileKeys, null, null);
 	}
 
 	public Index(KeyPair fileKeys, String name, FolderIndex parent) {
+		if(fileKeys == null) {
+			throw new IllegalArgumentException("File keys can't be null.");
+		}
 		this.fileKeys = fileKeys;
 		this.name = name;
 		this.parent = parent;

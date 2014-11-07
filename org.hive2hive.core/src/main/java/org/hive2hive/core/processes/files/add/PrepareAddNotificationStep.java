@@ -1,4 +1,4 @@
-package org.hive2hive.core.processes.common;
+package org.hive2hive.core.processes.files.add;
 
 import java.security.PublicKey;
 import java.util.HashSet;
@@ -7,22 +7,21 @@ import java.util.Set;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
-import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.context.AddFileProcessContext;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 /**
- * Provide the needed data for the notification
+ * Provide the needed data for the add notification.
  * 
  * @author Nico, Seppi
  */
-public class PrepareNotificationStep extends ProcessStep {
+public class PrepareAddNotificationStep extends ProcessStep {
 
-	private final IUploadContext context;
+	private final AddFileProcessContext context;
 
-	public PrepareNotificationStep(IUploadContext context) {
+	public PrepareAddNotificationStep(AddFileProcessContext context) {
 		this.context = context;
 	}
 
@@ -52,7 +51,7 @@ public class PrepareNotificationStep extends ProcessStep {
 		// decouple from file tree
 		indexToSend.decoupleFromParent();
 
-		UploadNotificationMessageFactory messageFactory = new UploadNotificationMessageFactory(indexToSend, parentKey);
+		AddNotificationMessageFactory messageFactory = new AddNotificationMessageFactory(indexToSend, parentKey);
 		context.provideMessageFactory(messageFactory);
 	}
 

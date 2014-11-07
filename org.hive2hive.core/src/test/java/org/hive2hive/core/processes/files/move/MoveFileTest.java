@@ -74,7 +74,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		Index fileNode = userProfile.getFileByPath(destination, root.toPath());
+		Index fileNode = userProfile.getFileByPath(destination, root);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(folder.getName(), fileNode.getParent().getName());
 	}
@@ -99,7 +99,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		Index fileNode = userProfile.getFileByPath(destination, root.toPath());
+		Index fileNode = userProfile.getFileByPath(destination, root);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(userProfile.getRoot(), fileNode.getParent());
 	}
@@ -129,7 +129,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		Index fileNode = userProfile.getFileByPath(destination, root.toPath());
+		Index fileNode = userProfile.getFileByPath(destination, root);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(destFolder.getName(), fileNode.getParent().getName());
 	}
@@ -153,7 +153,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 		// check that the user profile has a correct entry
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(client, userCredentials);
-		Index fileNode = userProfile.getFileByPath(destination, root.toPath());
+		Index fileNode = userProfile.getFileByPath(destination, root);
 		Assert.assertNotNull(fileNode);
 		Assert.assertEquals(fileNode.getName(), destination.getName());
 	}

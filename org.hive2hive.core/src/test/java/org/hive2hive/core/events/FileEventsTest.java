@@ -188,6 +188,12 @@ public class FileEventsTest extends H2HJUnitTest {
 
 		@Override
 		@Handler
+		public void onFileUpdate(IFileUpdateEvent fileEvent) {
+			events.add(fileEvent);
+		}
+
+		@Override
+		@Handler
 		public void onFileDelete(IFileDeleteEvent fileEvent) {
 			events.add(fileEvent);
 		}
@@ -195,11 +201,6 @@ public class FileEventsTest extends H2HJUnitTest {
 		@Override
 		@Handler
 		public void onFileMove(IFileMoveEvent fileEvent) {
-			events.add(fileEvent);
-		}
-
-		@Override
-		public void onFileUpdate(IFileUpdateEvent fileEvent) {
 			events.add(fileEvent);
 		}
 	}

@@ -17,7 +17,7 @@ import org.hive2hive.core.processes.context.interfaces.IGetFileKeysContext;
 import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.core.processes.files.add.UploadNotificationMessageFactory;
+import org.hive2hive.core.processes.files.update.UpdateNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 
 public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysContext, IGetMetaFileContext, INotifyContext {
@@ -35,7 +35,7 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 	private byte[] hash;
 	private Index index;
 	private Set<String> users;
-	private UploadNotificationMessageFactory messageFactory;
+	private UpdateNotificationMessageFactory messageFactory;
 	private List<MetaChunk> chunksToDelete;
 
 	public UpdateFileProcessContext(File file, H2HSession session) {
@@ -167,8 +167,7 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 		this.users = users;
 	}
 
-	@Override
-	public void provideMessageFactory(UploadNotificationMessageFactory messageFactory) {
+	public void provideMessageFactory(UpdateNotificationMessageFactory messageFactory) {
 		this.messageFactory = messageFactory;
 	}
 

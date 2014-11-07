@@ -3,7 +3,6 @@ package org.hive2hive.core.processes.files.update;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
@@ -49,7 +48,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
-	private static Path uploaderRoot;
+	private static File uploaderRoot;
 	private static File file;
 	private static NetworkManager uploader;
 	private static NetworkManager downloader;
@@ -70,17 +69,16 @@ public class UpdateFileTest extends H2HJUnitTest {
 		downloader.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 
 		// create the roots and the file manager
-		File rootUploader = FileTestUtil.getTempDirectory();
-		uploaderRoot = rootUploader.toPath();
+		uploaderRoot = FileTestUtil.getTempDirectory();
 		File rootDownloader = FileTestUtil.getTempDirectory();
 
 		// register a user
 		UseCaseTestUtil.register(userCredentials, registrer);
-		UseCaseTestUtil.login(userCredentials, uploader, rootUploader);
+		UseCaseTestUtil.login(userCredentials, uploader, uploaderRoot);
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, rootUploader, CHUNK_SIZE);
+		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
@@ -225,7 +223,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderRoot.toFile());
+		FileUtils.deleteDirectory(uploaderRoot);
 		afterClass();
 	}
 }

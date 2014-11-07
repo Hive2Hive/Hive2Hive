@@ -1,17 +1,17 @@
-package org.hive2hive.core.processes.files.delete;
+package org.hive2hive.core.processes.files.update;
 
-import java.io.File;
 import java.security.PublicKey;
 import java.util.Random;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
-import org.hive2hive.core.events.implementations.FileDeleteEvent;
+import org.hive2hive.core.events.implementations.FileUpdateEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
@@ -24,17 +24,17 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Nico, Seppi
  */
-public class DeleteUserProfileTask extends UserProfileTask implements IFileEventGenerator {
+public class UpdateUserProfileTask extends UserProfileTask implements IFileEventGenerator {
 
-	private static final Logger logger = LoggerFactory.getLogger(DeleteUserProfileTask.class);
+	private static final long serialVersionUID = -4568985873058024202L;
 
-	private static final long serialVersionUID = 4580106953301162049L;
+	private static final Logger logger = LoggerFactory.getLogger(UpdateUserProfileTask.class);
 
 	private final PublicKey fileKey;
 
 	private final int forkLimit = 2;
 
-	public DeleteUserProfileTask(String sender, PublicKey fileKey) {
+	public UpdateUserProfileTask(String sender, PublicKey fileKey) {
 		super(sender);
 		this.fileKey = fileKey;
 	}
@@ -49,8 +49,7 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 			return;
 		}
 
-		Index fileToDelete;
-		FolderIndex parent;
+		Index updatedFile;
 		int forkCounter = 0;
 		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (true) {
@@ -64,28 +63,37 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 				return;
 			}
 
-			fileToDelete = userProfile.getFileById(fileKey);
-			if (fileToDelete == null) {
+			updatedFile = userProfile.getFileById(fileKey);
+			if (updatedFile == null) {
 				logger.error("Got notified about a file we don't know.");
 				return;
 			}
 
-			parent = fileToDelete.getParent();
+			FolderIndex parent = updatedFile.getParent();
 			if (parent == null) {
-				logger.error("Got task to delete the root, which is invalid.");
+				logger.error("Got task to update the root, which is invalid.");
 				return;
 			}
 
 			// check write permission
 			if (!parent.canWrite(sender)) {
-				logger.error("User without WRITE permissions tried to delete a file.");
+				logger.error("User without WRITE permissions tried to update a file.");
 				return;
 			}
 
-			parent.removeChild(fileToDelete);
+			// copy the md5 parameter of the received file
+			Index existing = parent.getChildByName(updatedFile.getName());
+			if (existing.isFile() && updatedFile.isFile()) {
+				logger.debug("File update in a shared folder received: '{}'.", updatedFile.getName());
+				FileIndex existingFile = (FileIndex) existing;
+				FileIndex newFile = (FileIndex) updatedFile;
+				existingFile.setMD5(newFile.getMD5());
+			}
 
 			try {
+				// upload the changes
 				profileManager.readyToPut(userProfile, getId());
+				logger.debug("Successfully updated the index '{}' in the own user profile.", updatedFile.getName());
 			} catch (VersionForkAfterPutException e) {
 				if (forkCounter++ > forkLimit) {
 					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
@@ -104,25 +112,25 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 					continue;
 				}
 			} catch (PutFailedException e) {
-				logger.error("Couldn't put updated user profile.", e);
+				logger.error("Couldn't put updated user profile.");
 				return;
 			}
 
+			try {
+				// notify own other clients
+				notifyOtherClients(new UpdateNotificationMessageFactory(updatedFile));
+				logger.debug("Notified other clients that a file has been updated by another user.");
+			} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
+					| NoSessionException e) {
+				logger.error("Could not notify other clients of me about the updated file.", e);
+			}
+
+			// trigger event
+			networkManager.getEventBus().publish(
+					new FileUpdateEvent(updatedFile.asFile(session.getRootFile()), updatedFile.isFile()));
+
 			break;
 		}
-
-		try {
-			// notify own other clients
-			notifyOtherClients(new DeleteNotifyMessageFactory(fileToDelete.getFilePublicKey(), parent.getFilePublicKey(),
-					fileToDelete.getName(), fileToDelete.isFile()));
-			logger.debug("Notified other clients that a file has been deleted by another user.");
-		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
-			logger.error("Could not notify other clients of me about the deleted file.", e);
-		}
-
-		// trigger event
-		File deletedFile = fileToDelete.asFile(session.getRootFile());
-		networkManager.getEventBus().publish(new FileDeleteEvent(deletedFile, fileToDelete.isFile()));
 	}
 
 }
