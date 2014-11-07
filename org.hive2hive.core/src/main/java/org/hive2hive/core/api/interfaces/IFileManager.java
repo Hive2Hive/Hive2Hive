@@ -12,7 +12,6 @@ import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 /**
  * Basic interface for all file operations.
@@ -32,7 +31,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 * @throws IllegalFileLocation the file is at a wrong location
 	 */
-	IProcessComponent add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
+	IProcessComponent<Void> add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
 
 	/**
 	 * Update a file and create a new version.<br>
@@ -46,7 +45,7 @@ public interface IFileManager extends IManager {
 	 *             exception description.
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent update(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> update(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Move a file / folder from a given source to a given destination. This operation can also be used to
@@ -58,7 +57,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Delete a file / folder and all versions of that file from the network. This operation deletes also the
@@ -70,7 +69,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent delete(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> delete(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Recover a file version from the network and restore it under a new file (name is indicated with special
@@ -85,7 +84,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent recover(File file, IVersionSelector versionSelector) throws FileNotFoundException, NoSessionException,
+	IProcessComponent<Void> recover(File file, IVersionSelector versionSelector) throws FileNotFoundException, NoSessionException,
 			NoPeerConnectionException;
 
 	/**
@@ -105,7 +104,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
+	IProcessComponent<Void> share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -115,7 +114,7 @@ public interface IFileManager extends IManager {
 	 * @return an observable process component providing results of the request asynchronous.
 	 * @throws NoSessionException no user has logged in
 	 */
-	IResultProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
+	IProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
 
 	/**
 	 * Subscribe all file event handlers of the given listener instance.
