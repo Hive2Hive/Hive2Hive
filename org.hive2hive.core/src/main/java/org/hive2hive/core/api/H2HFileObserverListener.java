@@ -3,7 +3,6 @@ package org.hive2hive.core.api;
 import java.io.File;
 
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IFileObserverListener;
 import org.hive2hive.core.extras.buffer.AddFileBuffer;
 import org.hive2hive.core.extras.buffer.DeleteFileBuffer;
@@ -27,7 +26,7 @@ public class H2HFileObserverListener implements IFileObserverListener {
 	private final IFileBuffer deleteFileBuffer;
 	private final ModifyFileBuffer modifyFileBuffer;
 
-	public H2HFileObserverListener(IFileManager fileManager) {
+	public H2HFileObserverListener(H2HFileManager fileManager) {
 		this.addFileBuffer = new AddFileBuffer(fileManager);
 		this.deleteFileBuffer = new DeleteFileBuffer(fileManager);
 		this.modifyFileBuffer = new ModifyFileBuffer(fileManager);

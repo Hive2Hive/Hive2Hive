@@ -77,20 +77,24 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
-		IProcessComponent<Void> deleteProcess;
+		IProcessComponent<Future<Void>> asyncDeleteProcess;
 		if (file.isDirectory() && file.listFiles().length > 0) {
 			// delete the files recursively
 			List<Path> preorderList = FileRecursionUtil.getPreorderList(file.toPath());
-			deleteProcess = FileRecursionUtil.buildDeletionProcess(preorderList, networkManager);
+			asyncDeleteProcess = FileRecursionUtil.buildDeletionProcess(preorderList, networkManager);
+			
+			// built process is already async
+			
 		} else {
 			// delete a single file
-			deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
+			IProcessComponent<Void> deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
+			
+			// this process must be wrapped to be async
+			asyncDeleteProcess = new AsyncComponent<>(deleteProcess);
 		}
 
-		IProcessComponent<Future<Void>> asyncProcess = new AsyncComponent<>(deleteProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		submitProcess(asyncDeleteProcess);
+		return asyncDeleteProcess;
 	}
 
 	@Override

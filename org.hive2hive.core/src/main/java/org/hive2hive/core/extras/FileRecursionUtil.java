@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -17,8 +18,7 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
@@ -51,18 +51,18 @@ public class FileRecursionUtil {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	public static ProcessComponent buildUploadProcess(List<Path> files, FileProcessAction action,
+	public static IProcessComponent<Void> buildUploadProcess(List<Path> files, FileProcessAction action,
 			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
-		// the sequential root process
-		SequentialProcess rootProcess = new SequentialProcess();
+		// the root process
+		SyncProcess rootProcess = new SyncProcess();
 
 		// key idea: Find the children with the same parents and add them to a sequential process. They need
 		// to be sequential because the parent meta file must be adapted. If they would run in parallel, they
 		// would modify the parent meta folder simultaneously.
-		Map<Path, SequentialProcess> sameParents = new HashMap<Path, SequentialProcess>();
+		Map<Path, SyncProcess> sameParents = new HashMap<Path, SyncProcess>();
 		for (Path file : files) {
 			// create the process which uploads or updates the file
-			ProcessComponent uploadProcess;
+			IProcessComponent<Void> uploadProcess;
 			if (action == FileProcessAction.NEW_FILE) {
 				uploadProcess = ProcessFactory.instance().createNewFileProcess(file.toFile(), networkManager);
 			} else {
@@ -72,24 +72,24 @@ public class FileRecursionUtil {
 			Path parentFile = file.getParent();
 			if (sameParents.containsKey(parentFile)) {
 				// a sibling exists that already created a sequential process
-				SequentialProcess sequentialProcess = sameParents.get(parentFile);
-				sequentialProcess.add(uploadProcess);
+				SyncProcess process = sameParents.get(parentFile);
+				process.add(uploadProcess);
 			} else {
 				// first file with this parent; create new sequential process
-				SequentialProcess sequentialProcess = new SequentialProcess();
-				sequentialProcess.add(uploadProcess);
-				sameParents.put(parentFile, sequentialProcess);
+				SyncProcess process = new SyncProcess();
+				process.add(uploadProcess);
+				sameParents.put(parentFile, process);
 			}
 		}
 
 		// the children are now grouped together. Next, we need to link the parent files.
 		for (Path parent : sameParents.keySet()) {
-			AsyncComponent asyncChain = new AsyncComponent(sameParents.get(parent));
+			IProcessComponent<?> asyncChain = new AsyncComponent<>(sameParents.get(parent));
 			Path parentOfParent = parent.getParent();
 			if (sameParents.containsKey(parentOfParent)) {
 				// parent exists, we add this sub-process (sequential) to it. It can be async here
-				SequentialProcess sequentialProcess = sameParents.get(parentOfParent);
-				sequentialProcess.add(asyncChain);
+				SyncProcess process = sameParents.get(parentOfParent);
+				process.add(asyncChain);
 			} else {
 				// parent does not exist --> attach the sub-tree to the root
 				rootProcess.add(asyncChain);
@@ -109,21 +109,21 @@ public class FileRecursionUtil {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	public static ProcessComponent buildDeletionProcess(List<Path> files, NetworkManager networkManager)
+	public static IProcessComponent<Future<Void>> buildDeletionProcess(List<Path> files, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
-		// the sequential root process
-		SequentialProcess rootProcess = new SequentialProcess();
+		// the root process
+		SyncProcess rootProcess = new SyncProcess();
 
 		// deletion must happen in reverse tree order. Since this is very complicated when it contains
 		// asynchronous components, we simply delete them all in the same thread (reverse preorder of course)
 		Collections.reverse(files);
 		for (Path file : files) {
-			ProcessComponent deletionProcess = ProcessFactory.instance().createDeleteFileProcess(file.toFile(),
+			IProcessComponent<Void> deletionProcess = ProcessFactory.instance().createDeleteFileProcess(file.toFile(),
 					networkManager);
 			rootProcess.add(deletionProcess);
 		}
 
-		return new AsyncComponent(rootProcess);
+		return new AsyncComponent<>(rootProcess);
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class FileRecursionUtil {
 	 * @throws NoPeerConnectionException
 	 */
 	@Deprecated
-	public static ProcessComponent buildDeletionProcessFromNodelist(List<Index> files, NetworkManager networkManager)
+	public static IProcessComponent<Future<Void>> buildDeletionProcessFromNodelist(List<Index> files, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		List<Path> filesToDelete = new ArrayList<Path>();
 		for (Index documentIndex : files) {
@@ -155,26 +155,26 @@ public class FileRecursionUtil {
 	 * @return the root process component containing all sub-processes (and sub-tasks)
 	 * @throws NoSessionException
 	 */
-	public static ProcessComponent buildDownloadProcess(List<Index> files, NetworkManager networkManager)
+	public static IProcessComponent<Void> buildDownloadProcess(List<Index> files, NetworkManager networkManager)
 			throws NoSessionException {
 		// the root process, where everything runs in parallel (only async children are added)
-		SequentialProcess rootProcess = new SequentialProcess();
+		SyncProcess rootProcess = new SyncProcess();
 
 		// build a flat map of the folders to download (such that O(1) for each lookup)
-		Map<FolderIndex, SequentialProcess> folderMap = new HashMap<FolderIndex, SequentialProcess>();
-		Map<FileIndex, AsyncComponent> fileMap = new HashMap<FileIndex, AsyncComponent>();
+		Map<FolderIndex, SyncProcess> folderMap = new HashMap<FolderIndex, SyncProcess>();
+		Map<FileIndex, AsyncComponent<Void>> fileMap = new HashMap<FileIndex, AsyncComponent<Void>>();
 
 		for (Index file : files) {
 			PublicKey fileKey = file.getFilePublicKey();
-			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
+			IProcessComponent<Void> downloadProcess = ProcessFactory.instance().createDownloadFileProcess(fileKey, networkManager);
 			if (file.isFolder()) {
 				// when a directory, the process may have multiple children, thus we need a sequential process
-				SequentialProcess folderProcess = new SequentialProcess();
+				SyncProcess folderProcess = new SyncProcess();
 				folderProcess.add(downloadProcess);
 				folderMap.put((FolderIndex) file, folderProcess);
 			} else {
 				// when a file, the process can run in parallel with all siblings (done in next step)
-				fileMap.put((FileIndex) file, new AsyncComponent(downloadProcess));
+				fileMap.put((FileIndex) file, new AsyncComponent<>(downloadProcess));
 			}
 		}
 
@@ -182,14 +182,14 @@ public class FileRecursionUtil {
 		// idea: iterate through all children and search for parent in other map. If not there, they can be
 		// added to the root process anyway
 		for (FileIndex file : fileMap.keySet()) {
-			AsyncComponent fileProcess = fileMap.get(file);
+			AsyncComponent<Void> fileProcess = fileMap.get(file);
 			Index parent = file.getParent();
 			if (parent == null) {
 				// file is in root, thus we can add it to the root process
 				rootProcess.add(fileProcess);
 			} else if (folderMap.containsKey(parent)) {
 				// the parent exists here
-				SequentialProcess parentProcess = folderMap.get(parent);
+				SyncProcess parentProcess = folderMap.get(parent);
 				parentProcess.add(fileProcess);
 			} else {
 				// file is not in root and parent is not here, thus we simply add it to the root process
@@ -199,16 +199,16 @@ public class FileRecursionUtil {
 
 		// files and folder are linked. We now link the folders with other folders
 		for (FolderIndex folder : folderMap.keySet()) {
-			SequentialProcess folderProcess = folderMap.get(folder);
+			SyncProcess folderProcess = folderMap.get(folder);
 			// In addition, we can make this process run asynchronous because it does not affect the siblings
-			AsyncComponent asyncFolderProcess = new AsyncComponent(folderProcess);
+			AsyncComponent<Void> asyncFolderProcess = new AsyncComponent<>(folderProcess);
 			Index parent = folder.getParent();
 			if (parent == null) {
 				// file is in root, thus we can add it to the root process.
 				rootProcess.add(asyncFolderProcess);
 			} else if (folderMap.containsKey(parent)) {
 				// this folder has a parent
-				SequentialProcess parentProcess = folderMap.get(parent);
+				SyncProcess parentProcess = folderMap.get(parent);
 				parentProcess.add(asyncFolderProcess);
 			} else {
 				// folder is not in root and parent folder does not sync here, add it to the root process
@@ -225,9 +225,9 @@ public class FileRecursionUtil {
 	 * @param processes the processes to align to a center
 	 * @return the process chain
 	 */
-	public static IProcessComponent createProcessChain(List<ProcessComponent> processes) {
-		SequentialProcess rootProcess = new SequentialProcess();
-		for (ProcessComponent processComponent : processes) {
+	public static IProcessComponent<Void> createProcessChain(List<IProcessComponent<Void>> processes) {
+		SyncProcess rootProcess = new SyncProcess();
+		for (IProcessComponent<Void> processComponent : processes) {
 			rootProcess.add(processComponent);
 		}
 		return rootProcess;
