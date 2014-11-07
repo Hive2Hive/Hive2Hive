@@ -299,7 +299,9 @@ public final class ProcessFactory {
 		H2HSession session = networkManager.getSession();
 		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRootFile());
 
-		SequentialProcess process = new SequentialProcess();
+		// process composition
+		SyncProcess process = new SyncProcess();
+		
 		process.add(new org.hive2hive.core.processes.files.move.CheckWriteAccessStep(context, session.getProfileManager()));
 		process.add(new RelinkUserProfileStep(context, session.getProfileManager(), networkManager.getDataManager()));
 		process.add(createNotificationProcess(context.getMoveNotificationContext(), networkManager));

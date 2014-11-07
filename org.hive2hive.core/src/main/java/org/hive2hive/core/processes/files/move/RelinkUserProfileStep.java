@@ -24,25 +24,23 @@ import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Nico, Seppi
  */
-public class RelinkUserProfileStep extends ProcessStep {
+public class RelinkUserProfileStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RelinkUserProfileStep.class);
 
 	private final MoveFileProcessContext context;
 	private final UserProfileManager profileManager;
 	private final DataManager dataManger;
-
-	private boolean profileUpdated;
 
 	private final int forkLimit = 2;
 
@@ -53,7 +51,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File source = context.getSource();
 		File destination = context.getDestination();
 		File root = context.getRoot();
@@ -69,8 +67,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 			UserProfile userProfile;
 			try {
 				userProfile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (GetFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 
 			// get the corresponding node of the moving file
@@ -95,7 +93,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 				profileManager.readyToPut(userProfile, getID());
 
 				// set modification flag
-				profileUpdated = true;
+				setRequiresRollback(true);
 			} catch (VersionForkAfterPutException e) {
 				if (forkCounter++ > forkLimit) {
 					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
@@ -113,8 +111,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 					// retry update of user profile
 					continue;
 				}
-			} catch (PutFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 
 			logger.debug("Successfully relinked the moved file in the user profile.");
@@ -130,6 +128,8 @@ public class RelinkUserProfileStep extends ProcessStep {
 
 			break;
 		}
+		
+		return null;
 	}
 
 	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
@@ -200,67 +200,64 @@ public class RelinkUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		// only when user profile has been updated
-		if (profileUpdated) {
-			File source = context.getSource();
-			File destination = context.getDestination();
-			File root = context.getRoot();
+	protected Void doRollback() throws InvalidProcessStateException, ProcessRollbackException {
+		File source = context.getSource();
+		File destination = context.getDestination();
+		File root = context.getRoot();
 
-			int forkCounter = 0;
-			int forkWaitTime = new Random().nextInt(1000) + 500;
-			while (true) {
-				UserProfile userProfile;
-				try {
-					userProfile = profileManager.getUserProfile(getID(), true);
-				} catch (GetFailedException e) {
-					logger.error("Couldn't load user profile for redo.", e);
-					return;
-				}
-
-				Index movedNode = userProfile.getFileByPath(source, root);
-				FolderIndex oldParentNode = (FolderIndex) userProfile.getFileByPath(source.getParentFile(), root);
-				FolderIndex newParentNode = movedNode.getParent();
-
-				// consider renaming
-				movedNode.setName(destination.getName());
-
-				// remove moved node from destination parent node
-				newParentNode.removeChild(movedNode);
-				// re-re-link them
-				movedNode.setParent(oldParentNode);
-				oldParentNode.addChild(movedNode);
-
-				try {
-					// update in DHT
-					profileManager.readyToPut(userProfile, getID());
-				} catch (VersionForkAfterPutException e) {
-					if (forkCounter++ > forkLimit) {
-						logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
-					} else {
-						logger.warn("Version fork after put detected. Rejecting and retrying put.");
-
-						// exponential back off waiting
-						try {
-							Thread.sleep(forkWaitTime);
-						} catch (InterruptedException e1) {
-							// ignore
-						}
-						forkWaitTime = forkWaitTime * 2;
-
-						// retry update of user profile
-						continue;
-					}
-				} catch (PutFailedException e) {
-					logger.error("Couldn't redo user profile update.", e);
-					return;
-				}
-
-				// reset modification flag
-				profileUpdated = false;
-
-				break;
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
+		while (true) {
+			UserProfile userProfile;
+			try {
+				userProfile = profileManager.getUserProfile(getID(), true);
+			} catch (GetFailedException ex) {
+				throw new ProcessRollbackException(this, ex, "Couldn't load user profile for redo.");
 			}
+
+			Index movedNode = userProfile.getFileByPath(source, root);
+			FolderIndex oldParentNode = (FolderIndex) userProfile.getFileByPath(source.getParentFile(), root);
+			FolderIndex newParentNode = movedNode.getParent();
+
+			// consider renaming
+			movedNode.setName(destination.getName());
+
+			// remove moved node from destination parent node
+			newParentNode.removeChild(movedNode);
+			// re-re-link them
+			movedNode.setParent(oldParentNode);
+			oldParentNode.addChild(movedNode);
+
+			try {
+				// update in DHT
+				profileManager.readyToPut(userProfile, getID());
+			} catch (VersionForkAfterPutException e) {
+				if (forkCounter++ > forkLimit) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
+			} catch (PutFailedException ex) {
+				throw new ProcessRollbackException(this, ex, "Couldn't redo user profile update.");
+			}
+
+			// reset modification flag
+			setRequiresRollback(false);
+
+			break;
 		}
+		
+		return null;
 	}
 }
