@@ -24,12 +24,12 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.decorators.AsyncComponent;
-import org.hive2hive.processframework.decorators.AsyncResultComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.interfaces.IResultProcessComponent;
 
 /**
  * Default implementation of {@link IFileManager}.
+ * This implementation of {@link IFileManager} is asynchronous. Thus, the return types of the
+ * {@link IProcessComponent}s uses {@link Future}s.
  * 
  * @author Christian, Nico
  * 
@@ -175,7 +175,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
 		}
 
-		IProcessComponent<Void> shareProcess = ProcessFactory.instance().createShareProcess(folder, new UserPermission(userId, permission), networkManager);
+		IProcessComponent<Void> shareProcess = ProcessFactory.instance().createShareProcess(folder,
+				new UserPermission(userId, permission), networkManager);
 		IProcessComponent<Future<Void>> asyncProcess = new AsyncComponent<>(shareProcess);
 
 		submitProcess(asyncProcess);
@@ -184,10 +185,10 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 	@Override
 	public IProcessComponent<Future<List<FileTaste>>> getFileList() throws NoSessionException {
-		
+
 		IProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(networkManager);
 		IProcessComponent<Future<List<FileTaste>>> asyncProcess = new AsyncComponent<>(fileListProcess);
-		
+
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}

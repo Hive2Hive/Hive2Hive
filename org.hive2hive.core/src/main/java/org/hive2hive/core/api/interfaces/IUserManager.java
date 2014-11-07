@@ -1,6 +1,5 @@
 package org.hive2hive.core.api.interfaces;
 
-import org.hive2hive.core.events.framework.interfaces.IUserEventGenerator;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
@@ -8,12 +7,13 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
- * Basic interface for all user operations.
+ * Basic interface for all user operations. The implementation of this interface can either be synchronous or
+ * asynchronous. Thus, the return types of the {@link IProcessComponent}s is wildcarded ({@code <?>}).
  * 
  * @author Christian, Nico, Seppi
  * 
  */
-public interface IUserManager extends IManager, IUserEventGenerator {
+public interface IUserManager extends IManager {
 
 	/**
 	 * Each user must be registered in the network. This call creates a new UserProfile for the
@@ -24,7 +24,7 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * @return an observable process component
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
-	IProcessComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException;
+	IProcessComponent<?> register(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
 	 * Login a (registered) user with the same credentials as {@link IUserManager#register(UserCredentials)}
@@ -36,7 +36,7 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	IProcessComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
+	IProcessComponent<?> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
@@ -46,7 +46,7 @@ public interface IUserManager extends IManager, IUserEventGenerator {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 * @throws NoSessionException no user has logged in
 	 */
-	IProcessComponent<Void> logout() throws NoPeerConnectionException, NoSessionException;
+	IProcessComponent<?> logout() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Checks whether a user is registered in the network.
