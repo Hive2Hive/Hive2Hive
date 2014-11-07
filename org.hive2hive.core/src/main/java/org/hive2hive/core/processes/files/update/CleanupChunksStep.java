@@ -50,7 +50,7 @@ public class CleanupChunksStep extends ProcessStep<Void> {
 
 			// make async, insert it as next step
 			List<IProcessComponent<?>> parentComponents = new ArrayList<IProcessComponent<?>>(getParent().getComponents());
-			int index = parentComponents.indexOf(prev);
+			int index = parentComponents.indexOf(prev) + 1;
 			
 			IProcessComponent<?> asyncDeletion = new AsyncComponent<>(deleteStep);
 			getParent().add(index, asyncDeletion);

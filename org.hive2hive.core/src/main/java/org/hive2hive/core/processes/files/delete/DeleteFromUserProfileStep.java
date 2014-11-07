@@ -1,6 +1,8 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -17,10 +19,10 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
 import org.hive2hive.core.processes.files.GetMetaFileStep;
-import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.exceptions.ProcessRollbackException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,14 +130,17 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
 
 			// insert them in correct order
-			getParent().insertNext(getMeta, this);
-			getParent().insertNext(deleteChunks, getMeta);
-			getParent().insertNext(deleteMeta, deleteChunks);
+			List<IProcessComponent<?>> parentComponents = new ArrayList<>(getParent().getComponents());
+			int index = parentComponents.indexOf(this) + 1;
+			
+			getParent().add(index, getMeta);
+			getParent().add(index + 1, deleteChunks);
+			getParent().add(index + 2, deleteMeta);
 		}
 	}
 
 	@Override
-	protected Void doRollback() throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException, ProcessRollbackException {
 		File file = context.consumeFile();
 		File root = context.consumeRoot();
 		Index index = context.consumeIndex();
@@ -149,7 +154,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 				try {
 					profile = profileManager.getUserProfile(getID(), true);
 				} catch (GetFailedException ex) {
-					throw new ProcessExecutionException(this, ex);
+					throw new ProcessRollbackException(this, ex);
 				}
 
 				// re-add file to user profile
@@ -187,8 +192,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			context.provideIndex(null);
 			
 			setRequiresRollback(false);
-			return null;
 		}
+		return null;
 	}
 
 }

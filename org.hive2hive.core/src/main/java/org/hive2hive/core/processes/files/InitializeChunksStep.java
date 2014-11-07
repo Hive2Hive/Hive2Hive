@@ -75,7 +75,7 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 
 			// insert just after this step
 			List<IProcessComponent<?>> parentComponents = new ArrayList<IProcessComponent<?>>(getParent().getComponents());
-			int index = parentComponents.indexOf(prev);
+			int index = parentComponents.indexOf(prev) + 1;
 			getParent().add(index, putChunkStep);
 			prev = putChunkStep;
 		}

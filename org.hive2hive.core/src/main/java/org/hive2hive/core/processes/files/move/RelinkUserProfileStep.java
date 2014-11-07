@@ -3,7 +3,9 @@ package org.hive2hive.core.processes.files.move;
 import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -28,6 +30,7 @@ import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.exceptions.ProcessRollbackException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +138,11 @@ public class RelinkUserProfileStep extends ProcessStep<Void> {
 	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
 		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode, oldProtectionKeys,
 				newProtectionKeys);
-		getParent().insertNext(new InitializeMetaUpdateStep(pkUpdateContext, dataManger), this);
+		
+		List<IProcessComponent<?>> parentComponents = new ArrayList<>(getParent().getComponents());
+		int index = parentComponents.indexOf(this) + 1;
+		
+		getParent().add(index, new InitializeMetaUpdateStep(pkUpdateContext, dataManger));
 	}
 
 	/**
