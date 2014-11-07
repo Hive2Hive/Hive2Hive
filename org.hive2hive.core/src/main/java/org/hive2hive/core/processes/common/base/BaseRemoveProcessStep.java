@@ -10,8 +10,7 @@ import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi, Nico
  */
-public abstract class BaseRemoveProcessStep extends ProcessStep {
+public abstract class BaseRemoveProcessStep extends ProcessStep<Void> {
 
 	// TODO this class needs to be refactored
 	// TODO this class is only rollbacking the last execution, however there are steps that execute remove()

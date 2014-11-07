@@ -12,10 +12,10 @@ import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.security.HashUtil;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class UpdateMD5inUserProfileStep extends ProcessStep {
+public class UpdateMD5inUserProfileStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateMD5inUserProfileStep.class);
 
@@ -41,13 +41,14 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws ProcessExecutionException {
+	protected Void doExecute() throws ProcessExecutionException {
+		
 		BaseMetaFile metaFile = context.consumeMetaFile();
 		byte[] newMD5;
 		try {
 			newMD5 = HashUtil.hash(context.consumeFile());
-		} catch (IOException e) {
-			throw new ProcessExecutionException("The new MD5 hash for the user profile could not be generated.", e);
+		} catch (IOException ex) {
+			throw new ProcessExecutionException(this, ex, "The new MD5 hash for the user profile could not be generated.");
 		}
 
 		int forkCounter = 0;
@@ -63,7 +64,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 				// store for backup
 				originalMD5 = index.getMD5();
 				if (HashUtil.compare(originalMD5, newMD5)) {
-					throw new ProcessExecutionException("Try to create new version with same content.");
+					throw new ProcessExecutionException(this, "Try to create a new version with same content.");
 				}
 
 				// make and put modifications
@@ -90,16 +91,19 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 					// retry update of user profile
 					continue;
 				}
-			} catch (GetFailedException | PutFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (GetFailedException | PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 
 			break;
 		}
+		setRequiresRollback(true);
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException, ProcessRollbackException {
+		
 		BaseMetaFile metaFile = context.consumeMetaFile();
 
 		int forkCounter = 0;
@@ -108,9 +112,8 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 			UserProfile userProfile;
 			try {
 				userProfile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				logger.error("Couldn't get user profile and redo modifications.");
-				return;
+			} catch (GetFailedException ex) {
+				throw new ProcessRollbackException(this, ex, "Couldn't get user profile and redo modifications.");
 			}
 
 			FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
@@ -135,12 +138,13 @@ public class UpdateMD5inUserProfileStep extends ProcessStep {
 					// retry update of user profile
 					continue;
 				}
-			} catch (PutFailedException e) {
-				logger.warn("Couldn't redo put of user profile.", e);
-				return;
+			} catch (PutFailedException ex) {
+				throw new ProcessRollbackException(this, ex, "Couldn't redo put of user profile.");
 			}
 
 			break;
 		}
+		setRequiresRollback(false);
+		return null;
 	}
 }

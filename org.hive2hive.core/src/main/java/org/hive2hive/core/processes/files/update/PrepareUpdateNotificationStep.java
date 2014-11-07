@@ -7,7 +7,7 @@ import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
@@ -16,7 +16,7 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  * 
  * @author Nico, Seppi
  */
-public class PrepareUpdateNotificationStep extends ProcessStep {
+public class PrepareUpdateNotificationStep extends ProcessStep<Void> {
 
 	private final UpdateFileProcessContext context;
 
@@ -25,7 +25,7 @@ public class PrepareUpdateNotificationStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// get the recently updated index
 		Index index = context.consumeIndex();
 
@@ -43,13 +43,15 @@ public class PrepareUpdateNotificationStep extends ProcessStep {
 			FolderIndex folderIndex = (FolderIndex) index;
 			indexToSend = new FolderIndex(folderIndex);
 		} else {
-			throw new ProcessExecutionException("Unknown index object");
+			throw new ProcessExecutionException(this, "Unknown index object.");
 		}
 		// decouple from file tree
 		indexToSend.decoupleFromParent();
 
 		UpdateNotificationMessageFactory messageFactory = new UpdateNotificationMessageFactory(indexToSend);
 		context.provideMessageFactory(messageFactory);
+		
+		return null;
 	}
 
 }
