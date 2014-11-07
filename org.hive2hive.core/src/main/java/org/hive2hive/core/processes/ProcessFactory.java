@@ -363,9 +363,9 @@ public final class ProcessFactory {
 		H2HSession session = networkManager.getSession();
 		
 		// only one process step
-		GetFileListStep listStep = new GetFileListStep(session.getProfileManager(), session.getRootFile());
+		IProcessComponent<List<FileTaste>>step  = new GetFileListStep(session.getProfileManager(), session.getRootFile());
 		
-		return listStep;
+		return step;
 	}
 
 	public IProcessComponent<Void> createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
@@ -392,7 +392,7 @@ public final class ProcessFactory {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		// process composition
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 		
 		process.add(new VerifyNotificationFactoryStep(context, networkManager.getUserId()));
 		process.add(new GetPublicKeysStep(context, networkManager.getSession().getKeyManager()));

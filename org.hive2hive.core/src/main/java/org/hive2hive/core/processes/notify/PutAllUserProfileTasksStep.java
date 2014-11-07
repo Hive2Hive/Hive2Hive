@@ -22,13 +22,13 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 
 		UserProfileTask userProfileTask = messageFactory.createUserProfileTask(networkManager.getUserId());
 		if (userProfileTask == null) {
 			// skip that step
-			return;
+			return null;
 		}
 
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
@@ -45,5 +45,7 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 				logger.error("Could not put the user profile task to the queue of user '{}'." + user, e);
 			}
 		}
+		
+		return null;
 	}
 }

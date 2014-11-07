@@ -12,7 +12,7 @@ import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHand
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.request.RoutedRequestMessage;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 
 /**
  * This is a process step for sending a {@link BaseMessage}.
@@ -32,7 +32,7 @@ import org.hive2hive.processframework.abstracts.ProcessStep;
  * 
  * @author Seppi, Nico
  */
-public abstract class BaseMessageProcessStep extends ProcessStep implements IResponseCallBackHandler {
+public abstract class BaseMessageProcessStep extends ProcessStep<Void> implements IResponseCallBackHandler {
 
 	protected final IMessageManager messageManager;
 

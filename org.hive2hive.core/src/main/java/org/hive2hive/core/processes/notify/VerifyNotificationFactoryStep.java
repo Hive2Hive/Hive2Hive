@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.notify;
 import java.util.Set;
 
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
@@ -13,10 +13,10 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  * @author Nico
  * 
  */
-public class VerifyNotificationFactoryStep extends ProcessStep {
+public class VerifyNotificationFactoryStep extends ProcessStep<Void> {
 
 	private final INotifyContext context;
-	// own User id
+	// own user ID
 	private final String userId;
 
 	public VerifyNotificationFactoryStep(INotifyContext context, String userId) {
@@ -25,13 +25,14 @@ public class VerifyNotificationFactoryStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		
 		Set<String> usersToNotify = context.consumeUsersToNotify();
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 		if (messageFactory.createUserProfileTask(userId) == null && !usersToNotify.contains(userId)) {
-			throw new ProcessExecutionException(
-					"Users can't be notified because the UserProfileTask is null and no notification of the own user.");
+			throw new ProcessExecutionException(this, "Users can't be notified because the UserProfileTask is null and not a notification of the own user.");
 		}
+		return null;
 	}
 
 }

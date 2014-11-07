@@ -36,7 +36,8 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
+		
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
 		Map<String, List<PeerAddress>> locations = context.getAllLocations();
@@ -57,6 +58,8 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
 			getParent().add(new RemoveUnreachableStep(unreachablePeers, networkManager));
 		}
+		
+		return null;
 	}
 
 	private void notifyMyPeers(List<PeerAddress> ownPeers, BaseNotificationMessageFactory messageFactory,
