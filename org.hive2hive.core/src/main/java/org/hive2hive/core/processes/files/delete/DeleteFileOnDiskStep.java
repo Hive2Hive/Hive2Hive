@@ -6,8 +6,7 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico
  */
-public class DeleteFileOnDiskStep extends ProcessStep {
+public class DeleteFileOnDiskStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteFileOnDiskStep.class);
 
@@ -28,7 +27,7 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		File file = context.consumeFile();
 		
 		if (file.exists()) {
@@ -36,6 +35,7 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 
 			try {
 				FileUtils.moveFileToDirectory(file, H2HConstants.TRASH_DIRECTORY, true);
+				setRequiresRollback(true);
 			} catch (IOException e) {
 				logger.warn("File '{}' could not be moved to the trash directory and gets deleted.",
 						file.getAbsolutePath());
@@ -44,16 +44,19 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 		} else {
 			logger.warn("File '{}' cannot be deleted as it does not exist.", file.getAbsolutePath());
 		}
+		
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		File file = context.consumeFile();
 		File trashFile = new File(H2HConstants.TRASH_DIRECTORY, file.getName());
 
 		if (trashFile.exists()) {
 			try {
 				FileUtils.moveFileToDirectory(trashFile, file.getParentFile(), true);
+				setRequiresRollback(false);
 			} catch (IOException e) {
 				logger.warn("File '{}' could not be moved to the original folder.",
 						trashFile.getAbsolutePath());
@@ -62,6 +65,8 @@ public class DeleteFileOnDiskStep extends ProcessStep {
 			logger.warn("File '{}' cannot be recovered from trash as it does not exist.",
 					trashFile.getAbsolutePath());
 		}
+		
+		return null;
 	}
 
 }

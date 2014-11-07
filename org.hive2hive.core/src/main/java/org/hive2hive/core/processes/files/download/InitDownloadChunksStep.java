@@ -91,7 +91,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 
 			// join the download process
 			try {
-				task.join();
+				task.join(this);
 			} catch (InterruptedException ex) {
 				throw new ProcessExecutionException(this, ex);
 			}
@@ -107,7 +107,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 
 			// join the download process
 			try {
-				task.join();
+				task.join(this);
 			} catch (InterruptedException ex) {
 				throw new ProcessExecutionException(this, ex);
 			}

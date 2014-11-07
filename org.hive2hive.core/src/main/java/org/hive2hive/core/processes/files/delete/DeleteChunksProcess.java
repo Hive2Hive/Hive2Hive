@@ -9,11 +9,11 @@ import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
-public class DeleteChunksProcess extends SequentialProcess {
+public class DeleteChunksProcess extends SyncProcess {
 
 	private final DeleteFileProcessContext context;
 	private final DataManager dataManager;

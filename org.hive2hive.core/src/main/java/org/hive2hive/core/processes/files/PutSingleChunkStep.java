@@ -46,16 +46,15 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
 		IFileConfiguration config = context.consumeFileConfiguration();
 
 		Chunk chunk;
 		try {
 			chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), index, chunkId);
-		} catch (IOException e) {
-			logger.error("File {}: Could not read the file.", file.getAbsolutePath());
-			throw new ProcessExecutionException("File " + file.getAbsolutePath() + ": Could not read the file", e);
+		} catch (IOException ex) {
+			throw new ProcessExecutionException(this, ex, String.format("File '%s': Could not read the file.", file.getAbsolutePath()));
 		}
 
 		if (chunk != null) {
@@ -77,10 +76,11 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 				// store the hash in the index of the meta file
 				context.getMetaChunks().add(new MetaChunk(chunkId, parameters.getHash(), index));
 			} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
-					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | PutFailedException e) {
-				logger.error("Could not encrypt and put the chunk.", e);
-				throw new ProcessExecutionException("Could not encrypt and put the chunk.", e);
+					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex, "Could not encrypt and put the chunk.");
 			}
 		}
+		
+		return null;
 	}
 }

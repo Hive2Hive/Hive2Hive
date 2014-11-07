@@ -71,7 +71,6 @@ import org.hive2hive.core.processes.share.UpdateUserProfileStep;
 import org.hive2hive.core.processes.share.VerifyFriendIdStep;
 import org.hive2hive.core.processes.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.ProcessComponent;
 import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;

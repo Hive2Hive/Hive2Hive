@@ -13,8 +13,9 @@ import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,11 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		try {
 			if (networkManager.getUserId().equals(addedFriend.getUserId())) {
 				// I'm the new sharer
-				processSharedWithMe();
+				try {
+					processSharedWithMe();
+				} catch (ProcessExecutionException ex) {
+					logger.error("Some process could not be executed.", ex);
+				}
 			} else {
 				// New sharer, but I have the file already
 				logger.debug("Other user shared folder with new user '{}'.", addedFriend);
@@ -77,7 +82,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		}
 	}
 
-	private void processSharedWithMe() throws Hive2HiveException, InvalidProcessStateException {
+	private void processSharedWithMe() throws Hive2HiveException, InvalidProcessStateException, ProcessExecutionException {
 		/** 1. add the tree to the root node in the user profile */
 		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
 		while (true) {
@@ -103,9 +108,10 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		// TODO notify instead of download
 		/** 3. download the files that are now available */
 		List<Index> fileList = Index.getIndexList(sharedIndex);
+		
 		// the folder itself is also contained, so remove it
-		ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList, networkManager);
+		IProcessComponent<Void> downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList, networkManager);
 		logger.debug("Start to download {} files that have been shared with me.", fileList.size());
-		downloadProcess.start();
+		downloadProcess.execute();
 	}
 }

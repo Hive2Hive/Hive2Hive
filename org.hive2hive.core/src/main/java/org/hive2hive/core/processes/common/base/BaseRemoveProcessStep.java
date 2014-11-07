@@ -12,6 +12,7 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,6 @@ public abstract class BaseRemoveProcessStep extends ProcessStep<Void> {
 
 	private IParameters parameters;
 	private final DataManager dataManager;
-	private boolean removePerformed = false;
 
 	public BaseRemoveProcessStep(DataManager dataManager) {
 		this.dataManager = dataManager;
@@ -48,7 +48,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep<Void> {
 
 		// deletes all versions
 		boolean success = dataManager.remove(parameters);
-		removePerformed = true;
+		setRequiresRollback(true);
 
 		if (!success) {
 			throw new RemoveFailedException();
@@ -56,23 +56,21 @@ public abstract class BaseRemoveProcessStep extends ProcessStep<Void> {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (!removePerformed) {
-			logger.info("Noting has been removed. Skip re-adding it to the network.");
-			return;
-		}
+	protected Void doRollback() throws InvalidProcessStateException, ProcessRollbackException {
 
 		// TODO ugly bug fix
 		if (parameters.getNetworkContent() == null) {
-			logger.warn("Rollback of remove failed. No content to re-put. '{}'", parameters.toString());
-			return;
+			throw new ProcessRollbackException(this, String.format("Rollback of remove failed. No content to re-put. Parameters: '%s'.", parameters.toString()));
 		}
 
 		H2HPutStatus status = dataManager.put(parameters);
 		if (status.equals(H2HPutStatus.OK)) {
 			logger.debug("Rollback of remove succeeded. '{}'", parameters.toString());
+			setRequiresRollback(false);
 		} else {
-			logger.warn("Rollback of remove failed. Re-put failed. '{}'", parameters.toString());
+			throw new ProcessRollbackException(this, String.format("Rollback of remove failed. Re-put failed. Parameters: '%s'.", parameters.toString()));
 		}
+		
+		return null;
 	}
 }

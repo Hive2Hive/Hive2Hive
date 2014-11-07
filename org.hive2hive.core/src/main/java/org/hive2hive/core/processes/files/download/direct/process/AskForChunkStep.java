@@ -42,17 +42,17 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.getTask().isAborted()) {
-			logger.warn("Not executing step because task is aborted");
-			return;
+			logger.warn("Not executing step because task is aborted.");
+			return null;
 		}
 
 		PublicKey receiverPublicKey;
 		try {
 			receiverPublicKey = keyManager.getPublicKey(context.getUserName());
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException("Cannot get public key of user " + context.getUserName());
+		} catch (GetFailedException ex) {
+			throw new ProcessExecutionException(this, String.format("Cannot get public key of user '%s'.", context.getUserName()));
 		}
 
 		MetaChunk metaChunk = context.getMetaChunk();
@@ -69,6 +69,8 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 			logger.warn("Cannot wait until the peer {} responded", context.getSelectedPeer());
 			rerunProcess(false);
 		}
+		
+		return null;
 	}
 
 	@Override

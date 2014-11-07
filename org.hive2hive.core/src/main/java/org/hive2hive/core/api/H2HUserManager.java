@@ -1,14 +1,11 @@
 package org.hive2hive.core.api;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Future;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
-import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
