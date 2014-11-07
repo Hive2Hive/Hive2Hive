@@ -71,11 +71,10 @@ import org.hive2hive.core.processes.share.UpdateUserProfileStep;
 import org.hive2hive.core.processes.share.VerifyFriendIdStep;
 import org.hive2hive.core.processes.userprofiletask.HandleUserProfileTaskStep;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.ProcessComponent;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
-import org.hive2hive.processframework.decorators.AsyncResultComponent;
-import org.hive2hive.processframework.interfaces.IResultProcessComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Factory class for the creation of specific process components and composites that represent basic
@@ -107,20 +106,20 @@ public final class ProcessFactory {
 	 * @return A registration process.
 	 * @throws NoPeerConnectionException
 	 */
-	public ProcessComponent createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
+	public IProcessComponent<Void> createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
 		RegisterProcessContext context = new RegisterProcessContext(credentials);
 
 		// process composition
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 
 		process.add(new CheckIsUserRegisteredStep(context, dataManager));
 		process.add(new LocationsCreationStep(context));
 		process.add(new UserProfileCreationStep(context));
-		process.add(new AsyncComponent(new PutUserProfileStep(context, dataManager)));
-		process.add(new AsyncComponent(new org.hive2hive.core.processes.register.PutLocationsStep(context, dataManager)));
-		process.add(new AsyncComponent(new PutPublicKeyStep(context, dataManager)));
+		process.add(new AsyncComponent<>(new PutUserProfileStep(context, dataManager)));
+		process.add(new AsyncComponent<>(new org.hive2hive.core.processes.register.PutLocationsStep(context, dataManager)));
+		process.add(new AsyncComponent<>(new PutPublicKeyStep(context, dataManager)));
 
 		return process;
 	}
@@ -134,7 +133,7 @@ public final class ProcessFactory {
 	 * @return A login process.
 	 * @throws NoPeerConnectionException
 	 */
-	public ProcessComponent createLoginProcess(UserCredentials credentials, SessionParameters params,
+	public IProcessComponent<Void> createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
 		LoginProcessContext context = new LoginProcessContext(credentials, params);
@@ -150,7 +149,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createUserProfileTaskStep(NetworkManager networkManager) {
+	public IProcessComponent<Void> createUserProfileTaskStep(NetworkManager networkManager) {
 		SequentialProcess process = new SequentialProcess();
 		UserProfileTaskContext context = new UserProfileTaskContext();
 		process.add(new GetUserProfileTaskStep(context, networkManager));
@@ -168,7 +167,7 @@ public final class ProcessFactory {
 	 * @throws NoPeerConnectionException
 	 * @throws NoSessionException
 	 */
-	public ProcessComponent createLogoutProcess(NetworkManager networkManager) throws NoPeerConnectionException,
+	public IProcessComponent<Void> createLogoutProcess(NetworkManager networkManager) throws NoPeerConnectionException,
 			NoSessionException {
 		H2HSession session = networkManager.getSession();
 
@@ -191,7 +190,7 @@ public final class ProcessFactory {
 	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
 	 * tree.
 	 */
-	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+	public IProcessComponent<Void> createNewFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
 		if (file == null) {
 			throw new IllegalArgumentException("File can't be null.");
@@ -217,7 +216,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createUpdateFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+	public IProcessComponent<Void> createUpdateFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
@@ -244,7 +243,7 @@ public final class ProcessFactory {
 	/**
 	 * Process for downloading the newest version to the default location.
 	 */
-	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
+	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
 			throws NoSessionException {
 		return createDownloadFileProcess(fileKey, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
 	}
@@ -253,7 +252,7 @@ public final class ProcessFactory {
 	 * Process for downloading with some extra parameters. This can for example be used to restore a file. The
 	 * version and the filename are only effective for files, not for folders.
 	 */
-	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, int versionToDownload, File destination,
+	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, int versionToDownload, File destination,
 			NetworkManager networkManager) throws NoSessionException {
 		// precondition: session is existent
 		networkManager.getSession();
@@ -270,7 +269,7 @@ public final class ProcessFactory {
 	 * Deletes the specified file. Note that this is only valid for a single file or an empty folder
 	 * (non-recursive)
 	 */
-	public ProcessComponent createDeleteFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+	public IProcessComponent<Void> createDeleteFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
 		H2HSession session = networkManager.getSession();
 
@@ -287,7 +286,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createMoveFileProcess(File source, File destination, NetworkManager networkManager)
+	public IProcessComponent<Void> createMoveFileProcess(File source, File destination, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		H2HSession session = networkManager.getSession();
 		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRootFile());
@@ -302,7 +301,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createRecoverFileProcess(File file, IVersionSelector selector, NetworkManager networkManager)
+	public IProcessComponent<Void> createRecoverFileProcess(File file, IVersionSelector selector, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		RecoverFileContext context = new RecoverFileContext(file);
 		SequentialProcess process = new SequentialProcess();
@@ -313,7 +312,7 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public ProcessComponent createShareProcess(File folder, UserPermission permission, NetworkManager networkManager)
+	public IProcessComponent<Void> createShareProcess(File folder, UserPermission permission, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
@@ -344,14 +343,14 @@ public final class ProcessFactory {
 	 * @return A file list process.
 	 * @throws NoSessionException
 	 */
-	public IResultProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
+	public IProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
 			throws NoSessionException {
 		H2HSession session = networkManager.getSession();
 		GetFileListStep listStep = new GetFileListStep(session.getProfileManager(), session.getRootFile());
 		return new AsyncResultComponent<List<FileTaste>>(listStep);
 	}
 
-	public ProcessComponent createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
+	public IProcessComponent<Void> createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
 			final Set<String> usersToNotify, NetworkManager networkManager) throws NoPeerConnectionException,
 			NoSessionException {
 		// create a context here to provide the necessary data
@@ -370,7 +369,7 @@ public final class ProcessFactory {
 		return createNotificationProcess(context, networkManager);
 	}
 
-	private ProcessComponent createNotificationProcess(INotifyContext providerContext, NetworkManager networkManager)
+	private IProcessComponent<Void> createNotificationProcess(INotifyContext providerContext, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 

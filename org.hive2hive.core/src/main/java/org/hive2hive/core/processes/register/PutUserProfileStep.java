@@ -26,19 +26,19 @@ public class PutUserProfileStep extends BasePutProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			EncryptedNetworkContent encrypted = dataManager.getEncryption().encryptAES(context.consumeUserProfile(),
 					context.consumeUserProfileEncryptionKeys());
 			encrypted.generateVersionKey();
 			put(context.consumeUserProflieLocationKey(), H2HConstants.USER_PROFILE, encrypted,
 					context.consumeUserProfileProtectionKeys());
-		} catch (PutFailedException e) {
-			throw new ProcessExecutionException(e);
-		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
-			throw new ProcessExecutionException(String.format("Cannot encrypt the user profile. reason = '%s'",
-					e.getMessage()));
+		} catch (PutFailedException ex) {
+			throw new ProcessExecutionException(this, ex);
+		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException ex) {
+			throw new ProcessExecutionException(this, ex, String.format("Cannot encrypt the user profile."));
 		}
+		return null;
 	}
 
 }

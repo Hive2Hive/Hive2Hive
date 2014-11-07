@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.register;
 
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.processes.context.RegisterProcessContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Seppi
  */
-public class UserProfileCreationStep extends ProcessStep {
+public class UserProfileCreationStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileCreationStep.class);
 
@@ -22,10 +22,11 @@ public class UserProfileCreationStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		String userId = context.consumeUserId();
 		logger.trace("Creating new user profile. user id ='{}'", userId);
 		context.provideUserProfile(new UserProfile(userId));
+		return null;
 	}
 
 }
