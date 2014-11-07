@@ -1,4 +1,4 @@
-package org.hive2hive.core.api;
+package org.hive2hive.client.util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,8 +8,6 @@ import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.interfaces.IFileObserver;
-import org.hive2hive.core.api.interfaces.IFileObserverListener;
 
 /**
  * Default implementation of {@link IFileObserver}. Internally uses the Apache Commons IO
@@ -18,7 +16,7 @@ import org.hive2hive.core.api.interfaces.IFileObserverListener;
  * @author Christian
  * 
  */
-public class H2HFileObserver implements IFileObserver {
+public class FileObserver {
 
 	private final FileAlterationObserver observer;
 	private final FileAlterationMonitor monitor;
@@ -31,7 +29,7 @@ public class H2HFileObserver implements IFileObserver {
 	 * @param rootDirectory
 	 * @param ms
 	 */
-	public H2HFileObserver(File rootDirectory, long ms) {
+	public FileObserver(File rootDirectory, long ms) {
 		this.observer = new FileAlterationObserver(rootDirectory);
 		this.monitor = new FileAlterationMonitor(ms, observer);
 	}
@@ -41,11 +39,10 @@ public class H2HFileObserver implements IFileObserver {
 	 * 
 	 * @param rootDirectory
 	 */
-	public H2HFileObserver(File rootDirectory) {
+	public FileObserver(File rootDirectory) {
 		this(rootDirectory, H2HConstants.DEFAULT_FILE_OBSERVER_INTERVAL);
 	}
 
-	@Override
 	public void start() throws Exception {
 		if (!isRunning) {
 			monitor.start();
@@ -53,7 +50,6 @@ public class H2HFileObserver implements IFileObserver {
 		}
 	}
 
-	@Override
 	public void stop() throws Exception {
 		stop(0);
 	}
@@ -65,23 +61,20 @@ public class H2HFileObserver implements IFileObserver {
 		}
 	}
 
-	@Override
-	public void addFileObserverListener(IFileObserverListener listener) {
+	public void addFileObserverListener(FileObserverListener listener) {
 		observer.addListener(listener);
 	}
 
-	@Override
-	public void removeFileObserverListener(IFileObserverListener listener) {
+	public void removeFileObserverListener(FileObserverListener listener) {
 		observer.removeListener(listener);
 	}
 
-	@Override
-	public List<IFileObserverListener> getFileObserverListeners() {
-		List<IFileObserverListener> listeners = new ArrayList<IFileObserverListener>();
+	public List<FileObserverListener> getFileObserverListeners() {
+		List<FileObserverListener> listeners = new ArrayList<FileObserverListener>();
 
 		// TODO check if this interface casting is allowed
 		for (FileAlterationListener listener : observer.getListeners()) {
-			listeners.add((IFileObserverListener) listener);
+			listeners.add((FileObserverListener) listener);
 		}
 		return listeners;
 	}

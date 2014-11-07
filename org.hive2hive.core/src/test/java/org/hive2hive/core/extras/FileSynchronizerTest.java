@@ -2,7 +2,6 @@ package org.hive2hive.core.extras;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +95,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testDeletedLocally() throws IOException, ClassNotFoundException {
 		Map<String, byte[]> before = FileSynchronizer.visitFiles(rootFile);
-		Files.delete(file1f1.toPath());
-		Files.delete(file2d.toPath());
+		file1f1.delete();
+		file2d.delete();
 		Map<String, byte[]> after = FileSynchronizer.visitFiles(rootFile);
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);

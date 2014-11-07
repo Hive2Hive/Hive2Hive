@@ -2,16 +2,14 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.FileObserver;
+import org.hive2hive.client.util.FileObserverListener;
 import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.H2HFileObserver;
-import org.hive2hive.core.api.H2HFileObserverListener;
-import org.hive2hive.core.api.interfaces.IFileObserver;
-import org.hive2hive.core.api.interfaces.IFileObserverListener;
 
 public class FileObserverMenu extends H2HConsoleMenu {
 
-	private IFileObserver fileObserver;
+	private FileObserver fileObserver;
 	private long interval = H2HConstants.DEFAULT_FILE_OBSERVER_INTERVAL;
 
 	public FileObserverMenu(MenuContainer menus) {
@@ -41,11 +39,9 @@ public class FileObserverMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Exception {
-
-				fileObserver = new H2HFileObserver(menus.getFileMenu().getRootDirectory(), interval);
-
-				IFileObserverListener listener = new H2HFileObserverListener(menus.getNodeMenu().getNode().getFileManager());
-
+				fileObserver = new FileObserver(menus.getFileMenu().getRootDirectory(), interval);
+				FileObserverListener listener = new FileObserverListener(menus.getNodeMenu().getNode()
+						.getFileManager());
 				fileObserver.addFileObserverListener(listener);
 
 				fileObserver.start();
@@ -76,7 +72,7 @@ public class FileObserverMenu extends H2HConsoleMenu {
 		}
 	}
 
-	public IFileObserver getFileObserver() {
+	public FileObserver getFileObserver() {
 		return fileObserver;
 	}
 

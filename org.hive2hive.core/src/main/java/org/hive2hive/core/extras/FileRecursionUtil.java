@@ -1,7 +1,6 @@
 package org.hive2hive.core.extras;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -239,18 +238,18 @@ public class FileRecursionUtil {
 	 * @param root
 	 * @return
 	 */
-	public static List<Path> getPreorderList(Path root) {
-		List<Path> allFiles = new ArrayList<Path>();
+	public static List<File> getPreorderList(File root) {
+		List<File> allFiles = new ArrayList<File>();
 		listFiles(root, allFiles);
 		return allFiles;
 	}
 
-	private static void listFiles(Path path, List<Path> preorderList) {
-		preorderList.add(path);
-		File[] listFiles = path.toFile().listFiles();
+	private static void listFiles(File file, List<File> preorderList) {
+		preorderList.add(file);
+		File[] listFiles = file.listFiles();
 		if (listFiles != null) {
 			for (File child : listFiles) {
-				listFiles(child.toPath(), preorderList);
+				listFiles(child, preorderList);
 			}
 		}
 	}

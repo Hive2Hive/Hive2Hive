@@ -2,26 +2,27 @@ package org.hive2hive.client.menu;
 
 import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.FileObserver;
 import org.hive2hive.client.util.MenuContainer;
-import org.hive2hive.core.api.interfaces.IFileObserver;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 
 /**
  * The topmost intro menu of the console client.
+ * 
  * @author Christian
  *
  */
 public class IntroMenu extends ConsoleMenu {
 
 	private final MenuContainer menus;
-	
+
 	public IntroMenu() {
 		menus = new MenuContainer();
 	}
-	
+
 	@Override
 	protected void addMenuItems() {
-		
+
 		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
@@ -35,7 +36,7 @@ public class IntroMenu extends ConsoleMenu {
 			}
 		});
 	}
-	
+
 	@Override
 	protected String getExitItemText() {
 		return "Exit";
@@ -45,19 +46,19 @@ public class IntroMenu extends ConsoleMenu {
 	protected void onMenuExit() {
 		shutdown();
 	}
-	
+
 	public void shutdown() {
 		// TODO check whether network indeed has to be shut down here, e.g., when bootstrapped -> just leave
-		
+
 		// shutdown network
 		IH2HNode node = menus.getNodeMenu().getNode();
 		if (node != null && node.isConnected()) {
 			print("Disconnecting from the network...");
-			node.disconnect();			
+			node.disconnect();
 		}
-		
+
 		// stop file observer
-		IFileObserver fileObserver = menus.getFileObserverMenu().getFileObserver();
+		FileObserver fileObserver = menus.getFileObserverMenu().getFileObserver();
 		if (fileObserver != null && fileObserver.isRunning()) {
 			print("Stopping the file observer...");
 			try {

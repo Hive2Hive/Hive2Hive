@@ -1,10 +1,10 @@
-package org.hive2hive.core.api;
+package org.hive2hive.client.util;
 
 import java.io.File;
 
+import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.api.interfaces.IFileObserverListener;
 import org.hive2hive.core.extras.buffer.AddFileBuffer;
 import org.hive2hive.core.extras.buffer.DeleteFileBuffer;
 import org.hive2hive.core.extras.buffer.IFileBuffer;
@@ -13,21 +13,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of {@link IFileObserverListener}. The file events are caught and the according
+ * Default implementation of a file observer listener. The file events are caught and the according
  * process is automatically started.
  * 
  * @author Christian
  * 
  */
-public class H2HFileObserverListener implements IFileObserverListener {
+public class FileObserverListener implements FileAlterationListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(H2HFileObserverListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileObserverListener.class);
 
 	private final IFileBuffer addFileBuffer;
 	private final IFileBuffer deleteFileBuffer;
 	private final ModifyFileBuffer modifyFileBuffer;
 
-	public H2HFileObserverListener(IFileManager fileManager) {
+	public FileObserverListener(IFileManager fileManager) {
 		this.addFileBuffer = new AddFileBuffer(fileManager);
 		this.deleteFileBuffer = new DeleteFileBuffer(fileManager);
 		this.modifyFileBuffer = new ModifyFileBuffer(fileManager);
