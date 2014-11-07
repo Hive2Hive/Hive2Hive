@@ -18,12 +18,11 @@ import org.hive2hive.core.network.data.download.BaseDownloadTask;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.core.processes.context.LoginProcessContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
-public class SessionCreationStep extends ProcessStep {
+public class SessionCreationStep extends ProcessStep<Void> {
 
 	private final LoginProcessContext context;
 	private final NetworkManager networkManager;
@@ -34,7 +33,7 @@ public class SessionCreationStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		H2HSession session;
 		try {
 			SessionParameters params = context.consumeSessionParameters();
@@ -80,20 +79,24 @@ public class SessionCreationStep extends ProcessStep {
 
 			// create session
 			session = new H2HSession(params);
-		} catch (NoPeerConnectionException e1) {
-			throw new ProcessExecutionException("Session could not be created.", e1);
-		} catch (GetFailedException e2) {
-			throw new ProcessExecutionException(e2);
+		} catch (NoPeerConnectionException ex) {
+			throw new ProcessExecutionException(this, ex, "Session could not be created.");
+		} catch (GetFailedException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
 
 		// set session
 		networkManager.setSession(session);
+		setRequiresRollback(true);
+		
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		// invalidate the session
 		networkManager.setSession(null);
+		return null;
 	}
 
 }

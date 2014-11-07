@@ -139,7 +139,7 @@ public final class ProcessFactory {
 		LoginProcessContext context = new LoginProcessContext(credentials, params);
 
 		// process composition
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 
 		process.add(new SessionCreationStep(context, networkManager));
 		process.add(new GetLocationsStep(context, networkManager));
