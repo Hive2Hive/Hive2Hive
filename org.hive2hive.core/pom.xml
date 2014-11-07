@@ -16,12 +16,15 @@
 	<description>The core project of the Hive2Hive library.</description>
 
 	<dependencies>
+
+		<!-- Hive2Hive Process Framework -->
 		<dependency>
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
+			<version>1.0-Beta1</version>
 			<scope>compile</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-dht</artifactId>
@@ -57,9 +60,9 @@
 			<artifactId>fst</artifactId>
 			<version>1.58</version>
 			<scope>compile</scope>
-			</dependency>
-		
-		<!--  https://github.com/bennidi/mbassador  -->
+		</dependency>
+
+		<!-- https://github.com/bennidi/mbassador -->
 		<dependency>
 			<groupId>net.engio</groupId>
 			<artifactId>mbassador</artifactId>
@@ -74,14 +77,7 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency> <!-- reuse src/test/java code from process framework -->
-			<groupId>org.hive2hive</groupId>
-			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
-			<scope>test</scope>
-			<classifier>tests</classifier>
-		</dependency>
-		
+
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-common</artifactId>
@@ -95,13 +91,21 @@
 	</dependencies>
 
 	<repositories>
+		<!-- Hive2Hive Repository -->
+		<repository>
+			<id>hive2hive.org</id>
+			<name>Hive2Hive Repository</name>
+			<url>http://repo.hive2hive.org</url>
+		</repository>
+
+		<!-- TomP2P Repository -->
 		<repository>
 			<id>tomp2p.net</id>
 			<name>TomP2P Repository</name>
 			<url>http://tomp2p.net/dev/mvn/</url>
 		</repository>
 	</repositories>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -112,7 +116,7 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-	
+
 			<!-- create a test jar with the test classes -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -127,5 +131,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
