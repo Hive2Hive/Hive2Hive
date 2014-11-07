@@ -96,6 +96,7 @@ public class SessionCreationStep extends ProcessStep<Void> {
 	protected Void doRollback() throws InvalidProcessStateException {
 		// invalidate the session
 		networkManager.setSession(null);
+		setRequiresRollback(false);
 		return null;
 	}
 

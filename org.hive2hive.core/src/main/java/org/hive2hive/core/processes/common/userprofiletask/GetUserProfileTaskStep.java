@@ -89,6 +89,7 @@ public class GetUserProfileTaskStep extends ProcessStep<Void> {
 	@Override
 	protected Void doRollback() throws InvalidProcessStateException {
 		context.provideUserProfileTask(null);
+		setRequiresRollback(false);
 		return null;
 	}
 

@@ -58,11 +58,10 @@ public abstract class BasePutProcessStep extends ProcessStep<Void> {
 		this.parameters = parameters;
 
 		H2HPutStatus status = dataManager.put(parameters);
-		setRequiresRollback(true);
-
 		if (!status.equals(H2HPutStatus.OK)) {
 			throw new PutFailedException();
 		}
+		setRequiresRollback(true);
 	}
 
 	@Override
@@ -74,6 +73,7 @@ public abstract class BasePutProcessStep extends ProcessStep<Void> {
 		} else {
 			logger.warn("Rollback of put failed. Remove failed. '{}'", parameters.toString());
 		}
+		setRequiresRollback(false);
 		return null;
 	}
 }

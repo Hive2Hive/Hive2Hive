@@ -43,6 +43,7 @@ public class GetLocationsStep extends ProcessStep<Void> {
 	@Override
 	protected Void doRollback() throws InvalidProcessStateException {
 		context.provideLocations(null);
+		setRequiresRollback(false);
 		return null;
 	}
 

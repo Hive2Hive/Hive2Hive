@@ -175,7 +175,7 @@ public final class ProcessFactory {
 		H2HSession session = networkManager.getSession();
 
 		// process composition
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 
 		process.add(new RemoveOwnLocationsStep(networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));

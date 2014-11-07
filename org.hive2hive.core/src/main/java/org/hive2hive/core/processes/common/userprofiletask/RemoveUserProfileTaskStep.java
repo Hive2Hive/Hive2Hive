@@ -104,6 +104,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep<Void> {
 			logger.warn("Rollback of removing user profile task failed. Re-put failed. User ID = '{}', Content key = '{}'.",
 					userId, upTask.getContentKey());
 		}
+		setRequiresRollback(false);
 		return null;
 	}
 }
