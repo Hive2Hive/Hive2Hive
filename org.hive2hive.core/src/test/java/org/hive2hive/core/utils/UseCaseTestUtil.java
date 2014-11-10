@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.List;
-import java.util.UUID;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -78,7 +77,7 @@ public class UseCaseTestUtil {
 	public static UserProfile getUserProfile(NetworkManager networkManager, UserCredentials credentials)
 			throws GetFailedException, NoPeerConnectionException {
 		UserProfileManager manager = new UserProfileManager(networkManager.getDataManager(), credentials);
-		return manager.getUserProfile(UUID.randomUUID().toString(), false);
+		return manager.readUserProfile();
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,

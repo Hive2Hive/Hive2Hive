@@ -45,7 +45,7 @@ public class UpdateNotificationMessage extends BaseDirectMessage implements IFil
 
 		UserProfile userProfile;
 		try {
-			userProfile = profileManager.getUserProfile(getMessageID(), false);
+			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			logger.error("Couldn't load user profile.", e);
 			return;

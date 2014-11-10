@@ -2,19 +2,18 @@ package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
 import java.security.PublicKey;
-import java.util.Random;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileMoveEvent;
-import org.hive2hive.core.exceptions.GetFailedException;
+import org.hive2hive.core.exceptions.AbortModifyException;
+import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -24,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Nico, Seppi
  */
-public class MoveUserProfileTask extends UserProfileTask implements IFileEventGenerator {
+public class MoveUserProfileTask extends UserProfileTask implements IUserProfileModification, IFileEventGenerator {
 
 	private static final long serialVersionUID = 2182278170922295626L;
 
@@ -35,7 +34,10 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 	private final PublicKey oldParentKey;
 	private final PublicKey newParentKey;
 
-	private final int forkLimit = 2;
+	// initialized during user profile modification
+	private FolderIndex oldParentNode;
+	private Index movedNode;
+	private FolderIndex newParentNode;
 
 	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName, PublicKey oldParentKey,
 			PublicKey newParentKey) {
@@ -56,79 +58,13 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 			return;
 		}
 
-		FolderIndex newParentNode = null;
-		FolderIndex oldParentNode = null;
-		Index movedNode = null;
-		int forkCounter = 0;
-		int forkWaitTime = new Random().nextInt(1000) + 500;
-		while (true) {
-			UserProfileManager profileManager = session.getProfileManager();
+		UserProfileManager profileManager = session.getProfileManager();
 
-			UserProfile userProfile;
-			try {
-				userProfile = profileManager.getUserProfile(getId(), true);
-			} catch (GetFailedException e) {
-				logger.error("Couldn't get user profile.", e);
-				return;
-			}
-
-			// get and check the file nodes to be rearranged
-			oldParentNode = (FolderIndex) userProfile.getFileById(oldParentKey);
-			if (oldParentNode == null) {
-				logger.error("Could not find the old parent.");
-				return;
-			} else if (!oldParentNode.canWrite(sender)) {
-				logger.error("User was not allowed to change the source directory.");
-				return;
-			}
-
-			movedNode = oldParentNode.getChildByName(sourceFileName);
-			if (movedNode == null) {
-				logger.error("File node that should be moved not found.");
-				return;
-			}
-
-			newParentNode = (FolderIndex) userProfile.getFileById(newParentKey);
-			if (newParentNode == null) {
-				logger.error("Could not find the new parent.");
-				return;
-			} else if (!newParentNode.canWrite(sender)) {
-				logger.error("User was not allowed to change the destination directory.");
-				return;
-			}
-
-			// relink
-			oldParentNode.removeChild(movedNode);
-			newParentNode.addChild(movedNode);
-			movedNode.setParent(newParentNode);
-
-			// change the child's name
-			movedNode.setName(destFileName);
-
-			try {
-				profileManager.readyToPut(userProfile, getId());
-			} catch (VersionForkAfterPutException e) {
-				if (forkCounter++ > forkLimit) {
-					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
-				} else {
-					logger.warn("Version fork after put detected. Rejecting and retrying put.");
-
-					// exponential back off waiting
-					try {
-						Thread.sleep(forkWaitTime);
-					} catch (InterruptedException e1) {
-						// ignore
-					}
-					forkWaitTime = forkWaitTime * 2;
-
-					// retry update of user profile
-					continue;
-				}
-			} catch (PutFailedException e) {
-				logger.error("Couldn't put updated user profile.", e);
-				return;
-			}
-			break;
+		try {
+			profileManager.modifyUserProfile(getId(), this);
+		} catch (Hive2HiveException e) {
+			logger.error("Couldn't update / modify the user profile.", e);
+			return;
 		}
 
 		try {
@@ -147,4 +83,34 @@ public class MoveUserProfileTask extends UserProfileTask implements IFileEventGe
 		networkManager.getEventBus().publish(new FileMoveEvent(src, dst, movedNode.isFile()));
 	}
 
+	@Override
+	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
+		// get and check the file nodes to be rearranged
+		oldParentNode = (FolderIndex) userProfile.getFileById(oldParentKey);
+		if (oldParentNode == null) {
+			throw new AbortModifyException("Could not find the old parent.");
+		} else if (!oldParentNode.canWrite(sender)) {
+			throw new AbortModifyException("User was not allowed to change the source directory.");
+		}
+
+		movedNode = oldParentNode.getChildByName(sourceFileName);
+		if (movedNode == null) {
+			throw new AbortModifyException("File node that should be moved not found.");
+		}
+
+		newParentNode = (FolderIndex) userProfile.getFileById(newParentKey);
+		if (newParentNode == null) {
+			throw new AbortModifyException("Could not find the new parent.");
+		} else if (!newParentNode.canWrite(sender)) {
+			throw new AbortModifyException("User was not allowed to change the destination directory.");
+		}
+
+		// relink
+		oldParentNode.removeChild(movedNode);
+		newParentNode.addChild(movedNode);
+		movedNode.setParent(newParentNode);
+
+		// change the child's name
+		movedNode.setName(destFileName);
+	}
 }

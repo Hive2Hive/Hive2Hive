@@ -50,14 +50,13 @@ public class DeleteNotificationMessage extends BaseDirectMessage implements IFil
 
 		UserProfile userProfile;
 		try {
-			userProfile = session.getProfileManager().getUserProfile(getMessageID(), false);
+			userProfile = session.getProfileManager().readUserProfile();
 		} catch (GetFailedException e) {
 			logger.error("Couldn't load the user profile.");
 			return;
 		}
 
 		Index parentNode = userProfile.getFileById(parentFileKey);
-
 		if (parentNode == null) {
 			logger.error("Got notified about a file we don't know the parent of.");
 			return;
@@ -71,5 +70,4 @@ public class DeleteNotificationMessage extends BaseDirectMessage implements IFil
 		File deletedFile = new File(parentFile, fileName);
 		getEventBus().publish(new FileDeleteEvent(deletedFile, isFile));
 	}
-
 }

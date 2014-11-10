@@ -68,7 +68,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		UserProfile userProfile;
 		try {
 			UserProfileManager profileManager = session.getProfileManager();
-			userProfile = profileManager.getUserProfile(messageID, false);
+			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			logger.error("Cannot get the user profile", e);
 			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));

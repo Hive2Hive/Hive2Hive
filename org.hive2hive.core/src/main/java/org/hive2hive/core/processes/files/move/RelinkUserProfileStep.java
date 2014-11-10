@@ -1,20 +1,17 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
-import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
-import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.exceptions.VersionForkAfterPutException;
+import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.core.processes.common.base.BaseModifyUserProfileStep;
 import org.hive2hive.core.processes.context.MoveFileProcessContext;
 import org.hive2hive.core.processes.context.MoveFileProcessContext.AddNotificationContext;
 import org.hive2hive.core.processes.context.MoveFileProcessContext.DeleteNotificationContext;
@@ -24,117 +21,79 @@ import org.hive2hive.core.processes.files.InitializeMetaUpdateStep;
 import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
-import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Different possibilities of movement:
+ * <ul>
+ * <li>file moved from root to other destination</li>
+ * <li>file moved from other source to root</li>
+ * <li>file moved from other source to other destination</li>
+ * <li>Additionally, the file can be renamed (within any directory)</li>
+ * </ul>
+ * 
  * @author Nico, Seppi
  */
-public class RelinkUserProfileStep extends ProcessStep {
+public class RelinkUserProfileStep extends BaseModifyUserProfileStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(RelinkUserProfileStep.class);
 
 	private final MoveFileProcessContext context;
-	private final UserProfileManager profileManager;
 	private final DataManager dataManger;
 
-	private boolean profileUpdated;
-
-	private final int forkLimit = 2;
+	// initialized during profile modification
+	private FolderIndex oldParentNode;
+	private FolderIndex newParentNode;
+	private Index movedNode;
 
 	public RelinkUserProfileStep(MoveFileProcessContext context, UserProfileManager profileManager, DataManager dataManger) {
+		super(profileManager);
 		this.context = context;
-		this.profileManager = profileManager;
 		this.dataManger = dataManger;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		File source = context.getSource();
+	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
 		File destination = context.getDestination();
 		File root = context.getRoot();
 
-		// different possibilities of movement:
-		// - file moved from root to other destination
-		// - file moved from other source to root
-		// - file moved from other source to other destination
-		// Additionally, the file can be renamed (within any directory)
-		int forkCounter = 0;
-		int forkWaitTime = new Random().nextInt(1000) + 500;
-		while (true) {
-			UserProfile userProfile;
-			try {
-				userProfile = profileManager.getUserProfile(getID(), true);
-			} catch (GetFailedException e) {
-				throw new ProcessExecutionException(e);
-			}
+		// get the corresponding node of the moving file
+		movedNode = userProfile.getFileByPath(context.getSource(), root);
 
-			// get the corresponding node of the moving file
-			Index movedNode = userProfile.getFileByPath(source, root);
+		// get the old parent
+		oldParentNode = movedNode.getParent();
+		// get the new parent
+		newParentNode = (FolderIndex) userProfile.getFileByPath(destination.getParentFile(), root);
 
-			// get the old parent
-			FolderIndex oldParentNode = movedNode.getParent();
-			// get the new parent
-			FolderIndex newParentNode = (FolderIndex) userProfile.getFileByPath(destination.getParentFile(), root);
+		// consider renaming
+		movedNode.setName(destination.getName());
 
-			// consider renaming
-			movedNode.setName(destination.getName());
+		// source's parent needs to be updated, no matter if it's root or not
+		oldParentNode.removeChild(movedNode);
+		// relink moved node with new parent node
+		movedNode.setParent(newParentNode);
+		newParentNode.addChild(movedNode);
 
-			// source's parent needs to be updated, no matter if it's root or not
-			oldParentNode.removeChild(movedNode);
-			// relink moved node with new parent node
-			movedNode.setParent(newParentNode);
-			newParentNode.addChild(movedNode);
-
-			try {
-				// update in DHT
-				profileManager.readyToPut(userProfile, getID());
-
-				// set modification flag
-				profileUpdated = true;
-			} catch (VersionForkAfterPutException e) {
-				if (forkCounter++ > forkLimit) {
-					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
-				} else {
-					logger.warn("Version fork after put detected. Rejecting and retrying put.");
-
-					// exponential back off waiting
-					try {
-						Thread.sleep(forkWaitTime);
-					} catch (InterruptedException e1) {
-						// ignore
-					}
-					forkWaitTime = forkWaitTime * 2;
-
-					// retry update of user profile
-					continue;
-				}
-			} catch (PutFailedException e) {
-				throw new ProcessExecutionException(e);
-			}
-
-			logger.debug("Successfully relinked the moved file in the user profile.");
-
-			// check if the protection key of the meta file and chunks need to be updated
-			if (!H2HDefaultEncryption.compare(oldParentNode.getProtectionKeys(), newParentNode.getProtectionKeys())) {
-				logger.info("Required to update the protection key of the moved file(s)/folder(s).");
-				initPKUpdateStep(movedNode, oldParentNode.getProtectionKeys(), newParentNode.getProtectionKeys());
-			}
-
-			// notify other users
-			initNotificationParameters(oldParentNode, movedNode);
-
-			break;
-		}
+		logger.debug("Successfully relinked the moved file in the user profile.");
 	}
 
-	private void initPKUpdateStep(Index movedNode, KeyPair oldProtectionKeys, KeyPair newProtectionKeys) {
-		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode, oldProtectionKeys,
-				newProtectionKeys);
+	@Override
+	protected void afterModify() throws ProcessExecutionException {
+		// check if the protection key of the meta file and chunks need to be updated
+		if (!H2HDefaultEncryption.compare(oldParentNode.getProtectionKeys(), newParentNode.getProtectionKeys())) {
+			logger.info("Required to update the protection key of the moved file(s)/folder(s).");
+			initPKUpdateStep();
+		}
+
+		// notify other users
+		initNotificationParameters();
+	}
+
+	private void initPKUpdateStep() {
+		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode,
+				oldParentNode.getProtectionKeys(), newParentNode.getProtectionKeys());
 		getParent().insertNext(new InitializeMetaUpdateStep(pkUpdateContext, dataManger), this);
 	}
 
@@ -144,7 +103,7 @@ public class RelinkUserProfileStep extends ProcessStep {
 	 * 2. users that don't have access to the file anymore
 	 * 3. users that now have access to the file but didn't have prior movement
 	 */
-	private void initNotificationParameters(Index oldParentNode, Index movedNode) {
+	private void initNotificationParameters() {
 		// the users at the destination
 		Set<String> usersAtDestination = new HashSet<String>(movedNode.getCalculatedUserList());
 		// the users at the source
@@ -200,67 +159,22 @@ public class RelinkUserProfileStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		// only when user profile has been updated
-		if (profileUpdated) {
-			File source = context.getSource();
-			File destination = context.getDestination();
-			File root = context.getRoot();
+	protected void modifyRollback(UserProfile userProfile) {
+		File source = context.getSource();
+		File destination = context.getDestination();
+		File root = context.getRoot();
 
-			int forkCounter = 0;
-			int forkWaitTime = new Random().nextInt(1000) + 500;
-			while (true) {
-				UserProfile userProfile;
-				try {
-					userProfile = profileManager.getUserProfile(getID(), true);
-				} catch (GetFailedException e) {
-					logger.error("Couldn't load user profile for redo.", e);
-					return;
-				}
+		Index movedNode = userProfile.getFileByPath(source, root);
+		FolderIndex oldParentNode = (FolderIndex) userProfile.getFileByPath(source.getParentFile(), root);
+		FolderIndex newParentNode = movedNode.getParent();
 
-				Index movedNode = userProfile.getFileByPath(source, root);
-				FolderIndex oldParentNode = (FolderIndex) userProfile.getFileByPath(source.getParentFile(), root);
-				FolderIndex newParentNode = movedNode.getParent();
+		// consider renaming
+		movedNode.setName(destination.getName());
 
-				// consider renaming
-				movedNode.setName(destination.getName());
-
-				// remove moved node from destination parent node
-				newParentNode.removeChild(movedNode);
-				// re-re-link them
-				movedNode.setParent(oldParentNode);
-				oldParentNode.addChild(movedNode);
-
-				try {
-					// update in DHT
-					profileManager.readyToPut(userProfile, getID());
-				} catch (VersionForkAfterPutException e) {
-					if (forkCounter++ > forkLimit) {
-						logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
-					} else {
-						logger.warn("Version fork after put detected. Rejecting and retrying put.");
-
-						// exponential back off waiting
-						try {
-							Thread.sleep(forkWaitTime);
-						} catch (InterruptedException e1) {
-							// ignore
-						}
-						forkWaitTime = forkWaitTime * 2;
-
-						// retry update of user profile
-						continue;
-					}
-				} catch (PutFailedException e) {
-					logger.error("Couldn't redo user profile update.", e);
-					return;
-				}
-
-				// reset modification flag
-				profileUpdated = false;
-
-				break;
-			}
-		}
+		// remove moved node from destination parent node
+		newParentNode.removeChild(movedNode);
+		// re-re-link them
+		movedNode.setParent(oldParentNode);
+		oldParentNode.addChild(movedNode);
 	}
 }

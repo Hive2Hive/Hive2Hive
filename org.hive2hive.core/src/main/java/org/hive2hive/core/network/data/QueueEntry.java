@@ -7,21 +7,11 @@ import org.hive2hive.core.model.versioned.UserProfile;
 
 class QueueEntry {
 
-	private final String pid;
-
 	private final CountDownLatch getWaiter = new CountDownLatch(1);
 
 	// got from DHT
 	private UserProfile userProfile;
 	private GetFailedException getFailedException;
-
-	public QueueEntry(String pid) {
-		this.pid = pid;
-	}
-
-	public String getPid() {
-		return pid;
-	}
 
 	public void notifyGet() {
 		getWaiter.countDown();
@@ -57,22 +47,5 @@ class QueueEntry {
 
 	public void setUserProfile(UserProfile userProfile) {
 		this.userProfile = userProfile;
-	}
-
-	@Override
-	public int hashCode() {
-		return pid.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object otherPid) {
-		if (otherPid instanceof String) {
-			String pidString = (String) otherPid;
-			return pid.equals(pidString);
-		} else if (otherPid instanceof QueueEntry) {
-			QueueEntry otherEntry = (QueueEntry) otherPid;
-			return pid.equals(otherEntry.getPid());
-		}
-		return false;
 	}
 }

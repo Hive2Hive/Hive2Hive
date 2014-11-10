@@ -59,7 +59,7 @@ public class MoveNotificationMessage extends BaseDirectMessage implements IFileE
 
 		UserProfile userProfile;
 		try {
-			userProfile = profileManager.getUserProfile(getMessageID(), false);
+			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			logger.error("Couldn't load user profile.", e);
 			return;

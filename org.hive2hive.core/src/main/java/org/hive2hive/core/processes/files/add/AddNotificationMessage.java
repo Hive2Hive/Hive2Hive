@@ -45,7 +45,7 @@ public class AddNotificationMessage extends BaseDirectMessage implements IFileEv
 
 		UserProfile userProfile;
 		try {
-			userProfile = profileManager.getUserProfile(getMessageID(), false);
+			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			logger.error("Couldn't load user profile.", e);
 			return;
@@ -60,5 +60,4 @@ public class AddNotificationMessage extends BaseDirectMessage implements IFileEv
 		// trigger event
 		getEventBus().publish(new FileAddEvent(addedFile.asFile(session.getRootFile()), addedFile.isFile()));
 	}
-
 }

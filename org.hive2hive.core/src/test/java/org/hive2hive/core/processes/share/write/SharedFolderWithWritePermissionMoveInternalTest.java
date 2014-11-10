@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -679,13 +678,11 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	private static void checkIndex(File oldFileAtA, File oldFileAtB, File newFileAtA, File newFileAtB)
 			throws GetFailedException, NoSessionException {
-		UserProfile userProfileA = network.get(0).getSession().getProfileManager()
-				.getUserProfile(UUID.randomUUID().toString(), false);
+		UserProfile userProfileA = network.get(0).getSession().getProfileManager().readUserProfile();
 		Index oldIndexAtA = userProfileA.getFileByPath(oldFileAtA, network.get(0).getSession().getRootFile());
 		Index newIndexAtA = userProfileA.getFileByPath(newFileAtA, network.get(0).getSession().getRootFile());
 
-		UserProfile userProfileB = network.get(1).getSession().getProfileManager()
-				.getUserProfile(UUID.randomUUID().toString(), false);
+		UserProfile userProfileB = network.get(1).getSession().getProfileManager().readUserProfile();
 		Index oldIndexAtB = userProfileB.getFileByPath(oldFileAtB, network.get(1).getSession().getRootFile());
 		Index newIndexAtB = userProfileB.getFileByPath(newFileAtB, network.get(1).getSession().getRootFile());
 

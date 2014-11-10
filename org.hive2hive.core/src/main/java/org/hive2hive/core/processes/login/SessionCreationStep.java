@@ -45,7 +45,7 @@ public class SessionCreationStep extends ProcessStep {
 			params.setUserProfileManager(userProfileManager);
 
 			// load user profile
-			UserProfile userProfile = userProfileManager.getUserProfile(getID(), false);
+			UserProfile userProfile = userProfileManager.readUserProfile();
 			context.provideUserProfile(userProfile);
 
 			// create the locations manager

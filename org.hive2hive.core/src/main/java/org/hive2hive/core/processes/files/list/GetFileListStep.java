@@ -33,7 +33,7 @@ public class GetFileListStep extends ResultProcessStep<List<FileTaste>> {
 		// get the user profile
 		UserProfile profile = null;
 		try {
-			profile = profileManager.getUserProfile(getID(), false);
+			profile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			throw new ProcessExecutionException("User profile could not be loaded.");
 		}

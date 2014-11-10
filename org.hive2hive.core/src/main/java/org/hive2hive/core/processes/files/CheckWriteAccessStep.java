@@ -43,7 +43,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 		UserProfile userProfile = null;
 		try {
 			// fetch user profile (only read)
-			userProfile = profileManager.getUserProfile(getID(), false);
+			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

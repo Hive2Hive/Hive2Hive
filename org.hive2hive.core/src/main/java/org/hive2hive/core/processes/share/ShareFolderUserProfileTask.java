@@ -1,24 +1,21 @@
 package org.hive2hive.core.processes.share;
 
-import java.util.List;
-import java.util.UUID;
-
+import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.exceptions.VersionForkAfterPutException;
-import org.hive2hive.core.extras.FileRecursionUtil;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FolderIndex;
-import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShareFolderUserProfileTask extends UserProfileTask {
+public class ShareFolderUserProfileTask extends UserProfileTask implements IUserProfileModification {
 
 	private static final long serialVersionUID = -2476009828696898562L;
 	private static final Logger logger = LoggerFactory.getLogger(ShareFolderUserProfileTask.class);
@@ -42,70 +39,59 @@ public class ShareFolderUserProfileTask extends UserProfileTask {
 		logger.debug("Executing a shared folder user profile task.");
 
 		try {
-			if (networkManager.getUserId().equals(addedFriend.getUserId())) {
-				// I'm the new sharer
-				processSharedWithMe();
-			} else {
-				// New sharer, but I have the file already
-				logger.debug("Other user shared folder with new user '{}'.", addedFriend);
-				processSharedWithOther();
-			}
-		} catch (Hive2HiveException | InvalidProcessStateException e) {
+			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
+			profileManager.modifyUserProfile(getId(), this);
+		} catch (Hive2HiveException e) {
 			logger.error("Cannot execute the task.", e);
 		}
 
-	}
-
-	private void processSharedWithOther() throws Hive2HiveException {
-		/** Add the new user to the permission list of the folder index */
-		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-		while (true) {
-			String pid = UUID.randomUUID().toString();
-			UserProfile userProfile = profileManager.getUserProfile(pid, true);
-			FolderIndex index = (FolderIndex) userProfile.getFileById(sharedIndex.getFilePublicKey());
-			if (index == null) {
-				throw new Hive2HiveException("I'm not the newly shared user but don't have the shared folder");
-			}
-
-			index.addUserPermissions(addedFriend);
+		if (networkManager.getUserId().equals(addedFriend.getUserId())) {
+			/** Case when shared with me: Notify others that files are available */
 			try {
-				profileManager.readyToPut(userProfile, pid);
-			} catch (VersionForkAfterPutException e) {
-				continue;
+				// notify own other clients
+				notifyOtherClients(new AddNotificationMessageFactory(sharedIndex, null));
+				logger.debug("Notified other client that new (shared) files are available for download.");
+			} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
+					| NoSessionException e) {
+				logger.error("Could not notify other clients of me about the shared file.", e);
 			}
-			break;
+
+			// TODO notify instead of download
+			// /** 3. download the files that are now available */
+			// List<Index> fileList = Index.getIndexList(sharedIndex);
+			// // the folder itself is also contained, so remove it
+			// ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,
+			// networkManager);
+			// logger.debug("Start to download {} files that have been shared with me.", fileList.size());
+			// downloadProcess.start();
 		}
 	}
 
-	private void processSharedWithMe() throws Hive2HiveException, InvalidProcessStateException {
-		/** 1. add the tree to the root node in the user profile */
-		UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-		while (true) {
-			String pid = UUID.randomUUID().toString();
-			UserProfile userProfile = profileManager.getUserProfile(pid, true);
+	@Override
+	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
+		if (networkManager.getUserId().equals(addedFriend.getUserId())) {
+			// I'm the new sharer
+			processSharedWithMe(userProfile);
+		} else {
+			// New sharer, but I have the file already
+			logger.debug("Other user shared folder with new user '{}'.", addedFriend);
+			processSharedWithOther(userProfile);
+		}
+	}
 
-			// add it to the root (by definition)
-			userProfile.getRoot().addChild(sharedIndex);
-			sharedIndex.setParent(userProfile.getRoot());
-			try {
-				profileManager.readyToPut(userProfile, pid);
-				logger.debug("Added the newly shared folder to the own user profile.");
-			} catch (VersionForkAfterPutException e) {
-				continue;
-			}
-			break;
+	private void processSharedWithMe(UserProfile userProfile) {
+		// add the tree to the root node in the user profile
+		userProfile.getRoot().addChild(sharedIndex);
+		sharedIndex.setParent(userProfile.getRoot());
+	}
+
+	private void processSharedWithOther(UserProfile userProfile) throws AbortModifyException {
+		// Add the new user to the permission list of the folder index
+		FolderIndex index = (FolderIndex) userProfile.getFileById(sharedIndex.getFilePublicKey());
+		if (index == null) {
+			throw new AbortModifyException("I'm not the newly shared user but don't have the shared folder");
 		}
 
-		/** 2. Notify others that files are available */
-		notifyOtherClients(new AddNotificationMessageFactory(sharedIndex, null));
-		logger.debug("Notified other client that new (shared) files are available for download.");
-
-		// TODO notify instead of download
-		/** 3. download the files that are now available */
-		List<Index> fileList = Index.getIndexList(sharedIndex);
-		// the folder itself is also contained, so remove it
-		ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList, networkManager);
-		logger.debug("Start to download {} files that have been shared with me.", fileList.size());
-		downloadProcess.start();
+		index.addUserPermissions(addedFriend);
 	}
 }

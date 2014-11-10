@@ -46,7 +46,7 @@ public class FindInUserProfileStep extends ProcessStep {
 
 		UserProfile userProfile = null;
 		try {
-			userProfile = profileManager.getUserProfile(getID(), false);
+			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
 			throw new ProcessExecutionException(e);
 		}

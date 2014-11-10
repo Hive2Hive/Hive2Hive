@@ -94,7 +94,7 @@ public class SelectVersionStep extends ProcessStep {
 		try {
 			// find the node at the user profile
 			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
-			UserProfile userProfile = profileManager.getUserProfile(getID(), false);
+			UserProfile userProfile = profileManager.readUserProfile();
 			Index selectedNode = userProfile.getFileById(metaFileSmall.getId());
 			if (selectedNode == null) {
 				throw new Hive2HiveException("File node not found");

@@ -12,11 +12,11 @@ import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
-import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
@@ -26,6 +26,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
@@ -191,17 +192,20 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		@Override
 		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
-				UserProfile userProfile = profileManager.getUserProfile(getID(), operation == Operation.PUT);
-
-				if (operation == Operation.MODIFY) {
-					new FolderIndex(userProfile.getRoot(), null, randomString());
-				}
-
 				if (operation == Operation.PUT) {
-					profileManager.readyToPut(userProfile, getID());
-				}
+					profileManager.modifyUserProfile(getID(), new IUserProfileModification() {
 
-			} catch (GetFailedException | PutFailedException e) {
+						@Override
+						public void modifyUserProfile(UserProfile userProfile) {
+							if (operation == Operation.MODIFY) {
+								new FolderIndex(userProfile.getRoot(), null, randomString());
+							}
+						}
+					});
+				} else {
+					profileManager.readUserProfile();
+				}
+			} catch (GetFailedException | PutFailedException | AbortModifyException e) {
 				throw new ProcessExecutionException(e);
 			}
 		}
@@ -209,40 +213,34 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void testStress() throws NoSessionException, GetFailedException, PutFailedException, IOException,
-			NoPeerConnectionException {
+			NoPeerConnectionException, AbortModifyException {
 		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);
-		Random random = new Random();
+		final Random random = new Random();
 
 		for (int i = 0; i < 10; i++) {
-			boolean isFolder = random.nextBoolean();
+			final boolean isFolder = random.nextBoolean();
 
-			File file = null;
-			KeyPair keys = null;
-			byte[] md5Hash = null;
+			final File file = new File(root, randomString());
 			if (!isFolder) {
-				file = new File(root, randomString());
 				FileUtils.writeStringToFile(file, randomString());
-				keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-				md5Hash = HashUtil.hash(file);
 			}
+			final byte[] md5Hash = HashUtil.hash(file);
+			final KeyPair fileKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
 
 			while (true) {
 				String pid = UUID.randomUUID().toString();
-				UserProfile profile = profileManager.getUserProfile(pid, true);
+				profileManager.modifyUserProfile(pid, new IUserProfileModification() {
 
-				List<FolderIndex> indexes = getIndexList(profile.getRoot());
-
-				if (isFolder) {
-					new FolderIndex(indexes.get(random.nextInt(indexes.size())), null, randomString());
-				} else {
-					new FileIndex(indexes.get(random.nextInt(indexes.size())), keys, file.getName(), md5Hash);
-				}
-
-				try {
-					profileManager.readyToPut(profile, pid);
-				} catch (VersionForkAfterPutException e) {
-					continue;
-				}
+					@Override
+					public void modifyUserProfile(UserProfile userProfile) {
+						List<FolderIndex> indexes = getIndexList(userProfile.getRoot());
+						if (isFolder) {
+							new FolderIndex(indexes.get(random.nextInt(indexes.size())), fileKeys, randomString());
+						} else {
+							new FileIndex(indexes.get(random.nextInt(indexes.size())), fileKeys, file.getName(), md5Hash);
+						}
+					}
+				});
 				break;
 			}
 		}

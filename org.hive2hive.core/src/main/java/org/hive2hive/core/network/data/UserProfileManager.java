@@ -2,12 +2,15 @@ package org.hive2hive.core.network.data;
 
 import java.security.KeyPair;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
+import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.vdht.EncryptedVersionManager;
 import org.hive2hive.core.security.PasswordUtil;
@@ -19,12 +22,14 @@ import org.slf4j.LoggerFactory;
  * Manages the user profile resource. Each process waiting for get / put is added to a queue and delivered in
  * order.
  * 
- * @author Nico, Seppi
+ * @author Nico
+ * @author Seppi
  */
 public class UserProfileManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
 	private static final long MAX_MODIFICATION_TIME = 1000;
+	private static final int FORK_LIMIT = 2;
 
 	private final EncryptedVersionManager<UserProfile> versionManager;
 	private final UserCredentials credentials;
@@ -63,25 +68,15 @@ public class UserProfileManager {
 	}
 
 	/**
-	 * Gets the user profile. The call blocks until the most recent profile is here.
+	 * Gets the user profile (read-only). The call blocks until the most recent profile is here.
 	 * 
 	 * @param pid the process identifier
-	 * @param intendsToPut whether the process intends modifying and putting the user profile. After the
-	 *            get-call, the profile has a given time to make its modification.
-	 * @param the user profile
+	 * @return the user profile
 	 * @throws GetFailedException if the profile cannot be fetched
 	 */
-	public UserProfile getUserProfile(String pid, boolean intendsToPut) throws GetFailedException {
-		QueueEntry entry;
-
-		if (intendsToPut) {
-			PutQueueEntry putEntry = new PutQueueEntry(pid);
-			modifyQueue.add(putEntry);
-			entry = putEntry;
-		} else {
-			entry = new QueueEntry(pid);
-			readOnlyQueue.add(entry);
-		}
+	public UserProfile readUserProfile() throws GetFailedException {
+		QueueEntry entry = new QueueEntry();
+		readOnlyQueue.add(entry);
 
 		synchronized (queueWaiter) {
 			queueWaiter.notify();
@@ -91,9 +86,6 @@ public class UserProfileManager {
 			entry.waitForGet();
 		} catch (GetFailedException e) {
 			// just stop the modification if an error occurs.
-			if (intendsToPut) {
-				stopModification(pid);
-			}
 			throw e;
 		}
 
@@ -102,6 +94,69 @@ public class UserProfileManager {
 			throw new GetFailedException("User Profile not found");
 		}
 		return profile;
+	}
+
+	/**
+	 * Gets the user profile and allows to modify it. The call blocks until
+	 * {@link IUserProfileModification#modifyUserProfile(UserProfile)} is called or an exception is thrown.
+	 * 
+	 * @param pid the process identifier
+	 * @param modifier the implementation where the modification is done
+	 * @throws GetFailedException if the profile cannot be fetched
+	 * @throws AbortModifyException if the modification was aborted
+	 */
+	public void modifyUserProfile(String pid, IUserProfileModification modifier) throws GetFailedException,
+			PutFailedException, AbortModifyException {
+		PutQueueEntry entry = new PutQueueEntry(pid);
+		modifyQueue.add(entry);
+
+		synchronized (queueWaiter) {
+			queueWaiter.notify();
+		}
+
+		try {
+			entry.waitForGet();
+		} catch (GetFailedException e) {
+			// just stop the modification if an error occurs.
+			stopModification(pid);
+			throw e;
+		}
+
+		UserProfile profile = entry.getUserProfile();
+		if (profile == null) {
+			throw new GetFailedException("User Profile not found");
+		}
+
+		int forkCounter = 0;
+		int forkWaitTime = new Random().nextInt(1000) + 500;
+		while (true) {
+			// user starts modifying it
+			modifier.modifyUserProfile(profile);
+
+			try {
+				// put the updated user profile
+				readyToPut(profile, pid);
+			} catch (VersionForkAfterPutException e) {
+				if (forkCounter++ > FORK_LIMIT) {
+					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+				} else {
+					logger.warn("Version fork after put detected. Rejecting and retrying put.");
+
+					// exponential back off waiting
+					try {
+						Thread.sleep(forkWaitTime);
+					} catch (InterruptedException e1) {
+						// ignore
+					}
+					forkWaitTime = forkWaitTime * 2;
+
+					// retry update of user profile
+					continue;
+				}
+			}
+
+			break;
+		}
 	}
 
 	/**
@@ -114,7 +169,7 @@ public class UserProfileManager {
 	 *             An error is also thrown when the process is not allowed to put (because he did not register
 	 *             himself as intending to put)
 	 */
-	public void readyToPut(UserProfile profile, String pid) throws PutFailedException {
+	private void readyToPut(UserProfile profile, String pid) throws PutFailedException {
 		if (protectionKeys == null) {
 			protectionKeys = profile.getProtectionKeys();
 		}

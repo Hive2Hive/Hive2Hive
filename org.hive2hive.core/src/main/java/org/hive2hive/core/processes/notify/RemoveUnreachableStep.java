@@ -35,7 +35,7 @@ public class RemoveUnreachableStep extends ProcessStep {
 	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		UserProfile userProfile;
 		try {
-			userProfile = networkManager.getSession().getProfileManager().getUserProfile(getID(), false);
+			userProfile = networkManager.getSession().getProfileManager().readUserProfile();
 		} catch (GetFailedException | NoSessionException e) {
 			throw new ProcessExecutionException(e);
 		}

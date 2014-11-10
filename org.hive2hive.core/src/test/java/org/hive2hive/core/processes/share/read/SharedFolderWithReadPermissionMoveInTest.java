@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -260,12 +259,10 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 	}
 
 	private static void checkIndex(File file) throws GetFailedException, NoSessionException {
-		UserProfile userProfileA = nodeA.getSession().getProfileManager()
-				.getUserProfile(UUID.randomUUID().toString(), false);
+		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
 		Index indexA = userProfileA.getFileByPath(file, nodeA.getSession().getRootFile());
 
-		UserProfile userProfileB = nodeB.getSession().getProfileManager()
-				.getUserProfile(UUID.randomUUID().toString(), false);
+		UserProfile userProfileB = nodeB.getSession().getProfileManager().readUserProfile();
 		Index indexB = userProfileB.getFileByPath(file, nodeB.getSession().getRootFile());
 
 		// check if userA's content protection keys are other ones

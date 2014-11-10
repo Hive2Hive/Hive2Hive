@@ -7,6 +7,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 
 class PutQueueEntry extends QueueEntry {
 
+	private final String pid;
 	private final AtomicBoolean readyToPut = new AtomicBoolean(false);
 	private final AtomicBoolean abort = new AtomicBoolean(false);
 	private final CountDownLatch putWaiter = new CountDownLatch(1);
@@ -14,7 +15,11 @@ class PutQueueEntry extends QueueEntry {
 	private PutFailedException putFailedException;
 
 	public PutQueueEntry(String pid) {
-		super(pid);
+		this.pid = pid;
+	}
+
+	public String getPid() {
+		return pid;
 	}
 
 	public boolean isReadyToPut() {
@@ -55,5 +60,22 @@ class PutQueueEntry extends QueueEntry {
 
 	public void setPutError(PutFailedException error) {
 		this.putFailedException = error;
+	}
+
+	@Override
+	public int hashCode() {
+		return getPid().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object otherPid) {
+		if (otherPid instanceof String) {
+			String pidString = (String) otherPid;
+			return getPid().equals(pidString);
+		} else if (otherPid instanceof PutQueueEntry) {
+			PutQueueEntry otherEntry = (PutQueueEntry) otherPid;
+			return getPid().equals(otherEntry.getPid());
+		}
+		return false;
 	}
 }

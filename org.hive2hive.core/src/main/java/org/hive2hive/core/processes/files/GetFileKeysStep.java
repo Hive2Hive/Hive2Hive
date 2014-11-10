@@ -40,7 +40,7 @@ public class GetFileKeysStep extends ProcessStep {
 		// file node is null, first look it up in the user profile
 		UserProfile profile = null;
 		try {
-			profile = session.getProfileManager().getUserProfile(getID(), false);
+			profile = session.getProfileManager().readUserProfile();
 		} catch (GetFailedException e) {
 			throw new ProcessExecutionException(e);
 		}
