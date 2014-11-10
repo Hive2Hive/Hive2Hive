@@ -1,5 +1,7 @@
 package org.hive2hive.core.processes.share;
 
+import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.implementations.FileShareEvent;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -36,10 +38,17 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 			return;
 		}
 
-		logger.debug("Executing a shared folder user profile task.");
-
+		H2HSession session;
 		try {
-			UserProfileManager profileManager = networkManager.getSession().getProfileManager();
+			session = networkManager.getSession();
+		} catch (NoSessionException e) {
+			logger.error("No user seems to be logged in.", e);
+			return;
+		}
+
+		logger.debug("Executing a shared folder user profile task.");
+		UserProfileManager profileManager = session.getProfileManager();
+		try {
 			profileManager.modifyUserProfile(getId(), this);
 		} catch (Hive2HiveException e) {
 			logger.error("Cannot execute the task.", e);
@@ -56,14 +65,9 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 				logger.error("Could not notify other clients of me about the shared file.", e);
 			}
 
-			// TODO notify instead of download
-			// /** 3. download the files that are now available */
-			// List<Index> fileList = Index.getIndexList(sharedIndex);
-			// // the folder itself is also contained, so remove it
-			// ProcessComponent downloadProcess = FileRecursionUtil.buildDownloadProcess(fileList,
-			// networkManager);
-			// logger.debug("Start to download {} files that have been shared with me.", fileList.size());
-			// downloadProcess.start();
+			// trigger event
+			FileShareEvent event = new FileShareEvent(sharedIndex.asFile(session.getRootFile()), false, addedFriend, sender);
+			networkManager.getEventBus().publish(event);
 		}
 	}
 
