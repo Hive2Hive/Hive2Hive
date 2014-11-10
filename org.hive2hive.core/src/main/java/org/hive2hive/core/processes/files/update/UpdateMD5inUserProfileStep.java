@@ -58,9 +58,12 @@ public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
 			throw new AbortModifyException("Try to create new version with same content.");
 		}
 
-		// make and put modifications
-		index.setMD5(newMD5);
+		// make modifications
 		logger.debug("Updating the MD5 hash in the user profile.");
+		index.setMD5(newMD5);
+
+		// store for notification
+		context.provideIndex(index);
 	}
 
 	@Override
