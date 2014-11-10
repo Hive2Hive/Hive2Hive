@@ -23,6 +23,7 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep implements I
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseModifyUserProfileStep.class);
 	private final UserProfileManager profileManager;
+	private boolean modified = false;
 
 	public BaseModifyUserProfileStep(UserProfileManager profileManager) {
 		this.profileManager = profileManager;
@@ -33,7 +34,7 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep implements I
 		beforeModify();
 		try {
 			profileManager.modifyUserProfile(getID(), this);
-			// TODO set a boolean that the profile has been updated
+			modified = true;
 		} catch (GetFailedException | PutFailedException | AbortModifyException e) {
 			logger.error("Cannot modify the user profile", e);
 			throw new ProcessExecutionException(e);
@@ -79,7 +80,9 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep implements I
 
 		@Override
 		public void modifyUserProfile(UserProfile userProfile) {
-			modifyRollback(userProfile);
+			if (modified) {
+				modifyRollback(userProfile);
+			}
 		}
 
 	}
