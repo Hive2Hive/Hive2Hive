@@ -51,7 +51,13 @@ public class FindInUserProfileStep extends ProcessStep {
 			throw new ProcessExecutionException(e);
 		}
 
-		Index index = userProfile.getFileById(context.getFileKey());
+		Index index;
+		if (context.getFileKey() == null) {
+			index = userProfile.getFileByPath(context.getFile(), session.getRootFile());
+		} else {
+			index = userProfile.getFileById(context.getFileKey());
+		}
+
 		if (index == null) {
 			throw new ProcessExecutionException("File key not found in user profile.");
 		}

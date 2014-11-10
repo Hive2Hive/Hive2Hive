@@ -244,9 +244,16 @@ public final class ProcessFactory {
 	/**
 	 * Process for downloading the newest version to the default location.
 	 */
+	public ProcessComponent createDownloadFileProcess(File file, NetworkManager networkManager) throws NoSessionException {
+		return createDownloadFileProcess(null, file, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
+	}
+
+	/**
+	 * Process for downloading the newest version to the default location.
+	 */
 	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
 			throws NoSessionException {
-		return createDownloadFileProcess(fileKey, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
+		return createDownloadFileProcess(fileKey, null, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
 	}
 
 	/**
@@ -255,11 +262,21 @@ public final class ProcessFactory {
 	 */
 	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, int versionToDownload, File destination,
 			NetworkManager networkManager) throws NoSessionException {
+		return createDownloadFileProcess(fileKey, null, versionToDownload, destination, networkManager);
+	}
+
+	/**
+	 * Process for downloading with some extra parameters. This can for example be used to restore a file. The
+	 * version and the filename are only effective for files, not for folders. Either give the file key or the
+	 * absolute file as argument.
+	 */
+	public ProcessComponent createDownloadFileProcess(PublicKey fileKey, File file, int versionToDownload, File destination,
+			NetworkManager networkManager) throws NoSessionException {
 		// precondition: session is existent
 		networkManager.getSession();
 
 		SequentialProcess process = new SequentialProcess();
-		DownloadFileContext context = new DownloadFileContext(fileKey, destination, versionToDownload);
+		DownloadFileContext context = new DownloadFileContext(fileKey, file, destination, versionToDownload);
 
 		process.add(new FindInUserProfileStep(context, networkManager));
 

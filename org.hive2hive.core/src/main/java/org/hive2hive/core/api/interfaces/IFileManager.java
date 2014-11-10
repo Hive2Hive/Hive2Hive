@@ -50,6 +50,19 @@ public interface IFileManager extends IManager {
 	IProcessComponent update(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
+	 * Download a file that exists in the network and store it on the disk. If the file is a folder, a folder
+	 * on disk is created, but containing files are not downloaded automatically.<br>
+	 * <strong>Note:</strong>If the file on disk already exists, it's content will be overwritten.
+	 * 
+	 * @param file the absolute file that should be downloaded. Use {@link #getFileList()} to get a list of
+	 *            available files or register yourself at the event bus.
+	 * @return an observable process component
+	 * @throws NoSessionException no user has logged in
+	 * @throws NoPeerConnectionException the peer has no connection to the network
+	 */
+	IProcessComponent download(File file) throws NoSessionException, NoPeerConnectionException;
+
+	/**
 	 * Move a file / folder from a given source to a given destination. This operation can also be used to
 	 * rename a file, or moving and renaming it together. In case of moving a folder, sub-files are moved too.
 	 * Note that this call does not perform any change on the file system.

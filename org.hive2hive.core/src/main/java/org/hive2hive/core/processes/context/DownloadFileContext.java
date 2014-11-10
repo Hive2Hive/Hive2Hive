@@ -9,26 +9,42 @@ import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
 
+/**
+ * Context to download a file from the network. There are two modes:<br>
+ * <ul>
+ * <li>Download by giving the file key</li>
+ * <li>Download by giving the full path of the file</li>
+ * <ul>
+ * 
+ * @author Nico
+ *
+ */
 public class DownloadFileContext implements IGetMetaFileContext {
 
 	// set -1 for default
 	public static final int NEWEST_VERSION_INDEX = -1;
 
 	private final PublicKey fileKey;
+	private final File file;
 	private final File destination; // set null for default
 	private final int versionToDownload;
 
 	private Index index;
 	private BaseMetaFile metaFile;
 
-	public DownloadFileContext(PublicKey fileKey, File destination, int versionToDownload) {
+	public DownloadFileContext(PublicKey fileKey, File file, File destination, int versionToDownload) {
 		this.fileKey = fileKey;
+		this.file = file;
 		this.destination = destination;
 		this.versionToDownload = versionToDownload;
 	}
 
 	public PublicKey getFileKey() {
 		return fileKey;
+	}
+
+	public File getFile() {
+		return file;
 	}
 
 	@Override

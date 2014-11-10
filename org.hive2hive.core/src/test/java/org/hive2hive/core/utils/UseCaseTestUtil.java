@@ -100,6 +100,12 @@ public class UseCaseTestUtil {
 		return userProfile.getFileById(fileKey).asFile(networkManager.getSession().getRootFile());
 	}
 
+	public static void downloadFile(NetworkManager networkManager, File file) throws NoSessionException, GetFailedException,
+			NoPeerConnectionException {
+		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(file, networkManager);
+		TestExecutionUtil.executeProcessTillSucceded(process);
+	}
+
 	public static void deleteFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
 		ProcessComponent process = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
