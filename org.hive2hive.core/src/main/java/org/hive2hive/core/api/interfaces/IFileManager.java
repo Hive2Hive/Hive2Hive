@@ -24,7 +24,8 @@ public interface IFileManager extends IManager {
 
 	/**
 	 * Add a file or a folder. Note that the file must already be in the predefined Hive2Hive folder. If the
-	 * folder is not empty, all containing files are added to Hive2Hive as well.
+	 * folder is not empty, containing files are <strong>not</strong> automatically added as well. The file
+	 * must exist on the disk.
 	 * 
 	 * @param file the file / folder to add
 	 * @return an observable process component
@@ -50,7 +51,8 @@ public interface IFileManager extends IManager {
 
 	/**
 	 * Move a file / folder from a given source to a given destination. This operation can also be used to
-	 * rename a file, or moving and renaming it together.
+	 * rename a file, or moving and renaming it together. In case of moving a folder, sub-files are moved too.
+	 * Note that this call does not perform any change on the file system.
 	 * 
 	 * @param source the full path of the file to move
 	 * @param destination the full path of the file destination
@@ -61,9 +63,9 @@ public interface IFileManager extends IManager {
 	IProcessComponent move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
 
 	/**
-	 * Delete a file / folder and all versions of that file from the network. This operation deletes also the
-	 * file on disk. <strong>Note that this operation is irreversible.</strong> If the folder is not empty,
-	 * all sub-files are deleted as well.
+	 * Delete a file / folder and all versions of that file from the network. <strong>Note that this operation
+	 * is irreversible.</strong> If the folder is not empty, all sub-files are deleted as well (in the
+	 * network). Files on disk are not touched.
 	 * 
 	 * @param file the file / folder to delete. The file must still be on disk
 	 * @return an observable process component
@@ -74,7 +76,9 @@ public interface IFileManager extends IManager {
 
 	/**
 	 * Recover a file version from the network and restore it under a new file (name is indicated with special
-	 * suffix).
+	 * suffix). The file is saved at the preferred location, but not automatically added to the network. If
+	 * you want to synchronize that file, too, you need to call {@link #add(File)} after this process
+	 * succeeded.
 	 * 
 	 * @param file the file to recover
 	 * @param versionSelector selector to select a file version from the choice of all existing versions
