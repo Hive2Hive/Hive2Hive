@@ -62,23 +62,25 @@ public class DeleteFromUserProfileStep extends BaseModifyUserProfileStep {
 
 		// store for later
 		context.provideIndex(fileIndex);
-		if (fileIndex.isFile()) {
-			context.provideProtectionKeys(fileIndex.getProtectionKeys());
-			context.provideMetaFileEncryptionKeys(fileIndex.getFileKeys());
-		}
 	}
 
 	@Override
 	protected void afterModify() throws ProcessExecutionException {
-		// create steps to delete meta and all chunks
-		GetMetaFileStep getMeta = new GetMetaFileStep(context, dataManager);
-		DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
-		DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
+		Index fileIndex = context.consumeIndex();
+		if (fileIndex.isFile()) {
+			context.provideProtectionKeys(fileIndex.getProtectionKeys());
+			context.provideMetaFileEncryptionKeys(fileIndex.getFileKeys());
 
-		// insert them in correct order
-		getParent().insertNext(getMeta, this);
-		getParent().insertNext(deleteChunks, getMeta);
-		getParent().insertNext(deleteMeta, deleteChunks);
+			// create steps to delete meta and all chunks
+			GetMetaFileStep getMeta = new GetMetaFileStep(context, dataManager);
+			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
+			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
+
+			// insert them in correct order
+			getParent().insertNext(getMeta, this);
+			getParent().insertNext(deleteChunks, getMeta);
+			getParent().insertNext(deleteMeta, deleteChunks);
+		}
 	}
 
 	@Override
