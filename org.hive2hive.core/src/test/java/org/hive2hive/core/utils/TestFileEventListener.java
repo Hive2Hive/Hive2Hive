@@ -116,7 +116,11 @@ public class TestFileEventListener implements IFileEventListener {
 		move.add(fileEvent);
 		if (networkManager != null) {
 			try {
-				FileUtils.moveFile(fileEvent.getSrcFile(), fileEvent.getDstFile());
+				if (fileEvent.isFolder()) {
+					FileUtils.moveDirectory(fileEvent.getSrcFile(), fileEvent.getDstFile());
+				} else {
+					FileUtils.moveFile(fileEvent.getSrcFile(), fileEvent.getDstFile());
+				}
 			} catch (IOException e) {
 				Assert.fail("Cannot move the file. Reason: " + e.getMessage());
 

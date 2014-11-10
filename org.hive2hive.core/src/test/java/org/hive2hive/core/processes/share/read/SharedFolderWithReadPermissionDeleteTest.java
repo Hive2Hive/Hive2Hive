@@ -81,7 +81,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
 
 		eventsAtA = new TestFileEventListener(nodeA);
-		network.get(0).getEventBus().subscribe(eventsAtA);
+		nodeA.getEventBus().subscribe(eventsAtA);
 
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
@@ -90,7 +90,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		UseCaseTestUtil.registerAndLogin(userB, nodeB, rootB);
 
 		eventsAtB = new TestFileEventListener(nodeB);
-		network.get(1).getEventBus().subscribe(eventsAtB);
+		nodeB.getEventBus().subscribe(eventsAtB);
 
 		sharedFolderA = new File(rootA, "sharedfolder");
 		sharedFolderA.mkdirs();
