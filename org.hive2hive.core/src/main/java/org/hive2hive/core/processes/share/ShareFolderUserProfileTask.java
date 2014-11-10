@@ -1,13 +1,17 @@
 package org.hive2hive.core.processes.share;
 
+import java.util.List;
+
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
+import org.hive2hive.core.events.implementations.FileAddEvent;
 import org.hive2hive.core.events.implementations.FileShareEvent;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.IUserProfileModification;
@@ -48,6 +52,11 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 		}
 
 		logger.debug("Executing a shared folder user profile task.");
+
+		// TODO before changing the user profile, the user should be asked to accept / decline the share
+		// invitation. If the invitation is accepted, the UP should be updated and all events should be
+		// triggered. If declined, the sender should be informed about it.
+
 		UserProfileManager profileManager = session.getProfileManager();
 		try {
 			profileManager.modifyUserProfile(getId(), this);
@@ -55,20 +64,27 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 			logger.error("Cannot execute the task.", e);
 		}
 
+		/** Case when shared with me: Notify others that files are available */
 		if (networkManager.getUserId().equals(addedFriend.getUserId())) {
-			/** Case when shared with me: Notify others that files are available */
-			try {
-				// notify own other clients
-				notifyOtherClients(new AddNotificationMessageFactory(sharedIndex, null));
-				logger.debug("Notified other client that new (shared) files are available for download.");
-			} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
-					| NoSessionException e) {
-				logger.error("Could not notify other clients of me about the shared file.", e);
-			}
+			// trigger event that file has been shared
+			IFileShareEvent shareEvent = new FileShareEvent(sharedIndex.asFile(session.getRootFile()), addedFriend, sender);
+			networkManager.getEventBus().publish(shareEvent);
 
-			// trigger event
-			IFileShareEvent event = new FileShareEvent(sharedIndex.asFile(session.getRootFile()), addedFriend, sender);
-			networkManager.getEventBus().publish(event);
+			List<Index> sharedFiles = Index.getIndexList(sharedIndex);
+			for (Index sharedFile : sharedFiles) {
+				// trigger the add file event
+				FileAddEvent addEvent = new FileAddEvent(sharedFile.asFile(session.getRootFile()), sharedFile.isFile());
+				networkManager.getEventBus().publish(addEvent);
+
+				try {
+					// notify own other clients about
+					notifyOtherClients(new AddNotificationMessageFactory(sharedFile, null));
+					logger.debug("Notified other client that new (shared) files are available for download.");
+				} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
+						| NoSessionException e) {
+					logger.error("Could not notify other clients of me about the shared file.", e);
+				}
+			}
 		}
 	}
 

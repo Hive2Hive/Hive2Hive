@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -264,24 +263,6 @@ public abstract class Index implements Comparable<Index>, Serializable {
 
 	@Override
 	public abstract String toString();
-
-	/**
-	 * Walks recursively through the file tree to build, sort and return the whole file list.
-	 * 
-	 * @param node The root node from which the digest is started.
-	 * @return The digest in sorted order.
-	 */
-	public static List<String> getFilePathList(Index node) {
-		List<Index> fileNodes = getIndexList(node);
-		List<String> digest = new ArrayList<String>();
-
-		for (Index fileNode : fileNodes) {
-			digest.add(fileNode.getFullPath());
-		}
-		// sort by full path
-		Collections.sort(digest);
-		return digest;
-	}
 
 	/**
 	 * Walks recursively through the file tree and returns a preorder list

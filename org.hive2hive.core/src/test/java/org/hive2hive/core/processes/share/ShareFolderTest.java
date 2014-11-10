@@ -93,8 +93,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
 		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission().getPermission());
 
+		IFileAddEvent added = waitTillAdded(sharedFolderAtB);
+		Assert.assertTrue(added.isFolder());
+
 		File file1AtB = new File(sharedFolderAtB, file1.getName());
-		IFileAddEvent added = waitTillAdded(file1AtB);
+		added = waitTillAdded(file1AtB);
 		Assert.assertTrue(added.isFile());
 
 		File file2AtB = new File(sharedFolderAtB, file2.getName());
@@ -126,6 +129,9 @@ public class ShareFolderTest extends H2HJUnitTest {
 		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
 		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
 		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission().getPermission());
+
+		IFileAddEvent added = waitTillAdded(sharedFolderAtB);
+		Assert.assertTrue(added.isFolder());
 	}
 
 	private static IFileShareEvent waitTillShared(File sharedFolder) {
