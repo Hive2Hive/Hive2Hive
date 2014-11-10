@@ -21,6 +21,7 @@ import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
@@ -51,6 +52,9 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 	private static UserCredentials userA;
 	private static UserCredentials userB;
 
+	private static TestFileEventListener eventsAtA;
+	private static TestFileEventListener eventsAtB;
+
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
 	 * 
@@ -70,11 +74,17 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
+		eventsAtA = new TestFileEventListener(network.get(0));
+		network.get(0).getEventBus().subscribe(eventsAtA);
+
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
+
+		eventsAtB = new TestFileEventListener(network.get(1));
+		network.get(1).getEventBus().subscribe(eventsAtB);
 
 		sharedFolderA = new File(rootA, "sharedfolder");
 		sharedFolderA.mkdirs();
@@ -115,7 +125,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
 	}
 
 	@Test
@@ -139,7 +149,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtA, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
 	}
 
 	@Test
@@ -163,7 +173,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtB, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
 	}
 
 	@Test
@@ -187,7 +197,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtA, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
 	}
 
 	@Test
@@ -211,7 +221,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
 	}
 
 	@Test
@@ -235,7 +245,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtA, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
 	}
 
 	@Test
@@ -259,7 +269,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtB, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
 	}
 
 	@Test
@@ -283,7 +293,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtA, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
 	}
 
 	/**
@@ -321,12 +331,12 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 		Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
 	}
 
-	private static void checkFileIndex(File file, byte[] md5Hash) throws GetFailedException, NoSessionException {
+	private static void checkFileIndex(File fileA, File fileB, byte[] md5Hash) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager().readUserProfile();
-		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(file, network.get(0).getSession().getRootFile());
+		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(fileA, network.get(0).getSession().getRootFile());
 
 		UserProfile userProfileB = network.get(1).getSession().getProfileManager().readUserProfile();
-		FileIndex indexB = (FileIndex) userProfileB.getFileByPath(file, network.get(0).getSession().getRootFile());
+		FileIndex indexB = (FileIndex) userProfileB.getFileByPath(fileB, network.get(1).getSession().getRootFile());
 
 		// check if index is file
 		Assert.assertTrue(indexA.isFile());

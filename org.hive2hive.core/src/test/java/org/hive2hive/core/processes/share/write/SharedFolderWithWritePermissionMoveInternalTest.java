@@ -21,6 +21,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
@@ -53,6 +54,9 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	private static UserCredentials userA;
 	private static UserCredentials userB;
 
+	private static TestFileEventListener eventsAtA;
+	private static TestFileEventListener eventsAtB;
+
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
 	 * 
@@ -72,11 +76,17 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
+		eventsAtA = new TestFileEventListener(network.get(0));
+		network.get(0).getEventBus().subscribe(eventsAtA);
+
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
+
+		eventsAtB = new TestFileEventListener(network.get(1));
+		network.get(1).getEventBus().subscribe(eventsAtB);
 
 		logger.info("Upload folder 'sharedfolder' from A.");
 		sharedFolderA = new File(rootA, "sharedfolder");
@@ -117,6 +127,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'fileFromA' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromAAtA = new File(subFolder1AtA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved file 'file1FromA' gets synchronized with B.");
@@ -140,6 +151,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'file2FromA' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtB, movedFileFromAAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromAAtB, movedFileFromAAtB);
 
 		logger.info("Wait till new moved file 'file2FromA' gets synchronized with A.");
@@ -163,6 +175,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'file1FromB' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromAAtA = new File(subFolder1AtA, fileFromBAtA.getName());
+		FileUtils.moveFile(fileFromBAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromBAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved file 'file1FromB' gets synchronized with B.");
@@ -186,6 +199,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'file2FromB' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromBAtB = new File(subFolder1AtB, fileFromBAtB.getName());
+		FileUtils.moveFile(fileFromBAtB, movedFileFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromBAtB, movedFileFromBAtB);
 
 		logger.info("Wait till new moved file 'fileFromB' gets synchronized with A.");
@@ -209,6 +223,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subfolder1FromA' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromAAtA = new File(subFolder1AtA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till moved folder 'subfolder1FromA' gets synchronized with B.");
@@ -232,6 +247,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subfolder2FromA' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtB, movedFolderFromAAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromAAtB, movedFolderFromAAtB);
 
 		logger.info("Wait till moved folder 'subfolder2FromA' gets synchronized with A.");
@@ -255,6 +271,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subfolder1FromB' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromAAtA = new File(subFolder1AtA, folderFromBAtA.getName());
+		FileUtils.moveDirectory(folderFromBAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromBAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till moved folder 'subfolder1FromB' gets synchronized with B.");
@@ -278,6 +295,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subfolder2FromB' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromBAtB = new File(subFolder1AtB, folderFromBAtB.getName());
+		FileUtils.moveDirectory(folderFromBAtB, movedFolderFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromBAtB, movedFolderFromBAtB);
 
 		logger.info("Wait till moved folder 'subfolderFromB' gets synchronized with A.");
@@ -301,6 +319,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfileFromA' at A into shared folder 'sharedfolder'.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved file 'subfile1FromA' gets synchronized with B.");
@@ -324,6 +343,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile2FromA' at B into shared subfolder 'sharedfolder'.");
 		File movedFileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtB, movedFileFromAAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromAAtB, movedFileFromAAtB);
 
 		logger.info("Wait till new moved file 'subfile2FromA' gets synchronized with A.");
@@ -347,6 +367,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile1FromB' at A into shared subfolder 'sharedfolder'.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromBAtA.getName());
+		FileUtils.moveFile(fileFromBAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromBAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved file 'subfile1FromB' gets synchronized with B.");
@@ -370,6 +391,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile2FromB' at B into shared subfolder 'sharedfolder'.");
 		File movedFileFromBAtB = new File(sharedFolderB, fileFromBAtB.getName());
+		FileUtils.moveFile(fileFromBAtB, movedFileFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromBAtB, movedFileFromBAtB);
 
 		logger.info("Wait till new moved file 'subfileFromB' gets synchronized with A.");
@@ -393,6 +415,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder1FromA' at A into shared subfolder 'sharedfolder'.");
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till moved folder 'subsubfolder1FromA' gets synchronized with B.");
@@ -416,6 +439,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder2FromA' at B into shared subfolder 'sharedfolder'.");
 		File movedFolderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtB, movedFolderFromAAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromAAtB, movedFolderFromAAtB);
 
 		logger.info("Wait till moved folder 'subsubfolder2FromA' gets synchronized with A.");
@@ -439,6 +463,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder1FromB' at A into shared subfolder 'sharedfolder'.");
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromBAtA.getName());
+		FileUtils.moveDirectory(folderFromBAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromBAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till moved folder 'subsubfolder1FromB' gets synchronized with B.");
@@ -462,6 +487,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder2FromB' at B into shared subfolder 'sharedfolder'.");
 		File movedFolderFromBAtB = new File(sharedFolderB, folderFromBAtB.getName());
+		FileUtils.moveDirectory(folderFromBAtB, movedFolderFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromBAtB, movedFolderFromBAtB);
 
 		logger.info("Wait till moved folder 'subsubfolderFromB' gets synchronized with A.");
@@ -485,6 +511,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile3FromA' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromAAtA = new File(subFolder2AtA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till moved file 'subfile3FromA' gets synchronized with B.");
@@ -508,6 +535,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile4FromA' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromAAtB = new File(subFolder2AtB, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtB, movedFileFromAAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromAAtB, movedFileFromAAtB);
 
 		logger.info("Wait till new moved file 'subfile4FromA' gets synchronized with A.");
@@ -531,6 +559,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile3FromB' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromAAtA = new File(subFolder2AtA, fileFromBAtA.getName());
+		FileUtils.moveFile(fileFromBAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromBAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved file 'subfile3FromB' gets synchronized with B.");
@@ -554,6 +583,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move file 'subfile4FromB' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromBAtB = new File(subFolder2AtB, fileFromBAtB.getName());
+		FileUtils.moveFile(fileFromBAtB, movedFileFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromBAtB, movedFileFromBAtB);
 
 		logger.info("Wait till new moved file 'subfile4FromB' gets synchronized with A.");
@@ -577,6 +607,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder3FromA' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromAAtA = new File(subFolder2AtA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till moved folder 'subsubfolder3FromA' gets synchronized with B.");
@@ -600,6 +631,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder4FromA' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromAAtB = new File(subFolder2AtB, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtB, movedFolderFromAAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromAAtB, movedFolderFromAAtB);
 
 		logger.info("Wait till moved folder 'subsubfolder4FromA' gets synchronized with A.");
@@ -623,6 +655,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder3FromB' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromAAtA = new File(subFolder2AtA, folderFromBAtA.getName());
+		FileUtils.moveDirectory(folderFromBAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromBAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till moved folder 'subsubfolder3FromB' gets synchronized with B.");
@@ -646,6 +679,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Move folder 'subsubfolder4FromB' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromBAtB = new File(subFolder2AtB, folderFromBAtB.getName());
+		FileUtils.moveDirectory(folderFromBAtB, movedFolderFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromBAtB, movedFolderFromBAtB);
 
 		logger.info("Wait till moved folder 'subsubfolder4FromB' gets synchronized with A.");

@@ -21,6 +21,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
@@ -51,6 +52,9 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 	private static UserCredentials userA;
 	private static UserCredentials userB;
 
+	private static TestFileEventListener eventsAtA;
+	private static TestFileEventListener eventsAtB;
+
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
 	 * 
@@ -70,11 +74,17 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
+		eventsAtA = new TestFileEventListener(network.get(0));
+		network.get(0).getEventBus().subscribe(eventsAtA);
+
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
+
+		eventsAtB = new TestFileEventListener(network.get(1));
+		network.get(1).getEventBus().subscribe(eventsAtB);
 
 		logger.info("Upload folder 'sharedfolder' from A.");
 		sharedFolderA = new File(rootA, "sharedfolder");

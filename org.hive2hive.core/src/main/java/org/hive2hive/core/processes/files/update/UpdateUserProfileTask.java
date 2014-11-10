@@ -30,13 +30,15 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 	private static final Logger logger = LoggerFactory.getLogger(UpdateUserProfileTask.class);
 
 	private final PublicKey fileKey;
+	private final byte[] newHash;
 
 	// initialized during profile modification
-	private Index updatedFile;
+	private FileIndex updatedFile;
 
-	public UpdateUserProfileTask(String sender, PublicKey fileKey) {
+	public UpdateUserProfileTask(String sender, PublicKey fileKey, byte[] newHash) {
 		super(sender);
 		this.fileKey = fileKey;
+		this.newHash = newHash;
 	}
 
 	@Override
@@ -72,11 +74,14 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 
 	@Override
 	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
-		updatedFile = userProfile.getFileById(fileKey);
-		if (updatedFile == null) {
+		Index index = userProfile.getFileById(fileKey);
+		if (index == null) {
 			throw new AbortModifyException("Got notified about a file we don't know.");
+		} else if (!index.isFile()) {
+			throw new AbortModifyException("Got notified about a folder update (illegal)");
 		}
 
+		updatedFile = (FileIndex) index;
 		FolderIndex parent = updatedFile.getParent();
 		if (parent == null) {
 			throw new AbortModifyException("Got task to update the root, which is invalid.");
@@ -92,8 +97,7 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 		if (existing.isFile() && updatedFile.isFile()) {
 			logger.debug("File update in a shared folder received: '{}'.", updatedFile.getName());
 			FileIndex existingFile = (FileIndex) existing;
-			FileIndex newFile = (FileIndex) updatedFile;
-			existingFile.setMD5(newFile.getMD5());
+			existingFile.setMD5(newHash);
 		}
 	}
 }

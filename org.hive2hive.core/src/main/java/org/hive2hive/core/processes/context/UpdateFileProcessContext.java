@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
-import org.hive2hive.core.model.Index;
+import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
@@ -33,7 +33,7 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 	private boolean largeFile;
 	private BaseMetaFile metaFile;
 	private byte[] hash;
-	private Index index;
+	private FileIndex index;
 	private Set<String> users;
 	private UpdateNotificationMessageFactory messageFactory;
 	private List<MetaChunk> chunksToDelete;
@@ -153,12 +153,12 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 		return hash;
 	}
 
-	public void provideIndex(Index index) {
+	public void provideIndex(FileIndex index) {
 		this.index = index;
 	}
 
 	@Override
-	public Index consumeIndex() {
+	public FileIndex consumeIndex() {
 		return index;
 	}
 

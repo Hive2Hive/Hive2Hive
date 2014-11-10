@@ -21,6 +21,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
@@ -39,7 +40,10 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 	private static final int CHUNK_SIZE = 1024;
 	private static final int networkSize = 6;
 	private static final int maxNumChunks = 2;
+
 	private static ArrayList<NetworkManager> network;
+	private static NetworkManager nodeA;
+	private static NetworkManager nodeB;
 
 	private static File rootA;
 	private static File rootB;
@@ -50,6 +54,9 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
 	private static UserCredentials userA;
 	private static UserCredentials userB;
+
+	private static TestFileEventListener eventsAtA;
+	private static TestFileEventListener eventsAtB;
 
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
@@ -63,18 +70,26 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
 		logger.info("Setup network.");
 		network = NetworkTestUtil.createNetwork(networkSize);
+		nodeA = network.get(0);
+		nodeB = network.get(1);
 
 		logger.info("Create user A.");
 		rootA = FileTestUtil.getTempDirectory();
 		userA = generateRandomCredentials();
 		logger.info("Register and login user A.");
-		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
+		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
+
+		eventsAtA = new TestFileEventListener(nodeA);
+		nodeA.getEventBus().subscribe(eventsAtA);
 
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
+
+		eventsAtB = new TestFileEventListener(nodeB);
+		nodeB.getEventBus().subscribe(eventsAtB);
 
 		logger.info("Upload folder 'folder1' from A.");
 		sharedFolderA = new File(rootA, "folder1");

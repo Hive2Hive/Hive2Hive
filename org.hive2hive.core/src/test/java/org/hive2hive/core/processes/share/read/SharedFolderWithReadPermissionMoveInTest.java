@@ -22,6 +22,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -55,6 +56,9 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 	private static UserCredentials userA;
 	private static UserCredentials userB;
 
+	private static TestFileEventListener eventsAtA;
+	private static TestFileEventListener eventsAtB;
+
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
 	 * 
@@ -76,11 +80,17 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
 
+		eventsAtA = new TestFileEventListener(nodeA);
+		nodeA.getEventBus().subscribe(eventsAtA);
+
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, nodeB, rootB);
+
+		eventsAtB = new TestFileEventListener(nodeB);
+		nodeB.getEventBus().subscribe(eventsAtB);
 
 		sharedFolderA = new File(rootA, "sharedfolder");
 		sharedFolderA.mkdirs();
@@ -110,13 +120,14 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Move file '{}' at A into shared folder '{}'.", fileFromAAtA.getName(), sharedFolderA.getName());
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(nodeA, fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved in file '{}' gets synchronized with B.", movedFileFromAAtA.toString());
 		File movedFileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(movedFileFromAAtB);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
-		checkIndex(movedFileFromAAtA);
+		checkIndex(movedFileFromAAtA, movedFileFromAAtB);
 	}
 
 	@Test
@@ -143,13 +154,14 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Move folder '{}' at A into shared folder '{}'.", folderFromAAtA.getName(), sharedFolderA.getName());
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till new moved in folder '{}' gets synchronized with B.", movedFolderFromAAtA.toString());
 		File movedFolderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(movedFolderFromAAtB);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
-		checkIndex(movedFolderFromAAtA);
+		checkIndex(movedFolderFromAAtA, movedFolderFromAAtB);
 	}
 
 	@Test
@@ -178,13 +190,14 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		logger.info("Move file '{}' at A into shared folder '{}'.", fileFromAAtA.getName(),
 				rootA.toPath().relativize(subFolderA.toPath()));
 		File movedFileFromAAtA = new File(subFolderA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(nodeA, fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved in file '{}' gets synchronized with B.", movedFileFromAAtA.toString());
 		File movedFileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(movedFileFromAAtB);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
-		checkIndex(movedFileFromAAtA);
+		checkIndex(movedFileFromAAtA, movedFileFromAAtB);
 	}
 
 	@Test
@@ -213,13 +226,14 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		logger.info("Move folder '{}' at A into shared folder '{}'.", folderFromAAtA.getName(),
 				rootA.toPath().relativize(subFolderA.toPath()));
 		File movedFolderFromAAtA = new File(subFolderA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(nodeA, folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till new moved in folder '{}' gets synchronized with B.", movedFolderFromAAtA.toString());
 		File movedFolderFromAAtB = new File(subFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(movedFolderFromAAtB);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
-		checkIndex(movedFolderFromAAtA);
+		checkIndex(movedFolderFromAAtA, movedFolderFromAAtB);
 	}
 
 	@Test
@@ -258,12 +272,12 @@ public class SharedFolderWithReadPermissionMoveInTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndex(File file) throws GetFailedException, NoSessionException {
+	private static void checkIndex(File fileA, File fileB) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
-		Index indexA = userProfileA.getFileByPath(file, nodeA.getSession().getRootFile());
+		Index indexA = userProfileA.getFileByPath(fileA, nodeA.getSession().getRootFile());
 
 		UserProfile userProfileB = nodeB.getSession().getProfileManager().readUserProfile();
-		Index indexB = userProfileB.getFileByPath(file, nodeB.getSession().getRootFile());
+		Index indexB = userProfileB.getFileByPath(fileB, nodeB.getSession().getRootFile());
 
 		// check if userA's content protection keys are other ones
 		Assert.assertFalse(indexA.getProtectionKeys().getPrivate().equals(userProfileA.getProtectionKeys().getPrivate()));

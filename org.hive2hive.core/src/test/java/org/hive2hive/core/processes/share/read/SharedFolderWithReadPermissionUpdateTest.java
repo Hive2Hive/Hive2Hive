@@ -22,6 +22,7 @@ import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -55,6 +56,9 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 	private static UserCredentials userA;
 	private static UserCredentials userB;
 
+	private static TestFileEventListener eventsAtA;
+	private static TestFileEventListener eventsAtB;
+
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
 	 * 
@@ -76,11 +80,17 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Register and login user A.");
 		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
 
+		eventsAtA = new TestFileEventListener(nodeA);
+		nodeA.getEventBus().subscribe(eventsAtA);
+
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
 		UseCaseTestUtil.registerAndLogin(userB, nodeB, rootB);
+
+		eventsAtB = new TestFileEventListener(nodeB);
+		nodeB.getEventBus().subscribe(eventsAtB);
 
 		sharedFolderA = new File(rootA, "sharedfolder");
 		sharedFolderA.mkdirs();
@@ -121,7 +131,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
 	}
 
 	@Test
@@ -139,7 +149,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Try to update file '{}' at B.", fileFromAAtA.toString());
 		FileUtils.write(fileFromAAtB, randomString(), false);
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
-		checkFileIndex(fileFromAAtA, HashUtil.hash(fileFromAAtA));
+		checkFileIndex(fileFromAAtA, fileFromAAtB, HashUtil.hash(fileFromAAtA));
 	}
 
 	@Test
@@ -163,7 +173,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
 	}
 
 	@Test
@@ -181,7 +191,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		logger.info("Try to update file '{}' at B.", fileFromAAtA.toString());
 		FileUtils.write(fileFromAAtB, randomString(), false);
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
-		checkFileIndex(fileFromAAtA, HashUtil.hash(fileFromAAtA));
+		checkFileIndex(fileFromAAtA, fileFromAAtB, HashUtil.hash(fileFromAAtA));
 	}
 
 	/**
@@ -219,12 +229,12 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
 	}
 
-	private static void checkFileIndex(File file, byte[] md5Hash) throws GetFailedException, NoSessionException {
+	private static void checkFileIndex(File fileA, File fileB, byte[] md5Hash) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
-		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(file, nodeA.getSession().getRootFile());
+		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(fileA, nodeA.getSession().getRootFile());
 
 		UserProfile userProfileB = nodeB.getSession().getProfileManager().readUserProfile();
-		FileIndex indexB = (FileIndex) userProfileB.getFileByPath(file, nodeB.getSession().getRootFile());
+		FileIndex indexB = (FileIndex) userProfileB.getFileByPath(fileB, nodeB.getSession().getRootFile());
 
 		// check if index is file
 		Assert.assertTrue(indexA.isFile());
