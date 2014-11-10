@@ -22,6 +22,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.hive2hive.processframework.util.TestExecutionUtil;
@@ -35,6 +36,7 @@ import org.junit.Test;
  * scenarios.
  * 
  * @author Seppi
+ * @author Nico
  */
 public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
@@ -47,6 +49,8 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	private static File rootA;
 	private static File rootB;
+	private static TestFileEventListener eventsAtB;
+	private static TestFileEventListener eventsAtA;
 	private static File sharedFolderA;
 	private static File sharedFolderB;
 	private static File subFolderA;
@@ -74,14 +78,20 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		rootA = FileTestUtil.getTempDirectory();
 		userA = generateRandomCredentials();
 		logger.info("Register and login user A.");
-		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
+		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
+
+		eventsAtA = new TestFileEventListener(nodeA);
+		network.get(0).getEventBus().subscribe(eventsAtA);
 
 		logger.info("Create user B.");
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		logger.info("Register and login user B.");
+		UseCaseTestUtil.registerAndLogin(userB, nodeB, rootB);
 
-		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
+		eventsAtB = new TestFileEventListener(nodeB);
+		network.get(1).getEventBus().subscribe(eventsAtB);
+
 		sharedFolderA = new File(rootA, "sharedfolder");
 		sharedFolderA.mkdirs();
 		logger.info("Upload folder '{}' from A.", sharedFolderA.getName());
@@ -113,14 +123,14 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(fileFromAAtA, false);
+		checkIndex(fileFromAAtA, fileFromAAtB, false);
 
 		logger.info("Delete file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, fileFromAAtA);
 
 		logger.info("Wait till deletion of file '{}' gets synchronized with B.", fileFromAAtB.toString());
 		waitTillSynchronized(fileFromAAtB, false);
-		checkIndex(fileFromAAtA, true);
+		checkIndex(fileFromAAtA, fileFromAAtB, true);
 	}
 
 	@Test
@@ -135,11 +145,11 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(fileFromAAtA, false);
+		checkIndex(fileFromAAtA, fileFromAAtB, false);
 
 		logger.info("Try to delete file '{}' at B.", fileFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(fileFromAAtB, nodeB));
-		checkIndex(fileFromAAtA, false);
+		checkIndex(fileFromAAtA, fileFromAAtB, false);
 	}
 
 	@Test
@@ -163,14 +173,14 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File folderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(folderFromAAtA, false);
+		checkIndex(folderFromAAtA, folderFromAAtB, false);
 
 		logger.info("Delete folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, folderFromAAtA);
 
 		logger.info("Wait till deletion of folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		waitTillSynchronized(folderFromAAtB, false);
-		checkIndex(folderFromAAtA, true);
+		checkIndex(folderFromAAtA, folderFromAAtB, true);
 	}
 
 	@Test
@@ -185,11 +195,11 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File folderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(folderFromAAtA, false);
+		checkIndex(folderFromAAtA, folderFromAAtB, false);
 
 		logger.info("Try to delete folder '{}' at B.", folderFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folderFromAAtB, nodeB));
-		checkIndex(folderFromAAtA, false);
+		checkIndex(folderFromAAtA, folderFromAAtB, false);
 	}
 
 	@Test
@@ -213,14 +223,14 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File fileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(fileFromAAtA, false);
+		checkIndex(fileFromAAtA, fileFromAAtB, false);
 
 		logger.info("Delete file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, fileFromAAtA);
 
 		logger.info("Wait till deletion of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronized(fileFromAAtB, false);
-		checkIndex(fileFromAAtA, true);
+		checkIndex(fileFromAAtA, fileFromAAtB, true);
 	}
 
 	@Test
@@ -235,11 +245,11 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File fileFromAAtB = new File(subFolderB, fileFromAAtA.getName());
 		waitTillSynchronized(fileFromAAtB, true);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkIndex(fileFromAAtA, false);
+		checkIndex(fileFromAAtA, fileFromAAtB, false);
 
 		logger.info("Try to delete file '{}' at B.", fileFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(fileFromAAtB, nodeB));
-		checkIndex(fileFromAAtA, false);
+		checkIndex(fileFromAAtA, fileFromAAtB, false);
 	}
 
 	@Test
@@ -263,14 +273,14 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File folderFromAAtB = new File(subFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(folderFromAAtA, false);
+		checkIndex(folderFromAAtA, folderFromAAtB, false);
 
 		logger.info("Delete folder '{}' at A.", folderFromAAtA.toString());
 		UseCaseTestUtil.deleteFile(nodeA, folderFromAAtA);
 
 		logger.info("Wait till deletion of folder '{}' gets synchronized with B.", folderFromAAtA.toString());
 		waitTillSynchronized(folderFromAAtB, false);
-		checkIndex(folderFromAAtA, true);
+		checkIndex(folderFromAAtA, folderFromAAtB, true);
 	}
 
 	@Test
@@ -285,11 +295,11 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File folderFromAAtB = new File(subFolderB, folderFromAAtA.getName());
 		waitTillSynchronized(folderFromAAtB, true);
 		compareFiles(folderFromAAtA, folderFromAAtB);
-		checkIndex(folderFromAAtA, false);
+		checkIndex(folderFromAAtA, folderFromAAtB, false);
 
 		logger.info("Try to delete folder '{}' at B.", folderFromAAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createDeleteFileProcess(folderFromAAtB, nodeB));
-		checkIndex(folderFromAAtA, false);
+		checkIndex(folderFromAAtA, folderFromAAtB, false);
 	}
 
 	@Test
@@ -302,12 +312,10 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	}
 
 	/**
-	 * Waits a certain amount of time till a file appears (add) or disappears (delete).
+	 * Waits a certain amount of time until a file event appears (add) or disappears (delete).
 	 * 
-	 * @param synchronizingFile
-	 *            the file to synchronize
-	 * @param appearing
-	 *            <code>true</code> if file should appear, <code>false</code> if file should disappear
+	 * @param synchronizingFile the file to synchronize
+	 * @param appearing <code>true</code> if file should appear, <code>false</code> if file should disappear
 	 */
 	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
 		H2HWaiter waiter = new H2HWaiter(40);
@@ -329,18 +337,21 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		}
 	}
 
-	private static void checkIndex(File file, boolean deleted) throws GetFailedException, NoSessionException {
+	private static void checkIndex(File fileA, File fileB, boolean deleted) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
-		Index indexA = userProfileA.getFileByPath(file, nodeA.getSession().getRootFile());
+		Index indexA = userProfileA.getFileByPath(fileA, nodeA.getSession().getRootFile());
 
 		UserProfile userProfileB = nodeB.getSession().getProfileManager().readUserProfile();
-		Index indexB = userProfileB.getFileByPath(file, nodeB.getSession().getRootFile());
+		Index indexB = userProfileB.getFileByPath(fileB, nodeB.getSession().getRootFile());
 
 		// in case of deletion verify removed index nodes
 		if (deleted) {
 			Assert.assertNull(indexA);
 			Assert.assertNull(indexB);
 			return;
+		} else {
+			Assert.assertNotNull(indexA);
+			Assert.assertNotNull(indexB);
 		}
 
 		// check if userA's content protection keys are other ones
