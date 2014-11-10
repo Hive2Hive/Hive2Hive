@@ -97,7 +97,7 @@ public class SelectVersionStep extends ProcessStep {
 			UserProfile userProfile = profileManager.readUserProfile();
 			Index selectedNode = userProfile.getFileById(metaFileSmall.getId());
 			if (selectedNode == null) {
-				throw new Hive2HiveException("File node not found");
+				throw new ProcessExecutionException("File node not found");
 			}
 
 			// ask the user for the new file name
@@ -120,10 +120,6 @@ public class SelectVersionStep extends ProcessStep {
 			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(
 					selectedNode.getFilePublicKey(), selected.getIndex(), destination, networkManager);
 			getParent().add(downloadProcess);
-
-			// add the process to upload the file
-			ProcessComponent addProcess = ProcessFactory.instance().createNewFileProcess(destination, networkManager);
-			getParent().add(addProcess);
 		} catch (Hive2HiveException e) {
 			throw new ProcessExecutionException(e);
 		}

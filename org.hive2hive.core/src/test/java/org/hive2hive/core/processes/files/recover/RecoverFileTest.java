@@ -20,7 +20,6 @@ import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -86,10 +85,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 		TestVersionSelector selector = new TestVersionSelector(versionToRestore);
 		ProcessComponent process = ProcessFactory.instance().createRecoverFileProcess(file, selector, client);
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		process.start();
-		TestExecutionUtil.waitTillSucceded(listener, 120);
+		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// to verify, find the restored file
 		File restoredFile = null;

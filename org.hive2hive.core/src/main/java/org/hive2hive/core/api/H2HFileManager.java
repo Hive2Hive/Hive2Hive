@@ -1,7 +1,6 @@
 package org.hive2hive.core.api;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.hive2hive.core.H2HSession;
@@ -130,15 +129,13 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
-			NoSessionException, NoPeerConnectionException {
+	public IProcessComponent recover(File file, IVersionSelector versionSelector) throws NoSessionException,
+			NoPeerConnectionException {
 		// do some verifications
 		if (file == null) {
 			throw new IllegalArgumentException("File to recover cannot be null");
 		} else if (file.isDirectory()) {
-			throw new IllegalArgumentException("A foler has only one version");
-		} else if (!file.exists()) {
-			throw new FileNotFoundException("File does not exist");
+			throw new IllegalArgumentException("A folder has only one version");
 		}
 
 		IProcessComponent recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file, versionSelector,
