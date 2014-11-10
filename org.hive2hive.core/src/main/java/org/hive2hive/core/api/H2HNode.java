@@ -26,17 +26,18 @@ public class H2HNode implements IH2HNode {
 	private final INetworkConfiguration networkConfiguration;
 	private final IFileConfiguration fileConfiguration;
 	private final NetworkManager networkManager;
+	private final EventBus eventBus;
 
 	private IUserManager userManager;
 	private IFileManager fileManager;
-	private EventBus eventBus;
 
 	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
 			IH2HEncryption encryption) {
 		this.networkConfiguration = networkConfiguration;
 		this.fileConfiguration = fileConfiguration;
+		this.eventBus = new EventBus();
 
-		networkManager = new NetworkManager(networkConfiguration, encryption, getEventBus());
+		networkManager = new NetworkManager(networkConfiguration, encryption, eventBus);
 	}
 
 	/**
@@ -85,7 +86,7 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IUserManager getUserManager() {
 		if (userManager == null) {
-			userManager = new H2HUserManager(networkManager, fileConfiguration, getEventBus());
+			userManager = new H2HUserManager(networkManager, fileConfiguration, eventBus);
 		}
 		return userManager;
 	}
@@ -93,16 +94,9 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IFileManager getFileManager() {
 		if (fileManager == null) {
-			fileManager = new H2HFileManager(networkManager, getEventBus());
+			fileManager = new H2HFileManager(networkManager, eventBus);
 		}
 		return fileManager;
-	}
-
-	private EventBus getEventBus() {
-		if (eventBus == null) {
-			eventBus = new EventBus();
-		}
-		return eventBus;
 	}
 
 	@Override

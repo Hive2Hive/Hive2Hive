@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.share;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
 import org.hive2hive.core.events.implementations.FileShareEvent;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
@@ -66,7 +67,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 			}
 
 			// trigger event
-			FileShareEvent event = new FileShareEvent(sharedIndex.asFile(session.getRootFile()), false, addedFriend, sender);
+			IFileShareEvent event = new FileShareEvent(sharedIndex.asFile(session.getRootFile()), addedFriend, sender);
 			networkManager.getEventBus().publish(event);
 		}
 	}

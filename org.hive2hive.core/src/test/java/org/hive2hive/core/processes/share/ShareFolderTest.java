@@ -7,6 +7,8 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
+import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -16,6 +18,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
@@ -38,6 +41,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	private static File rootB;
 	private static UserCredentials userA;
 	private static UserCredentials userB;
+	private static TestFileEventListener eventB;
 
 	/**
 	 * Setup two users with each one client, log them in
@@ -57,6 +61,9 @@ public class ShareFolderTest extends H2HJUnitTest {
 		rootB = FileTestUtil.getTempDirectory();
 		userB = generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
+
+		eventB = new TestFileEventListener();
+		network.get(1).getEventBus().subscribe(eventB);
 	}
 
 	@Test
@@ -80,24 +87,27 @@ public class ShareFolderTest extends H2HJUnitTest {
 		// share the filled folder
 		UseCaseTestUtil.shareFolder(network.get(0), folderToShare, userB.getUserId(), PermissionType.WRITE);
 
-		// check the files and the folders at user B
+		// check the events at user B
 		File sharedFolderAtB = new File(rootB, folderToShare.getName());
-		waitTillSynchronized(sharedFolderAtB, true);
+		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
+		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
+		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission().getPermission());
 
 		File file1AtB = new File(sharedFolderAtB, file1.getName());
-		waitTillSynchronized(file1AtB, true);
-		Assert.assertEquals(file1.length(), file1AtB.length());
+		IFileAddEvent added = waitTillAdded(file1AtB);
+		Assert.assertTrue(added.isFile());
 
 		File file2AtB = new File(sharedFolderAtB, file2.getName());
-		waitTillSynchronized(file2AtB, true);
-		Assert.assertEquals(file2.length(), file2AtB.length());
+		added = waitTillAdded(file2AtB);
+		Assert.assertTrue(added.isFile());
 
 		File subfolderAtB = new File(sharedFolderAtB, subfolder.getName());
-		waitTillSynchronized(subfolderAtB, true);
+		added = waitTillAdded(subfolderAtB);
+		Assert.assertTrue(added.isFolder());
 
 		File file3AtB = new File(subfolderAtB, file3.getName());
-		waitTillSynchronized(file3AtB, true);
-		Assert.assertEquals(file3.length(), file3AtB.length());
+		added = waitTillAdded(file3AtB);
+		Assert.assertTrue(added.isFile());
 	}
 
 	@Test
@@ -113,21 +123,25 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 		// wait for userB to process the user profile task
 		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
-		waitTillSynchronized(sharedFolderAtB, true);
-		Assert.assertTrue(sharedFolderAtB.isDirectory());
+		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
+		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
+		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission().getPermission());
 	}
 
-	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
-		H2HWaiter waiter = new H2HWaiter(1000);
-		if (appearing) {
-			do {
-				waiter.tickASecond();
-			} while (!synchronizingFile.exists());
-		} else {
-			do {
-				waiter.tickASecond();
-			} while (synchronizingFile.exists());
-		}
+	private static IFileShareEvent waitTillShared(File sharedFolder) {
+		H2HWaiter waiter = new H2HWaiter(30);
+		do {
+			waiter.tickASecond();
+		} while (eventB.getShared(sharedFolder) == null);
+		return eventB.getShared(sharedFolder);
+	}
+
+	private static IFileAddEvent waitTillAdded(File addedFile) {
+		H2HWaiter waiter = new H2HWaiter(30);
+		do {
+			waiter.tickASecond();
+		} while (eventB.getAdded(addedFile) == null);
+		return eventB.getAdded(addedFile);
 	}
 
 	@AfterClass
