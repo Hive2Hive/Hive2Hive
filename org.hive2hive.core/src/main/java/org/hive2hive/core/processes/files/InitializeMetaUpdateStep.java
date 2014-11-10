@@ -61,7 +61,9 @@ public class InitializeMetaUpdateStep extends ProcessStep {
 			NoPeerConnectionException {
 		List<Index> indexList = Index.getIndexList(folderIndex);
 		for (Index index : indexList) {
-			initForFile((FileIndex) index);
+			if (index.isFile()) {
+				initForFile((FileIndex) index);
+			}
 		}
 	}
 
