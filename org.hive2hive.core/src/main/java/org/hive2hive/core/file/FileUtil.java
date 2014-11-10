@@ -60,7 +60,7 @@ public class FileUtil {
 			}
 			return (PersistentMetaData) SerializationUtil.deserialize(content);
 		} catch (IOException | ClassNotFoundException e) {
-			logger.error("Cannot deserialize meta data", e);
+			logger.error("Cannot deserialize meta data. Reason: {}", e.getMessage());
 			return new PersistentMetaData();
 		}
 	}
