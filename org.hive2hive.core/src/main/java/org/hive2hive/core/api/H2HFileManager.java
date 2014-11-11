@@ -119,6 +119,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File cannot be null");
 		} else if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
+		} else if (file.isDirectory() && file.list().length > 0) {
+			throw new IllegalArgumentException("Folder to delete is not empty");
 		}
 
 		IProcessComponent deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
