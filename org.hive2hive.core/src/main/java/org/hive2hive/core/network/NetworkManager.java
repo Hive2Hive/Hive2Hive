@@ -50,7 +50,7 @@ public class NetworkManager implements INetworkEventGenerator {
 	public boolean connect() {
 		boolean success = false;
 		if (networkConfiguration.isLocal()) {
-			if (networkConfiguration.isBootstrappingLocaly()) {
+			if (networkConfiguration.isBootstrappingLocal()) {
 				success = connection.connectInternal(networkConfiguration.getBootstapPeer());
 			} else {
 				success = connection.connectInternal();

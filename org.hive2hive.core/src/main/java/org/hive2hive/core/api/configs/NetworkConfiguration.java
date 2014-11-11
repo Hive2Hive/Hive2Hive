@@ -125,7 +125,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	}
 
 	@Override
-	public boolean isBootstrappingLocaly() {
+	public boolean isBootstrappingLocal() {
 		return bootstrapPeer != null;
 	}
 

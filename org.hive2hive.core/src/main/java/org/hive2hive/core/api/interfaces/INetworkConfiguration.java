@@ -42,7 +42,7 @@ public interface INetworkConfiguration {
 	 * 
 	 * @return <code>true</code> when peer is bootstrapping to a local peer
 	 */
-	boolean isBootstrappingLocaly();
+	boolean isBootstrappingLocal();
 	
 	/**
 	 * Returns whether this peer running locally or not.
