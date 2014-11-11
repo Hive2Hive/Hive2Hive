@@ -76,7 +76,9 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 			logger.warn("Could not wait until the locations are here");
 		}
 
-		return new ArrayList<Locations>(locations);
+		synchronized (locations) {
+			return new ArrayList<Locations>(locations);
+		}
 	}
 
 	public synchronized void removeAddress(PeerAddress toRemove) {

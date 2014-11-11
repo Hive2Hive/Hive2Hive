@@ -3,7 +3,6 @@ package org.hive2hive.core.processes.files.download.direct;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
@@ -37,7 +36,7 @@ public class GetLocationsList implements Runnable {
 	@Override
 	public void run() {
 		// thread safe super collection
-		final Set<Locations> collectingSet = Collections.newSetFromMap(new ConcurrentHashMap<Locations, Boolean>());
+		final Set<Locations> collectingSet = Collections.synchronizedSet(new HashSet<Locations>());
 
 		SequentialProcess process = new SequentialProcess();
 		for (final String userId : task.getUsers()) {
@@ -46,7 +45,9 @@ public class GetLocationsList implements Runnable {
 				protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 					BaseNetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
 					if (content != null) {
-						collectingSet.add((Locations) content);
+						synchronized (collectingSet) {
+							collectingSet.add((Locations) content);
+						}
 					}
 				}
 			}));

@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.files.download.direct.process;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class SelectPeerForDownloadStep extends ProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectPeerForDownloadStep.class);
-
+	private static final int SLEEP_TIME = 5000;
 	private final DownloadDirectContext context;
 
 	public SelectPeerForDownloadStep(DownloadDirectContext context) {
@@ -43,7 +44,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		PeerAddress selectedOwnPeer = null;
 		for (Locations location : locations) {
 			if (location.getUserId().equals(task.getOwnUserName())) {
-				selectedOwnPeer = selectAddressOwnUser(location.getPeerAddresses());
+				selectedOwnPeer = selectAddressOwnUser(new HashSet<>(location.getPeerAddresses()));
 				break;
 			}
 		}
@@ -71,6 +72,12 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		}
 
 		logger.warn("No online peer found that could be contacted to get the file {}", task.getDestinationName());
+		try {
+			// sleep for some time such that it's not an infinite loop
+			Thread.sleep(SLEEP_TIME);
+		} catch (InterruptedException e) {
+			// ignore
+		}
 		throw new ProcessExecutionException("No online peer found that could be contacted");
 	}
 
