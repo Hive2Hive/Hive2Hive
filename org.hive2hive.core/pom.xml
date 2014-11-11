@@ -79,7 +79,6 @@
 			<artifactId>org.hive2hive.processframework</artifactId>
 			<version>1.1.1-SNAPSHOT</version>
 			<scope>test</scope>
-			<classifier>tests</classifier>
 		</dependency>
 		
 		<dependency>
