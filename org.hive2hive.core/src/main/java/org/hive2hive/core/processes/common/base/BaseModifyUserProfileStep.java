@@ -44,13 +44,15 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep implements I
 
 	@Override
 	protected final void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		try {
-			// TODO only do this if the modification of the UP was successful
-			profileManager.modifyUserProfile(getID(), new RollbackUPModification());
-		} catch (GetFailedException | PutFailedException | AbortModifyException e) {
-			logger.error("Cannot modify the user profile", e);
-			// TODO replace exception by RollbackException
-			throw new InvalidProcessStateException(getState());
+		if (modified) {
+			// only do this if the modification of the UP was successful
+			try {
+				profileManager.modifyUserProfile(getID(), new RollbackUPModification());
+			} catch (GetFailedException | PutFailedException | AbortModifyException e) {
+				logger.error("Cannot modify the user profile", e);
+				// TODO replace exception by RollbackException
+				throw new InvalidProcessStateException(getState());
+			}
 		}
 	}
 
@@ -80,9 +82,7 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep implements I
 
 		@Override
 		public void modifyUserProfile(UserProfile userProfile) {
-			if (modified) {
-				modifyRollback(userProfile);
-			}
+			modifyRollback(userProfile);
 		}
 
 	}
