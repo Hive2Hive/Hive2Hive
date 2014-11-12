@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import net.tomp2p.connection.ChannelClientConfiguration;
-import net.tomp2p.connection.ChannelServerConficuration;
+import net.tomp2p.connection.ChannelServerConfiguration;
 import net.tomp2p.connection.Ports;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
@@ -102,9 +102,6 @@ public class Connection {
 			logger.debug("Discovery successful. Outside address is '{}'.", futureDiscover.peerAddress().inetAddress());
 		} else {
 			logger.warn("Discovery failed: {}.", futureDiscover.failedReason());
-			peerDHT.shutdown().awaitUninterruptibly();
-			isConnected = false;
-			return false;
 		}
 
 		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(port).start();
@@ -171,7 +168,7 @@ public class Connection {
 		clientConfig.signatureFactory(new H2HSignatureFactory());
 		clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 
-		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
+		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
 		serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 		serverConfig.ports(new Ports(port, port));

@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.share;
 import java.util.List;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
 import org.hive2hive.core.events.implementations.FileAddEvent;
 import org.hive2hive.core.events.implementations.FileShareEvent;
@@ -22,7 +23,7 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShareFolderUserProfileTask extends UserProfileTask implements IUserProfileModification {
+public class ShareFolderUserProfileTask extends UserProfileTask implements IUserProfileModification, IFileEventGenerator {
 
 	private static final long serialVersionUID = -2476009828696898562L;
 	private static final Logger logger = LoggerFactory.getLogger(ShareFolderUserProfileTask.class);

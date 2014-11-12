@@ -24,7 +24,7 @@ public abstract class H2HConsoleMenu extends ConsoleMenu {
 		// do nothing by default
 	}
 
-	protected boolean executeBlocking(IProcessComponent process, String itemName) throws InterruptedException,
+	public static boolean executeBlocking(IProcessComponent process, String itemName) throws InterruptedException,
 			InvalidProcessStateException {
 
 		print(String.format("Executing '%s'...", itemName));

@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
+import org.hive2hive.client.util.FileEventListener;
 import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
@@ -128,7 +129,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 	}
 
 	public boolean createNetwork() {
-
 		if (getNode() == null) {
 			H2HConsoleMenuItem.printPrecondition("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
@@ -141,6 +141,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
 		node.getUserManager().configureAutostart(false);
 		node.getFileManager().configureAutostart(false);
+		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 
 	private void connectNode() {

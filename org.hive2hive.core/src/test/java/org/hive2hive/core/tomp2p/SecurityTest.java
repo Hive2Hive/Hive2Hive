@@ -18,7 +18,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import net.tomp2p.connection.ChannelClientConfiguration;
-import net.tomp2p.connection.ChannelServerConficuration;
+import net.tomp2p.connection.ChannelServerConfiguration;
 import net.tomp2p.connection.DSASignatureFactory;
 import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.dht.FutureGet;
@@ -778,7 +778,7 @@ public class SecurityTest extends H2HJUnitTest {
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(factory);
-		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
+		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(factory);
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -854,7 +854,7 @@ public class SecurityTest extends H2HJUnitTest {
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(factory);
-		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
+		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(factory);
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -1047,7 +1047,7 @@ public class SecurityTest extends H2HJUnitTest {
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(factory);
-		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
+		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(factory);
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
@@ -1138,7 +1138,7 @@ public class SecurityTest extends H2HJUnitTest {
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(factory);
-		ChannelServerConficuration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
+		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(factory);
 
 		KeyPair keyPairPeer1 = gen.generateKeyPair();
