@@ -105,6 +105,22 @@ public class FileMenu extends H2HConsoleMenu {
 				executeBlocking(updateFileProcess, displayText);
 			}
 		});
+		
+		add(new H2HConsoleMenuItem("Download File") {
+			protected boolean checkPreconditions() {
+				return createRootDirectory();
+			}
+
+			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException {
+
+				File file = askForFile(false);
+				if (file == null) {
+					return;
+				}
+				IProcessComponent updateFileProcess = menus.getNodeMenu().getNode().getFileManager().download(file);
+				executeBlocking(updateFileProcess, displayText);
+			}
+		});
 
 		add(new H2HConsoleMenuItem("Move File") {
 			protected boolean checkPreconditions() {
