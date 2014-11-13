@@ -28,7 +28,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 	private H2HConsoleMenuItem createNetworkMenuItem;
 	private H2HConsoleMenuItem connectToExistingNetworkItem;
 	private IH2HNode node;
-	private FileEventListener eventListener;
 
 	private BigInteger maxFileSize = H2HConstants.DEFAULT_MAX_FILE_SIZE;
 	private int maxNumOfVersions = H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS;
@@ -142,8 +141,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
 		node.getUserManager().configureAutostart(false);
 		node.getFileManager().configureAutostart(false);
-		eventListener = new FileEventListener(node.getFileManager());
-		node.getFileManager().subscribeFileEvents(eventListener);
+		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 
 	private void connectNode() {

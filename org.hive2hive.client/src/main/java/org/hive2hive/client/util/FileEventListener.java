@@ -3,6 +3,8 @@ package org.hive2hive.client.util;
 import java.io.IOException;
 
 import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Listener;
+import net.engio.mbassy.listener.References;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.console.H2HConsoleMenu;
@@ -17,6 +19,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
+@Listener(references = References.Strong)
 public class FileEventListener implements IFileEventListener {
 
 	private final IFileManager fileManager;
