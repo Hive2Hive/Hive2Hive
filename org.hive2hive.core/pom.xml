@@ -57,13 +57,12 @@
 			<artifactId>fst</artifactId>
 			<version>1.58</version>
 			<scope>compile</scope>
-			</dependency>
-		
-		<!--  https://github.com/bennidi/mbassador  -->
+		</dependency>
 		<dependency>
 			<groupId>net.engio</groupId>
 			<artifactId>mbassador</artifactId>
 			<version>1.2.0</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -79,17 +78,7 @@
 			<artifactId>org.hive2hive.processframework</artifactId>
 			<version>1.1.1-SNAPSHOT</version>
 			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-common</artifactId>
-			<version>4.0.23.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-buffer</artifactId>
-			<version>4.0.23.Final</version>
+			<type>test-jar</type>
 		</dependency>
 	</dependencies>
 
@@ -100,7 +89,7 @@
 			<url>http://tomp2p.net/dev/mvn/</url>
 		</repository>
 	</repositories>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -111,11 +100,12 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-	
+
 			<!-- create a test jar with the test classes -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
 				<executions>
 					<execution>
 						<goals>
@@ -123,8 +113,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
