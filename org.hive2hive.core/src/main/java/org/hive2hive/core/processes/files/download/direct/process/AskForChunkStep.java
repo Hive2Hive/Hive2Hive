@@ -61,7 +61,10 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 		try {
 			logger.debug("Requesting chunk {} from peer {}", metaChunk.getIndex(), context.getSelectedPeer());
 			sendDirect(request, receiverPublicKey);
-			responseLatch.await(H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS, TimeUnit.MILLISECONDS);
+			boolean success = responseLatch.await(H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS, TimeUnit.MILLISECONDS);
+			if(!success) {
+				throw new InterruptedException();
+			}
 		} catch (SendFailedException e) {
 			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
 			rerunProcess(true);
@@ -75,6 +78,11 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	public void handleResponseMessage(ResponseMessage responseMessage) {
 		MetaChunk metaChunk = context.getMetaChunk();
 
+		if(responseLatch.getCount() == 0) {
+			// it already timed out
+			return;
+		}
+		
 		// check the response
 		if (responseMessage.getContent() == null) {
 			logger.error("Peer {} did not send the chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
