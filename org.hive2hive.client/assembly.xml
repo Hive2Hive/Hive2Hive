@@ -17,14 +17,6 @@
 	</dependencySets>
 
 	<fileSets>
-		<!-- Adds readme to the root directory of zip package -->
-		<fileSet>
-			<includes>
-				<include>../LICENSE.txt</include>
-				<!-- <include>README.txt</include> -->
-			</includes>
-		</fileSet>
-
 		<!-- adds jar package to the root directory of zip package -->
 		<fileSet>
 			<directory>${project.build.directory}</directory>
