@@ -45,9 +45,10 @@
 		</dependency>
 	</dependencies>
 	
-	<!-- platform independent encoding -->
 	<properties>
+		<!-- platform independent encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 	</properties>
 
 	<build>

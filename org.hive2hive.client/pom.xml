@@ -56,7 +56,13 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
-					<finalName>H2HConsoleClient</finalName>
+					<archive>
+						<manifest>
+							<mainClass>org.hive2hive.client.ConsoleClient</mainClass>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+					<finalName>H2HConsoleClient-${project.version}-${maven.build.timestamp}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 				<executions>
