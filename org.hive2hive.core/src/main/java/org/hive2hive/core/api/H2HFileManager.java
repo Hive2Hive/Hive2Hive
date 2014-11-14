@@ -50,7 +50,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalFileLocation();
 		}
 
-		IProcessComponent addProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
+		IProcessComponent addProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager);
 		AsyncComponent asyncProcess = new AsyncComponent(addProcess);
 
 		submitProcess(asyncProcess);

@@ -62,7 +62,7 @@ public class FileRecursionUtil {
 			// create the process which uploads or updates the file
 			ProcessComponent uploadProcess;
 			if (action == FileProcessAction.NEW_FILE) {
-				uploadProcess = ProcessFactory.instance().createNewFileProcess(file, networkManager);
+				uploadProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager);
 			} else {
 				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 			}

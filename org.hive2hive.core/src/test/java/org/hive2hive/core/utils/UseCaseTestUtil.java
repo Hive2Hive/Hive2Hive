@@ -82,7 +82,7 @@ public class UseCaseTestUtil {
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
-		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, networkManager);
+		IProcessComponent process = ProcessFactory.instance().createAddFileProcess(file, networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 

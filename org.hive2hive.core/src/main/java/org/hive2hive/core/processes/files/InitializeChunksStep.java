@@ -82,6 +82,8 @@ public class InitializeChunksStep extends ProcessStep {
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
 
+		// TODO Hashing is slow --> do this in multiple threads to speedup the initialization.
+		
 		// process chunk for chunk, hash it and add the meta information to the context
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();

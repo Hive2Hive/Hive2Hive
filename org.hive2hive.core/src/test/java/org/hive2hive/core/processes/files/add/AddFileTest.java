@@ -126,7 +126,7 @@ public class AddFileTest extends H2HJUnitTest {
 		NetworkManager client = network.get(2);
 
 		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, CHUNK_SIZE);
-		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, client);
+		IProcessComponent process = ProcessFactory.instance().createAddFileProcess(file, client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 		process.start();
@@ -136,7 +136,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testUploadNull() throws NoSessionException, NoPeerConnectionException {
-		ProcessFactory.instance().createNewFileProcess(null, network.get(0));
+		ProcessFactory.instance().createAddFileProcess(null, network.get(0));
 	}
 
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,

@@ -191,7 +191,7 @@ public final class ProcessFactory {
 	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
 	 * tree.
 	 */
-	public ProcessComponent createNewFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
+	public ProcessComponent createAddFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
 			NoPeerConnectionException {
 		if (file == null) {
 			throw new IllegalArgumentException("File can't be null.");

@@ -158,7 +158,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
-		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createAddFileProcess(fileAtB, nodeB));
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File folderAtB = new File(sharedFolderB, "folderFromB");
 		folderAtB.mkdir();
 		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
-		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createAddFileProcess(folderAtB, nodeB));
 	}
 
 	@Test
@@ -258,7 +258,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, CHUNK_SIZE);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
-		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(fileAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createAddFileProcess(fileAtB, nodeB));
 	}
 
 	@Test
@@ -308,7 +308,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		File folderAtB = new File(subFolderB, "subfolderFromB");
 		folderAtB.mkdir();
 		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
-		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createNewFileProcess(folderAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createAddFileProcess(folderAtB, nodeB));
 	}
 
 	/**
