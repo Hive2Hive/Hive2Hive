@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>client</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+
+	<!-- Adds dependencies to zip package under lib directory -->
+	<dependencySets>
+		<dependencySet>
+			<!-- Project artifact is not copied under library directory since it is 
+				added to the root directory of the zip package. -->
+			<useProjectArtifact>true</useProjectArtifact>
+			<outputDirectory>lib</outputDirectory>
+			<unpack>false</unpack>
+		</dependencySet>
+	</dependencySets>
+
+	<fileSets>
+		<!-- Adds readme to the root directory of zip package -->
+		<fileSet>
+			<includes>
+				<include>../LICENSE.txt</include>
+				<!-- <include>README.txt</include> -->
+			</includes>
+		</fileSet>
+
+		<!-- adds jar package to the root directory of zip package -->
+		<fileSet>
+			<directory>${project.build.directory}</directory>
+			<outputDirectory></outputDirectory>
+			<includes>
+				<include>*.jar</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

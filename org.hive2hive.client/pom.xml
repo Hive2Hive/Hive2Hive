@@ -45,35 +45,41 @@
 	<build>
 		<plugins>
 			<plugin>
+				<!-- states the main class and that dependencies are in the separate lib folder (see assembly.xml) -->
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
 				<configuration>
 					<archive>
 						<manifest>
 							<mainClass>org.hive2hive.client.ConsoleClient</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>org.hive2hive.client.ConsoleClient</mainClass>
 							<addClasspath>true</addClasspath>
+               				<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 					</archive>
-					<finalName>H2HConsoleClient-${project.version}-${maven.build.timestamp}</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
+			</plugin>
+			
+			<plugin>
+				<!-- Creates a zip file containing all dependencies -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.5.1</version>
 				<executions>
 					<execution>
-						<id>assembly</id>
+						<id>jar-with-dependencies</id>
 						<phase>package</phase>
 						<goals>
-							<goal>assembly</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
+					<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
