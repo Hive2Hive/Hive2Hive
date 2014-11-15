@@ -84,7 +84,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
 			@Override
-			public void handleResponseMessage(ResponseMessage responseMessage) {
+			public void handleResponse(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
 			}
 
@@ -142,7 +142,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			// initialize the process and the one and only step to test
 			BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
 				@Override
-				public void handleResponseMessage(ResponseMessage responseMessage) {
+				public void handleResponse(ResponseMessage responseMessage) {
 					Assert.fail("Should be not used.");
 				}
 
@@ -196,7 +196,7 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 		// initialize the process and the one and only step to test
 		BaseDirectMessageProcessStep step = new BaseDirectMessageProcessStep(nodeA.getMessageManager()) {
 			@Override
-			public void handleResponseMessage(ResponseMessage responseMessage) {
+			public void handleResponse(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
 				try {

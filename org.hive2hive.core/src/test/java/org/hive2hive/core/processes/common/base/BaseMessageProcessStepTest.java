@@ -89,7 +89,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			}
 
 			@Override
-			public void handleResponseMessage(ResponseMessage responseMessage) {
+			public void handleResponse(ResponseMessage responseMessage) {
 				Assert.fail("Should be not used.");
 			}
 		};
@@ -149,7 +149,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 				}
 
 				@Override
-				public void handleResponseMessage(ResponseMessage responseMessage) {
+				public void handleResponse(ResponseMessage responseMessage) {
 					Assert.fail("Should be not used.");
 				}
 			};
@@ -202,7 +202,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			}
 
 			@Override
-			public void handleResponseMessage(ResponseMessage responseMessage) {
+			public void handleResponse(ResponseMessage responseMessage) {
 				// locally store on requesting node received data
 				String receivedSecret = (String) responseMessage.getContent();
 				try {

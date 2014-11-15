@@ -111,7 +111,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	}
 
 	@Override
-	public void handleResponseMessage(ResponseMessage responseMessage) {
+	public void handleResponse(ResponseMessage responseMessage) {
 		// no response expected
 	}
 }

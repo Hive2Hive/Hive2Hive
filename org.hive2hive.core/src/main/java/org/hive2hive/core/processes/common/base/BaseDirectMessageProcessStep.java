@@ -23,7 +23,7 @@ import org.hive2hive.core.network.messages.request.IRequestMessage;
  * <li>When a direct request message implementing the {@link IRequestMessage} interface is sent, the process
  * step acts also as a {@link IResponseCallBackHandler} callback handler for this message. The whole callback
  * functionality has to be (if desired) implemented in the
- * {@link BaseDirectMessageProcessStep#handleResponseMessage(ResponseMessage)} method.</li>
+ * {@link BaseDirectMessageProcessStep#handleResponse(ResponseMessage)} method.</li>
  * <li>All messages in <code>Hive2Hive</code> are sent synchronous</li>
  * </ul>
  * 
@@ -36,15 +36,7 @@ public abstract class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 	}
 
 	protected void sendDirect(BaseDirectMessage message, PublicKey receiverPublicKey) throws SendFailedException {
-		if (message instanceof IRequestMessage) {
-			IRequestMessage requestMessage = (IRequestMessage) message;
-			requestMessage.setCallBackHandler(this);
-		}
-
-		boolean success = messageManager.sendDirect(message, receiverPublicKey);
-		if (!success) {
-			throw new SendFailedException();
-		}
+		super.send(message, receiverPublicKey);
 	}
 
 	@Override
