@@ -64,7 +64,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(addProcess);
 		
-		asyncProcess.setName("Add Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -91,7 +90,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			asyncProcess = new AsyncComponent<>(deleteProcess);
 		}
 
-		asyncProcess.setName("Delete Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -109,7 +107,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IProcessComponent<Void> updateProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(updateProcess);
 
-		asyncProcess.setName("Update Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -134,7 +131,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 				networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(moveProcess);
 
-		asyncProcess.setName("Move Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -153,7 +149,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 				networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(recoverProcess);
 
-		asyncProcess.setName("Recover Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -185,7 +180,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 				new UserPermission(userId, permission), networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(shareProcess);
 
-		asyncProcess.setName("Share Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -196,7 +190,6 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		IProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(networkManager);
 		AsyncComponent<List<FileTaste>> asyncProcess = new AsyncComponent<>(fileListProcess);
 
-		asyncProcess.setName("File List Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}

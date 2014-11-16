@@ -120,6 +120,7 @@ public final class ProcessFactory {
 		process.add(new AsyncComponent<>(new org.hive2hive.core.processes.register.PutLocationsStep(context, dataManager)));
 		process.add(new AsyncComponent<>(new PutPublicKeyStep(context, dataManager)));
 
+		process.setName("Register Process");
 		return process;
 	}
 
@@ -145,6 +146,7 @@ public final class ProcessFactory {
 		process.add(new ContactOtherClientsStep(context, networkManager));
 		process.add(new org.hive2hive.core.processes.login.PutLocationsStep(context, dataManager));
 
+		process.setName("Login Process");
 		return process;
 	}
 
@@ -158,6 +160,7 @@ public final class ProcessFactory {
 		// Note: this step will add the next steps since it depends on the get result
 		process.add(new HandleUserProfileTaskStep(context, networkManager));
 
+		process.setName("User Profile Task Process");
 		return process;
 	}
 
@@ -185,6 +188,7 @@ public final class ProcessFactory {
 		// // stop all running processes
 		// ProcessManager.getInstance().stopAll("Logout stopped all processes.");
 
+		process.setName("Logout Process");
 		return process;
 	}
 
@@ -217,6 +221,7 @@ public final class ProcessFactory {
 		process.add(new PrepareAddNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
+		process.setName("New File Process");
 		return process;
 	}
 
@@ -242,6 +247,7 @@ public final class ProcessFactory {
 		process.add(new PrepareUpdateNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
+		process.setName("Update File Process");
 		return process;
 	}
 
@@ -268,6 +274,7 @@ public final class ProcessFactory {
 		
 		process.add(new FindInUserProfileStep(context, networkManager));
 
+		process.setName("Download File Process");
 		return process;
 	}
 
@@ -290,6 +297,7 @@ public final class ProcessFactory {
 		process.add(new PrepareDeleteNotificationStep(context));
 		process.add(createNotificationProcess(context, networkManager));
 
+		process.setName("Delete File Process");
 		return process;
 	}
 
@@ -307,6 +315,7 @@ public final class ProcessFactory {
 		process.add(createNotificationProcess(context.getDeleteNotificationContext(), networkManager));
 		process.add(createNotificationProcess(context.getAddNotificationContext(), networkManager));
 
+		process.setName("Move File Process");
 		return process;
 	}
 
@@ -321,6 +330,7 @@ public final class ProcessFactory {
 		process.add(new GetMetaFileStep(context, networkManager.getDataManager()));
 		process.add(new SelectVersionStep(context, selector, networkManager));
 
+		process.setName("Recover File Process");
 		return process;
 	}
 
@@ -337,6 +347,7 @@ public final class ProcessFactory {
 		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
 		process.add(createNotificationProcess(context, networkManager));
 
+		process.setName("Share Process");
 		return process;
 	}
 
@@ -364,6 +375,7 @@ public final class ProcessFactory {
 		// only one process step
 		IProcessComponent<List<FileTaste>>step  = new GetFileListStep(session.getProfileManager(), session.getRootFile());
 		
+		step.setName("File List Process");
 		return step;
 	}
 
@@ -399,6 +411,7 @@ public final class ProcessFactory {
 		process.add(new GetAllLocationsStep(context, networkManager.getDataManager()));
 		process.add(new SendNotificationsMessageStep(context, networkManager));
 
+		process.setName("Notification Process");
 		return process;
 	}
 }
