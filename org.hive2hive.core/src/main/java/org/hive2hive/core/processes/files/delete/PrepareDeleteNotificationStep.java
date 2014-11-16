@@ -19,6 +19,7 @@ public class PrepareDeleteNotificationStep extends ProcessStep<Void> {
 
 	public PrepareDeleteNotificationStep(DeleteFileProcessContext context) {
 		this.context = context;
+		this.setName(getClass().getName());
 	}
 
 	@Override

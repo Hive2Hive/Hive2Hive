@@ -15,6 +15,7 @@ public class LocationsCreationStep extends ProcessStep<Void> {
 	private final RegisterProcessContext context;
 
 	public LocationsCreationStep(RegisterProcessContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

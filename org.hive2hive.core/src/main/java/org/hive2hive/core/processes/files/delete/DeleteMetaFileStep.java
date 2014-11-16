@@ -14,6 +14,7 @@ public class DeleteMetaFileStep extends BaseRemoveProcessStep {
 
 	public DeleteMetaFileStep(DeleteFileProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

@@ -33,6 +33,7 @@ public abstract class BaseDirectMessageProcessStep extends BaseMessageProcessSte
 
 	public BaseDirectMessageProcessStep(IMessageManager messageManager) {
 		super(messageManager);
+		this.setName(getClass().getName());
 	}
 
 	protected void sendDirect(BaseDirectMessage message, PublicKey receiverPublicKey) throws SendFailedException {

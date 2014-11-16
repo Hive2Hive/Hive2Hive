@@ -18,6 +18,7 @@ public class HandleUserProfileTaskStep extends ProcessStep<Void> {
 	private final NetworkManager networkManager;
 
 	public HandleUserProfileTaskStep(UserProfileTaskContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 

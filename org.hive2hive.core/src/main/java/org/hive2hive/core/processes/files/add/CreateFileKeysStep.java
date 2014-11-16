@@ -20,6 +20,7 @@ public class CreateFileKeysStep extends ProcessStep<Void> {
 
 	public CreateFileKeysStep(AddFileProcessContext context) {
 		this.context = context;
+		this.setName(getClass().getName());
 	}
 
 	@Override

@@ -25,6 +25,7 @@ public class PrepareNotificationsStep extends ProcessStep<Void> {
 	private final String userId;
 
 	public PrepareNotificationsStep(ShareProcessContext context, String userId) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.userId = userId; // ownUserId
 	}

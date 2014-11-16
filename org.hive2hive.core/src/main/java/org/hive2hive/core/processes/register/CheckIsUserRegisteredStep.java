@@ -20,6 +20,7 @@ public class CheckIsUserRegisteredStep extends BaseGetProcessStep {
 
 	public CheckIsUserRegisteredStep(RegisterProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

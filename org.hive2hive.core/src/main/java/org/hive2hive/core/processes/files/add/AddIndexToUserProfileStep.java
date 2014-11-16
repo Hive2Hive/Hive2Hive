@@ -38,6 +38,7 @@ public class AddIndexToUserProfileStep extends ProcessStep<Void> {
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
 		this.context = context;
 		this.profileManager = profileManager;
+		this.setName(getClass().getName());
 	}
 
 	@Override

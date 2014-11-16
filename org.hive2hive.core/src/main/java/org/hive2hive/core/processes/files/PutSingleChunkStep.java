@@ -40,6 +40,7 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 
 	public PutSingleChunkStep(IUploadContext context, int index, String chunkId, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.index = index;
 		this.context = context;
 		this.chunkId = chunkId;

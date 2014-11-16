@@ -24,6 +24,7 @@ public class ValidateFileStep extends ProcessStep<Void> {
 	private final IUploadContext context;
 
 	public ValidateFileStep(IUploadContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

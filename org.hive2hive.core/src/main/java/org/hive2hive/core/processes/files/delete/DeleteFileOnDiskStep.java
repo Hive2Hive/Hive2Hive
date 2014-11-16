@@ -24,6 +24,7 @@ public class DeleteFileOnDiskStep extends ProcessStep<Void> {
 
 	public DeleteFileOnDiskStep(DeleteFileProcessContext context) {
 		this.context = context;
+		this.setName(getClass().getName());
 	}
 
 	@Override

@@ -47,6 +47,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 
 	public ContactOtherClientsStep(LoginProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 		this.messageManager = networkManager.getMessageManager();

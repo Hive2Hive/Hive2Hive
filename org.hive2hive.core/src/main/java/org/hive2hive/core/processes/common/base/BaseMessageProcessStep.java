@@ -38,6 +38,7 @@ public abstract class BaseMessageProcessStep extends ProcessStep<Void> implement
 
 	public BaseMessageProcessStep(IMessageManager messageManager) {
 		this.messageManager = messageManager;
+		this.setName(getClass().getName());
 	}
 
 	protected void send(BaseMessage message, PublicKey receiverPublicKey) throws SendFailedException {

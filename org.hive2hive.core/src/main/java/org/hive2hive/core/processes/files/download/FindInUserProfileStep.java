@@ -28,6 +28,7 @@ public class FindInUserProfileStep extends ProcessStep<Void> {
 	private final NetworkManager networkManager;
 
 	public FindInUserProfileStep(DownloadFileContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 	}

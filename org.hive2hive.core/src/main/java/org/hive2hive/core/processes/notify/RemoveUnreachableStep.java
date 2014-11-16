@@ -27,6 +27,7 @@ public class RemoveUnreachableStep extends ProcessStep<Void> {
 	private final Set<PeerAddress> unreachablePeers;
 
 	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.unreachablePeers = unreachablePeers;
 		this.networkManager = networkManager;
 	}

@@ -18,6 +18,7 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 
 	public PutPublicKeyStep(RegisterProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

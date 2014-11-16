@@ -48,6 +48,7 @@ public class RelinkUserProfileStep extends ProcessStep<Void> {
 	private final int forkLimit = 2;
 
 	public RelinkUserProfileStep(MoveFileProcessContext context, UserProfileManager profileManager, DataManager dataManger) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.profileManager = profileManager;
 		this.dataManger = dataManger;

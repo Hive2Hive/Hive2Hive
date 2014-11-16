@@ -16,6 +16,7 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 
 	public DeleteSingleChunkStep(String locationKey, KeyPair protectionKeys, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.locationKey = locationKey;
 		this.protectionKeys = protectionKeys;
 	}

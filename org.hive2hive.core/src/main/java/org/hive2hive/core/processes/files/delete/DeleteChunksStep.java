@@ -22,6 +22,7 @@ public class DeleteChunksStep extends ProcessStep<Void> {
 	public DeleteChunksStep(DeleteFileProcessContext context, DataManager dataManager) {
 		this.context = context;
 		this.dataManager = dataManager;
+		this.setName(getClass().getName());
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ public class StopDownloadsStep extends ProcessStep<Void> {
 	private final DownloadManager downloadManager;
 
 	public StopDownloadsStep(DownloadManager downloadManager) {
+		this.setName(getClass().getName());
 		this.downloadManager = downloadManager;
 	}
 

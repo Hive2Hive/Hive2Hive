@@ -19,6 +19,7 @@ public class VerifyFriendIdStep extends ProcessStep<Void> {
 	private final String friendId;
 
 	public VerifyFriendIdStep(PublicKeyManager keyManager, String friendId) {
+		this.setName(getClass().getName());
 		this.keyManager = keyManager;
 		this.friendId = friendId;
 	}

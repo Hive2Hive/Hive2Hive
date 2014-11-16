@@ -37,6 +37,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep<Void> {
 
 	public BaseRemoveProcessStep(DataManager dataManager) {
 		this.dataManager = dataManager;
+		this.setName(getClass().getName());
 	}
 
 	protected void remove(PublicKey locationKey, String contentKey, KeyPair protectionKey) throws RemoveFailedException {

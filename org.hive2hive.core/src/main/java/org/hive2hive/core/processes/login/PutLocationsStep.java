@@ -18,6 +18,7 @@ public class PutLocationsStep extends BasePutProcessStep {
 
 	public PutLocationsStep(LoginProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

@@ -35,6 +35,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager, PublicKeyManager keyManager,
 			IFileConfiguration config) {
 		super(messageManager);
+		this.setName(getClass().getName());
 		this.context = context;
 		this.keyManager = keyManager;
 		this.config = config;

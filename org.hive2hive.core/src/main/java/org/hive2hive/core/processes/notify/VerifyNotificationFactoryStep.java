@@ -20,6 +20,7 @@ public class VerifyNotificationFactoryStep extends ProcessStep<Void> {
 	private final String userId;
 
 	public VerifyNotificationFactoryStep(INotifyContext context, String userId) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.userId = userId;
 	}

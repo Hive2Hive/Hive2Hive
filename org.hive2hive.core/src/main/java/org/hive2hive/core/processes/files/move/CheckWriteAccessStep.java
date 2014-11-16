@@ -23,6 +23,7 @@ public class CheckWriteAccessStep extends ProcessStep<Void> {
 	private final UserProfileManager profileManager;
 
 	public CheckWriteAccessStep(MoveFileProcessContext context, UserProfileManager profileManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.profileManager = profileManager;
 	}

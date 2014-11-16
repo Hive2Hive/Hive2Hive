@@ -19,6 +19,7 @@ public class DeleteSessionStep extends ProcessStep<Void> {
 	private H2HSession session; // backup
 
 	public DeleteSessionStep(NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.networkManager = networkManager;
 	}
 

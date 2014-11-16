@@ -31,6 +31,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 
 	public GetAllLocationsStep(NotifyProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

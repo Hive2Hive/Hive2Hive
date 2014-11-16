@@ -39,6 +39,7 @@ public class SelectVersionStep extends ProcessStep<Void> {
 	private final NetworkManager networkManager;
 
 	public SelectVersionStep(RecoverFileContext context, IVersionSelector selector, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.selector = selector;
 		this.networkManager = networkManager;

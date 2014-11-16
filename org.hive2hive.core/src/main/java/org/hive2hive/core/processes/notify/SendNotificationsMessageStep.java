@@ -30,6 +30,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	public SendNotificationsMessageStep(NotifyProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		super(networkManager.getMessageManager());
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 		this.unreachablePeers = new HashSet<PeerAddress>();

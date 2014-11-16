@@ -36,6 +36,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 	private File destination;
 
 	public InitDownloadChunksStep(DownloadFileContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 	}

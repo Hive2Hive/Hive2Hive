@@ -35,6 +35,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 	public GetMetaFileStep(IGetMetaFileContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

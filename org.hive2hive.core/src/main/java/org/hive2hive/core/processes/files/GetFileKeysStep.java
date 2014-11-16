@@ -26,6 +26,7 @@ public class GetFileKeysStep extends ProcessStep<Void> {
 	private final H2HSession session;
 
 	public GetFileKeysStep(IGetFileKeysContext context, H2HSession session) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.session = session;
 	}

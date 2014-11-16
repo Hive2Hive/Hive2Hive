@@ -28,6 +28,7 @@ public class GetPublicKeysStep extends ProcessStep<Void> {
 	private final PublicKeyManager keyManager;
 
 	public GetPublicKeysStep(NotifyProcessContext context, PublicKeyManager keyManager) throws NoPeerConnectionException {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.keyManager = keyManager;
 	}

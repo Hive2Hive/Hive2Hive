@@ -17,6 +17,7 @@ public class WritePersistentStep extends ProcessStep<Void> {
 	private final DownloadManager downloadManager;
 
 	public WritePersistentStep(IFileAgent fileAgent, PublicKeyManager keyManager, DownloadManager downloadManager) {
+		this.setName(getClass().getName());
 		this.fileAgent = fileAgent;
 		this.keyManager = keyManager;
 		this.downloadManager = downloadManager;

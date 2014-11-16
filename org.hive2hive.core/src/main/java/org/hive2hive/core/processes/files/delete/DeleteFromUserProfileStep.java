@@ -46,6 +46,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 	public DeleteFromUserProfileStep(DeleteFileProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
 		super(networkManager.getDataManager());
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = networkManager.getDataManager();
 		this.profileManager = networkManager.getSession().getProfileManager();

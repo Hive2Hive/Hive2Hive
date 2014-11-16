@@ -16,6 +16,7 @@ public class GetLocationsStep extends ProcessStep<Void> {
 	private final NetworkManager networkManager;
 
 	public GetLocationsStep(LoginProcessContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 	}

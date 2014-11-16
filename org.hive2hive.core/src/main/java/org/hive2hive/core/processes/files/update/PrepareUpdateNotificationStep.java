@@ -21,6 +21,7 @@ public class PrepareUpdateNotificationStep extends ProcessStep<Void> {
 	private final UpdateFileProcessContext context;
 
 	public PrepareUpdateNotificationStep(UpdateFileProcessContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

@@ -18,6 +18,7 @@ public class PutAllUserProfileTasksStep extends PutUserProfileTaskStep {
 
 	public PutAllUserProfileTasksStep(NotifyProcessContext context, NetworkManager networkManager) {
 		super(networkManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

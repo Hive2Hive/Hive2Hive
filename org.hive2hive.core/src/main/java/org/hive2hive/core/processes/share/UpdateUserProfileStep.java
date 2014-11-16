@@ -35,6 +35,7 @@ public class UpdateUserProfileStep extends ProcessStep<Void> {
 	private final String userId;
 
 	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.profileManager = session.getProfileManager();
 		this.root = session.getRootFile();

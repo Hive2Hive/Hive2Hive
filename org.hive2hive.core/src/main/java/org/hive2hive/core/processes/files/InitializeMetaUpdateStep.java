@@ -35,6 +35,7 @@ public class InitializeMetaUpdateStep extends ProcessStep<Void> {
 	private final DataManager dataManager;
 
 	public InitializeMetaUpdateStep(IInitializeMetaUpdateContext context, DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = dataManager;
 	}

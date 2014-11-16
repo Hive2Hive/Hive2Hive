@@ -24,6 +24,7 @@ public class SelectPeerForDownloadStep extends ProcessStep<Void> {
 	private final DownloadDirectContext context;
 
 	public SelectPeerForDownloadStep(DownloadDirectContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

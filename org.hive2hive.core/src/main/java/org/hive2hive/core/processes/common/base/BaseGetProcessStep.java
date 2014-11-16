@@ -22,6 +22,7 @@ public abstract class BaseGetProcessStep extends ProcessStep<Void> {
 
 	public BaseGetProcessStep(DataManager dataManager) {
 		this.dataManager = dataManager;
+		this.setName(getClass().getName());
 	}
 
 	protected BaseNetworkContent get(PublicKey locationKey, String contentKey) throws InvalidProcessStateException {

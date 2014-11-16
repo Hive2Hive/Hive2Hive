@@ -36,6 +36,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 
 	public PutMetaFileStep(IUploadContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

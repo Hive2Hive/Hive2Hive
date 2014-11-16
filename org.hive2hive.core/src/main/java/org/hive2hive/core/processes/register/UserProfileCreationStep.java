@@ -18,6 +18,7 @@ public class UserProfileCreationStep extends ProcessStep<Void> {
 	private final RegisterProcessContext context;
 
 	public UserProfileCreationStep(RegisterProcessContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 

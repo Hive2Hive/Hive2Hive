@@ -28,6 +28,7 @@ public class SessionCreationStep extends ProcessStep<Void> {
 	private final NetworkManager networkManager;
 
 	public SessionCreationStep(LoginProcessContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 	}

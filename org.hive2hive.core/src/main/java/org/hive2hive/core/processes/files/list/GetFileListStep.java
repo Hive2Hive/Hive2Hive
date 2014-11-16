@@ -25,6 +25,7 @@ public class GetFileListStep extends ProcessStep<List<FileTaste>> {
 	private List<FileTaste> result = new ArrayList<FileTaste>();
 
 	public GetFileListStep(UserProfileManager profileManager, File root) {
+		this.setName(getClass().getName());
 		this.profileManager = profileManager;
 		this.rootFile = root;
 	}

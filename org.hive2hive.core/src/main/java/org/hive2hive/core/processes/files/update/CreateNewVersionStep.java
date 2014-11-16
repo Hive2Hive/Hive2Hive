@@ -31,6 +31,7 @@ public class CreateNewVersionStep extends ProcessStep<Void> {
 	private final List<FileVersion> deletedFileVersions;
 
 	public CreateNewVersionStep(UpdateFileProcessContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.deletedFileVersions = new ArrayList<FileVersion>();
 	}

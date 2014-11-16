@@ -27,6 +27,7 @@ public class ChangeProtectionKeysStep extends ProcessStep<Void> {
 	private IParameters parameters;
 
 	public ChangeProtectionKeysStep(BasePKUpdateContext context, DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = dataManager;
 	}

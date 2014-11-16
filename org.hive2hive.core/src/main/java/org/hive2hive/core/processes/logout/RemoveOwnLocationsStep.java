@@ -18,6 +18,7 @@ public class RemoveOwnLocationsStep extends ProcessStep<Void> {
 	private final NetworkManager networkManager;
 
 	public RemoveOwnLocationsStep(NetworkManager networkManager) throws NoPeerConnectionException {
+		this.setName(getClass().getName());
 		this.networkManager = networkManager;
 	}
 

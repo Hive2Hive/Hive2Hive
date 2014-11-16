@@ -23,6 +23,7 @@ public class PrepareAddNotificationStep extends ProcessStep<Void> {
 
 	public PrepareAddNotificationStep(AddFileProcessContext context) {
 		this.context = context;
+		this.setName(getClass().getName());
 	}
 
 	@Override

@@ -25,6 +25,7 @@ public class CreateFolderStep extends ProcessStep<Void> {
 	private final DownloadFileContext context;
 
 	public CreateFolderStep(DownloadFileContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 	}

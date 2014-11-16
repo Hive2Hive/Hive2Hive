@@ -31,6 +31,7 @@ public class CleanupChunksStep extends ProcessStep<Void> {
 	private final DataManager dataManager;
 
 	public CleanupChunksStep(UpdateFileProcessContext context, DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = dataManager;
 	}

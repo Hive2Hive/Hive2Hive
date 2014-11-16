@@ -36,6 +36,7 @@ public class UpdateMD5inUserProfileStep extends ProcessStep<Void> {
 	private byte[] originalMD5;
 
 	public UpdateMD5inUserProfileStep(UpdateFileProcessContext context, UserProfileManager profileManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.profileManager = profileManager;
 	}
