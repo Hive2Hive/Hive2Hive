@@ -4,11 +4,10 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.decorators.AsyncComponent;
 
 /**
- * Basic interface for all user operations. The implementation of this interface can either be synchronous or
- * asynchronous. Thus, the return types of the {@link IProcessComponent}s is wildcarded ({@code <?>}).
+ * Basic interface for all user operations.
  * 
  * @author Christian, Nico, Seppi
  * 
@@ -24,7 +23,7 @@ public interface IUserManager extends IManager {
 	 * @return an observable process component
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
-	IProcessComponent<?> register(UserCredentials credentials) throws NoPeerConnectionException;
+	AsyncComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
 	 * Login a (registered) user with the same credentials as {@link IUserManager#register(UserCredentials)}
@@ -36,7 +35,7 @@ public interface IUserManager extends IManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	IProcessComponent<?> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
+	AsyncComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
@@ -46,7 +45,7 @@ public interface IUserManager extends IManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 * @throws NoSessionException no user has logged in
 	 */
-	IProcessComponent<?> logout() throws NoPeerConnectionException, NoSessionException;
+	AsyncComponent<Void> logout() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Checks whether a user is registered in the network.

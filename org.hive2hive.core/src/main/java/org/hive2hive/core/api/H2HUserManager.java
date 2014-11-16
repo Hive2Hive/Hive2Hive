@@ -41,31 +41,31 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	@Override
-	public IProcessComponent<Future<Void>> register(UserCredentials credentials) throws NoPeerConnectionException {
+	public AsyncComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException {
 		
 		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
-		IProcessComponent<Future<Void>> asyncProcess = new AsyncComponent<>(registerProcess);
+		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(registerProcess);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
 
 	@Override
-	public IProcessComponent<Future<Void>> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
+	public AsyncComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
 		SessionParameters params = new SessionParameters(fileAgent, fileConfiguration);
 
 		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
-		IProcessComponent<Future<Void>> asyncProcess = new AsyncComponent<>(loginProcess);
+		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(loginProcess);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
 
 	@Override
-	public IProcessComponent<Future<Void>> logout() throws NoPeerConnectionException, NoSessionException {
+	public AsyncComponent<Void> logout() throws NoPeerConnectionException, NoSessionException {
 		
 		IProcessComponent<Void> logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
-		IProcessComponent<Future<Void>> asyncProcess = new AsyncComponent<>(logoutProcess);
+		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(logoutProcess);
 
 		submitProcess(asyncProcess);
 		return asyncProcess;

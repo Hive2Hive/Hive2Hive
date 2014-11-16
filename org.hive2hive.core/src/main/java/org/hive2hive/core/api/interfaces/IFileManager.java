@@ -2,18 +2,19 @@ package org.hive2hive.core.api.interfaces;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
+import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
-import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.decorators.AsyncComponent;
 
 /**
- * Basic interface for all file operations. The implementation of this interface can either be synchronous or
- * asynchronous. Thus, the return types of the {@link IProcessComponent}s is wildcarded ({@code <?>}).
+ * Basic interface for all file operations.
  * 
  * @author Christian, Nico, Seppi
  * 
@@ -30,7 +31,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 * @throws IllegalFileLocation the file is at a wrong location
 	 */
-	IProcessComponent<?> add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
+	AsyncComponent<Void> add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
 
 	/**
 	 * Delete a file / folder and all versions of that file from the network. This operation deletes also the
@@ -42,7 +43,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<?> delete(File file) throws NoSessionException, NoPeerConnectionException;
+	AsyncComponent<Void> delete(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Update a file and create a new version.<br>
@@ -56,7 +57,7 @@ public interface IFileManager extends IManager {
 	 *             exception description.
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<?> update(File file) throws NoSessionException, NoPeerConnectionException;
+	AsyncComponent<Void> update(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Move a file / folder from a given source to a given destination. This operation can also be used to
@@ -68,7 +69,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<?> move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
+	AsyncComponent<Void> move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Recover a file version from the network and restore it under a new file (name is indicated with special
@@ -83,7 +84,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<?> recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
+	AsyncComponent<Void> recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -103,7 +104,7 @@ public interface IFileManager extends IManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<?> share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
+	AsyncComponent<Void> share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -113,7 +114,7 @@ public interface IFileManager extends IManager {
 	 * @return an observable process component providing results of the request asynchronous.
 	 * @throws NoSessionException no user has logged in
 	 */
-	IProcessComponent<?> getFileList() throws NoSessionException;
+	AsyncComponent<List<FileTaste>> getFileList() throws NoSessionException;
 
 	/**
 	 * Subscribe all file event handlers of the given listener instance.

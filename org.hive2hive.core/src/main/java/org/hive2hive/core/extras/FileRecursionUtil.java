@@ -109,7 +109,7 @@ public class FileRecursionUtil {
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
-	public static IProcessComponent<Future<Void>> buildDeletionProcess(List<Path> files, NetworkManager networkManager)
+	public static AsyncComponent<Void> buildDeletionProcess(List<Path> files, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
 		// the root process
 		SyncProcess rootProcess = new SyncProcess();
@@ -123,7 +123,7 @@ public class FileRecursionUtil {
 			rootProcess.add(deletionProcess);
 		}
 
-		return new AsyncComponent<>(rootProcess);
+		return new AsyncComponent<Void>(rootProcess);
 	}
 
 	/**
