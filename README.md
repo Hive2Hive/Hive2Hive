@@ -205,7 +205,7 @@ There are several things - from simple to complex - you can do to help:
 - spread the word, help us getting attention (e.g., follow/tweet about [@Hive2Hive](https://twitter.com/Hive2Hive))
 - suggest and post **your ideas** about improvements or extensions on the [issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) page
 - participate in the [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
-- help us with the documentation: code, GitHub wiki, etc.
+- help us with the documentation: JavaDoc, [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki), etc.
 - help us with the implementation of (your) features
 - **fork the project** and send your pull requests
 - help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
