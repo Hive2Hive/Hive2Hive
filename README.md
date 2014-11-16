@@ -190,9 +190,9 @@ If you want to [contribute to the project](#contribution), please refer to optio
 
 ## Documentation
 
-For more details and documentation about the project, please visit http://www.hive2hive.com/.
-
-The source code itself is thoroughly documented using JavaDoc.
+- For more details and documentation about the project, please visit http://www.hive2hive.com/.
+- You can also take a look at our [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki).
+- The source code itself is thoroughly documented using JavaDoc.
 
 ## Contribution
 
