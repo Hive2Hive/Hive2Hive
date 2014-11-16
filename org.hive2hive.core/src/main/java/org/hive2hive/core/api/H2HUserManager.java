@@ -46,6 +46,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(registerProcess);
 
+		asyncProcess.setName("Register Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -57,6 +58,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(loginProcess);
 
+		asyncProcess.setName("Login Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
@@ -67,6 +69,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		IProcessComponent<Void> logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(logoutProcess);
 
+		asyncProcess.setName("Logout Process");
 		submitProcess(asyncProcess);
 		return asyncProcess;
 	}
