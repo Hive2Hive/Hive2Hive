@@ -20,11 +20,12 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
+import org.hive2hive.processframework.utils.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -64,7 +65,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadSingleChunk() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException {
+			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, CHUNK_SIZE);
 
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
@@ -73,7 +74,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadMultipleChunks() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException {
+			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// creates a file with length of at least 5 chunks
 		File file = FileTestUtil.createFileRandomContent(5, uploaderRoot, CHUNK_SIZE);
 
@@ -83,7 +84,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolder() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException {
+			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		File folder = new File(uploaderRoot, "folder1");
 		folder.mkdirs();
 
@@ -93,7 +94,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFile() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException {
+			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// create a container
 		File folder = new File(uploaderRoot, "folder-with-file");
 		folder.mkdirs();
@@ -107,7 +108,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testUploadFolderWithFolder() throws IOException, IllegalFileLocation, NoSessionException,
-			GetFailedException, NoPeerConnectionException, InvalidProcessStateException {
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		File folder = new File(uploaderRoot, "folder-with-folder");
 		folder.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folder);
@@ -121,15 +122,15 @@ public class AddFileTest extends H2HJUnitTest {
 
 	@Test(expected = NoSessionException.class)
 	public void testUploadNoSession() throws IOException, IllegalFileLocation, NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException {
+			InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
 		// skip the login and continue with the newfile process
 		NetworkManager client = network.get(2);
 
 		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, CHUNK_SIZE);
-		IProcessComponent process = ProcessFactory.instance().createNewFileProcess(file, client);
+		IProcessComponent<Void> process = ProcessFactory.instance().createNewFileProcess(file, client);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
-		process.start();
+		process.execute();
 
 		TestExecutionUtil.waitTillFailed(listener, 40);
 	}
@@ -140,7 +141,7 @@ public class AddFileTest extends H2HJUnitTest {
 	}
 
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,
-			NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
+			NoSessionException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// pick new client to test
 		NetworkManager client = network.get(1);
 
