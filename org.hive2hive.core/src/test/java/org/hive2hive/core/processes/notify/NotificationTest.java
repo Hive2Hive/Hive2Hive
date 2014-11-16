@@ -14,16 +14,16 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.ProcessState;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.H2HWaiter;
-import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
+import org.hive2hive.processframework.utils.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -89,14 +89,14 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testNotifyNobody() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			IllegalArgumentException, NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, new HashSet<String>(0),
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, new HashSet<String>(0),
 				notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
-		process.start();
+		process.execute();
 
 		// wait until all messages are sent
 		TestExecutionUtil.waitTillSucceded(listener, 10);
@@ -116,23 +116,23 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testNotifyOwnUser() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			IllegalArgumentException, NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userACredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, new HashSet<String>(0),
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, new HashSet<String>(0),
 				notifier);
-		process.start();
+		process.execute();
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
 			waiter.tickASecond();
 		} while (!msgFactory.allMsgsArrived());
 
-		Assert.assertEquals(ProcessState.SUCCEEDED, process.getState());
+		Assert.assertEquals(ProcessState.EXECUTION_SUCCEEDED, process.getState());
 	}
 
 	/**
@@ -146,21 +146,21 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testNotifyOwnUserSession() throws ClassNotFoundException, IOException, NoSessionException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userACredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
-		process.start();
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
+		process.execute();
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
 			waiter.tickASecond();
 		} while (!msgFactory.allMsgsArrived());
 
-		Assert.assertEquals(ProcessState.SUCCEEDED, process.getState());
+		Assert.assertEquals(ProcessState.EXECUTION_SUCCEEDED, process.getState());
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testNotifyOtherUsers() throws ClassNotFoundException, IOException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			IllegalArgumentException, NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(3);
@@ -183,8 +183,8 @@ public class NotificationTest extends H2HJUnitTest {
 		users.add(userBCredentials.getUserId());
 		users.add(userCCredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
-		process.start();
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
+		process.execute();
 
 		H2HWaiter waiter = new H2HWaiter(20);
 		do {
@@ -192,7 +192,7 @@ public class NotificationTest extends H2HJUnitTest {
 		} while (!msgFactory.allMsgsArrived());
 
 		Assert.assertEquals(4, msgFactory.getSentMessageCount());
-		Assert.assertEquals(ProcessState.SUCCEEDED, process.getState());
+		Assert.assertEquals(ProcessState.EXECUTION_SUCCEEDED, process.getState());
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutInitial() throws ClassNotFoundException, IOException, InterruptedException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -216,13 +216,13 @@ public class NotificationTest extends H2HJUnitTest {
 		users.add(userACredentials.getUserId());
 		users.add(userBCredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
 		// kick out peer 3 (B)
 		network.get(3).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
-		process.start();
+		process.execute();
 
 		// wait until all messages are sent
 		TestExecutionUtil.waitTillSucceded(listener, 20);
@@ -246,7 +246,7 @@ public class NotificationTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void testNotifyUnfriendlyLogoutAllPeers() throws ClassNotFoundException, IOException, InterruptedException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException {
+			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
@@ -254,14 +254,14 @@ public class NotificationTest extends H2HJUnitTest {
 		users.add(userACredentials.getUserId());
 		users.add(userBCredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
 		// kick out peer 3 and 4 (B)
 		network.get(3).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
 		network.get(4).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
-		process.start();
+		process.execute();
 
 		// wait until all messages are sent
 		TestExecutionUtil.waitTillSucceded(listener, 20);
@@ -287,20 +287,20 @@ public class NotificationTest extends H2HJUnitTest {
 	@Test
 	public void testNotifyUnfriendlyLogoutOwnPeer() throws ClassNotFoundException, IOException, InterruptedException,
 			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException, NoSessionException,
-			GetFailedException {
+			GetFailedException, ProcessExecutionException {
 		NetworkManager notifier = network.get(0);
 
 		// send notification to own peers
 		Set<String> users = new HashSet<String>(1);
 		users.add(userACredentials.getUserId());
 		CountingNotificationMessageFactory msgFactory = new CountingNotificationMessageFactory(notifier);
-		IProcessComponent process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
+		IProcessComponent<Void> process = ProcessFactory.instance().createNotificationProcess(msgFactory, users, notifier);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
 		// kick out Peer 1
 		network.get(1).getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
-		process.start();
+		process.execute();
 
 		// wait until all messages are sent
 		TestExecutionUtil.waitTillSucceded(listener, 20);
