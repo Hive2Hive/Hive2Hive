@@ -126,7 +126,7 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 
 			// create steps to delete meta and all chunks
 			GetMetaFileStep getMeta = new GetMetaFileStep(context, dataManager);
-			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
+			DeleteChunksStep deleteChunks = new DeleteChunksStep(context, dataManager);
 			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
 
 			// insert them in correct order
@@ -137,6 +137,8 @@ public class DeleteFromUserProfileStep extends BaseGetProcessStep {
 			getParent().add(index + 1, deleteChunks);
 			getParent().add(index + 2, deleteMeta);
 		}
+		
+		return null;
 	}
 
 	@Override
