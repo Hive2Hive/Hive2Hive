@@ -24,8 +24,8 @@ public class CreateMetaFileStep extends ProcessStep<Void> {
 	private final AddFileProcessContext context;
 
 	public CreateMetaFileStep(AddFileProcessContext context) {
-		this.context = context;
 		this.setName(getClass().getName());
+		this.context = context;
 	}
 
 	@Override

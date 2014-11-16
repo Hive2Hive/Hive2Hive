@@ -42,8 +42,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 	private KeyPair protectionKey;
 
 	public PutUserProfileTaskStep(NetworkManager networkManager) {
-		this.networkManager = networkManager;
 		this.setName(getClass().getName());
+		this.networkManager = networkManager;
 	}
 
 	protected void put(String userId, UserProfileTask userProfileTask, PublicKey publicKey) throws PutFailedException,

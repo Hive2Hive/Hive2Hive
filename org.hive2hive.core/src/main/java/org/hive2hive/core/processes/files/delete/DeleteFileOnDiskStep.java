@@ -23,8 +23,8 @@ public class DeleteFileOnDiskStep extends ProcessStep<Void> {
 	private final DeleteFileProcessContext context;
 
 	public DeleteFileOnDiskStep(DeleteFileProcessContext context) {
-		this.context = context;
 		this.setName(getClass().getName());
+		this.context = context;
 	}
 
 	@Override

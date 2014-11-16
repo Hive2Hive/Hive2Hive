@@ -36,9 +36,9 @@ public class AddIndexToUserProfileStep extends ProcessStep<Void> {
 	private final int forkLimit = 2;
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.profileManager = profileManager;
-		this.setName(getClass().getName());
 	}
 
 	@Override

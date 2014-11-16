@@ -37,9 +37,9 @@ public class RemoveUserProfileTaskStep extends ProcessStep<Void> {
 	private NetworkManager networkManager;
 
 	public RemoveUserProfileTaskStep(IUserProfileTaskContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
-		this.setName(getClass().getName());
 	}
 
 	@Override

@@ -30,8 +30,8 @@ public abstract class BasePutProcessStep extends ProcessStep<Void> {
 	private IParameters parameters;
 
 	public BasePutProcessStep(DataManager dataManager) {
-		this.dataManager = dataManager;
 		this.setName(getClass().getName());
+		this.dataManager = dataManager;
 	}
 
 	protected void put(PublicKey locationKey, String contentKey, BaseNetworkContent content, KeyPair protectionKey)
