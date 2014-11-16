@@ -37,12 +37,12 @@ import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.helper.TestFileAgent;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,7 +66,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPut() throws NoPeerConnectionException, InvalidProcessStateException {
+	public void testPut() throws NoPeerConnectionException, InvalidProcessStateException, ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -82,14 +82,14 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertNotNull(node.getDataManager().get(parameters));
 
 		// manually trigger roll back
-		putStep.cancel(new RollbackReason("Testing rollback."));
+		putStep.rollback();
 
 		// check if user profile task has been removed from network
 		assertNull(node.getDataManager().get(parameters));
 	}
 
 	@Test
-	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException {
+	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException, ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -103,7 +103,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 		process.add(new TestPutUserProfileTaskStep(credentials.getUserId(), userProfileTask, key.getPublic(), node));
 		process.add(new GetUserProfileTaskStep(context, node));
 
@@ -118,7 +118,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertEquals(userProfileTask.getId(), ((TestUserProfileTask) context.consumeUserProfileTask()).getId());
 
 		// manually trigger roll back
-		process.cancel(new RollbackReason("Testing rollback."));
+		process.rollback();
 
 		// check if context has been cleaned up
 		assertNull(context.consumeUserProfileTask());
@@ -127,7 +127,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException {
+	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException, ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
@@ -141,7 +141,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 		SimpleGetUserProfileTaskContext context = new SimpleGetUserProfileTaskContext();
 
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 		process.add(new TestPutUserProfileTaskStep(credentials.getUserId(), userProfileTask, key.getPublic(), node));
 		process.add(new GetUserProfileTaskStep(context, node));
 		process.add(new RemoveUserProfileTaskStep(context, node));
@@ -153,7 +153,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		assertNull(node.getDataManager().get(parameters));
 
 		// manually trigger roll back
-		process.cancel(new RollbackReason("Testing rollback."));
+		process.rollback();
 
 		// check if context has been cleaned up
 		assertNull(context.consumeUserProfileTask());
@@ -255,12 +255,13 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
 				put(userId, userProfileTask, publicKey);
-			} catch (PutFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
+			return null;
 		}
 
 	}

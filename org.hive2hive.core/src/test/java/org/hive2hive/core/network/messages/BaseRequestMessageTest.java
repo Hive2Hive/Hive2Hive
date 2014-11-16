@@ -19,11 +19,11 @@ import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHand
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply;
-import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply.TestCallBackHandler;
+import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

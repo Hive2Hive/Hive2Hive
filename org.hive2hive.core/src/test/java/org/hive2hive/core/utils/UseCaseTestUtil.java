@@ -25,7 +25,6 @@ import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.helper.GetMetaFileContext;
 import org.hive2hive.core.utils.helper.TestFileAgent;
-import org.hive2hive.core.utils.helper.TestResultProcessComponentListener;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -139,19 +138,10 @@ public class UseCaseTestUtil {
 	}
 
 	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoSessionException,
-			InvalidProcessStateException {
+			InvalidProcessStateException, ProcessExecutionException {
 		IProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(
 				networkManager);
-		TestResultProcessComponentListener<List<FileTaste>> listener = new TestResultProcessComponentListener<List<FileTaste>>();
-		fileListProcess.attachListener(listener);
-		fileListProcess.start();
 
-		H2HWaiter waiter = new H2HWaiter(TestExecutionUtil.MAX_PROCESS_WAIT_TIME);
-		do {
-			waiter.tickASecond();
-		} while (!listener.hasResultArrived());
-
-		return listener.getResult();
+		return fileListProcess.execute();
 	}
-
 }
