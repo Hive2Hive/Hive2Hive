@@ -39,7 +39,7 @@ public class ChangeProtectionKeysStep extends ProcessStep<Void> {
 				.setHash(context.getHash());
 
 		boolean success = dataManager.changeProtectionKey(parameters);
-		setRequiresRollback(true);
+		setRequiresRollback(success);
 		if (!success) {
 			throw new ProcessExecutionException(this, String.format("Could not change content protection keys. Parameters: %s.",
 					parameters.toString()));
