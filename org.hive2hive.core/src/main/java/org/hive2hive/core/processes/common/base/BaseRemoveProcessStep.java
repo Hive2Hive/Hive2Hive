@@ -48,7 +48,7 @@ public abstract class BaseRemoveProcessStep extends ProcessStep<Void> {
 
 		// deletes all versions
 		boolean success = dataManager.remove(parameters);
-		setRequiresRollback(true);
+		setRequiresRollback(success);
 
 		if (!success) {
 			throw new RemoveFailedException();

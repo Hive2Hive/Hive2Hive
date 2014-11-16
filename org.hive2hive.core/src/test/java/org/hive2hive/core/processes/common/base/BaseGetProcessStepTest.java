@@ -10,9 +10,9 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -88,8 +88,9 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException {
+		protected Void doExecute() throws InvalidProcessStateException {
 			this.content = get(locationKey, contentKey);
+			return null;
 		}
 
 		public BaseNetworkContent getContent() {
@@ -116,11 +117,13 @@ public class BaseGetProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			BaseNetworkContent content = get(locationKey, contentKey);
 			this.content = content;
-			if (content == null)
-				throw new ProcessExecutionException("Content is null.");
+			if (content == null) {
+				throw new ProcessExecutionException(this, "Content is null.");
+			}
+			return null;
 		}
 
 		public BaseNetworkContent getContent() {

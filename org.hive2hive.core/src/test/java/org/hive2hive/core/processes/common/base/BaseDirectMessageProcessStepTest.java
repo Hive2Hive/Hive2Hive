@@ -22,12 +22,12 @@ import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessage;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
-import org.hive2hive.processframework.util.H2HWaiter;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -89,12 +89,13 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			}
 
 			@Override
-			protected void doExecute() throws InvalidProcessStateException {
+			protected Void doExecute() throws InvalidProcessStateException {
 				try {
 					sendDirect(message, getPublicKey(nodeB));
 				} catch (SendFailedException e) {
 					Assert.fail();
 				}
+				return null;
 			}
 		};
 		TestExecutionUtil.executeProcessTillSucceded(step);
@@ -147,13 +148,14 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 				}
 
 				@Override
-				protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+				protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 					try {
 						sendDirect(message, getPublicKey(nodeB));
 						Assert.fail();
-					} catch (SendFailedException e) {
-						throw new ProcessExecutionException("Expected behavior.", e);
+					} catch (SendFailedException ex) {
+						throw new ProcessExecutionException(this, ex, "Expected behavior.");
 					}
+					return null;
 				}
 			};
 			TestExecutionUtil.executeProcessTillFailed(step);
@@ -208,12 +210,13 @@ public class BaseDirectMessageProcessStepTest extends H2HJUnitTest {
 			}
 
 			@Override
-			protected void doExecute() throws InvalidProcessStateException {
+			protected Void doExecute() throws InvalidProcessStateException {
 				try {
 					sendDirect(message, getPublicKey(nodeB));
 				} catch (SendFailedException e) {
 					Assert.fail();
 				}
+				return null;
 			}
 		};
 		TestExecutionUtil.executeProcessTillSucceded(step);

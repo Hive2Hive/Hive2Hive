@@ -12,9 +12,9 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 				.put(new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setNetworkContent(testData));
 
 		// initialize the process and the one and only step to test
-		TestRemoveProcessStepRollBack removeStep = new TestRemoveProcessStepRollBack(locationKey, contentKey, network.get(0)
+		TestRemoveProcessStepFail removeStep = new TestRemoveProcessStepFail(locationKey, contentKey, network.get(0)
 				.getDataManager());
 
 		TestExecutionUtil.executeProcessTillFailed(removeStep);
@@ -96,39 +96,40 @@ public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
 				remove(locationKey, contentKey, null);
-			} catch (RemoveFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (RemoveFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
+			return null;
 		}
 	}
 
 	/**
-	 * A simple remove process step which always roll backs.
+	 * A simple remove process step which always fails.
 	 * 
 	 * @author Seppi
 	 */
-	private class TestRemoveProcessStepRollBack extends BaseRemoveProcessStep {
+	private class TestRemoveProcessStepFail extends BaseRemoveProcessStep {
 
 		private final String locationKey;
 		private final String contentKey;
 
-		public TestRemoveProcessStepRollBack(String locationKey, String contentKey, DataManager dataManager) {
+		public TestRemoveProcessStepFail(String locationKey, String contentKey, DataManager dataManager) {
 			super(dataManager);
 			this.locationKey = locationKey;
 			this.contentKey = contentKey;
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
 				remove(locationKey, contentKey, null);
-			} catch (RemoveFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (RemoveFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
-			throw new ProcessExecutionException("Rollback test.");
+			throw new ProcessExecutionException(this, "Fail test.");
 		}
 	}
 }

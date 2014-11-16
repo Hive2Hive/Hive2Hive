@@ -16,9 +16,9 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -114,12 +114,13 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 		}
 
 		@Override
-		protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 			try {
 				put(locationKey, contentKey, data, null);
-			} catch (PutFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
+			return null;
 		}
 	}
 
