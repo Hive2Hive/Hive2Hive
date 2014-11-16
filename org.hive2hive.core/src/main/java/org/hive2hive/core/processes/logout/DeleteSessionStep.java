@@ -3,8 +3,7 @@ package org.hive2hive.core.processes.logout;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
@@ -14,29 +13,34 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  * @author Nico
  * 
  */
-public class DeleteSessionStep extends ProcessStep {
+public class DeleteSessionStep extends ProcessStep<Void> {
 
 	private final NetworkManager networkManager;
 	private H2HSession session; // backup
 
 	public DeleteSessionStep(NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.networkManager = networkManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			session = networkManager.getSession();
 			networkManager.setSession(null);
+			setRequiresRollback(true);
 		} catch (NoSessionException e) {
 			// session already deleted
 		}
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		// restore the session
 		networkManager.setSession(session);
+		setRequiresRollback(false);
+		return null;
 	}
 
 }

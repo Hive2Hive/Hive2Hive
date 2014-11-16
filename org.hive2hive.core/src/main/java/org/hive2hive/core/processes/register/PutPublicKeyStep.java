@@ -18,18 +18,20 @@ public class PutPublicKeyStep extends BasePutProcessStep {
 
 	public PutPublicKeyStep(RegisterProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		UserPublicKey publicKey = new UserPublicKey(context.consumeUserProfile().getEncryptionKeys().getPublic());
 		try {
 			put(context.consumeUserId(), H2HConstants.USER_PUBLIC_KEY, publicKey,
 					context.consumeUserPublicKeyProtectionKeys());
-		} catch (PutFailedException e) {
-			throw new ProcessExecutionException(e);
+		} catch (PutFailedException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
+		return null;
 	}
 
 }

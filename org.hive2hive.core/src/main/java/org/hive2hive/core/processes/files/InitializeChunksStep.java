@@ -3,6 +3,8 @@ package org.hive2hive.core.processes.files;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HConstants;
@@ -14,10 +16,10 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class InitializeChunksStep extends ProcessStep {
+public class InitializeChunksStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitializeChunksStep.class);
 
@@ -34,23 +36,25 @@ public class InitializeChunksStep extends ProcessStep {
 	private final DataManager dataManager;
 
 	public InitializeChunksStep(IUploadContext context, DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = dataManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File file = context.consumeFile();
 
 		// only continue if the file has content
 		if (file.isDirectory()) {
 			logger.trace("File '{}': No data to put because the file is a folder.", file.getName());
-			return;
+			return null;
 		} else if (context.isLargeFile()) {
 			initLargeFile(file);
 		} else {
 			initSmallFile(file);
 		}
+		return null;
 	}
 
 	private void initSmallFile(File file) {
@@ -65,13 +69,15 @@ public class InitializeChunksStep extends ProcessStep {
 		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
 		logger.trace("{} chunks to upload for file '{}'.", Integer.toString(chunks), file.getName());
-		ProcessComponent prev = this;
+		IProcessComponent<Void> prev = this;
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();
 			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager);
 
 			// insert just after this step
-			getParent().insertNext(putChunkStep, prev);
+			List<IProcessComponent<?>> parentComponents = new ArrayList<IProcessComponent<?>>(getParent().getComponents());
+			int index = parentComponents.indexOf(prev) + 1;
+			getParent().add(index, putChunkStep);
 			prev = putChunkStep;
 		}
 	}
@@ -91,8 +97,8 @@ public class InitializeChunksStep extends ProcessStep {
 
 			try {
 				chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), i, chunkId);
-			} catch (IOException e) {
-				throw new ProcessExecutionException("Cannot read the large file", e);
+			} catch (IOException ex) {
+				throw new ProcessExecutionException(this, ex, "Cannot read the large file.");
 			}
 
 			byte[] md5Hash = HashUtil.hash(chunk.getData());

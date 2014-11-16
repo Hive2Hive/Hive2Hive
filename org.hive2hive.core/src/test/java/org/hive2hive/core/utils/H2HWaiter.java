@@ -1,4 +1,4 @@
-package org.hive2hive.processframework.util;
+package org.hive2hive.core.utils;
 
 import static org.junit.Assert.fail;
 

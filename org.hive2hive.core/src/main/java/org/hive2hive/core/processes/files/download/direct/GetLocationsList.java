@@ -9,7 +9,7 @@ import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -38,27 +38,28 @@ public class GetLocationsList implements Runnable {
 		// thread safe super collection
 		final Set<Locations> collectingSet = Collections.synchronizedSet(new HashSet<Locations>());
 
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 		for (final String userId : task.getUsers()) {
-			process.add(new AsyncComponent(new BaseGetProcessStep(dataManager) {
+			process.add(new AsyncComponent<>(new BaseGetProcessStep(dataManager) {
 				@Override
-				protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+				protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 					BaseNetworkContent content = get(userId, H2HConstants.USER_LOCATIONS);
 					if (content != null) {
 						synchronized (collectingSet) {
 							collectingSet.add((Locations) content);
 						}
 					}
+					return null;
 				}
 			}));
 		}
 
 		try {
 			logger.debug("Started getting the list of locations to download {}", task.getDestinationName());
-			process.start().await();
-		} catch (InvalidProcessStateException | InterruptedException e) {
+			process.execute();
+		} catch (InvalidProcessStateException | ProcessExecutionException ex) {
 			task.provideLocations(new HashSet<Locations>());
-			task.abortDownload(e.getMessage());
+			task.abortDownload(ex.getMessage());
 			return;
 		}
 

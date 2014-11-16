@@ -18,6 +18,7 @@ import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,11 +190,11 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	 * @throws ProcessExecutionException if there was an error while downloading
 	 * @throws InterruptedException if the process was interrupted or was unable to wait
 	 */
-	public void join() throws ProcessExecutionException, InterruptedException {
+	public void join(IProcessComponent<?> process) throws ProcessExecutionException, InterruptedException {
 		finishedLatch.await();
 
 		if (isAborted()) {
-			throw new ProcessExecutionException(reason);
+			throw new ProcessExecutionException(process, String.format("Aborted. Reason: %s.", reason));
 		} else if (!isDone()) {
 			throw new InterruptedException("Could not wait until all downloads are done");
 		}

@@ -31,11 +31,12 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 
 	public GetAllLocationsStep(NotifyProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		logger.debug("Starting to get all locations from the users to be notified.");
 		Map<String, List<PeerAddress>> allLocations = new HashMap<String, List<PeerAddress>>();
 
@@ -54,5 +55,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 		// done with all locations
 		logger.debug("Sending notifications to {} users.", allLocations.size());
 		context.setAllLocations(allLocations);
+		
+		return null;
 	}
 }

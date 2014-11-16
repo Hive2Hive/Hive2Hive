@@ -29,9 +29,9 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -59,7 +59,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepSuccessAndRollbackWithChunk() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException,
+			ProcessRollbackException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 		// where the data gets stored
@@ -99,7 +100,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
-		step.cancel(new RollbackReason("Testing rollback."));
+		step.rollback();
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
@@ -109,7 +110,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepSuccessAndRollbackWithMetaFile() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException,
+			ProcessRollbackException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 
@@ -160,7 +162,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
-		step.cancel(new RollbackReason("Testing rollback."));
+		step.rollback();
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)

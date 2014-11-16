@@ -13,6 +13,7 @@ import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,13 +67,15 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 
 		for (File file : fileBuffer) {
 			try {
-				IProcessComponent process = fileManager.update(file);
+				IProcessComponent<?> process = fileManager.update(file);
 				if (!fileManager.isAutostart()) {
-					process.start();
+					process.execute();
 				}
 			} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
-					| InvalidProcessStateException e) {
-				logger.error("Cannot start a process to modify {}.", file.getName(), e);
+					| InvalidProcessStateException ex) {
+				logger.error("Cannot start a process to modify {}.", file.getName(), ex);
+			} catch (ProcessExecutionException ex) {
+				logger.error("Process to modify {} failed.", file.getName(), ex);
 			}
 		}
 	}

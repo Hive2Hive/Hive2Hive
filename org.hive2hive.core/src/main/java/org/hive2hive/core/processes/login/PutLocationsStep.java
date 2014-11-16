@@ -18,19 +18,21 @@ public class PutLocationsStep extends BasePutProcessStep {
 
 	public PutLocationsStep(LoginProcessContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			Locations locations = context.consumeLocations();
 			locations.generateVersionKey();
 			put(context.consumeUserId(), H2HConstants.USER_LOCATIONS, locations,
 					context.consumeUserLocationsProtectionKeys());
-		} catch (PutFailedException e) {
-			throw new ProcessExecutionException(e);
+		} catch (PutFailedException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
+		return null;
 	}
 
 }

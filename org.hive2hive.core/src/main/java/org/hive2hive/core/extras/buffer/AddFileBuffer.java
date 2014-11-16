@@ -12,6 +12,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +32,14 @@ public class AddFileBuffer extends BaseFileBuffer {
 
 		for (File toAdd : fileBuffer) {
 			try {
-				IProcessComponent process = fileManager.add(toAdd);
+				IProcessComponent<?> process = fileManager.add(toAdd);
 				if (!fileManager.isAutostart()) {
-					process.start();
+					process.execute();
 				}
-			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation | InvalidProcessStateException e) {
-				logger.error("Cannot start a process to add {}", toAdd.getName(), e);
+			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation | InvalidProcessStateException ex) {
+				logger.error("Cannot start a process to add {}", toAdd.getName(), ex);
+			} catch (ProcessExecutionException ex) {
+				logger.error("Process execution to add {} failed.", toAdd.getName(), ex);
 			}
 		}
 	}

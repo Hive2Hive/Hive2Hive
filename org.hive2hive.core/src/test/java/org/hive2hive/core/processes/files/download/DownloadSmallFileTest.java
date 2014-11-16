@@ -20,12 +20,13 @@ import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
+import org.hive2hive.core.utils.TestProcessComponentListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -103,15 +104,16 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
-			InvalidProcessStateException, NoPeerConnectionException {
+			InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
 		// create fake file keys
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		// try to download with wrong keys
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(), downloader);
+		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(),
+				downloader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
-		process.start();
+		process.execute();
 		TestExecutionUtil.waitTillFailed(listener, 20);
 	}
 
@@ -140,17 +142,17 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	@Test
 	// should NOT overwrite the existing file
 	public void testDownloadFileAlreadyExistingSameContent() throws IOException, NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException, GetFailedException {
+			InvalidProcessStateException, NoPeerConnectionException, GetFailedException, ProcessExecutionException {
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, FileUtils.readFileToString(uploadedFile));
 		long lastModifiedBefore = existing.lastModified();
 
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
+		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
 				downloader);
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
-		process.start();
+		process.execute();
 
 		TestExecutionUtil.waitTillFailed(listener, 20);
 

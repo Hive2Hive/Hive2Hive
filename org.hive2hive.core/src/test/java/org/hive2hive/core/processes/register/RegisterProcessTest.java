@@ -21,10 +21,10 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -87,7 +87,7 @@ public class RegisterProcessTest extends H2HJUnitTest {
 				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS)
 				.setNetworkContent(new Locations(credentials.getUserId()))));
 
-		IProcessComponent registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, client);
+		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, client);
 		TestExecutionUtil.executeProcessTillFailed(registerProcess);
 	}
 

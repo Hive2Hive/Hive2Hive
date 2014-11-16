@@ -8,7 +8,6 @@ import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
-import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
@@ -114,13 +113,4 @@ public class H2HNode implements IH2HNode {
 		return networkManager.getConnection().getPeerDHT();
 	}
 
-	@Override
-	public synchronized void addEventListener(INetworkEventListener listener) {
-		networkManager.addEventListener(listener);
-	}
-
-	@Override
-	public synchronized void removeEventListener(INetworkEventListener listener) {
-		networkManager.removeEventListener(listener);
-	}
 }

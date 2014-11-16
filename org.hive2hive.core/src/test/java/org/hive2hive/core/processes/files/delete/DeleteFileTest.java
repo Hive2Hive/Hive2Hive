@@ -27,6 +27,7 @@ import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -63,7 +64,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
-			NoPeerConnectionException, NoSessionException, InvalidProcessStateException {
+			NoPeerConnectionException, NoSessionException, InvalidProcessStateException, ProcessExecutionException {
 		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
@@ -118,7 +119,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
-			NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
+			NoSessionException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// add a folder to the network
 		File folder = new File(root, randomString());
 		folder.mkdir();

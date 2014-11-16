@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.files.update;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -8,11 +9,11 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.files.delete.DeleteSingleChunkStep;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class CleanupChunksStep extends ProcessStep {
+public class CleanupChunksStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CleanupChunksStep.class);
 
@@ -30,27 +31,32 @@ public class CleanupChunksStep extends ProcessStep {
 	private final DataManager dataManager;
 
 	public CleanupChunksStep(UpdateFileProcessContext context, DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = dataManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		List<MetaChunk> chunksToDelete = context.getChunksToDelete();
 		KeyPair protectionKeys = context.consumeChunkProtectionKeys();
 
 		logger.debug("Cleaning {} old file chunks.", chunksToDelete.size());
 		int counter = 0;
-		ProcessComponent prev = this;
+		IProcessComponent<?> prev = this;
 		for (MetaChunk metaChunk : chunksToDelete) {
 			logger.debug("Delete chunk {} of {}.", counter++, chunksToDelete.size());
 			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(metaChunk.getChunkId(),
 					protectionKeys, dataManager);
 
 			// make async, insert it as next step
-			AsyncComponent asyncDeletion = new AsyncComponent(deleteStep);
-			getParent().insertNext(asyncDeletion, prev);
+			List<IProcessComponent<?>> parentComponents = new ArrayList<IProcessComponent<?>>(getParent().getComponents());
+			int index = parentComponents.indexOf(prev) + 1;
+			
+			IProcessComponent<?> asyncDeletion = new AsyncComponent<>(deleteStep);
+			getParent().add(index, asyncDeletion);
 			prev = asyncDeletion;
 		}
+		return null;
 	}
 }

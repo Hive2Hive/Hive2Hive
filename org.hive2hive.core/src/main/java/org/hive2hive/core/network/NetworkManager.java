@@ -1,22 +1,15 @@
 package org.hive2hive.core.network;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
-import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
-import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
-import org.hive2hive.core.events.implementations.ConnectionEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
 
-public class NetworkManager implements INetworkEventGenerator {
+public class NetworkManager {
 
 	// TODO this class needs heavy refactoring! many man-in-the-middle delegations and methods that do not
 	// belong here
@@ -28,7 +21,6 @@ public class NetworkManager implements INetworkEventGenerator {
 	private final MessageManager messageManager;
 	private H2HSession session;
 
-	private List<INetworkEventListener> eventListeners;
 	private final EventBus eventBus;
 
 	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption, EventBus eventBus) {
@@ -38,7 +30,6 @@ public class NetworkManager implements INetworkEventGenerator {
 		dataManager = new DataManager(this, encryption);
 		messageManager = new MessageManager(this, encryption);
 
-		eventListeners = new ArrayList<INetworkEventListener>();
 		this.eventBus = eventBus;
 	}
 
@@ -63,7 +54,6 @@ public class NetworkManager implements INetworkEventGenerator {
 			success = connection
 					.connect(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
 		}
-		notifyConnectionStatus(success);
 		return success;
 	}
 
@@ -78,7 +68,6 @@ public class NetworkManager implements INetworkEventGenerator {
 		}
 
 		boolean success = connection.disconnect();
-		notifyDisconnectionStatus(success);
 		return success;
 	}
 
@@ -145,39 +134,6 @@ public class NetworkManager implements INetworkEventGenerator {
 		}
 		return messageManager;
 	}
-
-	@Override
-	public synchronized void addEventListener(INetworkEventListener listener) {
-		eventListeners.add(listener);
-	}
-
-	@Override
-	public synchronized void removeEventListener(INetworkEventListener listener) {
-		eventListeners.remove(listener);
-	}
-
-	private void notifyConnectionStatus(boolean isSuccessful) {
-		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
-		while (iterator.hasNext()) {
-			if (isSuccessful) {
-				iterator.next().onConnectionSuccess(new ConnectionEvent(networkConfiguration));
-			} else {
-				iterator.next().onConnectionFailure(new ConnectionEvent(networkConfiguration));
-			}
-		}
-	}
-
-	private void notifyDisconnectionStatus(boolean isSuccessful) {
-		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
-		while (iterator.hasNext()) {
-			if (isSuccessful) {
-				iterator.next().onDisconnectionSuccess(new ConnectionEvent(networkConfiguration));
-			} else {
-				iterator.next().onDisconnectionFailure(new ConnectionEvent(networkConfiguration));
-			}
-		}
-	}
-	
 	
 	public EventBus getEventBus() {
 		return eventBus;

@@ -1,6 +1,7 @@
 package org.hive2hive.client.util;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Listener;
@@ -18,6 +19,7 @@ import org.hive2hive.core.events.framework.interfaces.file.IFileUpdateEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
 @Listener(references = References.Strong)
 public class FileEventListener implements IFileEventListener {
@@ -33,7 +35,8 @@ public class FileEventListener implements IFileEventListener {
 	public void onFileAdd(IFileAddEvent fileEvent) {
 		try {
 			H2HConsoleMenu.executeBlocking(fileManager.download(fileEvent.getFile()), "AddFileEvent");
-		} catch (InvalidProcessStateException | NoSessionException | NoPeerConnectionException | InterruptedException e) {
+		} catch (InvalidProcessStateException | NoSessionException | NoPeerConnectionException | InterruptedException
+				| ProcessExecutionException | ExecutionException e) {
 			System.err.println("Cannot download the new file " + fileEvent.getFile());
 		}
 	}
@@ -43,7 +46,8 @@ public class FileEventListener implements IFileEventListener {
 	public void onFileUpdate(IFileUpdateEvent fileEvent) {
 		try {
 			H2HConsoleMenu.executeBlocking(fileManager.download(fileEvent.getFile()), "UpdateFileEvent");
-		} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException e) {
+		} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException
+				| ProcessExecutionException | ExecutionException e) {
 			System.err.println("Cannot download the updated file " + fileEvent.getFile());
 		}
 	}

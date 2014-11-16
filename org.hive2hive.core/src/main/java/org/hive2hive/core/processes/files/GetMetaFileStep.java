@@ -17,7 +17,6 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.common.base.BaseGetProcessStep;
 import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
-import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -36,11 +35,12 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 	public GetMetaFileStep(IGetMetaFileContext context, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		KeyPair keyPair = context.consumeMetaFileEncryptionKeys();
 
 		BaseVersionedNetworkContent loadedContent = (BaseVersionedNetworkContent) get(keyPair.getPublic(),
@@ -48,7 +48,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 		if (loadedContent == null) {
 			logger.warn("Meta file not found.");
-			throw new ProcessExecutionException("Meta file not found.");
+			throw new ProcessExecutionException(this, "Meta file not found.");
 		}
 
 		HybridEncryptedContent encryptedContent = (HybridEncryptedContent) loadedContent;
@@ -58,8 +58,8 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 		try {
 			decryptedContent = dataManager.getEncryption().decryptHybrid(encryptedContent, keyPair.getPrivate());
 		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-				| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
-			throw new ProcessExecutionException("Meta file could not be decrypted.", e);
+				| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException ex) {
+			throw new ProcessExecutionException(this, ex, "Meta file could not be decrypted.");
 		}
 
 		BaseMetaFile metaFile = (BaseMetaFile) decryptedContent;
@@ -68,14 +68,19 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 
 		context.provideMetaFile(metaFile);
 		context.provideEncryptedMetaFile(encryptedContent);
+		setRequiresRollback(true);
 
 		logger.debug("Got and decrypted the meta file.");
+		
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		context.provideMetaFile(null);
 		context.provideEncryptedMetaFile(null);
+		setRequiresRollback(false);
+		return null;
 	}
 
 }

@@ -16,10 +16,11 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -75,7 +76,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testRestoreVersion() throws IOException, NoSessionException, InvalidProcessStateException,
-			IllegalArgumentException, NoPeerConnectionException {
+			IllegalArgumentException, NoPeerConnectionException, ProcessExecutionException {
 		// add 3 new versions (total 4)
 		uploadVersion("1");
 		uploadVersion("2");
@@ -84,7 +85,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		final int versionToRestore = 2;
 
 		TestVersionSelector selector = new TestVersionSelector(versionToRestore);
-		ProcessComponent process = ProcessFactory.instance().createRecoverFileProcess(file, selector, client);
+		IProcessComponent<Void> process = ProcessFactory.instance().createRecoverFileProcess(file, selector, client);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// to verify, find the restored file

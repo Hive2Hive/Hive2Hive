@@ -4,8 +4,9 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IManager;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,18 +30,29 @@ public abstract class H2HManager implements IManager {
 		this.eventBus = eventBus;
 	}
 
-	protected void submitProcess(IProcessComponent processComponent) {
+	protected void submitProcess(AsyncComponent<?> asyncComponent) {
 		if (isAutostart) {
-			executeProcess(processComponent);
+			executeComponent(asyncComponent);
 		}
 	}
 
-	protected void executeProcess(IProcessComponent processComponent) {
+	/**
+	 * Starts the execution of the AsyncComponent. Does not handle the rollback!
+	 * 
+	 * @param asyncComponent
+	 */
+	protected void executeComponent(AsyncComponent<?> asyncComponent) {
+		// start execution
 		try {
-			processComponent.start();
-		} catch (InvalidProcessStateException e) {
-			// should not happen
-			logger.error("Cannot execute the process", e);
+			asyncComponent.execute();
+
+		} catch (InvalidProcessStateException ex) {
+			// should not happen as only processes that are READY are submitted
+			logger.error(ex.getMessage());
+		} catch (ProcessExecutionException ex) {
+			// AsyncComponent could not be started
+			logger.error(String.format("Error occurred during execution of %s.\nReason: %s.", ex.getSource(),
+					ex.getMessage()));
 		}
 	}
 

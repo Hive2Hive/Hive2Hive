@@ -8,7 +8,7 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.context.MoveFileProcessContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
@@ -17,18 +17,19 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  * 
  * @author Seppi
  */
-public class CheckWriteAccessStep extends ProcessStep {
+public class CheckWriteAccessStep extends ProcessStep<Void> {
 
 	private final MoveFileProcessContext context;
 	private final UserProfileManager profileManager;
 
 	public CheckWriteAccessStep(MoveFileProcessContext context, UserProfileManager profileManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.profileManager = profileManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		File source = context.getSource();
 		File destination = context.getDestination();
 		File root = context.getRoot();
@@ -49,7 +50,7 @@ public class CheckWriteAccessStep extends ProcessStep {
 		try {
 			userProfile = profileManager.readUserProfile();
 		} catch (GetFailedException e) {
-			throw new ProcessExecutionException(e);
+			throw new ProcessExecutionException(this, e);
 		}
 
 		// get the corresponding node of the moving file
@@ -68,11 +69,14 @@ public class CheckWriteAccessStep extends ProcessStep {
 
 		// validate the write protection
 		if (!oldParentNode.canWrite()) {
-			throw new ProcessExecutionException(String.format("This directory '%s' is write protected.", source.getName()));
+			throw new ProcessExecutionException(this, String.format("This directory '%s' is write protected.",
+					source.getName()));
 		} else if (!newParentNode.canWrite()) {
-			throw new ProcessExecutionException(String.format("This directory '%s' is write protected.",
+			throw new ProcessExecutionException(this, String.format("This directory '%s' is write protected.",
 					destination.getName()));
 		}
+
+		return null;
 	}
 
 }

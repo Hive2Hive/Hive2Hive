@@ -43,7 +43,7 @@ public class AddIndexToUserProfileStep extends BaseModifyUserProfileStep {
 				md5 = HashUtil.hash(file);
 			} catch (IOException e) {
 				logger.error("Creating MD5 hash of file '{}' was not possible.", file.getName(), e);
-				throw new ProcessExecutionException("Cannot calculate the hash of the file " + file.getName(), e);
+				throw new ProcessExecutionException(this, "Cannot calculate the hash of the file " + file.getName());
 			}
 		}
 	}

@@ -6,8 +6,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -19,41 +18,40 @@ import org.slf4j.LoggerFactory;
  * @author Nico
  *
  */
-public abstract class BaseModifyUserProfileStep extends ProcessStep implements IUserProfileModification {
+public abstract class BaseModifyUserProfileStep extends ProcessStep<Void> implements IUserProfileModification {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseModifyUserProfileStep.class);
 	private final UserProfileManager profileManager;
-	private boolean modified = false;
 
 	public BaseModifyUserProfileStep(UserProfileManager profileManager) {
 		this.profileManager = profileManager;
 	}
 
 	@Override
-	protected final void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected final Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		beforeModify();
 		try {
 			profileManager.modifyUserProfile(getID(), this);
-			modified = true;
+			setRequiresRollback(true);
 		} catch (GetFailedException | PutFailedException | AbortModifyException e) {
 			logger.error("Cannot modify the user profile", e);
-			throw new ProcessExecutionException(e);
+			throw new ProcessExecutionException(this, e);
 		}
 		afterModify();
+		return null;
 	}
 
 	@Override
-	protected final void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (modified) {
-			// only do this if the modification of the UP was successful
-			try {
-				profileManager.modifyUserProfile(getID(), new RollbackUPModification());
-			} catch (GetFailedException | PutFailedException | AbortModifyException e) {
-				logger.error("Cannot modify the user profile", e);
-				// TODO replace exception by RollbackException
-				throw new InvalidProcessStateException(getState());
-			}
+	protected final Void doRollback() throws InvalidProcessStateException {
+		// only do this if the modification of the UP was successful
+		try {
+			profileManager.modifyUserProfile(getID(), new RollbackUPModification());
+		} catch (GetFailedException | PutFailedException | AbortModifyException e) {
+			logger.error("Cannot modify the user profile", e);
+			// TODO replace exception by RollbackException
+			throw new InvalidProcessStateException(this, getState());
 		}
+		return null;
 	}
 
 	/**

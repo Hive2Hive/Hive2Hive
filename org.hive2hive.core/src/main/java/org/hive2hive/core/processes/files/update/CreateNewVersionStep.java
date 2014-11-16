@@ -9,8 +9,7 @@ import org.hive2hive.core.model.FileVersion;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi, Nico
  */
-public class CreateNewVersionStep extends ProcessStep {
+public class CreateNewVersionStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CreateNewVersionStep.class);
 
@@ -32,14 +31,15 @@ public class CreateNewVersionStep extends ProcessStep {
 	private final List<FileVersion> deletedFileVersions;
 
 	public CreateNewVersionStep(UpdateFileProcessContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.deletedFileVersions = new ArrayList<FileVersion>();
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.consumeMetaFile() == null) {
-			throw new ProcessExecutionException("Meta document is null.");
+			throw new ProcessExecutionException(this, "Meta document is null.");
 		}
 
 		logger.debug("Adding a new version to the meta file.");
@@ -51,6 +51,8 @@ public class CreateNewVersionStep extends ProcessStep {
 		metaFileSmall.getVersions().add(newVersion);
 
 		initiateCleanup();
+		setRequiresRollback(true);
+		return null;
 	}
 
 	private void initiateCleanup() {
@@ -81,7 +83,7 @@ public class CreateNewVersionStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		if (context.consumeMetaFile() != null) {
 			MetaFileSmall metaFileSmall = (MetaFileSmall) context.consumeMetaFile();
 			// remove the new version
@@ -90,5 +92,6 @@ public class CreateNewVersionStep extends ProcessStep {
 			// add the cleaned up versions
 			metaFileSmall.getVersions().addAll(deletedFileVersions);
 		}
+		return null;
 	}
 }

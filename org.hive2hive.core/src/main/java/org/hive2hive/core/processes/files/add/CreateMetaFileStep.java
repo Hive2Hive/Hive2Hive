@@ -11,8 +11,7 @@ import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.MetaFileLarge;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
@@ -20,16 +19,17 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  * 
  * @author Nico, Chris, Seppi
  */
-public class CreateMetaFileStep extends ProcessStep {
+public class CreateMetaFileStep extends ProcessStep<Void> {
 
 	private final AddFileProcessContext context;
 
 	public CreateMetaFileStep(AddFileProcessContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		File file = context.consumeFile();
 		KeyPair metaKeys = context.consumeMetaFileEncryptionKeys();
 
@@ -45,10 +45,14 @@ public class CreateMetaFileStep extends ProcessStep {
 			metaFile = new MetaFileSmall(metaKeys.getPublic(), versions, context.consumeChunkEncryptionKeys());
 		}
 		context.provideMetaFile(metaFile);
+		setRequiresRollback(true);
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		context.provideMetaFile(null);
+		setRequiresRollback(false);
+		return null;
 	}
 }

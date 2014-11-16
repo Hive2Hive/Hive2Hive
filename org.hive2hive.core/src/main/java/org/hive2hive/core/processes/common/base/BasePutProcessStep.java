@@ -11,8 +11,7 @@ import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +21,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Christian, Seppi
  */
-public abstract class BasePutProcessStep extends ProcessStep {
+public abstract class BasePutProcessStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BasePutProcessStep.class);
 
 	protected final DataManager dataManager;
-	protected boolean putPerformed;
 
 	private IParameters parameters;
 
 	public BasePutProcessStep(DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.dataManager = dataManager;
 	}
 
@@ -60,19 +59,14 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		this.parameters = parameters;
 
 		H2HPutStatus status = dataManager.put(parameters);
-		putPerformed = true;
-
 		if (!status.equals(H2HPutStatus.OK)) {
 			throw new PutFailedException();
 		}
+		setRequiresRollback(true);
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (!putPerformed) {
-			logger.warn("Nothing to remove at rollback because nothing has been put.");
-			return;
-		}
+	protected Void doRollback() throws InvalidProcessStateException {
 
 		boolean success = dataManager.removeVersion(parameters);
 		if (success) {
@@ -80,5 +74,7 @@ public abstract class BasePutProcessStep extends ProcessStep {
 		} else {
 			logger.warn("Rollback of put failed. Remove failed. '{}'", parameters.toString());
 		}
+		setRequiresRollback(false);
+		return null;
 	}
 }

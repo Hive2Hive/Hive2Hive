@@ -12,7 +12,7 @@ import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
@@ -21,38 +21,39 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  * 
  * @author Nico, Seppi
  */
-public class RemoveUnreachableStep extends ProcessStep {
+public class RemoveUnreachableStep extends ProcessStep<Void> {
 
 	private final NetworkManager networkManager;
 	private final Set<PeerAddress> unreachablePeers;
 
 	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.unreachablePeers = unreachablePeers;
 		this.networkManager = networkManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		UserProfile userProfile;
 		try {
 			userProfile = networkManager.getSession().getProfileManager().readUserProfile();
 		} catch (GetFailedException | NoSessionException e) {
-			throw new ProcessExecutionException(e);
+			throw new ProcessExecutionException(this, e);
 		}
 
 		VersionManager<Locations> locationsManager;
 		try {
 			locationsManager = networkManager.getSession().getLocationsManager();
-		} catch (NoSessionException e) {
-			throw new ProcessExecutionException("No session yet");
+		} catch (NoSessionException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
 
 		while (true) {
 			Locations locations;
 			try {
 				locations = locationsManager.get();
-			} catch (GetFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (GetFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 
 			// remove peer
@@ -64,11 +65,13 @@ public class RemoveUnreachableStep extends ProcessStep {
 				locationsManager.put(locations, userProfile.getProtectionKeys());
 			} catch (VersionForkAfterPutException e) {
 				continue;
-			} catch (PutFailedException e) {
-				throw new ProcessExecutionException(e);
+			} catch (PutFailedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 
 			break;
 		}
+
+		return null;
 	}
 }

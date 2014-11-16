@@ -16,17 +16,20 @@ public class DeleteSingleChunkStep extends BaseRemoveProcessStep {
 
 	public DeleteSingleChunkStep(String locationKey, KeyPair protectionKeys, DataManager dataManager) {
 		super(dataManager);
+		this.setName(getClass().getName());
 		this.locationKey = locationKey;
 		this.protectionKeys = protectionKeys;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			remove(locationKey, H2HConstants.FILE_CHUNK, protectionKeys);
-		} catch (RemoveFailedException e) {
-			throw new ProcessExecutionException("Removal of chunk failed.", e);
+		} catch (RemoveFailedException ex) {
+			throw new ProcessExecutionException(this, ex, "Removal of chunk failed.");
 		}
+		
+		return null;
 	}
 
 }

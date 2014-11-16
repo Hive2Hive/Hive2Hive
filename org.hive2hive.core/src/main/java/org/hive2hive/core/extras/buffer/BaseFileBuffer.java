@@ -5,14 +5,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processframework.interfaces.IProcessResultListener;
-import org.hive2hive.processframework.interfaces.IResultProcessComponent;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +81,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 				return;
 			}
 
-			IResultProcessComponent<List<FileTaste>> fileList = null;
+			IProcessComponent<Future<List<FileTaste>>> fileList = null;
 			try {
 				fileList = fileManager.getFileList();
 			} catch (NoSessionException e) {
@@ -89,21 +91,19 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 				return;
 			}
 
-			fileList.attachListener(new IProcessResultListener<List<FileTaste>>() {
-				@Override
-				public void onResultReady(List<FileTaste> result) {
-					// the result is ready, add it to the buffer
-					fileBuffer.setSyncFiles(new HashSet<FileTaste>(result));
-					fileBuffer.setReady();
-				}
-			});
-
 			// start when necessary
 			if (!fileManager.isAutostart()) {
 				try {
-					fileList.start();
-				} catch (InvalidProcessStateException e) {
-					logger.error("Could not launch the process to get the file list.", e);
+					Future<List<FileTaste>> future = fileList.execute();
+					List<FileTaste> result = future.get();
+					// the result is ready, add it to the buffer
+					fileBuffer.setSyncFiles(new HashSet<FileTaste>(result));
+					fileBuffer.setReady();
+
+				} catch (InvalidProcessStateException | InterruptedException | ExecutionException ex) {
+					logger.error("Could not launch the process to get the file list.", ex);
+				} catch (ProcessExecutionException ex) {
+					logger.error("Process execution to get the file list failed.", ex);
 				}
 			}
 		}

@@ -1,6 +1,8 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -14,6 +16,7 @@ import org.hive2hive.core.processes.common.base.BaseModifyUserProfileStep;
 import org.hive2hive.core.processes.context.DeleteFileProcessContext;
 import org.hive2hive.core.processes.files.GetMetaFileStep;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Step that deletes a file from the index in the user profile after doing some verification.
@@ -73,13 +76,16 @@ public class DeleteFromUserProfileStep extends BaseModifyUserProfileStep {
 
 			// create steps to delete meta and all chunks
 			GetMetaFileStep getMeta = new GetMetaFileStep(context, dataManager);
-			DeleteChunksProcess deleteChunks = new DeleteChunksProcess(context, dataManager);
+			DeleteChunksStep deleteChunks = new DeleteChunksStep(context, dataManager);
 			DeleteMetaFileStep deleteMeta = new DeleteMetaFileStep(context, dataManager);
 
 			// insert them in correct order
-			getParent().insertNext(getMeta, this);
-			getParent().insertNext(deleteChunks, getMeta);
-			getParent().insertNext(deleteMeta, deleteChunks);
+			List<IProcessComponent<?>> parentComponents = new ArrayList<>(getParent().getComponents());
+			int index = parentComponents.indexOf(this) + 1;
+
+			getParent().add(index, getMeta);
+			getParent().add(index + 1, deleteChunks);
+			getParent().add(index + 2, deleteMeta);
 		}
 	}
 

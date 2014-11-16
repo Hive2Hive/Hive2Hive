@@ -12,24 +12,25 @@ import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.processes.files.download.direct.DownloadTaskDirect;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SelectPeerForDownloadStep extends ProcessStep {
+public class SelectPeerForDownloadStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectPeerForDownloadStep.class);
 	private static final int SLEEP_TIME = 5000;
 	private final DownloadDirectContext context;
 
 	public SelectPeerForDownloadStep(DownloadDirectContext context) {
+		this.setName(getClass().getName());
 		this.context = context;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		DownloadTaskDirect task = context.getTask();
 		logger.debug("Getting the locations to download {} in a blocking manner.", task.getDestinationName());
 		List<Locations> locations = task.consumeLocationsBlocking();
@@ -37,7 +38,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 
 		if (task.isAborted()) {
 			logger.warn("Not executing step because task is aborted");
-			return;
+			return null;
 		}
 
 		// prefer own user name
@@ -52,7 +53,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		if (selectedOwnPeer != null) {
 			logger.debug("Found peer of own user to contact for the file {}", task.getDestinationName());
 			context.setSelectedPeer(selectedOwnPeer, task.getOwnUserName());
-			return;
+			return null;
 		}
 
 		// if own peer is not possible, take a foreign sharer
@@ -67,7 +68,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 				logger.debug("Found peer of foreign user to contact for the file {}", task.getDestinationName());
 				PeerAddress rndAddress = addresses.get(rnd.nextInt(addresses.size()));
 				context.setSelectedPeer(rndAddress, randomLocation.getUserId());
-				return;
+				return null;
 			}
 		}
 
@@ -78,7 +79,7 @@ public class SelectPeerForDownloadStep extends ProcessStep {
 		} catch (InterruptedException e) {
 			// ignore
 		}
-		throw new ProcessExecutionException("No online peer found that could be contacted");
+		throw new ProcessExecutionException(this, "No online peer found that could be contacted");
 	}
 
 	private PeerAddress selectAddressOwnUser(Set<PeerAddress> addresses) {

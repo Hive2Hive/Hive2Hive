@@ -32,23 +32,24 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager, PublicKeyManager keyManager,
 			IFileConfiguration config) {
 		super(messageManager);
+		this.setName(getClass().getName());
 		this.context = context;
 		this.keyManager = keyManager;
 		this.config = config;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		if (context.getTask().isAborted()) {
-			logger.warn("Not executing step because task is aborted");
-			return;
+			logger.warn("Not executing step because task is aborted.");
+			return null;
 		}
 
 		PublicKey receiverPublicKey;
 		try {
 			receiverPublicKey = keyManager.getPublicKey(context.getUserName());
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException("Cannot get public key of user " + context.getUserName());
+		} catch (GetFailedException ex) {
+			throw new ProcessExecutionException(this, String.format("Cannot get public key of user '%s'.", context.getUserName()));
 		}
 
 		MetaChunk metaChunk = context.getMetaChunk();
@@ -61,6 +62,8 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
 			rerunProcess(true);
 		}
+		
+		return null;
 	}
 
 	@Override

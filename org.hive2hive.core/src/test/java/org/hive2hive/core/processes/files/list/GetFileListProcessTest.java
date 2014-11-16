@@ -21,6 +21,7 @@ import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,7 +53,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 
 	@Test
 	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException,
-			NoPeerConnectionException, NoSessionException {
+			NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager client = network.get(0);
 		List<FileTaste> fileList = UseCaseTestUtil.getFileList(client);
 

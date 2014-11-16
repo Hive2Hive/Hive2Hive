@@ -16,10 +16,12 @@
 	<description>The core project of the Hive2Hive library.</description>
 
 	<dependencies>
+
 		<dependency>
+			<!-- Hive2Hive Process Framework -->
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
+			<version>1.0-Beta2</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -73,16 +75,17 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency> <!-- reuse src/test/java code from process framework -->
-			<groupId>org.hive2hive</groupId>
-			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
-			<scope>test</scope>
-			<type>test-jar</type>
-		</dependency>
 	</dependencies>
 
 	<repositories>
+		<!-- Hive2Hive Repository -->
+		<repository>
+			<id>hive2hive.org</id>
+			<name>Hive2Hive Repository</name>
+			<url>http://repo.hive2hive.org</url>
+		</repository>
+
+		<!-- TomP2P Repository -->
 		<repository>
 			<id>tomp2p.net</id>
 			<name>TomP2P Repository</name>
@@ -113,9 +116,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

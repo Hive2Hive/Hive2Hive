@@ -30,13 +30,15 @@ public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 	public SendNotificationsMessageStep(NotifyProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		super(networkManager.getMessageManager());
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 		this.unreachablePeers = new HashSet<PeerAddress>();
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
+		
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
 		Map<String, List<PeerAddress>> locations = context.getAllLocations();
@@ -57,6 +59,8 @@ public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
 			getParent().add(new RemoveUnreachableStep(unreachablePeers, networkManager));
 		}
+		
+		return null;
 	}
 
 	private void notifyMyPeers(List<PeerAddress> ownPeers, BaseNotificationMessageFactory messageFactory,

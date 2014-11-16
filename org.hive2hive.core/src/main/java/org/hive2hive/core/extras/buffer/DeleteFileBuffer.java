@@ -13,6 +13,7 @@ import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +64,15 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 		for (File toDelete : bufferedFiles) {
 			try {
 				logger.debug("Starting to delete buffered file {}.", toDelete);
-				IProcessComponent delete = fileManager.delete(toDelete);
+				IProcessComponent<?> delete = fileManager.delete(toDelete);
 				if (!fileManager.isAutostart()) {
-					delete.start();
+					delete.execute();
 				}
 				delete.await(MAX_DELETION_PROCESS_DURATION_MS);
-			} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException e) {
-				logger.error("Cannot start the process to delete {}.", toDelete.getName(), e);
+			} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException ex) {
+				logger.error("Cannot start the process to delete {}.", toDelete.getName(), ex);
+			} catch (ProcessExecutionException ex) {
+				logger.error("Process execution to delete {} failed.", toDelete.getName(), ex);
 			}
 		}
 

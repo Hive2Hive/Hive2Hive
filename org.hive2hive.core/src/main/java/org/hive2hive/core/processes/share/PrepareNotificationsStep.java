@@ -7,7 +7,7 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.context.ShareProcessContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi, Nico
  */
-public class PrepareNotificationsStep extends ProcessStep {
+public class PrepareNotificationsStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(PrepareNotificationsStep.class);
 
@@ -25,12 +25,13 @@ public class PrepareNotificationsStep extends ProcessStep {
 	private final String userId;
 
 	public PrepareNotificationsStep(ShareProcessContext context, String userId) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.userId = userId; // ownUserId
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		logger.debug("Preparing a notification message to the friend '{}' and all other sharers of the shared folder '{}'.",
 				context.getFriendId(), context.getFolder().getName());
 
@@ -57,5 +58,7 @@ public class PrepareNotificationsStep extends ProcessStep {
 				context.getUserPermission());
 		context.provideMessageFactory(messageFactory);
 		context.provideUsersToNotify(friends);
+
+		return null;
 	}
 }

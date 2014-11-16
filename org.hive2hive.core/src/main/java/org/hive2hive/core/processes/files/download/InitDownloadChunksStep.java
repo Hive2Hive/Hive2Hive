@@ -17,7 +17,7 @@ import org.hive2hive.core.processes.context.DownloadFileContext;
 import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.files.download.direct.DownloadTaskDirect;
 import org.hive2hive.core.security.HashUtil;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Nico, Seppi
  */
-public class InitDownloadChunksStep extends ProcessStep {
+public class InitDownloadChunksStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitDownloadChunksStep.class);
 
@@ -36,19 +36,20 @@ public class InitDownloadChunksStep extends ProcessStep {
 	private File destination;
 
 	public InitDownloadChunksStep(DownloadFileContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		BaseMetaFile metaFile = context.consumeMetaFile();
 
 		H2HSession session;
 		try {
 			session = networkManager.getSession();
-		} catch (NoSessionException e) {
-			throw new ProcessExecutionException(e);
+		} catch (NoSessionException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
 
 		// support to store the file on another location than default (used for recovery)
@@ -76,11 +77,11 @@ public class InitDownloadChunksStep extends ProcessStep {
 				FileIndex fileIndex = (FileIndex) context.consumeIndex();
 				try {
 					if (HashUtil.compare(destination, fileIndex.getMD5())) {
-						throw new ProcessExecutionException(
+						throw new ProcessExecutionException(this, 
 								"File already exists on disk. Content does match. No download needed.");
 					}
-				} catch (IOException e) {
-					logger.warn("Got an unexpected exception while comparing hashes.", e);
+				} catch (IOException ex) {
+					throw new ProcessExecutionException(this, ex, "Got an unexpected exception while comparing hashes.");
 				}
 			}
 
@@ -91,9 +92,9 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 			// join the download process
 			try {
-				task.join();
-			} catch (InterruptedException e) {
-				throw new ProcessExecutionException(e.getMessage());
+				task.join(this);
+			} catch (InterruptedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 		} else {
 			// download chunks from users
@@ -107,13 +108,14 @@ public class InitDownloadChunksStep extends ProcessStep {
 
 			// join the download process
 			try {
-				task.join();
-			} catch (InterruptedException e) {
-				throw new ProcessExecutionException(e.getMessage());
+				task.join(this);
+			} catch (InterruptedException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 		}
-
 		logger.debug("Finished downloading file '{}'.", destination);
+		
+		return null;
 	}
 
 }

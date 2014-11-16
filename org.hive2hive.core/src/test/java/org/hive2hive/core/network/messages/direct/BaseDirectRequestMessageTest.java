@@ -18,8 +18,8 @@ import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessage
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply.TestCallBackHandler;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReplyMaxSending;
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReplyMaxSending.TestCallBackHandlerMaxSendig;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

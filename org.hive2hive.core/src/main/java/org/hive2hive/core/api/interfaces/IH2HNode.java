@@ -2,8 +2,6 @@ package org.hive2hive.core.api.interfaces;
 
 import net.tomp2p.dht.PeerDHT;
 
-import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
-
 /**
  * The starting point for the Hive2Hive node. From this class, you can perform user management (login, logout,
  * ...) and file management (add, remove, share, ...).<br>
@@ -14,7 +12,7 @@ import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
  * @author Christian, Nico, Seppi
  * 
  */
-public interface IH2HNode extends INetworkEventGenerator {
+public interface IH2HNode {
 
 	/**
 	 * Connect to the network. The connection kind is dependent on {@link INetworkConfiguration}.
