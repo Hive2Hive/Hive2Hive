@@ -16,6 +16,7 @@ There are many simple ways to improve this experience even more. [Start to contr
 
 - [PeerBox](https://github.com/Hive2Hive/PeerBox), a Windows-based shell extension à la Dropbox.
 - [H2H Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client), an executable `.jar` console application.
+- [Eclipse RCP Client](https://github.com/Hive2Hive/RCP_Client), an RCP-based client.
 
 ### Table of Contents
 
