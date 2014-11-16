@@ -14,14 +14,14 @@ import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.common.base.BaseDirectMessageProcessStep;
+import org.hive2hive.core.processes.common.base.BaseMessageProcessStep;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AskForChunkStep extends BaseDirectMessageProcessStep {
+public class AskForChunkStep extends BaseMessageProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(AskForChunkStep.class);
 
@@ -56,7 +56,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 				metaChunk.getIndex(), config.getChunkSize(), metaChunk.getChunkHash());
 		try {
 			logger.debug("Requesting chunk {} from peer {}", metaChunk.getIndex(), context.getSelectedPeer());
-			sendDirect(request, receiverPublicKey);
+			send(request, receiverPublicKey);
 		} catch (SendFailedException e) {
 			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
 			rerunProcess(true);
@@ -66,7 +66,7 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 	@Override
 	public void handleResponse(ResponseMessage responseMessage) {
 		MetaChunk metaChunk = context.getMetaChunk();
-		
+
 		// check the response
 		if (responseMessage.getContent() == null) {
 			logger.error("Peer {} did not send the chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
@@ -90,7 +90,8 @@ public class AskForChunkStep extends BaseDirectMessageProcessStep {
 				verifyAndWriteChunk(metaChunk, response.getChunk());
 				break;
 			default:
-				logger.error("Invaid response type when downloading chunk {}: {}", context.getMetaChunk().getIndex(), response.getAnswerType());
+				logger.error("Invaid response type when downloading chunk {}: {}", context.getMetaChunk().getIndex(),
+						response.getAnswerType());
 				rerunProcess(false);
 				break;
 		}

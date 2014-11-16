@@ -14,13 +14,13 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.common.base.BaseDirectMessageProcessStep;
+import org.hive2hive.core.processes.common.base.BaseMessageProcessStep;
 import org.hive2hive.core.processes.context.NotifyProcessContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
+public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(SendNotificationsMessageStep.class);
 	private final NotifyProcessContext context;
@@ -75,7 +75,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 				if (message == null) {
 					logger.info("Not notifying any of the own peers because the message to be sent is null.");
 				} else {
-					sendDirect(message, ownPublicKey);
+					send(message, ownPublicKey);
 				}
 			} catch (SendFailedException e) {
 				// add to the unreachable list, such that the next step can cleanup those locations
@@ -93,7 +93,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			PeerAddress initial = NetworkUtils.choseFirstPeerAddress(peerList);
 			BaseDirectMessage msg = messageFactory.createHintNotificationMessage(initial, userId);
 			try {
-				sendDirect(msg, publicKey);
+				send(msg, publicKey);
 				success = true;
 			} catch (SendFailedException e) {
 				if (!peerList.isEmpty()) {
