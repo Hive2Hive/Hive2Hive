@@ -12,6 +12,11 @@ The Hive2Hive library addresses these issues by providing a **free** and **open-
 
 There are many simple ways to improve this experience even more. [Start to contribute now!](#contribution)
 
+**Are you looking for a demo application?**
+
+- [PeerBox](https://github.com/Hive2Hive/PeerBox), a Windows-based shell extension à la Dropbox.
+- [H2H Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client), an executable `.jar` console application.
+
 ### Table of Contents
 
 **[API Demonstration](#api-demonstration)**  
