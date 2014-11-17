@@ -29,45 +29,49 @@ There are many simple ways to improve this experience even more. [Start to contr
 
 ## API Demonstration
 
-A short demonstration of the API and its basic usage are given here. ([see more](http://hive2hive.com/?page_id=429))
+The Hive2Hive library provides a simple API that is straightforward to use. ([View Source](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.core/src/main/java/org/hive2hive/core/api))
+A short demonstration of the API and its basic usage are given here.
+
 ### Network Management
 
-**Create P2P Network**  
+#### Creating a P2P Network
+
 Configuring and setting up a new P2P network is very easy. Just specify the configurations and setup an initial node.
 
-1. `NetworkConfiguration` and `FileConfiguration` factory classes may help to specify your configurations
-2. create the initial node and connect it
+1. The `NetworkConfiguration` and `FileConfiguration` factory classes may help to specify your configurations.
+2. Create an initial peer node and connect it.
 
 ```java
 INetworkConfiguration netConfig = NetworkConfiguration.create("first");
 IFileConfiguration fileConfig = FileConfiguration.createDefault();
 
-IH2HNode node = H2HNode.createNode(netConfig, fileConfig);
-node.connect();
+IH2HNode peerNode = H2HNode.createNode(netConfig, fileConfig);
+peerNode.connect();
 ```
 
-**Join Existing P2P Network**  
-You may want to add other nodes to your created network. Any node can join by bootstrapping to another node that is already part of the network.
+#### Joining an Existing P2P Network
 
-1. specify the network configuration for the joining node (i.e., provide bootstrap address of another node)
-2. create the new node and connect it (it will bootstrap according to its network configuration)
+You may want to add other peer nodes to the created network. Any node can join by bootstrapping to another node that is already part of the network.
+
+1. Specify the network configuration for the joining node (i.e., provide the bootstrap address of another node).
+2. Create the new node and connect it. It will bootstrap according to its network configuration.
 
 ```java
 INetworkConfiguration netConfig2 = NetworkConfiguration.create("second", InetAddress.getByName("192.168.1.100"));
-IH2HNode node2 = H2HNode.createNode(netConfig2, fileConfig);
-node2.connect();
+IH2HNode peerNode2 = H2HNode.createNode(netConfig2, fileConfig);
+peerNode2.connect();
 ```
 
 ### User Management
 
-Once a node is connected to a network, users can interact with it. For this, each node provides a user management interface.
+Once a peer node is connected to a network, users can interact with it. For this, each node provides a user management interface.
 
-1. user has to provide its credentials
-2. login user (if a user is new to the network, she has to register on her first visit)
-3. user can interact with the network (i.e., file management is enabled)
+1. The user has to provide her credentials.
+2. Login the user to the network. If it's the *first* login, she has to register herself, one-time.
+3. Then, the user can interact with the network (i.e., file management is enabled).
 
 ```java
-IUserManager userManager = node.getUserManager();
+IUserManager userManager = peerNode.getUserManager();
 
 UserCredentials credentials = new UserCredentials("userId", "password", "pin");
 Path rootDirectory = Paths.get("sample/path/to/rootDirectory");
@@ -87,7 +91,7 @@ As soon as a user is logged in to the network, her files are automatically synch
 - **move** file
 
 ```java
-IFileManager fileManager = node.getFileManager();
+IFileManager fileManager = peerNode.getFileManager();
 
 File folder = new File("folderpath");
 File file = new File(folder, "filepath");
@@ -111,9 +115,9 @@ fileManager.move(folder, new File("other-folder"));
 fileManager.delete(file);
 ```
 
-### File Watchdog
+#### File Watchdog
 
-In order to keep track of changes in the local file system, a file observer is needed. This observer then notifies its attached listeners on all file system events. You can either use the provided `H2HFileObserver` and `H2HFileObserverListener` or implement your own adhering to the `IFileObserver` and `IFileObserverListener` interfaces.  
+In order to keep track of changes in the local file system, a file observer is needed. This observer notifies its attached listeners about all file system events. Either use the provided `H2HFileObserver` and `H2HFileObserverListener` or implement your own observer adhering to the `IFileObserver` and `IFileObserverListener` interfaces.  
 The `H2HFileObserverListener` automatically synchronizes the Hive2Hive root folder with the network.
 
 ```java
