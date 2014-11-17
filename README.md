@@ -4,19 +4,26 @@
 
 **Problems of common sync and sharing services**
 
-Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over her data because she cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to such services’ respective pricing and terms of service.
+Although many well-known synchronization and sharing services exist, most of them exhibit the following drawbacks:
+* centralized client-server approaches, data resides in large, external data centers
+  * single-point-of-failure, vulnerable to targeted attacks
+  * often not scalable
+* private data is not encrypted
+* user control is revoked, no control over who has access to the private data
+* user is bound to the respective pricing and terms of service
+* no version control, no conflict management
 
 **Hive2Hive is the solution!**
 
-The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. It supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, all packed in a **clean, simple API**.
+The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. It supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, and adds functionality for file **versioning** and **conflict management**. All packed in a **clean, simple API**.
 
 There are many simple ways to improve this experience even more. [Start to contribute now!](#contribution)
 
 **Are you looking for a demo application?**
 
-- [PeerBox](https://github.com/Hive2Hive/PeerBox), a Windows-based shell extension à la Dropbox.
-- [H2H Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client), an executable `.jar` console application.
-- [Eclipse RCP Client](https://github.com/Hive2Hive/RCP_Client), an RCP-based client.
+* [PeerBox](https://github.com/Hive2Hive/PeerBox), a Windows-based shell extension à la Dropbox.
+* [H2H Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client), an executable `.jar` console application.
+* [Eclipse RCP Client](https://github.com/Hive2Hive/RCP_Client), an RCP-based client.
 
 ### Table of Contents
 
