@@ -173,16 +173,16 @@ If you want to [contribute to the project](#contribution), please refer to optio
 - **Option 1: Add Maven dependency** *(recommended)*  
   You can add the latest stable release as an [Apache Maven](http://maven.apache.org/) dependency and fetch it from our repository. Add the following to your `pom.xml` and make sure to select the most recent version.  
 ```xml
-  <repository>
-    <id>hive2hive.org</id>
-    <url>http://repo.hive2hive.org</url>
-  </repository>
-  ...
-  <dependency>
-    <groupId>org.hive2hive</groupId>
-    <artifactId>org.hive2hive.core</artifactId>
-    <version>1.X.X</version>
-  </dependency>
+<repository>
+  <id>hive2hive.org</id>
+  <url>http://repo.hive2hive.org</url>
+</repository>
+...
+<dependency>
+  <groupId>org.hive2hive</groupId>
+  <artifactId>org.hive2hive.core</artifactId>
+  <version>1.X.X</version>
+</dependency>
 ```
 - **Option 2: Add JAR-file directly**  
   In case you don't want to use Maven, you can just download the [latest stable release](https://github.com/Hive2Hive/Hive2Hive/releases) that comes directly with all necessary sources. All required `.jar`-files are packed and delivered to you as a `.zip`.
