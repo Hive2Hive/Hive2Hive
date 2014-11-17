@@ -8,7 +8,7 @@ Although many well-known synchronization and sharing services exist, most of the
 
 **Hive2Hive is the solution!**
 
-The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** solution that focuses on maximum **security** and **privacy** of both users and data. It supports the whole feature set known from similar centralized approaches, such as Dropbox, OneDrive or Google Drive, all packed in a **clean, simple API**.
+The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. It supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, all packed in a **clean, simple API**.
 
 There are many simple ways to improve this experience even more. [Start to contribute now!](#contribution)
 
@@ -202,14 +202,14 @@ The library is intended to be improved and extended so that we all profit from i
 **We believe that everyone can contribute to make Hive2Hive even better!** 
 
 There are several things - from simple to complex - you can do to help:
-- [star](https://github.com/Hive2Hive/Hive2Hive/stargazers) and [watch](https://github.com/Hive2Hive/Hive2Hive/watchers) the project here on GitHub
-- spread the word, help us getting attention (e.g., follow/tweet about [@Hive2Hive](https://twitter.com/Hive2Hive))
-- suggest and post **your ideas** about improvements or extensions on the [issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) page
-- participate in the [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
-- help us with the documentation: JavaDoc, [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki), etc.
-- help us with the implementation of (your) features
-- **fork the project** and send your pull requests
-- help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
+- [Star](https://github.com/Hive2Hive/Hive2Hive/stargazers) and [watch](https://github.com/Hive2Hive/Hive2Hive/watchers) the project here on GitHub
+- Spread the word and help us getting attention (e.g., follow/tweet about [@Hive2Hive](https://twitter.com/Hive2Hive))
+- Suggest and post **your ideas** about improvements or extensions on the [issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) page
+- Participate in [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
+- Help us with the documentation: JavaDoc, [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki), etc.
+- Help us with the implementation of (your) features
+- **Fork the project** and send your pull requests
+- Help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
 
 **Also, if you are a professional cryptographer with interest in this project, any feedback on the project is very welcome!**
 
