@@ -15,7 +15,7 @@ Although many well-known synchronization and sharing services exist, most of the
 
 **Hive2Hive is the solution!**
 
-The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. It supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, and adds functionality for file **versioning** and **conflict management**. All packed in a **clean, simple API**.
+The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. Aside of this, it supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, and adds functionality for file **versioning** and **conflict management**. All packed in a **clean, simple API**.
 
 There are many simple ways to improve this experience even more. [Start to contribute now!](#contribution)
 
@@ -137,7 +137,7 @@ observer.start();
 
 ## Features & Advantages
 
-Hive2Hive offers the same basic functionality known from popular synchronization services. (e.g., [Dropbox](http://www.dropbox.com))  
+Hive2Hive offers the same basic functionality known from popular synchronization services (e.g., [Dropbox](http://www.dropbox.com)).  
 On top of that, Hive2Hive provides additional features such as security and versioning.
 
 - File Synchronization
