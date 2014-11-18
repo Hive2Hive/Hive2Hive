@@ -140,16 +140,15 @@ observer.start();
 Hive2Hive offers the same basic functionality known from popular synchronization services (e.g., [Dropbox](http://www.dropbox.com)).  
 On top of that, Hive2Hive provides additional features such as security and versioning.
 
-- File Synchronization
-- File Sharing (including user permissions (*write*, *read-only*))
-- File Versioning (including conflict detection)
-- File Watchdog / Change Detection (automated, configurable)
-- Security (configurable, [see more](http://hive2hive.com/security-aspects/))
-  - Encryption of files
-  - Encryption of messages
-  - Authenticity of data and messages
-- Users can use multiple clients (simulatenously)
-- Multiple users can use the same machine (simultaneously)
+* File Synchronization
+* File Sharing and Access Permissions *(read/write and read-only)*
+* File Versioning and Conflict Management
+* File Watchdog / Change Detection *(automated, configurable)*
+* [Security](https://github.com/Hive2Hive/Hive2Hive/wiki/Security-Concepts) *(configurable)*
+  * [Encryption](https://github.com/Hive2Hive/Hive2Hive/wiki/Security-Concepts#encryption) of files and messages
+  * [Authentication](https://github.com/Hive2Hive/Hive2Hive/wiki/Security-Concepts#authentication) of data and messages
+* Users can use multiple clients *(simulatenously)*
+* Multiple users can use the same machine *(simultaneously)*
 
 **Using the Hive2Hive library is very simple and has several advantages:**
 - P2P Decentralization
