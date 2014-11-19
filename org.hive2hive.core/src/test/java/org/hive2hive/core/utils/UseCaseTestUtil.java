@@ -27,6 +27,7 @@ import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.junit.Assert;
 
 /**
  * Helper class for JUnit tests to get some documents from the DHT.
@@ -127,17 +128,19 @@ public class UseCaseTestUtil {
 	}
 
 	public static BaseMetaFile getMetaFile(NetworkManager networkManager, KeyPair keys, boolean expectSuccess)
-			throws NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
+			throws NoPeerConnectionException {
 		GetMetaFileContext context = new GetMetaFileContext(keys);
 		GetMetaFileStep step = new GetMetaFileStep(context, networkManager.getDataManager());
 		if (expectSuccess) {
 			TestExecutionUtil.executeProcessTillSucceded(step);
 			return context.metaFile;
 		} else {
-			TestProcessComponentListener listener = new TestProcessComponentListener();
-			step.attachListener(listener);
-			step.execute();
-			TestExecutionUtil.waitTillFailed(listener, TestExecutionUtil.MAX_PROCESS_WAIT_TIME);
+			try {
+				step.execute();
+				Assert.fail("Expected the process to fail");
+			} catch (InvalidProcessStateException | ProcessExecutionException e) {
+				// expected
+			}
 			return null;
 		}
 	}
