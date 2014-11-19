@@ -101,7 +101,7 @@ public interface H2HConstants {
 	 * Replication
 	 */
 	public static final int REPLICATION_FACTOR = 5;
-	public static final int REPLICATION_INTERVAL = 300000; // in milliseconds
+	public static final int REPLICATION_INTERVAL_MS = 300000;
 	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
 
 	/**

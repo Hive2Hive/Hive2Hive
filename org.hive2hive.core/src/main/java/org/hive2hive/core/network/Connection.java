@@ -182,7 +182,7 @@ public class Connection {
 		// set replication factor
 		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
 		// set replication frequency
-		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL);
+		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
 		// set kind of replication, default is 0Root
 		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
 			replication.nRoot();
