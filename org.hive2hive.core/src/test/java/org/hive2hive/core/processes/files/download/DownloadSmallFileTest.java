@@ -21,11 +21,9 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
-import org.hive2hive.core.utils.TestProcessComponentListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -104,17 +102,14 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
-			InvalidProcessStateException, NoPeerConnectionException, ProcessExecutionException {
+			InvalidProcessStateException, NoPeerConnectionException {
 		// create fake file keys
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		// try to download with wrong keys
 		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(),
 				downloader);
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		process.execute();
-		TestExecutionUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.executeProcessTillFailed(process);
 	}
 
 	@Test
@@ -142,7 +137,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	@Test
 	// should NOT overwrite the existing file
 	public void testDownloadFileAlreadyExistingSameContent() throws IOException, NoSessionException,
-			InvalidProcessStateException, NoPeerConnectionException, GetFailedException, ProcessExecutionException {
+			InvalidProcessStateException, NoPeerConnectionException, GetFailedException {
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, FileUtils.readFileToString(uploadedFile));
@@ -150,11 +145,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 
 		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
 				downloader);
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		process.execute();
-
-		TestExecutionUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.executeProcessTillFailed(process);
 
 		// the existing file has already same content, should not have been downloaded
 		Assert.assertEquals(lastModifiedBefore, existing.lastModified());

@@ -20,8 +20,6 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.core.utils.TestExecutionUtil;
-import org.hive2hive.core.utils.TestProcessComponentListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -128,11 +126,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, CHUNK_SIZE);
 		IProcessComponent<Void> process = ProcessFactory.instance().createAddFileProcess(file, client);
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
 		process.execute();
-
-		TestExecutionUtil.waitTillFailed(listener, 40);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -164,21 +158,6 @@ public class AddFileTest extends H2HJUnitTest {
 			Assert.assertEquals(1, metaFileSmall.getVersions().size());
 			Assert.assertEquals(expectedChunks, metaFileSmall.getVersions().get(0).getMetaChunks().size());
 		}
-
-		// // verify the file (should have been downloaded automatically during the notification)
-		// Path relative = uploaderRoot.toPath().relativize(originalFile.toPath());
-		// File file = new File(downloaderRoot, relative.toString());
-		//
-		// // give some seconds for the file to download
-		// H2HWaiter waiter = new H2HWaiter(10);
-		// do {
-		// waiter.tickASecond();
-		// } while (!file.exists());
-		//
-		// Assert.assertTrue(file.exists());
-		// if (originalFile.isFile()) {
-		// Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(file));
-		// }
 	}
 
 	@AfterClass

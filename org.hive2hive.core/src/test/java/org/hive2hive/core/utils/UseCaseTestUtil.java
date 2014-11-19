@@ -128,7 +128,7 @@ public class UseCaseTestUtil {
 	}
 
 	public static BaseMetaFile getMetaFile(NetworkManager networkManager, KeyPair keys, boolean expectSuccess)
-			throws NoPeerConnectionException {
+			throws NoPeerConnectionException, InvalidProcessStateException {
 		GetMetaFileContext context = new GetMetaFileContext(keys);
 		GetMetaFileStep step = new GetMetaFileStep(context, networkManager.getDataManager());
 		if (expectSuccess) {
@@ -138,7 +138,7 @@ public class UseCaseTestUtil {
 			try {
 				step.execute();
 				Assert.fail("Expected the process to fail");
-			} catch (InvalidProcessStateException | ProcessExecutionException e) {
+			} catch (ProcessExecutionException e) {
 				// expected
 			}
 			return null;

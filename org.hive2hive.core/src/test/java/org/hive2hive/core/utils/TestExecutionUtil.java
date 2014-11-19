@@ -31,15 +31,6 @@ public final class TestExecutionUtil {
 		} while (!listener.hasExecutionSucceeded());
 	}
 
-	public static void waitTillFailed(TestProcessComponentListener listener, int maxSeconds) {
-		H2HWaiter waiter = new H2HWaiter(maxSeconds);
-		do {
-			if (listener.hasExecutionSucceeded())
-				Assert.fail();
-			waiter.tickASecond();
-		} while (!listener.hasExecutionFailed());
-	}
-
 	public static void executeProcessTillSucceded(IProcessComponent<?> process) {
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
@@ -47,19 +38,18 @@ public final class TestExecutionUtil {
 			process.execute();
 			waitTillSucceded(listener, MAX_PROCESS_WAIT_TIME);
 		} catch (InvalidProcessStateException | ProcessExecutionException ex) {
-			System.out.println("ERROR: Cannot wait until process is done.");
+			System.err.println("ERROR: Cannot wait until process is done.");
 			Assert.fail();
 		}
 	}
 
 	public static void executeProcessTillFailed(IProcessComponent<?> process) {
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
 		try {
 			process.execute();
-			waitTillFailed(listener, MAX_PROCESS_WAIT_TIME);
+			System.err.println("ERROR: Cannot wait until process is done.");
+			Assert.fail("Process should fail");
 		} catch (InvalidProcessStateException | ProcessExecutionException e) {
-			System.out.println("ERROR: Cannot wait until process is done.");
+			// expected behavior
 		}
 	}
 }
