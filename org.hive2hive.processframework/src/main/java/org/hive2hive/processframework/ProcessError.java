@@ -10,6 +10,8 @@ public enum ProcessError {
 	
 	PARENT_IN_USERFILE_NOT_FOUND,
 	
-	VERSION_FORK //unused atm as PutFailedException throws are not distinguished
+	VERSION_FORK, //unused atm as PutFailedException throws are not distinguished
+	
+	SAME_CONTENT
 
 }
