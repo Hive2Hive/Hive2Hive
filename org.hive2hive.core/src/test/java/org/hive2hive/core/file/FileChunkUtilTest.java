@@ -99,7 +99,7 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 			File randomFile = FileTestUtil.createFileRandomContent(genNOC, parent, CHUNK_SIZE);
 
 			// get chunk 0 ... n-1
-			int chosenChunk = rnd.nextInt(genNOC - 2); // index starts at 0
+			int chosenChunk = rnd.nextInt(genNOC - 1); // index starts at 0
 			Chunk chunk = FileChunkUtil.getChunk(randomFile, CHUNK_SIZE, chosenChunk, randomString());
 			assertEquals(CHUNK_SIZE, chunk.getSize());
 			assertEquals(chosenChunk, chunk.getOrder());
