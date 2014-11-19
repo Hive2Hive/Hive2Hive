@@ -6,6 +6,7 @@ import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
+import org.hive2hive.processframework.ProcessError;
 import org.hive2hive.processframework.RollbackReason;
 import org.hive2hive.processframework.abstracts.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -37,7 +38,7 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep implements I
 			modified = true;
 		} catch (GetFailedException | PutFailedException | AbortModifyException e) {
 			logger.error("Cannot modify the user profile", e);
-			throw new ProcessExecutionException(e);
+			throw new ProcessExecutionException(e, ProcessError.SAME_CONTENT);
 		}
 		afterModify();
 	}
