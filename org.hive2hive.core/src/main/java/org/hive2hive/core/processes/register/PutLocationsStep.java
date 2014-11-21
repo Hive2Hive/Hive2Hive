@@ -24,9 +24,10 @@ public class PutLocationsStep extends BasePutProcessStep {
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		Locations locations = new Locations(context.consumeUserId());
+		locations.generateVersionKey();
+
 		try {
-			Locations locations = new Locations(context.consumeUserId());
-			locations.generateVersionKey();
 			put(context.consumeUserId(), H2HConstants.USER_LOCATIONS, locations,
 					context.consumeUserLocationsProtectionKeys());
 		} catch (PutFailedException ex) {
@@ -34,5 +35,4 @@ public class PutLocationsStep extends BasePutProcessStep {
 		}
 		return null;
 	}
-
 }

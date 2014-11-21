@@ -67,7 +67,6 @@ public abstract class BasePutProcessStep extends ProcessStep<Void> {
 
 	@Override
 	protected Void doRollback() throws InvalidProcessStateException {
-
 		boolean success = dataManager.removeVersion(parameters);
 		if (success) {
 			logger.debug("Rollback of put succeeded. '{}'", parameters.toString());
