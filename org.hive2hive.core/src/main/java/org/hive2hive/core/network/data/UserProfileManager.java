@@ -114,82 +114,60 @@ public class UserProfileManager {
 			queueWaiter.notify();
 		}
 
+		UserProfile profile;
 		try {
 			entry.waitForGet();
+			profile = entry.getUserProfile();
+			if (profile == null) {
+				throw new GetFailedException("User Profile not found");
+			}
 		} catch (GetFailedException e) {
 			// just stop the modification if an error occurs.
-			stopModification(pid);
+			if (modifying != null && modifying.getPid().equals(pid)) {
+				modifying.abort();
+			}
 			throw e;
 		}
 
-		UserProfile profile = entry.getUserProfile();
-		if (profile == null) {
-			throw new GetFailedException("User Profile not found");
-		}
-
+		boolean retryPut = true;
 		int forkCounter = 0;
 		int forkWaitTime = new Random().nextInt(1000) + 500;
-		while (true) {
+		while (retryPut) {
 			// user starts modifying it
 			modifier.modifyUserProfile(profile);
 
 			try {
 				// put the updated user profile
-				readyToPut(profile, pid);
+				if (protectionKeys == null) {
+					protectionKeys = profile.getProtectionKeys();
+				}
+
+				if (modifying != null && modifying.getPid().equals(pid)) {
+					modifying.setUserProfile(profile);
+					modifying.readyToPut();
+					modifying.waitForPut();
+
+					// successfully put the user profile
+					retryPut = false;
+				} else {
+					throw new PutFailedException("Not allowed to put anymore");
+				}
 			} catch (VersionForkAfterPutException e) {
 				if (forkCounter++ > FORK_LIMIT) {
 					logger.warn("Ignoring fork after {} rejects and retries.", forkCounter);
+					retryPut = false;
 				} else {
 					logger.warn("Version fork after put detected. Rejecting and retrying put.");
 
-					// exponential back off waiting
+					// exponential back off waiting and retry to update the user profile
 					try {
 						Thread.sleep(forkWaitTime);
 					} catch (InterruptedException e1) {
 						// ignore
 					}
 					forkWaitTime = forkWaitTime * 2;
-
-					// retry update of user profile
-					continue;
 				}
 			}
-
-			break;
-		}
-	}
-
-	/**
-	 * A process notifies that he is ready to put the new profile. Note that the profile in the argument must
-	 * be a modification of the profile in the DHT.
-	 * 
-	 * @param profile the modified user profile
-	 * @param pid the process identifier
-	 * @throws PutFailedException if putting has failed (because of network errors or the profile is invalid).
-	 *             An error is also thrown when the process is not allowed to put (because he did not register
-	 *             himself as intending to put)
-	 */
-	private void readyToPut(UserProfile profile, String pid) throws PutFailedException {
-		if (protectionKeys == null) {
-			protectionKeys = profile.getProtectionKeys();
-		}
-
-		if (modifying != null && modifying.equals(pid)) {
-			modifying.setUserProfile(profile);
-			modifying.readyToPut();
-			modifying.waitForPut();
-		} else {
-			throw new PutFailedException("Not allowed to put anymore");
-		}
-	}
-
-	/**
-	 * Notifies that a process is done with a modification on the user profile.
-	 */
-	private void stopModification(String pid) {
-		// test whether is the current modifying process
-		if (modifying != null && modifying.equals(pid)) {
-			modifying.abort();
 		}
 	}
 
