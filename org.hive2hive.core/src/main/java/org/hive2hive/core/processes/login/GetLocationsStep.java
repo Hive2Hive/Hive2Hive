@@ -33,19 +33,9 @@ public class GetLocationsStep extends ProcessStep<Void> {
 		try {
 			Locations locations = locationsManager.get();
 			context.provideLocations(locations);
-			setRequiresRollback(true);
-			
 		} catch (GetFailedException ex) {
 			throw new ProcessExecutionException(this, ex);
 		}
 		return null;
 	}
-
-	@Override
-	protected Void doRollback() throws InvalidProcessStateException {
-		context.provideLocations(null);
-		setRequiresRollback(false);
-		return null;
-	}
-
 }

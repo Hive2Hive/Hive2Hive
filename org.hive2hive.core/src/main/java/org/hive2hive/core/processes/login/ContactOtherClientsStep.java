@@ -67,22 +67,19 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 
 		sendBlocking(locations.getPeerAddresses(), ownPublicKey);
 
-		Locations updatedLocations = new Locations(locations.getUserId());
-		updatedLocations.setBasedOnKey(locations.getBasedOnKey());
-		updatedLocations.setVersionKey(locations.getVersionKey());
+		locations.getPeerAddresses().clear();
 
 		// add addresses that responded
 		for (PeerAddress address : responses.keySet()) {
 			if (responses.get(address)) {
-				updatedLocations.addPeerAddress(address);
+				locations.addPeerAddress(address);
 			}
 		}
 		// add self
-		updatedLocations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
-		context.provideLocations(updatedLocations);
+		locations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
 
 		// evaluate if initial
-		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
+		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(locations.getPeerAddresses());
 		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
 				networkManager.getConnection().getPeerDHT().peerAddress())) {
 			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
@@ -90,7 +87,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 				getParent().add(ProcessFactory.instance().createUserProfileTaskProcess(networkManager));
 			}
 		}
-		
+
 		return null;
 	}
 

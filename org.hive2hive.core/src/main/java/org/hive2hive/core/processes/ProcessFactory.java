@@ -135,7 +135,6 @@ public final class ProcessFactory {
 	 */
 	public IProcessComponent<Void> createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
-		DataManager dataManager = networkManager.getDataManager();
 		LoginProcessContext context = new LoginProcessContext(credentials, params);
 
 		// process composition
@@ -144,7 +143,7 @@ public final class ProcessFactory {
 		process.add(new SessionCreationStep(context, networkManager));
 		process.add(new GetLocationsStep(context, networkManager));
 		process.add(new ContactOtherClientsStep(context, networkManager));
-		process.add(new org.hive2hive.core.processes.login.PutLocationsStep(context, dataManager));
+		process.add(new org.hive2hive.core.processes.login.PutLocationsStep(context, networkManager));
 
 		process.setName("Login Process");
 		return process;
