@@ -17,7 +17,9 @@ Although many well-known synchronization and sharing services exist, most of the
 
 The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. Aside of this, it supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, and adds functionality for file **versioning** and **conflict management**. All packed in a **clean, simple API**.
 
-There are many simple ways to improve this experience even more. [Start to contribute now!](#contribution)
+There are many simple ways to improve this experience even more. [Start to contribute now!](https://github.com/Hive2Hive/Hive2Hive/wiki/Contribution)
+
+Check our [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki) to learn more about [How To Use](https://github.com/Hive2Hive/Hive2Hive/wiki/How-To-Use) and [How It Works](https://github.com/Hive2Hive/Hive2Hive/wiki/How-It-Works).
 
 **Are you looking for a demo application?**
 
