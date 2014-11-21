@@ -5,7 +5,6 @@ import java.security.KeyPair;
 import javax.crypto.SecretKey;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -17,7 +16,6 @@ public final class RegisterProcessContext {
 
 	private final UserCredentials userCredentials;
 
-	private Locations locations;
 	private UserProfile profile;
 
 	public RegisterProcessContext(UserCredentials userCredentials) {
@@ -30,14 +28,6 @@ public final class RegisterProcessContext {
 
 	public String consumeUserProflieLocationKey() {
 		return userCredentials.getProfileLocationKey();
-	}
-
-	public void provideUserLocations(Locations locations) {
-		this.locations = locations;
-	}
-
-	public Locations consumeUserLocations() {
-		return locations;
 	}
 
 	public void provideUserProfile(UserProfile profile) {

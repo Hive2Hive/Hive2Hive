@@ -62,7 +62,6 @@ import org.hive2hive.core.processes.notify.PutAllUserProfileTasksStep;
 import org.hive2hive.core.processes.notify.SendNotificationsMessageStep;
 import org.hive2hive.core.processes.notify.VerifyNotificationFactoryStep;
 import org.hive2hive.core.processes.register.CheckIsUserRegisteredStep;
-import org.hive2hive.core.processes.register.LocationsCreationStep;
 import org.hive2hive.core.processes.register.PutPublicKeyStep;
 import org.hive2hive.core.processes.register.PutUserProfileStep;
 import org.hive2hive.core.processes.register.UserProfileCreationStep;
@@ -114,7 +113,6 @@ public final class ProcessFactory {
 		SyncProcess process = new SyncProcess();
 
 		process.add(new CheckIsUserRegisteredStep(context, dataManager));
-		process.add(new LocationsCreationStep(context));
 		process.add(new UserProfileCreationStep(context));
 		process.add(new AsyncComponent<>(new PutUserProfileStep(context, dataManager)));
 		process.add(new AsyncComponent<>(new org.hive2hive.core.processes.register.PutLocationsStep(context, dataManager)));
