@@ -132,7 +132,7 @@ public class NetworkTestUtil {
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					FileConfiguration.createDefault(), keyManager);
+					FileConfiguration.createDefault());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 

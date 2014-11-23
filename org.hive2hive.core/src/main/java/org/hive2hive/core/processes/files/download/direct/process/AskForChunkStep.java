@@ -11,7 +11,6 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.common.base.BaseMessageProcessStep;
@@ -26,15 +25,12 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 	private static final Logger logger = LoggerFactory.getLogger(AskForChunkStep.class);
 
 	private final DownloadDirectContext context;
-	private final PublicKeyManager keyManager;
 	private final IFileConfiguration config;
 
-	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager, PublicKeyManager keyManager,
-			IFileConfiguration config) {
+	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager, IFileConfiguration config) {
 		super(messageManager);
 		this.setName(getClass().getName());
 		this.context = context;
-		this.keyManager = keyManager;
 		this.config = config;
 	}
 
@@ -47,9 +43,10 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 
 		PublicKey receiverPublicKey;
 		try {
-			receiverPublicKey = keyManager.getPublicKey(context.getUserName());
+			receiverPublicKey = context.getTask().getKeyManager().getPublicKey(context.getUserName());
 		} catch (GetFailedException ex) {
-			throw new ProcessExecutionException(this, String.format("Cannot get public key of user '%s'.", context.getUserName()));
+			throw new ProcessExecutionException(this, String.format("Cannot get public key of user '%s'.",
+					context.getUserName()));
 		}
 
 		MetaChunk metaChunk = context.getMetaChunk();
@@ -62,7 +59,7 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
 			rerunProcess(true);
 		}
-		
+
 		return null;
 	}
 
@@ -148,6 +145,6 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 		// select another peer
 		logger.debug("Re-run the process: select another peer and ask him for chunk {}", context.getMetaChunk().getIndex());
 		getParent().add(new SelectPeerForDownloadStep(context));
-		getParent().add(new AskForChunkStep(context, messageManager, keyManager, config));
+		getParent().add(new AskForChunkStep(context, messageManager, config));
 	}
 }

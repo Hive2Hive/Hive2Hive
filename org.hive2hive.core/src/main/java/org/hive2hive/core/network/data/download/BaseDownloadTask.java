@@ -17,6 +17,7 @@ import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.file.FileChunkUtil;
 import org.hive2hive.core.model.MetaChunk;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
@@ -35,14 +36,16 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	// when the download has finished
 	private transient CountDownLatch finishedLatch;
 	private transient Set<IDownloadListener> listeners;
+	private transient PublicKeyManager keyManager;
+	protected transient EventBus eventBus;
+
 	private final AtomicBoolean aborted;
 	private String reason;
-	
-	protected EventBus eventBus;
 
-	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination, EventBus eventBus) {
+	public BaseDownloadTask(List<MetaChunk> metaChunks, File destination, EventBus eventBus, PublicKeyManager keyManager) {
 		this.metaChunks = metaChunks;
 		this.destination = destination;
+		this.keyManager = keyManager;
 		this.finishedLatch = new CountDownLatch(1);
 		this.listeners = new HashSet<IDownloadListener>();
 		this.aborted = new AtomicBoolean(false);
@@ -171,7 +174,10 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	/**
 	 * Re-initialize transient variables after the serialization
 	 */
-	public void reinitializeAfterDeserialization() {
+	public void reinitializeAfterDeserialization(EventBus eventBus, PublicKeyManager keyManager) {
+		this.eventBus = eventBus;
+		this.keyManager = keyManager;
+
 		this.listeners = new HashSet<IDownloadListener>();
 		if (!isAborted() && !isDone()) {
 			finishedLatch = new CountDownLatch(1);
@@ -198,5 +204,9 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 		} else if (!isDone()) {
 			throw new InterruptedException("Could not wait until all downloads are done");
 		}
+	}
+
+	public PublicKeyManager getKeyManager() {
+		return keyManager;
 	}
 }

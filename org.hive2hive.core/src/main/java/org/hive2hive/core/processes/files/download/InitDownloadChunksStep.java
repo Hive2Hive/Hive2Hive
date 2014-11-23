@@ -77,7 +77,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 				FileIndex fileIndex = (FileIndex) context.consumeIndex();
 				try {
 					if (HashUtil.compare(destination, fileIndex.getMD5())) {
-						throw new ProcessExecutionException(this, 
+						throw new ProcessExecutionException(this,
 								"File already exists on disk. Content does match. No download needed.");
 					}
 				} catch (IOException ex) {
@@ -87,7 +87,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 
 			// start the download
 			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFileSmall.getChunkKey().getPrivate(),
-					networkManager.getEventBus());
+					networkManager.getEventBus(), session.getKeyManager());
 			session.getDownloadManager().submit(task);
 
 			// join the download process
@@ -103,7 +103,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 			Set<String> users = context.consumeIndex().getCalculatedUserList();
 			DownloadTaskDirect task = new DownloadTaskDirect(metaFileLarge.getMetaChunks(), destination, metaFile.getId(),
 					session.getUserId(), networkManager.getConnection().getPeerDHT().peerAddress(), users,
-					networkManager.getEventBus());
+					networkManager.getEventBus(), session.getKeyManager());
 			session.getDownloadManager().submit(task);
 
 			// join the download process
@@ -114,7 +114,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 			}
 		}
 		logger.debug("Finished downloading file '{}'.", destination);
-		
+
 		return null;
 	}
 

@@ -11,7 +11,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.processes.files.download.dht.DownloadChunkRunnableDHT;
 import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
@@ -39,35 +38,20 @@ public class DownloadManager {
 	private final IFileConfiguration fileConfig;
 	private final Set<BaseDownloadTask> openTasks;
 
-	private PublicKeyManager keyManager;
 	private ExecutorService executor;
 
 	public DownloadManager(DataManager dataManager, IMessageManager messageManager, IFileConfiguration fileConfig) {
-		this(dataManager, messageManager, fileConfig, null);
-	}
-
-	public DownloadManager(DataManager dataManager, IMessageManager messageManager, IFileConfiguration fileConfig,
-			PublicKeyManager keyManager) {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;
 		this.fileConfig = fileConfig;
-		this.keyManager = keyManager;
 		this.executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
-	}
-
-	public void setKeyManager(PublicKeyManager keyManager) {
-		this.keyManager = keyManager;
 	}
 
 	/**
 	 * Add a new task to download a file. The download is automatically started in the background
 	 */
 	public void submit(BaseDownloadTask task) {
-		if (keyManager == null) {
-			throw new IllegalStateException("The keymanager is not set. Should login first");
-		}
-
 		logger.debug("Submitted to download {}", task.getDestinationName());
 
 		// store the task for possible later recovery
@@ -91,7 +75,7 @@ public class DownloadManager {
 			// then download all chunks in separate threads
 			for (MetaChunk chunk : task.getOpenChunks()) {
 				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(directTask, chunk, messageManager,
-						keyManager, fileConfig);
+						fileConfig);
 				executor.submit(runnable);
 			}
 		} else {
