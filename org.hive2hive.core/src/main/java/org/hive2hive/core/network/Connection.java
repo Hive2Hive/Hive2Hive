@@ -82,6 +82,10 @@ public class Connection {
 			return false;
 		}
 		this.peerDHT = peer;
+
+		// attach a reply handler for messages
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+
 		return true;
 	}
 

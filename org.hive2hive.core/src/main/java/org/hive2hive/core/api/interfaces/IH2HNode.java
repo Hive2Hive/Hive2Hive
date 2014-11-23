@@ -1,6 +1,7 @@
 package org.hive2hive.core.api.interfaces;
 
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.rpc.ObjectDataReply;
 
 /**
  * This interface represents the entry point of Hive2Hive and exposes the managers necessary for interaction.
@@ -23,7 +24,8 @@ public interface IH2HNode {
 	 * Connect to the network using an existing peer (which is already connected and bootstrapped).
 	 * It's an alternative to creating an own peer using {@link #connect(INetworkConfiguration)}. <br>
 	 * <strong>Important:</strong> When using this method, you must care yourself about bootstrapping,
-	 * replication and the storage layer.
+	 * replication and the storage layer.<br>
+	 * Also note that the {@link ObjectDataReply} will be overwritten because Hive2Hive uses it for messaging.
 	 * 
 	 * @param peer a (connected) peer
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
