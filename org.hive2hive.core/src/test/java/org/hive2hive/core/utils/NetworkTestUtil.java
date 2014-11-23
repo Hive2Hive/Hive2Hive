@@ -167,8 +167,6 @@ public class NetworkTestUtil {
 		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.createInitial("initial"),
 				FileConfiguration.createDefault(), new H2HDummyEncryption());
 		initial.connect();
-		initial.getFileManager().configureAutostart(false);
-		initial.getUserManager().configureAutostart(false);
 
 		nodes.add(initial);
 
@@ -178,8 +176,6 @@ public class NetworkTestUtil {
 				IH2HNode node = H2HNode.createNode(NetworkConfiguration.create("node " + i, bootstrapAddress),
 						FileConfiguration.createDefault(), new H2HDummyEncryption());
 				node.connect();
-				node.getFileManager().configureAutostart(false);
-				node.getUserManager().configureAutostart(false);
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {
