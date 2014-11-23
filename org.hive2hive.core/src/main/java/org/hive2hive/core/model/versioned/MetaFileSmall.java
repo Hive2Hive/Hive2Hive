@@ -51,14 +51,12 @@ public class MetaFileSmall extends BaseMetaFile {
 			return null;
 		}
 
-		Collections.sort(versions, new Comparator<FileVersion>() {
+		return Collections.max(versions, new Comparator<FileVersion>() {
 			@Override
 			public int compare(FileVersion o1, FileVersion o2) {
 				return new Integer(o1.getIndex()).compareTo(o2.getIndex());
 			}
 		});
-
-		return versions.get(versions.size() - 1);
 	}
 
 	public FileVersion getVersionByIndex(int index) {

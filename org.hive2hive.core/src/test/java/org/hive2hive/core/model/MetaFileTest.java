@@ -34,7 +34,6 @@ public class MetaFileTest extends H2HJUnitTest {
 
 		FileVersion newestVersion = metaFileSmall.getNewestVersion();
 		Assert.assertEquals(2, newestVersion.getIndex());
-
 	}
 
 	@AfterClass
