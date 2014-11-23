@@ -61,7 +61,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		// registering from random node (await)
 		IUserManager userManager = network.get(new Random().nextInt(network.size())).getUserManager();
 		userManager.configureAutostart(true);
-		userManager.register(userCredentials).await();
+		userManager.createRegisterProcess(userCredentials).await();
 
 		// all nodes must have same result: true
 		for (int i = 0; i < network.size(); i++) {
@@ -88,24 +88,24 @@ public class UserManagerTest extends H2HJUnitTest {
 		// before registering: login all nodes and check again
 		for (int i = 0; i < network.size(); i++) {
 			network.get(i).getUserManager().configureAutostart(true);
-			network.get(i).getUserManager().login(userCredentials, fileAgent).await();
+			network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent).await();
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
 			assertFalse(isLoggedIn);
 		}
 
 		// registering from random node (await)
-		network.get(new Random().nextInt(network.size())).getUserManager().register(userCredentials).await();
+		network.get(new Random().nextInt(network.size())).getUserManager().createRegisterProcess(userCredentials).await();
 
 		// after registering: login all nodes and check again
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getUserManager().login(userCredentials, fileAgent).await();
+			network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent).await();
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
 			assertTrue(isLoggedIn);
 		}
 
 		// logout
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getUserManager().logout().await();
+			network.get(i).getUserManager().createLogoutProcess().await();
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
 			assertFalse(isLoggedIn);
 		}

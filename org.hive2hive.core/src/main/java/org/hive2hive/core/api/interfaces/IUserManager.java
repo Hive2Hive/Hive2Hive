@@ -23,10 +23,10 @@ public interface IUserManager {
 	 * @return an observable process component
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
-	IProcessComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException;
+	IProcessComponent<Void> createRegisterProcess(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
-	 * Login a (registered) user with the same credentials as {@link IUserManager#register(UserCredentials)}
+	 * Login a (registered) user with the same credentials as {@link IUserManager#createRegisterProcess(UserCredentials)}
 	 * has been called. After login, the root folder gets synchronized.
 	 * 
 	 * @param credentials the user credentials
@@ -35,7 +35,7 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	IProcessComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
+	IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
@@ -45,7 +45,7 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 * @throws NoSessionException no user has logged in
 	 */
-	IProcessComponent<Void> logout() throws NoPeerConnectionException, NoSessionException;
+	IProcessComponent<Void> createLogoutProcess() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Checks whether a user is registered in the network.

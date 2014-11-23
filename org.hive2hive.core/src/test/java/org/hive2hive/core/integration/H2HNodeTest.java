@@ -63,12 +63,12 @@ public class H2HNodeTest extends H2HJUnitTest {
 		credentials = generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcessComponent<?> registerProcess = registerNode.getUserManager().register(credentials);
+		IProcessComponent<?> registerProcess = registerNode.getUserManager().createRegisterProcess(credentials);
 		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
 
 		fileAgent = new TestFileAgent();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcessComponent<?> loginProcess = loggedInNode.getUserManager().login(credentials, fileAgent);
+		IProcessComponent<?> loginProcess = loggedInNode.getUserManager().createLoginProcess(credentials, fileAgent);
 		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 	}
 
@@ -108,7 +108,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@After
 	public void logoutAndUnregister() throws NoSessionException, NoPeerConnectionException {
-		IProcessComponent<?> process = loggedInNode.getUserManager().logout();
+		IProcessComponent<?> process = loggedInNode.getUserManager().createLogoutProcess();
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// TODO unregister

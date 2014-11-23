@@ -52,7 +52,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
 				ConsoleFileAgent fileAgent = new ConsoleFileAgent(menus.getFileMenu().getRootDirectory());
 				AsyncComponent<Void> loginProcess = menus.getNodeMenu().getNode().getUserManager()
-						.login(menus.getUserMenu().getUserCredentials(), fileAgent);
+						.createLoginProcess(menus.getUserMenu().getUserCredentials(), fileAgent);
 
 				try {
 					executeBlocking(loginProcess, displayText);
@@ -69,7 +69,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Exception {
-				AsyncComponent<Void> logoutProcess = menus.getNodeMenu().getNode().getUserManager().logout();
+				AsyncComponent<Void> logoutProcess = menus.getNodeMenu().getNode().getUserManager().createLogoutProcess();
 				executeBlocking(logoutProcess, displayText);
 			}
 		});
@@ -100,7 +100,7 @@ public final class RootMenu extends H2HConsoleMenu {
 		} else {
 			H2HConsoleMenuItem
 					.printPrecondition("You are not registered to the network. This will now happen automatically.");
-			AsyncComponent<Void> registerProcess = userManager.register(userCredentials);
+			AsyncComponent<Void> registerProcess = userManager.createRegisterProcess(userCredentials);
 			try {
 				executeBlocking(registerProcess, "Register");
 				return true;

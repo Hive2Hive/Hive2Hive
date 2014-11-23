@@ -35,20 +35,20 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException {
+	public IProcessComponent<Void> createRegisterProcess(UserCredentials credentials) throws NoPeerConnectionException {
 		
 		return ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
 	}
 
 	@Override
-	public IProcessComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
+	public IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
 		SessionParameters params = new SessionParameters(fileAgent, fileConfiguration);
 
 		return ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 	}
 
 	@Override
-	public IProcessComponent<Void> logout() throws NoPeerConnectionException, NoSessionException {
+	public IProcessComponent<Void> createLogoutProcess() throws NoPeerConnectionException, NoSessionException {
 		
 		return ProcessFactory.instance().createLogoutProcess(networkManager);
 	}
