@@ -7,7 +7,8 @@ import net.tomp2p.dht.PeerDHT;
  * ...) and file management (add, remove, share, ...).<br>
  * The user management and the file management are split for a better understanding. However, this interface
  * could easily be extended.<br>
- * For further information, check the Hive2Hive website (http://hive2hive.com/).
+ * For further information, check the Hive2Hive website (http://hive2hive.com/) or the wiki
+ * (https://github.com/Hive2Hive/Hive2Hive/wiki)
  * 
  * @author Christian, Nico, Seppi
  * 
@@ -17,6 +18,8 @@ public interface IH2HNode {
 	/**
 	 * Connect to the network. The connection kind is dependent on {@link INetworkConfiguration}.
 	 * 
+	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
+	 *            to listen to.
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	boolean connect(INetworkConfiguration networkConfiguration);
@@ -31,8 +34,6 @@ public interface IH2HNode {
 	/**
 	 * Checks whether this {@link IH2HNode} is connected.
 	 * 
-	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
-	 *            to listen to.
 	 * @return <code>true</code> if connected, <code>false</code> otherwise
 	 */
 	boolean isConnected();
