@@ -40,7 +40,7 @@ public class AddFileBuffer extends BaseFileBuffer {
 				continue;
 			}
 			try {
-				addProcess.executeAsync();
+				addProcess.executeAsync(); // asynchronous
 			} catch (InvalidProcessStateException ex) {
 				logger.error("Cannot start the '{}' to add '{}'.", addProcess, toAdd.getName(), ex);
 				continue;

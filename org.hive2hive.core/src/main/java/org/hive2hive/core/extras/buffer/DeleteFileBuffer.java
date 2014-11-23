@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 public class DeleteFileBuffer extends BaseFileBuffer {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeleteFileBuffer.class);
-	// timeout to omit blocks
-	private static final long MAX_DELETION_PROCESS_DURATION_MS = 30000;
 
 	public DeleteFileBuffer(IFileManager fileManager) {
 		super(fileManager);
@@ -60,19 +58,23 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 		// reverse the sorting
 		Collections.reverse(bufferedFiles);
 
-		// delete individual files
+		// execute processes synchronously
+		IProcessComponent<?> deleteProcess;
 		for (File toDelete : bufferedFiles) {
 			try {
-				logger.debug("Starting to delete buffered file {}.", toDelete);
-				IProcessComponent<?> delete = fileManager.createDeleteProcess(toDelete);
-				if (!fileManager.isAutostart()) {
-					delete.execute();
-				}
-				delete.await(MAX_DELETION_PROCESS_DURATION_MS);
-			} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException ex) {
-				logger.error("Cannot start the process to delete {}.", toDelete.getName(), ex);
+				deleteProcess = fileManager.createDeleteProcess(toDelete);
+			} catch (NoSessionException | NoPeerConnectionException ex) {
+				logger.error("Cannot create a process to delete '{}'.", toDelete.getName(), ex);
+				continue;
+			}
+			try {
+				deleteProcess.execute(); // synchronous
+			} catch (InvalidProcessStateException ex) {
+				logger.error("Cannot start the '{}' to delete '{}'.", deleteProcess, toDelete.getName(), ex);
+				continue;
 			} catch (ProcessExecutionException ex) {
-				logger.error("Process execution to delete {} failed.", toDelete.getName(), ex);
+				logger.error("Process execution of '{}' to delete '{}' failed.", deleteProcess, toDelete.getName(), ex);
+				continue;
 			}
 		}
 
