@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -81,7 +79,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 				return;
 			}
 
-			IProcessComponent<Future<List<FileTaste>>> fileList = null;
+			IProcessComponent<List<FileTaste>> fileList = null;
 			try {
 				fileList = fileManager.createFileListProcess();
 			} catch (NoSessionException e) {
@@ -91,20 +89,16 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 				return;
 			}
 
-			// start when necessary
-			if (!fileManager.isAutostart()) {
-				try {
-					Future<List<FileTaste>> future = fileList.execute();
-					List<FileTaste> result = future.get();
-					// the result is ready, add it to the buffer
-					fileBuffer.setSyncFiles(new HashSet<FileTaste>(result));
-					fileBuffer.setReady();
+			// execute process synchronously
+			try {
+				List<FileTaste> result = fileList.execute();
+				fileBuffer.setSyncFiles(new HashSet<FileTaste>(result));
+				fileBuffer.setReady();
 
-				} catch (InvalidProcessStateException | InterruptedException | ExecutionException ex) {
-					logger.error("Could not launch the process to get the file list.", ex);
-				} catch (ProcessExecutionException ex) {
-					logger.error("Process execution to get the file list failed.", ex);
-				}
+			} catch (InvalidProcessStateException ex) {
+				logger.error("Could not launch the process to get the file list.", ex);
+			} catch (ProcessExecutionException ex) {
+				logger.error("Process execution to get the file list failed.", ex);
 			}
 		}
 	}
