@@ -64,7 +64,7 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 		for (File toDelete : bufferedFiles) {
 			try {
 				logger.debug("Starting to delete buffered file {}.", toDelete);
-				IProcessComponent<?> delete = fileManager.delete(toDelete);
+				IProcessComponent<?> delete = fileManager.createDeleteProcess(toDelete);
 				if (!fileManager.isAutostart()) {
 					delete.execute();
 				}

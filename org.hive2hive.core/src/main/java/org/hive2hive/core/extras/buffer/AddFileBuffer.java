@@ -32,7 +32,7 @@ public class AddFileBuffer extends BaseFileBuffer {
 
 		for (File toAdd : fileBuffer) {
 			try {
-				IProcessComponent<?> process = fileManager.add(toAdd);
+				IProcessComponent<?> process = fileManager.createAddProcess(toAdd);
 				if (!fileManager.isAutostart()) {
 					process.execute();
 				}

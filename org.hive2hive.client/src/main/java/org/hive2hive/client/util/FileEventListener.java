@@ -34,7 +34,7 @@ public class FileEventListener implements IFileEventListener {
 	@Handler
 	public void onFileAdd(IFileAddEvent fileEvent) {
 		try {
-			H2HConsoleMenu.executeBlocking(fileManager.download(fileEvent.getFile()), "AddFileEvent");
+			H2HConsoleMenu.executeBlocking(fileManager.createDownloadProcess(fileEvent.getFile()), "AddFileEvent");
 		} catch (InvalidProcessStateException | NoSessionException | NoPeerConnectionException | InterruptedException
 				| ProcessExecutionException | ExecutionException e) {
 			System.err.println("Cannot download the new file " + fileEvent.getFile());
@@ -45,7 +45,7 @@ public class FileEventListener implements IFileEventListener {
 	@Handler
 	public void onFileUpdate(IFileUpdateEvent fileEvent) {
 		try {
-			H2HConsoleMenu.executeBlocking(fileManager.download(fileEvent.getFile()), "UpdateFileEvent");
+			H2HConsoleMenu.executeBlocking(fileManager.createDownloadProcess(fileEvent.getFile()), "UpdateFileEvent");
 		} catch (NoSessionException | NoPeerConnectionException | InvalidProcessStateException | InterruptedException
 				| ProcessExecutionException | ExecutionException e) {
 			System.err.println("Cannot download the updated file " + fileEvent.getFile());

@@ -78,11 +78,11 @@ public class H2HNodeTest extends H2HJUnitTest {
 		File testFile = new File(fileAgent.getRoot(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		IProcessComponent<?> process = loggedInNode.getFileManager().add(testFile);
+		IProcessComponent<?> process = loggedInNode.getFileManager().createAddProcess(testFile);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// is now added; delete it
-		process = loggedInNode.getFileManager().delete(testFile);
+		process = loggedInNode.getFileManager().createDeleteProcess(testFile);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 
@@ -91,7 +91,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		loggedInNode.getFileManager().add(testFile);
+		loggedInNode.getFileManager().createAddProcess(testFile);
 	}
 
 	@Test

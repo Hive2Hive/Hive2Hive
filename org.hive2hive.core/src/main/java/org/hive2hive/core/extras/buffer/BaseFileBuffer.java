@@ -83,7 +83,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 
 			IProcessComponent<Future<List<FileTaste>>> fileList = null;
 			try {
-				fileList = fileManager.getFileList();
+				fileList = fileManager.createFileListProcess();
 			} catch (NoSessionException e) {
 				logger.error("Could not get the file list.", e);
 				fileBuffer.setSyncFiles(new HashSet<FileTaste>(0));

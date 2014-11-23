@@ -67,7 +67,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 
 		for (File file : fileBuffer) {
 			try {
-				IProcessComponent<?> process = fileManager.update(file);
+				IProcessComponent<?> process = fileManager.createUpdateProcess(file);
 				if (!fileManager.isAutostart()) {
 					process.execute();
 				}

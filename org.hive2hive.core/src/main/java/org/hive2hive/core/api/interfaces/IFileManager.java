@@ -32,7 +32,7 @@ public interface IFileManager {
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 * @throws IllegalFileLocation the file is at a wrong location
 	 */
-	IProcessComponent<Void> add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
+	IProcessComponent<Void> createAddProcess(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
 
 	/**
 	 * Delete a file / folder and all versions of that file from the network. This operation deletes also the
@@ -44,7 +44,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<Void> delete(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> createDeleteProcess(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Update a file and create a new version.<br>
@@ -58,20 +58,20 @@ public interface IFileManager {
 	 *             exception description.
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<Void> update(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> createUpdateProcess(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Download a file that exists in the network and store it on the disk. If the file is a folder, a folder
 	 * on disk is created, but containing files are not downloaded automatically.<br>
 	 * <strong>Note:</strong>If the file on disk already exists, it's content will be overwritten.
 	 * 
-	 * @param file the absolute file that should be downloaded. Use {@link #getFileList()} to get a list of
+	 * @param file the absolute file that should be downloaded. Use {@link #createFileListProcess()} to get a list of
 	 *            available files or register yourself at the event bus.
 	 * @return an observable process component
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<Void> download(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> createDownloadProcess(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Move a file / folder from a given source to a given destination. This operation can also be used to
@@ -84,12 +84,12 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<Void> move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> createMoveProcess(File source, File destination) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Recover a file version from the network and restore it under a new file (name is indicated with special
 	 * suffix). The file is saved at the preferred location, but not automatically added to the network. If
-	 * you want to synchronize that file, too, you need to call {@link #add(File)} after this process
+	 * you want to synchronize that file, too, you need to call {@link #createAddProcess(File)} after this process
 	 * succeeded.
 	 * 
 	 * @param file the file to recover
@@ -101,7 +101,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<Void> recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
+	IProcessComponent<Void> createRecoverProcess(File file, IVersionSelector versionSelector) throws FileNotFoundException,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -121,7 +121,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	IProcessComponent<Void> share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
+	IProcessComponent<Void> createShareProcess(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -131,7 +131,7 @@ public interface IFileManager {
 	 * @return an observable process component providing results of the request asynchronous.
 	 * @throws NoSessionException no user has logged in
 	 */
-	IProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
+	IProcessComponent<List<FileTaste>> createFileListProcess() throws NoSessionException;
 
 	/**
 	 * Subscribe all file event handlers of the given listener instance.
