@@ -12,7 +12,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileIndex;
@@ -106,7 +105,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException, NoSessionException,
+	public void testUploadSameVersion() throws IllegalArgumentException, GetFailedException, IOException, NoSessionException,
 			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader,

@@ -1,7 +1,5 @@
 package org.hive2hive.core.api;
 
-import java.util.concurrent.Future;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
@@ -13,13 +11,10 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Default implementation of {@link IUserManager}.
- * This implementation of {@link IUserManager} is asynchronous. Thus, the return types of the
- * {@link IProcessComponent}s uses {@link Future}s.
  * 
  * @author Christian, Nico
  * 
@@ -30,42 +25,21 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		super(networkManager, eventBus);
 	}
 
-	public H2HUserManager autostart(boolean autostart) {
-		configureAutostart(autostart);
-		return this;
+	@Override
+	public IProcessComponent<Void> createRegisterProcess(UserCredentials credentials) throws NoPeerConnectionException {
+		return ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
 	}
 
 	@Override
-	public AsyncComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException {
-
-		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
-				networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(registerProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
-	}
-
-	@Override
-	public AsyncComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
+	public IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent)
+			throws NoPeerConnectionException {
 		SessionParameters params = new SessionParameters(fileAgent);
-
-		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params,
-				networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(loginProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 	}
 
 	@Override
-	public AsyncComponent<Void> logout() throws NoPeerConnectionException, NoSessionException {
-
-		IProcessComponent<Void> logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(logoutProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+	public IProcessComponent<Void> createLogoutProcess() throws NoPeerConnectionException, NoSessionException {
+		return ProcessFactory.instance().createLogoutProcess(networkManager);
 	}
 
 	@Override

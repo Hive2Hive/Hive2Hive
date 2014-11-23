@@ -11,7 +11,6 @@ import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
@@ -61,35 +60,36 @@ public class H2HNodeTest extends H2HJUnitTest {
 		credentials = generateRandomCredentials();
 
 		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcessComponent<?> registerProcess = registerNode.getUserManager().register(credentials);
+		IProcessComponent<?> registerProcess = registerNode.getUserManager().createRegisterProcess(credentials);
 		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
 
 		fileAgent = new TestFileAgent();
 		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcessComponent<?> loginProcess = loggedInNode.getUserManager().login(credentials, fileAgent);
+		IProcessComponent<?> loginProcess = loggedInNode.getUserManager().createLoginProcess(credentials, fileAgent);
 		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 	}
 
 	@Test
-	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException, NoSuchFieldException,
-			SecurityException, IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
+	public void testAddDeleteFile() throws IOException, NoSessionException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
 		File testFile = new File(fileAgent.getRoot(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		IProcessComponent<?> process = loggedInNode.getFileManager().add(testFile);
+		IProcessComponent<?> process = loggedInNode.getFileManager().createAddProcess(testFile);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// is now added; delete it
-		process = loggedInNode.getFileManager().delete(testFile);
+		process = loggedInNode.getFileManager().createDeleteProcess(testFile);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 
-	@Test(expected = IllegalFileLocation.class)
-	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation, NoPeerConnectionException {
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddFileWrongDir() throws IOException, NoPeerConnectionException, NoSessionException,
+			IllegalArgumentException {
 		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
-		loggedInNode.getFileManager().add(testFile);
+		loggedInNode.getFileManager().createAddProcess(testFile);
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 
 	@After
 	public void logoutAndUnregister() throws NoSessionException, NoPeerConnectionException {
-		IProcessComponent<?> process = loggedInNode.getUserManager().logout();
+		IProcessComponent<?> process = loggedInNode.getUserManager().createLogoutProcess();
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// TODO unregister

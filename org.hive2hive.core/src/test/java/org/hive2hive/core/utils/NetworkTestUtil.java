@@ -163,8 +163,6 @@ public class NetworkTestUtil {
 		// create initial peer
 		IH2HNode initial = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption());
 		initial.connect(NetworkConfiguration.createInitial("initial"));
-		initial.getFileManager().configureAutostart(false);
-		initial.getUserManager().configureAutostart(false);
 
 		nodes.add(initial);
 
@@ -173,8 +171,6 @@ public class NetworkTestUtil {
 			for (int i = 1; i < numberOfNodes; i++) {
 				IH2HNode node = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption());
 				node.connect(NetworkConfiguration.create("node " + i, bootstrapAddress));
-				node.getFileManager().configureAutostart(false);
-				node.getUserManager().configureAutostart(false);
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {

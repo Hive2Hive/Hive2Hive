@@ -157,7 +157,7 @@ public class FileRecursionUtil {
 	 * @throws NoSessionException
 	 */
 	public static IProcessComponent<Void> buildDownloadProcess(List<Index> files, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoPeerConnectionException, NoSessionException {
 		// the root process, where everything runs in parallel (only async children are added)
 		SyncProcess rootProcess = new SyncProcess();
 

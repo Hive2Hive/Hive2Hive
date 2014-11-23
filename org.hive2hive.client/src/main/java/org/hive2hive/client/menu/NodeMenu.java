@@ -138,8 +138,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 	private void buildNode() {
 		node = H2HNode.createNode(FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions,
 				chunkSize));
-		node.getUserManager().configureAutostart(false);
-		node.getFileManager().configureAutostart(false);
 		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 

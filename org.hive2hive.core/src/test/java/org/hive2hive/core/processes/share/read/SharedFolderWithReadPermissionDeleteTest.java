@@ -12,7 +12,6 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FolderIndex;
@@ -118,7 +117,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 
@@ -141,7 +140,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
@@ -160,7 +159,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddFileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
@@ -170,7 +169,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFolderFromADeleteFromA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder1FromA");
 		folderFromAAtA.mkdir();
 		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
@@ -192,7 +191,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFolderAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(sharedFolderA, "folder2FromA");
 		folderFromAAtA.mkdir();
 		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
@@ -211,7 +210,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddFolderAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(sharedFolderB, "folderFromB");
 		folderAtB.mkdir();
 		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
@@ -221,7 +220,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
@@ -243,7 +242,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
@@ -262,7 +261,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddSubfileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
@@ -272,7 +271,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfolderFromADeleteFromA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder1FromA");
 		folderFromAAtA.mkdir();
 		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
@@ -294,7 +293,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfolderAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderFromAAtA = new File(subFolderA, "subfolder2FromA");
 		folderFromAAtA.mkdir();
 		logger.info("Upload a new folder '{}' at A.", folderFromAAtA.toString());
@@ -313,7 +312,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddSubfolderAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(subFolderB, "subfolderFromB");
 		folderAtB.mkdir();
 		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());

@@ -29,9 +29,9 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
-	private KeyPair chunkEncryptionKeys;
-	private KeyPair chunkProtectionKeys;
-	private KeyPair fileKeys;
+	private KeyPair chunkEncryptionKeys; // generated
+	private KeyPair chunkProtectionKeys; // from parent FolderIndex
+	private KeyPair fileKeys; // File Encryption Key Pair
 	private KeyPair metaFileProtectionKeys;
 	private boolean largeFile;
 	private BaseMetaFile metaFile;

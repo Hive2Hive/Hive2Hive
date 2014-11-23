@@ -65,17 +65,23 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 
 		fileBuffer.removeAll(toDelete);
 
-		for (File file : fileBuffer) {
+		// execute processes asynchronously
+		IProcessComponent<?> updateProcess;
+		for (File toUpdate : fileBuffer) {
 			try {
-				IProcessComponent<?> process = fileManager.update(file);
-				if (!fileManager.isAutostart()) {
-					process.execute();
-				}
-			} catch (IllegalArgumentException | NoSessionException | NoPeerConnectionException
-					| InvalidProcessStateException ex) {
-				logger.error("Cannot start a process to modify {}.", file.getName(), ex);
+				updateProcess = fileManager.createUpdateProcess(toUpdate);
+			} catch (NoPeerConnectionException | NoSessionException | IllegalArgumentException ex) {
+				logger.error("Cannot create a process to add '{}'.", toUpdate.getName(), ex);
+				continue;
+			}
+			try {
+				updateProcess.executeAsync(); // asynchronous
+			} catch (InvalidProcessStateException ex) {
+				logger.error("Cannot start the '{}' to update '{}'.", updateProcess, toUpdate.getName(), ex);
+				continue;
 			} catch (ProcessExecutionException ex) {
-				logger.error("Process to modify {} failed.", file.getName(), ex);
+				logger.error("Process execution of '{}' to update '{}' failed.", updateProcess, toUpdate.getName(), ex);
+				continue;
 			}
 		}
 	}

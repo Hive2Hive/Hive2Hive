@@ -103,10 +103,11 @@ public final class ProcessFactory {
 	 * @param networkManager The network manager / node on which the registration operations should be
 	 *            executed.
 	 * @return A registration process.
-	 * @throws NoPeerConnectionException
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	public IProcessComponent<Void> createRegisterProcess(UserCredentials credentials, NetworkManager networkManager)
 			throws NoPeerConnectionException {
+
 		DataManager dataManager = networkManager.getDataManager();
 		RegisterProcessContext context = new RegisterProcessContext(credentials);
 
@@ -130,10 +131,11 @@ public final class ProcessFactory {
 	 * @param params The session parameters that shall be used.
 	 * @param networkManager The network manager / node on which the login operations should be executed.
 	 * @return A login process.
-	 * @throws NoPeerConnectionException
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	public IProcessComponent<Void> createLoginProcess(UserCredentials credentials, SessionParameters params,
 			NetworkManager networkManager) throws NoPeerConnectionException {
+
 		LoginProcessContext context = new LoginProcessContext(credentials, params);
 
 		// process composition
@@ -167,11 +169,12 @@ public final class ProcessFactory {
 	 * 
 	 * @param networkManager The network manager / node on which the logout operations should be executed.
 	 * @return A logout process.
-	 * @throws NoPeerConnectionException
-	 * @throws NoSessionException
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
+	 * @throws NoSessionException If the peer is not connected to the network.
 	 */
 	public IProcessComponent<Void> createLogoutProcess(NetworkManager networkManager) throws NoPeerConnectionException,
 			NoSessionException {
+
 		H2HSession session = networkManager.getSession();
 
 		// process composition
@@ -193,9 +196,16 @@ public final class ProcessFactory {
 	/**
 	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
 	 * tree.
+	 * 
+	 * @param file
+	 * @param networkManager
+	 * @param fileConfiguration
+	 * @return
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
+	 * @throws NoSessionException If no user has logged in.
 	 */
 	public IProcessComponent<Void> createAddFileProcess(File file, NetworkManager networkManager,
-			IFileConfiguration fileConfiguration) throws NoSessionException, NoPeerConnectionException {
+			IFileConfiguration fileConfiguration) throws NoPeerConnectionException, NoSessionException {
 		if (file == null) {
 			throw new IllegalArgumentException("File can't be null.");
 		}
@@ -224,7 +234,7 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent<Void> createUpdateFileProcess(File file, NetworkManager networkManager,
-			IFileConfiguration fileConfiguration) throws NoSessionException, NoPeerConnectionException {
+			IFileConfiguration fileConfiguration) throws NoPeerConnectionException, NoSessionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
 		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session, fileConfiguration);
@@ -253,7 +263,8 @@ public final class ProcessFactory {
 	 * Process for downloading the newest version to the default location.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoPeerConnectionException, NoSessionException {
+
 		return createDownloadFileProcess(null, file, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
 	}
 
@@ -261,7 +272,8 @@ public final class ProcessFactory {
 	 * Process for downloading the newest version to the default location.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
-			throws NoSessionException {
+			throws NoPeerConnectionException, NoSessionException {
+
 		return createDownloadFileProcess(fileKey, null, DownloadFileContext.NEWEST_VERSION_INDEX, null, networkManager);
 	}
 
@@ -270,7 +282,8 @@ public final class ProcessFactory {
 	 * version and the filename are only effective for files, not for folders.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, int versionToDownload, File destination,
-			NetworkManager networkManager) throws NoSessionException {
+			NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
+
 		return createDownloadFileProcess(fileKey, null, versionToDownload, destination, networkManager);
 	}
 
@@ -280,7 +293,8 @@ public final class ProcessFactory {
 	 * absolute file as argument.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, File file, int versionToDownload,
-			File destination, NetworkManager networkManager) throws NoSessionException {
+			File destination, NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
+
 		// precondition: session is existent
 		networkManager.getSession();
 		DownloadFileContext context = new DownloadFileContext(fileKey, file, destination, versionToDownload);
@@ -297,9 +311,16 @@ public final class ProcessFactory {
 	/**
 	 * Deletes the specified file. Note that this is only valid for a single file or an empty folder
 	 * (non-recursive)
+	 * 
+	 * @param file
+	 * @param networkManager
+	 * @return
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
+	 * @throws NoSessionException If no user has logged in.
 	 */
 	public IProcessComponent<Void> createDeleteFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException, NoPeerConnectionException {
+			throws NoPeerConnectionException, NoSessionException {
+
 		H2HSession session = networkManager.getSession();
 
 		DeleteFileProcessContext context = new DeleteFileProcessContext(file, session);
@@ -318,7 +339,8 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent<Void> createMoveFileProcess(File source, File destination, NetworkManager networkManager)
-			throws NoSessionException, NoPeerConnectionException {
+			throws NoPeerConnectionException, NoSessionException {
+
 		H2HSession session = networkManager.getSession();
 		MoveFileProcessContext context = new MoveFileProcessContext(source, destination, session.getRootFile());
 
@@ -336,7 +358,8 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent<Void> createRecoverFileProcess(File file, IVersionSelector selector,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
+			NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException, IllegalArgumentException {
+
 		RecoverFileContext context = new RecoverFileContext(file);
 
 		// process composition
@@ -351,7 +374,8 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent<Void> createShareProcess(File folder, UserPermission permission, NetworkManager networkManager)
-			throws NoSessionException, NoPeerConnectionException {
+			throws NoPeerConnectionException, NoSessionException {
+
 		ShareProcessContext context = new ShareProcessContext(folder, permission);
 
 		// process composition
@@ -384,7 +408,9 @@ public final class ProcessFactory {
 	 * @return A file list process.
 	 * @throws NoSessionException
 	 */
-	public IProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager) throws NoSessionException {
+	public IProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
+			throws NoPeerConnectionException, NoSessionException {
+
 		H2HSession session = networkManager.getSession();
 
 		// only one process step
@@ -397,6 +423,7 @@ public final class ProcessFactory {
 	public IProcessComponent<Void> createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
 			final Set<String> usersToNotify, NetworkManager networkManager) throws NoPeerConnectionException,
 			NoSessionException {
+
 		// create a context here to provide the necessary data
 		INotifyContext context = new INotifyContext() {
 
@@ -415,6 +442,7 @@ public final class ProcessFactory {
 
 	private IProcessComponent<Void> createNotificationProcess(INotifyContext providerContext, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
+
 		NotifyProcessContext context = new NotifyProcessContext(providerContext);
 
 		// process composition

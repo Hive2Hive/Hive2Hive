@@ -23,7 +23,6 @@ public interface H2HConstants {
 			.valueOf(DEFAULT_MAX_NUM_OF_VERSIONS));// max_size * max_num
 	public static final int DEFAULT_CHUNK_SIZE = MEGABYTES.intValue(); // 1 MB
 
-	public static final boolean DEFAULT_AUTOSTART_PROCESSES = true;
 	public static final boolean DEFAULT_IS_INITIAL_PEER = false;
 	public static final InetAddress DEFAULT_BOOTSTRAP_ADDRESS = null;
 	public static final String DEFAULT_ROOT_PATH = new File(System.getProperty("user.home"), "Hive2Hive").getAbsolutePath();
