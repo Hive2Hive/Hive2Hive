@@ -41,7 +41,7 @@ public final class UserMenu extends H2HConsoleMenu {
 	protected String getInstruction() {
 		return "Please select a user configuration option:";
 	}
-	
+
 	@Override
 	public void reset() {
 		userCredentials = null;

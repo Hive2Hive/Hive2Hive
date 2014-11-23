@@ -28,7 +28,7 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	private void printSelection() {
 		ConsoleMenu.print(String.format("Selected Option: %s", displayText));
 	}
-	
+
 	public static void printPrecondition(String message) {
 		ConsoleMenu.print(message);
 	}
@@ -36,8 +36,8 @@ public abstract class H2HConsoleMenuItem extends ConsoleMenuItem {
 	public static void printAbortion(String menuName, String message) {
 		ConsoleMenu.print(String.format("'%s' aborted: %s", menuName, message));
 	}
-	
+
 	private void printExecuted() {
-//		ConsoleMenu.print(String.format("%s executed.", displayText));
+		// ConsoleMenu.print(String.format("%s executed.", displayText));
 	}
 }

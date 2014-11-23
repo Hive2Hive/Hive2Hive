@@ -35,7 +35,7 @@ public class FileEventListener implements IFileEventListener {
 		try {
 			IProcessComponent<Void> downloadProcess = fileManager.createDownloadProcess(fileEvent.getFile());
 			downloadProcess.execute();
-			
+
 		} catch (InvalidProcessStateException | ProcessExecutionException | NoSessionException | NoPeerConnectionException e) {
 			System.err.println("Cannot download the new file " + fileEvent.getFile());
 		}
@@ -47,7 +47,7 @@ public class FileEventListener implements IFileEventListener {
 		try {
 			IProcessComponent<Void> downloadProcess = fileManager.createDownloadProcess(fileEvent.getFile());
 			downloadProcess.execute();
-			
+
 		} catch (InvalidProcessStateException | ProcessExecutionException | NoSessionException | NoPeerConnectionException e) {
 			System.err.println("Cannot download the updated file " + fileEvent.getFile());
 		}

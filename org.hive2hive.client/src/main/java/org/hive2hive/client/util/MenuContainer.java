@@ -8,6 +8,7 @@ import org.hive2hive.client.menu.UserMenu;
 
 /**
  * Container for all console menus used by the console client.
+ * 
  * @author Christian
  *
  */
@@ -18,7 +19,7 @@ public class MenuContainer {
 	private final UserMenu userMenu = new UserMenu(this);
 	private final FileMenu fileMenu = new FileMenu(this);
 	private final FileObserverMenu fileObserverMenu = new FileObserverMenu(this);
-	
+
 	public RootMenu getRootMenu() {
 		return rootMenu;
 	}
