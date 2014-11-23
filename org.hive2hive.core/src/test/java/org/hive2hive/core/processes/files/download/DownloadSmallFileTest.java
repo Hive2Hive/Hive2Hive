@@ -40,7 +40,6 @@ import org.junit.Test;
 public class DownloadSmallFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
-	private final static int CHUNK_SIZE = 1024;
 
 	private static ArrayList<NetworkManager> network;
 	private static NetworkManager uploader;
@@ -79,7 +78,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
 		// upload a small file
 		String fileName = randomString();
-		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
+		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);

@@ -36,26 +36,38 @@ public class DownloadManager {
 
 	private final DataManager dataManager;
 	private final IMessageManager messageManager;
-	private final PublicKeyManager keyManager;
 	private final IFileConfiguration fileConfig;
 	private final Set<BaseDownloadTask> openTasks;
 
+	private PublicKeyManager keyManager;
 	private ExecutorService executor;
 
-	public DownloadManager(DataManager dataManager, IMessageManager messageManager, PublicKeyManager keyManager,
-			IFileConfiguration fileConfig) {
+	public DownloadManager(DataManager dataManager, IMessageManager messageManager, IFileConfiguration fileConfig) {
+		this(dataManager, messageManager, fileConfig, null);
+	}
+
+	public DownloadManager(DataManager dataManager, IMessageManager messageManager, IFileConfiguration fileConfig,
+			PublicKeyManager keyManager) {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;
-		this.keyManager = keyManager;
 		this.fileConfig = fileConfig;
+		this.keyManager = keyManager;
 		this.executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
+	}
+
+	public void setKeyManager(PublicKeyManager keyManager) {
+		this.keyManager = keyManager;
 	}
 
 	/**
 	 * Add a new task to download a file. The download is automatically started in the background
 	 */
 	public void submit(BaseDownloadTask task) {
+		if (keyManager == null) {
+			throw new IllegalStateException("The keymanager is not set. Should login first");
+		}
+
 		logger.debug("Submitted to download {}", task.getDestinationName());
 
 		// store the task for possible later recovery

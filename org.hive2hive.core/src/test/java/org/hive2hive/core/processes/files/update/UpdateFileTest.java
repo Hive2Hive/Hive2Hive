@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -45,7 +46,6 @@ import org.junit.Test;
 public class UpdateFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
-	private final static int CHUNK_SIZE = 1024;
 
 	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
@@ -79,7 +79,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, CHUNK_SIZE);
+		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
@@ -109,7 +109,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException, NoSessionException,
 			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
-		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader);
+		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader,
+				FileConfiguration.createDefault());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
@@ -158,7 +159,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		SessionParameters params = new SessionParameters(session.getFileAgent(), limitingConfig);
+		SessionParameters params = new SessionParameters(session.getFileAgent());
 		params.setDownloadManager(session.getDownloadManager());
 		params.setKeyManager(session.getKeyManager());
 		params.setLocationsManager(session.getLocationsManager());
@@ -168,7 +169,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// update the file
 		FileUtils.write(file, "bla", false);
-		UseCaseTestUtil.uploadNewVersion(uploader, file);
+		UseCaseTestUtil.uploadNewVersion(uploader, file, limitingConfig);
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
@@ -206,7 +207,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		SessionParameters params = new SessionParameters(session.getFileAgent(), limitingConfig);
+		SessionParameters params = new SessionParameters(session.getFileAgent());
 		params.setDownloadManager(session.getDownloadManager());
 		params.setKeyManager(session.getKeyManager());
 		params.setLocationsManager(session.getLocationsManager());
@@ -217,7 +218,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// update the file (append some data)
 		FileUtils.write(file, randomString(), true);
 
-		UseCaseTestUtil.uploadNewVersion(uploader, file);
+		UseCaseTestUtil.uploadNewVersion(uploader, file, limitingConfig);
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);

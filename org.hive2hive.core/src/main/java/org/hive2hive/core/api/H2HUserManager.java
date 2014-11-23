@@ -3,7 +3,6 @@ package org.hive2hive.core.api;
 import java.util.concurrent.Future;
 
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -27,12 +26,8 @@ import org.hive2hive.processframework.interfaces.IProcessComponent;
  */
 public class H2HUserManager extends H2HManager implements IUserManager {
 
-	private final IFileConfiguration fileConfiguration;
-
-	// TODO remove IFileConfiguration
-	public H2HUserManager(NetworkManager networkManager, IFileConfiguration fileConfiguration, EventBus eventBus) {
+	public H2HUserManager(NetworkManager networkManager, EventBus eventBus) {
 		super(networkManager, eventBus);
-		this.fileConfiguration = fileConfiguration;
 	}
 
 	public H2HUserManager autostart(boolean autostart) {
@@ -42,8 +37,9 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public AsyncComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException {
-		
-		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
+
+		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials,
+				networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(registerProcess);
 
 		submitProcess(asyncProcess);
@@ -52,9 +48,10 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public AsyncComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
-		SessionParameters params = new SessionParameters(fileAgent, fileConfiguration);
+		SessionParameters params = new SessionParameters(fileAgent);
 
-		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
+		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params,
+				networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(loginProcess);
 
 		submitProcess(asyncProcess);
@@ -63,7 +60,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public AsyncComponent<Void> logout() throws NoPeerConnectionException, NoSessionException {
-		
+
 		IProcessComponent<Void> logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(logoutProcess);
 

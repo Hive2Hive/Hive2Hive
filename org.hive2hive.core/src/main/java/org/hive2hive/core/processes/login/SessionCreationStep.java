@@ -68,8 +68,8 @@ public class SessionCreationStep extends ProcessStep<Void> {
 			params.setKeyManager(keyManager);
 
 			// create the download manager
-			DownloadManager downloadManager = new DownloadManager(networkManager.getDataManager(),
-					networkManager.getMessageManager(), keyManager, params.getFileConfig());
+			DownloadManager downloadManager = networkManager.getDownloadManager();
+			downloadManager.setKeyManager(keyManager);
 
 			// read the cached downloads and add them to the download manager
 			for (BaseDownloadTask task : metaData.getDownloads()) {
@@ -89,7 +89,7 @@ public class SessionCreationStep extends ProcessStep<Void> {
 		// set session
 		networkManager.setSession(session);
 		setRequiresRollback(true);
-		
+
 		return null;
 	}
 

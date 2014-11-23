@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileIndex;
@@ -50,7 +51,8 @@ public class FileRecursionUtil {
 	 * @throws NoPeerConnectionException
 	 */
 	public static IProcessComponent<Void> buildUploadProcess(List<File> files, FileProcessAction action,
-			NetworkManager networkManager) throws NoSessionException, NoPeerConnectionException {
+			NetworkManager networkManager, IFileConfiguration fileConfiguration) throws NoSessionException,
+			NoPeerConnectionException {
 		// the root process
 		SyncProcess rootProcess = new SyncProcess();
 
@@ -62,9 +64,9 @@ public class FileRecursionUtil {
 			// create the process which uploads or updates the file
 			IProcessComponent<Void> uploadProcess;
 			if (action == FileProcessAction.NEW_FILE) {
-				uploadProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager);
+				uploadProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager, fileConfiguration);
 			} else {
-				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
+				uploadProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager, fileConfiguration);
 			}
 
 			File parentFile = file.getParentFile();

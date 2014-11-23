@@ -11,6 +11,7 @@ import java.util.List;
 import net.engio.mbassy.listener.Handler;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
@@ -39,7 +40,6 @@ public class FileEventsTest extends H2HJUnitTest {
 	protected static final int networkSize = 6;
 	protected static ArrayList<NetworkManager> network;
 	protected static UserCredentials userCredentials;
-	protected final static int CHUNK_SIZE = 1024;
 	protected static File rootA;
 	protected static File rootB;
 	protected static NetworkManager clientA;
@@ -129,7 +129,7 @@ public class FileEventsTest extends H2HJUnitTest {
 
 	protected File createAndAddFile(File root, NetworkManager client) throws IOException, NoSessionException,
 			NoPeerConnectionException {
-		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(3, root, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 		return file;
 	}

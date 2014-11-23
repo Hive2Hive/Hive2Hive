@@ -3,7 +3,6 @@ package org.hive2hive.core;
 import java.io.File;
 import java.security.KeyPair;
 
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -19,7 +18,6 @@ public class H2HSession {
 	private final VersionManager<Locations> locationsManager;
 	private final PublicKeyManager keyManager;
 	private final DownloadManager downloadManager;
-	private final IFileConfiguration fileConfiguration;
 	private final IFileAgent fileAgent;
 
 	public H2HSession(SessionParameters params) {
@@ -27,7 +25,6 @@ public class H2HSession {
 		this.locationsManager = params.getLocationsManager();
 		this.keyManager = params.getKeyManager();
 		this.downloadManager = params.getDownloadManager();
-		this.fileConfiguration = params.getFileConfig();
 		this.fileAgent = params.getFileAgent();
 	}
 
@@ -41,10 +38,6 @@ public class H2HSession {
 
 	public UserCredentials getCredentials() {
 		return profileManager.getUserCredentials();
-	}
-
-	public IFileConfiguration getFileConfiguration() {
-		return fileConfiguration;
 	}
 
 	/**

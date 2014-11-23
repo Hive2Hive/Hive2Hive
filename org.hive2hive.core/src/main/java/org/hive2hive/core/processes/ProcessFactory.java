@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.UserPermission;
@@ -193,14 +194,14 @@ public final class ProcessFactory {
 	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
 	 * tree.
 	 */
-	public IProcessComponent<Void> createAddFileProcess(File file, NetworkManager networkManager) throws NoSessionException,
-			NoPeerConnectionException {
+	public IProcessComponent<Void> createAddFileProcess(File file, NetworkManager networkManager,
+			IFileConfiguration fileConfiguration) throws NoSessionException, NoPeerConnectionException {
 		if (file == null) {
 			throw new IllegalArgumentException("File can't be null.");
 		}
 		H2HSession session = networkManager.getSession();
 		DataManager dataManager = networkManager.getDataManager();
-		AddFileProcessContext context = new AddFileProcessContext(file, session);
+		AddFileProcessContext context = new AddFileProcessContext(file, session, fileConfiguration);
 
 		// process composition
 		SyncProcess process = new SyncProcess();
@@ -222,11 +223,11 @@ public final class ProcessFactory {
 		return process;
 	}
 
-	public IProcessComponent<Void> createUpdateFileProcess(File file, NetworkManager networkManager)
-			throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent<Void> createUpdateFileProcess(File file, NetworkManager networkManager,
+			IFileConfiguration fileConfiguration) throws NoSessionException, NoPeerConnectionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
-		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session);
+		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session, fileConfiguration);
 
 		// process composition
 		SyncProcess process = new SyncProcess();

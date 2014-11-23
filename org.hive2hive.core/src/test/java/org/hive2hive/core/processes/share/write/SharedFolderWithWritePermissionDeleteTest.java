@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -37,7 +38,6 @@ import org.junit.Test;
  */
 public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
-	private static final int CHUNK_SIZE = 1024;
 	private static final int networkSize = 6;
 	private static final int maxNumChunks = 2;
 
@@ -114,7 +114,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file1FromA' from A.");
 		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, CHUNK_SIZE);
+				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1FromAAtA);
 
 		logger.info("Wait till new file 'folder1/file1FromA' gets synchronized with B.");
@@ -136,7 +136,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file2FromA' from A.");
 		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, CHUNK_SIZE);
+				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2FromAAtA);
 
 		logger.info("Wait till new file 'folder1/file2FromA' gets synchronized with B.");
@@ -158,7 +158,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file1FromB' from B.");
 		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, CHUNK_SIZE);
+				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file1FromBAtB);
 
 		logger.info("Wait till new file 'folder1/file1FromB' gets synchronized with A.");
@@ -180,7 +180,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file2FromB' from B.");
 		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, CHUNK_SIZE);
+				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file2FromBAtB);
 
 		logger.info("Wait till new file 'folder1/file2FromB' gets synchronized with A.");
@@ -290,7 +290,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file1FromA' from A.");
 		File subFile1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolderA, CHUNK_SIZE);
+				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFile1FromAAtA);
 
 		logger.info("Wait till new file 'folder1/subfolder/file1FromA' gets synchronized with B.");
@@ -312,7 +312,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file2FromA' from A.");
 		File subFile2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolderA, CHUNK_SIZE);
+				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFile2FromAAtA);
 
 		logger.info("Wait till new file 'folder1/subfolder/file2FromA' gets synchronized with B.");
@@ -334,7 +334,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file1FromB' from B.");
 		File subFile1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolderB, CHUNK_SIZE);
+				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), subFile1FromBAtB);
 
 		logger.info("Wait till new file 'folder1/subfolder/file1FromB' gets synchronized with A.");
@@ -356,7 +356,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file2FromB' from B.");
 		File subFile2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolderB, CHUNK_SIZE);
+				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), subFile2FromBAtB);
 
 		logger.info("Wait till new file 'folder1/subfolder/file2FromB' gets synchronized with A.");

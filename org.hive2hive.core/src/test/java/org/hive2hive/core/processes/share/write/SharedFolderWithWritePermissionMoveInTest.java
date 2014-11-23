@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
@@ -37,7 +38,6 @@ import org.junit.Test;
  */
 public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 
-	private static final int CHUNK_SIZE = 1024;
 	private static final int networkSize = 6;
 	private static final int maxNumChunks = 2;
 	private static ArrayList<NetworkManager> network;
@@ -109,11 +109,12 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'fileFromA' into root folder of A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("fileFromA", new Random().nextInt(maxNumChunks) + 1, rootA,
-				CHUNK_SIZE);
+				H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Move file 'fileFromA' at A into shared folder 'sharedfolder'.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved in file 'fileFromA' gets synchronized with B.");
@@ -128,11 +129,12 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'fileFromB' into root folder of B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(maxNumChunks) + 1, rootB,
-				CHUNK_SIZE);
+				H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Move file 'fileFromB' at B into shared folder 'sharedfolder'.");
 		File movedFileFromBAtB = new File(sharedFolderB, fileFromBAtB.getName());
+		FileUtils.moveFile(fileFromBAtB, movedFileFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromBAtB, movedFileFromBAtB);
 
 		logger.info("Wait till new moved in file 'fileFromB' gets synchronized with A.");
@@ -152,6 +154,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Move folder 'folderFromA' at A into shared folder 'sharedfolder'.");
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till new moved in folder 'folderFromA' gets synchronized with B.");
@@ -171,6 +174,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Move folder 'folderFromB' at B into shared folder 'sharedfolder'.");
 		File movedFolderFromBAtB = new File(sharedFolderB, folderFromBAtB.getName());
+		FileUtils.moveDirectory(folderFromBAtB, movedFolderFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromBAtB, movedFolderFromBAtB);
 
 		logger.info("Wait till new moved in folder 'folderFromB' gets synchronized with A.");
@@ -185,11 +189,12 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'subfileFromA' into root folder of A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfileFromA", new Random().nextInt(maxNumChunks) + 1,
-				rootA, CHUNK_SIZE);
+				rootA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Move file 'subfileFromA' at A into shared folder 'sharedfolder/subfolderA'.");
 		File movedFileFromAAtA = new File(subFolderA, fileFromAAtA.getName());
+		FileUtils.moveFile(fileFromAAtA, movedFileFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), fileFromAAtA, movedFileFromAAtA);
 
 		logger.info("Wait till new moved in file 'subfileFromA' gets synchronized with B.");
@@ -204,11 +209,12 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'subfileFromB' into root folder of B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(maxNumChunks) + 1,
-				rootB, CHUNK_SIZE);
+				rootB, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Move file 'subfileFromB' at B into shared folder 'sharedfolder/subfolder'.");
 		File movedFileFromBAtB = new File(subFolderB, fileFromBAtB.getName());
+		FileUtils.moveFile(fileFromBAtB, movedFileFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), fileFromBAtB, movedFileFromBAtB);
 
 		logger.info("Wait till new moved in file 'subfileFromB' gets synchronized with A.");
@@ -228,6 +234,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Move folder 'subfolderFromA' at A into shared folder 'sharedfolder/subfolder'.");
 		File movedFolderFromAAtA = new File(subFolderA, folderFromAAtA.getName());
+		FileUtils.moveDirectory(folderFromAAtA, movedFolderFromAAtA);
 		UseCaseTestUtil.moveFile(network.get(0), folderFromAAtA, movedFolderFromAAtA);
 
 		logger.info("Wait till new moved in folder 'subfolderFromA' gets synchronized with B.");
@@ -247,6 +254,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends H2HJUnitTest {
 
 		logger.info("Move folder 'subfolderFromB' at B into shared folder 'sharedFolder/subfolder'.");
 		File movedFolderFromBAtB = new File(subFolderB, folderFromBAtB.getName());
+		FileUtils.moveDirectory(folderFromBAtB, movedFolderFromBAtB);
 		UseCaseTestUtil.moveFile(network.get(1), folderFromBAtB, movedFolderFromBAtB);
 
 		logger.info("Wait till new moved in folder 'subfolderFromB' gets synchronized with A.");

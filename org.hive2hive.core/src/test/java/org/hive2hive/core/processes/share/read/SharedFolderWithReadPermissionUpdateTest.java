@@ -8,7 +8,10 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.api.configs.FileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -39,7 +42,6 @@ import org.junit.Test;
  */
 public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
-	private static final int CHUNK_SIZE = 1024;
 	private static final int maxNumChunks = 2;
 
 	private static ArrayList<NetworkManager> network;
@@ -58,6 +60,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 	private static TestFileEventListener eventsAtA;
 	private static TestFileEventListener eventsAtB;
+	private static IFileConfiguration fileConfig;
 
 	/**
 	 * Setup network. Setup two users with each one client, log them in.
@@ -108,13 +111,15 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 		UseCaseTestUtil.uploadNewFile(nodeA, subFolderA);
 		subFolderB = new File(sharedFolderB, subFolderA.getName());
 		waitTillSynchronizedAdding(subFolderB);
+
+		fileConfig = FileConfiguration.createDefault();
 	}
 
 	@Test
 	public void testSynchronizeAddFileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, CHUNK_SIZE);
+				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -138,7 +143,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 	public void testSynchronizeAddFileFromATryToUpdateAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, CHUNK_SIZE);
+				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -148,7 +153,8 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Try to update file '{}' at B.", fileFromAAtA.toString());
 		FileUtils.write(fileFromAAtB, randomString(), false);
-		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB,
+				fileConfig));
 		checkFileIndex(fileFromAAtA, fileFromAAtB, HashUtil.hash(fileFromAAtA));
 	}
 
@@ -156,7 +162,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 	public void testSynchronizeAddSubfileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolderA, CHUNK_SIZE);
+				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -180,7 +186,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 	public void testSynchronizeAddSubfileFromATryToUpdateAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolderA, CHUNK_SIZE);
+				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -190,7 +196,8 @@ public class SharedFolderWithReadPermissionUpdateTest extends H2HJUnitTest {
 
 		logger.info("Try to update file '{}' at B.", fileFromAAtA.toString());
 		FileUtils.write(fileFromAAtB, randomString(), false);
-		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB));
+		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance().createUpdateFileProcess(fileFromAAtB, nodeB,
+				fileConfig));
 		checkFileIndex(fileFromAAtA, fileFromAAtB, HashUtil.hash(fileFromAAtA));
 	}
 

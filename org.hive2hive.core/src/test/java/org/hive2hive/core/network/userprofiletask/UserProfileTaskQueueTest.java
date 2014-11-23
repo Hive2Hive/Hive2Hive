@@ -21,8 +21,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.api.configs.FileConfiguration;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.network.NetworkManager;
@@ -52,7 +50,6 @@ import org.junit.Test;
  */
 public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
-	private static final IFileConfiguration config = FileConfiguration.createDefault();
 	private static ArrayList<NetworkManager> network;
 	private static TestFileAgent fileAgent;
 	private static final int networkSize = 10;
@@ -89,14 +86,15 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException, ProcessRollbackException {
+	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException,
+			ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(fileAgent, config);
+		SessionParameters params = new SessionParameters(fileAgent);
 		params.setKeyManager(publicKeyManager);
 		params.setUserProfileManager(userProfileManager);
 		node.setSession(new H2HSession(params));
@@ -127,14 +125,15 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException, ProcessRollbackException {
+	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException,
+			ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(fileAgent, config);
+		SessionParameters params = new SessionParameters(fileAgent);
 		params.setKeyManager(publicKeyManager);
 		params.setUserProfileManager(userProfileManager);
 		node.setSession(new H2HSession(params));
@@ -170,7 +169,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
-		SessionParameters params = new SessionParameters(fileAgent, config);
+		SessionParameters params = new SessionParameters(fileAgent);
 		params.setKeyManager(publicKeyManager);
 		params.setUserProfileManager(userProfileManager);
 		node.setSession(new H2HSession(params));

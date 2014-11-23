@@ -1,6 +1,5 @@
 package org.hive2hive.core.processes.login;
 
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.PublicKeyManager;
@@ -10,7 +9,6 @@ import org.hive2hive.core.network.data.vdht.VersionManager;
 
 public class SessionParameters {
 
-	private final IFileConfiguration fileConfig;
 	private final IFileAgent fileAgent;
 
 	private UserProfileManager profileManager;
@@ -18,9 +16,8 @@ public class SessionParameters {
 	private DownloadManager downloadManager;
 	private PublicKeyManager keyManager;
 
-	public SessionParameters(IFileAgent fileAgent, IFileConfiguration fileConfig) {
+	public SessionParameters(IFileAgent fileAgent) {
 		this.fileAgent = fileAgent;
-		this.fileConfig = fileConfig;
 	}
 
 	public UserProfileManager getProfileManager() {
@@ -29,10 +26,6 @@ public class SessionParameters {
 
 	public void setUserProfileManager(UserProfileManager userProfileManager) {
 		this.profileManager = userProfileManager;
-	}
-
-	public IFileConfiguration getFileConfig() {
-		return fileConfig;
 	}
 
 	public PublicKeyManager getKeyManager() {

@@ -5,12 +5,13 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.List;
 
+import org.hive2hive.core.api.configs.FileConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
-import org.hive2hive.core.integration.TestFileConfiguration;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
@@ -53,7 +54,7 @@ public class UseCaseTestUtil {
 
 	public static void login(UserCredentials credentials, NetworkManager networkManager, IFileAgent fileAgent)
 			throws NoPeerConnectionException {
-		SessionParameters sessionParameters = new SessionParameters(fileAgent, new TestFileConfiguration());
+		SessionParameters sessionParameters = new SessionParameters(fileAgent);
 		IProcessComponent<Void> process = ProcessFactory.instance().createLoginProcess(credentials, sessionParameters,
 				networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
@@ -78,13 +79,24 @@ public class UseCaseTestUtil {
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
-		IProcessComponent<Void> process = ProcessFactory.instance().createAddFileProcess(file, networkManager);
+		uploadNewFile(networkManager, file, FileConfiguration.createDefault());
+	}
+
+	public static void uploadNewFile(NetworkManager networkManager, File file, IFileConfiguration fileConfig)
+			throws NoSessionException, NoPeerConnectionException {
+		IProcessComponent<Void> process = ProcessFactory.instance().createAddFileProcess(file, networkManager, fileConfig);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 
 	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException,
 			IllegalArgumentException, NoPeerConnectionException {
-		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
+		uploadNewVersion(networkManager, file, FileConfiguration.createDefault());
+	}
+
+	public static void uploadNewVersion(NetworkManager networkManager, File file, IFileConfiguration fileConfig)
+			throws NoSessionException, IllegalArgumentException, NoPeerConnectionException {
+		IProcessComponent<Void> process = ProcessFactory.instance()
+				.createUpdateFileProcess(file, networkManager, fileConfig);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 

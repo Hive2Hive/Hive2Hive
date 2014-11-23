@@ -13,7 +13,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
@@ -57,7 +56,8 @@ public class NetworkTestUtil {
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
-		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), new EventBus());
+		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+				FileConfiguration.createDefault());
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
 		initial.connect(netConfig);
 		nodes.add(initial);
@@ -65,7 +65,8 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), new EventBus());
+			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+					FileConfiguration.createDefault());
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeerDHT().peer());
 			node.connect(otherNetConfig);
@@ -100,16 +101,14 @@ public class NetworkTestUtil {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 
-			IFileConfiguration fileConfig = FileConfiguration.createDefault();
-
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					keyManager, fileConfig);
+					FileConfiguration.createDefault());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
-			SessionParameters params = new SessionParameters(new TestFileAgent(), fileConfig);
+			SessionParameters params = new SessionParameters(new TestFileAgent());
 			params.setDownloadManager(downloadManager);
 			params.setKeyManager(keyManager);
 			params.setUserProfileManager(profileManager);
@@ -130,16 +129,14 @@ public class NetworkTestUtil {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 		for (NetworkManager node : network) {
-			IFileConfiguration fileConfig = FileConfiguration.createDefault();
-
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					keyManager, fileConfig);
+					FileConfiguration.createDefault(), keyManager);
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
-			SessionParameters params = new SessionParameters(new TestFileAgent(), fileConfig);
+			SessionParameters params = new SessionParameters(new TestFileAgent());
 			params.setDownloadManager(downloadManager);
 			params.setKeyManager(keyManager);
 			params.setUserProfileManager(profileManager);

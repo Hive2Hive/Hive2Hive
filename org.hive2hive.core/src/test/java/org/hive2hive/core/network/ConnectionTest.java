@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
@@ -24,7 +25,8 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectAsInitial() {
-		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), new EventBus());
+		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+				FileConfiguration.createDefault());
 
 		try {
 			INetworkConfiguration netConfig = NetworkConfiguration.createInitial("initial node");
@@ -36,8 +38,10 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectToOtherPeer() throws UnknownHostException {
-		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), new EventBus());
-		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), new EventBus());
+		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+				FileConfiguration.createDefault());
+		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+				FileConfiguration.createDefault());
 
 		INetworkConfiguration netConfigA = NetworkConfiguration.createInitial("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());

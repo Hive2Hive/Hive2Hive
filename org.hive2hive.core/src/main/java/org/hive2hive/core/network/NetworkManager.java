@@ -1,11 +1,13 @@
 package org.hive2hive.core.network;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
 
@@ -21,13 +23,15 @@ public class NetworkManager {
 	private H2HSession session;
 
 	private final EventBus eventBus;
+	private final DownloadManager downloadManager;
 
-	public NetworkManager(IH2HEncryption encryption, EventBus eventBus) {
+	public NetworkManager(IH2HEncryption encryption, EventBus eventBus, IFileConfiguration fileConfig) {
 		this.eventBus = eventBus;
 
 		connection = new Connection(this, encryption);
 		dataManager = new DataManager(this, encryption);
 		messageManager = new MessageManager(this, encryption);
+		downloadManager = new DownloadManager(dataManager, messageManager, fileConfig);
 	}
 
 	/**
@@ -128,6 +132,10 @@ public class NetworkManager {
 			throw new NoPeerConnectionException();
 		}
 		return messageManager;
+	}
+
+	public DownloadManager getDownloadManager() {
+		return downloadManager;
 	}
 
 	public EventBus getEventBus() {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
@@ -29,8 +30,11 @@ import org.hive2hive.processframework.interfaces.IProcessComponent;
  */
 public class H2HFileManager extends H2HManager implements IFileManager {
 
-	public H2HFileManager(NetworkManager networkManager, EventBus eventBus) {
+	private final IFileConfiguration fileConfiguration;
+
+	public H2HFileManager(NetworkManager networkManager, IFileConfiguration fileConfiguration, EventBus eventBus) {
 		super(networkManager, eventBus);
+		this.fileConfiguration = fileConfiguration;
 	}
 
 	@Override
@@ -47,7 +51,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalFileLocation();
 		}
 
-		IProcessComponent<Void> addProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager);
+		IProcessComponent<Void> addProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager,
+				fileConfiguration);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(addProcess);
 
 		submitProcess(asyncProcess);
@@ -83,7 +88,8 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
-		IProcessComponent<Void> updateProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
+		IProcessComponent<Void> updateProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager,
+				fileConfiguration);
 		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(updateProcess);
 
 		submitProcess(asyncProcess);

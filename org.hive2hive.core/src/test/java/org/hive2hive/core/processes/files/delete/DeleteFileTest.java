@@ -43,7 +43,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 	private static final int networkSize = 6;
 	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
-	private final static int CHUNK_SIZE = 1024;
 	private static File root;
 	private static NetworkManager client;
 
@@ -65,7 +64,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	@Test
 	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
 			NoPeerConnectionException, NoSessionException, InvalidProcessStateException, ProcessExecutionException {
-		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(3, root, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// store the keys of the meta file to verify them later
