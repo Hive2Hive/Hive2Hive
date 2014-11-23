@@ -1,7 +1,5 @@
 package org.hive2hive.core.api;
 
-import java.util.concurrent.Future;
-
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
@@ -18,8 +16,6 @@ import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Default implementation of {@link IUserManager}.
- * This implementation of {@link IUserManager} is asynchronous. Thus, the return types of the
- * {@link IProcessComponent}s uses {@link Future}s.
  * 
  * @author Christian, Nico
  * 

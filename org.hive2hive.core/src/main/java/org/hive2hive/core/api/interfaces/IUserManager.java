@@ -7,7 +7,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
- * Basic interface for all user operations.
+ * Basic interface for all user management operations.
  * 
  * @author Christian, Nico, Seppi
  * 
@@ -20,7 +20,7 @@ public interface IUserManager {
 	 * 
 	 * @param credentials the user credentials. Note that the user id must be unique, the password and pin
 	 *            must be kept private to ensure the security.
-	 * @return an observable process component
+	 * @return A registration process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	IProcessComponent<Void> createRegisterProcess(UserCredentials credentials) throws NoPeerConnectionException;
@@ -31,7 +31,7 @@ public interface IUserManager {
 	 * 
 	 * @param credentials the user credentials
 	 * @param fileAgent handles needed file operations and provides the root folder of this user
-	 * @return an observable process component
+	 * @return A login process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
@@ -41,7 +41,7 @@ public interface IUserManager {
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
 	 * he does not receive any messages / notifications anymore and files don't get synchronized anymore.
 	 * 
-	 * @return an observable process component
+	 * @return A logout process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If not user has logged in.
 	 */
@@ -50,17 +50,17 @@ public interface IUserManager {
 	/**
 	 * Checks whether a user is registered in the network.
 	 * 
-	 * @param userId the ID of the user
-	 * @return <code>true</code> if logged in, <code>false</code> otherwise
+	 * @param userId The ID of the user.
+	 * @return <code>True</code> if logged in, <code>false</code> otherwise.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	boolean isRegistered(String userId) throws NoPeerConnectionException;
 
 	/**
-	 * Checks whether a user is logged in on the network <b>from this {@link IH2HNode}</b>.
+	 * Checks whether a user is logged in on the network.
 	 * 
-	 * @param uderId the ID of the user
-	 * @return <code>true</code> if logged in, <code>false</code> otherwise
+	 * @param uderId The ID of the user.
+	 * @return <code>True</code> if logged in, <code>false</code> otherwise.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	boolean isLoggedIn(String uderId) throws NoPeerConnectionException;

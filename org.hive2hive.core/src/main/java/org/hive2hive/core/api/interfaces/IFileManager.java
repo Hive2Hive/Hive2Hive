@@ -12,7 +12,7 @@ import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
- * Basic interface for all file operations.
+ * Basic interface for all file management operations.
  * 
  * @author Christian, Nico, Seppi
  * 
@@ -24,8 +24,8 @@ public interface IFileManager {
 	 * folder is not empty, containing files are <strong>not</strong> automatically added as well. The file
 	 * must exist on the disk.
 	 * 
-	 * @param file the file / folder to add
-	 * @return an observable process component
+	 * @param file The file or folder to add.
+	 * @return A file add process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -38,8 +38,8 @@ public interface IFileManager {
 	 * file on disk. <strong>Note that this operation is irreversible.</strong> If the folder is not empty,
 	 * all sub-files are deleted as well.
 	 * 
-	 * @param file the file / folder to delete. The file must still be on disk
-	 * @return an observable process component
+	 * @param file The file or folder to delete.
+	 * @return A file delete process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -48,12 +48,10 @@ public interface IFileManager {
 			IllegalArgumentException;
 
 	/**
-	 * Update a file and create a new version.<br>
-	 * Note that the number of allowed versions can be configured in
-	 * {@link IFileConfiguration#getMaxNumOfVersions()}.
+	 * Update a file and create a new version. Folders cannot be updated.<br>
 	 * 
-	 * @param file the file to update
-	 * @return an observable process component
+	 * @param file The file to update.
+	 * @return A file update process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -64,12 +62,10 @@ public interface IFileManager {
 	/**
 	 * Download a file that exists in the network and store it on the disk. If the file is a folder, a folder
 	 * on disk is created, but containing files are not downloaded automatically.<br>
-	 * <strong>Note:</strong>If the file on disk already exists, it's content will be overwritten.
+	 * <strong>Note:</strong>If the file on disk already exists, it will be overwritten.
 	 * 
-	 * @param file the absolute file that should be downloaded. Use {@link #createFileListProcess()} to get a
-	 *            list of
-	 *            available files or register yourself at the event bus.
-	 * @return an observable process component
+	 * @param file The file to be downloaded.
+	 * @return A file download process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -82,9 +78,9 @@ public interface IFileManager {
 	 * rename a file, or moving and renaming it together. In case of moving a folder, sub-files are moved too.
 	 * Note that this call does not perform any change on the file system.
 	 * 
-	 * @param source the full path of the file to move
-	 * @param destination the full path of the file destination
-	 * @return an observable process component
+	 * @param source The full file path of the file to be moved.
+	 * @param destination The full file path of the file destination.
+	 * @return A file move process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -99,10 +95,9 @@ public interface IFileManager {
 	 * process
 	 * succeeded.
 	 * 
-	 * @param file the file to recover
-	 * @param versionSelector selector to select a file version from the choice of all existing versions
-	 *            (excluded the current one).
-	 * @return an observable process component
+	 * @param file The file to be recovered.
+	 * @param versionSelector The file version selector to be used.
+	 * @return A file recover process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -115,10 +110,10 @@ public interface IFileManager {
 	 * the share and can see all contents of that folder. Note that this operation is irreversible, unsharing
 	 * is currently only supported by deleting the whole folder.
 	 * 
-	 * @param folder the folder to share
-	 * @param userId the unique user id of the new sharer
-	 * @param permission the permission type (read-only or write access)
-	 * @return
+	 * @param folder The folder to be shared.
+	 * @param userId The user ID of the new sharer.
+	 * @param permission The permission type for the new sharer.
+	 * @return A file share process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 * @throws IllegalArgumentException If the provided parameters are incorrect.
@@ -130,7 +125,7 @@ public interface IFileManager {
 	 * Get a full list of all files in the DHT of the currently logged in user. This must not necessary match
 	 * with the file tree on disk because Hive2Hive only performs file operations at manual calls.
 	 * 
-	 * @return an observable process component providing results of the request asynchronous.
+	 * @return A file list process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 */

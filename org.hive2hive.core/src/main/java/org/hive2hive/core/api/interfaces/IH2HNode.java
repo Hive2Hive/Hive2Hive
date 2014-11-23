@@ -3,11 +3,7 @@ package org.hive2hive.core.api.interfaces;
 import net.tomp2p.dht.PeerDHT;
 
 /**
- * The starting point for the Hive2Hive node. From this class, you can perform user management (login, logout,
- * ...) and file management (add, remove, share, ...).<br>
- * The user management and the file management are split for a better understanding. However, this interface
- * could easily be extended.<br>
- * For further information, check the Hive2Hive website (http://hive2hive.com/).
+ * This interface represents the entry point of Hive2Hive and exposes the managers necessary for interaction.
  * 
  * @author Christian, Nico, Seppi
  * 
