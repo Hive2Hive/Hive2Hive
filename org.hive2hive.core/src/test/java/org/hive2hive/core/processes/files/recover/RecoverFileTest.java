@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.IFileVersion;
@@ -53,7 +52,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void registerAndAddFileVersions() throws IOException, IllegalFileLocation, NoSessionException,
+	public void registerAndAddFileVersions() throws IOException, IllegalArgumentException, NoSessionException,
 			NoPeerConnectionException {
 		userCredentials = generateRandomCredentials();
 		client = NetworkTestUtil.getRandomNode(network);

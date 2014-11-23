@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
@@ -35,7 +34,7 @@ public class AddFileBuffer extends BaseFileBuffer {
 		for (File toAdd : fileBuffer) {
 			try {
 				addProcess = fileManager.createAddProcess(toAdd);
-			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation ex) {
+			} catch (NoPeerConnectionException | NoSessionException | IllegalArgumentException ex) {
 				logger.error("Cannot create a process to add '{}'.", toAdd.getName(), ex);
 				continue;
 			}

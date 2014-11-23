@@ -6,7 +6,6 @@ import java.security.PublicKey;
 import java.util.List;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
@@ -116,7 +115,7 @@ public class UseCaseTestUtil {
 	}
 
 	public static void shareFolder(NetworkManager networkManager, File folder, String friendId, PermissionType permission)
-			throws IllegalFileLocation, IllegalArgumentException, NoSessionException, NoPeerConnectionException {
+			throws IllegalArgumentException, NoSessionException, NoPeerConnectionException {
 		IProcessComponent<Void> process = ProcessFactory.instance().createShareProcess(folder,
 				new UserPermission(friendId, permission), networkManager);
 		TestExecutionUtil.executeProcessTillSucceded(process);
@@ -145,8 +144,8 @@ public class UseCaseTestUtil {
 		}
 	}
 
-	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoSessionException,
-			InvalidProcessStateException, ProcessExecutionException {
+	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoPeerConnectionException,
+			NoSessionException, InvalidProcessStateException, ProcessExecutionException {
 		IProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(networkManager);
 
 		return fileListProcess.execute();

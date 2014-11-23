@@ -15,7 +15,6 @@ import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.console.SelectionMenu;
 import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.exceptions.Hive2HiveException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.IFileVersion;
@@ -241,8 +240,8 @@ public class FileMenu extends H2HConsoleMenu {
 				try {
 					shareProcess = menus.getNodeMenu().getNode().getFileManager()
 							.createShareProcess(folderToShare, friendID, permission);
-				} catch (IllegalFileLocation | IllegalArgumentException e) {
-					printError(e.getMessage());
+				} catch (NoPeerConnectionException | NoSessionException | IllegalArgumentException ex) {
+					printError(ex.getMessage());
 					return;
 				}
 				shareProcess.execute();

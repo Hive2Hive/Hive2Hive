@@ -10,7 +10,6 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileIndex;
@@ -106,7 +105,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
@@ -130,7 +129,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromAUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
@@ -154,7 +153,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
@@ -178,7 +177,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
@@ -202,7 +201,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileFromAUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
@@ -226,7 +225,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileFromAUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolderA, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
@@ -250,7 +249,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileFromBUpdateAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());
@@ -274,7 +273,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileFromBUpdateAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-			IllegalFileLocation, IllegalArgumentException, GetFailedException {
+	IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolderB, CHUNK_SIZE);
 		logger.info("Upload a new file '{}' from B.", fileFromBAtB.toString());

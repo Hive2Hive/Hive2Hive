@@ -42,6 +42,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 
 	@Override
 	public IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
+		
 		SessionParameters params = new SessionParameters(fileAgent, fileConfiguration);
 
 		return ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);

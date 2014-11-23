@@ -63,7 +63,7 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 		for (File toDelete : bufferedFiles) {
 			try {
 				deleteProcess = fileManager.createDeleteProcess(toDelete);
-			} catch (NoSessionException | NoPeerConnectionException ex) {
+			} catch (NoPeerConnectionException | NoSessionException | IllegalArgumentException ex) {
 				logger.error("Cannot create a process to delete '{}'.", toDelete.getName(), ex);
 				continue;
 			}

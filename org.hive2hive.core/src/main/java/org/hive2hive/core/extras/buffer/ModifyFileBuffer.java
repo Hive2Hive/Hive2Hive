@@ -70,7 +70,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 		for (File toUpdate : fileBuffer) {
 			try {
 				updateProcess = fileManager.createUpdateProcess(toUpdate);
-			} catch (NoSessionException | NoPeerConnectionException | IllegalArgumentException ex) {
+			} catch (NoPeerConnectionException | NoSessionException | IllegalArgumentException ex) {
 				logger.error("Cannot create a process to add '{}'.", toUpdate.getName(), ex);
 				continue;
 			}

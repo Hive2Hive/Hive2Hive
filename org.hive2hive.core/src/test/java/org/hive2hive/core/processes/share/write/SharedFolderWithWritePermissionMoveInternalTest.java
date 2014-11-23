@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FolderIndex;
@@ -115,7 +114,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file1FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
@@ -139,7 +138,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file2FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, CHUNK_SIZE);
@@ -163,7 +162,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFileFromBMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file1FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
@@ -187,7 +186,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFileFromBMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file2FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, CHUNK_SIZE);
@@ -211,7 +210,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFolderFromAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1FromA' from A.");
 		File folderFromAAtA = new File(sharedFolderA, "subfolder1FromA");
 		folderFromAAtA.mkdir();
@@ -235,7 +234,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFolderFromAMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder2FromA' from A.");
 		File folderFromAAtA = new File(sharedFolderA, "subfolder2FromA");
 		folderFromAAtA.mkdir();
@@ -259,7 +258,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFolderFromBMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1FromB' from B.");
 		File folderFromBAtB = new File(sharedFolderB, "subfolder1FromB");
 		folderFromBAtB.mkdir();
@@ -283,7 +282,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddFolderFromBMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder2FromB' from B.");
 		File folderFromBAtB = new File(sharedFolderB, "subfolder2FromB");
 		folderFromBAtB.mkdir();
@@ -307,7 +306,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromAMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile1FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtA, CHUNK_SIZE);
@@ -331,7 +330,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromAMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile2FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtA, CHUNK_SIZE);
@@ -355,7 +354,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromBMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile1FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtB, CHUNK_SIZE);
@@ -379,7 +378,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromBMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile2FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtB, CHUNK_SIZE);
@@ -403,7 +402,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromAMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder1FromA' from A.");
 		File folderFromAAtA = new File(subFolder1AtA, "subsubfolder1FromA");
 		folderFromAAtA.mkdir();
@@ -427,7 +426,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromAMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder2FromA' from A.");
 		File folderFromAAtA = new File(subFolder1AtA, "subsubfolder2FromA");
 		folderFromAAtA.mkdir();
@@ -451,7 +450,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromBMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder1FromB' from B.");
 		File folderFromBAtB = new File(subFolder1AtB, "subsubfolder1FromB");
 		folderFromBAtB.mkdir();
@@ -475,7 +474,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromBMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder2FromB' from B.");
 		File folderFromBAtB = new File(subFolder1AtB, "subsubfolder2FromB");
 		folderFromBAtB.mkdir();
@@ -499,7 +498,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile3FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile3FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtA, CHUNK_SIZE);
@@ -523,7 +522,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromAMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile4FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile4FromA", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtA, CHUNK_SIZE);
@@ -547,7 +546,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromBMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile3FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile3FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtB, CHUNK_SIZE);
@@ -571,7 +570,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfileFromBMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile4FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile4FromB", new Random().nextInt(maxNumChunks) + 1,
 				subFolder1AtB, CHUNK_SIZE);
@@ -595,7 +594,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder3FromA' from A.");
 		File folderFromAAtA = new File(subFolder1AtA, "subsubfolder3FromA");
 		folderFromAAtA.mkdir();
@@ -619,7 +618,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromAMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder4FromA' from A.");
 		File folderFromAAtA = new File(subFolder1AtA, "subsubfolder4FromA");
 		folderFromAAtA.mkdir();
@@ -643,7 +642,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromBMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder3FromB' from B.");
 		File folderFromBAtB = new File(subFolder1AtB, "subsubfolder3FromB");
 		folderFromBAtB.mkdir();
@@ -667,7 +666,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 	@Test
 	public void testSynchronizeAddSubfolderFromBMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
-			IOException, IllegalFileLocation, IllegalArgumentException, GetFailedException {
+			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new folder 'sharedfolder/subfolder1/subsubfolder4FromB' from B.");
 		File folderFromBAtB = new File(subFolder1AtB, "subsubfolder4FromB");
 		folderFromBAtB.mkdir();

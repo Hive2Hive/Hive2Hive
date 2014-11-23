@@ -21,7 +21,7 @@ public interface IUserManager {
 	 * @param credentials the user credentials. Note that the user id must be unique, the password and pin
 	 *            must be kept private to ensure the security.
 	 * @return an observable process component
-	 * @throws NoPeerConnectionException if the peer is not connected to the network
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	IProcessComponent<Void> createRegisterProcess(UserCredentials credentials) throws NoPeerConnectionException;
 
@@ -32,7 +32,7 @@ public interface IUserManager {
 	 * @param credentials the user credentials
 	 * @param fileAgent handles needed file operations and provides the root folder of this user
 	 * @return an observable process component
-	 * @throws NoPeerConnectionException if the peer is not connected to the network
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
 	IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
@@ -42,8 +42,8 @@ public interface IUserManager {
 	 * he does not receive any messages / notifications anymore and files don't get synchronized anymore.
 	 * 
 	 * @return an observable process component
-	 * @throws NoPeerConnectionException if the peer is not connected to the network
-	 * @throws NoSessionException no user has logged in
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
+	 * @throws NoSessionException If not user has logged in.
 	 */
 	IProcessComponent<Void> createLogoutProcess() throws NoPeerConnectionException, NoSessionException;
 
@@ -52,7 +52,7 @@ public interface IUserManager {
 	 * 
 	 * @param userId the ID of the user
 	 * @return <code>true</code> if logged in, <code>false</code> otherwise
-	 * @throws NoPeerConnectionException
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	boolean isRegistered(String userId) throws NoPeerConnectionException;
 
@@ -61,7 +61,7 @@ public interface IUserManager {
 	 * 
 	 * @param uderId the ID of the user
 	 * @return <code>true</code> if logged in, <code>false</code> otherwise
-	 * @throws NoPeerConnectionException
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	boolean isLoggedIn(String uderId) throws NoPeerConnectionException;
 }

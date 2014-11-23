@@ -13,7 +13,6 @@ import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
@@ -73,8 +72,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testAddDeleteFile() throws IOException, IllegalFileLocation, NoSessionException, NoSuchFieldException,
-			SecurityException, IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
+	public void testAddDeleteFile() throws IOException, NoSessionException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
 		File testFile = new File(fileAgent.getRoot(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 
@@ -86,8 +85,9 @@ public class H2HNodeTest extends H2HJUnitTest {
 		TestExecutionUtil.executeProcessTillSucceded(process);
 	}
 
-	@Test(expected = IllegalFileLocation.class)
-	public void testAddFileWrongDir() throws IOException, NoSessionException, IllegalFileLocation, NoPeerConnectionException {
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddFileWrongDir() throws IOException, NoPeerConnectionException, NoSessionException,
+			IllegalArgumentException {
 		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file");
 		FileUtils.write(testFile, "Hello World");
 

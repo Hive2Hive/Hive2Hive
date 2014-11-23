@@ -10,11 +10,9 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
@@ -52,7 +50,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void getFileListTest() throws IOException, IllegalFileLocation, InvalidProcessStateException,
+	public void getFileListTest() throws IOException, IllegalArgumentException, InvalidProcessStateException,
 			NoPeerConnectionException, NoSessionException, ProcessExecutionException {
 		NetworkManager client = network.get(0);
 		List<FileTaste> fileList = UseCaseTestUtil.getFileList(client);

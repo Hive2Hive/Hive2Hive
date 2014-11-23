@@ -7,7 +7,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.FileUtil;
@@ -33,8 +32,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> createAddProcess(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation {
-		// verify the argument
+	public IProcessComponent<Void> createAddProcess(File file) throws NoPeerConnectionException, NoSessionException,
+			IllegalArgumentException {
+
 		H2HSession session = networkManager.getSession();
 		if (file == null) {
 			throw new IllegalArgumentException("File cannot be null.");
@@ -43,14 +43,16 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 		} else if (session.getRootFile().equals(file)) {
 			throw new IllegalArgumentException("Root cannot be added.");
 		} else if (!FileUtil.isInH2HDirectory(session.getFileAgent(), file)) {
-			throw new IllegalFileLocation();
+			throw new IllegalArgumentException("File is not within the root file tree.");
 		}
 
 		return ProcessFactory.instance().createAddFileProcess(file, networkManager);
 	}
 
 	@Override
-	public IProcessComponent<Void> createDeleteProcess(File file) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent<Void> createDeleteProcess(File file) throws NoPeerConnectionException, NoSessionException,
+			IllegalArgumentException {
+
 		if (file == null) {
 			throw new IllegalArgumentException("File cannot be null");
 		} else if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
@@ -63,7 +65,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> createUpdateProcess(File file) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent<Void> createUpdateProcess(File file) throws NoPeerConnectionException, NoSessionException,
+			IllegalArgumentException {
+
 		if (file == null) {
 			throw new IllegalArgumentException("File cannot be null");
 		} else if (file.isDirectory()) {
@@ -78,7 +82,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> createDownloadProcess(File file) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent<Void> createDownloadProcess(File file) throws NoPeerConnectionException, NoSessionException,
+			IllegalArgumentException {
+
 		if (file == null) {
 			throw new IllegalArgumentException("File cannot be null");
 		} else if (!FileUtil.isInH2HDirectory(networkManager.getSession().getFileAgent(), file)) {
@@ -89,7 +95,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> createMoveProcess(File source, File destination) throws NoSessionException, NoPeerConnectionException {
+	public IProcessComponent<Void> createMoveProcess(File source, File destination) throws NoSessionException,
+			NoPeerConnectionException, IllegalArgumentException {
+
 		IFileAgent fileAgent = networkManager.getSession().getFileAgent();
 
 		if (source == null) {
@@ -106,9 +114,9 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> createRecoverProcess(File file, IVersionSelector versionSelector) throws NoSessionException,
-			NoPeerConnectionException {
-		// do some verifications
+	public IProcessComponent<Void> createRecoverProcess(File file, IVersionSelector versionSelector)
+			throws NoPeerConnectionException, NoSessionException, IllegalArgumentException {
+
 		if (file == null) {
 			throw new IllegalArgumentException("File to recover cannot be null");
 		} else if (file.isDirectory()) {
@@ -119,35 +127,35 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<Void> createShareProcess(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
-			NoSessionException, NoPeerConnectionException {
-		// verify
+	public IProcessComponent<Void> createShareProcess(File folder, String userId, PermissionType permission)
+			throws NoPeerConnectionException, NoSessionException, IllegalArgumentException {
+
 		if (folder == null) {
 			throw new IllegalArgumentException("Folder to share cannot be null");
 		} else if (!folder.isDirectory()) {
 			throw new IllegalArgumentException("File has to be a folder.");
 		} else if (!folder.exists()) {
-			throw new IllegalFileLocation("Folder does not exist.");
+			throw new IllegalArgumentException("Folder does not exist.");
 		}
 
 		H2HSession session = networkManager.getSession();
 
 		// folder must be in the given root directory
 		if (!FileUtil.isInH2HDirectory(session.getFileAgent(), folder)) {
-			throw new IllegalFileLocation("Folder must be in root of the H2H directory.");
+			throw new IllegalArgumentException("Folder must be in root of the H2H directory.");
 		}
 
 		// sharing root folder is not allowed
 		if (folder.equals(session.getRootFile())) {
-			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
+			throw new IllegalArgumentException("Root folder of the H2H directory can't be shared.");
 		}
 
 		return ProcessFactory.instance().createShareProcess(folder, new UserPermission(userId, permission), networkManager);
 	}
 
 	@Override
-	public IProcessComponent<List<FileTaste>> createFileListProcess() throws NoSessionException {
-		
+	public IProcessComponent<List<FileTaste>> createFileListProcess() throws NoPeerConnectionException, NoSessionException {
+
 		return ProcessFactory.instance().createFileListProcess(networkManager);
 	}
 

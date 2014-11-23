@@ -10,7 +10,6 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
@@ -67,7 +66,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareFilledFolderTest() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+	public void shareFilledFolderTest() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
 			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File folderToShare = new File(rootA, "sharedFolder");
@@ -114,7 +113,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareEmptyFolder() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+	public void shareEmptyFolder() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
 			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File sharedFolderAtA = new File(rootA, randomString());
