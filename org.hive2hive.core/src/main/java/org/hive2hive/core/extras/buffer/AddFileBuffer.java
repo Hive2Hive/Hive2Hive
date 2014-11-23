@@ -30,16 +30,23 @@ public class AddFileBuffer extends BaseFileBuffer {
 	protected void processBuffer(IFileBufferHolder buffer) {
 		Set<File> fileBuffer = filterBuffer(buffer.getFileBuffer(), buffer.getSyncFiles());
 
+		// execute processes asynchronously
+		IProcessComponent<?> addProcess;
 		for (File toAdd : fileBuffer) {
 			try {
-				IProcessComponent<?> process = fileManager.createAddProcess(toAdd);
-				if (!fileManager.isAutostart()) {
-					process.execute();
-				}
-			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation | InvalidProcessStateException ex) {
-				logger.error("Cannot start a process to add {}", toAdd.getName(), ex);
+				addProcess = fileManager.createAddProcess(toAdd);
+			} catch (NoSessionException | NoPeerConnectionException | IllegalFileLocation ex) {
+				logger.error("Cannot create a process to add '{}'.", toAdd.getName(), ex);
+				continue;
+			}
+			try {
+				addProcess.executeAsync();
+			} catch (InvalidProcessStateException ex) {
+				logger.error("Cannot start the '{}' to add '{}'.", addProcess, toAdd.getName(), ex);
+				continue;
 			} catch (ProcessExecutionException ex) {
-				logger.error("Process execution to add {} failed.", toAdd.getName(), ex);
+				logger.error("Process execution of '{}' to add '{}' failed.", addProcess, toAdd.getName(), ex);
+				continue;
 			}
 		}
 	}
