@@ -4,7 +4,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Basic interface for all user operations.
@@ -23,7 +23,7 @@ public interface IUserManager {
 	 * @return an observable process component
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
-	AsyncComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException;
+	IProcessComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
 	 * Login a (registered) user with the same credentials as {@link IUserManager#register(UserCredentials)}
@@ -35,7 +35,7 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	AsyncComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
+	IProcessComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
@@ -45,7 +45,7 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException if the peer is not connected to the network
 	 * @throws NoSessionException no user has logged in
 	 */
-	AsyncComponent<Void> logout() throws NoPeerConnectionException, NoSessionException;
+	IProcessComponent<Void> logout() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Checks whether a user is registered in the network.

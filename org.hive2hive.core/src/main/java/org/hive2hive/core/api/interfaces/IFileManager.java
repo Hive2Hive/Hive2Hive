@@ -11,7 +11,7 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
-import org.hive2hive.processframework.decorators.AsyncComponent;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
  * Basic interface for all file operations.
@@ -32,7 +32,7 @@ public interface IFileManager {
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 * @throws IllegalFileLocation the file is at a wrong location
 	 */
-	AsyncComponent<Void> add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
+	IProcessComponent<Void> add(File file) throws NoSessionException, NoPeerConnectionException, IllegalFileLocation;
 
 	/**
 	 * Delete a file / folder and all versions of that file from the network. This operation deletes also the
@@ -44,7 +44,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	AsyncComponent<Void> delete(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> delete(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Update a file and create a new version.<br>
@@ -58,7 +58,7 @@ public interface IFileManager {
 	 *             exception description.
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	AsyncComponent<Void> update(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> update(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Download a file that exists in the network and store it on the disk. If the file is a folder, a folder
@@ -71,7 +71,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	AsyncComponent<Void> download(File file) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> download(File file) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Move a file / folder from a given source to a given destination. This operation can also be used to
@@ -84,7 +84,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	AsyncComponent<Void> move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
+	IProcessComponent<Void> move(File source, File destination) throws NoSessionException, NoPeerConnectionException;
 
 	/**
 	 * Recover a file version from the network and restore it under a new file (name is indicated with special
@@ -101,7 +101,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	AsyncComponent<Void> recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
+	IProcessComponent<Void> recover(File file, IVersionSelector versionSelector) throws FileNotFoundException,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -121,7 +121,7 @@ public interface IFileManager {
 	 * @throws NoSessionException no user has logged in
 	 * @throws NoPeerConnectionException the peer has no connection to the network
 	 */
-	AsyncComponent<Void> share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
+	IProcessComponent<Void> share(File folder, String userId, PermissionType permission) throws IllegalFileLocation,
 			NoSessionException, NoPeerConnectionException;
 
 	/**
@@ -131,7 +131,7 @@ public interface IFileManager {
 	 * @return an observable process component providing results of the request asynchronous.
 	 * @throws NoSessionException no user has logged in
 	 */
-	AsyncComponent<List<FileTaste>> getFileList() throws NoSessionException;
+	IProcessComponent<List<FileTaste>> getFileList() throws NoSessionException;
 
 	/**
 	 * Subscribe all file event handlers of the given listener instance.
