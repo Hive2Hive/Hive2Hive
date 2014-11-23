@@ -1,7 +1,5 @@
 package org.hive2hive.client.menu;
 
-import java.util.concurrent.ExecutionException;
-
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.ConsoleFileAgent;
@@ -9,9 +7,9 @@ import org.hive2hive.client.util.MenuContainer;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 public final class RootMenu extends H2HConsoleMenu {
 
@@ -51,12 +49,12 @@ public final class RootMenu extends H2HConsoleMenu {
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
 				ConsoleFileAgent fileAgent = new ConsoleFileAgent(menus.getFileMenu().getRootDirectory());
-				AsyncComponent<Void> loginProcess = menus.getNodeMenu().getNode().getUserManager()
+				IProcessComponent<Void> loginProcess = menus.getNodeMenu().getNode().getUserManager()
 						.createLoginProcess(menus.getUserMenu().getUserCredentials(), fileAgent);
 
 				try {
-					executeBlocking(loginProcess, displayText);
-				} catch (ProcessExecutionException | ExecutionException e) {
+					loginProcess.execute();
+				} catch (ProcessExecutionException e) {
 					menus.getUserMenu().reset();
 					menus.getFileMenu().reset();
 				}
@@ -69,8 +67,8 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Exception {
-				AsyncComponent<Void> logoutProcess = menus.getNodeMenu().getNode().getUserManager().createLogoutProcess();
-				executeBlocking(logoutProcess, displayText);
+				IProcessComponent<Void> logoutProcess = menus.getNodeMenu().getNode().getUserManager().createLogoutProcess();
+				logoutProcess.execute();
 			}
 		});
 
@@ -100,11 +98,11 @@ public final class RootMenu extends H2HConsoleMenu {
 		} else {
 			H2HConsoleMenuItem
 					.printPrecondition("You are not registered to the network. This will now happen automatically.");
-			AsyncComponent<Void> registerProcess = userManager.createRegisterProcess(userCredentials);
+			IProcessComponent<Void> registerProcess = userManager.createRegisterProcess(userCredentials);
 			try {
-				executeBlocking(registerProcess, "Register");
+				registerProcess.execute();
 				return true;
-			} catch (ProcessExecutionException | ExecutionException e) {
+			} catch (ProcessExecutionException e) {
 				return false;
 			}
 		}

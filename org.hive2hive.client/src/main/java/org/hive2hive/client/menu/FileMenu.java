@@ -22,9 +22,9 @@ import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
-import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 public class FileMenu extends H2HConsoleMenu {
 
@@ -41,10 +41,12 @@ public class FileMenu extends H2HConsoleMenu {
 			protected void execute() throws Exception {
 
 				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_"
-						+ menus.getUserMenu().getUserCredentials().getUserId() + "_" + System.currentTimeMillis());
+						+ menus.getUserMenu().getUserCredentials().getUserId() + "_"
+						+ System.currentTimeMillis());
 
 				if (isExpertMode) {
-					print(String.format("Please specify the root directory path or enter 'ok' if you agree with '%s'.",
+					print(String.format(
+							"Please specify the root directory path or enter 'ok' if you agree with '%s'.",
 							rootDirectory.toPath()));
 
 					String input = awaitStringParameter();
@@ -62,8 +64,8 @@ public class FileMenu extends H2HConsoleMenu {
 						FileUtils.forceMkdir(rootDirectory);
 						print(String.format("Root directory '%s' created.", rootDirectory));
 					} catch (Exception e) {
-						printError(String
-								.format("Exception on creating the root directory %s: " + e, rootDirectory.toPath()));
+						printError(String.format("Exception on creating the root directory %s: " + e,
+								rootDirectory.toPath()));
 					}
 				} else {
 					print(String.format("Existing root directory '%s' will be used.", rootDirectory));
@@ -79,16 +81,17 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
-					ProcessExecutionException, ExecutionException {
+			protected void execute() throws Hive2HiveException, InterruptedException,
+					InvalidProcessStateException, ProcessExecutionException, ExecutionException {
 
 				File file = askForFile(true);
 				if (file == null) {
 					return;
 				}
 
-				AsyncComponent<Void> addFileProcess = menus.getNodeMenu().getNode().getFileManager().createAddProcess(file);
-				executeBlocking(addFileProcess, displayText);
+				IProcessComponent<Void> addFileProcess = menus.getNodeMenu().getNode().getFileManager()
+						.createAddProcess(file);
+				addFileProcess.execute();
 			}
 		});
 
@@ -97,15 +100,16 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
-					ProcessExecutionException, ExecutionException {
+			protected void execute() throws Hive2HiveException, InterruptedException,
+					InvalidProcessStateException, ProcessExecutionException, ExecutionException {
 
 				File file = askForFile(true);
 				if (file == null) {
 					return;
 				}
-				AsyncComponent<Void> updateFileProcess = menus.getNodeMenu().getNode().getFileManager().createUpdateProcess(file);
-				executeBlocking(updateFileProcess, displayText);
+				IProcessComponent<Void> updateFileProcess = menus.getNodeMenu().getNode().getFileManager()
+						.createUpdateProcess(file);
+				updateFileProcess.execute();
 			}
 		});
 
@@ -114,15 +118,16 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
-					ProcessExecutionException, ExecutionException {
+			protected void execute() throws Hive2HiveException, InterruptedException,
+					InvalidProcessStateException, ProcessExecutionException, ExecutionException {
 
 				File file = askForFile(false);
 				if (file == null) {
 					return;
 				}
-				AsyncComponent<Void> updateFileProcess = menus.getNodeMenu().getNode().getFileManager().createDownloadProcess(file);
-				executeBlocking(updateFileProcess, displayText);
+				IProcessComponent<Void> updateFileProcess = menus.getNodeMenu().getNode().getFileManager()
+						.createDownloadProcess(file);
+				updateFileProcess.execute();
 			}
 		});
 
@@ -131,22 +136,24 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
-					ProcessExecutionException, ExecutionException {
-				File source = askForFile("Specify the relative path of the source file to the root directory '%s'.", true);
+			protected void execute() throws Hive2HiveException, InterruptedException,
+					InvalidProcessStateException, ProcessExecutionException, ExecutionException {
+				File source = askForFile(
+						"Specify the relative path of the source file to the root directory '%s'.", true);
 				if (source == null) {
 					return;
 				}
 
 				File destination = askForFile(
-						"Specify the relative path of the destination file to the root directory '%s'.", false);
+						"Specify the relative path of the destination file to the root directory '%s'.",
+						false);
 				if (destination == null) {
 					return;
 				}
 
-				AsyncComponent<Void> moveFileProcess = menus.getNodeMenu().getNode().getFileManager()
+				IProcessComponent<Void> moveFileProcess = menus.getNodeMenu().getNode().getFileManager()
 						.createMoveProcess(source, destination);
-				executeBlocking(moveFileProcess, displayText);
+				moveFileProcess.execute();
 			}
 		});
 
@@ -155,15 +162,16 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
-					ProcessExecutionException, ExecutionException {
+			protected void execute() throws Hive2HiveException, InterruptedException,
+					InvalidProcessStateException, ProcessExecutionException, ExecutionException {
 				File file = askForFile(true);
 				if (file == null) {
 					return;
 				}
 
-				AsyncComponent<Void> deleteFileProcess = menus.getNodeMenu().getNode().getFileManager().createDeleteProcess(file);
-				executeBlocking(deleteFileProcess, displayText);
+				IProcessComponent<Void> deleteFileProcess = menus.getNodeMenu().getNode().getFileManager()
+						.createDeleteProcess(file);
+				deleteFileProcess.execute();
 			}
 		});
 
@@ -182,8 +190,8 @@ public class FileMenu extends H2HConsoleMenu {
 
 				IVersionSelector versionSelector = new IVersionSelector() {
 					public IFileVersion selectVersion(List<IFileVersion> availableVersions) {
-						return new SelectionMenu<IFileVersion>(availableVersions, "Choose the version you want to recover.")
-								.openAndSelect();
+						return new SelectionMenu<IFileVersion>(availableVersions,
+								"Choose the version you want to recover.").openAndSelect();
 					}
 
 					public String getRecoveredFileName(String fullName, String name, String extension) {
@@ -199,9 +207,9 @@ public class FileMenu extends H2HConsoleMenu {
 					}
 				};
 
-				AsyncComponent<Void> recoverFileProcess = menus.getNodeMenu().getNode().getFileManager()
+				IProcessComponent<Void> recoverFileProcess = menus.getNodeMenu().getNode().getFileManager()
 						.createRecoverProcess(file, versionSelector);
-				executeBlocking(recoverFileProcess, displayText);
+				recoverFileProcess.execute();
 			}
 		});
 
@@ -210,11 +218,13 @@ public class FileMenu extends H2HConsoleMenu {
 				return createRootDirectory();
 			}
 
-			protected void execute() throws NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
-					InterruptedException, ProcessExecutionException, ExecutionException {
+			protected void execute() throws NoSessionException, NoPeerConnectionException,
+					InvalidProcessStateException, InterruptedException, ProcessExecutionException,
+					ExecutionException {
 
 				File folderToShare = askForFolder(
-						"Specify the relative path of the folder you want to share to the root directory '%s'.", true);
+						"Specify the relative path of the folder you want to share to the root directory '%s'.",
+						true);
 				if (folderToShare == null) {
 					return;
 				}
@@ -227,23 +237,24 @@ public class FileMenu extends H2HConsoleMenu {
 					return;
 				}
 
-				AsyncComponent<Void> shareProcess;
+				IProcessComponent<Void> shareProcess;
 				try {
-					shareProcess = menus.getNodeMenu().getNode().getFileManager().createShareProcess(folderToShare, friendID, permission);
+					shareProcess = menus.getNodeMenu().getNode().getFileManager()
+							.createShareProcess(folderToShare, friendID, permission);
 				} catch (IllegalFileLocation | IllegalArgumentException e) {
 					printError(e.getMessage());
 					return;
 				}
-				executeBlocking(shareProcess, displayText);
+				shareProcess.execute();
 			}
 		});
 
 		add(new H2HConsoleMenuItem("Print File List") {
 			@Override
 			protected void execute() throws Exception {
-				AsyncComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode().getFileManager()
-						.createFileListProcess();
-				List<FileTaste> list = executeBlocking(fileListProcess, displayText);
+				IProcessComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode()
+						.getFileManager().createFileListProcess();
+				List<FileTaste> list = fileListProcess.execute();
 
 				if (!list.isEmpty()) {
 					for (FileTaste fileTaste : list) {
@@ -309,8 +320,9 @@ public class FileMenu extends H2HConsoleMenu {
 
 		File file = null;
 		do {
-			print(String.format(msg.concat(expectExistence ? String.format(" The %s at this path must exist.",
-					requireDirectory ? "folder" : "file") : ""), rootDirectory.getAbsolutePath()));
+			print(String.format(msg.concat(expectExistence ? String.format(
+					" The %s at this path must exist.", requireDirectory ? "folder" : "file") : ""),
+					rootDirectory.getAbsolutePath()));
 			print("Or enter 'cancel' in order to go back.");
 
 			String input = awaitStringParameter();
@@ -321,14 +333,16 @@ public class FileMenu extends H2HConsoleMenu {
 
 			file = new File(rootDirectory, input);
 			if (expectExistence && !file.exists()) {
-				printError(String.format("The specified %s '%s' does not exist. Try again.", requireDirectory ? "folder"
-						: "file", file.getAbsolutePath()));
+				printError(String.format("The specified %s '%s' does not exist. Try again.",
+						requireDirectory ? "folder" : "file", file.getAbsolutePath()));
 				continue;
 			}
 			if (expectExistence && requireDirectory && !file.isDirectory()) {
-				printError(String.format("The specified file '%s' is not a folder. Try again.", file.getAbsolutePath()));
+				printError(String.format("The specified file '%s' is not a folder. Try again.",
+						file.getAbsolutePath()));
 			}
-		} while (expectExistence && (file == null || !file.exists() || (requireDirectory && !file.isDirectory())));
+		} while (expectExistence
+				&& (file == null || !file.exists() || (requireDirectory && !file.isDirectory())));
 		return file;
 	}
 

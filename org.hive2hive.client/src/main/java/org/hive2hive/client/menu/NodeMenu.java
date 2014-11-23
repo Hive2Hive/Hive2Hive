@@ -130,7 +130,8 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 	public boolean createNetwork() {
 		if (getNode() == null) {
-			H2HConsoleMenuItem.printPrecondition("You are not connected to a network. Connect to a network first.");
+			H2HConsoleMenuItem
+					.printPrecondition("You are not connected to a network. Connect to a network first.");
 			open(isExpertMode);
 		}
 		return getNode() != null;
@@ -139,8 +140,6 @@ public final class NodeMenu extends H2HConsoleMenu {
 	private void buildNode(INetworkConfiguration networkConfig) {
 		node = H2HNode.createNode(networkConfig,
 				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
-		node.getUserManager().configureAutostart(false);
-		node.getFileManager().configureAutostart(false);
 		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 
