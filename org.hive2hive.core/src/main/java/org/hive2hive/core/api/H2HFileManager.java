@@ -18,7 +18,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.files.list.FileTaste;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
-import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
@@ -47,11 +46,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalFileLocation();
 		}
 
-		IProcessComponent<Void> addProcess = ProcessFactory.instance().createAddFileProcess(file, networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(addProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createAddFileProcess(file, networkManager);
 	}
 
 	@Override
@@ -64,11 +59,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("Folder to delete is not empty");
 		}
 
-		IProcessComponent<Void> deleteProcess = ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(deleteProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createDeleteFileProcess(file, networkManager);
 	}
 
 	@Override
@@ -83,12 +74,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
-		IProcessComponent<Void> updateProcess = ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(updateProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
-
+		return ProcessFactory.instance().createUpdateFileProcess(file, networkManager);
 	}
 
 	@Override
@@ -99,11 +85,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("File is not in the Hive2Hive directory");
 		}
 
-		IProcessComponent<Void> downloadProcess = ProcessFactory.instance().createDownloadFileProcess(file, networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(downloadProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createDownloadFileProcess(file, networkManager);
 	}
 
 	@Override
@@ -120,12 +102,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("Destination file not in the Hive2Hive directory");
 		}
 
-		IProcessComponent<Void> moveProcess = ProcessFactory.instance().createMoveFileProcess(source, destination,
-				networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(moveProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createMoveFileProcess(source, destination, networkManager);
 	}
 
 	@Override
@@ -138,13 +115,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalArgumentException("A folder has only one version");
 		}
 
-		IProcessComponent<Void> recoverProcess = ProcessFactory.instance().createRecoverFileProcess(file, versionSelector,
-				networkManager);
-
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(recoverProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createRecoverFileProcess(file, versionSelector, networkManager);
 	}
 
 	@Override
@@ -171,22 +142,13 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 			throw new IllegalFileLocation("Root folder of the H2H directory can't be shared.");
 		}
 
-		IProcessComponent<Void> shareProcess = ProcessFactory.instance().createShareProcess(folder,
-				new UserPermission(userId, permission), networkManager);
-
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<Void>(shareProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createShareProcess(folder, new UserPermission(userId, permission), networkManager);
 	}
 
 	@Override
 	public IProcessComponent<List<FileTaste>> getFileList() throws NoSessionException {
-		IProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(networkManager);
-		AsyncComponent<List<FileTaste>> asyncProcess = new AsyncComponent<List<FileTaste>>(fileListProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		
+		return ProcessFactory.instance().createFileListProcess(networkManager);
 	}
 
 	@Override
