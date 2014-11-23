@@ -21,7 +21,7 @@
 			<!-- Hive2Hive Process Framework -->
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.0-Beta2</version>
+			<version>1.0-Beta3</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
