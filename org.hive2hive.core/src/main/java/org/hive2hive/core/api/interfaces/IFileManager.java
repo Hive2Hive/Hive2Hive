@@ -19,7 +19,7 @@ import org.hive2hive.processframework.decorators.AsyncComponent;
  * @author Christian, Nico, Seppi
  * 
  */
-public interface IFileManager extends IManager {
+public interface IFileManager {
 
 	/**
 	 * Add a file or a folder. Note that the file must already be in the predefined Hive2Hive folder. If the

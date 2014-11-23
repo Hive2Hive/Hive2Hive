@@ -12,7 +12,7 @@ import org.hive2hive.processframework.decorators.AsyncComponent;
  * @author Christian, Nico, Seppi
  * 
  */
-public interface IUserManager extends IManager {
+public interface IUserManager {
 
 	/**
 	 * Each user must be registered in the network. This call creates a new UserProfile for the
