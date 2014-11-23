@@ -14,7 +14,6 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 /**
@@ -38,32 +37,20 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	@Override
 	public IProcessComponent<Void> register(UserCredentials credentials) throws NoPeerConnectionException {
 		
-		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(registerProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createRegisterProcess(credentials, networkManager);
 	}
 
 	@Override
 	public IProcessComponent<Void> login(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException {
 		SessionParameters params = new SessionParameters(fileAgent, fileConfiguration);
 
-		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(loginProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createLoginProcess(credentials, params, networkManager);
 	}
 
 	@Override
 	public IProcessComponent<Void> logout() throws NoPeerConnectionException, NoSessionException {
 		
-		IProcessComponent<Void> logoutProcess = ProcessFactory.instance().createLogoutProcess(networkManager);
-		AsyncComponent<Void> asyncProcess = new AsyncComponent<>(logoutProcess);
-
-		submitProcess(asyncProcess);
-		return asyncProcess;
+		return ProcessFactory.instance().createLogoutProcess(networkManager);
 	}
 
 	@Override
