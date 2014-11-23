@@ -64,6 +64,11 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
+	public boolean connect(PeerDHT peer) {
+		return networkManager.connect(peer);
+	}
+
+	@Override
 	public boolean disconnect() {
 		return networkManager.disconnect();
 	}
@@ -98,5 +103,4 @@ public class H2HNode implements IH2HNode {
 	public PeerDHT getPeer() {
 		return networkManager.getConnection().getPeerDHT();
 	}
-
 }

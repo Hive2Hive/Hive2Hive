@@ -1,5 +1,7 @@
 package org.hive2hive.core.network;
 
+import net.tomp2p.dht.PeerDHT;
+
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
@@ -19,7 +21,7 @@ public class NetworkManager {
 	private final Connection connection;
 	private final DataManager dataManager;
 	private final MessageManager messageManager;
-	private INetworkConfiguration networkConfiguration;
+	private String nodeID;
 	private H2HSession session;
 
 	private final EventBus eventBus;
@@ -40,7 +42,7 @@ public class NetworkManager {
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect(INetworkConfiguration networkConfiguration) {
-		this.networkConfiguration = networkConfiguration;
+		this.nodeID = networkConfiguration.getNodeID();
 
 		if (networkConfiguration.isLocal()) {
 			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getBootstapPeer());
@@ -54,7 +56,14 @@ public class NetworkManager {
 
 			return success;
 		}
+	}
 
+	/**
+	 * Uses an existing peer for DHT interaction
+	 */
+	public boolean connect(PeerDHT peer) {
+		this.nodeID = peer.peerID().toString();
+		return connection.connect(peer);
 	}
 
 	/**
@@ -80,7 +89,7 @@ public class NetworkManager {
 	}
 
 	public String getNodeId() {
-		return networkConfiguration.getNodeID();
+		return nodeID;
 	}
 
 	public Connection getConnection() {
@@ -114,10 +123,6 @@ public class NetworkManager {
 			return null;
 		}
 		return session.getCredentials().getUserId();
-	}
-
-	public INetworkConfiguration getNetworkConfiguration() {
-		return networkConfiguration;
 	}
 
 	public DataManager getDataManager() throws NoPeerConnectionException {

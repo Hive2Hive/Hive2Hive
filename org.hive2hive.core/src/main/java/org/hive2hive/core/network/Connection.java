@@ -55,7 +55,8 @@ public class Connection {
 	 * Creates a peer and connects it to the network.
 	 * 
 	 * @param nodeId the id of the network node (should be unique among the network)
-	 * @return True, if the peer creation and connection was successful, false otherwise
+	 * @return <code>true</code>, if the peer creation and connection was successful, otherwise
+	 *         <code>false</code>
 	 */
 	public boolean connect(String nodeID) {
 		if (isConnected()) {
@@ -64,6 +65,24 @@ public class Connection {
 		}
 
 		return createPeer(nodeID);
+	}
+
+	/**
+	 * Uses the given peer and does not bootstrap any further
+	 * 
+	 * @param peer the peer
+	 * @return <code>true</code> if the given peer is valid, otherwise <code>false</code>.
+	 */
+	public boolean connect(PeerDHT peer) {
+		if (isConnected()) {
+			logger.warn("Peer is already connected.");
+			return false;
+		} else if (peer.peer().isShutdown()) {
+			logger.warn("Peer is already shut down.");
+			return false;
+		}
+		this.peerDHT = peer;
+		return true;
 	}
 
 	/**

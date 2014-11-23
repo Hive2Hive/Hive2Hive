@@ -20,6 +20,17 @@ public interface IH2HNode {
 	boolean connect(INetworkConfiguration networkConfiguration);
 
 	/**
+	 * Connect to the network using an existing peer (which is already connected and bootstrapped).
+	 * It's an alternative to creating an own peer using {@link #connect(INetworkConfiguration)}. <br>
+	 * <strong>Important:</strong> When using this method, you must care yourself about bootstrapping,
+	 * replication and the storage layer.
+	 * 
+	 * @param peer a (connected) peer
+	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
+	 */
+	boolean connect(PeerDHT peer);
+
+	/**
 	 * Disconnect the node from the network.
 	 * 
 	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
