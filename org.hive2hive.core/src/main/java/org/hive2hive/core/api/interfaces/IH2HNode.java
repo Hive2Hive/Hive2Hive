@@ -19,7 +19,7 @@ public interface IH2HNode {
 	 * 
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
-	boolean connect();
+	boolean connect(INetworkConfiguration networkConfiguration);
 
 	/**
 	 * Disconnect the node from the network.
@@ -31,6 +31,8 @@ public interface IH2HNode {
 	/**
 	 * Checks whether this {@link IH2HNode} is connected.
 	 * 
+	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
+	 *            to listen to.
 	 * @return <code>true</code> if connected, <code>false</code> otherwise
 	 */
 	boolean isConnected();
@@ -49,13 +51,6 @@ public interface IH2HNode {
 	 * @return the file management
 	 */
 	IFileManager getFileManager();
-
-	/**
-	 * Returns the {@link INetworkConfiguration} given at the node creation.
-	 * 
-	 * @return the network configuration
-	 */
-	INetworkConfiguration getNetworkConfiguration();
 
 	/**
 	 * Returns the {@link IFileConfiguration} given at the node creation.

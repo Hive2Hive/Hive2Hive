@@ -9,10 +9,8 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
-import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
-import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -97,9 +95,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test
 	public void getPeer() {
 		// a unconnected node does not provide a peer
-		INetworkConfiguration config = NetworkConfiguration.createInitial();
 		IFileConfiguration fileConfig = FileConfiguration.createDefault();
-		IH2HNode node = H2HNode.createNode(config, fileConfig);
+		IH2HNode node = H2HNode.createNode(fileConfig);
 		Assert.assertNull(node.getPeer());
 
 		// connected nodes return a peer

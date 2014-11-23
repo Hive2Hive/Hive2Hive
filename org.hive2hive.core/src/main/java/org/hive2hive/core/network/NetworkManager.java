@@ -14,23 +14,20 @@ public class NetworkManager {
 	// TODO this class needs heavy refactoring! many man-in-the-middle delegations and methods that do not
 	// belong here
 
-	private final INetworkConfiguration networkConfiguration;
-
 	private final Connection connection;
 	private final DataManager dataManager;
 	private final MessageManager messageManager;
+	private INetworkConfiguration networkConfiguration;
 	private H2HSession session;
 
 	private final EventBus eventBus;
 
-	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption, EventBus eventBus) {
-		this.networkConfiguration = networkConfiguration;
+	public NetworkManager(IH2HEncryption encryption, EventBus eventBus) {
+		this.eventBus = eventBus;
 
-		connection = new Connection(networkConfiguration.getNodeID(), this, encryption);
+		connection = new Connection(this, encryption);
 		dataManager = new DataManager(this, encryption);
 		messageManager = new MessageManager(this, encryption);
-
-		this.eventBus = eventBus;
 	}
 
 	/**
@@ -38,23 +35,22 @@ public class NetworkManager {
 	 * 
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
-	public boolean connect() {
-		boolean success = false;
+	public boolean connect(INetworkConfiguration networkConfiguration) {
+		this.networkConfiguration = networkConfiguration;
+
 		if (networkConfiguration.isLocal()) {
-			if (networkConfiguration.isBootstrappingLocal()) {
-				success = connection.connectInternal(networkConfiguration.getBootstapPeer());
-			} else {
-				success = connection.connectInternal();
-			}
-		} else if (networkConfiguration.isInitialPeer()) {
-			success = connection.connect();
-		} else if (networkConfiguration.getBootstrapPort() == -1) {
-			success = connection.connect(networkConfiguration.getBootstrapAddress());
+			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getBootstapPeer());
 		} else {
-			success = connection
-					.connect(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
+			boolean success = connection.connect(networkConfiguration.getNodeID());
+			// bootstrap if not initial peer
+			if (success && !networkConfiguration.isInitialPeer()) {
+				success = connection.bootstrap(networkConfiguration.getBootstrapAddress(),
+						networkConfiguration.getBootstrapPort());
+			}
+
+			return success;
 		}
-		return success;
+
 	}
 
 	/**
@@ -67,8 +63,7 @@ public class NetworkManager {
 			session.getProfileManager().stopQueueWorker();
 		}
 
-		boolean success = connection.disconnect();
-		return success;
+		return connection.disconnect();
 	}
 
 	/**
@@ -134,7 +129,7 @@ public class NetworkManager {
 		}
 		return messageManager;
 	}
-	
+
 	public EventBus getEventBus() {
 		return eventBus;
 	}

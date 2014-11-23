@@ -42,9 +42,8 @@ public final class NodeMenu extends H2HConsoleMenu {
 	protected void createItems() {
 		createNetworkMenuItem = new H2HConsoleMenuItem("Create New Network") {
 			protected void execute() {
-
-				buildNode(NetworkConfiguration.createInitial(askNodeID()));
-				connectNode();
+				buildNode();
+				connectNode(NetworkConfiguration.createInitial(askNodeID()));
 			}
 		};
 
@@ -60,13 +59,13 @@ public final class NodeMenu extends H2HConsoleMenu {
 					print("Specify Bootstrap Port or enter 'default':");
 					port = awaitStringParameter();
 				}
-				if ("default".equalsIgnoreCase(port)) {
-					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
-				} else {
-					buildNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
-				}
 
-				connectNode();
+				buildNode();
+				if ("default".equalsIgnoreCase(port)) {
+					connectNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
+				} else {
+					connectNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
+				}
 			}
 		};
 	}
@@ -136,16 +135,16 @@ public final class NodeMenu extends H2HConsoleMenu {
 		return getNode() != null;
 	}
 
-	private void buildNode(INetworkConfiguration networkConfig) {
-		node = H2HNode.createNode(networkConfig,
-				FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions, chunkSize));
+	private void buildNode() {
+		node = H2HNode.createNode(FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions,
+				chunkSize));
 		node.getUserManager().configureAutostart(false);
 		node.getFileManager().configureAutostart(false);
 		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 
-	private void connectNode() {
-		if (node.connect()) {
+	private void connectNode(INetworkConfiguration networkConfig) {
+		if (node.connect(networkConfig)) {
 			print("Network connection successfully established.");
 			exit();
 		} else {

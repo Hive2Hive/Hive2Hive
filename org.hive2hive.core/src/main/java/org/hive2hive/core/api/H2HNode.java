@@ -22,7 +22,6 @@ public class H2HNode implements IH2HNode {
 
 	// TODO remove manager singletons
 	// TODO atm, this class is just a wrapper for the NetworkManager
-	private final INetworkConfiguration networkConfiguration;
 	private final IFileConfiguration fileConfiguration;
 	private final NetworkManager networkManager;
 	private final EventBus eventBus;
@@ -30,46 +29,39 @@ public class H2HNode implements IH2HNode {
 	private IUserManager userManager;
 	private IFileManager fileManager;
 
-	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IH2HEncryption encryption) {
-		this.networkConfiguration = networkConfiguration;
+	private H2HNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption) {
 		this.fileConfiguration = fileConfiguration;
 		this.eventBus = new EventBus();
 
-		networkManager = new NetworkManager(networkConfiguration, encryption, eventBus);
+		networkManager = new NetworkManager(encryption, eventBus);
 	}
 
 	/**
 	 * Create a Hive2Hive node instance. Before the node can be used, a {@link IH2HNode#connect()} must be
 	 * called.
 	 * 
-	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
-	 *            to listen to.
 	 * @param fileConfiguration the file configuration
 	 * @return
 	 */
-	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration) {
-		return new H2HNode(networkConfiguration, fileConfiguration, new H2HDefaultEncryption());
+	public static IH2HNode createNode(IFileConfiguration fileConfiguration) {
+		return new H2HNode(fileConfiguration, new H2HDefaultEncryption());
 	}
 
 	/**
-	 * Same as {@link H2HNode#createNode(INetworkConfiguration, IFileConfiguration)}, but with additional
+	 * Same as {@link H2HNode#createNode(IFileConfiguration)}, but with additional
 	 * capability to provide an own encryption implementation
 	 * 
-	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
-	 *            to listen to.
 	 * @param fileConfiguration the file configuration
 	 * @param encryption and decryption implementation
 	 * @return
 	 */
-	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IH2HEncryption encryption) {
-		return new H2HNode(networkConfiguration, fileConfiguration, encryption);
+	public static IH2HNode createNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption) {
+		return new H2HNode(fileConfiguration, encryption);
 	}
 
 	@Override
-	public boolean connect() {
-		return networkManager.connect();
+	public boolean connect(INetworkConfiguration networkConfiguration) {
+		return networkManager.connect(networkConfiguration);
 	}
 
 	@Override
@@ -96,11 +88,6 @@ public class H2HNode implements IH2HNode {
 			fileManager = new H2HFileManager(networkManager, eventBus);
 		}
 		return fileManager;
-	}
-
-	@Override
-	public INetworkConfiguration getNetworkConfiguration() {
-		return networkConfiguration;
 	}
 
 	@Override

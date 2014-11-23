@@ -24,11 +24,11 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectAsInitial() {
-		INetworkConfiguration netConfig = NetworkConfiguration.createInitial("initial node");
-		NetworkManager initialNode = new NetworkManager(netConfig, new H2HDummyEncryption(), new EventBus());
+		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), new EventBus());
 
 		try {
-			assertTrue(initialNode.connect());
+			INetworkConfiguration netConfig = NetworkConfiguration.createInitial("initial node");
+			assertTrue(initialNode.connect(netConfig));
 		} finally {
 			initialNode.disconnect();
 		}
@@ -36,15 +36,14 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectToOtherPeer() throws UnknownHostException {
+		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), new EventBus());
+		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), new EventBus());
+
 		INetworkConfiguration netConfigA = NetworkConfiguration.createInitial("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());
-
-		NetworkManager nodeA = new NetworkManager(netConfigA, new H2HDummyEncryption(), new EventBus());
-		NetworkManager nodeB = new NetworkManager(netConfigB, new H2HDummyEncryption(), new EventBus());
-
 		try {
-			assertTrue(nodeA.connect());
-			assertTrue(nodeB.connect());
+			assertTrue(nodeA.connect(netConfigA));
+			assertTrue(nodeB.connect(netConfigB));
 		} finally {
 			nodeA.disconnect();
 			nodeB.disconnect();

@@ -57,18 +57,18 @@ public class NetworkTestUtil {
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
+		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), new EventBus());
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
-		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption(), new EventBus());
-		initial.connect();
+		initial.connect(netConfig);
 		nodes.add(initial);
 
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
+			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), new EventBus());
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeerDHT().peer());
-			NetworkManager node = new NetworkManager(otherNetConfig, new H2HDummyEncryption(), new EventBus());
-			node.connect();
+			node.connect(otherNetConfig);
 			nodes.add(node);
 		}
 
@@ -164,9 +164,8 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.createInitial("initial"),
-				FileConfiguration.createDefault(), new H2HDummyEncryption());
-		initial.connect();
+		IH2HNode initial = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption());
+		initial.connect(NetworkConfiguration.createInitial("initial"));
 		initial.getFileManager().configureAutostart(false);
 		initial.getUserManager().configureAutostart(false);
 
@@ -175,9 +174,8 @@ public class NetworkTestUtil {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(NetworkConfiguration.create("node " + i, bootstrapAddress),
-						FileConfiguration.createDefault(), new H2HDummyEncryption());
-				node.connect();
+				IH2HNode node = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption());
+				node.connect(NetworkConfiguration.create("node " + i, bootstrapAddress));
 				node.getFileManager().configureAutostart(false);
 				node.getUserManager().configureAutostart(false);
 				nodes.add(node);
