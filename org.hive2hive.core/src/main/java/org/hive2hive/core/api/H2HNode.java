@@ -64,8 +64,8 @@ public class H2HNode implements IH2HNode {
 	}
 
 	@Override
-	public boolean connect(PeerDHT peer) {
-		return networkManager.connect(peer);
+	public boolean connect(PeerDHT peer, boolean startReplication) {
+		return networkManager.connect(peer, startReplication);
 	}
 
 	@Override

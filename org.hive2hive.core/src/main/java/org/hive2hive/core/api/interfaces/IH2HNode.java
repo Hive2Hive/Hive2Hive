@@ -23,14 +23,16 @@ public interface IH2HNode {
 	/**
 	 * Connect to the network using an existing peer (which is already connected and bootstrapped).
 	 * It's an alternative to creating an own peer using {@link #connect(INetworkConfiguration)}. <br>
-	 * <strong>Important:</strong> When using this method, you must care yourself about bootstrapping,
-	 * replication and the storage layer.<br>
+	 * <strong>Important:</strong> When using this method, you must care yourself about bootstrapping, the
+	 * storage layer, etc.<br>
 	 * Also note that the {@link ObjectDataReply} will be overwritten because Hive2Hive uses it for messaging.
 	 * 
 	 * @param peer a (connected) peer
+	 * @param startReplication whether replication is self-managed by you (in case of <code>false</code>) or
+	 *            Hive2Hive should start the replication (in case of <code>true</code>).
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
-	boolean connect(PeerDHT peer);
+	boolean connect(PeerDHT peer, boolean startReplication);
 
 	/**
 	 * Disconnect the node from the network.

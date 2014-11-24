@@ -61,9 +61,9 @@ public class NetworkManager {
 	/**
 	 * Uses an existing peer for DHT interaction
 	 */
-	public boolean connect(PeerDHT peer) {
+	public boolean connect(PeerDHT peer, boolean startReplication) {
 		this.nodeID = peer.peerID().toString();
-		return connection.connect(peer);
+		return connection.connect(peer, startReplication);
 	}
 
 	/**

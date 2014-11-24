@@ -71,9 +71,10 @@ public class Connection {
 	 * Uses the given peer and does not bootstrap any further
 	 * 
 	 * @param peer the peer
+	 * @param startReplication whether replication should be started
 	 * @return <code>true</code> if the given peer is valid, otherwise <code>false</code>.
 	 */
-	public boolean connect(PeerDHT peer) {
+	public boolean connect(PeerDHT peer, boolean startReplication) {
 		if (isConnected()) {
 			logger.warn("Peer is already connected.");
 			return false;
@@ -85,6 +86,10 @@ public class Connection {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+
+		if (startReplication) {
+			startReplication();
+		}
 
 		return true;
 	}
