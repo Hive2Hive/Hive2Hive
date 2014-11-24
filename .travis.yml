@@ -6,3 +6,4 @@ jdk:
 branches:
   only:
     - master
+    - dev
