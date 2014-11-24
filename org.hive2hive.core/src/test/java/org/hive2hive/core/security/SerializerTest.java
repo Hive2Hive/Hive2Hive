@@ -30,7 +30,7 @@ public class SerializerTest extends H2HJUnitTest {
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection data() {
-		return Arrays.asList(new Object[][] { { new JavaSerializer() }, { new FSTSerializer() }, { new KryoSerializer() } });
+		return Arrays.asList(new Object[][] { { new JavaSerializer() }, { new FSTSerializer() } });
 	}
 
 	public SerializerTest(IH2HSerialize serializer) {
