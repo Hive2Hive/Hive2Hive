@@ -51,7 +51,7 @@ public class H2HNode implements IH2HNode {
 
 	/**
 	 * Same as {@link H2HNode#createNode(IFileConfiguration)}, but with additional
-	 * capability to provide an own encryption implementation
+	 * capability to provide an own encryption and serialization implementation
 	 * 
 	 * @param fileConfiguration the file configuration
 	 * @param encryption and decryption implementation
