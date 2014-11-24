@@ -24,6 +24,7 @@ import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessage
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply;
 import org.hive2hive.core.network.messages.testmessages.TestMessage;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
@@ -46,11 +47,13 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	private static ArrayList<NetworkManager> network;
 	private static final int networkSize = 10;
 	private static Random random = new Random();
+	private static FSTSerializer serializer;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = BaseMessageProcessStepTest.class;
 		beforeClass();
+		serializer = new FSTSerializer();
 		network = NetworkTestUtil.createNetwork(networkSize);
 		NetworkTestUtil.setSameSession(network);
 	}
@@ -166,7 +169,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			assertNull(nodeA.getDataManager().get(parameters));
 		} finally {
 			nodeB.getConnection().getPeerDHT().peer()
-					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption()));
+					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption(), serializer));
 		}
 	}
 
@@ -348,7 +351,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			assertNull(nodeB.getDataManager().get(parameters));
 		} finally {
 			nodeB.getConnection().getPeerDHT().peer()
-					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption()));
+					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption(), serializer));
 		}
 	}
 

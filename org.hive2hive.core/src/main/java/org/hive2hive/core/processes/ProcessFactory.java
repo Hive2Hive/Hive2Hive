@@ -182,7 +182,8 @@ public final class ProcessFactory {
 
 		process.add(new RemoveOwnLocationsStep(networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
-		process.add(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(), session.getDownloadManager()));
+		process.add(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(), session.getDownloadManager(),
+				networkManager.getDataManager().getSerializer()));
 		process.add(new DeleteSessionStep(networkManager));
 
 		// TODO to be implemented:

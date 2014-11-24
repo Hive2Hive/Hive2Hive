@@ -29,7 +29,7 @@ import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.IH2HEncryption;
-import org.hive2hive.core.security.SerializationUtil;
+import org.hive2hive.core.security.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +45,12 @@ public final class MessageManager implements IMessageManager {
 	private final NetworkManager networkManager;
 	private final Map<String, IResponseCallBackHandler> callBackHandlers;
 	private final IH2HEncryption encryption;
+	private final IH2HSerialize serializer;
 
-	public MessageManager(NetworkManager networkManager, IH2HEncryption encryption) {
+	public MessageManager(NetworkManager networkManager, IH2HEncryption encryption, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
 		this.encryption = encryption;
+		this.serializer = serializer;
 		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
 	}
 
@@ -200,7 +202,7 @@ public final class MessageManager implements IMessageManager {
 		HybridEncryptedContent encryptedMessage;
 		try {
 			// asymmetrically encrypt message
-			messageBytes = SerializationUtil.serialize(message);
+			messageBytes = serializer.serialize(message);
 			encryptedMessage = encryption.encryptHybrid(messageBytes, targetPublicKey);
 		} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
 				| IllegalBlockSizeException | BadPaddingException | IOException e) {

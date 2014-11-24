@@ -10,6 +10,7 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -26,6 +27,7 @@ import org.junit.Test;
  */
 public class FileUtilTest extends H2HJUnitTest {
 
+	private static FSTSerializer serializer;
 	private File root;
 	private TestFileAgent fileAgent;
 
@@ -33,6 +35,7 @@ public class FileUtilTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = FileUtilTest.class;
 		beforeClass();
+		serializer = new FSTSerializer();
 	}
 
 	@AfterClass
@@ -56,8 +59,8 @@ public class FileUtilTest extends H2HJUnitTest {
 	public void testReadWriteMetaData() throws IOException, ClassNotFoundException {
 		DownloadManager downloadManager = new DownloadManager(null, null, null);
 		PublicKeyManager publicKeyManager = new PublicKeyManager("user", EncryptionUtil.generateRSAKeyPair(), null);
-		FileUtil.writePersistentMetaData(fileAgent, publicKeyManager, downloadManager);
-		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(fileAgent);
+		FileUtil.writePersistentMetaData(fileAgent, publicKeyManager, downloadManager, serializer);
+		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(fileAgent, serializer);
 		Assert.assertNotNull(persistentMetaData);
 		Assert.assertEquals(0, persistentMetaData.getDownloads().size());
 		Assert.assertEquals(0, persistentMetaData.getPublicKeyCache().size());

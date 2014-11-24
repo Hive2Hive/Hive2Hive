@@ -12,6 +12,7 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
 
 public class NetworkManager {
 
@@ -27,12 +28,13 @@ public class NetworkManager {
 	private final EventBus eventBus;
 	private final DownloadManager downloadManager;
 
-	public NetworkManager(IH2HEncryption encryption, EventBus eventBus, IFileConfiguration fileConfig) {
+	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, EventBus eventBus,
+			IFileConfiguration fileConfig) {
 		this.eventBus = eventBus;
 
-		connection = new Connection(this, encryption);
-		dataManager = new DataManager(this, encryption);
-		messageManager = new MessageManager(this, encryption);
+		connection = new Connection(this, encryption, serializer);
+		dataManager = new DataManager(this, encryption, serializer);
+		messageManager = new MessageManager(this, encryption, serializer);
 		downloadManager = new DownloadManager(dataManager, messageManager, fileConfig);
 	}
 

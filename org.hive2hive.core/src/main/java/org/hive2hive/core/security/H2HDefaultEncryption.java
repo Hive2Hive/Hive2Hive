@@ -18,10 +18,16 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 
 public final class H2HDefaultEncryption implements IH2HEncryption {
 
+	private final IH2HSerialize serializer;
+
+	public H2HDefaultEncryption(IH2HSerialize serializer) {
+		this.serializer = serializer;
+	}
+
 	@Override
-	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
-			IOException {
-		byte[] serialized = SerializationUtil.serialize(content);
+	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey)
+			throws InvalidCipherTextException, IOException {
+		byte[] serialized = serializer.serialize(content);
 		byte[] initVector = EncryptionUtil.generateIV();
 		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector);
 
@@ -31,16 +37,16 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
-			ClassNotFoundException, IOException {
+	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
+			throws InvalidCipherTextException, ClassNotFoundException, IOException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector());
-		return (BaseNetworkContent) SerializationUtil.deserialize(decrypted);
+		return (BaseNetworkContent) serializer.deserialize(decrypted);
 	}
 
 	@Override
 	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
-		byte[] serialized = SerializationUtil.serialize(content);
+		byte[] serialized = serializer.serialize(content);
 
 		HybridEncryptedContent encryptHybrid = encryptHybrid(serialized, publicKey);
 		encryptHybrid.setTimeToLive(content.getTimeToLive());
@@ -54,9 +60,10 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		return (BaseNetworkContent) SerializationUtil.deserialize(decryptHybridRaw(content, privateKey));
+	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException,
+			ClassNotFoundException, IOException {
+		return (BaseNetworkContent) serializer.deserialize(decryptHybridRaw(content, privateKey));
 	}
 
 	@Override

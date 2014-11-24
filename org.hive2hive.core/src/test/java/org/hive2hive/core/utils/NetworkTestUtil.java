@@ -25,6 +25,7 @@ import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.helper.TestFileAgent;
@@ -56,7 +57,8 @@ public class NetworkTestUtil {
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
-		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+		FSTSerializer serializer = new FSTSerializer();
+		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
 				FileConfiguration.createDefault());
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
 		initial.connect(netConfig);
@@ -65,7 +67,7 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
 					FileConfiguration.createDefault());
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeerDHT().peer());
@@ -161,7 +163,8 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption());
+		FSTSerializer serializer = new FSTSerializer();
+		IH2HNode initial = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption(), serializer);
 		initial.connect(NetworkConfiguration.createInitial("initial"));
 
 		nodes.add(initial);
@@ -169,7 +172,7 @@ public class NetworkTestUtil {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption());
+				IH2HNode node = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption(), serializer);
 				node.connect(NetworkConfiguration.create("node " + i, bootstrapAddress));
 				nodes.add(node);
 			}

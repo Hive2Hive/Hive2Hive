@@ -9,8 +9,10 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
 
 /**
  * Default implementation of {@link IH2HNode}.
@@ -29,10 +31,10 @@ public class H2HNode implements IH2HNode {
 	private IUserManager userManager;
 	private IFileManager fileManager;
 
-	private H2HNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption) {
+	private H2HNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption, IH2HSerialize serializer) {
 		this.fileConfiguration = fileConfiguration;
 		this.eventBus = new EventBus();
-		this.networkManager = new NetworkManager(encryption, eventBus, fileConfiguration);
+		this.networkManager = new NetworkManager(encryption, serializer, eventBus, fileConfiguration);
 	}
 
 	/**
@@ -43,7 +45,8 @@ public class H2HNode implements IH2HNode {
 	 * @return
 	 */
 	public static IH2HNode createNode(IFileConfiguration fileConfiguration) {
-		return new H2HNode(fileConfiguration, new H2HDefaultEncryption());
+		FSTSerializer serializer = new FSTSerializer();
+		return new H2HNode(fileConfiguration, new H2HDefaultEncryption(serializer), serializer);
 	}
 
 	/**
@@ -52,10 +55,12 @@ public class H2HNode implements IH2HNode {
 	 * 
 	 * @param fileConfiguration the file configuration
 	 * @param encryption and decryption implementation
+	 * @param serializer the serialization implementation
 	 * @return
 	 */
-	public static IH2HNode createNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption) {
-		return new H2HNode(fileConfiguration, encryption);
+	public static IH2HNode createNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption,
+			IH2HSerialize serializer) {
+		return new H2HNode(fileConfiguration, encryption, serializer);
 	}
 
 	@Override

@@ -3,48 +3,42 @@ package org.hive2hive.core.security;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.ruedigermoeller.serialization.FSTConfiguration;
-import de.ruedigermoeller.serialization.FSTObjectInput;
-import de.ruedigermoeller.serialization.FSTObjectOutput;
-
 /**
- * Provides serialization and deserialization of objects
+ * Standard java serialization. This implementation is slower than {@link FSTSerializer}, but compatible with
+ * all jvms.
  * 
- * @author Nico, Chris
- * 
+ * @author Nico
+ *
  */
-public class SerializationUtil {
+public final class JavaSerializer implements IH2HSerialize {
 
-	private static final Logger logger = LoggerFactory.getLogger(SerializationUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(JavaSerializer.class);
 
-	// thread safe usage of FST
-	private static final FSTConfiguration FST = FSTConfiguration.createDefaultConfiguration();
-
-	private SerializationUtil() {
-		// only static methods
-	}
-
-	/**
-	 * Serializes an object to a byte array which can be sent over the network
-	 */
-	public static byte[] serialize(Serializable object) throws IOException {
+	@Override
+	public byte[] serialize(Serializable object) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		FSTObjectOutput fstOut = FST.getObjectOutput(baos);
-		byte[] result = new byte[0];
+		ObjectOutputStream oos = null;
+		byte[] result = null;
 
 		try {
-			fstOut.writeObject(object);
+			oos = new ObjectOutputStream(baos);
+			oos.writeObject(object);
 			result = baos.toByteArray();
 		} catch (IOException e) {
 			logger.error("Exception while serializing object:", e);
 			throw e;
 		} finally {
 			try {
+				if (oos != null) {
+					oos.close();
+				}
 				if (baos != null) {
 					baos.close();
 				}
@@ -55,26 +49,28 @@ public class SerializationUtil {
 		return result;
 	}
 
-	/**
-	 * Deserializes an object from a byte array. The object type is not yet specific
-	 */
-	public static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+	@Override
+	public Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
 		if (bytes == null || bytes.length == 0) {
 			// nothing to deserialize
 			return null;
 		}
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		FSTObjectInput fstIn = FST.getObjectInput(bais);
+		ObjectInputStream ois = null;
 		Object result = null;
 
 		try {
-			result = fstIn.readObject();
+			ois = new ObjectInputStream(bais);
+			result = ois.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Exception while deserializing object.");
 			throw e;
 		} finally {
 			try {
+				if (ois != null) {
+					ois.close();
+				}
 				if (bais != null) {
 					bais.close();
 				}
@@ -85,4 +81,5 @@ public class SerializationUtil {
 
 		return result;
 	}
+
 }

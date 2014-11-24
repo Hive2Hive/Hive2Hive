@@ -10,6 +10,7 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -17,15 +18,18 @@ import org.junit.Test;
 
 public class ConnectionTest extends H2HJUnitTest {
 
+	private static FSTSerializer serializer;
+
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = ConnectionTest.class;
 		beforeClass();
+		serializer = new FSTSerializer();
 	}
 
 	@Test
 	public void testConnectAsInitial() {
-		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
 				FileConfiguration.createDefault());
 
 		try {
@@ -38,9 +42,9 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectToOtherPeer() throws UnknownHostException {
-		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
 				FileConfiguration.createDefault());
-		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), new EventBus(),
+		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
 				FileConfiguration.createDefault());
 
 		INetworkConfiguration netConfigA = NetworkConfiguration.createInitial("nodeA");

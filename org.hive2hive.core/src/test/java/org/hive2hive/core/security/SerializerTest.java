@@ -6,18 +6,35 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public class SerializationUtilTest extends H2HJUnitTest {
+@RunWith(Parameterized.class)
+public class SerializerTest extends H2HJUnitTest {
+
+	private final IH2HSerialize serializer;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		testClass = SerializationUtilTest.class;
+		testClass = SerializerTest.class;
 		beforeClass();
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Parameterized.Parameters(name = "{0}")
+	public static Collection data() {
+		return Arrays.asList(new Object[][] { { new JavaSerializer() }, { new FSTSerializer() }, { new KryoSerializer() } });
+	}
+
+	public SerializerTest(IH2HSerialize serializer) {
+		this.serializer = serializer;
 	}
 
 	@Test
@@ -26,12 +43,12 @@ public class SerializationUtilTest extends H2HJUnitTest {
 		logger.debug("Testing data serialization.");
 		logger.debug("Test String: {}.", data);
 
-		byte[] serializedData = SerializationUtil.serialize(data);
+		byte[] serializedData = serializer.serialize(data);
 		assertNotNull(serializedData);
 		assertNotEquals(0, serializedData.length);
 		printBytes("Serialized Data:", serializedData);
 
-		String deserializedData = (String) SerializationUtil.deserialize(serializedData);
+		String deserializedData = (String) serializer.deserialize(serializedData);
 		assertNotNull(deserializedData);
 		assertEquals(data, deserializedData);
 	}
@@ -41,14 +58,14 @@ public class SerializationUtilTest extends H2HJUnitTest {
 		logger.debug("Testing null serialization.");
 
 		// serializing results in non-null value
-		byte[] serialized = SerializationUtil.serialize(null);
+		byte[] serialized = serializer.serialize(null);
 		assertNotNull(serialized);
 
 		// when deserializing, it's again null
-		assertNull(SerializationUtil.deserialize(serialized));
+		assertNull(serializer.deserialize(serialized));
 
 		// however, deseriazlizing null is not allowed
-		assertNull(SerializationUtil.deserialize(null));
+		assertNull(serializer.deserialize(null));
 	}
 
 	@AfterClass
