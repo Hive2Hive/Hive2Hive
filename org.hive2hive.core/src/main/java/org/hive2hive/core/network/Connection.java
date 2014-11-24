@@ -160,6 +160,61 @@ public class Connection {
 		return isDisconnected;
 	}
 
+	/**
+	 * Create a local peer. Bootstrap to local master peer. <b>Important:</b> This is only for testing
+	 * purposes!
+	 * 
+	 * @param nodeId the id of the network node (should be unique among the network)
+	 * @param masterPeer
+	 *            the newly created peer bootstraps to given local master peer. Can be <code>null</code> to
+	 *            create a new network.
+	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
+	 */
+	public boolean connectInternal(String nodeId, Peer masterPeer) {
+		// disable peer verification (faster mutual acceptance)
+		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeId));
+		peerMapConfiguration.peerVerification(false);
+		// set higher peer map update frequency
+		peerMapConfiguration.maintenance(new DefaultMaintenance(4, new int[] { 1 }));
+		// only one try required to label a peer as offline
+		peerMapConfiguration.offlineCount(1);
+		peerMapConfiguration.shutdownTimeout(1);
+		PeerMap peerMap = new PeerMap(peerMapConfiguration);
+
+		try {
+			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId).masterPeer(masterPeer).peerMap(peerMap).start())
+					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storageLayer(storageMemory).start();
+		} catch (IOException e) {
+			logger.error("Exception while creating a local peer: ", e);
+			return false;
+		}
+
+		// attach a reply handler for messages
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
+
+		// setup replication
+		startReplication();
+
+		if (masterPeer != null) {
+			// bootstrap to master peer
+			FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
+			futureBootstrap.awaitUninterruptibly();
+
+			if (futureBootstrap.isSuccess()) {
+				logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
+				return true;
+			} else {
+				logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
+				peerDHT.shutdown().awaitUninterruptibly();
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
+
 	public boolean isConnected() {
 		return peerDHT != null && !peerDHT.peer().isShutdown();
 	}
@@ -222,61 +277,6 @@ public class Connection {
 
 		logger.debug("Peer successfully created and connected.");
 		return true;
-	}
-
-	/**
-	 * Create a local peer. Bootstrap to local master peer. <b>Important:</b> This is only for testing
-	 * purposes!
-	 * 
-	 * @param nodeId the id of the network node (should be unique among the network)
-	 * @param masterPeer
-	 *            the newly created peer bootstraps to given local master peer. Can be <code>null</code> to
-	 *            create a new network.
-	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
-	 */
-	public boolean connectInternal(String nodeId, Peer masterPeer) {
-		// disable peer verification (faster mutual acceptance)
-		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeId));
-		peerMapConfiguration.peerVerification(false);
-		// set higher peer map update frequency
-		peerMapConfiguration.maintenance(new DefaultMaintenance(4, new int[] { 1 }));
-		// only one try required to label a peer as offline
-		peerMapConfiguration.offlineCount(1);
-		peerMapConfiguration.shutdownTimeout(1);
-		PeerMap peerMap = new PeerMap(peerMapConfiguration);
-
-		try {
-			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId).masterPeer(masterPeer).peerMap(peerMap).start())
-					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
-					.storageLayer(storageMemory).start();
-		} catch (IOException e) {
-			logger.error("Exception while creating a local peer: ", e);
-			return false;
-		}
-
-		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption));
-
-		// setup replication
-		startReplication();
-
-		if (masterPeer != null) {
-			// bootstrap to master peer
-			FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
-			futureBootstrap.awaitUninterruptibly();
-
-			if (futureBootstrap.isSuccess()) {
-				logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
-				return true;
-			} else {
-				logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-				peerDHT.shutdown().awaitUninterruptibly();
-				return false;
-			}
-		} else {
-			return true;
-		}
 	}
 
 	/**
