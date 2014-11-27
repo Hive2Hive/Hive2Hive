@@ -5,12 +5,11 @@ import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.util.FileObserver;
 import org.hive2hive.client.util.FileObserverListener;
 import org.hive2hive.client.util.MenuContainer;
-import org.hive2hive.core.H2HConstants;
 
 public class FileObserverMenu extends H2HConsoleMenu {
 
 	private FileObserver fileObserver;
-	private long interval = H2HConstants.DEFAULT_FILE_OBSERVER_INTERVAL;
+	private long interval = 1000;
 
 	public FileObserverMenu(MenuContainer menus) {
 		super(menus);

@@ -2,7 +2,6 @@ package org.hive2hive.core;
 
 import java.io.File;
 import java.math.BigInteger;
-import java.net.InetAddress;
 
 import net.tomp2p.peers.Number160;
 
@@ -22,10 +21,6 @@ public interface H2HConstants {
 	public static final BigInteger DEFAULT_MAX_SIZE_OF_ALL_VERSIONS = DEFAULT_MAX_FILE_SIZE.multiply(BigInteger
 			.valueOf(DEFAULT_MAX_NUM_OF_VERSIONS));// max_size * max_num
 	public static final int DEFAULT_CHUNK_SIZE = MEGABYTES.intValue(); // 1 MB
-
-	public static final boolean DEFAULT_IS_INITIAL_PEER = false;
-	public static final InetAddress DEFAULT_BOOTSTRAP_ADDRESS = null;
-	public static final String DEFAULT_ROOT_PATH = new File(System.getProperty("user.home"), "Hive2Hive").getAbsolutePath();
 
 	// standard port for the Hive2Hive network
 	public static final int H2H_PORT = 4622;
@@ -121,12 +116,6 @@ public interface H2HConstants {
 
 	// period in milliseconds between successive ttl refreshment task executions
 	public static final int TTL_REFRESHMENT_PERIOD = 1000;
-
-	/**
-	 * File Observer
-	 */
-	// default interval in milliseconds between file observation checks
-	public static final long DEFAULT_FILE_OBSERVER_INTERVAL = 1000;
 
 	/**
 	 * Download Manager
