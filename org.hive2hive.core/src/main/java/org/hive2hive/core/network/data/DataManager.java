@@ -83,9 +83,7 @@ public class DataManager {
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
 		logger.debug("Change content protection key. {}", parameters.toString());
 		// create dummy object to change the protection key
-		Data data = new Data().protectEntry();
-		// set new content protection keys
-		data.publicKey(parameters.getNewProtectionKeys().getPublic());
+		Data data = new Data().protectEntry(parameters.getNewProtectionKeys());
 		if (parameters.getTTL() != -1) {
 			data.ttlSeconds(parameters.getTTL());
 		}
