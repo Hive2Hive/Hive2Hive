@@ -12,15 +12,14 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.processes.context.interfaces.IInitializeMetaUpdateContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.EncryptionUtil;
 
 public class ShareProcessContext implements IInitializeMetaUpdateContext, INotifyContext {
 
 	private final File folder;
-	private final KeyPair newProtectionKeys;
 	private final UserPermission permission;
 
 	private KeyPair oldProtectionKeys;
+	private KeyPair newProtectionKeys;
 	private BaseMetaFile metaFile;
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
@@ -29,7 +28,6 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 	public ShareProcessContext(File folder, UserPermission permission) {
 		this.folder = folder;
 		this.permission = permission;
-		this.newProtectionKeys = EncryptionUtil.generateRSAKeyPair();
 	}
 
 	public File getFolder() {
@@ -46,6 +44,10 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 
 	public UserPermission getUserPermission() {
 		return permission;
+	}
+
+	public void provideNewProtectionKeys(KeyPair newProtectionKeys) {
+		this.newProtectionKeys = newProtectionKeys;
 	}
 
 	@Override

@@ -89,6 +89,9 @@ public interface H2HConstants {
 	// key length for asymmetric chunk encryption
 	public static final RSA_KEYLENGTH KEYLENGTH_CHUNK = RSA_KEYLENGTH.BIT_2048;
 
+	// key length for asymmetric protection / authentication keys
+	public static final RSA_KEYLENGTH KEYLENGTH_PROTECTION = RSA_KEYLENGTH.BIT_1024;
+
 	// key length for symmetric user profile encryption
 	public static final AES_KEYLENGTH KEYLENGTH_USER_PROFILE = AES_KEYLENGTH.BIT_256;
 

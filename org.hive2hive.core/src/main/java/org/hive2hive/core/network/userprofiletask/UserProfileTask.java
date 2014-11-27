@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public abstract class UserProfileTask extends BaseNetworkContent {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileTask.class);
-	
+
 	private static final long serialVersionUID = -773794512479641000L;
 
 	protected final String sender;
@@ -59,7 +59,7 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 
 	public UserProfileTask(String sender) {
 		this.sender = sender;
-		this.protectionKey = EncryptionUtil.generateRSAKeyPair();
+		this.protectionKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 		this.id = UUID.randomUUID().toString();
 
 		// get the current time
@@ -113,10 +113,10 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 			InvalidProcessStateException, NoSessionException {
 		Set<String> onlyMe = new HashSet<String>(1);
 		onlyMe.add(networkManager.getUserId());
-		
-		IProcessComponent<Void> notificationProcess = ProcessFactory.instance().createNotificationProcess(messageFactory, onlyMe,
-				networkManager);
-		
+
+		IProcessComponent<Void> notificationProcess = ProcessFactory.instance().createNotificationProcess(messageFactory,
+				onlyMe, networkManager);
+
 		try {
 			notificationProcess.execute();
 		} catch (ProcessExecutionException ex) {

@@ -68,8 +68,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// generate necessary keys
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair();
-		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		// generate a fake chunk
 		Chunk chunk = new Chunk(proxy.getNodeId(), randomString().getBytes(), 0);
@@ -118,8 +118,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		// generate necessary keys
 		KeyPair chunkEncryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
 		KeyPair metaFileEncryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair();
-		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		// generate a fake meta file
 		List<MetaChunk> metaChunks1 = new ArrayList<MetaChunk>();
