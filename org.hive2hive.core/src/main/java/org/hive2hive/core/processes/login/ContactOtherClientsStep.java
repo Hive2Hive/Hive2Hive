@@ -76,12 +76,13 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 			}
 		}
 		// add self
-		locations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
+		PeerAddress ownAddress = networkManager.getConnection().getPeerDHT().peerAddress();
+		logger.debug("Adding own peeraddress to locations file: {}", ownAddress);
+		locations.addPeerAddress(ownAddress);
 
 		// evaluate if initial
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(locations.getPeerAddresses());
-		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
-				networkManager.getConnection().getPeerDHT().peerAddress())) {
+		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(ownAddress)) {
 			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
 			if (getParent() != null) {
 				getParent().add(ProcessFactory.instance().createUserProfileTaskProcess(networkManager));
@@ -96,6 +97,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 		for (PeerAddress address : peerAddresses) {
 			// contact all other clients (exclude self)
 			if (!address.equals(networkManager.getConnection().getPeerDHT().peerAddress())) {
+				logger.debug("Sending contact message to check for aliveness to {}", address);
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);
 
@@ -131,6 +133,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 
 		// verify response
 		if (evidences.get(responseMessage.getSenderAddress()).equals((String) responseMessage.getContent())) {
+			logger.debug("Received valid response from {}", responseMessage.getSenderAddress());
 			responses.put(responseMessage.getSenderAddress(), true);
 			waitForResponses.countDown();
 		} else {
