@@ -28,7 +28,7 @@ public class H2HSignatureCodec implements SignatureCodec {
 
 	@Override
 	public byte[] encode() throws IOException {
-		// no decoding necessary
+		// no encoding necessary
 		return encodedData;
 	}
 

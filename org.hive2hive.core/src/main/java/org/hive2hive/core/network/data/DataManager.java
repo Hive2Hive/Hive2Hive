@@ -155,7 +155,7 @@ public class DataManager {
 
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+				data.protectEntry(parameters.getProtectionKeys());
 			}
 
 			// cache data
