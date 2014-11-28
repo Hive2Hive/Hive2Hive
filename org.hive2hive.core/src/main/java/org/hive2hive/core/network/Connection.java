@@ -6,6 +6,7 @@ import io.netty.util.concurrent.Future;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import net.tomp2p.connection.Bindings;
 import net.tomp2p.connection.ChannelClientConfiguration;
 import net.tomp2p.connection.ChannelServerConfiguration;
 import net.tomp2p.connection.Ports;
@@ -106,7 +107,7 @@ public class Connection {
 	 */
 	public boolean bootstrap(InetAddress bootstrapAddress, int port) {
 		if (!isConnected()) {
-			logger.warn("Connect first!");
+			logger.warn("Build peer first!");
 			return false;
 		}
 
@@ -241,8 +242,12 @@ public class Connection {
 		serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 		serverConfig.ports(new Ports(port, port));
 
-		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).channelClientConfiguration(clientConfig)
-				.channelServerConfiguration(serverConfig);
+		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
+		Bindings bindings = new Bindings();
+		bindings.listenAny();// .addProtocol(StandardProtocolFamily.INET);
+
+		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).bindings(bindings)
+				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
 	}
 
 	private void startReplication() {

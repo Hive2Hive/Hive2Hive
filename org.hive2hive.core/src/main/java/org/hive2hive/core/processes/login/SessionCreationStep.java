@@ -59,7 +59,7 @@ public class SessionCreationStep extends ProcessStep<Void> {
 
 			// create the key manager
 			PublicKeyManager keyManager = new PublicKeyManager(userProfile.getUserId(), userProfile.getEncryptionKeys(),
-					networkManager.getDataManager());
+					userProfile.getProtectionKeys(), networkManager.getDataManager());
 
 			// read eventually cached keys and add them to the key manager
 			Map<String, PublicKey> publicKeyCache = metaData.getPublicKeyCache();

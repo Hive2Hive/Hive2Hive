@@ -101,10 +101,12 @@ public class NetworkTestUtil {
 	public static void setDifferentSessions(List<NetworkManager> network) throws NoPeerConnectionException {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+			KeyPair protectionKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 			UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
-			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeyPair,
+					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
 					FileConfiguration.createDefault());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
@@ -129,10 +131,12 @@ public class NetworkTestUtil {
 	 */
 	public static void setSameSession(List<NetworkManager> network) throws NoPeerConnectionException {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 		for (NetworkManager node : network) {
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
-			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeys,
+					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
 					FileConfiguration.createDefault());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),

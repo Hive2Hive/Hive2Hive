@@ -92,7 +92,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
-		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
+		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
 		SessionParameters params = new SessionParameters(fileAgent);
 		params.setKeyManager(publicKeyManager);
@@ -131,7 +131,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		TestUserProfileTask userProfileTask = new TestUserProfileTask();
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
-		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
+		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
 		SessionParameters params = new SessionParameters(fileAgent);
 		params.setKeyManager(publicKeyManager);
@@ -167,7 +167,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		UserCredentials credentials = generateRandomCredentials();
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, node.getDataManager());
+		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
 		SessionParameters params = new SessionParameters(fileAgent);
 		params.setKeyManager(publicKeyManager);

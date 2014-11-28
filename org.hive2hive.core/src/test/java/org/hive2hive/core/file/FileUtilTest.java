@@ -60,6 +60,7 @@ public class FileUtilTest extends H2HJUnitTest {
 	public void testReadWriteMetaData() throws IOException, ClassNotFoundException {
 		DownloadManager downloadManager = new DownloadManager(null, null, null);
 		PublicKeyManager publicKeyManager = new PublicKeyManager("user",
+				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
 				EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), null);
 		FileUtil.writePersistentMetaData(fileAgent, publicKeyManager, downloadManager, serializer);
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(fileAgent, serializer);

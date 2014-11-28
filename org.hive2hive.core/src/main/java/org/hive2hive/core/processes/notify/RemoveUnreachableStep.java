@@ -5,12 +5,10 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.Locations;
-import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -23,31 +21,21 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  */
 public class RemoveUnreachableStep extends ProcessStep<Void> {
 
-	private final NetworkManager networkManager;
 	private final Set<PeerAddress> unreachablePeers;
+	private final VersionManager<Locations> locationsManager;
+	private final PublicKeyManager keyManager;
 
-	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers, NetworkManager networkManager) {
-		this.setName(getClass().getName());
+	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers, VersionManager<Locations> locationsManager,
+			PublicKeyManager keyManager) {
+		this.locationsManager = locationsManager;
+		this.keyManager = keyManager;
 		this.unreachablePeers = unreachablePeers;
-		this.networkManager = networkManager;
+		this.setName(getClass().getName());
 	}
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		UserProfile userProfile;
-		try {
-			userProfile = networkManager.getSession().getProfileManager().readUserProfile();
-		} catch (GetFailedException | NoSessionException e) {
-			throw new ProcessExecutionException(this, e);
-		}
-
-		VersionManager<Locations> locationsManager;
-		try {
-			locationsManager = networkManager.getSession().getLocationsManager();
-		} catch (NoSessionException ex) {
-			throw new ProcessExecutionException(this, ex);
-		}
-
+		// TODO remove while loop
 		while (true) {
 			Locations locations;
 			try {
@@ -62,7 +50,7 @@ public class RemoveUnreachableStep extends ProcessStep<Void> {
 			}
 
 			try {
-				locationsManager.put(locations, userProfile.getProtectionKeys());
+				locationsManager.put(locations, keyManager.getDefaultProtectionKeyPair());
 			} catch (VersionForkAfterPutException e) {
 				continue;
 			} catch (PutFailedException ex) {

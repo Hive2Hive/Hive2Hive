@@ -8,7 +8,9 @@ import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
@@ -38,7 +40,6 @@ public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException {
-		
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
 		Map<String, List<PeerAddress>> locations = context.getAllLocations();
@@ -57,9 +58,15 @@ public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 
 		if (!unreachablePeers.isEmpty()) {
 			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
-			getParent().add(new RemoveUnreachableStep(unreachablePeers, networkManager));
+			try {
+				H2HSession session = networkManager.getSession();
+				getParent().add(
+						new RemoveUnreachableStep(unreachablePeers, session.getLocationsManager(), session.getKeyManager()));
+			} catch (NoSessionException e) {
+				logger.error("Cannot cleanup unreachable peers because no session");
+			}
 		}
-		
+
 		return null;
 	}
 
