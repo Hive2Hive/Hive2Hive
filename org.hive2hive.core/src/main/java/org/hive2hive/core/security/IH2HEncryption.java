@@ -18,7 +18,8 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 public interface IH2HEncryption {
 
 	/**
-	 * Symmetrically encrypts content inheriting from {@link BaseNetworkContent} by means of the AES algorithm.
+	 * Symmetrically encrypts content inheriting from {@link BaseNetworkContent} by means of the AES
+	 * algorithm.
 	 * The content first gets serialized, then encrypted.
 	 * 
 	 * @param content the content to be encrypted. Can be of any type that extends {@link BaseNetworkContent}.
@@ -50,12 +51,11 @@ public interface IH2HEncryption {
 			ClassNotFoundException, IOException;
 
 	/**
-	 * Asymmetrically encrypts content inheriting from {@link BaseNetworkContent}. A default key length will be
-	 * used.
+	 * Asymmetrically encrypts content inheriting from {@link BaseNetworkContent}. A default key length will
+	 * be used.
 	 * 
 	 * @param content the content to be encrypted.
 	 * @param publicKey The asymmetric public key with which the content will be encrypted
-	 * @param keyLength the strength of the encryption
 	 * @return the encrypted content
 	 * @throws DataLengthException
 	 * @throws InvalidKeyException
@@ -74,7 +74,6 @@ public interface IH2HEncryption {
 	 * 
 	 * @param content the content to be encrypted.
 	 * @param publicKey The asymmetric public key with which the content will be encrypted
-	 * @param keyLength the strength of the encryption
 	 * @return the encrypted content
 	 * @throws DataLengthException
 	 * @throws InvalidKeyException
