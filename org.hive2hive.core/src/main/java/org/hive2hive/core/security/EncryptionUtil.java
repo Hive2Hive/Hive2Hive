@@ -49,6 +49,7 @@ public final class EncryptionUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(EncryptionUtil.class);
 
+	private static final String SECURITY_PROVIDER = "BC";
 	private static final String SINGATURE_ALGORITHM = "SHA1withRSA";
 	private static final int IV_LENGTH = 16;
 
@@ -114,7 +115,7 @@ public final class EncryptionUtil {
 		installBCProvider();
 
 		try {
-			final KeyGenerator kg = KeyGenerator.getInstance("AES", "BC");
+			final KeyGenerator kg = KeyGenerator.getInstance("AES", SECURITY_PROVIDER);
 			kg.init(keyLength.value(), new SecureRandom());
 			byte[] encoded = kg.generateKey().getEncoded();
 			return new SecretKeySpec(encoded, "AES");
@@ -188,7 +189,7 @@ public final class EncryptionUtil {
 		installBCProvider();
 
 		try {
-			Cipher cipher = Cipher.getInstance("RSA", "BC");
+			Cipher cipher = Cipher.getInstance("RSA", SECURITY_PROVIDER);
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
@@ -214,7 +215,7 @@ public final class EncryptionUtil {
 		installBCProvider();
 
 		try {
-			Cipher cipher = Cipher.getInstance("RSA", "BC");
+			Cipher cipher = Cipher.getInstance("RSA", SECURITY_PROVIDER);
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
@@ -310,7 +311,7 @@ public final class EncryptionUtil {
 		installBCProvider();
 
 		try {
-			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
+			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, SECURITY_PROVIDER);
 			signEngine.initSign(privateKey);
 			signEngine.update(data);
 			return signEngine.sign();
@@ -337,7 +338,7 @@ public final class EncryptionUtil {
 		installBCProvider();
 
 		try {
-			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, "BC");
+			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, SECURITY_PROVIDER);
 			signEngine.initVerify(publicKey);
 			signEngine.update(data);
 			return signEngine.verify(signature);
@@ -349,7 +350,7 @@ public final class EncryptionUtil {
 	}
 
 	private static void installBCProvider() {
-		if (Security.getProvider("BC") == null) {
+		if (Security.getProvider(SECURITY_PROVIDER) == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
 	}
