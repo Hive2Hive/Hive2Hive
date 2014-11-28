@@ -153,8 +153,7 @@ public class DataManager {
 
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				// TODO uncomment
-				// data.protectEntry(parameters.getProtectionKeys());
+				data.protectEntry(parameters.getProtectionKeys());
 			}
 
 			// cache data
@@ -179,8 +178,7 @@ public class DataManager {
 
 		// check if data to put is content protected
 		if (parameters.getProtectionKeys() != null) {
-			// TODO uncomment
-			// data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+			data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
 		}
 
 		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
