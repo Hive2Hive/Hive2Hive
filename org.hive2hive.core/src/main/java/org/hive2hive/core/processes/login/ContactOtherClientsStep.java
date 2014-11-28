@@ -1,5 +1,7 @@
 package org.hive2hive.core.processes.login;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +102,13 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 				logger.debug("Sending contact message to check for aliveness to {}", address);
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);
+
+				try {
+					// TODO workaround of Android generating invalid InetAdresses
+					address = address.changeAddress(InetAddress.getByAddress(address.inetAddress().getAddress()));
+				} catch (UnknownHostException e) {
+					// ignore, probably leads to SIGSEGV error and JVM crash
+				}
 
 				ContactPeerMessage message = new ContactPeerMessage(address, evidence);
 				message.setCallBackHandler(this);
