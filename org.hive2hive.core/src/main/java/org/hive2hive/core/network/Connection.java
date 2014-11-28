@@ -244,7 +244,7 @@ public class Connection {
 
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
 		Bindings bindings = new Bindings();
-		bindings.listenAny();// .addProtocol(StandardProtocolFamily.INET);
+		bindings.listenAny();
 
 		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).bindings(bindings)
 				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
