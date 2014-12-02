@@ -37,7 +37,8 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	private static final long serialVersionUID = 5080812282190501445L;
 
-	private final PeerAddress targetAddress;
+	// TODO make final
+	private PeerAddress targetAddress;
 	private final boolean needsRedirectedSend;
 
 	private int directSendingCounter = 0;
@@ -106,6 +107,11 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	public PeerAddress getTargetAddress() {
 		return targetAddress;
+	}
+
+	// TODO remove when fixed Android misbehavior
+	public void setTargetAddress(PeerAddress targetAddress) {
+		this.targetAddress = targetAddress;
 	}
 
 	public int getDirectSendingCounter() {

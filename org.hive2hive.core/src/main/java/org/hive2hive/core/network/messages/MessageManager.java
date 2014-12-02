@@ -70,14 +70,6 @@ public final class MessageManager implements IMessageManager {
 		prepareMessage(message);
 		message.increaseRoutedSendingCounter();
 
-		try {
-			// TODO workaround of Android generating invalid InetAdresses
-			PeerAddress address = message.getSenderAddress();
-			message.setSenderAddress(address.changeAddress(InetAddress.getByAddress(address.inetAddress().getAddress())));
-		} catch (UnknownHostException e) {
-			// ignore, probably leads to SIGSEGV error and JVM crash
-		}
-
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
 		if (encryptedMessage == null) {
@@ -119,8 +111,8 @@ public final class MessageManager implements IMessageManager {
 
 		try {
 			// TODO workaround of Android generating invalid InetAdresses
-			PeerAddress address = message.getSenderAddress();
-			message.setSenderAddress(address.changeAddress(InetAddress.getByAddress(address.inetAddress().getAddress())));
+			PeerAddress address = message.getTargetAddress();
+			message.setTargetAddress(address.changeAddress(InetAddress.getByAddress(address.inetAddress().getAddress())));
 		} catch (UnknownHostException e) {
 			// ignore, probably leads to SIGSEGV error and JVM crash
 		}
