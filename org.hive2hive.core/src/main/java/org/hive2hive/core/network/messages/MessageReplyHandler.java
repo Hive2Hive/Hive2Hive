@@ -1,8 +1,6 @@
 package org.hive2hive.core.network.messages;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -15,6 +13,7 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.extras.AndroidAddressFixer;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -98,14 +97,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
 
-			try {
-				// TODO workaround of Android generating invalid InetAdresses
-				PeerAddress address = receivedMessage.getSenderAddress();
-				receivedMessage.setSenderAddress(address.changeAddress(InetAddress.getByAddress(address.inetAddress()
-						.getAddress())));
-			} catch (UnknownHostException e) {
-				// ignore, probably leads to SIGSEGV error and JVM crash
-			}
+			receivedMessage.setSenderAddress(AndroidAddressFixer.fix(receivedMessage.getSenderAddress()));
 
 			// verify the signature
 			if (session.getKeyManager().containsPublicKey(senderId)) {

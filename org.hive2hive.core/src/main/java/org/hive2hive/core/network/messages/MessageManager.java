@@ -1,8 +1,6 @@
 package org.hive2hive.core.network.messages;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -16,12 +14,12 @@ import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.PeerAddress;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.extras.AndroidAddressFixer;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -109,13 +107,7 @@ public final class MessageManager implements IMessageManager {
 		prepareMessage(message);
 		message.increaseDirectSendingCounter();
 
-		try {
-			// TODO workaround of Android generating invalid InetAdresses
-			PeerAddress address = message.getTargetAddress();
-			message.setTargetAddress(address.changeAddress(InetAddress.getByAddress(address.inetAddress().getAddress())));
-		} catch (UnknownHostException e) {
-			// ignore, probably leads to SIGSEGV error and JVM crash
-		}
+		message.setTargetAddress(AndroidAddressFixer.fix(message.getTargetAddress()));
 
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);

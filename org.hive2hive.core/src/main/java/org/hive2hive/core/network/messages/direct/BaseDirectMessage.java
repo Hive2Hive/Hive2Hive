@@ -3,6 +3,7 @@ package org.hive2hive.core.network.messages.direct;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.extras.AndroidAddressFixer;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
@@ -58,7 +59,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 */
 	public BaseDirectMessage(String messageID, String targetKey, PeerAddress targetAddress, boolean needsRedirectedSend) {
 		super(messageID, targetKey);
-		this.targetAddress = targetAddress;
+		this.targetAddress = AndroidAddressFixer.fix(targetAddress);
 		this.needsRedirectedSend = needsRedirectedSend;
 	}
 
@@ -75,9 +76,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 *            to the {@link PeerAddress} fails
 	 */
 	public BaseDirectMessage(String targetKey, PeerAddress targetAddress, boolean needsRedirectedSend) {
-		super(createMessageID(), targetKey);
-		this.targetAddress = targetAddress;
-		this.needsRedirectedSend = needsRedirectedSend;
+		this(createMessageID(), targetKey, targetAddress, needsRedirectedSend);
 	}
 
 	/**

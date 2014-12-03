@@ -1,7 +1,5 @@
 package org.hive2hive.core.processes.notify;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,16 +48,6 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 			} else {
 				Locations currentLoc = (Locations) content;
 				List<PeerAddress> addresses = new ArrayList<PeerAddress>(currentLoc.getPeerAddresses());
-
-				// TODO workaround of Android generating invalid InetAdresses
-				for (PeerAddress address : addresses) {
-					try {
-						address = address.changeAddress(InetAddress.getByAddress(address.inetAddress().getAddress()));
-					} catch (UnknownHostException e) {
-						// ignore, probably leads to SIGSEGV error and JVM crash
-					}
-				}
-
 				allLocations.put(userId, addresses);
 			}
 		}
