@@ -4,11 +4,11 @@ import java.io.File;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.hive2hive.client.util.buffer.AddFileBuffer;
+import org.hive2hive.client.util.buffer.DeleteFileBuffer;
+import org.hive2hive.client.util.buffer.IFileBuffer;
+import org.hive2hive.client.util.buffer.ModifyFileBuffer;
 import org.hive2hive.core.api.interfaces.IFileManager;
-import org.hive2hive.core.extras.buffer.AddFileBuffer;
-import org.hive2hive.core.extras.buffer.DeleteFileBuffer;
-import org.hive2hive.core.extras.buffer.IFileBuffer;
-import org.hive2hive.core.extras.buffer.ModifyFileBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
