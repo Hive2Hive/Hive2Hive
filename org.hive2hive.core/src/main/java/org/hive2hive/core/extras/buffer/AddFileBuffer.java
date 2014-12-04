@@ -9,7 +9,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -50,10 +50,10 @@ public class AddFileBuffer extends BaseFileBuffer {
 		}
 	}
 
-	private Set<File> filterBuffer(List<File> fileBuffer, Set<FileTaste> syncFiles) {
+	private Set<File> filterBuffer(List<File> fileBuffer, Set<FileNode> syncFiles) {
 		// remove the files from the buffer which are already in the DHT
 		// the event has been triggered by Hive2Hive when downloading it.
-		for (FileTaste syncFile : syncFiles) {
+		for (FileNode syncFile : syncFiles) {
 			fileBuffer.remove(syncFile.getFile());
 		}
 

@@ -1,29 +1,57 @@
 package org.hive2hive.core.processes.files.list;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.security.EncryptionUtil;
 
 /**
- * Gives information about a file in the DHT
+ * Gives information about a file in the DHT. Links to child nodes and parent node (if existing)
  * 
  * @author Nico
  * 
  */
-public class FileTaste {
+public class FileNode {
 
+	// can be null in case of the root
+	private final FileNode parent;
+	// holds all children
+	private final Set<FileNode> children;
 	private final String path;
 	private final File file;
 	private final byte[] md5;
 	private final Set<UserPermission> userPermissions;
 
-	FileTaste(File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
+	FileNode(FileNode parent, File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
+		this.parent = parent;
 		this.file = file;
 		this.path = path;
 		this.md5 = md5;
 		this.userPermissions = userPermissions;
+		this.children = new HashSet<FileNode>();
+	}
+
+	/**
+	 * Get the parent node or <code>null</code> if this node is the root folder
+	 * 
+	 * @return
+	 */
+	public FileNode getParent() {
+		return parent;
+	}
+
+	/**
+	 * Get child nodes. Note that this may be empty
+	 * 
+	 * @return the children (can be an empty set) or <code>null</code> if this node is a file and not a folder
+	 */
+	public Set<FileNode> getChildren() {
+		if (isFile()) {
+			return null;
+		}
+		return children;
 	}
 
 	/**
@@ -55,7 +83,7 @@ public class FileTaste {
 
 	/**
 	 * Returns whether the file is a file and not a directory. This is just the reverse option of
-	 * {@link FileTaste#isFolder()}.
+	 * {@link FileNode#isFolder()}.
 	 * 
 	 * @return true when the file is a file and not a folder.
 	 */
@@ -68,7 +96,7 @@ public class FileTaste {
 	}
 
 	/**
-	 * Returns whether the file is a directory. This is just the reverse option of {@link FileTaste#isFile()}.
+	 * Returns whether the file is a directory. This is just the reverse option of {@link FileNode#isFile()}.
 	 * 
 	 * @return true when the file is a folder.
 	 */

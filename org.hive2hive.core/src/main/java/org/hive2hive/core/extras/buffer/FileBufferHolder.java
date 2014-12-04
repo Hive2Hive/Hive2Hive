@@ -2,13 +2,14 @@ package org.hive2hive.core.extras.buffer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.hive2hive.core.extras.Extra;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class FileBufferHolder implements IFileBufferHolder {
 
 	private final List<File> fileBuffer;
 	private final CountDownLatch syncFilesLatch;
-	private Set<FileTaste> syncFiles;
+	private Set<FileNode> syncFiles;
 
 	public FileBufferHolder() {
 		this.fileBuffer = new ArrayList<File>();
@@ -49,8 +50,23 @@ public class FileBufferHolder implements IFileBufferHolder {
 	/**
 	 * Set the files which are in sync with the DHT
 	 */
-	public void setSyncFiles(Set<FileTaste> syncFiles) {
-		this.syncFiles = syncFiles;
+	public void setSyncFiles(FileNode fileNode) {
+		syncFiles = new HashSet<FileNode>();
+		addRecursively(fileNode, syncFiles);
+	}
+
+	private void addRecursively(FileNode current, Set<FileNode> flatList) {
+		if (current == null) {
+			return;
+		}
+
+		flatList.add(current);
+
+		if (current.isFolder()) {
+			for (FileNode child : current.getChildren()) {
+				addRecursively(child, flatList);
+			}
+		}
 	}
 
 	/**
@@ -74,7 +90,7 @@ public class FileBufferHolder implements IFileBufferHolder {
 	}
 
 	@Override
-	public Set<FileTaste> getSyncFiles() {
+	public Set<FileNode> getSyncFiles() {
 		return syncFiles;
 	}
 

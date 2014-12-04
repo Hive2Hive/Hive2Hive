@@ -19,7 +19,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -245,17 +245,10 @@ public class FileMenu extends H2HConsoleMenu {
 		add(new H2HConsoleMenuItem("Print File List") {
 			@Override
 			protected void execute() throws Exception {
-				IProcessComponent<List<FileTaste>> fileListProcess = menus.getNodeMenu().getNode().getFileManager()
+				IProcessComponent<FileNode> fileListProcess = menus.getNodeMenu().getNode().getFileManager()
 						.createFileListProcess();
-				List<FileTaste> list = fileListProcess.execute();
-
-				if (!list.isEmpty()) {
-					for (FileTaste fileTaste : list) {
-						print("* " + fileTaste);
-					}
-				} else {
-					print("The file list is empty.");
-				}
+				FileNode root = fileListProcess.execute();
+				printRecursively(root, 0);
 			}
 		});
 
@@ -268,6 +261,23 @@ public class FileMenu extends H2HConsoleMenu {
 				menus.getFileObserverMenu().open(isExpertMode);
 			}
 		});
+	}
+
+	private void printRecursively(FileNode node, int level) {
+		if (node.getParent() != null) {
+			// skip the root node
+			StringBuilder spaces = new StringBuilder("*");
+			for (int i = 0; i < level; i++) {
+				spaces.append(" ");
+			}
+			print(spaces.toString() + node.getName());
+		}
+
+		if (node.isFolder()) {
+			for (FileNode child : node.getChildren()) {
+				printRecursively(child, level + 1);
+			}
+		}
 	}
 
 	@Override

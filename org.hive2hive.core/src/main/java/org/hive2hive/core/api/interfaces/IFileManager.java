@@ -1,13 +1,12 @@
 package org.hive2hive.core.api.interfaces;
 
 import java.io.File;
-import java.util.List;
 
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
@@ -122,14 +121,14 @@ public interface IFileManager {
 			throws NoPeerConnectionException, NoSessionException, IllegalArgumentException;
 
 	/**
-	 * Get a full list of all files in the DHT of the currently logged in user. This must not necessary match
+	 * Get a tree of all files in the DHT of the currently logged in user. This must not necessary match
 	 * with the file tree on disk because Hive2Hive only performs file operations at manual calls.
 	 * 
 	 * @return A file list process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 */
-	IProcessComponent<List<FileTaste>> createFileListProcess() throws NoPeerConnectionException, NoSessionException;
+	IProcessComponent<FileNode> createFileListProcess() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Subscribe all file event handlers of the given listener instance.

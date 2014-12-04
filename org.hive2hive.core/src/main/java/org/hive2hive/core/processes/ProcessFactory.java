@@ -2,7 +2,6 @@ package org.hive2hive.core.processes;
 
 import java.io.File;
 import java.security.PublicKey;
-import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
@@ -39,7 +38,7 @@ import org.hive2hive.core.processes.files.add.PrepareAddNotificationStep;
 import org.hive2hive.core.processes.files.delete.DeleteFromUserProfileStep;
 import org.hive2hive.core.processes.files.delete.PrepareDeleteNotificationStep;
 import org.hive2hive.core.processes.files.download.FindInUserProfileStep;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.core.processes.files.list.GetFileListStep;
 import org.hive2hive.core.processes.files.move.RelinkUserProfileStep;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
@@ -409,13 +408,12 @@ public final class ProcessFactory {
 	 * @return A file list process.
 	 * @throws NoSessionException
 	 */
-	public IProcessComponent<List<FileTaste>> createFileListProcess(NetworkManager networkManager)
+	public IProcessComponent<FileNode> createFileListProcess(NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
-
 		H2HSession session = networkManager.getSession();
 
 		// only one process step
-		IProcessComponent<List<FileTaste>> step = new GetFileListStep(session.getProfileManager(), session.getRootFile());
+		IProcessComponent<FileNode> step = new GetFileListStep(session.getProfileManager(), session.getRootFile());
 
 		step.setName("File List Process");
 		return step;

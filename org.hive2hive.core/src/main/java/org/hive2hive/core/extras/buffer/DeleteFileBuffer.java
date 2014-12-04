@@ -11,7 +11,7 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.file.FileUtil;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -34,12 +34,12 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 	 */
 	protected void processBuffer(IFileBufferHolder buffer) {
 		List<File> bufferedFiles = buffer.getFileBuffer();
-		Set<FileTaste> syncFiles = buffer.getSyncFiles();
+		Set<FileNode> syncFiles = buffer.getSyncFiles();
 
 		Set<File> toRemove = new HashSet<File>();
 		for (File file : bufferedFiles) {
 			boolean found = false;
-			for (FileTaste fileTaste : syncFiles) {
+			for (FileNode fileTaste : syncFiles) {
 				if (fileTaste.getFile().equals(file)) {
 					found = true;
 					break;
