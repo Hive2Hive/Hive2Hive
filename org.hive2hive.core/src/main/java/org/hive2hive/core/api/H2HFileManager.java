@@ -1,7 +1,6 @@
 package org.hive2hive.core.api;
 
 import java.io.File;
-import java.util.List;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
@@ -16,7 +15,7 @@ import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.core.processes.files.recover.IVersionSelector;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 
@@ -158,8 +157,7 @@ public class H2HFileManager extends H2HManager implements IFileManager {
 	}
 
 	@Override
-	public IProcessComponent<List<FileTaste>> createFileListProcess() throws NoPeerConnectionException, NoSessionException {
-
+	public IProcessComponent<FileNode> createFileListProcess() throws NoPeerConnectionException, NoSessionException {
 		return ProcessFactory.instance().createFileListProcess(networkManager);
 	}
 

@@ -1,8 +1,6 @@
 package org.hive2hive.core.processes.files.list;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -16,21 +14,19 @@ import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
-public class GetFileListStep extends ProcessStep<List<FileTaste>> {
+public class GetFileListStep extends ProcessStep<FileNode> {
 
 	private final UserProfileManager profileManager;
 	private final File rootFile;
 
-	private List<FileTaste> result = new ArrayList<FileTaste>();
-
 	public GetFileListStep(UserProfileManager profileManager, File root) {
-		this.setName(getClass().getName());
 		this.profileManager = profileManager;
 		this.rootFile = root;
+		setName(getClass().getName());
 	}
 
 	@Override
-	protected List<FileTaste> doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected FileNode doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		// get the user profile
 		UserProfile profile = null;
 		try {
@@ -39,34 +35,43 @@ public class GetFileListStep extends ProcessStep<List<FileTaste>> {
 			throw new ProcessExecutionException(this, "User profile could not be loaded.");
 		}
 
-		// the result set
-		result.clear();
-
 		// build the digest recursively
-		FolderIndex root = profile.getRoot();
-		List<Index> digest = Index.getIndexList(root);
-		for (Index index : digest) {
-			if (index.equals(root)) {
-				// skip the root
-				continue;
-			}
+		FolderIndex rootIndex = profile.getRoot();
+		// FileNode rootNode = new FileNode(null, rootFile, rootIndex.getFullPath(), null,
+		// rootIndex.getUserPermissions());
+		return copyTree(rootIndex, null);
+	}
 
-			String path = index.getFullPath();
-			File file = new File(rootFile, path);
-
-			byte[] md5Hash = null;
-			Set<UserPermission> userPermissions;
-			if (index.isFile()) {
-				FileIndex fileIndex = (FileIndex) index;
-				md5Hash = fileIndex.getMD5();
-				userPermissions = fileIndex.getParent().getCalculatedUserPermissions();
-			} else {
-				userPermissions = ((FolderIndex) index).getCalculatedUserPermissions();
-			}
-
-			result.add(new FileTaste(file, path, md5Hash, userPermissions));
+	private FileNode copyTree(Index current, FileNode parent) {
+		if (current == null) {
+			return parent;
 		}
 
-		return result;
+		String path = current.getFullPath();
+		File file = new File(rootFile, path);
+
+		byte[] hash = null;
+		Set<UserPermission> userPermissions;
+		if (current.isFile()) {
+			FileIndex fileIndex = (FileIndex) current;
+			hash = fileIndex.getMD5();
+			userPermissions = fileIndex.getParent().getCalculatedUserPermissions();
+		} else {
+			userPermissions = ((FolderIndex) current).getCalculatedUserPermissions();
+		}
+
+		FileNode node = new FileNode(parent, file, path, hash, userPermissions);
+		if (parent != null) {
+			parent.getChildren().add(node);
+		}
+
+		if (hash == null) {
+			// current is a folder, visit recursively
+			for (Index child : ((FolderIndex) current).getChildren()) {
+				copyTree(child, node);
+			}
+		}
+
+		return node;
 	}
 }

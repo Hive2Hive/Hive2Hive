@@ -153,15 +153,14 @@ public class DataManager {
 
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				// TODO uncomment
-				// data.protectEntry(parameters.getProtectionKeys());
+				data.protectEntry(parameters.getProtectionKeys());
 			}
 
 			// cache data
 			parameters.setData(data);
 
 			return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-					.versionKey(parameters.getVersionKey())/* .keyPair(parameters.getProtectionKeys()) */.start();
+					.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 		} catch (IOException e) {
 			logger.error("Put failed. {}.", parameters.toString(), e);
 			return null;
@@ -179,12 +178,11 @@ public class DataManager {
 
 		// check if data to put is content protected
 		if (parameters.getProtectionKeys() != null) {
-			// TODO uncomment
-			// data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+			data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
 		}
 
 		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-				.versionKey(parameters.getVersionKey())/* .keyPair(parameters.getProtectionKeys()) */.putConfirm().start();
+				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).putConfirm().start();
 	}
 
 	public BaseNetworkContent get(IParameters parameters) {

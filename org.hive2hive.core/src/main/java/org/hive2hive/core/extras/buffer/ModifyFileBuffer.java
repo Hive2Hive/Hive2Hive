@@ -10,7 +10,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -30,7 +30,7 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 	@Override
 	protected void processBuffer(IFileBufferHolder buffer) {
 		List<File> fileBuffer = buffer.getFileBuffer();
-		Set<FileTaste> syncFiles = buffer.getSyncFiles();
+		Set<FileNode> syncFiles = buffer.getSyncFiles();
 
 		/**
 		 * Start the verification: remove files that are not in the DHT yet and remove files that equal to the
@@ -38,8 +38,8 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 		 */
 		Set<File> toDelete = new HashSet<File>();
 		for (File file : fileBuffer) {
-			FileTaste fileTaste = null;
-			for (FileTaste syncFile : syncFiles) {
+			FileNode fileTaste = null;
+			for (FileNode syncFile : syncFiles) {
 				if (syncFile.getFile().equals(file)) {
 					fileTaste = syncFile;
 					break;

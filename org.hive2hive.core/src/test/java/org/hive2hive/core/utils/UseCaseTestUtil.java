@@ -3,7 +3,6 @@ package org.hive2hive.core.utils;
 import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.List;
 
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
@@ -19,7 +18,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.files.GetMetaFileStep;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.helper.GetMetaFileContext;
@@ -156,10 +155,9 @@ public class UseCaseTestUtil {
 		}
 	}
 
-	public static List<FileTaste> getFileList(NetworkManager networkManager) throws NoPeerConnectionException,
-			NoSessionException, InvalidProcessStateException, ProcessExecutionException {
-		IProcessComponent<List<FileTaste>> fileListProcess = ProcessFactory.instance().createFileListProcess(networkManager);
-
+	public static FileNode getFileList(NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException,
+			InvalidProcessStateException, ProcessExecutionException {
+		IProcessComponent<FileNode> fileListProcess = ProcessFactory.instance().createFileListProcess(networkManager);
 		return fileListProcess.execute();
 	}
 }

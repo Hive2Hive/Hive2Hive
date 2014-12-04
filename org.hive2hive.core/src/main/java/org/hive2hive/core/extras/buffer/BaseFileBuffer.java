@@ -1,8 +1,6 @@
 package org.hive2hive.core.extras.buffer;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,7 +8,7 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.Extra;
-import org.hive2hive.core.processes.files.list.FileTaste;
+import org.hive2hive.core.processes.files.list.FileNode;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -75,25 +73,24 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 		public void run() {
 			// skip the file list
 			if (fileManager == null) {
-				fileBuffer.setSyncFiles(new HashSet<FileTaste>(0));
+				fileBuffer.setSyncFiles(null);
 				fileBuffer.setReady();
 				return;
 			}
 
-			IProcessComponent<List<FileTaste>> fileList = null;
+			IProcessComponent<FileNode> fileList = null;
 			try {
 				fileList = fileManager.createFileListProcess();
 			} catch (NoPeerConnectionException | NoSessionException e) {
 				logger.error("Could not get the file list.", e);
-				fileBuffer.setSyncFiles(new HashSet<FileTaste>(0));
+				fileBuffer.setSyncFiles(null);
 				fileBuffer.setReady();
 				return;
 			}
 
 			// execute process synchronously
 			try {
-				List<FileTaste> result = fileList.execute();
-				fileBuffer.setSyncFiles(new HashSet<FileTaste>(result));
+				fileBuffer.setSyncFiles(fileList.execute());
 				fileBuffer.setReady();
 
 			} catch (InvalidProcessStateException ex) {
@@ -103,5 +100,4 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 			}
 		}
 	}
-
 }
