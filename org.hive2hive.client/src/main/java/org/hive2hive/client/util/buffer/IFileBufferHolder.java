@@ -1,13 +1,11 @@
-package org.hive2hive.core.extras.buffer;
+package org.hive2hive.client.util.buffer;
 
 import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import org.hive2hive.core.extras.Extra;
 import org.hive2hive.core.processes.files.list.FileNode;
 
-@Extra
 public interface IFileBufferHolder {
 
 	/**

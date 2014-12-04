@@ -34,12 +34,22 @@
 			<version>1.1.1</version>
 			<scope>compile</scope>
 		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<!-- states the main class and that dependencies are in the separate lib folder (see assembly.xml) -->
+				<!-- states the main class and that dependencies are in the separate 
+					lib folder (see assembly.xml) -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.5</version>
@@ -48,12 +58,12 @@
 						<manifest>
 							<mainClass>org.hive2hive.client.ConsoleClient</mainClass>
 							<addClasspath>true</addClasspath>
-               				<classpathPrefix>lib/</classpathPrefix>
+							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 					</archive>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<!-- Creates a zip file containing all dependencies -->
 				<groupId>org.apache.maven.plugins</groupId>
