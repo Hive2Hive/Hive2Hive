@@ -160,7 +160,7 @@ public class DataManager {
 			parameters.setData(data);
 
 			return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-					.versionKey(parameters.getVersionKey())/* .keyPair(parameters.getProtectionKeys()) */.start();
+					.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
 		} catch (IOException e) {
 			logger.error("Put failed. {}.", parameters.toString(), e);
 			return null;
@@ -182,7 +182,7 @@ public class DataManager {
 		}
 
 		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-				.versionKey(parameters.getVersionKey())/* .keyPair(parameters.getProtectionKeys()) */.putConfirm().start();
+				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).putConfirm().start();
 	}
 
 	public BaseNetworkContent get(IParameters parameters) {
