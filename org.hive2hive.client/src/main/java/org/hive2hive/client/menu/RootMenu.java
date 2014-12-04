@@ -118,7 +118,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			H2HConsoleMenuItem.printPrecondition("You are not logged in. No user credentials specified.");
 			return false;
 		}
-		if (!menus.getNodeMenu().getNode().getUserManager().isLoggedIn(menus.getUserMenu().getUserCredentials().getUserId())) {
+		if (!menus.getNodeMenu().getNode().getUserManager().isLoggedIn()) {
 			H2HConsoleMenuItem.printPrecondition("You are not logged in.");
 			return false;
 		}
