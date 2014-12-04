@@ -178,7 +178,7 @@ public class DataManager {
 
 		// check if data to put is content protected
 		if (parameters.getProtectionKeys() != null) {
-			data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+			data.protectEntry(parameters.getProtectionKeys());
 		}
 
 		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
