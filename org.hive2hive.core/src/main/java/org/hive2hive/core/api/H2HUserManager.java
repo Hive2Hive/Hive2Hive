@@ -49,7 +49,7 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	@Override
-	public boolean isLoggedIn(String userId) throws NoPeerConnectionException {
+	public boolean isLoggedIn() throws NoPeerConnectionException {
 		try {
 			return networkManager.getSession() != null;
 		} catch (NoSessionException e) {

@@ -51,7 +51,8 @@ public class UserManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void isRegisteredTest() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException, ProcessExecutionException {
+	public void isRegisteredTest() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException,
+			ProcessExecutionException {
 		UserCredentials userCredentials = generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
@@ -65,7 +66,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		IUserManager userManager = network.get(new Random().nextInt(network.size())).getUserManager();
 		IProcessComponent<Void> registerProcess = userManager.createRegisterProcess(userCredentials);
 		registerProcess.execute();
-		
+
 		// all nodes must have same result: true
 		for (int i = 0; i < network.size(); i++) {
 			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
@@ -76,15 +77,15 @@ public class UserManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException, NoSessionException, InvalidProcessStateException, ProcessExecutionException {
+	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException, NoSessionException,
+			InvalidProcessStateException, ProcessExecutionException {
 		UserCredentials userCredentials = generateRandomCredentials();
-		String userId = userCredentials.getUserId();
 
 		TestFileAgent fileAgent = new TestFileAgent();
 
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}
 
@@ -93,19 +94,20 @@ public class UserManagerTest extends H2HJUnitTest {
 		for (int i = 0; i < network.size(); i++) {
 			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
 			loginProcess.execute();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}
 
 		// registering from random node
-		IProcessComponent<Void> registerProcess = network.get(new Random().nextInt(network.size())).getUserManager().createRegisterProcess(userCredentials);
+		IProcessComponent<Void> registerProcess = network.get(new Random().nextInt(network.size())).getUserManager()
+				.createRegisterProcess(userCredentials);
 		registerProcess.execute();
 
 		// after registering: login all nodes and check again
 		for (int i = 0; i < network.size(); i++) {
 			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
 			loginProcess.execute();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertTrue(isLoggedIn);
 		}
 
@@ -114,7 +116,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		for (int i = 0; i < network.size(); i++) {
 			logoutProcess = network.get(i).getUserManager().createLogoutProcess();
 			logoutProcess.execute();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}
 
