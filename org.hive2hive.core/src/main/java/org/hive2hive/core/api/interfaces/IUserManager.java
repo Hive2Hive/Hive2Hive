@@ -26,8 +26,9 @@ public interface IUserManager {
 	IProcessComponent<Void> createRegisterProcess(UserCredentials credentials) throws NoPeerConnectionException;
 
 	/**
-	 * Login a (registered) user with the same credentials as {@link IUserManager#createRegisterProcess(UserCredentials)}
-	 * has been called. After login, the root folder gets synchronized.
+	 * Login a (registered) user with the same credentials as
+	 * {@link IUserManager#createRegisterProcess(UserCredentials)} has been called. After login, the root
+	 * folder gets synchronized.
 	 * 
 	 * @param credentials the user credentials
 	 * @param fileAgent handles needed file operations and provides the root folder of this user
@@ -35,7 +36,8 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
-	IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent) throws NoPeerConnectionException;
+	IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent)
+			throws NoPeerConnectionException;
 
 	/**
 	 * When a user is done, he should logout himself, killing the session at the current node. After logout,
@@ -57,11 +59,10 @@ public interface IUserManager {
 	boolean isRegistered(String userId) throws NoPeerConnectionException;
 
 	/**
-	 * Checks whether a user is logged in on the network.
+	 * Checks whether the user is logged in on the network.
 	 * 
-	 * @param uderId The ID of the user.
 	 * @return <code>True</code> if logged in, <code>false</code> otherwise.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
-	boolean isLoggedIn(String uderId) throws NoPeerConnectionException;
+	boolean isLoggedIn() throws NoPeerConnectionException;
 }
