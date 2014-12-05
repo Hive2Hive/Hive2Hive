@@ -258,13 +258,13 @@ public class DataManager {
 		return getPeer().remove(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.keyPair(parameters.getProtectionKeys()).start();
+				/* .keyPair(parameters.getProtectionKeys()) */.start();
 	}
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
 		logger.debug("Remove version. {}", parameters.toString());
 		return getPeer().remove(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
-				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
+				.versionKey(parameters.getVersionKey())/* .keyPair(parameters.getProtectionKeys()) */.start();
 	}
 
 	public NavigableMap<Number640, Collection<Number160>> getDigestLatest(IParameters parameters) {
