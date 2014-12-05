@@ -8,10 +8,11 @@ import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.EventBus;
-import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
 
 /**
  * Default implementation of {@link IH2HNode}.
@@ -23,7 +24,6 @@ public class H2HNode implements IH2HNode {
 
 	// TODO remove manager singletons
 	// TODO atm, this class is just a wrapper for the NetworkManager
-	private final INetworkConfiguration networkConfiguration;
 	private final IFileConfiguration fileConfiguration;
 	private final NetworkManager networkManager;
 	private final EventBus eventBus;
@@ -31,46 +31,46 @@ public class H2HNode implements IH2HNode {
 	private IUserManager userManager;
 	private IFileManager fileManager;
 
-	private H2HNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IH2HEncryption encryption) {
-		this.networkConfiguration = networkConfiguration;
+	private H2HNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption, IH2HSerialize serializer) {
 		this.fileConfiguration = fileConfiguration;
 		this.eventBus = new EventBus();
-
-		networkManager = new NetworkManager(networkConfiguration, encryption, eventBus);
+		this.networkManager = new NetworkManager(encryption, serializer, eventBus, fileConfiguration);
 	}
 
 	/**
 	 * Create a Hive2Hive node instance. Before the node can be used, a {@link IH2HNode#connect()} must be
 	 * called.
 	 * 
-	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
-	 *            to listen to.
 	 * @param fileConfiguration the file configuration
 	 * @return
 	 */
-	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration) {
-		return new H2HNode(networkConfiguration, fileConfiguration, new H2HDefaultEncryption());
+	public static IH2HNode createNode(IFileConfiguration fileConfiguration) {
+		FSTSerializer serializer = new FSTSerializer();
+		return new H2HNode(fileConfiguration, new H2HDefaultEncryption(serializer), serializer);
 	}
 
 	/**
-	 * Same as {@link H2HNode#createNode(INetworkConfiguration, IFileConfiguration)}, but with additional
-	 * capability to provide an own encryption implementation
+	 * Same as {@link H2HNode#createNode(IFileConfiguration)}, but with additional
+	 * capability to provide an own encryption and serialization implementation
 	 * 
-	 * @param networkConfiguration the network parameters, important to know how to bootstrap and which port
-	 *            to listen to.
 	 * @param fileConfiguration the file configuration
 	 * @param encryption and decryption implementation
+	 * @param serializer the serialization implementation
 	 * @return
 	 */
-	public static IH2HNode createNode(INetworkConfiguration networkConfiguration, IFileConfiguration fileConfiguration,
-			IH2HEncryption encryption) {
-		return new H2HNode(networkConfiguration, fileConfiguration, encryption);
+	public static IH2HNode createNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption,
+			IH2HSerialize serializer) {
+		return new H2HNode(fileConfiguration, encryption, serializer);
 	}
 
 	@Override
-	public boolean connect() {
-		return networkManager.connect();
+	public boolean connect(INetworkConfiguration networkConfiguration) {
+		return networkManager.connect(networkConfiguration);
+	}
+
+	@Override
+	public boolean connect(PeerDHT peer, boolean startReplication) {
+		return networkManager.connect(peer, startReplication);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IUserManager getUserManager() {
 		if (userManager == null) {
-			userManager = new H2HUserManager(networkManager, fileConfiguration, eventBus);
+			userManager = new H2HUserManager(networkManager, eventBus);
 		}
 		return userManager;
 	}
@@ -94,14 +94,9 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IFileManager getFileManager() {
 		if (fileManager == null) {
-			fileManager = new H2HFileManager(networkManager, eventBus);
+			fileManager = new H2HFileManager(networkManager, fileConfiguration, eventBus);
 		}
 		return fileManager;
-	}
-
-	@Override
-	public INetworkConfiguration getNetworkConfiguration() {
-		return networkConfiguration;
 	}
 
 	@Override
@@ -112,15 +107,5 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public PeerDHT getPeer() {
 		return networkManager.getConnection().getPeerDHT();
-	}
-
-	@Override
-	public synchronized void addEventListener(INetworkEventListener listener) {
-		networkManager.addEventListener(listener);
-	}
-
-	@Override
-	public synchronized void removeEventListener(INetworkEventListener listener) {
-		networkManager.removeEventListener(listener);
 	}
 }

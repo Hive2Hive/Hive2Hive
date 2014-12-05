@@ -24,6 +24,7 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 
 	private final File file;
 	private final H2HSession session;
+	private final IFileConfiguration fileConfiguration;
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
@@ -38,9 +39,10 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 	private UpdateNotificationMessageFactory messageFactory;
 	private List<MetaChunk> chunksToDelete;
 
-	public UpdateFileProcessContext(File file, H2HSession session) {
+	public UpdateFileProcessContext(File file, H2HSession session, IFileConfiguration fileConfiguration) {
 		this.file = file;
 		this.session = session;
+		this.fileConfiguration = fileConfiguration;
 	}
 
 	@Override
@@ -111,7 +113,7 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 
 	@Override
 	public IFileConfiguration consumeFileConfiguration() {
-		return session.getFileConfiguration();
+		return fileConfiguration;
 	}
 
 	@Override

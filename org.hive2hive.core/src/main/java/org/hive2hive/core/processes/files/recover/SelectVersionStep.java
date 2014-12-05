@@ -18,20 +18,20 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.context.RecoverFileContext;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Asks the user which version to restore and initiates the restore steps
+ * Asks the user which version to restore and initiates the restore steps.
  * 
  * @author Nico
  * 
  */
-public class SelectVersionStep extends ProcessStep {
+public class SelectVersionStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectVersionStep.class);
 	private final RecoverFileContext context;
@@ -39,18 +39,19 @@ public class SelectVersionStep extends ProcessStep {
 	private final NetworkManager networkManager;
 
 	public SelectVersionStep(RecoverFileContext context, IVersionSelector selector, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.selector = selector;
 		this.networkManager = networkManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		BaseMetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
-			throw new ProcessExecutionException("Meta document not found.");
+			throw new ProcessExecutionException(this, "Meta document not found.");
 		} else if (!metaFile.isSmall()) {
-			throw new ProcessExecutionException("Meta document is not a small meta file.");
+			throw new ProcessExecutionException(this, "Meta document is not a small meta file.");
 		}
 
 		MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
@@ -69,7 +70,7 @@ public class SelectVersionStep extends ProcessStep {
 				versions.size());
 		IFileVersion selected = selector.selectVersion(versions);
 		if (selected == null) {
-			throw new ProcessExecutionException("Selected file version is null.");
+			throw new ProcessExecutionException(this, "Selected file version is null.");
 		}
 
 		// find the selected version
@@ -83,7 +84,7 @@ public class SelectVersionStep extends ProcessStep {
 
 		// check if the developer returned an invalid index
 		if (selectedVersion == null) {
-			throw new ProcessExecutionException("Invalid version index selected.");
+			throw new ProcessExecutionException(this, "Invalid version index selected.");
 		}
 
 		logger.debug("Selected version {} where {} is newest.", selected.getIndex(), metaFileSmall.getNewestVersion()
@@ -97,7 +98,7 @@ public class SelectVersionStep extends ProcessStep {
 			UserProfile userProfile = profileManager.readUserProfile();
 			Index selectedNode = userProfile.getFileById(metaFileSmall.getId());
 			if (selectedNode == null) {
-				throw new ProcessExecutionException("File node not found");
+				throw new ProcessExecutionException(this, "File node not found");
 			}
 
 			// ask the user for the new file name
@@ -117,12 +118,13 @@ public class SelectVersionStep extends ProcessStep {
 			File destination = new File(context.consumeFile().getParentFile(), recoveredFileName);
 
 			// add the process to download the file
-			ProcessComponent downloadProcess = ProcessFactory.instance().createDownloadFileProcess(
+			IProcessComponent<Void> downloadProcess = ProcessFactory.instance().createDownloadFileProcess(
 					selectedNode.getFilePublicKey(), selected.getIndex(), destination, networkManager);
 			getParent().add(downloadProcess);
 		} catch (Hive2HiveException e) {
-			throw new ProcessExecutionException(e);
+			throw new ProcessExecutionException(this, e);
 		}
 
+		return null;
 	}
 }

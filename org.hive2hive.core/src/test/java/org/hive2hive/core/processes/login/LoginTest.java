@@ -8,19 +8,18 @@ import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.integration.TestFileConfiguration;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -97,10 +96,9 @@ public class LoginTest extends H2HJUnitTest {
 	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials) throws InvalidProcessStateException,
 			NoSessionException, NoPeerConnectionException {
 		NetworkManager client = NetworkTestUtil.getRandomNode(network);
-		SessionParameters sessionParameters = new SessionParameters(fileAgent, new TestFileConfiguration());
-
-		IProcessComponent loginProcess = ProcessFactory.instance().createLoginProcess(wrongCredentials, sessionParameters,
-				client);
+		SessionParameters sessionParameters = new SessionParameters(fileAgent);
+		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(wrongCredentials,
+				sessionParameters, client);
 		TestExecutionUtil.executeProcessTillFailed(loginProcess);
 
 		return client.getSession();

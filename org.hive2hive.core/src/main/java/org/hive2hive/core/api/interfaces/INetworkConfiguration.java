@@ -38,13 +38,6 @@ public interface INetworkConfiguration {
 	InetAddress getBootstrapAddress();
 
 	/**
-	 * Returns whether this peer is bootstrapping to a local peer.
-	 * 
-	 * @return <code>true</code> when peer is bootstrapping to a local peer
-	 */
-	boolean isBootstrappingLocal();
-	
-	/**
 	 * Returns whether this peer running locally or not.
 	 * 
 	 * @return <code>true</code> when peer is locally running

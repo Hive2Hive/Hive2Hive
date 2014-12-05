@@ -11,7 +11,7 @@ import java.util.List;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.security.SerializationUtil;
+import org.hive2hive.core.security.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static void writePersistentMetaData(IFileAgent fileAgent, PublicKeyManager keyManager,
-			DownloadManager downloadManager) throws IOException {
+			DownloadManager downloadManager, IH2HSerialize serializer) throws IOException {
 		// generate the new persistent meta data
 		PersistentMetaData metaData = new PersistentMetaData();
 
@@ -42,7 +42,7 @@ public class FileUtil {
 			metaData.setDownloads(downloadManager.getOpenTasks());
 		}
 
-		byte[] encoded = SerializationUtil.serialize(metaData);
+		byte[] encoded = serializer.serialize(metaData);
 		fileAgent.writeCache(H2HConstants.META_FILE_NAME, encoded);
 	}
 
@@ -51,14 +51,14 @@ public class FileUtil {
 	 * 
 	 * @return the read meta data (never null)
 	 */
-	public static PersistentMetaData readPersistentMetaData(IFileAgent fileAgent) {
+	public static PersistentMetaData readPersistentMetaData(IFileAgent fileAgent, IH2HSerialize serializer) {
 		try {
 			byte[] content = fileAgent.readCache(H2HConstants.META_FILE_NAME);
 			if (content == null || content.length == 0) {
 				logger.warn("Not found the meta data. Create new one");
 				return new PersistentMetaData();
 			}
-			return (PersistentMetaData) SerializationUtil.deserialize(content);
+			return (PersistentMetaData) serializer.deserialize(content);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Cannot deserialize meta data. Reason: {}", e.getMessage());
 			return new PersistentMetaData();

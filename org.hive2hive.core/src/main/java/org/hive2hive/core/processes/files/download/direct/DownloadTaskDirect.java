@@ -12,6 +12,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.BaseDownloadTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +35,8 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	private volatile Set<Locations> locations;
 
 	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey, String ownUserName,
-			PeerAddress ownAddress, Set<String> users, EventBus eventBus) {
-		super(metaChunks, destination, eventBus);
+			PeerAddress ownAddress, Set<String> users, EventBus eventBus, PublicKeyManager keyManager) {
+		super(metaChunks, destination, eventBus, keyManager);
 		this.fileKey = fileKey;
 		this.ownUserName = ownUserName;
 		this.ownAddress = ownAddress;
@@ -93,8 +94,8 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	}
 
 	@Override
-	public void reinitializeAfterDeserialization() {
-		super.reinitializeAfterDeserialization();
+	public void reinitializeAfterDeserialization(EventBus eventBus, PublicKeyManager keyManager) {
+		super.reinitializeAfterDeserialization(eventBus, keyManager);
 		this.locationLocker = new CountDownLatch(1);
 		this.locations = null;
 	}

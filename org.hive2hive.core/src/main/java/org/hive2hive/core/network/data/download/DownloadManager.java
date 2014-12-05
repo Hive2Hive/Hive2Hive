@@ -11,7 +11,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.processes.files.download.dht.DownloadChunkRunnableDHT;
 import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
@@ -36,17 +35,14 @@ public class DownloadManager {
 
 	private final DataManager dataManager;
 	private final IMessageManager messageManager;
-	private final PublicKeyManager keyManager;
 	private final IFileConfiguration fileConfig;
 	private final Set<BaseDownloadTask> openTasks;
 
 	private ExecutorService executor;
 
-	public DownloadManager(DataManager dataManager, IMessageManager messageManager, PublicKeyManager keyManager,
-			IFileConfiguration fileConfig) {
+	public DownloadManager(DataManager dataManager, IMessageManager messageManager, IFileConfiguration fileConfig) {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;
-		this.keyManager = keyManager;
 		this.fileConfig = fileConfig;
 		this.executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
@@ -79,7 +75,7 @@ public class DownloadManager {
 			// then download all chunks in separate threads
 			for (MetaChunk chunk : task.getOpenChunks()) {
 				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(directTask, chunk, messageManager,
-						keyManager, fileConfig);
+						fileConfig);
 				executor.submit(runnable);
 			}
 		} else {

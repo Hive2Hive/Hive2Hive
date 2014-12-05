@@ -1,45 +1,41 @@
 package org.hive2hive.core.network;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import net.tomp2p.dht.PeerDHT;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
-import org.hive2hive.core.events.framework.interfaces.INetworkEventGenerator;
-import org.hive2hive.core.events.framework.interfaces.INetworkEventListener;
-import org.hive2hive.core.events.implementations.ConnectionEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.data.DataManager;
+import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
 
-public class NetworkManager implements INetworkEventGenerator {
+public class NetworkManager {
 
 	// TODO this class needs heavy refactoring! many man-in-the-middle delegations and methods that do not
 	// belong here
 
-	private final INetworkConfiguration networkConfiguration;
-
 	private final Connection connection;
 	private final DataManager dataManager;
 	private final MessageManager messageManager;
+	private String nodeID;
 	private H2HSession session;
 
-	private List<INetworkEventListener> eventListeners;
 	private final EventBus eventBus;
+	private final DownloadManager downloadManager;
 
-	public NetworkManager(INetworkConfiguration networkConfiguration, IH2HEncryption encryption, EventBus eventBus) {
-		this.networkConfiguration = networkConfiguration;
-
-		connection = new Connection(networkConfiguration.getNodeID(), this, encryption);
-		dataManager = new DataManager(this, encryption);
-		messageManager = new MessageManager(this, encryption);
-
-		eventListeners = new ArrayList<INetworkEventListener>();
+	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, EventBus eventBus,
+			IFileConfiguration fileConfig) {
 		this.eventBus = eventBus;
+
+		connection = new Connection(this, encryption, serializer);
+		dataManager = new DataManager(this, encryption, serializer);
+		messageManager = new MessageManager(this, encryption, serializer);
+		downloadManager = new DownloadManager(dataManager, messageManager, fileConfig);
 	}
 
 	/**
@@ -47,24 +43,29 @@ public class NetworkManager implements INetworkEventGenerator {
 	 * 
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
-	public boolean connect() {
-		boolean success = false;
+	public boolean connect(INetworkConfiguration networkConfiguration) {
+		this.nodeID = networkConfiguration.getNodeID();
+
 		if (networkConfiguration.isLocal()) {
-			if (networkConfiguration.isBootstrappingLocal()) {
-				success = connection.connectInternal(networkConfiguration.getBootstapPeer());
-			} else {
-				success = connection.connectInternal();
-			}
-		} else if (networkConfiguration.isInitialPeer()) {
-			success = connection.connect();
-		} else if (networkConfiguration.getBootstrapPort() == -1) {
-			success = connection.connect(networkConfiguration.getBootstrapAddress());
+			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getBootstapPeer());
 		} else {
-			success = connection
-					.connect(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
+			boolean success = connection.connect(networkConfiguration.getNodeID());
+			// bootstrap if not initial peer
+			if (success && !networkConfiguration.isInitialPeer()) {
+				success = connection.bootstrap(networkConfiguration.getBootstrapAddress(),
+						networkConfiguration.getBootstrapPort());
+			}
+
+			return success;
 		}
-		notifyConnectionStatus(success);
-		return success;
+	}
+
+	/**
+	 * Uses an existing peer for DHT interaction
+	 */
+	public boolean connect(PeerDHT peer, boolean startReplication) {
+		this.nodeID = peer.peerID().toString();
+		return connection.connect(peer, startReplication);
 	}
 
 	/**
@@ -77,9 +78,7 @@ public class NetworkManager implements INetworkEventGenerator {
 			session.getProfileManager().stopQueueWorker();
 		}
 
-		boolean success = connection.disconnect();
-		notifyDisconnectionStatus(success);
-		return success;
+		return connection.disconnect();
 	}
 
 	/**
@@ -92,7 +91,7 @@ public class NetworkManager implements INetworkEventGenerator {
 	}
 
 	public String getNodeId() {
-		return networkConfiguration.getNodeID();
+		return nodeID;
 	}
 
 	public Connection getConnection() {
@@ -128,10 +127,6 @@ public class NetworkManager implements INetworkEventGenerator {
 		return session.getCredentials().getUserId();
 	}
 
-	public INetworkConfiguration getNetworkConfiguration() {
-		return networkConfiguration;
-	}
-
 	public DataManager getDataManager() throws NoPeerConnectionException {
 		if (!connection.isConnected() || dataManager == null) {
 			throw new NoPeerConnectionException();
@@ -146,39 +141,10 @@ public class NetworkManager implements INetworkEventGenerator {
 		return messageManager;
 	}
 
-	@Override
-	public synchronized void addEventListener(INetworkEventListener listener) {
-		eventListeners.add(listener);
+	public DownloadManager getDownloadManager() {
+		return downloadManager;
 	}
 
-	@Override
-	public synchronized void removeEventListener(INetworkEventListener listener) {
-		eventListeners.remove(listener);
-	}
-
-	private void notifyConnectionStatus(boolean isSuccessful) {
-		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
-		while (iterator.hasNext()) {
-			if (isSuccessful) {
-				iterator.next().onConnectionSuccess(new ConnectionEvent(networkConfiguration));
-			} else {
-				iterator.next().onConnectionFailure(new ConnectionEvent(networkConfiguration));
-			}
-		}
-	}
-
-	private void notifyDisconnectionStatus(boolean isSuccessful) {
-		Iterator<INetworkEventListener> iterator = eventListeners.iterator();
-		while (iterator.hasNext()) {
-			if (isSuccessful) {
-				iterator.next().onDisconnectionSuccess(new ConnectionEvent(networkConfiguration));
-			} else {
-				iterator.next().onDisconnectionFailure(new ConnectionEvent(networkConfiguration));
-			}
-		}
-	}
-	
-	
 	public EventBus getEventBus() {
 		return eventBus;
 	}

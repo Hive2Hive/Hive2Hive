@@ -17,8 +17,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.context.interfaces.IUserProfileTaskContext;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi, Nico
  */
-public class GetUserProfileTaskStep extends ProcessStep {
+public class GetUserProfileTaskStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GetUserProfileTaskStep.class);
 
@@ -39,6 +38,7 @@ public class GetUserProfileTaskStep extends ProcessStep {
 	private final NetworkManager networkManager;
 
 	public GetUserProfileTaskStep(IUserProfileTaskContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.networkManager = networkManager;
 		if (context == null) {
 			throw new IllegalArgumentException("Context can't be null.");
@@ -47,14 +47,14 @@ public class GetUserProfileTaskStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		userId = networkManager.getUserId();
 
 		DataManager dataManager;
 		try {
 			dataManager = networkManager.getDataManager();
-		} catch (NoPeerConnectionException e) {
-			throw new ProcessExecutionException(e);
+		} catch (NoPeerConnectionException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
 
 		logger.debug("Get the next user profile task of user '{}'.", userId);
@@ -70,25 +70,28 @@ public class GetUserProfileTaskStep extends ProcessStep {
 			PrivateKey key = null;
 			try {
 				key = networkManager.getSession().getKeyPair().getPrivate();
-			} catch (NoSessionException e) {
-				throw new ProcessExecutionException(e);
+			} catch (NoSessionException ex) {
+				throw new ProcessExecutionException(this, ex);
 			}
 			BaseNetworkContent decrypted = null;
 			try {
 				decrypted = dataManager.getEncryption().decryptHybrid(encrypted, key);
 			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException e) {
-				throw new ProcessExecutionException("Could not decrypt user profile task.", e);
+					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException ex) {
+				throw new ProcessExecutionException(this, ex, "Could not decrypt user profile task.");
 			}
 			context.provideUserProfileTask((UserProfileTask) decrypted);
+			setRequiresRollback(true);
 			logger.debug("Successfully decrypted a user profile task. User ID = '{}'.", userId);
-
 		}
+		return null;
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
+	protected Void doRollback() throws InvalidProcessStateException {
 		context.provideUserProfileTask(null);
+		setRequiresRollback(false);
+		return null;
 	}
 
 }

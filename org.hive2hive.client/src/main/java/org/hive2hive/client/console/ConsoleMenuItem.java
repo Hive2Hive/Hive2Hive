@@ -24,7 +24,7 @@ public abstract class ConsoleMenuItem {
 			ConsoleMenu.printError("Exception during precondition check.");
 			ConsoleMenu.printError(e);
 		}
-				
+
 		if (satisfied) {
 			initialize();
 			try {

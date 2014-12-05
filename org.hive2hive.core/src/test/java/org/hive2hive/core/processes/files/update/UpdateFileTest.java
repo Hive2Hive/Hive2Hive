@@ -9,9 +9,9 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileIndex;
@@ -24,13 +24,14 @@ import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestProcessComponentListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.H2HWaiter;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -44,7 +45,6 @@ import org.junit.Test;
 public class UpdateFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
-	private final static int CHUNK_SIZE = 1024;
 
 	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
@@ -78,7 +78,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, CHUNK_SIZE);
+		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
@@ -105,18 +105,24 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSameVersion() throws IllegalFileLocation, GetFailedException, IOException, NoSessionException,
+	public void testUploadSameVersion() throws IllegalArgumentException, GetFailedException, IOException, NoSessionException,
 			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
-		IProcessComponent process = ProcessFactory.instance().createUpdateFileProcess(file, uploader);
+		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader,
+				FileConfiguration.createDefault());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
-		process.start();
+
+		try {
+			process.execute();
+		} catch (ProcessExecutionException ex) {
+			// the below waiter waits for fail
+		}
 
 		H2HWaiter waiter = new H2HWaiter(60);
 		do {
 			waiter.tickASecond();
-		} while (!listener.hasFailed());
+		} while (!listener.hasExecutionFailed());
 
 		// verify if the md5 hash did not change
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
@@ -126,7 +132,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testCleanupMaxNumVersions() throws IOException, GetFailedException, NoSessionException,
-			IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException {
+			IllegalArgumentException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// overwrite config
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
 
@@ -152,7 +158,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		SessionParameters params = new SessionParameters(session.getFileAgent(), limitingConfig);
+		SessionParameters params = new SessionParameters(session.getFileAgent());
 		params.setDownloadManager(session.getDownloadManager());
 		params.setKeyManager(session.getKeyManager());
 		params.setLocationsManager(session.getLocationsManager());
@@ -162,7 +168,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 		// update the file
 		FileUtils.write(file, "bla", false);
-		UseCaseTestUtil.uploadNewVersion(uploader, file);
+		UseCaseTestUtil.uploadNewVersion(uploader, file, limitingConfig);
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
@@ -173,7 +179,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 	@Test
 	public void testCleanupMaxSize() throws IOException, GetFailedException, NoSessionException, IllegalArgumentException,
-			NoPeerConnectionException, InvalidProcessStateException {
+			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// overwrite config and set the currently max limit
 		final long fileSize = file.length();
 		IFileConfiguration limitingConfig = new IFileConfiguration() {
@@ -200,7 +206,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		};
 
 		H2HSession session = uploader.getSession();
-		SessionParameters params = new SessionParameters(session.getFileAgent(), limitingConfig);
+		SessionParameters params = new SessionParameters(session.getFileAgent());
 		params.setDownloadManager(session.getDownloadManager());
 		params.setKeyManager(session.getKeyManager());
 		params.setLocationsManager(session.getLocationsManager());
@@ -211,7 +217,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// update the file (append some data)
 		FileUtils.write(file, randomString(), true);
 
-		UseCaseTestUtil.uploadNewVersion(uploader, file);
+		UseCaseTestUtil.uploadNewVersion(uploader, file, limitingConfig);
 
 		// verify that only one version is online
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);

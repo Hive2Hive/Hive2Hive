@@ -13,7 +13,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
-import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.events.EventBus;
@@ -26,6 +25,7 @@ import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.helper.TestFileAgent;
@@ -57,18 +57,21 @@ public class NetworkTestUtil {
 		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
+		FSTSerializer serializer = new FSTSerializer();
+		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
+				FileConfiguration.createDefault());
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
-		NetworkManager initial = new NetworkManager(netConfig, new H2HDummyEncryption(), new EventBus());
-		initial.connect();
+		initial.connect(netConfig);
 		nodes.add(initial);
 
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
+			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
+					FileConfiguration.createDefault());
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeerDHT().peer());
-			NetworkManager node = new NetworkManager(otherNetConfig, new H2HDummyEncryption(), new EventBus());
-			node.connect();
+			node.connect(otherNetConfig);
 			nodes.add(node);
 		}
 
@@ -98,18 +101,18 @@ public class NetworkTestUtil {
 	public static void setDifferentSessions(List<NetworkManager> network) throws NoPeerConnectionException {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+			KeyPair protectionKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 			UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 
-			IFileConfiguration fileConfig = FileConfiguration.createDefault();
-
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
-			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeyPair,
+					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					keyManager, fileConfig);
+					FileConfiguration.createDefault());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
-			SessionParameters params = new SessionParameters(new TestFileAgent(), fileConfig);
+			SessionParameters params = new SessionParameters(new TestFileAgent());
 			params.setDownloadManager(downloadManager);
 			params.setKeyManager(keyManager);
 			params.setUserProfileManager(profileManager);
@@ -128,18 +131,18 @@ public class NetworkTestUtil {
 	 */
 	public static void setSameSession(List<NetworkManager> network) throws NoPeerConnectionException {
 		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 		for (NetworkManager node : network) {
-			IFileConfiguration fileConfig = FileConfiguration.createDefault();
-
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
-			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, node.getDataManager());
+			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeys,
+					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					keyManager, fileConfig);
+					FileConfiguration.createDefault());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
-			SessionParameters params = new SessionParameters(new TestFileAgent(), fileConfig);
+			SessionParameters params = new SessionParameters(new TestFileAgent());
 			params.setDownloadManager(downloadManager);
 			params.setKeyManager(keyManager);
 			params.setUserProfileManager(profileManager);
@@ -164,22 +167,17 @@ public class NetworkTestUtil {
 		List<IH2HNode> nodes = new ArrayList<IH2HNode>(numberOfNodes);
 
 		// create initial peer
-		IH2HNode initial = H2HNode.createNode(NetworkConfiguration.createInitial("initial"),
-				FileConfiguration.createDefault(), new H2HDummyEncryption());
-		initial.connect();
-		initial.getFileManager().configureAutostart(false);
-		initial.getUserManager().configureAutostart(false);
+		FSTSerializer serializer = new FSTSerializer();
+		IH2HNode initial = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption(), serializer);
+		initial.connect(NetworkConfiguration.createInitial("initial"));
 
 		nodes.add(initial);
 
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(NetworkConfiguration.create("node " + i, bootstrapAddress),
-						FileConfiguration.createDefault(), new H2HDummyEncryption());
-				node.connect();
-				node.getFileManager().configureAutostart(false);
-				node.getUserManager().configureAutostart(false);
+				IH2HNode node = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption(), serializer);
+				node.connect(NetworkConfiguration.create("node " + i, bootstrapAddress));
 				nodes.add(node);
 			}
 		} catch (UnknownHostException e) {

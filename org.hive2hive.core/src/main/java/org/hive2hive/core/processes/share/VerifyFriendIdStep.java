@@ -4,7 +4,7 @@ import java.security.PublicKey;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
@@ -13,18 +13,19 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
  * 
  * @author Nico, Seppi
  */
-public class VerifyFriendIdStep extends ProcessStep {
+public class VerifyFriendIdStep extends ProcessStep<Void> {
 
 	private final PublicKeyManager keyManager;
 	private final String friendId;
 
 	public VerifyFriendIdStep(PublicKeyManager keyManager, String friendId) {
+		this.setName(getClass().getName());
 		this.keyManager = keyManager;
 		this.friendId = friendId;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			// just get the public key. It does not produce any overhead since this call is cached or (if the
 			// first time), the result will be cached, making the notification faster.
@@ -32,10 +33,11 @@ public class VerifyFriendIdStep extends ProcessStep {
 			if (publicKey == null) {
 				throw new GetFailedException(String.format("The friend '%s' does not seem to exist.", friendId));
 			}
-		} catch (GetFailedException e) {
-			throw new ProcessExecutionException(String.format("The friend '%s' does not seem to exist. reason = '%s'",
-					friendId, e.getMessage()));
+		} catch (GetFailedException ex) {
+			throw new ProcessExecutionException(this, ex, String.format("The friend '%s' does not seem to exist.", friendId));
 		}
+		
+		return null;
 	}
 
 }

@@ -7,7 +7,7 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
 /**
@@ -16,11 +16,12 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  * @author Christian
  * 
  */
-public abstract class BaseGetProcessStep extends ProcessStep {
+public abstract class BaseGetProcessStep extends ProcessStep<Void> {
 
 	protected final DataManager dataManager;
 
 	public BaseGetProcessStep(DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.dataManager = dataManager;
 	}
 

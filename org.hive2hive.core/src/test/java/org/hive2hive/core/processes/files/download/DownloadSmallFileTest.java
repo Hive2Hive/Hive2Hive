@@ -20,12 +20,11 @@ import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.TestExecutionUtil;
-import org.hive2hive.processframework.util.TestProcessComponentListener;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -41,7 +40,6 @@ import org.junit.Test;
 public class DownloadSmallFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
-	private final static int CHUNK_SIZE = 1024;
 
 	private static ArrayList<NetworkManager> network;
 	private static NetworkManager uploader;
@@ -80,7 +78,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
 		// upload a small file
 		String fileName = randomString();
-		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, CHUNK_SIZE);
+		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
@@ -108,11 +106,9 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		// try to download with wrong keys
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(), downloader);
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		process.start();
-		TestExecutionUtil.waitTillFailed(listener, 20);
+		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(),
+				downloader);
+		TestExecutionUtil.executeProcessTillFailed(process);
 	}
 
 	@Test
@@ -146,13 +142,9 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		FileUtils.write(existing, FileUtils.readFileToString(uploadedFile));
 		long lastModifiedBefore = existing.lastModified();
 
-		IProcessComponent process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
+		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(fileNode.getFilePublicKey(),
 				downloader);
-		TestProcessComponentListener listener = new TestProcessComponentListener();
-		process.attachListener(listener);
-		process.start();
-
-		TestExecutionUtil.waitTillFailed(listener, 20);
+		TestExecutionUtil.executeProcessTillFailed(process);
 
 		// the existing file has already same content, should not have been downloaded
 		Assert.assertEquals(lastModifiedBefore, existing.lastModified());

@@ -14,6 +14,9 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.helper.TestFileAgent;
+import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,7 +51,8 @@ public class UserManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void isRegisteredTest() throws NoPeerConnectionException, InterruptedException {
+	public void isRegisteredTest() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException,
+			ProcessExecutionException {
 		UserCredentials userCredentials = generateRandomCredentials();
 		String userId = userCredentials.getUserId();
 
@@ -58,10 +62,10 @@ public class UserManagerTest extends H2HJUnitTest {
 			assertFalse(isRegistered);
 		}
 
-		// registering from random node (await)
+		// registering from random node
 		IUserManager userManager = network.get(new Random().nextInt(network.size())).getUserManager();
-		userManager.configureAutostart(true);
-		userManager.register(userCredentials).await();
+		IProcessComponent<Void> registerProcess = userManager.createRegisterProcess(userCredentials);
+		registerProcess.execute();
 
 		// all nodes must have same result: true
 		for (int i = 0; i < network.size(); i++) {
@@ -73,40 +77,46 @@ public class UserManagerTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException, NoSessionException {
+	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException, NoSessionException,
+			InvalidProcessStateException, ProcessExecutionException {
 		UserCredentials userCredentials = generateRandomCredentials();
-		String userId = userCredentials.getUserId();
 
 		TestFileAgent fileAgent = new TestFileAgent();
 
 		// all nodes must have same result: false
 		for (int i = 0; i < network.size(); i++) {
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}
 
 		// before registering: login all nodes and check again
+		IProcessComponent<Void> loginProcess;
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getUserManager().configureAutostart(true);
-			network.get(i).getUserManager().login(userCredentials, fileAgent).await();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
+			loginProcess.execute();
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}
 
-		// registering from random node (await)
-		network.get(new Random().nextInt(network.size())).getUserManager().register(userCredentials).await();
+		// registering from random node
+		IProcessComponent<Void> registerProcess = network.get(new Random().nextInt(network.size())).getUserManager()
+				.createRegisterProcess(userCredentials);
+		registerProcess.execute();
 
 		// after registering: login all nodes and check again
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getUserManager().login(userCredentials, fileAgent).await();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
+			loginProcess.execute();
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertTrue(isLoggedIn);
 		}
 
 		// logout
+		IProcessComponent<Void> logoutProcess;
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getUserManager().logout().await();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn(userId);
+			logoutProcess = network.get(i).getUserManager().createLogoutProcess();
+			logoutProcess.execute();
+			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}
 

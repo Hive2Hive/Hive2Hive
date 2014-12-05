@@ -7,7 +7,7 @@ import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.ChunkPKUpdateContext;
 import org.hive2hive.core.processes.context.MetaDocumentPKUpdateContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.decorators.AsyncComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Nico, Seppi
  */
-public class InitializeChunkUpdateStep extends ProcessStep {
+public class InitializeChunkUpdateStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitializeChunkUpdateStep.class);
 
@@ -27,18 +27,20 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 	private final DataManager dataManager;
 
 	public InitializeChunkUpdateStep(MetaDocumentPKUpdateContext context, DataManager dataManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.dataManager = dataManager;
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		
 		BaseMetaFile metaFile = context.consumeMetaFile();
 		if (metaFile == null) {
-			throw new ProcessExecutionException("Meta File not found");
+			throw new ProcessExecutionException(this, "Meta File not found.");
 		} else if (!(metaFile.isSmall())) {
 			logger.debug("No need to update any chunks for a large meta file");
-			return;
+			return null;
 		}
 
 		MetaFileSmall metaFileSmall = (MetaFileSmall) metaFile;
@@ -52,11 +54,13 @@ public class InitializeChunkUpdateStep extends ProcessStep {
 
 				// create the step and wrap it to run asynchronous, attach it to the parent process
 				ChangeProtectionKeysStep changeStep = new ChangeProtectionKeysStep(chunkContext, dataManager);
-				getParent().add(new AsyncComponent(changeStep));
+				getParent().add(new AsyncComponent<>(changeStep));
 				counter++;
 			}
 		}
 
 		logger.debug("{} chunks of file '{}' need to update their protection keys.", counter, context.getFileName());
+		
+		return null;
 	}
 }

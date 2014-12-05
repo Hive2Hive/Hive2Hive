@@ -23,12 +23,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.hive2hive</groupId>
-			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.1</version>
@@ -40,34 +34,56 @@
 			<version>1.1.1</version>
 			<scope>compile</scope>
 		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
+				<!-- states the main class and that dependencies are in the separate 
+					lib folder (see assembly.xml) -->
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
 				<configuration>
 					<archive>
 						<manifest>
 							<mainClass>org.hive2hive.client.ConsoleClient</mainClass>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<finalName>H2HConsoleClient</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<!-- Creates a zip file containing all dependencies -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.5.1</version>
 				<executions>
 					<execution>
-						<id>assembly</id>
+						<id>jar-with-dependencies</id>
 						<phase>package</phase>
 						<goals>
-							<goal>assembly</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
+					<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

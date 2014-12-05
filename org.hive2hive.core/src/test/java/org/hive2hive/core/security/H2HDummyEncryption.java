@@ -23,22 +23,28 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
  */
 public class H2HDummyEncryption implements IH2HEncryption {
 
-	@Override
-	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
-			IOException {
-		return new EncryptedNetworkContent(SerializationUtil.serialize(content), new byte[] {});
+	private final FSTSerializer serializer;
+
+	public H2HDummyEncryption() {
+		serializer = new FSTSerializer();
 	}
 
 	@Override
-	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
-			ClassNotFoundException, IOException {
-		return (BaseNetworkContent) SerializationUtil.deserialize(content.getCipherContent());
+	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey)
+			throws InvalidCipherTextException, IOException {
+		return new EncryptedNetworkContent(serializer.serialize(content), new byte[] {});
+	}
+
+	@Override
+	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
+			throws InvalidCipherTextException, ClassNotFoundException, IOException {
+		return (BaseNetworkContent) serializer.deserialize(content.getCipherContent());
 	}
 
 	@Override
 	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
-		return new HybridEncryptedContent(new byte[] {}, SerializationUtil.serialize(content));
+		return new HybridEncryptedContent(new byte[] {}, serializer.serialize(content));
 	}
 
 	@Override
@@ -48,9 +54,10 @@ public class H2HDummyEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		return (BaseNetworkContent) SerializationUtil.deserialize(content.getEncryptedData());
+	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException,
+			ClassNotFoundException, IOException {
+		return (BaseNetworkContent) serializer.deserialize(content.getEncryptedData());
 	}
 
 	@Override

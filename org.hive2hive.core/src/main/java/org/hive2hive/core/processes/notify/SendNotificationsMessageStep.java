@@ -8,19 +8,21 @@ import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
+import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.exceptions.SendFailedException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.NetworkUtils;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
-import org.hive2hive.core.processes.common.base.BaseDirectMessageProcessStep;
+import org.hive2hive.core.processes.common.base.BaseMessageProcessStep;
 import org.hive2hive.core.processes.context.NotifyProcessContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
+public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(SendNotificationsMessageStep.class);
 	private final NotifyProcessContext context;
@@ -30,13 +32,14 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	public SendNotificationsMessageStep(NotifyProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
 		super(networkManager.getMessageManager());
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 		this.unreachablePeers = new HashSet<PeerAddress>();
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		BaseNotificationMessageFactory messageFactory = context.consumeMessageFactory();
 		Map<String, PublicKey> userPublicKeys = context.getUserPublicKeys();
 		Map<String, List<PeerAddress>> locations = context.getAllLocations();
@@ -55,8 +58,16 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 
 		if (!unreachablePeers.isEmpty()) {
 			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
-			getParent().add(new RemoveUnreachableStep(unreachablePeers, networkManager));
+			try {
+				H2HSession session = networkManager.getSession();
+				getParent().add(
+						new RemoveUnreachableStep(unreachablePeers, session.getLocationsManager(), session.getKeyManager()));
+			} catch (NoSessionException e) {
+				logger.error("Cannot cleanup unreachable peers because no session");
+			}
 		}
+
+		return null;
 	}
 
 	private void notifyMyPeers(List<PeerAddress> ownPeers, BaseNotificationMessageFactory messageFactory,
@@ -75,7 +86,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 				if (message == null) {
 					logger.info("Not notifying any of the own peers because the message to be sent is null.");
 				} else {
-					sendDirect(message, ownPublicKey);
+					send(message, ownPublicKey);
 				}
 			} catch (SendFailedException e) {
 				// add to the unreachable list, such that the next step can cleanup those locations
@@ -93,7 +104,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 			PeerAddress initial = NetworkUtils.choseFirstPeerAddress(peerList);
 			BaseDirectMessage msg = messageFactory.createHintNotificationMessage(initial, userId);
 			try {
-				sendDirect(msg, publicKey);
+				send(msg, publicKey);
 				success = true;
 			} catch (SendFailedException e) {
 				if (!peerList.isEmpty()) {
@@ -111,7 +122,7 @@ public class SendNotificationsMessageStep extends BaseDirectMessageProcessStep {
 	}
 
 	@Override
-	public void handleResponseMessage(ResponseMessage responseMessage) {
+	public void handleResponse(ResponseMessage responseMessage) {
 		// no response expected
 	}
 }

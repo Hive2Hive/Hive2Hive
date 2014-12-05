@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 import net.tomp2p.message.SignatureCodec;
 
+import org.hive2hive.core.H2HConstants;
+
 /**
  * An ASN.1 encoder and decoder for the signature.
  * 
@@ -28,7 +30,7 @@ public class H2HSignatureCodec implements SignatureCodec {
 
 	@Override
 	public byte[] encode() throws IOException {
-		// no decoding necessary
+		// no encoding necessary
 		return encodedData;
 	}
 
@@ -47,8 +49,8 @@ public class H2HSignatureCodec implements SignatureCodec {
 
 	@Override
 	public int signatureSize() {
-		// 1024 bits by default
-		return 128;
+		// get the default byte count
+		return H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
 	}
 
 	@Override

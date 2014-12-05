@@ -25,14 +25,14 @@ import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHand
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.context.LoginProcessContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO this class should be split up into multiple steps
-public class ContactOtherClientsStep extends ProcessStep implements IResponseCallBackHandler {
+public class ContactOtherClientsStep extends ProcessStep<Void> implements IResponseCallBackHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(ContactOtherClientsStep.class);
 
@@ -47,18 +47,19 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 	public ContactOtherClientsStep(LoginProcessContext context, NetworkManager networkManager)
 			throws NoPeerConnectionException {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 		this.messageManager = networkManager.getMessageManager();
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		PublicKeyManager keyManager;
 		try {
 			keyManager = networkManager.getSession().getKeyManager();
-		} catch (NoSessionException e) {
-			throw new ProcessExecutionException("No session yet");
+		} catch (NoSessionException ex) {
+			throw new ProcessExecutionException(this, ex);
 		}
 
 		PublicKey ownPublicKey = keyManager.getOwnPublicKey();
@@ -66,29 +67,29 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 		sendBlocking(locations.getPeerAddresses(), ownPublicKey);
 
-		Locations updatedLocations = new Locations(locations.getUserId());
-		updatedLocations.setBasedOnKey(locations.getBasedOnKey());
-		updatedLocations.setVersionKey(locations.getVersionKey());
+		locations.getPeerAddresses().clear();
 
 		// add addresses that responded
 		for (PeerAddress address : responses.keySet()) {
 			if (responses.get(address)) {
-				updatedLocations.addPeerAddress(address);
+				locations.addPeerAddress(address);
 			}
 		}
 		// add self
-		updatedLocations.addPeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
-		context.provideLocations(updatedLocations);
+		PeerAddress ownAddress = networkManager.getConnection().getPeerDHT().peerAddress();
+		logger.debug("Adding own peeraddress to locations file: {}", ownAddress);
+		locations.addPeerAddress(ownAddress);
 
 		// evaluate if initial
-		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(updatedLocations.getPeerAddresses());
-		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(
-				networkManager.getConnection().getPeerDHT().peerAddress())) {
+		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(locations.getPeerAddresses());
+		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(ownAddress)) {
 			logger.debug("Node is master and needs to handle possible User Profile Tasks.");
 			if (getParent() != null) {
-				getParent().add(ProcessFactory.instance().createUserProfileTaskStep(networkManager));
+				getParent().add(ProcessFactory.instance().createUserProfileTaskProcess(networkManager));
 			}
 		}
+
+		return null;
 	}
 
 	private void sendBlocking(Set<PeerAddress> peerAddresses, PublicKey ownPublicKey) {
@@ -96,6 +97,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 		for (PeerAddress address : peerAddresses) {
 			// contact all other clients (exclude self)
 			if (!address.equals(networkManager.getConnection().getPeerDHT().peerAddress())) {
+				logger.debug("Sending contact message to check for aliveness to {}", address);
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);
 
@@ -131,6 +133,7 @@ public class ContactOtherClientsStep extends ProcessStep implements IResponseCal
 
 		// verify response
 		if (evidences.get(responseMessage.getSenderAddress()).equals((String) responseMessage.getContent())) {
+			logger.debug("Received valid response from {}", responseMessage.getSenderAddress());
 			responses.put(responseMessage.getSenderAddress(), true);
 			waitForResponses.countDown();
 		} else {

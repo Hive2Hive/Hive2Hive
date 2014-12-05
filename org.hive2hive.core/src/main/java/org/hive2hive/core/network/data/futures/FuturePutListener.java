@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A put future adapter for verifying a put of a {@link BaseNetworkContent} object. Provides failure handling and
- * a blocking wait.</br></br>
+ * A put future adapter for verifying a put of a {@link BaseNetworkContent} object. Provides failure handling
+ * and a blocking wait.</br></br>
  * 
  * <b>Failure Handling</b></br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
@@ -70,7 +70,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	@Override
 	public void operationComplete(FuturePut future) throws Exception {
 		if (future.isFailed()) {
-			logger.warn("Put future was not successful. '{}'", parameters.toString());
+			logger.warn("Put future was not successful. '{}'. Reason: {}", parameters.toString(), future.failedReason());
 			retryPut();
 			return;
 		} else if (future.rawResult().isEmpty()) {
@@ -88,23 +88,28 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				logger.warn("A node gave no status (null) back. '{}'", parameters.toString());
 				fail.add(peeradress);
 			} else {
-				for (Number640 key : future.rawResult().get(peeradress).keySet()) {
-					byte status = future.rawResult().get(peeradress).get(key);
-					switch (PutStatus.values()[status]) {
-						case OK:
-							break;
-						case FAILED:
-						case FAILED_SECURITY:
-							logger.warn("A node denied putting data. reason = '{}'. '{}'", PutStatus.values()[status],
-									parameters.toString());
-							fail.add(peeradress);
-							break;
-						case VERSION_FORK:
-							logger.warn("A node responded with a version fork. '{}'", parameters.toString());
-							versionFork.add(peeradress);
-							break;
-						default:
-							logger.warn("Got an unknown status: {}", PutStatus.values()[status]);
+				for (Number640 key : map.keySet()) {
+					byte status = map.get(key);
+					if (status == -1) {
+						logger.warn("Got an invalid status: {}", status);
+						fail.add(peeradress);
+					} else {
+						switch (PutStatus.values()[status]) {
+							case OK:
+								break;
+							case FAILED:
+							case FAILED_SECURITY:
+								logger.warn("A node denied putting data. reason = '{}'. '{}'", PutStatus.values()[status],
+										parameters.toString());
+								fail.add(peeradress);
+								break;
+							case VERSION_FORK:
+								logger.warn("A node responded with a version fork. '{}'", parameters.toString());
+								versionFork.add(peeradress);
+								break;
+							default:
+								logger.warn("Got an unknown status: {}", PutStatus.values()[status]);
+						}
 					}
 				}
 			}
@@ -123,7 +128,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 						@Override
 						public void operationComplete(FuturePut future) throws Exception {
 							if (future.isFailed()) {
-								logger.warn("Confirm future was not successful. reason = '{}' {}", future.failedReason(),
+								logger.warn("Confirm future was not successful. Reason = '{}' {}", future.failedReason(),
 										parameters.toString());
 								retryConfirm();
 								return;
@@ -149,7 +154,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 											case FAILED:
 											case FAILED_SECURITY:
 											case NOT_FOUND:
-												logger.warn("A node could not confirm data. reason = '{}'. {}",
+												logger.warn("A node could not confirm data. Reason = '{}'. {}",
 														PutStatus.values()[status], parameters.toString());
 												fail.add(peeradress);
 												break;

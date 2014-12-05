@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.hive2hive.core.H2HConstants;
 
 /**
  * Default implementation of {@link IFileObserver}. Internally uses the Apache Commons IO
@@ -40,7 +39,7 @@ public class FileObserver {
 	 * @param rootDirectory
 	 */
 	public FileObserver(File rootDirectory) {
-		this(rootDirectory, H2HConstants.DEFAULT_FILE_OBSERVER_INTERVAL);
+		this(rootDirectory, 1000);
 	}
 
 	public void start() throws Exception {

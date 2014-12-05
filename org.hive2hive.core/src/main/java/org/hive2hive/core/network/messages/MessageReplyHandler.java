@@ -17,7 +17,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.IH2HEncryption;
-import org.hive2hive.core.security.SerializationUtil;
+import org.hive2hive.core.security.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +37,12 @@ public class MessageReplyHandler implements ObjectDataReply {
 
 	private final NetworkManager networkManager;
 	private final IH2HEncryption encryption;
+	private final IH2HSerialize serializer;
 
-	public MessageReplyHandler(NetworkManager networkManager, IH2HEncryption encryption) {
+	public MessageReplyHandler(NetworkManager networkManager, IH2HEncryption encryption, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
 		this.encryption = encryption;
+		this.serializer = serializer;
 	}
 
 	@Override
@@ -86,7 +88,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		// deserialize decrypted message
 		Object message = null;
 		try {
-			message = SerializationUtil.deserialize(decryptedMessage);
+			message = serializer.deserialize(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Message could not be deserialized.", e);
 		}

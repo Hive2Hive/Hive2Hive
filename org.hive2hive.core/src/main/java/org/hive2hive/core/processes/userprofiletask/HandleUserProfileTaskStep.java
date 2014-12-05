@@ -5,12 +5,12 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.common.userprofiletask.GetUserProfileTaskStep;
 import org.hive2hive.core.processes.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.context.UserProfileTaskContext;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HandleUserProfileTaskStep extends ProcessStep {
+public class HandleUserProfileTaskStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(HandleUserProfileTaskStep.class);
 
@@ -18,6 +18,7 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 	private final NetworkManager networkManager;
 
 	public HandleUserProfileTaskStep(UserProfileTaskContext context, NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.context = context;
 		this.networkManager = networkManager;
 
@@ -27,14 +28,14 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 	}
 
 	@Override
-	protected void doExecute() throws InvalidProcessStateException {
+	protected Void doExecute() throws InvalidProcessStateException {
 		UserProfileTask userProfileTask = context.consumeUserProfileTask();
 		String userId = networkManager.getUserId();
 
 		if (userProfileTask == null) {
 			logger.debug("No more user profile tasks in queue. Stopping handling. User ID = '{}'.", userId);
 			// all user profile tasks are handled, stop process
-			return;
+			return null;
 		}
 
 		logger.debug("Executing a '{}' user profile task. User ID = '{}'.", userProfileTask.getClass().getSimpleName(),
@@ -53,5 +54,7 @@ public class HandleUserProfileTaskStep extends ProcessStep {
 		getParent().add(new RemoveUserProfileTaskStep(context, networkManager));
 		getParent().add(new GetUserProfileTaskStep(context, networkManager));
 		getParent().add(new HandleUserProfileTaskStep(context, networkManager));
+		
+		return null;
 	}
 }

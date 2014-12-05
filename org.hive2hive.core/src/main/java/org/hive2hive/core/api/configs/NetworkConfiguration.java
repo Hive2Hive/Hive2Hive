@@ -58,7 +58,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration
 	 */
 	public static INetworkConfiguration createInitial(String nodeID) {
-		return new NetworkConfiguration(nodeID, true, null, -1, false, null);
+		return new NetworkConfiguration(nodeID, true, null, H2HConstants.H2H_PORT, false, null);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration
 	 */
 	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
-		return create(nodeID, bootstrapAddress, -1);
+		return create(nodeID, bootstrapAddress, H2HConstants.H2H_PORT);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return
 	 */
 	public static INetworkConfiguration createLocalPeer(String nodeID, Peer initialPeer) {
-		return new NetworkConfiguration(nodeID, false, null, -1, true, initialPeer);
+		return new NetworkConfiguration(nodeID, false, null, H2HConstants.H2H_PORT, true, initialPeer);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return
 	 */
 	public static INetworkConfiguration createInitialLocalPeer(String nodeID) {
-		return new NetworkConfiguration(nodeID, false, null, -1, true, null);
+		return new NetworkConfiguration(nodeID, false, null, H2HConstants.H2H_PORT, true, null);
 	}
 
 	@Override
@@ -122,11 +122,6 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	@Override
 	public InetAddress getBootstrapAddress() {
 		return bootstrapAddress;
-	}
-
-	@Override
-	public boolean isBootstrappingLocal() {
-		return bootstrapPeer != null;
 	}
 
 	@Override

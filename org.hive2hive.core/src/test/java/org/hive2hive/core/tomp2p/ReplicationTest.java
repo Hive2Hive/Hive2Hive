@@ -12,7 +12,7 @@ import net.tomp2p.replication.IndirectReplication;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.processframework.util.H2HWaiter;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;

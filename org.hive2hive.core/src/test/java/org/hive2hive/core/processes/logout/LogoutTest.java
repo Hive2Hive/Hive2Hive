@@ -16,9 +16,9 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.hive2hive.processframework.util.TestExecutionUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -60,7 +60,7 @@ public class LogoutTest extends H2HJUnitTest {
 		Assert.assertEquals(1, locations.getPeerAddresses().size());
 
 		// logout
-		IProcessComponent process = ProcessFactory.instance().createLogoutProcess(client);
+		IProcessComponent<Void> process = ProcessFactory.instance().createLogoutProcess(client);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// verify the locations map after logout

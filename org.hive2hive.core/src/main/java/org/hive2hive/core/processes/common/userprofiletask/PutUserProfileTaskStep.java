@@ -19,9 +19,9 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.processframework.RollbackReason;
-import org.hive2hive.processframework.abstracts.ProcessStep;
+import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi, Nico
  */
-public abstract class PutUserProfileTaskStep extends ProcessStep {
+public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(PutUserProfileTaskStep.class);
 
@@ -41,9 +41,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 	private Number160 contentKey;
 	private KeyPair protectionKey;
 
-	private boolean putPerformed = false;
-
 	public PutUserProfileTaskStep(NetworkManager networkManager) {
+		this.setName(getClass().getName());
 		this.networkManager = networkManager;
 	}
 
@@ -68,42 +67,41 @@ public abstract class PutUserProfileTaskStep extends ProcessStep {
 			DataManager dataManager = networkManager.getDataManager();
 			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(userProfileTask, publicKey);
 			encrypted.setTimeToLive(userProfileTask.getTimeToLive());
-			H2HPutStatus status = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
-			putPerformed = true;
 
+			H2HPutStatus status = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			if (!status.equals(H2HPutStatus.OK)) {
 				throw new PutFailedException();
 			}
+			setRequiresRollback(true);
+
 		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new PutFailedException("Meta document could not be encrypted. Reason: " + e.getMessage());
-		} catch (NoPeerConnectionException e) {
-			throw new PutFailedException(e.getMessage());
+				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException ex) {
+			throw new PutFailedException(String.format("Meta document could not be encrypted. Reason: %s.", ex.getMessage()));
+		} catch (NoPeerConnectionException ex) {
+			throw new PutFailedException(ex.getMessage());
 		}
 	}
 
 	@Override
-	protected void doRollback(RollbackReason reason) throws InvalidProcessStateException {
-		if (!putPerformed) {
-			logger.warn("Nothing to remove at rollback because nothing has been put.");
-			return;
-		}
+	protected Void doRollback() throws InvalidProcessStateException, ProcessRollbackException {
 
 		DataManager dataManager;
 		try {
 			dataManager = networkManager.getDataManager();
-		} catch (NoPeerConnectionException e) {
-			logger.warn("Rollback of user profile task put failed. No connection. user = '{}', content key = '{}'.", userId,
-					contentKey, e);
-			return;
+		} catch (NoPeerConnectionException ex) {
+			throw new ProcessRollbackException(this, ex, String.format("Rollback of UserProfileTask put failed. No connection. User = '%s', Content Key = '%s'.", userId,
+					contentKey));
 		}
 
 		boolean success = dataManager.removeUserProfileTask(userId, contentKey, protectionKey);
 		if (success) {
-			logger.debug("Rollback of user profile task put succeeded. user = '{}', content key = '{}'.", userId, contentKey);
+			logger.debug("Rollback of user profile task put succeeded. User = '{}', Content Key = '{}'.", userId, contentKey);
+			setRequiresRollback(false);
 		} else {
-			logger.warn("Rollback of user profile put failed. Remove failed. user = '{}', content key = '{}'.", userId,
-					contentKey);
+			throw new ProcessRollbackException(this, String.format("Rollback of user profile put failed. Remove failed. User = '{}', Content Key = '{}'.", userId,
+					contentKey));
 		}
+		
+		return null;
 	}
 }

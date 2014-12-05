@@ -11,6 +11,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.slf4j.Logger;
@@ -26,13 +27,17 @@ public class PublicKeyManager {
 	private static final Logger logger = LoggerFactory.getLogger(PublicKeyManager.class);
 
 	private final String userId;
+	// the user's encryption key pair (e.g. for sending direct messages)
 	private final KeyPair usersKeyPair;
+	// the default authentication keys for signing (e.g. locations, unshared files, ..)
+	private final KeyPair defaultProtectionKeyPair;
 	private final DataManager dataManager;
 	private final Map<String, PublicKey> publicKeyCache;
 
-	public PublicKeyManager(String userId, KeyPair usersKeyPair, DataManager dataManager) {
+	public PublicKeyManager(String userId, KeyPair usersKeyPair, KeyPair defaultProtectionKeyPair, DataManager dataManager) {
 		this.userId = userId;
 		this.usersKeyPair = usersKeyPair;
+		this.defaultProtectionKeyPair = defaultProtectionKeyPair;
 		this.dataManager = dataManager;
 		this.publicKeyCache = new ConcurrentHashMap<String, PublicKey>();
 	}
@@ -56,6 +61,13 @@ public class PublicKeyManager {
 	 */
 	public KeyPair getOwnKeyPair() {
 		return usersKeyPair;
+	}
+
+	/**
+	 * Helper method that returns the protection keys for e.g. the {@link Locations}.
+	 */
+	public KeyPair getDefaultProtectionKeyPair() {
+		return defaultProtectionKeyPair;
 	}
 
 	/**
@@ -120,5 +132,4 @@ public class PublicKeyManager {
 			}
 		}
 	}
-
 }

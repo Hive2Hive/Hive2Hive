@@ -2,7 +2,9 @@ package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.exceptions.AbortModifyException;
@@ -22,6 +24,7 @@ import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.files.delete.DeleteNotifyMessageFactory;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +97,11 @@ public class RelinkUserProfileStep extends BaseModifyUserProfileStep {
 	private void initPKUpdateStep() {
 		MoveUpdateProtectionKeyContext pkUpdateContext = new MoveUpdateProtectionKeyContext(movedNode,
 				oldParentNode.getProtectionKeys(), newParentNode.getProtectionKeys());
-		getParent().insertNext(new InitializeMetaUpdateStep(pkUpdateContext, dataManger), this);
+		List<IProcessComponent<?>> parentComponents = new ArrayList<>(getParent().getComponents());
+		int index = parentComponents.indexOf(this) + 1;
+
+		getParent().add(index, new InitializeMetaUpdateStep(pkUpdateContext, dataManger));
+
 	}
 
 	/**

@@ -36,7 +36,7 @@ public class UserProfile extends BaseVersionedNetworkContent {
 
 		// create the root node
 		root = new FolderIndex(encryptionKeys);
-		root.setProtectionKeys(EncryptionUtil.generateRSAKeyPair());
+		root.setProtectionKeys(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
 

@@ -12,7 +12,6 @@ import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileVersion;
@@ -27,6 +26,7 @@ import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -42,7 +42,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 	private static final int networkSize = 6;
 	private static ArrayList<NetworkManager> network;
 	private static UserCredentials userCredentials;
-	private final static int CHUNK_SIZE = 1024;
 	private static File root;
 	private static NetworkManager client;
 
@@ -62,9 +61,9 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFile() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
-			NoPeerConnectionException, NoSessionException, InvalidProcessStateException {
-		File file = FileTestUtil.createFileRandomContent(3, root, CHUNK_SIZE);
+	public void testDeleteFile() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
+			NoPeerConnectionException, NoSessionException, InvalidProcessStateException, ProcessExecutionException {
+		File file = FileTestUtil.createFileRandomContent(3, root, H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// store the keys of the meta file to verify them later
@@ -97,7 +96,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFolder() throws FileNotFoundException, IllegalFileLocation, GetFailedException,
+	public void testDeleteFolder() throws FileNotFoundException, IllegalArgumentException, GetFailedException,
 			InterruptedException, NoSessionException, NoPeerConnectionException {
 		// add a folder to the network
 		File folder = new File(root, randomString());
@@ -117,8 +116,8 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFileInFolder() throws IOException, IllegalFileLocation, GetFailedException, InterruptedException,
-			NoSessionException, NoPeerConnectionException, InvalidProcessStateException {
+	public void testDeleteFileInFolder() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
+			NoSessionException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// add a folder to the network
 		File folder = new File(root, randomString());
 		folder.mkdir();
@@ -152,7 +151,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFolderInFolder() throws IOException, IllegalFileLocation, GetFailedException,
+	public void testDeleteFolderInFolder() throws IOException, IllegalArgumentException, GetFailedException,
 			InterruptedException, NoSessionException, NoPeerConnectionException {
 		// add a folder to the network
 		File folder = new File(root, randomString());

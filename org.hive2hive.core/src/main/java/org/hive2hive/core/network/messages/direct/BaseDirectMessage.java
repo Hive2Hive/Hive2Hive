@@ -134,11 +134,11 @@ public abstract class BaseDirectMessage extends BaseMessage {
 			case WRONG_TARGET:
 				logger.error("Wrong node responded while sending this message directly using the peer address '{}'.",
 						getTargetAddress());
-				return canResend();
+				return canResendDirect();
 			case FAILURE:
-				return canResend();
+				return canResendDirect();
 			case FUTURE_FAILURE:
-				return canResend();
+				return canResendDirect();
 			case FAILURE_DECRYPTION:
 				logger.warn("Message not accepted by the target. Decryption on target node failed. Peer address = '{}'.",
 						getTargetAddress());
@@ -156,7 +156,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 		}
 	}
 
-	private boolean canResend() {
+	private boolean canResendDirect() {
 		return directSendingCounter < H2HConstants.MAX_MESSAGE_SENDING_DIRECT;
 	}
 }

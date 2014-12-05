@@ -103,14 +103,12 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 		if (reply == AcceptanceReply.OK || reply == AcceptanceReply.OK_PROVISIONAL) {
 			// notify the listener about the success of sending the message
 			state = DeliveryState.SUCCESS;
-			latch.countDown();
 		} else {
 			// check if a direct re-send is necessary / wished
 			boolean directResending = message.handleSendingFailure(reply);
 			if (directResending) {
 				// re-send directly the message
 				state = DeliveryState.RESEND_DIRECT;
-				latch.countDown();
 			} else {
 				// check if the routed sending fall back is allowed
 				if (message.needsRedirectedSend()) {
@@ -119,14 +117,14 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 							message.getTargetKey(), message.getTargetAddress());
 					// re-send the message (routed)
 					state = DeliveryState.RESEND_ROUTED;
-					latch.countDown();
 				} else {
 					// notify the listener about the fail of sending the message
 					state = DeliveryState.ERROR;
-					latch.countDown();
 				}
 			}
 		}
+		
+		latch.countDown();
 	}
 
 	/**

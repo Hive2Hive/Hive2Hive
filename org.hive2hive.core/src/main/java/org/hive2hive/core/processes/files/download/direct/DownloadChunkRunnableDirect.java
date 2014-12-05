@@ -4,13 +4,13 @@ import java.io.File;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.messages.IMessageManager;
 import org.hive2hive.core.processes.files.download.direct.process.AskForChunkStep;
 import org.hive2hive.core.processes.files.download.direct.process.DownloadDirectContext;
 import org.hive2hive.core.processes.files.download.direct.process.SelectPeerForDownloadStep;
-import org.hive2hive.processframework.concretes.SequentialProcess;
+import org.hive2hive.processframework.composites.SyncProcess;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +28,12 @@ public class DownloadChunkRunnableDirect implements Runnable {
 	private final MetaChunk metaChunk;
 	private final File tempDestination;
 	private final IMessageManager messageManager;
-	private final PublicKeyManager keyManager;
 	private final IFileConfiguration config;
 
 	public DownloadChunkRunnableDirect(DownloadTaskDirect task, MetaChunk chunk, IMessageManager messageManager,
-			PublicKeyManager keyManager, IFileConfiguration config) {
+			IFileConfiguration config) {
 		this.task = task;
 		this.metaChunk = chunk;
-		this.keyManager = keyManager;
 		this.messageManager = messageManager;
 		this.config = config;
 
@@ -54,14 +52,14 @@ public class DownloadChunkRunnableDirect implements Runnable {
 		}
 
 		DownloadDirectContext context = new DownloadDirectContext(task, metaChunk, tempDestination);
-		SequentialProcess process = new SequentialProcess();
+		SyncProcess process = new SyncProcess();
 		process.add(new SelectPeerForDownloadStep(context));
-		process.add(new AskForChunkStep(context, messageManager, keyManager, config));
+		process.add(new AskForChunkStep(context, messageManager, config));
 
 		try {
-			process.start().await();
-		} catch (InvalidProcessStateException | InterruptedException e) {
-			task.abortDownload(e.getMessage());
+			process.execute();
+		} catch (InvalidProcessStateException | ProcessExecutionException ex) {
+			task.abortDownload(ex.getMessage());
 		}
 	}
 }

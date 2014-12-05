@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.utils.FileTestUtil;
@@ -24,7 +25,6 @@ import org.junit.Test;
  */
 public class FileChunkUtilTest extends H2HJUnitTest {
 
-	private final static int CHUNK_SIZE = 1024;
 	private static File parent;
 
 	@BeforeClass
@@ -44,8 +44,8 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 		Random rnd = new Random();
 		for (int i = 0; i < 10; i++) {
 			int genNOC = rnd.nextInt(100) + 1; // avoid 0's
-			File randomFile = FileTestUtil.createFileRandomContent(genNOC, parent, CHUNK_SIZE);
-			int resNOC = FileChunkUtil.getNumberOfChunks(randomFile, CHUNK_SIZE);
+			File randomFile = FileTestUtil.createFileRandomContent(genNOC, parent, H2HConstants.DEFAULT_CHUNK_SIZE);
+			int resNOC = FileChunkUtil.getNumberOfChunks(randomFile, H2HConstants.DEFAULT_CHUNK_SIZE);
 			assertEquals(genNOC, resNOC);
 
 			randomFile.deleteOnExit(); // cleanup
@@ -56,8 +56,8 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	public void testGetNumberOfChunksEmpty() throws IOException {
 		File file = new File(parent, randomString());
 		FileUtils.write(file, "");
-		assertEquals(1, FileChunkUtil.getNumberOfChunks(file, CHUNK_SIZE));
-		assertEquals(1, FileChunkUtil.getNumberOfChunks(file, CHUNK_SIZE / 2));
+		assertEquals(1, FileChunkUtil.getNumberOfChunks(file, H2HConstants.DEFAULT_CHUNK_SIZE));
+		assertEquals(1, FileChunkUtil.getNumberOfChunks(file, H2HConstants.DEFAULT_CHUNK_SIZE / 2));
 
 		file.deleteOnExit(); // clenaup
 	}
@@ -65,12 +65,12 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	@Test
 	public void testGetNumberOfChunksNotExisting() {
 		File file = new File(parent, randomString());
-		assertEquals(0, FileChunkUtil.getNumberOfChunks(file, CHUNK_SIZE));
+		assertEquals(0, FileChunkUtil.getNumberOfChunks(file, H2HConstants.DEFAULT_CHUNK_SIZE));
 	}
 
 	@Test
 	public void testGetNumberOfChunksNull() {
-		assertEquals(0, FileChunkUtil.getNumberOfChunks(null, CHUNK_SIZE));
+		assertEquals(0, FileChunkUtil.getNumberOfChunks(null, H2HConstants.DEFAULT_CHUNK_SIZE));
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	public void testGetNumberOfChunksSizeNegative() throws IOException {
 		File file = new File(parent, randomString());
 		FileUtils.write(file, "test");
-		assertEquals(0, FileChunkUtil.getNumberOfChunks(file, -1 * CHUNK_SIZE));
+		assertEquals(0, FileChunkUtil.getNumberOfChunks(file, -1 * H2HConstants.DEFAULT_CHUNK_SIZE));
 
 		file.deleteOnExit(); // clenaup
 	}
@@ -96,18 +96,18 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 		Random rnd = new Random();
 		for (int i = 0; i < 10; i++) {
 			int genNOC = rnd.nextInt(100) + 1; // avoid 0's
-			File randomFile = FileTestUtil.createFileRandomContent(genNOC, parent, CHUNK_SIZE);
+			File randomFile = FileTestUtil.createFileRandomContent(genNOC, parent, H2HConstants.DEFAULT_CHUNK_SIZE);
 
 			// get chunk 0 ... n-1
-			int chosenChunk = rnd.nextInt(genNOC - 2); // index starts at 0
-			Chunk chunk = FileChunkUtil.getChunk(randomFile, CHUNK_SIZE, chosenChunk, randomString());
-			assertEquals(CHUNK_SIZE, chunk.getSize());
+			int chosenChunk = rnd.nextInt(genNOC - 1); // index starts at 0
+			Chunk chunk = FileChunkUtil.getChunk(randomFile, H2HConstants.DEFAULT_CHUNK_SIZE, chosenChunk, randomString());
+			assertEquals(H2HConstants.DEFAULT_CHUNK_SIZE, chunk.getSize());
 			assertEquals(chosenChunk, chunk.getOrder());
 
 			// get last chunk n
 			int lastChunkIndex = genNOC - 1; // index starts at 0
-			chunk = FileChunkUtil.getChunk(randomFile, CHUNK_SIZE, lastChunkIndex, randomString());
-			assertTrue(CHUNK_SIZE > chunk.getSize());
+			chunk = FileChunkUtil.getChunk(randomFile, H2HConstants.DEFAULT_CHUNK_SIZE, lastChunkIndex, randomString());
+			assertTrue(H2HConstants.DEFAULT_CHUNK_SIZE > chunk.getSize());
 			assertEquals(lastChunkIndex, chunk.getOrder());
 
 			randomFile.deleteOnExit(); // cleanup
@@ -118,7 +118,7 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	public void testGetChunkEmpty() throws IOException {
 		File file = new File(parent, randomString());
 		FileUtils.write(file, "");
-		Chunk chunk = FileChunkUtil.getChunk(file, CHUNK_SIZE, 0, randomString());
+		Chunk chunk = FileChunkUtil.getChunk(file, H2HConstants.DEFAULT_CHUNK_SIZE, 0, randomString());
 		assertEquals(0, chunk.getSize());
 		assertEquals(0, chunk.getOrder());
 
@@ -128,31 +128,31 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	@Test(expected = IOException.class)
 	public void testGetChunkNotExisting() throws IOException {
 		File file = new File(parent, randomString());
-		FileChunkUtil.getChunk(file, CHUNK_SIZE, 0, randomString());
+		FileChunkUtil.getChunk(file, H2HConstants.DEFAULT_CHUNK_SIZE, 0, randomString());
 	}
 
 	@Test(expected = IOException.class)
 	public void testGetChunkNull() throws IOException {
-		FileChunkUtil.getChunk(null, CHUNK_SIZE, 0, randomString());
+		FileChunkUtil.getChunk(null, H2HConstants.DEFAULT_CHUNK_SIZE, 0, randomString());
 	}
 
 	@Test(expected = IOException.class)
 	public void testGetChunkNegativeChunkSize() throws IOException {
 		File file = new File(parent, randomString());
-		FileChunkUtil.getChunk(file, -1 * CHUNK_SIZE, 0, randomString());
+		FileChunkUtil.getChunk(file, -1 * H2HConstants.DEFAULT_CHUNK_SIZE, 0, randomString());
 	}
 
 	@Test(expected = IOException.class)
 	public void testGetChunkNegativeOrderNumber() throws IOException {
 		File file = new File(parent, randomString());
-		FileChunkUtil.getChunk(file, CHUNK_SIZE, -10, randomString());
+		FileChunkUtil.getChunk(file, H2HConstants.DEFAULT_CHUNK_SIZE, -10, randomString());
 	}
 
 	@Test
 	public void testGetChunkTooHighIndex() throws IOException {
 		File file = new File(parent, randomString());
 		FileUtils.write(file, "test");
-		Chunk chunk = FileChunkUtil.getChunk(file, CHUNK_SIZE, 100, randomString());
+		Chunk chunk = FileChunkUtil.getChunk(file, H2HConstants.DEFAULT_CHUNK_SIZE, 100, randomString());
 		assertNull(chunk);
 	}
 }

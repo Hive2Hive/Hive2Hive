@@ -6,21 +6,21 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
 import org.hive2hive.core.exceptions.GetFailedException;
-import org.hive2hive.core.exceptions.IllegalFileLocation;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.hive2hive.processframework.util.H2HWaiter;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -33,7 +33,6 @@ import org.junit.Test;
  */
 public class ShareFolderTest extends H2HJUnitTest {
 
-	private final static int CHUNK_SIZE = 1024;
 	private static final int networkSize = 6;
 	private static ArrayList<NetworkManager> network;
 
@@ -67,21 +66,24 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareFilledFolderTest() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+	public void shareFilledFolderTest() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
 			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File folderToShare = new File(rootA, "sharedFolder");
 		folderToShare.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
 
-		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1, folderToShare, CHUNK_SIZE);
+		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1, folderToShare,
+				H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1);
-		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1, folderToShare, CHUNK_SIZE);
+		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1, folderToShare,
+				H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2);
 		File subfolder = new File(folderToShare, "subfolder1");
 		subfolder.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subfolder);
-		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder, CHUNK_SIZE);
+		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder,
+				H2HConstants.DEFAULT_CHUNK_SIZE);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3);
 
 		// share the filled folder
@@ -114,7 +116,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareEmptyFolder() throws IOException, IllegalFileLocation, NoSessionException, GetFailedException,
+	public void shareEmptyFolder() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
 			InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File sharedFolderAtA = new File(rootA, randomString());

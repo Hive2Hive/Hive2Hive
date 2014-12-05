@@ -18,8 +18,11 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.processframework.abstracts.ProcessComponent;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.interfaces.IProcessComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The base class of all {@link UserProfileTask}s.</br>
@@ -44,6 +47,8 @@ import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
  */
 public abstract class UserProfileTask extends BaseNetworkContent {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserProfileTask.class);
+
 	private static final long serialVersionUID = -773794512479641000L;
 
 	protected final String sender;
@@ -54,7 +59,7 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 
 	public UserProfileTask(String sender) {
 		this.sender = sender;
-		this.protectionKey = EncryptionUtil.generateRSAKeyPair();
+		this.protectionKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 		this.id = UUID.randomUUID().toString();
 
 		// get the current time
@@ -108,8 +113,14 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 			InvalidProcessStateException, NoSessionException {
 		Set<String> onlyMe = new HashSet<String>(1);
 		onlyMe.add(networkManager.getUserId());
-		ProcessComponent notificationProcess = ProcessFactory.instance().createNotificationProcess(messageFactory, onlyMe,
-				networkManager);
-		notificationProcess.start();
+
+		IProcessComponent<Void> notificationProcess = ProcessFactory.instance().createNotificationProcess(messageFactory,
+				onlyMe, networkManager);
+
+		try {
+			notificationProcess.execute();
+		} catch (ProcessExecutionException ex) {
+			logger.error("Notification process execution failed.", ex);
+		}
 	}
 }

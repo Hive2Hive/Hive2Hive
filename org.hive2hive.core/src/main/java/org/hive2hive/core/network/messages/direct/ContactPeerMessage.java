@@ -26,8 +26,7 @@ public class ContactPeerMessage extends DirectRequestMessage {
 
 	@Override
 	public void run() {
-		logger.debug("Sending a contact peer response message. Requesting address = '{}'.",
-				getSenderAddress());
+		logger.debug("Sending a contact peer response message. Requesting address = '{}'.", getSenderAddress());
 		// send a response with the evidentContent -> proves this peer could decrypt and read the message
 		sendDirectResponse(createResponse(evidenceContent));
 	}

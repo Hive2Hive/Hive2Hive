@@ -1,7 +1,9 @@
 package org.hive2hive.core.processes.share;
 
 import java.io.File;
+import java.security.KeyPair;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -11,6 +13,8 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.processes.common.base.BaseModifyUserProfileStep;
 import org.hive2hive.core.processes.context.ShareProcessContext;
+import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +32,21 @@ public class UpdateUserProfileStep extends BaseModifyUserProfileStep {
 	private final File root;
 	private final String userId;
 
+	private KeyPair newProtectionKeys;
+
 	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
 		super(session.getProfileManager());
 		this.context = context;
 		this.root = session.getRootFile();
 		this.userId = session.getUserId();
+	}
+
+	@Override
+	protected void beforeModify() throws ProcessExecutionException {
+		// generate the new key pair only once
+		newProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		// make it available for future steps where we change protection keys
+		context.provideNewProtectionKeys(newProtectionKeys);
 	}
 
 	@Override
@@ -64,7 +78,7 @@ public class UpdateUserProfileStep extends BaseModifyUserProfileStep {
 			folderIndex.addUserPermissions(context.getUserPermission());
 		} else {
 			// make the node shared with the new protection keys
-			folderIndex.share(context.consumeNewProtectionKeys());
+			folderIndex.share(newProtectionKeys);
 			// add read/write user permission of friend
 			folderIndex.addUserPermissions(context.getUserPermission());
 			// add write user permission of user itself

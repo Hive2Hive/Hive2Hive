@@ -25,6 +25,7 @@ import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.IH2HEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +44,12 @@ public class DataManager {
 
 	private final NetworkManager networkManager;
 	private final IH2HEncryption encryptionTool;
+	private final IH2HSerialize serializer;
 
-	public DataManager(NetworkManager networkManager, IH2HEncryption encryptionTool) {
+	public DataManager(NetworkManager networkManager, IH2HEncryption encryptionTool, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
 		this.encryptionTool = encryptionTool;
+		this.serializer = serializer;
 	}
 
 	/**
@@ -60,6 +63,10 @@ public class DataManager {
 
 	public IH2HEncryption getEncryption() {
 		return encryptionTool;
+	}
+
+	public IH2HSerialize getSerializer() {
+		return serializer;
 	}
 
 	public boolean changeProtectionKey(IParameters parameters) {
@@ -76,9 +83,7 @@ public class DataManager {
 	public FuturePut changeProtectionKeyUnblocked(IParameters parameters) {
 		logger.debug("Change content protection key. {}", parameters.toString());
 		// create dummy object to change the protection key
-		Data data = new Data().protectEntry();
-		// set new content protection keys
-		data.publicKey(parameters.getNewProtectionKeys().getPublic());
+		Data data = new Data().protectEntry(parameters.getNewProtectionKeys());
 		if (parameters.getTTL() != -1) {
 			data.ttlSeconds(parameters.getTTL());
 		}
@@ -148,7 +153,7 @@ public class DataManager {
 
 			// check if data to put is content protected
 			if (parameters.getProtectionKeys() != null) {
-				data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+				data.protectEntry(parameters.getProtectionKeys());
 			}
 
 			// cache data
@@ -173,7 +178,7 @@ public class DataManager {
 
 		// check if data to put is content protected
 		if (parameters.getProtectionKeys() != null) {
-			data.protectEntry().publicKey(parameters.getProtectionKeys().getPublic());
+			data.protectEntry(parameters.getProtectionKeys());
 		}
 
 		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())

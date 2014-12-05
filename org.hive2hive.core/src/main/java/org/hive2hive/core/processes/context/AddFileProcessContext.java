@@ -25,12 +25,13 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	private final File file;
 	private final H2HSession session;
+	private final IFileConfiguration fileConfiguration;
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
-	private KeyPair chunkEncryptionKeys;
-	private KeyPair chunkProtectionKeys;
-	private KeyPair fileKeys;
+	private KeyPair chunkEncryptionKeys; // generated
+	private KeyPair chunkProtectionKeys; // from parent FolderIndex
+	private KeyPair fileKeys; // File Encryption Key Pair
 	private KeyPair metaFileProtectionKeys;
 	private boolean largeFile;
 	private BaseMetaFile metaFile;
@@ -38,9 +39,10 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 	private Set<String> usersToNotify;
 	private AddNotificationMessageFactory messageFactory;
 
-	public AddFileProcessContext(File file, H2HSession session) {
+	public AddFileProcessContext(File file, H2HSession session, IFileConfiguration fileConfiguration) {
 		this.file = file;
 		this.session = session;
+		this.fileConfiguration = fileConfiguration;
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 
 	@Override
 	public IFileConfiguration consumeFileConfiguration() {
-		return session.getFileConfiguration();
+		return fileConfiguration;
 	}
 
 	@Override

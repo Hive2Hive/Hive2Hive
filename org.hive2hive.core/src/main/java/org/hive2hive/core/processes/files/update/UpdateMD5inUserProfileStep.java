@@ -40,7 +40,7 @@ public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
 		try {
 			newMD5 = HashUtil.hash(context.consumeFile());
 		} catch (IOException e) {
-			throw new ProcessExecutionException("The new MD5 hash for the user profile could not be generated.", e);
+			throw new ProcessExecutionException(this, "The new MD5 hash for the user profile could not be generated.");
 		}
 	}
 

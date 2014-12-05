@@ -21,7 +21,6 @@
   	<modules>
 		<module>org.hive2hive.core</module>
 		<module>org.hive2hive.client</module>
-		<module>org.hive2hive.processframework</module>
 	</modules>
 	
 	<dependencies>
@@ -45,8 +44,8 @@
 		</dependency>
 	</dependencies>
 	
-	<!-- platform independent encoding -->
 	<properties>
+		<!-- platform independent encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

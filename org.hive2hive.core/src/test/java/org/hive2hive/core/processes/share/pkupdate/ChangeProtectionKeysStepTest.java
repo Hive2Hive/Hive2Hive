@@ -29,9 +29,9 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.processframework.RollbackReason;
+import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
-import org.hive2hive.processframework.util.TestExecutionUtil;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -59,7 +59,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepSuccessAndRollbackWithChunk() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException,
+			ProcessRollbackException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 		// where the data gets stored
@@ -67,8 +68,8 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 		// generate necessary keys
 		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair();
-		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		// generate a fake chunk
 		Chunk chunk = new Chunk(proxy.getNodeId(), randomString().getBytes(), 0);
@@ -99,7 +100,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
-		step.cancel(new RollbackReason("Testing rollback."));
+		step.rollback();
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)
@@ -109,15 +110,16 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	@Test
 	public void testStepSuccessAndRollbackWithMetaFile() throws InterruptedException, NoPeerConnectionException,
 			DataLengthException, InvalidKeyException, IllegalStateException, InvalidCipherTextException,
-			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException {
+			IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, InvalidProcessStateException,
+			ProcessRollbackException {
 		// where the process runs
 		NetworkManager getter = network.get(0);
 
 		// generate necessary keys
 		KeyPair chunkEncryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
 		KeyPair metaFileEncryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair();
-		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair();
+		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		// generate a fake meta file
 		List<MetaChunk> metaChunks1 = new ArrayList<MetaChunk>();
@@ -160,7 +162,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 				.awaitUninterruptibly().data().publicKey());
 
 		// manually trigger roll back
-		step.cancel(new RollbackReason("Testing rollback."));
+		step.rollback();
 
 		// verify if content protection keys have changed to old ones
 		Assert.assertEquals(protectionKeysOld.getPublic(), getter.getDataManager().getUnblocked(parameters)

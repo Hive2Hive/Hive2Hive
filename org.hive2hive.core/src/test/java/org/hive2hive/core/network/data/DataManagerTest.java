@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -41,8 +42,8 @@ public class DataManagerTest extends H2HJUnitTest {
 	@Test
 	public void testPutGetRemove() throws Exception {
 		String data = randomString();
-		Parameters parameters = new Parameters().setLocationKey(randomString())
-				.setContentKey(randomString()).setNetworkContent(new H2HTestData(data));
+		Parameters parameters = new Parameters().setLocationKey(randomString()).setContentKey(randomString())
+				.setNetworkContent(new H2HTestData(data));
 
 		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters));
 
@@ -58,6 +59,7 @@ public class DataManagerTest extends H2HJUnitTest {
 	public void testPutGetRemoveOneLocationKeyMultipleContentKeys() throws Exception {
 		String locationKey = randomString();
 
+		// put three data objects
 		String data1 = randomString();
 		Parameters parameters1 = new Parameters().setLocationKey(locationKey).setContentKey(randomString())
 				.setNetworkContent(new H2HTestData(data1));
@@ -73,6 +75,7 @@ public class DataManagerTest extends H2HJUnitTest {
 				.setNetworkContent(new H2HTestData(data3));
 		Assert.assertEquals(H2HPutStatus.OK, NetworkTestUtil.getRandomNode(network).getDataManager().put(parameters3));
 
+		// get all three data objects
 		Assert.assertEquals(data1,
 				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1)).getTestString());
 		Assert.assertEquals(data2,
@@ -80,22 +83,23 @@ public class DataManagerTest extends H2HJUnitTest {
 		Assert.assertEquals(data3,
 				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3)).getTestString());
 
+		// remove first object
 		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters1));
-
 		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1));
 		Assert.assertEquals(data2,
 				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2)).getTestString());
 		Assert.assertEquals(data3,
 				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3)).getTestString());
 
+		// remove 2nd object
 		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters2));
 		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1));
 		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2));
 		Assert.assertEquals(data3,
 				((H2HTestData) NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3)).getTestString());
 
+		// remove 3rd object
 		Assert.assertTrue(NetworkTestUtil.getRandomNode(network).getDataManager().remove(parameters3));
-
 		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters1));
 		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters2));
 		Assert.assertNull(NetworkTestUtil.getRandomNode(network).getDataManager().get(parameters3));
@@ -104,16 +108,15 @@ public class DataManagerTest extends H2HJUnitTest {
 	@Test
 	public void testChangeProtectionKeySingleVersionKey() throws NoPeerConnectionException, IOException,
 			InvalidKeyException, SignatureException {
-		KeyPair keypairOld = EncryptionUtil.generateRSAKeyPair();
-		KeyPair keypairNew = EncryptionUtil.generateRSAKeyPair();
+		KeyPair keypairOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair keypairNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
 		data.setBasedOnKey(Number160.ZERO);
-		Parameters parameters = new Parameters().setLocationKey(randomString())
-				.setContentKey(randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data)
-				.setProtectionKeys(keypairOld).setNewProtectionKeys(keypairNew).setTTL(data.getTimeToLive())
-				.setHashFlag(true);
+		Parameters parameters = new Parameters().setLocationKey(randomString()).setContentKey(randomString())
+				.setVersionKey(data.getVersionKey()).setNetworkContent(data).setProtectionKeys(keypairOld)
+				.setNewProtectionKeys(keypairNew).setTTL(data.getTimeToLive()).setHashFlag(true);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
