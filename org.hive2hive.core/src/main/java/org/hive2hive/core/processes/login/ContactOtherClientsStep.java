@@ -76,7 +76,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 			}
 		}
 		// add self
-		PeerAddress ownAddress = networkManager.getConnection().getPeerDHT().peerAddress();
+		PeerAddress ownAddress = networkManager.getConnection().getPeer().peerAddress();
 		logger.debug("Adding own peeraddress to locations file: {}", ownAddress);
 		locations.addPeerAddress(ownAddress);
 
@@ -96,7 +96,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 		waitForResponses = new CountDownLatch(peerAddresses.size());
 		for (PeerAddress address : peerAddresses) {
 			// contact all other clients (exclude self)
-			if (!address.equals(networkManager.getConnection().getPeerDHT().peerAddress())) {
+			if (!address.equals(networkManager.getConnection().getPeer().peerAddress())) {
 				logger.debug("Sending contact message to check for aliveness to {}", address);
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);

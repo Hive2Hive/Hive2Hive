@@ -75,7 +75,7 @@ public final class MessageManager implements IMessageManager {
 		}
 
 		// send message to the peer which is responsible for the given key
-		FutureSend futureSend = networkManager.getConnection().getPeerDHT()
+		FutureSend futureSend = networkManager.getConnection().getPeer()
 				.send(Number160.createHash(message.getTargetKey())).object(encryptedMessage)
 				.requestP2PConfiguration(createSendingConfiguration()).start();
 
@@ -116,7 +116,7 @@ public final class MessageManager implements IMessageManager {
 		}
 
 		// send message directly to the peer with the given peer address
-		FutureDirect futureDirect = networkManager.getConnection().getPeerDHT().peer()
+		FutureDirect futureDirect = networkManager.getConnection().getPeer().peer()
 				.sendDirect(message.getTargetAddress()).object(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
 		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this);
@@ -157,7 +157,7 @@ public final class MessageManager implements IMessageManager {
 	}
 
 	private void prepareMessage(BaseMessage message) {
-		message.setSenderAddress(networkManager.getConnection().getPeerDHT().peerAddress());
+		message.setSenderAddress(networkManager.getConnection().getPeer().peerAddress());
 		configureCallbackHandlerIfNeeded(message);
 		setSenderPublicKeyIfNeeded(message);
 	}

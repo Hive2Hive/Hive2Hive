@@ -102,7 +102,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 
 			Set<String> users = context.consumeIndex().getCalculatedUserList();
 			DownloadTaskDirect task = new DownloadTaskDirect(metaFileLarge.getMetaChunks(), destination, metaFile.getId(),
-					session.getUserId(), networkManager.getConnection().getPeerDHT().peerAddress(), users,
+					session.getUserId(), networkManager.getConnection().getPeer().peerAddress(), users,
 					networkManager.getEventBus(), session.getKeyManager());
 			session.getDownloadManager().submit(task);
 

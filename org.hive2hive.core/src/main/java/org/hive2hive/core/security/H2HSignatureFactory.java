@@ -13,6 +13,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.message.SignatureCodec;
@@ -100,6 +101,8 @@ public class H2HSignatureFactory implements SignatureFactory {
 		}
 
 		byte[] signatureData = signature.sign();
+		logger.debug("Sign: Data: {}", buf);
+		logger.debug("Sign: Signature: {}", Arrays.toString(signatureData));
 
 		SignatureCodec decodedSignature = new H2HSignatureCodec();
 		decodedSignature.decode(signatureData);
@@ -117,6 +120,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 			ByteBuffer buffer = byteBuffers[i];
 			signature.update(buffer);
 		}
+
 		byte[] signatureReceived = signatureEncoded.encode();
 		return signature.verify(signatureReceived);
 	}
@@ -130,6 +134,7 @@ public class H2HSignatureFactory implements SignatureFactory {
 		for (int i = 0; i < arrayLength; i++) {
 			signature.update(byteBuffers[i]);
 		}
+		logger.debug("Update: Data: {}", Arrays.toString(byteBuffers));
 		return signature;
 	}
 

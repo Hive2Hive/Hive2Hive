@@ -70,7 +70,7 @@ public class NetworkTestUtil {
 			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
 					FileConfiguration.createDefault());
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
-					initial.getConnection().getPeerDHT().peer());
+					initial.getConnection().getPeer().peer());
 			node.connect(otherNetConfig);
 			nodes.add(node);
 		}

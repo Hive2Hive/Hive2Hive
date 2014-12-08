@@ -43,7 +43,7 @@ public class RemoveOwnLocationsStep extends ProcessStep<Void> {
 			}
 
 			// remove peer
-			locations.removePeerAddress(networkManager.getConnection().getPeerDHT().peerAddress());
+			locations.removePeerAddress(networkManager.getConnection().getPeer().peerAddress());
 
 			try {
 				locationsManager.put(locations, keyManager.getDefaultProtectionKeyPair());

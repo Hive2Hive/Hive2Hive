@@ -33,7 +33,7 @@ public class NetworkManager {
 		this.eventBus = eventBus;
 
 		connection = new Connection(this, encryption, serializer);
-		dataManager = new DataManager(connection.getPeerDHT(), encryption, serializer);
+		dataManager = new DataManager(connection, encryption, serializer);
 		messageManager = new MessageManager(this, encryption, serializer);
 		downloadManager = new DownloadManager(dataManager, messageManager, fileConfig);
 	}

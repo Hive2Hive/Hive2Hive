@@ -146,7 +146,7 @@ public class Parameters implements IParameters {
 
 	@Override
 	public KeyPair getProtectionKeys() {
-		return protectionKeys;
+		return null; // protectionKeys;
 	}
 
 	@Override

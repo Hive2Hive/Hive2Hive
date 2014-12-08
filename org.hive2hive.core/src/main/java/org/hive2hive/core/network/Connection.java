@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Seppi, Nico
  */
-public class Connection {
+public class Connection implements IPeerHolder {
 
 	private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 	private static final int MAX_PORT = 65535;
@@ -223,7 +223,8 @@ public class Connection {
 		return peerDHT != null && !peerDHT.peer().isShutdown();
 	}
 
-	public PeerDHT getPeerDHT() {
+	@Override
+	public PeerDHT getPeer() {
 		return peerDHT;
 	}
 

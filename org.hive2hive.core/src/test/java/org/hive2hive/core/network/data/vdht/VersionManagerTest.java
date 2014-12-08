@@ -182,7 +182,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 							version0B.getVersionKey()), new Data(version0B).addBasedOn(Number160.ZERO));
 
 			for (int i = 0; i < networkSize; i++) {
-				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeerDHT().storageLayer();
+				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer();
 				storage.setGetMode(StorageMemoryGetMode.MANIPULATED);
 				storage.setManipulatedMap(manipulatedMap);
 			}
@@ -194,7 +194,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 			versionManager.get();
 		} finally {
 			for (int i = 0; i < networkSize; i++) {
-				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeerDHT().storageLayer();
+				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer();
 				storage.setGetMode(StorageMemoryGetMode.STANDARD);
 				storage.setManipulatedMap(null);
 			}

@@ -52,7 +52,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		String contentKey = randomString();
 		// create a message with target node B
 		TestDirectMessageWithReply message = new TestDirectMessageWithReply(
-				nodeB.getConnection().getPeerDHT().peerAddress(), contentKey);
+				nodeB.getConnection().getPeer().peerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);
@@ -89,7 +89,7 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		String contentKey = randomString();
 		// create a message with target node B
 		TestDirectMessageWithReplyMaxSending message = new TestDirectMessageWithReplyMaxSending(nodeB.getConnection()
-				.getPeerDHT().peerAddress(), contentKey);
+				.getPeer().peerAddress(), contentKey);
 		// create and add a callback handler
 		TestCallBackHandlerMaxSendig callBackHandler = message.new TestCallBackHandlerMaxSendig(nodeA);
 		message.setCallBackHandler(callBackHandler);

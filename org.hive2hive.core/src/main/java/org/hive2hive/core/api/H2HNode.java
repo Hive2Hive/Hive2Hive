@@ -106,6 +106,6 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public PeerDHT getPeer() {
-		return networkManager.getConnection().getPeerDHT();
+		return networkManager.getConnection().getPeer();
 	}
 }
