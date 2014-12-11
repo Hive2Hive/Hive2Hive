@@ -154,7 +154,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 
 			// TODO testing only
 			new PeerBuilderNAT(node.getPeer().peer()).gcmAuthenticationKey("AIzaSyC6j5SQYXCMM_ofHa7VLshnCgcnDptIsJY")
-					.bufferConfiguration(new MessageBufferConfiguration().bufferAgeLimit(10 * 1000)).start();
+					.bufferConfiguration(new MessageBufferConfiguration().bufferAgeLimit(20 * 1000)).start();
 
 			print("Network connection successfully established.");
 			exit();
