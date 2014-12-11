@@ -12,6 +12,7 @@ import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
+import net.tomp2p.peers.SlowPeerFilter;
 import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
@@ -44,12 +45,14 @@ public class DataManager {
 
 	private final IH2HEncryption encryptionTool;
 	private final IH2HSerialize serializer;
-	private IPeerHolder peerHolder;
+	private final IPeerHolder peerHolder;
+	private final SlowPeerFilter slowPeerFilter;
 
 	public DataManager(IPeerHolder peerHolder, IH2HEncryption encryptionTool, IH2HSerialize serializer) {
 		this.peerHolder = peerHolder;
 		this.encryptionTool = encryptionTool;
 		this.serializer = serializer;
+		this.slowPeerFilter = new SlowPeerFilter();
 	}
 
 	public IH2HEncryption getEncryption() {
@@ -105,7 +108,7 @@ public class DataManager {
 		// change the protection key through a put meta
 		return getPeer().put(parameters.getLKey()).domainKey(parameters.getDKey()).putMeta()
 				.data(parameters.getCKey(), data).versionKey(parameters.getVersionKey())
-				.keyPair(parameters.getProtectionKeys()).start();
+				.keyPair(parameters.getProtectionKeys()).addPeerFilter(slowPeerFilter).start();
 	}
 
 	public H2HPutStatus put(IParameters parameters) {
@@ -155,7 +158,8 @@ public class DataManager {
 			parameters.setData(data);
 
 			return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-					.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
+					.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys())
+					.addPeerFilter(slowPeerFilter).start();
 		} catch (IOException e) {
 			logger.error("Put failed. {}.", parameters.toString(), e);
 			return null;
@@ -177,7 +181,8 @@ public class DataManager {
 		}
 
 		return getPeer().put(parameters.getLKey()).data(parameters.getCKey(), data).domainKey(parameters.getDKey())
-				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).putConfirm().start();
+				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys())
+				.addPeerFilter(slowPeerFilter).putConfirm().start();
 	}
 
 	public BaseNetworkContent get(IParameters parameters) {
@@ -199,7 +204,7 @@ public class DataManager {
 		FutureGet futureGet = getPeer().get(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.ZERO, Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.MAX_VALUE, Number160.MAX_VALUE))
-				.ascending().returnNr(1).start();
+				.ascending().returnNr(1).addPeerFilter(slowPeerFilter).start();
 		FutureGetListener listener = new FutureGetListener(parameters);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
@@ -210,19 +215,19 @@ public class DataManager {
 		return getPeer().get(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.descending().returnNr(1).fastGet(false).start();
+				.descending().returnNr(1).fastGet(false).addPeerFilter(slowPeerFilter).start();
 	}
 
 	public FutureGet getVersionUnblocked(IParameters parameters) {
 		logger.debug("Get version. {}", parameters.toString());
 		return getPeer().get(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
-				.versionKey(parameters.getVersionKey()).start();
+				.versionKey(parameters.getVersionKey()).addPeerFilter(slowPeerFilter).start();
 	}
 
 	public FutureGet getLatestUnblocked(IParameters parameters) {
 		logger.debug("Get latest version. {}", parameters.toString());
 		return getPeer().get(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
-				.getLatest().withDigest().fastGet(false).start();
+				.getLatest().withDigest().fastGet(false).addPeerFilter(slowPeerFilter).start();
 	}
 
 	public boolean remove(IParameters parameters) {
@@ -253,13 +258,14 @@ public class DataManager {
 		return getPeer().remove(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.keyPair(parameters.getProtectionKeys()).start();
+				.keyPair(parameters.getProtectionKeys()).addPeerFilter(slowPeerFilter).start();
 	}
 
 	public FutureRemove removeVersionUnblocked(IParameters parameters) {
 		logger.debug("Remove version. {}", parameters.toString());
 		return getPeer().remove(parameters.getLKey()).domainKey(parameters.getDKey()).contentKey(parameters.getCKey())
-				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys()).start();
+				.versionKey(parameters.getVersionKey()).keyPair(parameters.getProtectionKeys())
+				.addPeerFilter(slowPeerFilter).start();
 	}
 
 	public NavigableMap<Number640, Collection<Number160>> getDigestLatest(IParameters parameters) {
@@ -274,7 +280,7 @@ public class DataManager {
 		return getPeer().digest(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.descending().returnNr(1).fastGet(false).start();
+				.descending().returnNr(1).fastGet(false).addPeerFilter(slowPeerFilter).start();
 	}
 
 	public FutureDigest getDigestUnblocked(IParameters parameters) {
@@ -282,7 +288,7 @@ public class DataManager {
 		return getPeer().digest(parameters.getLKey())
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(), Number160.MAX_VALUE))
-				.fastGet(false).start();
+				.fastGet(false).addPeerFilter(slowPeerFilter).start();
 
 	}
 }
