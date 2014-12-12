@@ -23,6 +23,12 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>net.tomp2p</groupId>
+			<artifactId>tomp2p-nat</artifactId>
+			<version>5.0-Beta1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.1</version>
@@ -32,6 +38,12 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<version>1.1.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe</groupId>
+			<artifactId>config</artifactId>
+			<version>1.2.1</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -45,6 +57,15 @@
 		</dependency>
 	</dependencies>
 
+	<repositories>
+		<!-- TomP2P Repository -->
+		<repository>
+			<id>tomp2p.net</id>
+			<name>TomP2P Repository</name>
+			<url>http://tomp2p.net/dev/mvn/</url>
+		</repository>
+	</repositories>
+	
 	<build>
 		<plugins>
 			<plugin>

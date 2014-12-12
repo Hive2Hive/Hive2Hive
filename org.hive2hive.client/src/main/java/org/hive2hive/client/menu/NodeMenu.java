@@ -4,6 +4,11 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import net.tomp2p.nat.PeerBuilderNAT;
+import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.relay.android.MessageBufferConfiguration;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.H2HConsoleMenu;
@@ -14,8 +19,13 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.H2HNode;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
+import org.hive2hive.core.security.FSTSerializer;
+import org.hive2hive.core.security.H2HDefaultEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
+import org.hive2hive.core.security.JavaSerializer;
 
 /**
  * The network configuration menu of the {@link ConsoleClient}.
@@ -136,14 +146,42 @@ public final class NodeMenu extends H2HConsoleMenu {
 	}
 
 	private void buildNode() {
-		node = H2HNode.createNode(FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions,
-				chunkSize));
+		IFileConfiguration fileConfig = FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions,
+				chunkSize);
+		IH2HSerialize serializer;
+		if ("java".equalsIgnoreCase(config.getString("Serializer"))) {
+			serializer = new JavaSerializer();
+		} else {
+			serializer = new FSTSerializer();
+		}
+
+		node = H2HNode.createNode(fileConfig, new H2HDefaultEncryption(serializer), serializer);
 		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 
 	private void connectNode(INetworkConfiguration networkConfig) {
 		if (node.connect(networkConfig)) {
 			print("Network connection successfully established.");
+
+			String address = config.getString("InetAddress");
+			if (!"auto".equalsIgnoreCase(address)) {
+				try {
+					InetAddress inetAddress = InetAddress.getByName(address);
+					print("Binding to address " + inetAddress);
+					PeerAddress peerAddress = node.getPeer().peerBean().serverPeerAddress().changeAddress(inetAddress);
+					node.getPeer().peerBean().serverPeerAddress(peerAddress);
+				} catch (UnknownHostException e) {
+					print("Cannot resolve address " + address);
+				}
+			}
+
+			if (config.getBoolean("Relay.enabled")) {
+				print("Starting relay functionality");
+				String authenticationKey = config.getString("Relay.GCM.api-key");
+				long bufferAge = config.getDuration("Relay.GCM.buffer-age-limit", TimeUnit.MILLISECONDS);
+				new PeerBuilderNAT(node.getPeer().peer()).gcmAuthenticationKey(authenticationKey)
+						.bufferConfiguration(new MessageBufferConfiguration().bufferAgeLimit(bufferAge)).start();
+			}
 			exit();
 		} else {
 			print("Network connection could not be established.");
