@@ -87,6 +87,7 @@
 					</archive>
 					<excludes>
 						<exclude>client.conf</exclude>
+						<exclude>logback.xml</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

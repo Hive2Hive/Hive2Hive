@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="true">
-
+	
 	<!-- Appenders -->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -9,8 +9,7 @@
 	</appender>
 	
 	<!-- Loggers -->
-	<logger name="net.tomp2p" level="INFO" /> <!-- mute tomp2p library -->
-	<logger name="net.tomp2p.relay" level="DEBUG" />
+	<logger name="net.tomp2p" level="ERROR" /> <!-- mute tomp2p library -->
 	<logger name="io.netty" level="OFF" /> <!-- mute netty library -->
 	
 	<root level="DEBUG">

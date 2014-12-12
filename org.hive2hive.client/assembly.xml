@@ -26,9 +26,13 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<!-- adds config file to the root directory of zip package -->
+			<!-- adds config files to the root directory of zip package -->
 			<directory>src/main/resources</directory>
 			<outputDirectory></outputDirectory>
+			<includes>
+				<include>client.conf</include>
+				<include>logback.xml</include>
+			</includes>
 		</fileSet>
 	</fileSets>
 </assembly>
