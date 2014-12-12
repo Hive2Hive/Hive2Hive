@@ -65,7 +65,7 @@
 			<url>http://tomp2p.net/dev/mvn/</url>
 		</repository>
 	</repositories>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -81,7 +81,13 @@
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
+						<manifestEntries>
+							<Class-Path>./</Class-Path>
+						</manifestEntries>
 					</archive>
+					<excludes>
+						<exclude>client.conf</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 

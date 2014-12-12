@@ -17,13 +17,18 @@
 	</dependencySets>
 
 	<fileSets>
-		<!-- adds jar package to the root directory of zip package -->
 		<fileSet>
+			<!-- adds jar package to the root directory of zip package -->
 			<directory>${project.build.directory}</directory>
-			<outputDirectory></outputDirectory>
+			<outputDirectory/>
 			<includes>
 				<include>*.jar</include>
 			</includes>
+		</fileSet>
+		<fileSet>
+			<!-- adds config file to the root directory of zip package -->
+			<directory>src/main/resources</directory>
+			<outputDirectory></outputDirectory>
 		</fileSet>
 	</fileSets>
 </assembly>
