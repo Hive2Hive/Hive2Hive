@@ -1,13 +1,15 @@
-# IntelliJ#
-.idea/
-*.iml
-*.iws
+# Eclipse #
 
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
+/bin
 /target
+.project
+.classpath
+.settings
+
+# IntelliJ IDEA #
+.idea
+*.iml
+
+# Mac #
+
+.DS_Store

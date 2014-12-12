@@ -147,10 +147,11 @@ public abstract class ConsoleMenu {
 	}
 
 	public static void printError(Throwable error) {
-		if (error.getMessage() == null) {
+		if (error.getMessage().isEmpty()) {
+			printError("An exception has been thrown: ");
 			error.printStackTrace();
 		} else {
-			printError("An exception has been thrown: " + error.getMessage());
+			printError(String.format("An exception has been thrown: %s", error.getMessage()));
 		}
 	}
 

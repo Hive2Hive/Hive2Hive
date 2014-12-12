@@ -1,4 +1,16 @@
+# Eclipse #
+
 /bin
 /target
 /logs
-.settings/org.sonar.ide.eclipse.core.prefs
+.project
+.classpath
+.settings
+
+# IntelliJ IDEA #
+.idea
+*.iml
+
+# Mac #
+
+.DS_Store
