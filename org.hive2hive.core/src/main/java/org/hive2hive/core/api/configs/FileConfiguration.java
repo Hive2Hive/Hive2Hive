@@ -19,8 +19,7 @@ public class FileConfiguration implements IFileConfiguration {
 	private final BigInteger maxSizeOfAllVersions;
 	private final int chunkSize;
 
-	private FileConfiguration(BigInteger maxFileSize, int maxNumOfVersions, BigInteger maxSizeAllVersions,
-			int chunkSize) {
+	private FileConfiguration(BigInteger maxFileSize, int maxNumOfVersions, BigInteger maxSizeAllVersions, int chunkSize) {
 		assert maxFileSize.signum() == 1;
 		assert maxNumOfVersions > 0;
 		assert maxSizeAllVersions.signum() == 1;
@@ -35,12 +34,11 @@ public class FileConfiguration implements IFileConfiguration {
 	/**
 	 * Creates a default file configuration
 	 * 
-	 * @return
+	 * @return the file configuration
 	 */
 	public static IFileConfiguration createDefault() {
-		return new FileConfiguration(H2HConstants.DEFAULT_MAX_FILE_SIZE,
-				H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS, H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS,
-				H2HConstants.DEFAULT_CHUNK_SIZE);
+		return new FileConfiguration(H2HConstants.DEFAULT_MAX_FILE_SIZE, H2HConstants.DEFAULT_MAX_NUM_OF_VERSIONS,
+				H2HConstants.DEFAULT_MAX_SIZE_OF_ALL_VERSIONS, H2HConstants.DEFAULT_CHUNK_SIZE);
 	}
 
 	/**

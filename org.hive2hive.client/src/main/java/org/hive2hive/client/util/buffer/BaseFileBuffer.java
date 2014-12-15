@@ -55,7 +55,7 @@ public abstract class BaseFileBuffer implements IFileBuffer {
 	/**
 	 * Process the files in the buffer after the buffering time exceeded.
 	 * 
-	 * @param bufferedFiles
+	 * @param buffer
 	 */
 	protected abstract void processBuffer(IFileBufferHolder buffer);
 

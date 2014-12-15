@@ -38,11 +38,12 @@ public class H2HNode implements IH2HNode {
 	}
 
 	/**
-	 * Create a Hive2Hive node instance. Before the node can be used, a {@link IH2HNode#connect()} must be
+	 * Create a Hive2Hive node instance. Before the node can be used, a
+	 * {@link IH2HNode#connect(INetworkConfiguration)} must be
 	 * called.
 	 * 
 	 * @param fileConfiguration the file configuration
-	 * @return
+	 * @return the Hive2Hive node
 	 */
 	public static IH2HNode createNode(IFileConfiguration fileConfiguration) {
 		FSTSerializer serializer = new FSTSerializer();
@@ -56,7 +57,7 @@ public class H2HNode implements IH2HNode {
 	 * @param fileConfiguration the file configuration
 	 * @param encryption and decryption implementation
 	 * @param serializer the serialization implementation
-	 * @return
+	 * @return the Hive2Hive node
 	 */
 	public static IH2HNode createNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption,
 			IH2HSerialize serializer) {
