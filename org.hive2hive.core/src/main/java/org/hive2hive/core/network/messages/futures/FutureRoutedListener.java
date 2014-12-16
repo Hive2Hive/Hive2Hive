@@ -3,10 +3,12 @@ package org.hive2hive.core.network.messages.futures;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.BaseFutureAdapter;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
@@ -66,9 +68,14 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	 */
 	public boolean await() {
 		try {
-			latch.await();
+			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS * H2HConstants.MAX_MESSAGE_SENDING, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Could not wait until the message is sent successfully.");
+		}
+
+		if (state == null) {
+			// timeout ocurred
+			return false;
 		}
 
 		switch (state) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
@@ -59,7 +60,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 	 */
 	public H2HPutStatus await() {
 		try {
-			latch.await();
+			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS * H2HConstants.PUT_RETRIES, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Could not wait until put has finished.", e);
 		}

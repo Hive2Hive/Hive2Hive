@@ -55,13 +55,12 @@ public interface H2HConstants {
 	public static final int CONFIRM_RETRIES = 3;
 	// number of allowed tries to retry a remove
 	public static final int REMOVE_RETRIES = 3;
-	// number of allowed tries to retry a get
-	public static final int GET_RETRIES = 3;
 
+	// maximum wait time until any network operation should be answered by the other peer (for each retry).
+	// This just serves as a fallback against infinite blocking when all other mechanisms fail.
+	public static final int AWAIT_NETWORK_OPERATION_MS = 60000;
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final int CONTACT_PEERS_AWAIT_MS = 10000;
-	// maximum wait time until a request should be answered by the other peer
-	public static final int AWAIT_MESSAGE_RESPONSE_MS = 20000;
 
 	// maximum delay to wait until a peer candidate replies whether a direct download is possible or not
 	public static final int DIRECT_DOWNLOAD_AWAIT_MS = 10000;
@@ -75,7 +74,7 @@ public interface H2HConstants {
 
 	// number of threads that netty / tomp2p are allowed to have. Too few threads can lead to slow response
 	// times, too many threads can exceed the available memory
-	public static final int NUM_OF_NETWORK_THREADS = 32;
+	public static final int NUM_OF_NETWORK_THREADS = 16;
 
 	/**
 	 * Encryption Key Management

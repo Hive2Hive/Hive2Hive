@@ -1,10 +1,12 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.futures.BaseFutureAdapter;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,7 @@ public class FutureChangeProtectionListener extends BaseFutureAdapter<FuturePut>
 	 */
 	public boolean await() {
 		try {
-			latch.await();
+			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS * H2HConstants.PUT_RETRIES, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Could not wait until the protection key change has finished. Reason = '{}'. '{}'", e.getMessage(),
 					parameters.toString());

@@ -1,10 +1,12 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureListener;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
@@ -38,7 +40,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	 */
 	public BaseNetworkContent awaitAndGet() {
 		try {
-			latch.await();
+			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Latch to wait for the get was interrupted.");
 			return null;
