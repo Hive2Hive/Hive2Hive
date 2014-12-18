@@ -5,6 +5,7 @@ import java.security.PublicKey;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileUpdateEvent;
+import org.hive2hive.core.exceptions.AbortModificationCode;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -76,20 +77,20 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
 		Index index = userProfile.getFileById(fileKey);
 		if (index == null) {
-			throw new AbortModifyException("Got notified about a file we don't know.");
+			throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND, "Got notified about a file we don't know.");
 		} else if (!index.isFile()) {
-			throw new AbortModifyException("Got notified about a folder update (illegal)");
+			throw new AbortModifyException(AbortModificationCode.FOLDER_UPDATE,"Got notified about a folder update (illegal)");
 		}
 
 		updatedFile = (FileIndex) index;
 		FolderIndex parent = updatedFile.getParent();
 		if (parent == null) {
-			throw new AbortModifyException("Got task to update the root, which is invalid.");
+			throw new AbortModifyException(AbortModificationCode.ROOT_DELETE_ATTEMPT, "Got task to update the root, which is invalid.");
 		}
 
 		// check write permission
 		if (!parent.canWrite(sender)) {
-			throw new AbortModifyException("User without WRITE permissions tried to update a file.");
+			throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM, "User without WRITE permissions tried to update a file.");
 		}
 
 		// copy the md5 parameter of the received file

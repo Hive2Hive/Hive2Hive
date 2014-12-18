@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hive2hive.core.exceptions.AbortModificationCode;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -46,16 +47,16 @@ public class DeleteFromUserProfileStep extends BaseModifyUserProfileStep {
 
 		// validate
 		if (fileIndex == null) {
-			throw new AbortModifyException("File index not found in user profile");
+			throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND, "File index not found in user profile");
 		} else if (!fileIndex.canWrite()) {
-			throw new AbortModifyException("Not allowed to delete this file (read-only permissions)");
+			throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM, "Not allowed to delete this file (read-only permissions)");
 		}
 
 		// check preconditions
 		if (fileIndex.isFolder()) {
 			FolderIndex folder = (FolderIndex) fileIndex;
 			if (!folder.getChildren().isEmpty()) {
-				throw new AbortModifyException("Cannot delete a directory that is not empty.");
+				throw new AbortModifyException(AbortModificationCode.NON_EMPTY_DIR, "Cannot delete a directory that is not empty.");
 			}
 		}
 

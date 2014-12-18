@@ -2,7 +2,9 @@ package org.hive2hive.core.processes.files.update;
 
 import java.io.IOException;
 
+import org.hive2hive.core.exceptions.AbortModificationCode;
 import org.hive2hive.core.exceptions.AbortModifyException;
+import org.hive2hive.core.exceptions.ErrorCode;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
 import org.hive2hive.core.model.versioned.UserProfile;
@@ -55,7 +57,7 @@ public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
 		// store for backup
 		originalMD5 = index.getMD5();
 		if (HashUtil.compare(originalMD5, newMD5)) {
-			throw new AbortModifyException("Try to create new version with same content.");
+			throw new AbortModifyException(AbortModificationCode.SAME_CONTENT, "Try to create new version with same content.");
 		}
 
 		// make modifications
