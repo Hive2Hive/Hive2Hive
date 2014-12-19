@@ -9,6 +9,9 @@ public class AbortModifyException extends Hive2HiveException {
 	}
 
 	public AbortModifyException(String message) {
-		super(message);
+		super(AbortModificationCode.UNSPECIFIED, message);
+	}
+	public AbortModifyException(ErrorCode error, String message) {
+		super(error, message);
 	}
 }

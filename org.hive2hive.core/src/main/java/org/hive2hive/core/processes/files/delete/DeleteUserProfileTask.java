@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.events.framework.interfaces.IFileEventGenerator;
 import org.hive2hive.core.events.implementations.FileDeleteEvent;
+import org.hive2hive.core.exceptions.AbortModificationCode;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.Hive2HiveException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -82,17 +83,17 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 		public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
 			Index fileToDelete = userProfile.getFileById(fileKey);
 			if (fileToDelete == null) {
-				throw new AbortModifyException("Got notified about a file we don't know.");
+				throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND, "Got notified about a file we don't know.");
 			}
 
 			FolderIndex parent = fileToDelete.getParent();
 			if (parent == null) {
-				throw new AbortModifyException("Got task to delete the root, which is invalid.");
+				throw new AbortModifyException(AbortModificationCode.ROOT_DELETE_ATTEMPT, "Got task to delete the root, which is invalid.");
 			}
 
 			// check write permission
 			if (!parent.canWrite(sender)) {
-				throw new AbortModifyException("User without WRITE permissions tried to delete a file.");
+				throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM, "User without WRITE permissions tried to delete a file.");
 			}
 
 			parent.removeChild(fileToDelete);

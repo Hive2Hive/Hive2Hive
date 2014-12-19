@@ -3,6 +3,7 @@ package org.hive2hive.core.processes.files.add;
 import java.io.File;
 import java.io.IOException;
 
+import org.hive2hive.core.exceptions.AbortModificationCode;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
@@ -58,7 +59,7 @@ public class AddIndexToUserProfileStep extends BaseModifyUserProfileStep {
 
 		// validate the write protection
 		if (!parentNode.canWrite()) {
-			throw new AbortModifyException("This directory is write protected (and we don't have the keys).");
+			throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM, "This directory is write protected (and we don't have the keys).");
 		}
 
 		// create a file tree node in the user profile
