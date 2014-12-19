@@ -59,7 +59,7 @@ public class UserProfileManager {
 	public void stopQueueWorker() {
 		running.set(false);
 		synchronized (queueWaiter) {
-			queueWaiter.notify();
+			queueWaiter.notifyAll();
 		}
 	}
 

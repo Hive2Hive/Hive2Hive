@@ -112,7 +112,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(port).start();
-		futureDiscover.awaitUninterruptibly();
+		futureDiscover.awaitUninterruptibly(H2HConstants.DISCOVERY_TIMEOUT_MS);
 
 		if (futureDiscover.isSuccess()) {
 			logger.debug("Discovery successful. Outside address is '{}'.", futureDiscover.peerAddress().inetAddress());
@@ -121,14 +121,14 @@ public class Connection implements IPeerHolder {
 		}
 
 		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(port).start();
-		futureBootstrap.awaitUninterruptibly();
+		futureBootstrap.awaitUninterruptibly(H2HConstants.BOOTSTRAPPING_TIMEOUT_MS);
 
 		if (futureBootstrap.isSuccess()) {
 			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", bootstrapAddress.getHostAddress());
 			return true;
 		} else {
 			logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-			peerDHT.shutdown().awaitUninterruptibly();
+			peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			return false;
 		}
 	}
@@ -142,7 +142,7 @@ public class Connection implements IPeerHolder {
 		boolean isDisconnected = true;
 		if (isConnected()) {
 			// notify neighbors about shutdown
-			peerDHT.peer().announceShutdown().start().awaitUninterruptibly();
+			peerDHT.peer().announceShutdown().start().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			// shutdown the peer, giving a certain timeout
 			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 
@@ -204,14 +204,14 @@ public class Connection implements IPeerHolder {
 		if (masterPeer != null) {
 			// bootstrap to master peer
 			FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
-			futureBootstrap.awaitUninterruptibly();
+			futureBootstrap.awaitUninterruptibly(H2HConstants.BOOTSTRAPPING_TIMEOUT_MS);
 
 			if (futureBootstrap.isSuccess()) {
 				logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
 				return true;
 			} else {
 				logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-				peerDHT.shutdown().awaitUninterruptibly();
+				peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 				return false;
 			}
 		} else {
