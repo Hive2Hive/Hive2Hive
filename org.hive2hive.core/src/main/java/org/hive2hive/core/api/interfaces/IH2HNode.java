@@ -73,7 +73,8 @@ public interface IH2HNode {
 	/**
 	 * Returns the {@link PeerDHT} which can be used to implement custom actions.
 	 * 
-	 * @return the TomP2P peer. Before calling {@link IH2HNode#connect()}, this method returns null.
+	 * @return the TomP2P peer. Before calling {@link IH2HNode#connect(INetworkConfiguration)}, this method
+	 *         returns null.
 	 */
 	PeerDHT getPeer();
 }

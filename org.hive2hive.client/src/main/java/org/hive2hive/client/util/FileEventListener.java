@@ -56,7 +56,11 @@ public class FileEventListener implements IFileEventListener {
 	@Override
 	@Handler
 	public void onFileDelete(IFileDeleteEvent fileEvent) {
-		fileEvent.getFile().delete();
+		if (fileEvent.getFile().delete()) {
+			System.out.println("Deleted file " + fileEvent.getFile());
+		} else {
+			System.err.println("Could not delete file " + fileEvent.getFile());
+		}
 	}
 
 	@Override

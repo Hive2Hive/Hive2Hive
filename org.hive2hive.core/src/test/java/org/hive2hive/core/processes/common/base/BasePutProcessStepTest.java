@@ -68,7 +68,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 			NetworkManager proxy = NetworkTestUtil.getRandomNode(network);
 
 			for (int i = 0; i < networkSize; i++) {
-				((H2HStorageMemory) network.get(i).getConnection().getPeerDHT().storageLayer())
+				((H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer())
 						.setPutMode(StorageMemoryPutMode.DENY_ALL);
 			}
 			String locationKey = proxy.getNodeId();
@@ -83,7 +83,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 			assertNull(proxy.getDataManager().get(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
 		} finally {
 			for (int i = 0; i < networkSize; i++) {
-				((H2HStorageMemory) network.get(i).getConnection().getPeerDHT().storageLayer())
+				((H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer())
 						.setPutMode(StorageMemoryPutMode.STANDARD);
 			}
 		}

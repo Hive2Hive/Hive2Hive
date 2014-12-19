@@ -76,7 +76,7 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 			}
 		}
 		// add self
-		PeerAddress ownAddress = networkManager.getConnection().getPeerDHT().peerAddress();
+		PeerAddress ownAddress = networkManager.getConnection().getPeer().peerAddress();
 		logger.debug("Adding own peeraddress to locations file: {}", ownAddress);
 		locations.addPeerAddress(ownAddress);
 
@@ -92,23 +92,27 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 		return null;
 	}
 
-	private void sendBlocking(Set<PeerAddress> peerAddresses, PublicKey ownPublicKey) {
+	private void sendBlocking(Set<PeerAddress> peerAddresses, final PublicKey ownPublicKey) {
 		waitForResponses = new CountDownLatch(peerAddresses.size());
-		for (PeerAddress address : peerAddresses) {
+		for (final PeerAddress address : peerAddresses) {
 			// contact all other clients (exclude self)
-			if (!address.equals(networkManager.getConnection().getPeerDHT().peerAddress())) {
+			if (!address.equals(networkManager.getConnection().getPeer().peerAddress())) {
 				logger.debug("Sending contact message to check for aliveness to {}", address);
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);
 
-				ContactPeerMessage message = new ContactPeerMessage(address, evidence);
+				final ContactPeerMessage message = new ContactPeerMessage(address, evidence);
 				message.setCallBackHandler(this);
 
-				// TODO this is blocking, should be parallel (asynchronous)
-				boolean success = messageManager.sendDirect(message, ownPublicKey);
-				if (!success) {
-					responses.put(address, false);
-				}
+				// asynchronously send all messages (parallel)
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						if (!messageManager.sendDirect(message, ownPublicKey)) {
+							responses.put(address, false);
+						}
+					}
+				}).start();
 			}
 		}
 

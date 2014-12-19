@@ -138,7 +138,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			assertNull(nodeA.getDataManager().get(parameters));
 
 			// assign a denying message handler at target node
-			nodeB.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
+			nodeB.getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
 
 			// create a message with target node B
 			final TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
@@ -168,7 +168,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			// check if selected location is still empty
 			assertNull(nodeA.getDataManager().get(parameters));
 		} finally {
-			nodeB.getConnection().getPeerDHT().peer()
+			nodeB.getConnection().getPeer().peer()
 					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption(), serializer));
 		}
 	}
@@ -265,7 +265,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeA.getDataManager().get(parameters));
 
 		// create a message with target node B
-		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeerDHT()
+		final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
 				.peerAddress(), contentKey, new H2HTestData(data), false);
 
 		// initialize the process and the one and only step to test
@@ -321,10 +321,10 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			assertNull(nodeA.getDataManager().get(parameters));
 
 			// assign a denying message handler at target node
-			nodeB.getConnection().getPeerDHT().peer().objectDataReply(new DenyingMessageReplyHandler());
+			nodeB.getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
 
 			// create a message with target node B
-			final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeerDHT()
+			final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
 					.peerAddress(), contentKey, new H2HTestData(data), false);
 
 			// initialize the process and the one and only step to test
@@ -350,7 +350,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			// check if selected location is still empty
 			assertNull(nodeB.getDataManager().get(parameters));
 		} finally {
-			nodeB.getConnection().getPeerDHT().peer()
+			nodeB.getConnection().getPeer().peer()
 					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption(), serializer));
 		}
 	}
@@ -379,7 +379,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 		assertNull(nodeA.getDataManager().get(parametersB));
 
 		// create a message with target node B
-		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeerDHT()
+		final TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer()
 				.peerAddress(), contentKey);
 
 		// initialize the process and the one and only step to test

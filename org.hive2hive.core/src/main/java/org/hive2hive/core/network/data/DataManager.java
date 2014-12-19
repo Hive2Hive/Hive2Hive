@@ -16,7 +16,7 @@ import net.tomp2p.storage.Data;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
-import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.IPeerHolder;
 import org.hive2hive.core.network.data.futures.FutureChangeProtectionListener;
 import org.hive2hive.core.network.data.futures.FutureDigestListener;
 import org.hive2hive.core.network.data.futures.FutureGetListener;
@@ -42,23 +42,14 @@ public class DataManager {
 		VERSION_FORK
 	};
 
-	private final NetworkManager networkManager;
 	private final IH2HEncryption encryptionTool;
 	private final IH2HSerialize serializer;
+	private final IPeerHolder peerHolder;
 
-	public DataManager(NetworkManager networkManager, IH2HEncryption encryptionTool, IH2HSerialize serializer) {
-		this.networkManager = networkManager;
+	public DataManager(IPeerHolder peerHolder, IH2HEncryption encryptionTool, IH2HSerialize serializer) {
+		this.peerHolder = peerHolder;
 		this.encryptionTool = encryptionTool;
 		this.serializer = serializer;
-	}
-
-	/**
-	 * Helper to get the <code>TomP2P</code> DHT peer.
-	 * 
-	 * @return the current peer
-	 */
-	private PeerDHT getPeer() {
-		return networkManager.getConnection().getPeerDHT();
 	}
 
 	public IH2HEncryption getEncryption() {
@@ -67,6 +58,10 @@ public class DataManager {
 
 	public IH2HSerialize getSerializer() {
 		return serializer;
+	}
+
+	private PeerDHT getPeer() {
+		return peerHolder.getPeer();
 	}
 
 	public boolean changeProtectionKey(IParameters parameters) {

@@ -74,9 +74,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	 *            to the {@link PeerAddress} fails
 	 */
 	public BaseDirectMessage(String targetKey, PeerAddress targetAddress, boolean needsRedirectedSend) {
-		super(createMessageID(), targetKey);
-		this.targetAddress = targetAddress;
-		this.needsRedirectedSend = needsRedirectedSend;
+		this(createMessageID(), targetKey, targetAddress, needsRedirectedSend);
 	}
 
 	/**
@@ -121,7 +119,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	@Override
 	public AcceptanceReply accept() {
-		if (networkManager.getConnection().getPeerDHT().peerAddress().equals(targetAddress)) {
+		if (networkManager.getConnection().getPeer().peerAddress().equals(targetAddress)) {
 			return AcceptanceReply.OK;
 		}
 		return AcceptanceReply.WRONG_TARGET;

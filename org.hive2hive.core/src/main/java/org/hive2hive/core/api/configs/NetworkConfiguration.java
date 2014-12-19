@@ -92,7 +92,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * 
 	 * @param nodeID the id of the peer to create
 	 * @param initialPeer the peer to bootstrap to
-	 * @return
+	 * @return the network configuration for local peers
 	 */
 	public static INetworkConfiguration createLocalPeer(String nodeID, Peer initialPeer) {
 		return new NetworkConfiguration(nodeID, false, null, H2HConstants.H2H_PORT, true, initialPeer);
@@ -103,7 +103,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * host.
 	 * 
 	 * @param nodeID the id of the initial peer
-	 * @return
+	 * @return the network configuration for local peers (initial)
 	 */
 	public static INetworkConfiguration createInitialLocalPeer(String nodeID) {
 		return new NetworkConfiguration(nodeID, false, null, H2HConstants.H2H_PORT, true, null);

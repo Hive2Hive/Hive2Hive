@@ -9,7 +9,7 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 
 /**
- * Default implementation of {@link IFileObserver}. Internally uses the Apache Commons IO
+ * Default implementation of a file observer. Internally uses the Apache Commons IO
  * {@link FileAlterationObserver} and {@link FileAlterationMonitor}.
  * 
  * @author Christian

@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.dht.FutureDigest;
 import net.tomp2p.dht.FutureRemove;
@@ -47,7 +48,7 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 	 */
 	public boolean await() {
 		try {
-			latch.await();
+			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS * H2HConstants.REMOVE_RETRIES, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Could not wait until put has finished.", e);
 		}

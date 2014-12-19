@@ -3,12 +3,14 @@ package org.hive2hive.core.network.data.futures;
 import java.util.Collection;
 import java.util.NavigableMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.dht.FutureDigest;
 import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +43,11 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 	 */
 	public NavigableMap<Number640, Collection<Number160>> awaitAndGet() {
 		try {
-			latch.await();
+			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Latch to wait for the get was interrupted.");
-			return null;
 		}
+
 		return result;
 	}
 

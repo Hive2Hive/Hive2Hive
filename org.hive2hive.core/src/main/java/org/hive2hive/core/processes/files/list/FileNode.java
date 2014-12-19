@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.files.list;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +19,7 @@ public class FileNode {
 	// can be null in case of the root
 	private final FileNode parent;
 	// holds all children
-	private final Set<FileNode> children;
+	private final List<FileNode> children;
 	private final String path;
 	private final File file;
 	private final byte[] md5;
@@ -32,7 +31,7 @@ public class FileNode {
 		this.path = path;
 		this.md5 = md5;
 		this.userPermissions = userPermissions;
-		this.children = new HashSet<FileNode>();
+		this.children = new ArrayList<FileNode>();
 	}
 
 	/**
@@ -49,7 +48,7 @@ public class FileNode {
 	 * 
 	 * @return the children (can be an empty set) or <code>null</code> if this node is a file and not a folder
 	 */
-	public Set<FileNode> getChildren() {
+	public List<FileNode> getChildren() {
 		if (isFile()) {
 			return null;
 		}
