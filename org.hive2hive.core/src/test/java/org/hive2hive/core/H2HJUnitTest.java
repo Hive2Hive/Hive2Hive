@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.junit.rules.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,9 @@ public class H2HJUnitTest {
 
 	@Rule
 	public TestName name = new TestName();
+
+	@Rule
+	public Timeout globalTimeout = new Timeout(5 * 60 * 1000); // 5 minutes max per method tested
 
 	@Before
 	public void beforeMethod() {
