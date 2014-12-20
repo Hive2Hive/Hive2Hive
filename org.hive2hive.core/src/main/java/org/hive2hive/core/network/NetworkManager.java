@@ -74,9 +74,17 @@ public class NetworkManager {
 	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
 	 */
 	public boolean disconnect() {
-		if (session != null && session.getProfileManager() != null) {
-			session.getProfileManager().stopQueueWorker();
+		if (session != null) {
+			if (session.getProfileManager() != null) {
+				session.getProfileManager().stopQueueWorker();
+			}
+			if (session.getDownloadManager() != null) {
+				session.getDownloadManager().stopBackgroundProcesses();
+			}
 		}
+
+		// TODO test-wise only
+		eventBus.shutdown();
 
 		return connection.disconnect();
 	}

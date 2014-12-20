@@ -27,6 +27,11 @@ public class DeleteSessionStep extends ProcessStep<Void> {
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
 			session = networkManager.getSession();
+
+			// stop all session components
+			session.getDownloadManager().stopBackgroundProcesses();
+			session.getProfileManager().stopQueueWorker();
+
 			networkManager.setSession(null);
 			setRequiresRollback(true);
 		} catch (NoSessionException e) {
@@ -39,6 +44,10 @@ public class DeleteSessionStep extends ProcessStep<Void> {
 	protected Void doRollback() throws InvalidProcessStateException {
 		// restore the session
 		networkManager.setSession(session);
+
+		// restart the queue worker
+		session.getProfileManager().startQueueWorker();
+
 		setRequiresRollback(false);
 		return null;
 	}

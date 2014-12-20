@@ -95,6 +95,7 @@ public class DownloadManager {
 		while (!executor.isTerminated()) {
 			logger.debug("Waiting for executor to shutdown...");
 		}
+		logger.debug("All downloads stopped");
 	}
 
 	/**

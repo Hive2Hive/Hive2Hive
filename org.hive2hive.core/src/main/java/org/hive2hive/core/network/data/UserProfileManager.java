@@ -38,10 +38,10 @@ public class UserProfileManager {
 	private final QueueWorker worker = new QueueWorker();
 	private final Queue<QueueEntry> readOnlyQueue = new ConcurrentLinkedQueue<QueueEntry>();
 	private final Queue<PutQueueEntry> modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
+	private final AtomicBoolean running = new AtomicBoolean(true);
 
 	private volatile PutQueueEntry modifying;
 
-	private final AtomicBoolean running;
 	private KeyPair protectionKeys = null;
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {
@@ -49,11 +49,7 @@ public class UserProfileManager {
 		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, PasswordUtil.generateAESKeyFromPassword(
 				credentials.getPassword(), credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE),
 				credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-		this.running = new AtomicBoolean(true);
-
-		Thread thread = new Thread(worker);
-		thread.setName("UP queue");
-		thread.start();
+		startQueueWorker();
 	}
 
 	public void stopQueueWorker() {
@@ -61,6 +57,13 @@ public class UserProfileManager {
 		synchronized (queueWaiter) {
 			queueWaiter.notifyAll();
 		}
+	}
+
+	public void startQueueWorker() {
+		running.set(true);
+		Thread thread = new Thread(worker);
+		thread.setName("UP queue");
+		thread.start();
 	}
 
 	public UserCredentials getUserCredentials() {

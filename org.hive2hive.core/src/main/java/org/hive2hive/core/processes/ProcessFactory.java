@@ -185,10 +185,6 @@ public final class ProcessFactory {
 				networkManager.getDataManager().getSerializer()));
 		process.add(new DeleteSessionStep(networkManager));
 
-		// TODO to be implemented:
-		// // stop all running processes
-		// ProcessManager.getInstance().stopAll("Logout stopped all processes.");
-
 		process.setName("Logout Process");
 		return process;
 	}
