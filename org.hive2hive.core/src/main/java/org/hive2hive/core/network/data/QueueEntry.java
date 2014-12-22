@@ -1,7 +1,9 @@
 package org.hive2hive.core.network.data;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.versioned.UserProfile;
 
@@ -23,7 +25,10 @@ class QueueEntry {
 		}
 
 		try {
-			getWaiter.await();
+			boolean success = getWaiter.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS, TimeUnit.MILLISECONDS);
+			if (!success) {
+				getFailedException = new GetFailedException("Could not wait for getting the user profile");
+			}
 		} catch (InterruptedException e) {
 			getFailedException = new GetFailedException("Could not wait for getting the user profile.");
 		}

@@ -53,10 +53,10 @@ class PutQueueEntry extends QueueEntry {
 			boolean success = putWaiter.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS * H2HConstants.PUT_RETRIES,
 					TimeUnit.MILLISECONDS);
 			if (!success) {
-				throw new PutFailedException("Timeout while putting occurred");
+				putFailedException = new PutFailedException("Timeout while putting occurred");
 			}
 		} catch (InterruptedException e) {
-			throw new PutFailedException("Could not wait to put the user profile");
+			putFailedException = new PutFailedException("Could not wait to put the user profile");
 		}
 
 		if (putFailedException != null) {
