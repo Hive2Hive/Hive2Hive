@@ -2,13 +2,10 @@ package org.hive2hive.core.processes.share.write;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -17,15 +14,11 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.processes.share.BaseShareReadWriteTest;
 import org.hive2hive.core.utils.FileTestUtil;
-import org.hive2hive.core.utils.H2HWaiter;
-import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,87 +27,40 @@ import org.junit.Test;
  * scenarios.
  * 
  * @author Seppi
+ * @author Nico
  */
-public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
+public class SharedFolderWithWritePermissionDeleteTest extends BaseShareReadWriteTest {
 
-	private static final int networkSize = 6;
-	private static final int maxNumChunks = 2;
+	private File sharedFolderA;
+	private File sharedFolderB;
+	private File subFolderA;
+	private File subFolderB;
 
-	private static ArrayList<NetworkManager> network;
-	private static NetworkManager nodeA;
-	private static NetworkManager nodeB;
-
-	private static File rootA;
-	private static File rootB;
-	private static File sharedFolderA;
-	private static File sharedFolderB;
-	private static File subFolderA;
-	private static File subFolderB;
-
-	private static UserCredentials userA;
-	private static UserCredentials userB;
-
-	private static TestFileEventListener eventsAtA;
-	private static TestFileEventListener eventsAtB;
-
-	/**
-	 * Setup network. Setup two users with each one client, log them in.
-	 * 
-	 * @throws Exception
-	 */
 	@BeforeClass
-	public static void initTest() throws Exception {
+	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithWritePermissionDeleteTest.class;
 		beforeClass();
+	}
 
-		logger.info("Setup network.");
-		network = NetworkTestUtil.createNetwork(networkSize);
-		nodeA = network.get(0);
-		nodeB = network.get(1);
-
-		logger.info("Create user A.");
-		rootA = FileTestUtil.getTempDirectory();
-		userA = generateRandomCredentials();
-		logger.info("Register and login user A.");
-		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
-
-		eventsAtA = new TestFileEventListener(nodeA);
-		nodeA.getEventBus().subscribe(eventsAtA);
-
-		logger.info("Create user B.");
-		rootB = FileTestUtil.getTempDirectory();
-		userB = generateRandomCredentials();
-		logger.info("Register and login user B.");
-		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
-
-		eventsAtB = new TestFileEventListener(nodeB);
-		nodeB.getEventBus().subscribe(eventsAtB);
-
-		logger.info("Upload folder 'folder1' from A.");
-		sharedFolderA = new File(rootA, "folder1");
-		sharedFolderA.mkdirs();
-		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderA);
-
-		logger.info("Share folder 'folder1' with user B giving write permission.");
-		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderA, userB.getUserId(), PermissionType.WRITE);
-		sharedFolderB = new File(rootB, sharedFolderA.getName());
-		waitTillSynchronized(sharedFolderB, true);
+	@Before
+	public void initTest() throws Exception {
+		setupNetworkAndShares(PermissionType.WRITE);
 
 		logger.info("Upload a new subfolder 'folder1/subfolder'.");
 		subFolderA = new File(sharedFolderA, "subfolder");
 		subFolderA.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(0), subFolderA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subFolderA);
 		subFolderB = new File(sharedFolderB, subFolderA.getName());
 		waitTillSynchronized(subFolderB, true);
 	}
 
 	@Test
 	public void testSynchronizeAddFileFromADeleteFromA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file1FromA' from A.");
-		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
+		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(0), file1FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, file1FromAAtA);
 
 		logger.info("Wait till new file 'folder1/file1FromA' gets synchronized with B.");
 		File file1FromAAtB = new File(sharedFolderB, file1FromAAtA.getName());
@@ -123,7 +69,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(file1FromAAtA, file1FromAAtB, false);
 
 		logger.info("Delete file 'folder1/file1FromA' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), file1FromAAtA);
+		UseCaseTestUtil.deleteFile(nodeA, file1FromAAtA);
 
 		logger.info("Wait till deletion of file 'folder1/file1FromA' gets synchronized with B.");
 		waitTillSynchronized(file1FromAAtB, false);
@@ -132,11 +78,11 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromADeleteFromB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file2FromA' from A.");
-		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
+		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(0), file2FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, file2FromAAtA);
 
 		logger.info("Wait till new file 'folder1/file2FromA' gets synchronized with B.");
 		File file2FromAAtB = new File(sharedFolderB, file2FromAAtA.getName());
@@ -145,7 +91,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(file2FromAAtA, file2FromAAtB, false);
 
 		logger.info("Delete file 'folder1/file2FromA' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), file2FromAAtB);
+		UseCaseTestUtil.deleteFile(nodeB, file2FromAAtB);
 
 		logger.info("Wait till deletion of file 'folder1/file2FromA' gets synchronized with A.");
 		waitTillSynchronized(file2FromAAtA, false);
@@ -154,11 +100,11 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBDeleteFromB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file1FromB' from B.");
-		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
+		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(1), file1FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, file1FromBAtB);
 
 		logger.info("Wait till new file 'folder1/file1FromB' gets synchronized with A.");
 		File file1FromBAtA = new File(sharedFolderA, file1FromBAtB.getName());
@@ -167,7 +113,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(file1FromBAtA, file1FromBAtB, false);
 
 		logger.info("Delete file 'folder1/file1FromB' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), file1FromBAtB);
+		UseCaseTestUtil.deleteFile(nodeB, file1FromBAtB);
 
 		logger.info("Wait till deletion of file 'folder1/file1FromB' gets synchronized with A.");
 		waitTillSynchronized(file1FromBAtA, false);
@@ -176,11 +122,11 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBDeleteFromA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/file2FromB' from B.");
-		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
+		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(1), file2FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, file2FromBAtB);
 
 		logger.info("Wait till new file 'folder1/file2FromB' gets synchronized with A.");
 		File file2FromBAtA = new File(sharedFolderA, file2FromBAtB.getName());
@@ -189,7 +135,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(file2FromBAtA, file2FromBAtB, false);
 
 		logger.info("Delete file 'folder1/file2FromB' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), file2FromBAtA);
+		UseCaseTestUtil.deleteFile(nodeA, file2FromBAtA);
 
 		logger.info("Wait till deletion of file 'folder1/file2FromB' gets synchronized with B.");
 		waitTillSynchronized(file2FromBAtB, false);
@@ -202,7 +148,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subfolder 'folder1/subfolder1FromA' from A.");
 		File subFolder1FromAAtA = new File(sharedFolderA, "subfolder1FromA");
 		subFolder1FromAAtA.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(0), subFolder1FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subFolder1FromAAtA);
 
 		logger.info("Wait till new subfolder 'folder1/subfolder1FromA' gets synchronized with B.");
 		File subFolder1FromAAtB = new File(sharedFolderB, subFolder1FromAAtA.getName());
@@ -211,7 +157,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFolder1FromAAtA, subFolder1FromAAtB, false);
 
 		logger.info("Delete subfolder 'folder1/subfolder1FromA' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), subFolder1FromAAtA);
+		UseCaseTestUtil.deleteFile(nodeA, subFolder1FromAAtA);
 
 		logger.info("Wait till deletion of subfolder 'folder1/subfolder1FromA' gets synchronized with B.");
 		waitTillSynchronized(subFolder1FromAAtB, false);
@@ -224,7 +170,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subfolder 'folder1/subfolder2FromA' from A.");
 		File subFolder2FromAAtA = new File(sharedFolderA, "subfolder2FromA");
 		subFolder2FromAAtA.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(0), subFolder2FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subFolder2FromAAtA);
 
 		logger.info("Wait till new subfolder 'folder1/subfolder2FromA' gets synchronized with B.");
 		File subFolder2FromAAtB = new File(sharedFolderB, subFolder2FromAAtA.getName());
@@ -233,7 +179,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFolder2FromAAtA, subFolder2FromAAtB, false);
 
 		logger.info("Delete subfolder 'folder1/subfolder2FromA' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), subFolder2FromAAtB);
+		UseCaseTestUtil.deleteFile(nodeB, subFolder2FromAAtB);
 
 		logger.info("Wait till deletion of subfolder 'folder1/subfolder2FromA' gets synchronized with A.");
 		waitTillSynchronized(subFolder2FromAAtA, false);
@@ -246,7 +192,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subfolder 'folder1/subfolder1FromB' from B.");
 		File subFolder1FromBAtB = new File(sharedFolderB, "subfolder1FromB");
 		subFolder1FromBAtB.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(1), subFolder1FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, subFolder1FromBAtB);
 
 		logger.info("Wait till new subfolder 'folder1/subfolder1FromB' gets synchronized with B.");
 		File subFolder1FromBAtA = new File(sharedFolderA, subFolder1FromBAtB.getName());
@@ -255,7 +201,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFolder1FromBAtA, subFolder1FromBAtB, false);
 
 		logger.info("Delete subfolder 'folder1/subfolder1FromB' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), subFolder1FromBAtA);
+		UseCaseTestUtil.deleteFile(nodeA, subFolder1FromBAtA);
 
 		logger.info("Wait till deletion of subfolder 'folder1/subfolder1FromB' gets synchronized with B.");
 		waitTillSynchronized(subFolder1FromBAtB, false);
@@ -268,7 +214,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subfolder 'folder1/subfolder2FromB' from B.");
 		File subFolder2FromBAtB = new File(sharedFolderB, "subfolder2FromB");
 		subFolder2FromBAtB.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(1), subFolder2FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, subFolder2FromBAtB);
 
 		logger.info("Wait till new subfolder 'folder1/subfolder2FromB' gets synchronized with A.");
 		File subFolder2FromBAtA = new File(sharedFolderA, subFolder2FromBAtB.getName());
@@ -277,7 +223,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFolder2FromBAtA, subFolder2FromBAtB, false);
 
 		logger.info("Delete subfolder 'folder1/subfolder2FromB' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), subFolder2FromBAtB);
+		UseCaseTestUtil.deleteFile(nodeB, subFolder2FromBAtB);
 
 		logger.info("Wait till deletion of subfolder 'folder1/subfolder2FromB' gets synchronized with A.");
 		waitTillSynchronized(subFolder2FromBAtA, false);
@@ -288,9 +234,9 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 	public void testSynchronizeAddSubFileFromADeleteFromA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file1FromA' from A.");
-		File subFile1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
+		File subFile1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(0), subFile1FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subFile1FromAAtA);
 
 		logger.info("Wait till new file 'folder1/subfolder/file1FromA' gets synchronized with B.");
 		File subFile1FromAAtB = new File(subFolderB, subFile1FromAAtA.getName());
@@ -299,7 +245,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFile1FromAAtA, subFile1FromAAtB, false);
 
 		logger.info("Delete file 'folder1/subfolder/file1FromA' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), subFile1FromAAtA);
+		UseCaseTestUtil.deleteFile(nodeA, subFile1FromAAtA);
 
 		logger.info("Wait till deletion of file 'folder1/subfolder/file1FromA' gets synchronized with B.");
 		waitTillSynchronized(subFile1FromAAtB, false);
@@ -310,9 +256,9 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 	public void testSynchronizeAddSubFileFromADeleteFromB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file2FromA' from A.");
-		File subFile2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
+		File subFile2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(0), subFile2FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subFile2FromAAtA);
 
 		logger.info("Wait till new file 'folder1/subfolder/file2FromA' gets synchronized with B.");
 		File subFile2FromAAtB = new File(subFolderB, subFile2FromAAtA.getName());
@@ -321,7 +267,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFile2FromAAtA, subFile2FromAAtB, false);
 
 		logger.info("Delete file 'folder1/subfolder/file2FromA' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), subFile2FromAAtB);
+		UseCaseTestUtil.deleteFile(nodeB, subFile2FromAAtB);
 
 		logger.info("Wait till deletion of file 'folder1/subfolder/file2FromA' gets synchronized with A.");
 		waitTillSynchronized(subFile2FromAAtA, false);
@@ -332,9 +278,9 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 	public void testSynchronizeAddSubFileFromBDeleteFromA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file1FromB' from B.");
-		File subFile1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
+		File subFile1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(1), subFile1FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, subFile1FromBAtB);
 
 		logger.info("Wait till new file 'folder1/subfolder/file1FromB' gets synchronized with A.");
 		File subFile1FromBAtA = new File(subFolderA, subFile1FromBAtB.getName());
@@ -343,7 +289,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFile1FromBAtA, subFile1FromBAtB, false);
 
 		logger.info("Delete file 'folder1/subfolder/file1FromB' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), subFile1FromBAtA);
+		UseCaseTestUtil.deleteFile(nodeA, subFile1FromBAtA);
 
 		logger.info("Wait till deletion of file 'folder1/subfolder/file1FromB' gets synchronized with B.");
 		waitTillSynchronized(subFile1FromBAtB, false);
@@ -354,9 +300,9 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 	public void testSynchronizeAddSubFileFromBDeleteFromB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'folder1/subfolder/file2FromB' from B.");
-		File subFile2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
+		File subFile2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
 				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
-		UseCaseTestUtil.uploadNewFile(network.get(1), subFile2FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, subFile2FromBAtB);
 
 		logger.info("Wait till new file 'folder1/subfolder/file2FromB' gets synchronized with A.");
 		File subFile2FromBAtA = new File(subFolderA, subFile2FromBAtB.getName());
@@ -365,7 +311,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subFile2FromBAtA, subFile2FromBAtB, false);
 
 		logger.info("Delete file 'folder1/subfolder/file2FromB' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), subFile2FromBAtB);
+		UseCaseTestUtil.deleteFile(nodeB, subFile2FromBAtB);
 
 		logger.info("Wait till deletion of file 'folder1/subfolder/file2FromB' gets synchronized with A.");
 		waitTillSynchronized(subFile2FromBAtA, false);
@@ -378,7 +324,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subsubfolder 'folder1/subfolder/subsubfolder1FromA' from A.");
 		File subsubFolder1FromAAtA = new File(subFolderA, "subsubfolder1FromA");
 		subsubFolder1FromAAtA.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(0), subsubFolder1FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subsubFolder1FromAAtA);
 
 		logger.info("Wait till new subsubfolder 'folder1/subfolder/subsubfolder1FromA' gets synchronized with B.");
 		File subsubFolder1FromAAtB = new File(subFolderB, subsubFolder1FromAAtA.getName());
@@ -387,7 +333,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subsubFolder1FromAAtA, subsubFolder1FromAAtB, false);
 
 		logger.info("Delete subsubfolder 'folder1/subfolder/subsubfolder1FromA' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), subsubFolder1FromAAtA);
+		UseCaseTestUtil.deleteFile(nodeA, subsubFolder1FromAAtA);
 
 		logger.info("Wait till deletion of subsubfolder 'folder1/subfolder/subsubfolder1FromA' gets synchronized with B.");
 		waitTillSynchronized(subsubFolder1FromAAtB, false);
@@ -400,7 +346,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subsubfolder 'folder1/subfolder/subsubfolder2FromA' from A.");
 		File subsubFolder2FromAAtA = new File(subFolderA, "subsubfolder2FromA");
 		subsubFolder2FromAAtA.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(0), subsubFolder2FromAAtA);
+		UseCaseTestUtil.uploadNewFile(nodeA, subsubFolder2FromAAtA);
 
 		logger.info("Wait till new folder 'folder1/subfolder/subsubfolder2FromA' gets synchronized with B.");
 		File subsubFolder2FromAAtB = new File(subFolderB, subsubFolder2FromAAtA.getName());
@@ -409,7 +355,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subsubFolder2FromAAtA, subsubFolder2FromAAtB, false);
 
 		logger.info("Delete folder 'folder1/subfolder/subsubfolder2FromA' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), subsubFolder2FromAAtB);
+		UseCaseTestUtil.deleteFile(nodeB, subsubFolder2FromAAtB);
 
 		logger.info("Wait till deletion of folder 'folder1/subfolder/subsubfolder2FromA' gets synchronized with A.");
 		waitTillSynchronized(subsubFolder2FromAAtA, false);
@@ -422,7 +368,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new subsubfolder 'folder1/subfolder/subsubfolder1FromB' from B.");
 		File subsubFolder1FromBAtB = new File(subFolderB, "subsubfolder1FromB");
 		subsubFolder1FromBAtB.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(1), subsubFolder1FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, subsubFolder1FromBAtB);
 
 		logger.info("Wait till new folder 'folder1/subfolder/subsubfolder1FromB' gets synchronized with B.");
 		File subsubFolder1FromBAtA = new File(subFolderA, subsubFolder1FromBAtB.getName());
@@ -431,7 +377,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subsubFolder1FromBAtA, subsubFolder1FromBAtB, false);
 
 		logger.info("Delete folder 'folder1/subfolder/subfolder1FromB' from A.");
-		UseCaseTestUtil.deleteFile(network.get(0), subsubFolder1FromBAtA);
+		UseCaseTestUtil.deleteFile(nodeA, subsubFolder1FromBAtA);
 
 		logger.info("Wait till deletion of folder 'folder1/subfolder/subfolder1FromB' gets synchronized with B.");
 		waitTillSynchronized(subsubFolder1FromBAtB, false);
@@ -444,7 +390,7 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		logger.info("Upload a new folder 'folder1/subfolder/subsubfolder2FromB' from B.");
 		File subsubFolder2FromBAtB = new File(subFolderB, "subsubfolder2FromB");
 		subsubFolder2FromBAtB.mkdir();
-		UseCaseTestUtil.uploadNewFile(network.get(1), subsubFolder2FromBAtB);
+		UseCaseTestUtil.uploadNewFile(nodeB, subsubFolder2FromBAtB);
 
 		logger.info("Wait till new folder 'folder1/subfolder/subsubfolder2FromB' gets synchronized with A.");
 		File subsubFolder2FromBAtA = new File(subFolderA, subsubFolder2FromBAtB.getName());
@@ -453,49 +399,19 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 		checkIndex(subsubFolder2FromBAtA, subsubFolder2FromBAtB, false);
 
 		logger.info("Delete folder 'folder1/subfolder/subsubfolder2FromB' from B.");
-		UseCaseTestUtil.deleteFile(network.get(1), subsubFolder2FromBAtB);
+		UseCaseTestUtil.deleteFile(nodeB, subsubFolder2FromBAtB);
 
 		logger.info("Wait till deletion of folder 'folder1/subfolder/subsubfolder2FromB' gets synchronized with A.");
 		waitTillSynchronized(subsubFolder2FromBAtA, false);
 		checkIndex(subsubFolder2FromBAtA, subsubFolder2FromBAtB, true);
 	}
 
-	/**
-	 * Waits a certain amount of time till a file appears (add) or disappears (delete).
-	 * 
-	 * @param synchronizingFile
-	 *            the file to synchronize
-	 * @param appearing
-	 *            <code>true</code> if file should appear, <code>false</code> if file should disappear
-	 */
-	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
-		H2HWaiter waiter = new H2HWaiter(40);
-		if (appearing) {
-			do {
-				waiter.tickASecond();
-			} while (!synchronizingFile.exists());
-		} else {
-			do {
-				waiter.tickASecond();
-			} while (synchronizingFile.exists());
-		}
-	}
+	private void checkIndex(File fileAtA, File fileAtB, boolean deleted) throws GetFailedException, NoSessionException {
+		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
+		Index indexA = userProfileA.getFileByPath(fileAtA, nodeA.getSession().getRootFile());
 
-	private static void compareFiles(File originalFile, File synchronizedFile) throws IOException {
-		Assert.assertEquals(originalFile.getName(), synchronizedFile.getName());
-		if (originalFile.isFile() || synchronizedFile.isFile()) {
-			Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
-			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(synchronizedFile));
-		}
-	}
-
-	private static void checkIndex(File fileAtA, File fileAtB, boolean deleted) throws GetFailedException,
-			NoSessionException {
-		UserProfile userProfileA = network.get(0).getSession().getProfileManager().readUserProfile();
-		Index indexA = userProfileA.getFileByPath(fileAtA, network.get(0).getSession().getRootFile());
-
-		UserProfile userProfileB = network.get(1).getSession().getProfileManager().readUserProfile();
-		Index indexB = userProfileB.getFileByPath(fileAtB, network.get(1).getSession().getRootFile());
+		UserProfile userProfileB = nodeB.getSession().getProfileManager().readUserProfile();
+		Index indexB = userProfileB.getFileByPath(fileAtB, nodeB.getSession().getRootFile());
 
 		// in case of deletion verify removed index nodes
 		if (deleted) {
@@ -550,14 +466,4 @@ public class SharedFolderWithWritePermissionDeleteTest extends H2HJUnitTest {
 			Assert.assertTrue(indexB.isFile());
 		}
 	}
-
-	@AfterClass
-	public static void endTest() throws IOException {
-		FileUtils.deleteDirectory(rootA);
-		FileUtils.deleteDirectory(rootB);
-
-		NetworkTestUtil.shutdownNetwork(network);
-		afterClass();
-	}
-
 }
