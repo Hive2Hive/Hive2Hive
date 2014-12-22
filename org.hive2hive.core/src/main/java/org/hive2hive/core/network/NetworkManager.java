@@ -13,11 +13,12 @@ import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.IH2HSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetworkManager {
 
-	// TODO this class needs heavy refactoring! many man-in-the-middle delegations and methods that do not
-	// belong here
+	private static final Logger logger = LoggerFactory.getLogger(NetworkManager.class);
 
 	private final Connection connection;
 	private final DataManager dataManager;
@@ -83,6 +84,7 @@ public class NetworkManager {
 		}
 
 		eventBus.shutdown();
+		logger.debug("Eventbus stopped");
 
 		return connection.disconnect();
 	}

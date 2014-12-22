@@ -11,13 +11,14 @@ import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDummyEncryption;
+import org.hive2hive.core.security.IH2HSerialize;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ConnectionTest extends H2HJUnitTest {
 
-	private static FSTSerializer serializer;
+	private static IH2HSerialize serializer;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
