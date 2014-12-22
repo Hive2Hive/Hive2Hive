@@ -55,7 +55,7 @@ public class InitializeMetaUpdateStep extends ProcessStep<Void> {
 		} catch (NoSessionException | NoPeerConnectionException ex) {
 			throw new ProcessExecutionException(this, ex);
 		}
-		
+
 		return null;
 	}
 
@@ -72,11 +72,11 @@ public class InitializeMetaUpdateStep extends ProcessStep<Void> {
 	private void initForFile(FileIndex fileIndex) throws NoSessionException, NoPeerConnectionException {
 		logger.debug("Initialize to change the protection keys of meta document of index '{}'.", fileIndex.getName());
 		// create the process and wrap it to make it asynchronous
-		getParent().add(new AsyncComponent<>(buildProcess(fileIndex)));
+		getParent().insertAfter(new AsyncComponent<>(buildProcess(fileIndex)), this);
 	}
 
 	private IProcessComponent<Void> buildProcess(FileIndex index) throws NoSessionException, NoPeerConnectionException {
-		
+
 		// create a new sub-process
 		SyncProcess subProcess = new SyncProcess();
 

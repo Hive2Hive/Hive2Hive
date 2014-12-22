@@ -1,7 +1,6 @@
 package org.hive2hive.core.processes.files.update;
 
 import java.security.KeyPair;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -46,15 +45,11 @@ public class CleanupChunksStep extends ProcessStep<Void> {
 		IProcessComponent<?> prev = this;
 		for (MetaChunk metaChunk : chunksToDelete) {
 			logger.debug("Delete chunk {} of {}.", counter++, chunksToDelete.size());
-			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(metaChunk.getChunkId(),
-					protectionKeys, dataManager);
+			DeleteSingleChunkStep deleteStep = new DeleteSingleChunkStep(metaChunk.getChunkId(), protectionKeys, dataManager);
 
 			// make async, insert it as next step
-			List<IProcessComponent<?>> parentComponents = new ArrayList<IProcessComponent<?>>(getParent().getComponents());
-			int index = parentComponents.indexOf(prev) + 1;
-			
 			IProcessComponent<?> asyncDeletion = new AsyncComponent<>(deleteStep);
-			getParent().add(index, asyncDeletion);
+			getParent().insertAfter(asyncDeletion, prev);
 			prev = asyncDeletion;
 		}
 		return null;

@@ -66,8 +66,8 @@ public class ShareFolderTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void shareFilledFolderTest() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
-			InterruptedException, NoPeerConnectionException {
+	public void shareFilledFolderTest() throws IOException, IllegalArgumentException, NoSessionException,
+			GetFailedException, InterruptedException, NoPeerConnectionException {
 		// upload an empty folder
 		File folderToShare = new File(rootA, "sharedFolder");
 		folderToShare.mkdirs();
@@ -154,8 +154,12 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@AfterClass
 	public static void endTest() throws IOException {
-		FileUtils.deleteDirectory(rootA);
-		FileUtils.deleteDirectory(rootB);
+		if (rootA.exists()) {
+			FileUtils.deleteDirectory(rootA);
+		}
+		if (rootB.exists()) {
+			FileUtils.deleteDirectory(rootB);
+		}
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}

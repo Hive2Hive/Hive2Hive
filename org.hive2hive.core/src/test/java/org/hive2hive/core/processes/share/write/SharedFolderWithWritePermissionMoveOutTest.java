@@ -105,7 +105,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveOutFromA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file1FromA' from A.");
 		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
@@ -127,7 +127,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveOutFromB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file2FromA' from A.");
 		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
@@ -149,7 +149,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBMoveOutFromA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file1FromB' from B.");
 		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
@@ -171,7 +171,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBMoveOutFromB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file2FromB' from B.");
 		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
 				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
