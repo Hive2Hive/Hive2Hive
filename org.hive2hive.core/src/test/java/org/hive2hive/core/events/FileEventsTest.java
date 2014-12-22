@@ -121,8 +121,8 @@ public class FileEventsTest extends H2HJUnitTest {
 	 * @param absB absolute path (client B)
 	 */
 	protected void assertEqualsRelativePaths(File absA, File absB) {
-		String relativeA = absA.getAbsolutePath().replaceFirst(rootA.getAbsolutePath(), "");
-		String relativeB = absB.getAbsolutePath().replaceFirst(rootB.getAbsolutePath(), "");
+		String relativeA = absA.getAbsolutePath().replace(rootA.getAbsolutePath(), "");
+		String relativeB = absB.getAbsolutePath().replace(rootB.getAbsolutePath(), "");
 		logger.debug("Path comparison: '{}' vs '{}'", relativeA, relativeB);
 		assertTrue(relativeA.equals(relativeB));
 	}
