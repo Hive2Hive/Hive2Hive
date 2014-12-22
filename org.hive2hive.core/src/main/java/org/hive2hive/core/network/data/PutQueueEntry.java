@@ -1,8 +1,10 @@
 package org.hive2hive.core.network.data;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 
 class PutQueueEntry extends QueueEntry {
@@ -48,9 +50,13 @@ class PutQueueEntry extends QueueEntry {
 		}
 
 		try {
-			putWaiter.await();
+			boolean success = putWaiter.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS * H2HConstants.PUT_RETRIES,
+					TimeUnit.MILLISECONDS);
+			if (!success) {
+				throw new PutFailedException("Timeout while putting occurred");
+			}
 		} catch (InterruptedException e) {
-			putFailedException = new PutFailedException("Could not wait to put the user profile");
+			throw new PutFailedException("Could not wait to put the user profile");
 		}
 
 		if (putFailedException != null) {
