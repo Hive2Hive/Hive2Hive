@@ -15,7 +15,6 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
@@ -58,8 +57,7 @@ public class NetworkTestUtil {
 
 		// create the first node (initial)
 		FSTSerializer serializer = new FSTSerializer();
-		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
-				FileConfiguration.createDefault());
+		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
 		initial.connect(netConfig);
 		nodes.add(initial);
@@ -67,8 +65,7 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
-					FileConfiguration.createDefault());
+			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeer().peer());
 			node.connect(otherNetConfig);
@@ -85,10 +82,15 @@ public class NetworkTestUtil {
 	 *            list containing all nodes which has to be disconnected.
 	 */
 	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
-		if (!network.isEmpty()) {
-			// shutdown of master peer is enough
-			network.get(0).disconnect();
+		if (network != null) {
+			for (NetworkManager networkManager : network) {
+				networkManager.disconnect();
+			}
 		}
+		// if (!network.isEmpty()) {
+		// // shutdown of master peer is enough
+		// network.get(0).disconnect();
+		// }
 	}
 
 	/**

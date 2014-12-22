@@ -2,7 +2,6 @@ package org.hive2hive.core.api;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
@@ -21,8 +20,8 @@ import org.hive2hive.processframework.interfaces.IProcessComponent;
  */
 public class H2HUserManager extends H2HManager implements IUserManager {
 
-	public H2HUserManager(NetworkManager networkManager, EventBus eventBus) {
-		super(networkManager, eventBus);
+	public H2HUserManager(NetworkManager networkManager) {
+		super(networkManager);
 	}
 
 	@Override

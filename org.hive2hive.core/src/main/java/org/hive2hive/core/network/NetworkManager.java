@@ -25,13 +25,10 @@ public class NetworkManager {
 	private String nodeID;
 	private H2HSession session;
 
-	private final EventBus eventBus;
+	private EventBus eventBus;
 	private final DownloadManager downloadManager;
 
-	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, EventBus eventBus,
-			IFileConfiguration fileConfig) {
-		this.eventBus = eventBus;
-
+	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, IFileConfiguration fileConfig) {
 		connection = new Connection(this, encryption, serializer);
 		dataManager = new DataManager(connection, encryption, serializer);
 		messageManager = new MessageManager(this, encryption, serializer);
@@ -44,6 +41,7 @@ public class NetworkManager {
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect(INetworkConfiguration networkConfiguration) {
+		this.eventBus = new EventBus();
 		this.nodeID = networkConfiguration.getNodeID();
 
 		if (networkConfiguration.isLocal()) {
@@ -64,6 +62,7 @@ public class NetworkManager {
 	 * Uses an existing peer for DHT interaction
 	 */
 	public boolean connect(PeerDHT peer, boolean startReplication) {
+		this.eventBus = new EventBus();
 		this.nodeID = peer.peerID().toString();
 		return connection.connect(peer, startReplication);
 	}
@@ -83,7 +82,6 @@ public class NetworkManager {
 			}
 		}
 
-		// TODO test-wise only
 		eventBus.shutdown();
 
 		return connection.disconnect();
