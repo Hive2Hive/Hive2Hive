@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * <b>Failure Handling</b></br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link PutStatus} for possible failures. If putting fails the
- * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). All puts are
+ * adapter retries it to a certain threshold (see {@link H2HConstants#PUT_RETRIES}). All puts are
  * asynchronous. That's why the future listener attaches himself to the new future objects so that the adapter
  * can finally notify his/her listener about a success or failure.
  * 

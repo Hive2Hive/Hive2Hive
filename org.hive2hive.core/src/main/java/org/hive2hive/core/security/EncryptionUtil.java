@@ -203,7 +203,7 @@ public final class EncryptionUtil {
 	 * content, a private RSA key has to be provided.
 	 * 
 	 * @param data The data to be decrypted.
-	 * @param publicKey The asymmetric private key with which the data shall be decrypted.
+	 * @param privateKey The asymmetric private key with which the data shall be decrypted.
 	 * @return Returns the decrypted data.
 	 * @throws InvalidKeyException
 	 * @throws BadPaddingException

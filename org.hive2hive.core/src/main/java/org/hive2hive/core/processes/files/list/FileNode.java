@@ -37,7 +37,7 @@ public class FileNode {
 	/**
 	 * Get the parent node or <code>null</code> if this node is the root folder
 	 * 
-	 * @return
+	 * @return the parent of this node (can be null in case of the root folder)
 	 */
 	public FileNode getParent() {
 		return parent;
@@ -67,7 +67,7 @@ public class FileNode {
 	/**
 	 * Returns the relative path of the file to the root
 	 * 
-	 * @return
+	 * @return the full path of the file
 	 */
 	public String getPath() {
 		return path;

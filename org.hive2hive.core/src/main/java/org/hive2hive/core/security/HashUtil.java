@@ -40,10 +40,10 @@ public class HashUtil {
 	}
 
 	/**
-	 * Generates a MD5 hash of an input stream
+	 * Generates a MD5 hash of an input stream (can take a while)
 	 * 
-	 * @param stream
-	 * @return
+	 * @param file
+	 * @return the hash of the file
 	 * @throws IOException
 	 */
 	public static byte[] hash(File file) throws IOException {
@@ -89,7 +89,7 @@ public class HashUtil {
 	 * 
 	 * @param file
 	 * @param expectedMD5
-	 * @return
+	 * @return <code>true</code> if the file has the expected hash
 	 * @throws IOException
 	 */
 	public static boolean compare(File file, byte[] expectedMD5) throws IOException {
@@ -111,7 +111,7 @@ public class HashUtil {
 	 * 
 	 * @param md5 the hash to test
 	 * @param expectedMD5 the expected md5 hash
-	 * @return
+	 * @return <code>true</code> if the hashes match
 	 */
 	public static boolean compare(byte[] md5, byte[] expectedMD5) {
 		return Arrays.equals(md5, expectedMD5);

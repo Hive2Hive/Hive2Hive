@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Use this future adapter when sending a {@link BaseMessage}. Attach this listener to the future which gets
- * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling. Use the
- * {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
+ * returned at {@link MessageManager#send(BaseMessage, PublicKey)} to enable a appropriate failure handling.
+ * Use the {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
  * not).</br></br>
  * <b>Failure Handling</b></br>
  * Sending a message can fail when the future object failed, when the future object contains wrong data or the
@@ -51,8 +51,8 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	 * 
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
-	 * @param networkManager
-	 *            reference needed for re-sending)
+	 * @param messageManager
+	 *            reference needed for re-sending
 	 */
 	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey, MessageManager messageManager) {
 		this.message = message;

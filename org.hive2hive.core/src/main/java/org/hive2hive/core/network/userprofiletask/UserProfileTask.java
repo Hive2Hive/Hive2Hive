@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * 
  * <b>User Profile Task Queue</b> All {@link UserProfileTask} objects have to be stored (encrypted with the
  * receivers public key) on the proxy node of the receiver. The {@link DataManager} provides the method
- * {@link DataManager#putUserProfileTask(String, Number160, BaseNetworkContent)} which stores an
+ * {@link DataManager#putUserProfileTask(String, Number160, BaseNetworkContent, KeyPair)} which stores an
  * {@link UserProfileTask} object in a specific domain (see {@link H2HConstants#USER_PROFILE_TASK_DOMAIN}).
  * For this purpose the constructor generates a content key which is based on a time stamp (taking the time at
  * creating the object). This allows us to build an implicit queue on the proxy node. The tasks are sorted
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * {@link DataManager#getUserProfileTask(String)} allows to get the oldest {@link UserProfileTask} object of
  * an user from the queue. The task can then be handled in a separate
  * thread. After handling please don't forget to remove the handled task (see
- * {@link DataManager#removeUserProfileTask(String, Number160)}).
+ * {@link DataManager#removeUserProfileTask(String, Number160, KeyPair)}).
  * 
  * @author Christian, Seppi, Nico
  */

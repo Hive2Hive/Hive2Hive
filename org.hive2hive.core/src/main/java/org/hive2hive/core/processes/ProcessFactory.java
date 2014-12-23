@@ -198,7 +198,7 @@ public final class ProcessFactory {
 	 * @param file
 	 * @param networkManager
 	 * @param fileConfiguration
-	 * @return
+	 * @return the process component
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 */
@@ -312,7 +312,7 @@ public final class ProcessFactory {
 	 * 
 	 * @param file
 	 * @param networkManager
-	 * @return
+	 * @return the process component
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
 	 */

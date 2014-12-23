@@ -58,7 +58,7 @@ public class Connection implements IPeerHolder {
 	/**
 	 * Creates a peer and connects it to the network.
 	 * 
-	 * @param nodeId the id of the network node (should be unique among the network)
+	 * @param nodeID the id of the network node (should be unique among the network)
 	 * @return <code>true</code>, if the peer creation and connection was successful, otherwise
 	 *         <code>false</code>
 	 */
@@ -232,15 +232,15 @@ public class Connection implements IPeerHolder {
 		int port = searchFreePort();
 
 		// configure the thread handling internally, callback can be blocking
-		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
+		// eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
 
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(new H2HSignatureFactory());
-		clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
+		// clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 
 		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
-		serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
+		// serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 		serverConfig.ports(new Ports(port, port));
 
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)

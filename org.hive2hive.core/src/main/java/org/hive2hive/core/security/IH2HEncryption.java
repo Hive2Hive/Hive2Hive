@@ -81,7 +81,6 @@ public interface IH2HEncryption {
 	 * @throws InvalidCipherTextException
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
-	 * @throws IOException
 	 */
 	HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException;

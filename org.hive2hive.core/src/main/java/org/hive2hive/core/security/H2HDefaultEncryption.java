@@ -76,7 +76,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	 * The toString() method of a public key
 	 * 
 	 * @param key
-	 * @return
+	 * @return the string representation of the public key
 	 */
 	public static String key2String(PublicKey key) {
 		return EncryptionUtil.byteToHex(key.getEncoded());

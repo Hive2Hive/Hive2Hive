@@ -26,7 +26,7 @@ public class H2HStorageMemory extends StorageLayer {
 		/** the normal behavior, where each 'put' is checked for version conflicts */
 		STANDARD,
 
-		/** Every request to store will fail and returns a {@link PutStatus#FAILED} */
+		/** Every request to store will fail and returns a {@link net.tomp2p.dht.StorageLayer.PutStatus#FAILED} */
 		DENY_ALL
 	}
 

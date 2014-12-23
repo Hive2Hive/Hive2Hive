@@ -28,7 +28,7 @@ public final class HybridEncryptedContent extends BaseVersionedNetworkContent {
 	/**
 	 * Get the RSA encrypted parameters.
 	 * 
-	 * @return
+	 * @return the encoded encrypted parameters
 	 */
 	public byte[] getEncryptedParameters() {
 		return encryptedParameters;
@@ -37,7 +37,7 @@ public final class HybridEncryptedContent extends BaseVersionedNetworkContent {
 	/**
 	 * Get the AES encrypted data.
 	 * 
-	 * @return
+	 * @return the encoded encrypted data
 	 */
 	public byte[] getEncryptedData() {
 		return encryptedData;

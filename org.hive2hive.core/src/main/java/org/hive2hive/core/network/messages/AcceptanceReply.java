@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.messages;
 
+import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
+
 /**
  * Represents the answer of a node which is asked to handle a specific message. This reply is used to inform
  * the sender of the message as quickly as possible (synchronously) if the sent message will be handled by the
@@ -10,7 +12,7 @@ package org.hive2hive.core.network.messages;
 public enum AcceptanceReply {
 	/** Default for 'everything is OK - I will handle this message' */
 	OK,
-	/** Provisional ok, e.g. when the signature of the message couldn't be checked.*/
+	/** Provisional ok, e.g. when the signature of the message couldn't be checked. */
 	OK_PROVISIONAL,
 	/** Default for 'something went wrong, I won't handle this message' */
 	FAILURE,
@@ -19,8 +21,8 @@ public enum AcceptanceReply {
 	/** When signature is wrong */
 	FAILURE_SIGNATURE,
 	/**
-	 * Basically used as replies for {@link AsynchronousReturnMessage}s. It indicates that there is no
-	 * {@link CallBackHandler} waiting for the return message on this 'sender' node.
+	 * It indicates that there is no {@link IResponseCallBackHandler} waiting for the return message on this
+	 * 'sender' node.
 	 */
 	NO_CALLBACK_HANDLER_FOR_THIS_MESSAGE,
 	/**

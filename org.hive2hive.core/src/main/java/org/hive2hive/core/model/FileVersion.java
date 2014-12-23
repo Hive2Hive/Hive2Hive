@@ -33,7 +33,7 @@ public class FileVersion implements Serializable, IFileVersion {
 	}
 
 	/**
-	 * Get a list containing all {@link MetaChunks}. Each meta chunk stores the chunk id and the hash of the
+	 * Get a list containing all {@link MetaChunk}s. Each meta chunk stores the chunk id and the hash of the
 	 * corresponding chunk stored in the network.
 	 * 
 	 * @return a list with all meta chunks

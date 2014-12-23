@@ -19,7 +19,7 @@ public interface IRequestMessage {
 	/**
 	 * Setter
 	 * 
-	 * @param aHandler
+	 * @param handler
 	 *            a {@link IResponseCallBackHandler} for handling responses from receiver node
 	 */
 	public void setCallBackHandler(IResponseCallBackHandler handler);

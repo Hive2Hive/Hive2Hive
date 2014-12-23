@@ -17,7 +17,7 @@ public class UpdateNotificationMessageFactory extends BaseNotificationMessageFac
 	private final FileIndex updatedFileIndex;
 
 	/**
-	 * @param addedFileKey the key of file that has been added (may contain sub-files)
+	 * @param updatedFileIndex the index that has been updated (may contain sub-files)
 	 */
 	public UpdateNotificationMessageFactory(FileIndex updatedFileIndex) {
 		this.updatedFileIndex = updatedFileIndex;

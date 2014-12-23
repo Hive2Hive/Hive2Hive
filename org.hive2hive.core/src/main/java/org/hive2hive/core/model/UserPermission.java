@@ -3,8 +3,9 @@ package org.hive2hive.core.model;
 import java.io.Serializable;
 
 /**
- * Mapping between the userId and the permission type. This is applied for {@link MetaFolder} objects in order
- * to identify users rights (and undertake necessary actions in case user leaves or wants to change rights).
+ * Mapping between the userId and the permission type. This is applied for {@link FolderIndex} objects in
+ * order to identify users rights (and undertake necessary actions in case user leaves or wants to change
+ * rights).
  * 
  * @author Nico
  */

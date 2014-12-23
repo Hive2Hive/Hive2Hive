@@ -68,7 +68,7 @@ public class FileUtil {
 	/**
 	 * Returns the file separator of the operating system
 	 * 
-	 * @return
+	 * @return the file separator of the current operating system
 	 */
 	public static String getFileSep() {
 		String fileSep = System.getProperty("file.separator");
@@ -90,7 +90,6 @@ public class FileUtil {
 	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
 	 * 
 	 * @return the file size in bytes
-	 * @throws IOException
 	 */
 	public static long getFileSize(File file) {
 		InputStream stream = null;
@@ -116,7 +115,7 @@ public class FileUtil {
 	 * Checks whether the given file is in the given H2H root folder (note, the user must be logged in).
 	 * 
 	 * @param file the file to test
-	 * @param session a valid session of any user
+	 * @param root the current root
 	 * @return true when the file is within the H2H directory, otherwise false
 	 */
 	public static boolean isInH2HDirectory(File file, File root) {
@@ -128,7 +127,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * Does the same as {@link #isInH2HDirectory(IFileAgent, File, File)} but taking a session as parameter
+	 * Does the same as {@link #isInH2HDirectory(File, File)} but taking a session as parameter
 	 */
 	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file) {
 		return fileAgent == null ? false : isInH2HDirectory(file, fileAgent.getRoot());

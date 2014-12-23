@@ -88,7 +88,6 @@ public class UserProfileManager {
 	/**
 	 * Gets the user profile (read-only). The call blocks until the most recent profile is here.
 	 * 
-	 * @param pid the process identifier
 	 * @return the user profile
 	 * @throws GetFailedException if the profile cannot be fetched
 	 */
