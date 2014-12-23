@@ -54,6 +54,7 @@ import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.processes.logout.DeleteSessionStep;
 import org.hive2hive.core.processes.logout.RemoveOwnLocationsStep;
 import org.hive2hive.core.processes.logout.StopDownloadsStep;
+import org.hive2hive.core.processes.logout.StopUserQueueWorkerStep;
 import org.hive2hive.core.processes.logout.WritePersistentStep;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.GetAllLocationsStep;
@@ -181,6 +182,7 @@ public final class ProcessFactory {
 
 		process.add(new RemoveOwnLocationsStep(networkManager));
 		process.add(new StopDownloadsStep(session.getDownloadManager()));
+		process.add(new StopUserQueueWorkerStep(session.getProfileManager()));
 		process.add(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(), session.getDownloadManager(),
 				networkManager.getDataManager().getSerializer()));
 		process.add(new DeleteSessionStep(networkManager));

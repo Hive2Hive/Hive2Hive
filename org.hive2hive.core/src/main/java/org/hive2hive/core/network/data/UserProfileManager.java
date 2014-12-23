@@ -59,9 +59,6 @@ public class UserProfileManager {
 		}
 
 		running.set(false);
-		synchronized (queueWaiter) {
-			queueWaiter.notifyAll();
-		}
 
 		try {
 			// interrupt the thread such that blocking 'wait' calls throw an exception and the thread can
