@@ -35,14 +35,14 @@ public class UserProfileManager {
 	private final UserCredentials credentials;
 
 	private final Object queueWaiter = new Object();
-	private final QueueWorker worker = new QueueWorker();
 	private final Queue<QueueEntry> readOnlyQueue = new ConcurrentLinkedQueue<QueueEntry>();
 	private final Queue<PutQueueEntry> modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
-	private final AtomicBoolean running = new AtomicBoolean(true);
+	private final AtomicBoolean running = new AtomicBoolean(false);
 
 	private volatile PutQueueEntry modifying;
 
 	private KeyPair protectionKeys = null;
+	private Thread workerThread;
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {
 		this.credentials = credentials;
@@ -53,17 +53,35 @@ public class UserProfileManager {
 	}
 
 	public void stopQueueWorker() {
+		if (!running.get()) {
+			logger.warn("The user profile manager has already been shutdown");
+			return;
+		}
+
 		running.set(false);
 		synchronized (queueWaiter) {
 			queueWaiter.notifyAll();
 		}
+
+		try {
+			// interrupt the thread such that blocking 'wait' calls throw an exception and the thread can
+			// shutdown gracefully
+			workerThread.checkAccess();
+			workerThread.interrupt();
+		} catch (SecurityException e) {
+			logger.warn("Cannot stop the user profile thread", e);
+		}
 	}
 
 	public void startQueueWorker() {
-		running.set(true);
-		Thread thread = new Thread(worker);
-		thread.setName("UP queue");
-		thread.start();
+		if (running.get()) {
+			logger.warn("Queue worker is already running");
+		} else {
+			running.set(true);
+			workerThread = new Thread(new QueueWorker());
+			workerThread.setName("UP queue");
+			workerThread.start();
+		}
 	}
 
 	public UserCredentials getUserCredentials() {
@@ -186,7 +204,8 @@ public class UserProfileManager {
 						try {
 							queueWaiter.wait();
 						} catch (InterruptedException e) {
-							// ignore
+							// interrupted, go to next iteration, probably the thread was stopped
+							continue;
 						}
 					}
 				} else if (modifyQueue.isEmpty()) {
