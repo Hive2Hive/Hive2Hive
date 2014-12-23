@@ -71,11 +71,7 @@ public class FileUtil {
 	 * @return the file separator of the current operating system
 	 */
 	public static String getFileSep() {
-		String fileSep = System.getProperty("file.separator");
-		if ("\\".equals(fileSep)) {
-			fileSep = "\\\\";
-		}
-		return fileSep;
+		return System.getProperty("file.separator");
 	}
 
 	/**

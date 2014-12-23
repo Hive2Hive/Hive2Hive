@@ -117,7 +117,7 @@ public class FolderIndex extends Index {
 	// TODO get child by full path??
 	public Index getChildByName(String name) {
 		if (name != null) {
-			String withoutSeparator = name.replaceAll(FileUtil.getFileSep(), "");
+			String withoutSeparator = name.replace(FileUtil.getFileSep(), "");
 			for (Index child : children) {
 				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
 					return child;
