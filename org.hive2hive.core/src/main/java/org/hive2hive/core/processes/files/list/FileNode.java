@@ -25,7 +25,7 @@ public class FileNode {
 	private final byte[] md5;
 	private final Set<UserPermission> userPermissions;
 
-	FileNode(FileNode parent, File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
+	public FileNode(FileNode parent, File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
 		this.parent = parent;
 		this.file = file;
 		this.path = path;
