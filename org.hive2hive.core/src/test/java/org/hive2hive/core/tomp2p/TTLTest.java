@@ -137,9 +137,6 @@ public class TTLTest extends H2HJUnitTest {
 		futurePut.awaitUninterruptibly();
 		Assert.assertTrue(futurePut.isSuccess());
 
-		// sleep to give maintenance a chance
-		Thread.sleep(1000);
-
 		// first version should be not available
 		FutureGet futureGet = p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(new Number160(0)).start();
 		futureGet.awaitUninterruptibly();
